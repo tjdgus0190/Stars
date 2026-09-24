@@ -20,6 +20,8 @@ specs/proposal-<주제>.md  아이디어·확장 제안서, 운영자 선택 전
 specs/selling-<slug>.md   셀링 포인트 (copywriter)
 design/<slug>.md          디자인 명세와 UI 점검 기록 (designer)
 reports/spec-review-<slug>.md  기획 검수 보고서 (qa-reviewer)
+products/<slug>/promo/    프로모션 페이지 (제품과 함께 배포)
+marketing/<slug>/         마케팅 영상 스토리보드·원본·렌더 결과(mp4), SNS 게시 문구
 reports/copy-<slug>.md    카피 변경 기록 (copywriter)
 reports/qa-<slug>.md      검수 보고서 (qa-reviewer)
 ```
