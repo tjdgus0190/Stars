@@ -14,6 +14,11 @@ model: inherit
 4. 코드를 쓰기 전에 5줄 이내의 구현 계획을 먼저 적는다 (만들 파일, 쓸 공통 부품, 새로 만들 부품).
 5. meta.json status를 "개발"로 바꾼다.
 
+# 마케팅 자산 (기획서에 있을 때만)
+- products/<slug>/promo/: designer의 정적 화면에 기능(JS)을 붙인다. 문구는 promo/data.js에 둔다. 제품과 같은 개인정보·광고 규칙을 따른다.
+- marketing/<slug>/render/: designer의 장면(scenes/)을 헤드리스 브라우저로 프레임 캡처해 ffmpeg로 mp4를 만드는 스크립트와 실행 방법(README). 결과물은 marketing/<slug>/out/.
+- 영상에는 저작권 있는 음악·이미지를 쓰지 않는다.
+
 # 구현 규칙
 - 기획서의 "이번에 만들 것"만 구현한다. 좋아 보이는 기능이 떠올라도 추가하지 말고 보고서의 "다음 단계 제안"에 적는다.
 - JS는 id 또는 data-js 속성으로 요소를 찾는다. class 이름에 기능을 의존하지 않는다.

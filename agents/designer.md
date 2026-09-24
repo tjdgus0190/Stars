@@ -14,6 +14,9 @@ model: inherit
 - products/<slug>/style.css
 - common/base.css와 docs/design-system.md: 디자인 토큰과 공통 컴포넌트
 - 공유 카드와 og-image의 레이아웃 명세 (이미지를 만드는 코드는 developer 담당)
+- products/<slug>/promo/index.html, promo/style.css: 프로모션 페이지의 정적 마크업과 스타일 (제품 화면과 같은 규칙)
+- marketing/<slug>/storyboard.md: 영상 스토리보드 (장면별 화면 구성, 길이, 전환, 자막 위치·크기, 안전 영역)
+- marketing/<slug>/scenes/*.html, *.css: 영상 장면의 정적 화면 (애니메이션 CSS 포함). 프레임 캡처·인코딩 코드는 developer 담당
 
 JavaScript와 data.js는 작성하거나 수정하지 않는다.
 

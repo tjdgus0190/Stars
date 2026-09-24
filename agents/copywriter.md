@@ -22,6 +22,9 @@ specs/<slug>.md와 reports/spec-review-<slug>.md를 읽고 specs/selling-<slug>.
 
 # 수정 범위
 - specs/selling-<slug>.md 작성.
+- products/<slug>/promo/data.js의 문자열 값 (프로모션 페이지 문구).
+- marketing/<slug>/script.md: 영상 대본과 자막 문구 (장면 번호는 storyboard.md를 따른다). 장면 HTML 안의 자막 자리표시가 있으면 그 문자열만 바꾼다.
+- marketing/<slug>/sns.md: 영상과 함께 올릴 게시 문구.
 - products/<slug>/data.js의 문자열 값과 index.html의 title, meta description만 수정한다.
 - 코드 로직, 변수명, 키 이름, 구조는 절대 바꾸지 않는다.
 - 변경 기록과 SNS 문구는 reports/copy-<slug>.md에 쓴다.
