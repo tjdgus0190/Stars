@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- title·description은 data.js의 TEXT.meta와 같은 문장으로 맞춰 둔다 (검색·공유 미리보기는 JS 실행 전 값을 읽는다) -->
+  <title>낯선 점술관 — 바이킹 룬 점 · 인도 베다 점성술</title>
+  <meta name="description" content="바이킹의 룬 점, 인도의 베다 점성술. 사주도 타로도 아닌 아주 먼 곳의 방식으로 나를 읽어 보는 무료 운세." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="낯선 점술관 — 바이킹 룬 점 · 인도 베다 점성술" />
+  <meta property="og:description" content="사주도 타로도 아닌, 아주 먼 곳의 방식으로 나를 읽어 보세요." />
+  <meta property="og:image" content="og-image.png" />
+  <meta name="theme-color" content="#0b0a1f" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Cinzel:wght@500;700&family=Noto+Sans+Runic&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <!-- 문구는 모두 data.js에 있다. data-t=글자, data-h=굵게·줄바꿈 포함 문구, data-list=문단 목록, data-ph=입력칸 안내 -->
+  <main id="app">
+    <!-- ───────── 입구 ───────── -->
+    <section class="screen active" id="screen-home">
+      <p class="eyebrow" data-t="home.eyebrow"></p>
+      <h1 class="logo" data-t="home.title"></h1>
+      <p class="lead" data-h="home.lead"></p>
+
+      <div class="doors">
+        <button class="door" data-go="rune-intro">
+          <span class="door-glyph runic" data-t="home.runeDoor.glyph"></span>
+          <span class="door-name" data-t="home.runeDoor.name"></span>
+          <span class="door-origin" data-t="home.runeDoor.origin"></span>
+          <span class="door-desc" data-h="home.runeDoor.desc"></span>
+        </button>
+        <button class="door" data-go="star-intro">
+          <span class="door-glyph" data-t="home.starDoor.glyph"></span>
+          <span class="door-name" data-t="home.starDoor.name"></span>
+          <span class="door-origin" data-t="home.starDoor.origin"></span>
+          <span class="door-desc" data-h="home.starDoor.desc"></span>
+        </button>
+      </div>
+
+      <div class="soon">
+        <p class="soon-title" data-t="home.soonTitle"></p>
+        <p data-t="home.soon"></p>
+      </div>
+
+      <section class="about">
+        <h2 data-t="home.aboutTitle"></h2>
+        <div data-list="home.about"></div>
+      </section>
+    </section>
+
+    <!-- ───────── 룬: 소개 ───────── -->
+    <section class="screen" id="screen-rune-intro">
+      <button class="back" data-go="home" data-t="common.back"></button>
+      <p class="eyebrow" data-t="rune.intro.eyebrow"></p>
+      <h2 data-t="rune.intro.title"></h2>
+      <div class="lore" data-list="rune.intro.lore"></div>
+
+      <label class="field">
+        <span><span data-t="rune.intro.nameLabel"></span> <small data-t="rune.intro.nameHint"></small></span>
+        <input id="rune-name" type="text" maxlength="10" data-ph="rune.intro.namePlaceholder" autocomplete="off" />
+      </label>
+
+      <p class="field-label" data-t="rune.intro.topicLabel"></p>
+      <div class="chips" id="rune-topics"></div>
+
+      <button class="primary" data-go="rune-ritual" data-t="rune.intro.go"></button>
+    </section>
+
+    <!-- ───────── 룬: 의식 ───────── -->
+    <section class="screen" id="screen-rune-ritual">
+      <p class="ritual-guide" id="ritual-guide"></p>
+
+      <div class="pouch-wrap">
+        <button class="pouch" id="pouch" data-aria="rune.ritual.pouchLabel">
+          <svg viewBox="0 0 120 120" class="pouch-ring" aria-hidden="true">
+            <circle cx="60" cy="60" r="56" class="ring-bg" />
+            <circle cx="60" cy="60" r="56" class="ring-fill" id="ring-fill" />
+          </svg>
+          <span class="pouch-body" aria-hidden="true">
+            <span class="runic">ᚠ ᛟ ᛉ</span>
+          </span>
+        </button>
+      </div>
+
+      <div class="stones" id="stones" hidden></div>
+      <p class="norn-hint" id="norn-hint" hidden></p>
+    </section>
+
+    <!-- ───────── 룬: 결과 ───────── -->
+    <section class="screen" id="screen-rune-result">
+      <button class="back" data-go="home" data-t="common.back"></button>
+      <div id="rune-result"></div>
+    </section>
+
+    <!-- ───────── 별: 소개 ───────── -->
+    <section class="screen" id="screen-star-intro">
+      <button class="back" data-go="home" data-t="common.back"></button>
+      <p class="eyebrow" data-t="star.intro.eyebrow"></p>
+      <h2 data-t="star.intro.title"></h2>
+      <div class="lore" data-list="star.intro.lore"></div>
+
+      <label class="field">
+        <span><span data-t="star.intro.nameLabel"></span> <small data-t="star.intro.nameHint"></small></span>
+        <input id="star-name" type="text" maxlength="10" data-ph="star.intro.namePlaceholder" autocomplete="off" />
+      </label>
+      <label class="field">
+        <span data-t="star.intro.dateLabel"></span>
+        <input id="star-date" type="date" min="1900-01-01" max="2100-12-31" />
+      </label>
+      <label class="field">
+        <span><span data-t="star.intro.timeLabel"></span> <small data-t="star.intro.timeHint"></small></span>
+        <input id="star-time" type="time" />
+      </label>
+      <label class="check">
+        <input id="star-time-unknown" type="checkbox" /> <span data-t="star.intro.unknownTime"></span>
+      </label>
+      <p class="error" id="star-error" hidden></p>
+
+      <button class="primary" id="star-go" data-t="star.intro.go"></button>
+    </section>
+
+    <!-- ───────── 별: 의식 ───────── -->
+    <section class="screen" id="screen-star-ritual">
+      <p class="ritual-guide"><span data-t="star.ritual.rewindBefore"></span><b id="rewind-year"></b><span data-t="star.ritual.rewindAfter"></span></p>
+      <div class="wheel-wrap">
+        <svg viewBox="-160 -160 320 320" class="wheel" id="wheel" aria-hidden="true"></svg>
+        <span class="wheel-pointer" aria-hidden="true">▼</span>
+      </div>
+      <p class="trivia" id="star-trivia"></p>
+    </section>
+
+    <!-- ───────── 별: 두 후보 중 고르기 ───────── -->
+    <section class="screen" id="screen-star-choose">
+      <p class="eyebrow" data-t="star.choose.eyebrow"></p>
+      <h2 data-t="star.choose.title"></h2>
+      <p class="lead small" data-t="star.choose.lead"></p>
+      <div class="choices" id="star-choices"></div>
+    </section>
+
+    <!-- ───────── 별: 결과 ───────── -->
+    <section class="screen" id="screen-star-result">
+      <button class="back" data-go="home" data-t="common.back"></button>
+      <div id="star-result"></div>
+    </section>
+  </main>
+
+  <script src="../../common/share-card.js"></script>
+  <script src="../../common/disclaimer.js"></script>
+  <script src="data.js"></script>
+  <script src="astro.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
