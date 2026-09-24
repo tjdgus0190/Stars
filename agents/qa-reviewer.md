@@ -40,7 +40,7 @@ specs/<slug>.md를 읽고 reports/spec-review-<slug>.md에 판정한다. 제품 
 ## 필수 (하나라도 실패하면 배포 불가)
 | 번호 | 항목 | 확인 방법 |
 |---|---|---|
-| P1 | 개인정보 | products/<slug>와 common/에서 fetch, XMLHttpRequest, sendBeacon, localStorage, sessionStorage, document.cookie, analytics 호출을 검색하고, 입력값이 흘러들어가는지 코드 흐름을 따라가 확인 |
+| P1 | 개인정보 | products/<slug>와 common/에서 fetch, XMLHttpRequest, sendBeacon, localStorage, sessionStorage, document.cookie, analytics 호출을 검색하고, 입력값이 흘러들어가는지 코드 흐름을 따라가 확인. sessionStorage 사용 시 CLAUDE.md 6장 예외 조건(안내 문구, "내 정보 지우기")을, 결제 서버 호출 시 입력값 원문이 빠져 있는지를 확인 |
 | P2 | 비밀정보 | key, token, secret, password, api 같은 문자열과 긴 무작위 문자열 검색 |
 | P3 | 제휴 표기 | coupang, coupa.ng 링크가 있으면 대가성 문구가 상품 박스 바로 위나 아래에 있는지 |
 | P4 | 광고 배치 | 한 화면 2개 이하, 결과 문구·버튼 바로 옆이 아닌지, 클릭 유도 문구가 없는지 |
