@@ -683,6 +683,9 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
   isolation: isolate;
   text-align: center;
   min-height: calc(100dvh - var(--topbar-h));
+  /* developer 추가(2026-09-25, designer 확인 필요): 되감기 궤적·지평선 빛이 화면 폭을 넘어 360px에서 가로 스크롤·축소가 생겨 잘라 낸다 */
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 .ritual.is-active {
   display: flex;

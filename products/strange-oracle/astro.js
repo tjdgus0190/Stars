@@ -69,16 +69,62 @@
     };
   }
 
-  // 태어난 시각을 모르면 그날 0시와 23시 59분을 모두 계산해, 나크샤트라가 바뀌는 날인지 알려준다.
-  // 같으면 정오 값 1개, 다르면 두 후보(0시·23:59)를 돌려주고 사용자가 고른다.
-  function birthChart(y, m, d, time) {
-    if (time) return { exact: true, charts: [chartAt(julianDayKST(y, m, d, time.h, time.m))] };
-    const start = chartAt(julianDayKST(y, m, d, 0, 0));
-    const end = chartAt(julianDayKST(y, m, d, 23, 59));
-    const noon = chartAt(julianDayKST(y, m, d, 12, 0));
-    if (start.nakshatra === end.nakshatra) return { exact: false, charts: [noon] };
-    return { exact: false, charts: [start, end] };
+  // 항성 달 경도(라히리)
+  const moonSiderealAt = (jd) => norm(moonLongitude(jd) - ayanamsa(jd));
+
+  // 태어난 시각을 모를 때: 그날(한국 시간 0:00 ~ 다음 날 0:00) 달이 거친 나크샤트라를 모두 찾는다.
+  // 달은 하루에 약 12~15° 움직이고 한 집은 13.33°라, 하루에 경계를 최대 2번 넘는다 → 후보 최대 3개.
+  // 경계 시각은 이분법으로 1초 이내까지 좁힌다. 달은 지구에서 볼 때 거꾸로 가지 않으므로
+  // "그날 0시 경도에서 얼마나 더 갔는가"가 시간에 따라 계속 커진다는 점을 이용한다.
+  // 각 후보의 결과(chart)는 그 후보 시간 구간의 한가운데 시각으로 계산한다.
+  // 후보: { chart, startMin, endMin, share }  (분 단위, 0~1440. share = 하루 중 비율)
+  const DAY_MIN = 1440;
+  function dayCandidates(y, m, d) {
+    const jd0 = julianDayKST(y, m, d, 0, 0);
+    const jd1 = jd0 + 1;
+    const lon0 = moonSiderealAt(jd0);
+    const advance = (jd) => norm(moonSiderealAt(jd) - lon0); // 0시부터 달이 간 거리(도)
+    const total = advance(jd1);
+    const startNak = Math.floor(lon0 / NAK_SPAN);
+    const cuts = []; // 경계를 넘는 시각(jd)
+    for (let k = 1; k <= 3; k++) {
+      const need = norm((startNak + k) * NAK_SPAN - lon0); // 다음 경계까지 남은 거리
+      if (need > total || need === 0) break;
+      let lo = cuts.length ? cuts[cuts.length - 1] : jd0;
+      let hi = jd1;
+      for (let i = 0; i < 40 && hi - lo > 1 / 86400; i++) {
+        const mid = (lo + hi) / 2;
+        if (advance(mid) < need) lo = mid;
+        else hi = mid;
+      }
+      cuts.push(hi);
+    }
+    const edges = [jd0, ...cuts, jd1];
+    const list = [];
+    for (let i = 0; i < edges.length - 1; i++) {
+      const startMin = Math.round((edges[i] - jd0) * DAY_MIN);
+      const endMin = Math.round((edges[i + 1] - jd0) * DAY_MIN);
+      if (endMin <= startMin) continue; // 1분도 안 되는 구간은 뺀다(반올림 결과)
+      list.push({ chart: chartAt((edges[i] + edges[i + 1]) / 2), startMin, endMin, share: (endMin - startMin) / DAY_MIN });
+    }
+    return list;
   }
 
-  window.Astro = { birthChart, moonLongitude, sunLongitude, ayanamsa, julianDayKST };
+  // 결과 계산.
+  //  - 시각을 알면: { exact: true, charts: [그 시각], candidates: [] }
+  //  - 모르면: 그날 후보를 모두 찾는다. 1개면 정오 값 1개(후보 화면 없이 바로 결과),
+  //    2~3개면 charts = 후보별 결과, candidates = 시간 구간·비율과 함께 (사용자가 고른다).
+  //    noon = 의식 화면에서 바퀴가 멈출 위치(그날 정오의 달).
+  function birthChart(y, m, d, time) {
+    if (time) {
+      const c = chartAt(julianDayKST(y, m, d, time.h, time.m));
+      return { exact: true, charts: [c], candidates: [], noon: c };
+    }
+    const noon = chartAt(julianDayKST(y, m, d, 12, 0));
+    const candidates = dayCandidates(y, m, d);
+    if (candidates.length <= 1) return { exact: false, charts: [noon], candidates: [], noon };
+    return { exact: false, charts: candidates.map((c) => c.chart), candidates, noon };
+  }
+
+  window.Astro = { birthChart, dayCandidates, moonLongitude, sunLongitude, ayanamsa, julianDayKST };
 })();

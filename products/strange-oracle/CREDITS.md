@@ -1,16 +1,19 @@
 # CREDITS — strange-oracle
 
-## 글꼴 (Google Fonts로 불러옴)
-| 글꼴 | 용도 | 라이선스 |
-|---|---|---|
-| Gowun Batang | 본문·제목 한글 | SIL Open Font License 1.1 |
-| Cinzel | 영문 장식 문구 | SIL Open Font License 1.1 |
-| Noto Sans Runic | 룬 문자 | SIL Open Font License 1.1 |
+## 글꼴 (jsdelivr의 Fontsource 배포본, 버전 고정 + SRI sha384)
+Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키지 안 LICENSE 파일로 다시 확인함.
+| 글꼴 | 용도 | 불러오는 주소 | 라이선스 |
+|---|---|---|---|
+| Gowun Batang 400·700 | 한국어 본문·제목·버튼 | https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/400.css, 700.css | SIL Open Font License 1.1 (Copyright 2021 The Gowun Batang Project Authors) |
+| Cinzel 500·700 | 영문 장식 문구 (eyebrow, 로마 숫자, 연도) | https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.3.0/500.css, 700.css | SIL Open Font License 1.1 (Copyright 2020 The Cinzel Project Authors) |
+| Noto Sans Runic 400 | 룬 기호 표시 전용 (한국어 글꼴 개수에 세지 않음, 운영자 결정) | https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-runic@5.3.0/400.css | SIL Open Font License 1.1 (Copyright 2022 The Noto Project Authors) |
+- Fontsource: https://fontsource.org , npm `@fontsource/*`. 각 CSS는 같은 패키지의 files/*.woff2를 불러온다.
 
 ## 이미지
 - 별하늘 배경, 룬 주머니, 룬 돌, 별 바퀴: CSS·SVG·Canvas로 코드에서 직접 그림. 외부 이미지 없음.
 - og-image.png: 제품 화면 요소로 직접 만들어 캡처.
-- 룬 글자와 ☾ 기호: 유니코드 문자.
+- 룬 글자와 ☾ 기호: 유니코드 문자. 룬 획(SVG)·별 바퀴·원형 문장: designer가 코드로 직접 그림.
+- 공유 카드(1080x1920)의 돌·아치·초승달: common/share-card.js와 app.js가 canvas로 직접 그림.
 
 ## 계산 방법
 - 달·태양 위치, 장동, ΔT: 외부 라이브러리 Astronomy Engine 2.1.19 (아래) 사용.
@@ -20,7 +23,7 @@
 - 검증 참고(제품에 포함 안 됨): Jean Meeus, *Astronomical Algorithms* 2판 예제 22.a·25.b·47.a (PyMeeus로 재현값 확인), Swiss Ephemeris 2.10.03(npm `sweph`, 테스트 때만 임시 폴더에 설치).
 
 ## 문구
-- 룬 24자, 나크샤트라 27개, 행성·라시 설명, 화면 문구: 직접 작성. 신화·상징 정보는 널리 알려진 전승을 쉬운 말로 풀어 씀.
+- 룬 24자, 나크샤트라 27개, 행성·라시 설명, 화면 문구: 직접 작성 (data.js, data-runes.js, data-stars.js). 신화·상징 정보는 널리 알려진 전승을 쉬운 말로 풀어 씀.
 
 ## 외부 라이브러리
 | 이름 | 버전 | 용도 | 라이선스 | 불러오는 주소 |
