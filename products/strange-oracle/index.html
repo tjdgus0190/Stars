@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="night">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -10,148 +10,1010 @@
   <meta property="og:title" content="낯선 점술관 — 바이킹 룬 점 · 인도 베다 점성술" />
   <meta property="og:description" content="사주도 타로도 아닌, 아주 먼 곳의 방식으로 나를 읽어 보세요." />
   <meta property="og:image" content="og-image.png" />
-  <meta name="theme-color" content="#0b0a1f" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Cinzel:wght@500;700&family=Noto+Sans+Runic&display=swap" rel="stylesheet" />
+  <meta name="theme-color" content="#080717" />
+
+  <!-- 글꼴: jsdelivr의 fontsource 배포본 (버전 고정). Google Fonts 사용 금지.
+       [developer 확인 필요] 아래 버전 번호(5.2.5)는 후보다. 패키지별 실제 존재하는 버전으로 고정해서 바꿀 것.
+       한국어: Gowun Batang / 영문 장식: Cinzel / 룬 기호 전용: Noto Sans Runic (한국어 글꼴 개수에 세지 않음, 운영자 결정) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.2.5/400.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.2.5/700.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.2.5/500.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.2.5/700.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-runic@5.2.5/400.css" />
+
+  <link rel="stylesheet" href="../../common/base.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+
+<!-- 정적 검토용: body의 is-static-preview가 있으면 모든 화면이 한꺼번에 보인다.
+     developer는 기능을 붙일 때 이 class를 지우고, 현재 화면에만 .is-active를 붙인다.
+     body[data-room]은 현재 화면의 data-room 값(hall / rune / star)으로 JS가 맞춰 준다 (우주 배경 빛깔이 바뀜). -->
+<body class="is-static-preview" data-room="hall">
+
+  <!-- ═════════ 룬 24자 획 모음 (돌 뒤집기·결과에서 "새겨지듯 그려지는" 선. <use href="#rune-이름">으로 부른다) ═════════ -->
+  <svg class="rune-sprite" aria-hidden="true" focusable="false">
+    <symbol id="rune-fehu" viewBox="0 0 40 60"><path pathLength="1" d="M13 4V56M13 22L30 8M13 34L30 20" /></symbol>
+    <symbol id="rune-uruz" viewBox="0 0 40 60"><path pathLength="1" d="M11 56V4L29 20V56" /></symbol>
+    <symbol id="rune-thurisaz" viewBox="0 0 40 60"><path pathLength="1" d="M13 4V56M13 18L28 30L13 42" /></symbol>
+    <symbol id="rune-ansuz" viewBox="0 0 40 60"><path pathLength="1" d="M13 4V56M13 6L29 18M13 20L29 32" /></symbol>
+    <symbol id="rune-raidho" viewBox="0 0 40 60"><path pathLength="1" d="M12 56V4L28 16L12 29L29 56" /></symbol>
+    <symbol id="rune-kenaz" viewBox="0 0 40 60"><path pathLength="1" d="M28 16L12 30L28 44" /></symbol>
+    <symbol id="rune-gebo" viewBox="0 0 40 60"><path pathLength="1" d="M8 8L32 52M32 8L8 52" /></symbol>
+    <symbol id="rune-wunjo" viewBox="0 0 40 60"><path pathLength="1" d="M13 56V4L28 15L13 27" /></symbol>
+    <symbol id="rune-hagalaz" viewBox="0 0 40 60"><path pathLength="1" d="M10 4V56M30 4V56M10 21L30 37" /></symbol>
+    <symbol id="rune-nauthiz" viewBox="0 0 40 60"><path pathLength="1" d="M20 4V56M10 22L30 38" /></symbol>
+    <symbol id="rune-isa" viewBox="0 0 40 60"><path pathLength="1" d="M20 4V56" /></symbol>
+    <symbol id="rune-jera" viewBox="0 0 40 60"><path pathLength="1" d="M18 10L8 22L18 34M22 26L32 38L22 50" /></symbol>
+    <symbol id="rune-eihwaz" viewBox="0 0 40 60"><path pathLength="1" d="M20 4V56M20 4L30 14M20 56L10 46" /></symbol>
+    <symbol id="rune-perthro" viewBox="0 0 40 60"><path pathLength="1" d="M13 4V56M13 4L27 14L21 22M13 56L27 46L21 38" /></symbol>
+    <symbol id="rune-algiz" viewBox="0 0 40 60"><path pathLength="1" d="M20 56V4M20 22L8 8M20 22L32 8" /></symbol>
+    <symbol id="rune-sowilo" viewBox="0 0 40 60"><path pathLength="1" d="M28 6L12 22L28 38L12 54" /></symbol>
+    <symbol id="rune-tiwaz" viewBox="0 0 40 60"><path pathLength="1" d="M20 56V4M8 18L20 4L32 18" /></symbol>
+    <symbol id="rune-berkano" viewBox="0 0 40 60"><path pathLength="1" d="M12 4V56M12 4L28 17L12 30L28 43L12 56" /></symbol>
+    <symbol id="rune-ehwaz" viewBox="0 0 40 60"><path pathLength="1" d="M10 56V4L20 20L30 4V56" /></symbol>
+    <symbol id="rune-mannaz" viewBox="0 0 40 60"><path pathLength="1" d="M10 56V4L30 26M30 56V4L10 26" /></symbol>
+    <symbol id="rune-laguz" viewBox="0 0 40 60"><path pathLength="1" d="M14 56V4L28 18" /></symbol>
+    <symbol id="rune-ingwaz" viewBox="0 0 40 60"><path pathLength="1" d="M20 8L32 30L20 52L8 30Z" /></symbol>
+    <symbol id="rune-dagaz" viewBox="0 0 40 60"><path pathLength="1" d="M8 4V56L32 4V56L8 4" /></symbol>
+    <symbol id="rune-othala" viewBox="0 0 40 60"><path pathLength="1" d="M20 4L32 18L10 52M20 4L8 18L30 52" /></symbol>
+  </svg>
+
+  <!-- ═════════ 우주 배경 (CSS만. 성운·오로라·원근 별·먼지·유성) ═════════ -->
+  <div class="cosmos" aria-hidden="true">
+    <div class="cosmos__nebula cosmos__nebula--a"></div>
+    <div class="cosmos__nebula cosmos__nebula--b"></div>
+    <div class="cosmos__aurora"></div>
+    <div class="cosmos__stars cosmos__stars--far"></div>
+    <div class="cosmos__stars cosmos__stars--mid"></div>
+    <div class="cosmos__stars cosmos__stars--near"></div>
+    <div class="cosmos__dust"></div>
+    <span class="cosmos__meteor"></span>
+    <span class="cosmos__meteor cosmos__meteor--late"></span>
+  </div>
   <canvas id="sky" aria-hidden="true"></canvas>
 
-  <!-- 문구는 모두 data.js에 있다. data-t=글자, data-h=굵게·줄바꿈 포함 문구, data-list=문단 목록, data-ph=입력칸 안내 -->
-  <main id="app">
-    <!-- ───────── 입구 ───────── -->
-    <section class="screen active" id="screen-home">
-      <p class="eyebrow" data-t="home.eyebrow"></p>
-      <h1 class="logo" data-t="home.title"></h1>
-      <p class="lead" data-h="home.lead"></p>
+  <!-- 방으로 빨려 들어갈 때 번지는 빛 (JS가 --warp-x/--warp-y와 .is-active) -->
+  <div class="warp" data-js="warp" aria-hidden="true"></div>
 
-      <div class="doors">
-        <button class="door" data-go="rune-intro">
-          <span class="door-glyph runic" data-t="home.runeDoor.glyph"></span>
-          <span class="door-name" data-t="home.runeDoor.name"></span>
-          <span class="door-origin" data-t="home.runeDoor.origin"></span>
-          <span class="door-desc" data-h="home.runeDoor.desc"></span>
-        </button>
-        <button class="door" data-go="star-intro">
-          <span class="door-glyph" data-t="home.starDoor.glyph"></span>
-          <span class="door-name" data-t="home.starDoor.name"></span>
-          <span class="door-origin" data-t="home.starDoor.origin"></span>
-          <span class="door-desc" data-h="home.starDoor.desc"></span>
-        </button>
-      </div>
+  <!-- ═════════ 상단 막대 (모든 화면 공통) ═════════ -->
+  <header class="topbar" data-js="topbar">
+    <div class="topbar__inner">
+      <button class="topbar__back" type="button" data-js="topbar-back">[초안] ← 입구로</button>
+      <p class="topbar__chapter" data-js="read-label" aria-live="polite">II · 사건 <span class="topbar__count">2/4</span></p>
+      <button class="topbar__clear" type="button" data-js="clear-open">
+        <svg class="topbar__clear-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>[초안] 내 정보 지우기</span>
+      </button>
+    </div>
+    <!-- 결과 화면에서만 보이는 읽기 진행률 (topbar에 .is-reading) -->
+    <div class="read-progress" data-js="read-progress" aria-hidden="true">
+      <span class="read-progress__seg is-done" data-js="read-progress-seg" style="--fill:1"></span>
+      <span class="read-progress__seg is-current" data-js="read-progress-seg" style="--fill:0.4"></span>
+      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
+      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
+    </div>
+  </header>
 
-      <div class="soon">
-        <p class="soon-title" data-t="home.soonTitle"></p>
-        <p data-t="home.soon"></p>
-      </div>
+  <main id="app" class="page">
 
-      <section class="about">
-        <h2 data-t="home.aboutTitle"></h2>
-        <div data-list="home.about"></div>
-      </section>
-    </section>
-
-    <!-- ───────── 룬: 소개 ───────── -->
-    <section class="screen" id="screen-rune-intro">
-      <button class="back" data-go="home" data-t="common.back"></button>
-      <p class="eyebrow" data-t="rune.intro.eyebrow"></p>
-      <h2 data-t="rune.intro.title"></h2>
-      <div class="lore" data-list="rune.intro.lore"></div>
-
-      <label class="field">
-        <span><span data-t="rune.intro.nameLabel"></span> <small data-t="rune.intro.nameHint"></small></span>
-        <input id="rune-name" type="text" maxlength="10" data-ph="rune.intro.namePlaceholder" autocomplete="off" />
-      </label>
-
-      <p class="field-label" data-t="rune.intro.topicLabel"></p>
-      <div class="chips" id="rune-topics"></div>
-
-      <button class="primary" data-go="rune-ritual" data-t="rune.intro.go"></button>
-    </section>
-
-    <!-- ───────── 룬: 의식 ───────── -->
-    <section class="screen" id="screen-rune-ritual">
-      <p class="ritual-guide" id="ritual-guide"></p>
-
-      <div class="pouch-wrap">
-        <button class="pouch" id="pouch" data-aria="rune.ritual.pouchLabel">
-          <svg viewBox="0 0 120 120" class="pouch-ring" aria-hidden="true">
-            <circle cx="60" cy="60" r="56" class="ring-bg" />
-            <circle cx="60" cy="60" r="56" class="ring-fill" id="ring-fill" />
+    <!-- ═════════ 0. 허브 (입구) ═════════ -->
+    <section class="screen hub is-active" id="screen-hub" data-js="screen-hub" data-room="hall" data-preview="0. 허브 (입구) — 상단 막대: 읽기 진행률 없음">
+      <header class="hub-head">
+        <div class="hub-sigil" aria-hidden="true">
+          <svg viewBox="0 0 120 120">
+            <circle class="hub-sigil__orbit" cx="60" cy="60" r="56" pathLength="1" />
+            <circle class="hub-sigil__orbit hub-sigil__orbit--inner" cx="60" cy="60" r="44" pathLength="1" />
+            <path class="hub-sigil__moon" d="M72 30a30 30 0 1 0 0 60a24 24 0 1 1 0-60Z" />
+            <circle class="hub-sigil__star" cx="60" cy="4" r="2.5" /><circle class="hub-sigil__star" cx="116" cy="60" r="2" /><circle class="hub-sigil__star" cx="20" cy="100" r="1.8" />
           </svg>
-          <span class="pouch-body" aria-hidden="true">
-            <span class="runic">ᚠ ᛟ ᛉ</span>
+        </div>
+        <p class="eyebrow">[초안] WORLD ORACLE HALL</p>
+        <h1 class="logo">[초안] 낯선 점술관</h1>
+        <p class="hub-lead">[초안] 사주도 타로도 아닌, 처음 듣는 이야기.<br />여섯 개의 낯선 문 너머, 당신이 있어요</p>
+      </header>
+
+      <!-- 열린 방의 포털 (1단계: 2개). 방문한 방은 .is-visited, 누른 순간 .is-entering -->
+      <nav class="doors" aria-label="[초안] 방 고르기" data-js="hub-doors">
+        <button class="door is-visited" type="button" data-room="rune" data-go="rune-intro" data-js="hub-door-rune">
+          <span class="door__portal" aria-hidden="true">
+            <span class="door__swirl"></span>
+            <span class="door__glyph runic">ᚱ</span>
+          </span>
+          <span class="door__name">[초안] 룬의 방</span>
+          <span class="door__origin">[초안] 북유럽 · 바이킹</span>
+          <span class="door__desc">[초안] 세 개의 돌이 읽는 과거·현재·미래</span>
+          <span class="door__badge" data-js="hub-door-badge">[초안] 6장 채움</span>
+        </button>
+        <button class="door" type="button" data-room="star" data-go="star-intro" data-js="hub-door-star">
+          <span class="door__portal" aria-hidden="true">
+            <span class="door__swirl"></span>
+            <span class="door__glyph">
+              <svg class="door__moon" viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg>
+            </span>
+          </span>
+          <span class="door__name">[초안] 별의 방</span>
+          <span class="door__origin">[초안] 인도 · 베다 점성술</span>
+          <span class="door__desc">[초안] 태어난 순간의 달이 아는 속마음</span>
+          <span class="door__badge" data-js="hub-door-badge">[초안] 2장 채움</span>
+        </button>
+      </nav>
+
+      <!-- 나의 이야기 진행 카드: 방을 1개 이상 마쳤을 때만 보인다 -->
+      <button class="story-teaser" type="button" data-go="story" data-js="hub-story">
+        <span class="story-teaser__marks" aria-hidden="true" data-js="hub-story-marks">
+          <span class="arch-mark" style="--i:0"></span><span class="arch-mark" style="--i:1"></span><span class="arch-mark" style="--i:2"></span>
+          <span class="arch-mark" style="--i:3"></span><span class="arch-mark" style="--i:4"></span><span class="arch-mark is-done" style="--i:5"></span>
+        </span>
+        <span class="story-teaser__text">
+          <span class="story-teaser__title" data-js="hub-story-title">[초안] 나의 이야기 · 1/6장</span>
+          <span class="story-teaser__desc" data-js="hub-story-desc">[초안] 지금까지는 전사 원형이에요. 이야기를 이어 볼까요?</span>
+        </span>
+        <span class="story-teaser__arrow" aria-hidden="true">→</span>
+      </button>
+
+      <!-- 아직 닫힌 방: 봉인된 포털(예고만) -->
+      <section class="closed-rooms" aria-labelledby="closed-title">
+        <h2 class="closed-rooms__title" id="closed-title">[초안] 아직 봉인된 방</h2>
+        <ul class="closed-rooms__list" data-js="hub-closed">
+          <li class="closed-room"><span class="closed-room__num" aria-hidden="true">I</span><span class="closed-room__name">[초안] 오검의 방</span><span class="closed-room__origin">[초안] 켈트 · 나무 문자</span></li>
+          <li class="closed-room"><span class="closed-room__num" aria-hidden="true">III</span><span class="closed-room__name">[초안] 데칸의 방</span><span class="closed-room__origin">[초안] 이집트 · 서른여섯 별</span></li>
+          <li class="closed-room"><span class="closed-room__num" aria-hidden="true">IV</span><span class="closed-room__name">[초안] 촐킨의 방</span><span class="closed-room__origin">[초안] 마야 · 신성한 달력</span></li>
+          <li class="closed-room"><span class="closed-room__num" aria-hidden="true">V</span><span class="closed-room__name">[초안] 시빌라 신탁의 방</span><span class="closed-room__origin">[초안] 로마 · 촛불의 신탁</span></li>
+        </ul>
+        <p class="closed-rooms__note">[초안] 방이 열릴 때마다 나의 이야기에 새 장이 생겨요</p>
+      </section>
+
+      <!-- 광고 심사용 소개 글 (300자 이상) — 시작 버튼(문) 아래 -->
+      <section class="about" aria-labelledby="about-title">
+        <h2 class="about__title" id="about-title">[초안] 낯선 점술관은 어떤 곳인가요?</h2>
+        <div class="about__body" data-js="hub-about">
+          <p>[초안] 낯선 점술관은 우리에게 익숙한 사주나 타로 대신, 세계 여러 문화에서 실제로 전해 오는 점술을 "방"으로 돌아다니며 체험해 보는 곳이에요. 북유럽의 룬, 인도의 베다 점성술, 켈트의 오검, 로마의 신탁, 마야의 촐킨, 이집트의 데칸까지 여섯 개의 방이 차례로 열려요.</p>
+          <p>[초안] 방 하나만 들러도 정체·사건·그림자·다음, 네 개의 장으로 이어지는 긴 이야기를 읽을 수 있어요. 방을 하나씩 더 지날 때마다 그 결과가 "나의 이야기"의 한 장으로 모이고, 지금까지 가장 많이 나온 원형이 당신을 설명하는 한 단어가 돼요.</p>
+          <p>[초안] 결과는 각 문화가 세상을 바라본 방식을 빌려 나를 돌아보는 이야기예요. 문화마다 실제로 전해지는 것과 이 점술관이 새로 붙인 해석은 결과 화면에서 구분해 알려 드려요. 입력한 이름과 생년월일은 이 기기의 이 탭에만 잠시 보관되고 어디에도 전송되지 않으며, 화면 위의 "내 정보 지우기"로 언제든 지울 수 있어요.</p>
+        </div>
+      </section>
+
+      <!-- 광고 자리 1 (허브: 소개 글 아래). ads.js가 채우면 .is-filled -->
+      <div class="ad-slot" data-js="ad-slot" data-ad="hub"></div>
+    </section>
+
+    <!-- ═════════ 1-R. 룬의 방: 시작 ═════════ -->
+    <section class="screen screen--dock room-intro" id="screen-rune-intro" data-js="screen-rune-intro" data-room="rune" data-preview="1. 룬의 방 — 시작">
+      <header class="room-head">
+        <div class="room-emblem room-emblem--rune" aria-hidden="true"><svg class="room-emblem__rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></div>
+        <p class="eyebrow">[초안] THE RUNE ROOM</p>
+        <h1 class="room-head__title">[초안] 룬의 방</h1>
+        <p class="room-head__chapter"><span class="room-head__chapter-num">[초안] 나의 이야기 6장</span> [초안] 과거·현재·미래</p>
+        <p class="room-head__pitch">[초안] 세 개의 돌이 말해주는, 당신의 과거·현재·미래</p>
+      </header>
+
+      <div class="lore" data-js="rune-lore">
+        <p>[초안] <b>룬</b>은 1,500년 전 북유럽 바이킹과 게르만 사람들이 쓰던 문자예요. 판타지 소설 속 드워프 문자도 룬을 본떠 만든 경우가 많죠.</p>
+        <p>[초안] 하지만 룬은 그냥 글자가 아니었어요. 글자 하나하나가 <b>불, 얼음, 태양, 선물</b> 같은 뜻을 품고 있어서, 사람들은 룬을 새긴 돌을 던져 신의 뜻을 물었답니다.</p>
+        <p>[초안] 오늘은 운명의 세 여신 노른의 자리에 돌 세 개를 놓아, 당신이 지나온 길과 지금 선 자리, 그리고 다가올 모습을 읽어요.</p>
+      </div>
+
+      <div class="cta-dock">
+        <button class="btn btn--primary btn--block" type="button" data-go="rune-input" data-js="rune-intro-go">[초안] 룬 주머니 앞으로</button>
+      </div>
+    </section>
+
+    <!-- ═════════ 2-R. 룬의 방: 입력 ═════════ -->
+    <section class="screen screen--dock room-input" id="screen-rune-input" data-js="screen-rune-input" data-room="rune" data-preview="2. 룬의 방 — 입력 (저장된 정보 카드 + 입력칸을 함께 보여 줌)">
+      <header class="room-head room-head--compact">
+        <p class="eyebrow">[초안] THE RUNE ROOM</p>
+        <h1 class="room-head__title">[초안] 무엇을 물어볼까요?</h1>
+      </header>
+
+      <div class="saved-info" data-js="saved-info">
+        <p class="saved-info__label">[초안] 지난번에 알려 준 정보</p>
+        <p class="saved-info__value" data-js="saved-info-value">[초안] 황보다솜빛나래</p>
+        <p class="saved-info__ask">[초안] 이 정보로 이어서 볼까요?</p>
+        <button class="btn btn--text saved-info__edit" type="button" data-js="saved-info-edit">[초안] 다시 입력하기</button>
+      </div>
+
+      <form class="form" data-js="rune-form" novalidate>
+        <div class="field" data-js="rune-name-field">
+          <label class="field__label" for="rune-name">[초안] 이름 <span class="field__hint">[초안] (선택 · 룬 문자로 새겨 드려요)</span></label>
+          <input class="input" id="rune-name" data-js="rune-name" type="text" maxlength="10" autocomplete="off" placeholder="[초안] 예: 김서윤" />
+        </div>
+
+        <fieldset class="field">
+          <legend class="field__label">[초안] 궁금한 주제</legend>
+          <div class="chip-group" role="radiogroup" data-js="rune-topics">
+            <button class="chip is-selected" type="button" role="radio" aria-checked="true" data-topic="me" data-js="rune-topic">[초안] 요즘의 나</button>
+            <button class="chip" type="button" role="radio" aria-checked="false" data-topic="love" data-js="rune-topic">[초안] 사랑</button>
+            <button class="chip" type="button" role="radio" aria-checked="false" data-topic="work" data-js="rune-topic">[초안] 일 · 공부</button>
+            <button class="chip" type="button" role="radio" aria-checked="false" data-topic="money" data-js="rune-topic">[초안] 돈</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <p class="notice notice--privacy" data-js="privacy-notice">
+        <svg class="notice__icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span>[초안] 입력한 이름은 이 기기의 이 탭에만 잠시 보관되며 어디에도 전송되지 않아요. 탭을 닫으면 사라지고, 위의 "내 정보 지우기"로 언제든 지울 수 있어요.</span>
+      </p>
+
+      <div class="cta-dock">
+        <button class="btn btn--primary btn--block" type="button" data-js="rune-input-go">[초안] 주머니를 손에 쥐기</button>
+      </div>
+    </section>
+
+    <!-- ═════════ 3-R. 룬의 방: 의식 (주머니 흔들기 → 돌 뒤집기) ═════════ -->
+    <section class="screen ritual ritual--rune" id="screen-rune-ritual" data-js="screen-rune-ritual" data-room="rune" data-preview="3. 룬의 방 — 의식 (위: 주머니 단계 --progress 0.42 / 아래: 돌 단계. 실제로는 같은 자리에서 바뀜)">
+      <p class="ritual__guide" data-js="rune-ritual-guide" aria-live="polite">[초안] 질문을 마음속으로 떠올리며<br /><b>주머니를 꾹 누르고 계세요</b></p>
+
+      <div class="cast-stage">
+        <!-- 1단계: 주머니. JS는 .cast의 style="--progress:0~1"만 바꾼다 (고리의 룬·서리·주머니 인장 빛이 함께 따라온다) -->
+        <div class="cast" data-js="rune-cast" style="--progress:0.42">
+          <div class="rune-ring__frost" aria-hidden="true"></div>
+          <ol class="rune-ring" data-js="rune-ring" aria-hidden="true">
+            <li style="--i:0">ᚠ</li><li style="--i:1">ᚢ</li><li style="--i:2">ᚦ</li><li style="--i:3">ᚨ</li><li style="--i:4">ᚱ</li><li style="--i:5">ᚲ</li><li style="--i:6">ᚷ</li><li style="--i:7">ᚹ</li>
+            <li style="--i:8">ᚺ</li><li style="--i:9">ᚾ</li><li style="--i:10">ᛁ</li><li style="--i:11">ᛃ</li><li style="--i:12">ᛇ</li><li style="--i:13">ᛈ</li><li style="--i:14">ᛉ</li><li style="--i:15">ᛊ</li>
+            <li style="--i:16">ᛏ</li><li style="--i:17">ᛒ</li><li style="--i:18">ᛖ</li><li style="--i:19">ᛗ</li><li style="--i:20">ᛚ</li><li style="--i:21">ᛜ</li><li style="--i:22">ᛞ</li><li style="--i:23">ᛟ</li>
+          </ol>
+          <button class="pouch" type="button" data-js="rune-pouch" aria-label="[초안] 룬 주머니를 길게 눌러 흔들기">
+            <span class="pouch__aura" aria-hidden="true"></span>
+            <span class="pouch__bag" aria-hidden="true">
+              <span class="pouch__ruffle"></span>
+              <span class="pouch__neck"></span>
+              <span class="pouch__body">
+                <span class="pouch__seal">
+                  <svg viewBox="0 0 60 60">
+                    <circle class="pouch__seal-ring" cx="30" cy="30" r="26" />
+                    <circle class="pouch__seal-dots" cx="30" cy="30" r="21" />
+                    <svg x="15" y="8" width="30" height="44" viewBox="0 0 40 60"><use class="pouch__seal-rune" href="#rune-othala" /></svg>
+                  </svg>
+                </span>
+              </span>
+              <span class="pouch__cord"><span class="pouch__tassel"></span><span class="pouch__tassel pouch__tassel--r"></span></span>
+            </span>
+          </button>
+        </div>
+
+        <!-- 2단계: 얼음판 위에 떨어진 돌 3개. 빛나는 돌(.is-next)부터 차례로 뒤집는다. 룬은 획으로 새겨지듯 그려진다 -->
+        <div class="cloth" data-js="rune-cloth">
+          <div class="stones" data-js="rune-stones">
+            <button class="stone is-flipped" type="button" data-js="rune-stone" data-i="0" aria-label="[초안] 우르드의 돌 뒤집기">
+              <span class="stone__inner">
+                <span class="stone__face stone__front"><span class="stone__norn">URÐR</span></span>
+                <span class="stone__face stone__back"><svg class="stone__rune" viewBox="0 0 40 60" aria-hidden="true"><use data-js="rune-stone-glyph" href="#rune-fehu" /></svg></span>
+              </span>
+            </button>
+            <button class="stone is-next" type="button" data-js="rune-stone" data-i="1" aria-label="[초안] 베르단디의 돌 뒤집기">
+              <span class="stone__inner">
+                <span class="stone__face stone__front"><span class="stone__norn">VERÐANDI</span></span>
+                <span class="stone__face stone__back"><svg class="stone__rune" viewBox="0 0 40 60" aria-hidden="true"><use data-js="rune-stone-glyph" href="#rune-othala" /></svg></span>
+              </span>
+            </button>
+            <button class="stone" type="button" data-js="rune-stone" data-i="2" aria-label="[초안] 스쿨드의 돌 뒤집기">
+              <span class="stone__inner">
+                <span class="stone__face stone__front"><span class="stone__norn">SKULD</span></span>
+                <span class="stone__face stone__back"><svg class="stone__rune" viewBox="0 0 40 60" aria-hidden="true"><use data-js="rune-stone-glyph" href="#rune-algiz" /></svg></span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="norn-hint" data-js="rune-norn-hint" aria-live="polite"><b>[초안] 베르단디</b> · [초안] 지금 짜이고 있는 실을 쥔 여신. 당신이 지금 서 있는 자리예요.</p>
+    </section>
+
+    <!-- ═════════ 4-R. 룬의 방: 결과 ═════════ -->
+    <section class="screen result" id="screen-rune-result" data-js="screen-rune-result" data-room="rune" data-preview="4. 룬의 방 — 결과 (이름이 가장 긴 경우: 10자)">
+
+      <!-- 정적 검토 전용: 결과 화면에서의 상단 막대 모습 (읽기 진행률 보임) -->
+      <div class="topbar topbar--sample is-reading" data-preview-only aria-hidden="true">
+        <div class="topbar__inner">
+          <span class="topbar__back">← 입구로</span>
+          <p class="topbar__chapter">II · 사건 <span class="topbar__count">2/4</span></p>
+          <span class="topbar__clear"><span>내 정보 지우기</span></span>
+        </div>
+        <div class="read-progress"><span class="read-progress__seg is-done" style="--fill:1"></span><span class="read-progress__seg" style="--fill:0.4"></span><span class="read-progress__seg" style="--fill:0"></span><span class="read-progress__seg" style="--fill:0"></span></div>
+      </div>
+
+      <!-- 캡처 영역. 화면에 들어오면 JS가 .is-revealed → 봉인이 그려지고 풀리며 룬 → 빛 → 제목 순서로 드러난다 -->
+      <div class="capture" data-js="result-capture">
+        <svg class="seal" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="seal__ring" cx="100" cy="100" r="94" pathLength="1" />
+          <circle class="seal__ring seal__ring--inner" cx="100" cy="100" r="80" pathLength="1" />
+          <path class="seal__marks" pathLength="1" d="M100 6V20M100 180V194M6 100H20M180 100H194M33.5 33.5L43 43M157 157L166.5 166.5M166.5 33.5L157 43M43 157L33.5 166.5" />
+        </svg>
+        <span class="capture__flash" aria-hidden="true"></span>
+        <p class="capture__eyebrow">[초안] 낯선 점술관 · 룬의 방</p>
+        <div class="mini-stones" aria-hidden="true" data-js="result-glyphs">
+          <span class="mini-stone"><svg class="mini-stone__rune" viewBox="0 0 40 60"><use data-js="result-glyph" href="#rune-fehu" /></svg><span class="mini-stone__label">URÐR</span></span>
+          <span class="mini-stone"><svg class="mini-stone__rune" viewBox="0 0 40 60"><use data-js="result-glyph" href="#rune-othala" /></svg><span class="mini-stone__label">VERÐANDI</span></span>
+          <span class="mini-stone"><svg class="mini-stone__rune" viewBox="0 0 40 60"><use data-js="result-glyph" href="#rune-algiz" /></svg><span class="mini-stone__label">SKULD</span></span>
+        </div>
+        <h1 class="capture__title" data-js="result-title">[초안] 황보다솜빛나래님의 세 개의 룬</h1>
+        <p class="capture__names" data-js="result-names">[초안] 페후 · 오달라 · 알기즈</p>
+        <p class="capture__key" data-js="result-key">[초안] 가진 것을 지키느라 굳어 있던 손이, 이제 누군가를 지키는 손으로 바뀌는 중이에요.</p>
+        <p class="capture__meta" data-js="result-meta">[초안] 물어본 것: 사랑 · 나의 이야기 6장</p>
+      </div>
+
+      <button class="btn btn--secondary btn--small capture-share" type="button" data-js="result-share-top">[초안] 이 카드 저장 · 공유</button>
+
+      <aside class="turn" data-js="result-turn">
+        <p class="eyebrow">[초안] THE THREAD OF FATE</p>
+        <ol class="thread">
+          <li class="thread__step"><span class="thread__when">[초안] 지나온</span><span class="thread__word">[초안] 손에 쥔 풍요</span></li>
+          <li class="thread__step"><span class="thread__when">[초안] 지금</span><span class="thread__word">[초안] 물려받은 집</span></li>
+          <li class="thread__step is-key"><span class="thread__when">[초안] 다가올</span><span class="thread__word">[초안] 지키는 힘</span></li>
+        </ol>
+        <p class="turn__text">[초안] 당신을 여기까지 데려온 건 '손에 쥔 풍요', 지금 당신을 둘러싼 건 '물려받은 집', 그리고 다가올 자리엔 '지키는 힘'이 놓였어요.</p>
+      </aside>
+
+      <nav class="toc" aria-label="[초안] 이 결과의 목차" data-js="result-toc">
+        <p class="toc__meta" data-js="result-length">[초안] 네 개의 장 · 약 11분</p>
+        <ol class="toc__list">
+          <li><a class="toc__link" href="#rune-ch-1"><span class="toc__num">I</span><span class="toc__name">[초안] 정체</span><span class="toc__title">[초안] 세 개의 돌은 어디서 왔나</span></a></li>
+          <li><a class="toc__link" href="#rune-ch-2"><span class="toc__num">II</span><span class="toc__name">[초안] 사건</span><span class="toc__title">[초안] 그날 밤, 당신이 한 일</span></a></li>
+          <li><a class="toc__link" href="#rune-ch-3"><span class="toc__num">III</span><span class="toc__name">[초안] 그림자</span><span class="toc__title">[초안] 지키려다 놓친 것</span></a></li>
+          <li><a class="toc__link" href="#rune-ch-4"><span class="toc__num">IV</span><span class="toc__name">[초안] 다음</span><span class="toc__title">[초안] 손을 펴는 연습</span></a></li>
+        </ol>
+      </nav>
+
+      <!-- 네 개의 장. JS가 화면에 .js-reveal을 붙이고, 장이 스크롤로 들어오면 그 장에 .is-in (한 번만) -->
+      <div class="chapters" data-js="result-chapters">
+
+        <section class="chapter" id="rune-ch-1" data-js="result-chapter" data-chapter="1" aria-labelledby="rune-ch-1-title">
+          <header class="chapter__head">
+            <p class="chapter__num" aria-hidden="true">I</p>
+            <p class="chapter__label">[초안] 첫째 장 · 정체</p>
+            <h2 class="chapter__title" id="rune-ch-1-title" data-js="chapter-title">[초안] 세 개의 돌은 어디서 왔나</h2>
+            <p class="chapter__time" data-js="chapter-time">[초안] 약 3분</p>
+          </header>
+          <div class="prose" data-js="chapter-body">
+            <p class="prose__lede">[초안] 당신의 주머니에서 나온 세 개의 돌은 모두 '집'과 '재물'과 '지킴'에 관한 룬이에요. 우연이라기엔, 방향이 꽤 한쪽으로 모여 있죠.</p>
+            <h3 class="prose__sub"><span class="prose__sub-glyph runic" aria-hidden="true">ᚠ</span><span>[초안] 우르드의 자리 · 페후</span></h3>
+            <p>[초안] 페후는 가축, 곧 소를 뜻해요. 바이킹 시대에 소는 먹을 것이자 옷이자 돈이었어요. 겨울을 날 수 있느냐 없느냐가 외양간에 소가 몇 마리 있느냐로 정해졌으니까요. 그래서 페후는 '지금 손에 쥔 것'을 뜻하면서, 동시에 그것을 어떻게 흘려보내느냐를 묻는 룬이 됐어요. 옛 룬 시는 페후를 두고 "친척 사이에 다툼을 부르는 것"이라고도 노래했어요.</p>
+            <h3 class="prose__sub"><span class="prose__sub-glyph runic" aria-hidden="true">ᛟ</span><span>[초안] 베르단디의 자리 · 오달라</span></h3>
+            <p>[초안] 오달라는 대대로 물려받은 땅과 집이에요. 사고팔 수 있는 재산이 아니라, 한 집안이 '우리'라고 부르는 울타리 전체를 가리켰죠. 룬 스물네 자 가운데 마지막 줄 끝에 놓인 글자라서, 오래전부터 '돌아갈 곳'이라는 뜻으로 읽혀 왔어요.</p>
+            <h3 class="prose__sub"><span class="prose__sub-glyph runic" aria-hidden="true">ᛉ</span><span>[초안] 스쿨드의 자리 · 알기즈</span></h3>
+            <p>[초안] 알기즈는 엘크의 뿔, 혹은 하늘을 향해 벌린 손바닥처럼 생겼어요. 해석은 문헌마다 조금씩 다르지만, 대부분 '지키는 힘'과 '보호'로 읽어요. 날카로운 뿔은 공격이 아니라 경계를 뜻했어요.</p>
+            <aside class="inset inset--name" data-js="rune-name-runes">
+              <p class="inset__label">[초안] 당신의 이름을 룬으로 새기면</p>
+              <p class="name-runes runic" data-js="rune-name-glyphs">ᚺᚹᚨᛜᛒᛟᛞᚨᛊᛟᛗᛒᛁᛏᚾᚨᚱᚨᛖ</p>
+              <p class="inset__fact"><span data-js="rune-name-source">[초안] 황보다솜빛나래</span> → <span class="latin" data-js="rune-name-latin">HWANGBODASOMBITNARAE</span></p>
+              <p class="inset__fact">[초안] 옛 룬 비문은 같은 글자를 두 번 연달아 새기지 않았어요. 돌에 새기는 데 품이 많이 들었거든요.</p>
+            </aside>
+          </div>
+          <p class="chapter__hook" data-reveal data-js="chapter-hook">[초안] 그런데 이 세 돌, 사실 당신이 이미 한 번 겪은 장면을 가리키고 있어요.</p>
+        </section>
+
+        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
+
+        <section class="chapter" id="rune-ch-2" data-js="result-chapter" data-chapter="2" aria-labelledby="rune-ch-2-title">
+          <header class="chapter__head">
+            <p class="chapter__num" aria-hidden="true">II</p>
+            <p class="chapter__label">[초안] 둘째 장 · 사건</p>
+            <h2 class="chapter__title" id="rune-ch-2-title" data-js="chapter-title">[초안] 그날 밤, 당신이 한 일</h2>
+            <p class="chapter__time" data-js="chapter-time">[초안] 약 3분</p>
+          </header>
+          <div class="prose" data-js="chapter-body">
+            <p class="prose__lede">[초안] 새벽 한 시쯤, 누군가의 메시지 알림이 떴는데 바로 열지 않고 한참 화면만 본 적 있죠. 답장을 쓰다 지우고, 다시 쓰다 지우고.</p>
+            <p>[초안] 그 메시지는 대단한 내용이 아니었을 거예요. "자?" 한 글자였거나, 오랜만에 온 안부였거나. 그런데 당신은 그 짧은 문장 뒤에 숨은 무게를 먼저 쟀어요. 지금 답하면 어디까지 이어질지, 내가 감당할 수 있는 만큼인지, 괜히 기대하게 만드는 건 아닌지. 결국 "응 아직"이라는 네 글자를 보내기까지 십 분이 걸렸고, 보낸 뒤에도 휴대폰을 뒤집어 놓고 한동안 천장을 봤어요.</p>
+            <p>[초안] 페후가 첫 자리에 놓인 사람들은 이런 계산을 아주 빨리, 그리고 아주 조용히 해요. 욕심이 많아서가 아니라, 내가 가진 마음의 양을 정확히 알고 싶어서예요. 누구에게도 빚지지 않고, 누구도 실망시키지 않으려면 먼저 내 손에 뭐가 얼마나 있는지 알아야 하니까요.</p>
+            <blockquote class="pull-quote" data-reveal data-js="chapter-quote">[초안] 당신은 마음을 아끼는 게 아니라, 제대로 쓰고 싶어서 세어 보는 사람이에요.</blockquote>
+            <p>[초안] 오달라가 지금의 자리에 놓였다는 건, 요즘 당신이 '내 사람'의 울타리를 다시 그리고 있다는 뜻이에요. 작년 이맘때 자주 만나던 사람 중 몇은 자연스럽게 멀어졌고, 대신 예전엔 몰랐던 누군가가 어느새 안쪽에 들어와 있죠. 주말에 누구와 밥을 먹을지 떠올릴 때 제일 먼저 생각나는 얼굴이 바뀌었다면, 울타리는 이미 새로 쳐지는 중이에요.</p>
+            <p>[초안] 그리고 그 울타리 안의 사람에게 당신은 꽤 너그러워요. 바깥사람에게는 계산이 빠르지만, 안쪽 사람이 늦게 답장해도, 약속을 한 번 미뤄도 "그럴 수도 있지" 하고 넘겨요. 그 차이를 당신 스스로도 알고 있어서, 가끔은 '내가 너무 선을 긋나' 싶어 혼자 머쓱해지기도 하죠.</p>
+          </div>
+          <p class="chapter__hook" data-reveal data-js="chapter-hook">[초안] 하지만 울타리를 단단히 칠수록, 문 앞에서 돌아선 사람도 생겨요.</p>
+        </section>
+
+        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
+
+        <section class="chapter" id="rune-ch-3" data-js="result-chapter" data-chapter="3" aria-labelledby="rune-ch-3-title">
+          <header class="chapter__head">
+            <p class="chapter__num" aria-hidden="true">III</p>
+            <p class="chapter__label">[초안] 셋째 장 · 그림자</p>
+            <h2 class="chapter__title" id="rune-ch-3-title" data-js="chapter-title">[초안] 지키려다 놓친 것</h2>
+            <p class="chapter__time" data-js="chapter-time">[초안] 약 2분</p>
+          </header>
+          <div class="prose" data-js="chapter-body">
+            <p class="prose__lede">[초안] 지키는 힘이 강한 사람은, 가끔 지킬 필요가 없는 것까지 지켜요.</p>
+            <p>[초안] 누군가 "요즘 어때?" 하고 물었을 때 "그냥 똑같지 뭐"라고 답하고 넘어간 적이 많을 거예요. 사실은 할 말이 있었는데, 꺼내는 순간 상대가 걱정할까 봐, 혹은 그 걱정에 내가 다시 답해야 할까 봐 문을 닫은 거죠. 그렇게 닫아 둔 이야기들이 쌓이면, 가까운 사람도 당신을 '괜찮은 사람'으로만 기억하게 돼요.</p>
+            <p>[초안] 알기즈의 뿔은 경계를 뜻하지만, 경계가 너무 높으면 안에 있는 사람도 밖을 못 봐요. 당신이 지키고 싶은 사람들이 정작 당신을 도울 기회를 얻지 못하는 것, 그게 이 세 돌이 조용히 가리키는 그림자예요.</p>
+          </div>
+          <p class="chapter__hook" data-reveal data-js="chapter-hook">[초안] 그럼 이 뿔을 어떻게 내려놓을 수 있을까요. 마지막 장에 방법이 있어요.</p>
+        </section>
+
+        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
+
+        <!-- 광고 자리 2 (결과: 셋째 장과 넷째 장 사이, 장 본문 밖) -->
+        <div class="ad-slot ad-slot--between" data-js="ad-slot" data-ad="result-mid"></div>
+
+        <section class="chapter" id="rune-ch-4" data-js="result-chapter" data-chapter="4" aria-labelledby="rune-ch-4-title">
+          <header class="chapter__head">
+            <p class="chapter__num" aria-hidden="true">IV</p>
+            <p class="chapter__label">[초안] 넷째 장 · 다음</p>
+            <h2 class="chapter__title" id="rune-ch-4-title" data-js="chapter-title">[초안] 손을 펴는 연습</h2>
+            <p class="chapter__time" data-js="chapter-time">[초안] 약 3분</p>
+          </header>
+          <div class="prose" data-js="chapter-body">
+            <p class="prose__lede">[초안] 이번 주에 딱 한 번, "그냥 똑같지 뭐" 대신 진짜 요즘 이야기를 한 문장만 해 보세요.</p>
+            <p>[초안] 거창할 필요 없어요. "요즘 회사에서 이것 때문에 좀 지쳐" 정도면 충분해요. 페후는 흘려보낸 재물이 돌아온다고 말하는 룬이에요. 마음도 같아요. 조금 꺼내 놓으면, 상대도 자기 이야기를 꺼내 놓고, 그렇게 오간 이야기가 울타리를 더 튼튼하게 만들어요.</p>
+            <p>[초안] 그리고 울타리 밖에서 문을 두드리는 사람이 있다면, 이번엔 문을 반쯤만 열어 보세요. 다 들일 필요는 없어요. 알기즈의 뿔은 지키는 힘이지만, 그 손바닥은 하늘을 향해 열려 있으니까요.</p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="fact-card" data-js="result-fact">
+        <p class="eyebrow">[초안] DID YOU KNOW?</p>
+        <p class="fact-card__text">[초안] 룬 24자는 여덟 개씩 세 줄로 나뉘고, 각 줄을 풍요의 신 프레이, 문지기 신 헤임달, 정의의 신 티르가 맡는다고 여겼어요. 오늘 당신이 뽑은 룬은 페후(프레이의 줄), 오달라(티르의 줄), 알기즈(헤임달의 줄)이에요.</p>
+      </aside>
+
+      <div class="disclaimer-slot" data-js="disclaimer-slot"><p class="disclaimer">재미로 보는 콘텐츠이며, 중요한 결정의 근거로 삼지 마세요.</p></div>
+
+      <div class="result-actions">
+        <button class="btn btn--primary btn--block" type="button" data-js="result-share">[초안] 결과 카드 저장 · 공유하기</button>
+        <button class="btn btn--secondary btn--block" type="button" data-js="result-retry">[초안] 다시 던지기</button>
+      </div>
+
+      <aside class="archetype-line" data-js="result-archetype">
+        <span class="archetype-line__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
+        </span>
+        <p class="archetype-line__text"><span class="archetype-line__label">[초안] 이 방에서 얻은 원형</span> <b data-js="result-archetype-name">[초안] 전사</b> — <span data-js="result-archetype-why">[초안] 다가올 자리의 알기즈가 '지키는 힘'이라, 도전하고 버티는 전사에 가까워요.</span></p>
+      </aside>
+
+      <section class="next-rooms" aria-labelledby="rune-next-title">
+        <h2 class="next-rooms__title" id="rune-next-title">[초안] 다음 방이 궁금하다면</h2>
+        <div class="next-rooms__list" data-js="next-rooms">
+          <button class="next-room" type="button" data-room="star" data-go="star-intro" data-js="next-room">
+            <span class="next-room__glyph" aria-hidden="true">
+              <svg viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg>
+            </span>
+            <span class="next-room__text">
+              <span class="next-room__name">[초안] 별의 방 <span class="next-room__chapter">[초안] 나의 이야기 2장 · 마음결</span></span>
+              <span class="next-room__hook">[초안] 룬이 정리해 준 이야기, 이번엔 다른 하늘 아래서도 당신을 알아볼까요?</span>
+            </span>
+            <span class="next-room__arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+        <button class="btn btn--secondary btn--block next-rooms__story" type="button" data-go="story" data-js="result-go-story">[초안] 나의 이야기 보기 · 1/6장</button>
+      </section>
+
+      <div class="page-end" aria-hidden="true"><span>ᛟ</span></div>
+
+      <!-- 광고 자리 3 (결과: 맨 아래). 결과 화면 광고는 이 둘로 최대 2개 -->
+      <div class="ad-slot" data-js="ad-slot" data-ad="result-end"></div>
+    </section>
+
+    <!-- ═════════ 1-S. 별의 방: 시작 ═════════ -->
+    <section class="screen screen--dock room-intro" id="screen-star-intro" data-js="screen-star-intro" data-room="star" data-preview="1. 별의 방 — 시작">
+      <header class="room-head">
+        <div class="room-emblem room-emblem--star" aria-hidden="true">
+          <svg viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg>
+        </div>
+        <p class="eyebrow">[초안] THE STAR ROOM</p>
+        <h1 class="room-head__title">[초안] 별의 방</h1>
+        <p class="room-head__chapter"><span class="room-head__chapter-num">[초안] 나의 이야기 2장</span> [초안] 마음결</p>
+        <p class="room-head__pitch">[초안] 태어난 순간 하늘의 달이 알려주는, 지금의 속마음</p>
+      </header>
+
+      <div class="lore" data-js="star-lore">
+        <p>[초안] <b>베다 점성술</b>은 3,000년 넘게 이어진 인도의 점성술이에요. 인도에서는 지금도 결혼 날짜나 아기 이름을 정할 때 이 점성술을 봐요.</p>
+        <p>[초안] 우리가 아는 별자리 운세가 <b>태양</b>을 본다면, 베다는 <b>달</b>을 더 중요하게 봐요. 달이 하늘을 한 바퀴 도는 길을 27개의 '달의 집'으로 나눴는데, 이 집을 <b>나크샤트라</b>라고 불러요.</p>
+        <p>[초안] 태어난 순간 달이 머물던 집이, 당신의 <b>마음결</b>을 알려준대요.</p>
+      </div>
+
+      <div class="cta-dock">
+        <button class="btn btn--primary btn--block" type="button" data-go="star-input" data-js="star-intro-go">[초안] 태어난 날 알려 주기</button>
+      </div>
+    </section>
+
+    <!-- ═════════ 2-S. 별의 방: 입력 ═════════ -->
+    <section class="screen screen--dock room-input" id="screen-star-input" data-js="screen-star-input" data-room="star" data-preview="2. 별의 방 — 입력 (저장된 정보 + 오류 상태를 함께 보여 줌)">
+      <header class="room-head room-head--compact">
+        <p class="eyebrow">[초안] THE STAR ROOM</p>
+        <h1 class="room-head__title">[초안] 언제 태어났나요?</h1>
+      </header>
+
+      <div class="saved-info" data-js="saved-info">
+        <p class="saved-info__label">[초안] 지난번에 알려 준 정보</p>
+        <p class="saved-info__value" data-js="saved-info-value">[초안] 김서윤 · 1995. 3. 21. · 시각 모름</p>
+        <p class="saved-info__ask">[초안] 이 정보로 이어서 볼까요?</p>
+        <button class="btn btn--text saved-info__edit" type="button" data-js="saved-info-edit">[초안] 다시 입력하기</button>
+      </div>
+
+      <form class="form" data-js="star-form" novalidate>
+        <div class="field">
+          <label class="field__label" for="star-name">[초안] 이름 <span class="field__hint">[초안] (선택)</span></label>
+          <input class="input" id="star-name" data-js="star-name" type="text" maxlength="10" autocomplete="off" placeholder="[초안] 예: 김서윤" />
+        </div>
+
+        <fieldset class="field is-error" data-js="star-date-field">
+          <legend class="field__label">[초안] 태어난 날</legend>
+          <div class="field__row">
+            <input class="input input--num date-y" data-js="star-year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="1995" aria-label="[초안] 태어난 해 (4자리)" />
+            <span class="field__unit">[초안] 년</span>
+            <input class="input input--num date-md" data-js="star-month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="3" aria-label="[초안] 태어난 달" />
+            <span class="field__unit">[초안] 월</span>
+            <input class="input input--num date-md" data-js="star-day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="21" aria-label="[초안] 태어난 날짜" />
+            <span class="field__unit">[초안] 일</span>
+          </div>
+          <p class="field__error" data-js="star-error" role="alert">[초안] 날짜를 확인해 주세요. 1900년에서 2100년 사이로 넣어 주세요 (예: 1995년 3월 21일)</p>
+        </fieldset>
+
+        <fieldset class="field" data-js="star-time-field">
+          <legend class="field__label">[초안] 태어난 시각 <span class="field__hint">[초안] (한국 시간 · 24시 기준)</span></legend>
+          <div class="field__row">
+            <input class="input input--num date-md" data-js="star-hour" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="15" aria-label="[초안] 태어난 시 (0~23)" />
+            <span class="field__unit">[초안] 시</span>
+            <input class="input input--num date-md" data-js="star-minute" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="30" aria-label="[초안] 태어난 분" />
+            <span class="field__unit">[초안] 분</span>
+          </div>
+          <label class="check">
+            <input type="checkbox" data-js="star-time-unknown" />
+            <span>[초안] 태어난 시각을 몰라요</span>
+          </label>
+          <p class="field__hint">[초안] 모르면 그날 달이 머문 집을 모두 보여 드리고, 직접 고르게 해 드려요.</p>
+        </fieldset>
+      </form>
+
+      <p class="notice notice--privacy" data-js="privacy-notice">
+        <svg class="notice__icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span>[초안] 입력한 이름과 생년월일은 이 기기의 이 탭에만 잠시 보관되며 어디에도 전송되지 않아요. 탭을 닫으면 사라지고, 위의 "내 정보 지우기"로 언제든 지울 수 있어요.</span>
+      </p>
+
+      <div class="cta-dock">
+        <button class="btn btn--primary btn--block" type="button" data-js="star-input-go">[초안] 그날의 하늘로 돌아가기</button>
+      </div>
+    </section>
+
+    <!-- ═════════ 3-S. 별의 방: 의식 (약 5초, 손대지 않고 지켜보는 되감기) ═════════
+         JS: .star-dial에 style="--moon-deg:57.3deg"(달의 황경), 화면에 .is-running → 약 4.4초 뒤 .is-landed,
+             달이 멈춘 집 g[data-js="star-nak"][data-n=번호]에 .is-home -->
+    <section class="screen ritual ritual--star" id="screen-star-ritual" data-js="screen-star-ritual" data-room="star" data-preview="3. 별의 방 — 의식 (정적 검토: 착지한 뒤 모습)">
+      <div class="rewind" aria-live="polite">
+        <p class="rewind__label">[초안] 하늘을 되감는 중</p>
+        <p class="rewind__year">
+          <span class="rewind__flare" aria-hidden="true"></span>
+          <span class="rewind__num" data-js="star-rewind-year">1995</span><span class="rewind__unit">[초안] 년</span>
+        </p>
+      </div>
+
+      <div class="star-dial" data-js="star-dial" style="--moon-deg:47deg">
+        <div class="star-dial__trails" aria-hidden="true"></div>
+        <svg class="wheel" viewBox="-160 -160 320 320" data-js="star-wheel" aria-hidden="true">
+          <g class="wheel__rim">
+            <circle class="ring ring--outer" r="150" /><circle class="ring" r="128" />
+            <path class="rim-ticks" pathLength="1" d="M0 -150L0 -138M8.7 -149.7L8.4 -144.8M17.4 -149L16.8 -144M26 -147.7L25.2 -142.8M34.6 -146L33.4 -141.1M43 -143.7L41.6 -138.9M51.3 -141L49.6 -136.3M59.4 -137.7L57.4 -133.1M67.3 -134L65.1 -129.6M75 -129.9L69 -119.5M82.4 -125.3L79.7 -121.1M89.6 -120.3L86.6 -116.3M96.4 -114.9L93.2 -111.1M102.9 -109.1L99.5 -105.5M109.1 -102.9L105.5 -99.5M114.9 -96.4L111.1 -93.2M120.3 -89.6L116.3 -86.6M125.3 -82.4L121.1 -79.7M129.9 -75L119.5 -69M134 -67.3L129.6 -65.1M137.7 -59.4L133.1 -57.4M141 -51.3L136.3 -49.6M143.7 -43L138.9 -41.6M146 -34.6L141.1 -33.4M147.7 -26L142.8 -25.2M149 -17.4L144 -16.8M149.7 -8.7L144.8 -8.4M150 0L138 0M149.7 8.7L144.8 8.4M149 17.4L144 16.8M147.7 26L142.8 25.2M146 34.6L141.1 33.4M143.7 43L138.9 41.6M141 51.3L136.3 49.6M137.7 59.4L133.1 57.4M134 67.3L129.6 65.1M129.9 75L119.5 69M125.3 82.4L121.1 79.7M120.3 89.6L116.3 86.6M114.9 96.4L111.1 93.2M109.1 102.9L105.5 99.5M102.9 109.1L99.5 105.5M96.4 114.9L93.2 111.1M89.6 120.3L86.6 116.3M82.4 125.3L79.7 121.1M75 129.9L69 119.5M67.3 134L65.1 129.6M59.4 137.7L57.4 133.1M51.3 141L49.6 136.3M43 143.7L41.6 138.9M34.6 146L33.4 141.1M26 147.7L25.2 142.8M17.4 149L16.8 144M8.7 149.7L8.4 144.8M0 150L0 138M-8.7 149.7L-8.4 144.8M-17.4 149L-16.8 144M-26 147.7L-25.2 142.8M-34.6 146L-33.4 141.1M-43 143.7L-41.6 138.9M-51.3 141L-49.6 136.3M-59.4 137.7L-57.4 133.1M-67.3 134L-65.1 129.6M-75 129.9L-69 119.5M-82.4 125.3L-79.7 121.1M-89.6 120.3L-86.6 116.3M-96.4 114.9L-93.2 111.1M-102.9 109.1L-99.5 105.5M-109.1 102.9L-105.5 99.5M-114.9 96.4L-111.1 93.2M-120.3 89.6L-116.3 86.6M-125.3 82.4L-121.1 79.7M-129.9 75L-119.5 69M-134 67.3L-129.6 65.1M-137.7 59.4L-133.1 57.4M-141 51.3L-136.3 49.6M-143.7 43L-138.9 41.6M-146 34.6L-141.1 33.4M-147.7 26L-142.8 25.2M-149 17.4L-144 16.8M-149.7 8.7L-144.8 8.4M-150 0L-138 0M-149.7 -8.7L-144.8 -8.4M-149 -17.4L-144 -16.8M-147.7 -26L-142.8 -25.2M-146 -34.6L-141.1 -33.4M-143.7 -43L-138.9 -41.6M-141 -51.3L-136.3 -49.6M-137.7 -59.4L-133.1 -57.4M-134 -67.3L-129.6 -65.1M-129.9 -75L-119.5 -69M-125.3 -82.4L-121.1 -79.7M-120.3 -89.6L-116.3 -86.6M-114.9 -96.4L-111.1 -93.2M-109.1 -102.9L-105.5 -99.5M-102.9 -109.1L-99.5 -105.5M-96.4 -114.9L-93.2 -111.1M-89.6 -120.3L-86.6 -116.3M-82.4 -125.3L-79.7 -121.1M-75 -129.9L-69 -119.5M-67.3 -134L-65.1 -129.6M-59.4 -137.7L-57.4 -133.1M-51.3 -141L-49.6 -136.3M-43 -143.7L-41.6 -138.9M-34.6 -146L-33.4 -141.1M-26 -147.7L-25.2 -142.8M-17.4 -149L-16.8 -144M-8.7 -149.7L-8.4 -144.8" />
+            <path class="rashi-lines" d="M0 -150L0 -128M75 -129.9L64 -110.9M129.9 -75L110.9 -64M150 0L128 0M129.9 75L110.9 64M75 129.9L64 110.9M0 150L0 128M-75 129.9L-64 110.9M-129.9 75L-110.9 64M-150 0L-128 0M-129.9 -75L-110.9 -64M-75 -129.9L-64 -110.9" />
+            <text class="rashi-label" data-js="rashi-label" x="34.4" y="-128.5" text-anchor="middle" dominant-baseline="middle" transform="rotate(15 34.4 -128.5)">양</text>
+            <text class="rashi-label" data-js="rashi-label" x="94" y="-94" text-anchor="middle" dominant-baseline="middle" transform="rotate(45 94 -94)">황소</text>
+            <text class="rashi-label" data-js="rashi-label" x="128.5" y="-34.4" text-anchor="middle" dominant-baseline="middle" transform="rotate(75 128.5 -34.4)">쌍둥이</text>
+            <text class="rashi-label" data-js="rashi-label" x="128.5" y="34.4" text-anchor="middle" dominant-baseline="middle" transform="rotate(105 128.5 34.4)">게</text>
+            <text class="rashi-label" data-js="rashi-label" x="94" y="94" text-anchor="middle" dominant-baseline="middle" transform="rotate(135 94 94)">사자</text>
+            <text class="rashi-label" data-js="rashi-label" x="34.4" y="128.5" text-anchor="middle" dominant-baseline="middle" transform="rotate(165 34.4 128.5)">처녀</text>
+            <text class="rashi-label" data-js="rashi-label" x="-34.4" y="128.5" text-anchor="middle" dominant-baseline="middle" transform="rotate(195 -34.4 128.5)">천칭</text>
+            <text class="rashi-label" data-js="rashi-label" x="-94" y="94" text-anchor="middle" dominant-baseline="middle" transform="rotate(225 -94 94)">전갈</text>
+            <text class="rashi-label" data-js="rashi-label" x="-128.5" y="34.4" text-anchor="middle" dominant-baseline="middle" transform="rotate(255 -128.5 34.4)">사수</text>
+            <text class="rashi-label" data-js="rashi-label" x="-128.5" y="-34.4" text-anchor="middle" dominant-baseline="middle" transform="rotate(285 -128.5 -34.4)">염소</text>
+            <text class="rashi-label" data-js="rashi-label" x="-94" y="-94" text-anchor="middle" dominant-baseline="middle" transform="rotate(315 -94 -94)">물병</text>
+            <text class="rashi-label" data-js="rashi-label" x="-34.4" y="-128.5" text-anchor="middle" dominant-baseline="middle" transform="rotate(345 -34.4 -128.5)">물고기</text>
+          </g>
+          <path class="nak-dividers" d="M0 -66L0 -100M15.2 -64.2L23.1 -97.3M29.6 -59L44.9 -89.4M42.4 -50.6L64.3 -76.6M52.9 -39.4L80.2 -59.7M60.6 -26.1L91.8 -39.6M65 -11.5L98.5 -17.4M65.9 3.8L99.8 5.8M63.2 18.9L95.8 28.7M57.2 33L86.6 50M48 45.3L72.7 68.6M36.3 55.1L55 83.5M22.6 62L34.2 94M7.7 65.6L11.6 99.3M-7.7 65.6L-11.6 99.3M-22.6 62L-34.2 94M-36.3 55.1L-55 83.5M-48 45.3L-72.7 68.6M-57.2 33L-86.6 50M-63.2 18.9L-95.8 28.7M-65.9 3.8L-99.8 5.8M-65 -11.5L-98.5 -17.4M-60.6 -26.1L-91.8 -39.6M-52.9 -39.4L-80.2 -59.7M-42.4 -50.6L-64.3 -76.6M-29.6 -59L-44.9 -89.4M-15.2 -64.2L-23.1 -97.3" />
+          <circle class="ring ring--inner" r="100" /><circle class="ring ring--inner" r="62" />
+          <circle class="moon-orbit" r="114" />
+          <path class="yantra" pathLength="1" d="M0 -58L42.2 39.8L-57.9 3.4L37.3 -44.4L6.7 57.6L-46.5 -34.6L57.1 -10.1L-31.9 48.5L-13.4 -56.4L50.2 29L-55.6 16.6L26 -51.8L19.8 54.5L-53.3 -23L53.3 -23L-19.8 54.5L-26 -51.8L55.6 16.6L-50.2 29L13.4 -56.4L31.9 48.5L-57.1 -10.1L46.5 -34.6L-6.7 57.6L-37.3 -44.4L57.9 3.4L-42.2 39.8L0 -58" />
+          <circle class="yantra-core" r="9" />
+          <g class="naks">
+            <g class="nak" data-js="star-nak" data-n="0" style="--n:0"><path class="nak-line" pathLength="1" d="M6.8 -89.8L13.5 -70.7L11.6 -81.2" /><circle class="nak-star" cx="6.8" cy="-89.8" r="1.2" /><circle class="nak-star" cx="13.5" cy="-70.7" r="1.8" /><circle class="nak-star" cx="11.6" cy="-81.2" r="2" /></g>
+            <g class="nak" data-js="star-nak" data-n="1" style="--n:1"><path class="nak-line" pathLength="1" d="M24.4 -81.3L31 -68.8L32 -72.6L28.8 -84.8" /><circle class="nak-star" cx="24.4" cy="-81.3" r="1.8" /><circle class="nak-star" cx="31" cy="-68.8" r="1.1" /><circle class="nak-star" cx="32" cy="-72.6" r="1.6" /><circle class="nak-star" cx="28.8" cy="-84.8" r="1.9" /></g>
+            <g class="nak" data-js="star-nak" data-n="2" style="--n:2"><path class="nak-line" pathLength="1" d="M49.7 -65.3L42.3 -58.6" /><circle class="nak-star" cx="49.7" cy="-65.3" r="2.1" /><circle class="nak-star" cx="42.3" cy="-58.6" r="1.2" /></g>
+            <g class="nak is-home" data-js="star-nak" data-n="3" style="--n:3"><path class="nak-line" pathLength="1" d="M57.5 -57.8L71.9 -58.1" /><circle class="nak-star" cx="57.5" cy="-57.8" r="1.1" /><circle class="nak-star" cx="71.9" cy="-58.1" r="1.8" /></g>
+            <g class="nak" data-js="star-nak" data-n="4" style="--n:4"><path class="nak-line" pathLength="1" d="M67.7 -44.8L74.5 -45.8" /><circle class="nak-star" cx="67.7" cy="-44.8" r="1.3" /><circle class="nak-star" cx="74.5" cy="-45.8" r="1.2" /></g>
+            <g class="nak" data-js="star-nak" data-n="5" style="--n:5"><path class="nak-line" pathLength="1" d="M82.3 -28.9L73.4 -18.2L73.9 -18.6L91 -27.9" /><circle class="nak-star" cx="82.3" cy="-28.9" r="2.2" /><circle class="nak-star" cx="73.4" cy="-18.2" r="2.1" /><circle class="nak-star" cx="73.9" cy="-18.6" r="2.3" /><circle class="nak-star" cx="91" cy="-27.9" r="1.4" /></g>
+            <g class="nak" data-js="star-nak" data-n="6" style="--n:6"><path class="nak-line" pathLength="1" d="M77.9 -9.1L84.1 -5.5L83.3 -1.3L85.2 -0.1" /><circle class="nak-star" cx="77.9" cy="-9.1" r="2.3" /><circle class="nak-star" cx="84.1" cy="-5.5" r="1.6" /><circle class="nak-star" cx="83.3" cy="-1.3" r="1.6" /><circle class="nak-star" cx="85.2" cy="-0.1" r="1.7" /></g>
+            <g class="nak" data-js="star-nak" data-n="7" style="--n:7"><path class="nak-line" pathLength="1" d="M84.6 11.2L74.8 15.2L77.4 7.3L77.7 18.3" /><circle class="nak-star" cx="84.6" cy="11.2" r="1.8" /><circle class="nak-star" cx="74.8" cy="15.2" r="1.4" /><circle class="nak-star" cx="77.4" cy="7.3" r="1.7" /><circle class="nak-star" cx="77.7" cy="18.3" r="1.5" /></g>
+            <g class="nak" data-js="star-nak" data-n="8" style="--n:8"><path class="nak-line" pathLength="1" d="M90.4 30.5L66.5 31" /><circle class="nak-star" cx="90.4" cy="30.5" r="1.3" /><circle class="nak-star" cx="66.5" cy="31" r="2.4" /></g>
+            <g class="nak" data-js="star-nak" data-n="9" style="--n:9"><path class="nak-line" pathLength="1" d="M68 53.3L71.3 62.9L64.7 56.1L54.5 47.5" /><circle class="nak-star" cx="68" cy="53.3" r="1.3" /><circle class="nak-star" cx="71.3" cy="62.9" r="1.8" /><circle class="nak-star" cx="64.7" cy="56.1" r="2" /><circle class="nak-star" cx="54.5" cy="47.5" r="1.5" /></g>
+            <g class="nak" data-js="star-nak" data-n="10" style="--n:10"><path class="nak-line" pathLength="1" d="M45.2 62.6L58.6 64.2" /><circle class="nak-star" cx="45.2" cy="62.6" r="1.3" /><circle class="nak-star" cx="58.6" cy="64.2" r="1.5" /></g>
+            <g class="nak" data-js="star-nak" data-n="11" style="--n:11"><path class="nak-line" pathLength="1" d="M43.3 78.8L41.5 76.1L41.6 80.7L32.6 64.5" /><circle class="nak-star" cx="43.3" cy="78.8" r="2.4" /><circle class="nak-star" cx="41.5" cy="76.1" r="1.6" /><circle class="nak-star" cx="41.6" cy="80.7" r="2.2" /><circle class="nak-star" cx="32.6" cy="64.5" r="2" /></g>
+            <g class="nak" data-js="star-nak" data-n="12" style="--n:12"><path class="nak-line" pathLength="1" d="M19.3 82.1L15.9 90.2L21.5 86.7L19.8 71.6" /><circle class="nak-star" cx="19.3" cy="82.1" r="1.6" /><circle class="nak-star" cx="15.9" cy="90.2" r="1.8" /><circle class="nak-star" cx="21.5" cy="86.7" r="2.1" /><circle class="nak-star" cx="19.8" cy="71.6" r="2.4" /></g>
+            <g class="nak" data-js="star-nak" data-n="13" style="--n:13"><path class="nak-line" pathLength="1" d="M4.9 74.2L6.4 78L-1 76.1" /><circle class="nak-star" cx="4.9" cy="74.2" r="2" /><circle class="nak-star" cx="6.4" cy="78" r="2.2" /><circle class="nak-star" cx="-1" cy="76.1" r="1.5" /></g>
+            <g class="nak" data-js="star-nak" data-n="14" style="--n:14"><path class="nak-line" pathLength="1" d="M-21.4 73.3L-22.8 86.5L-21.4 86.1L-22.4 85.6" /><circle class="nak-star" cx="-21.4" cy="73.3" r="1.3" /><circle class="nak-star" cx="-22.8" cy="86.5" r="1.8" /><circle class="nak-star" cx="-21.4" cy="86.1" r="1.4" /><circle class="nak-star" cx="-22.4" cy="85.6" r="1.6" /></g>
+            <g class="nak" data-js="star-nak" data-n="15" style="--n:15"><path class="nak-line" pathLength="1" d="M-29.7 65.3L-36.4 83L-32.5 67L-32.1 76.5" /><circle class="nak-star" cx="-29.7" cy="65.3" r="1.9" /><circle class="nak-star" cx="-36.4" cy="83" r="1.9" /><circle class="nak-star" cx="-32.5" cy="67" r="2.4" /><circle class="nak-star" cx="-32.1" cy="76.5" r="1.4" /></g>
+            <g class="nak" data-js="star-nak" data-n="16" style="--n:16"><path class="nak-line" pathLength="1" d="M-56.8 63.3L-51.5 58" /><circle class="nak-star" cx="-56.8" cy="63.3" r="2.1" /><circle class="nak-star" cx="-51.5" cy="58" r="1.9" /></g>
+            <g class="nak" data-js="star-nak" data-n="17" style="--n:17"><path class="nak-line" pathLength="1" d="M-73 54.7L-60.7 43.5L-67 44L-63.4 39.5" /><circle class="nak-star" cx="-73" cy="54.7" r="2.3" /><circle class="nak-star" cx="-60.7" cy="43.5" r="1.8" /><circle class="nak-star" cx="-67" cy="44" r="2" /><circle class="nak-star" cx="-63.4" cy="39.5" r="1.2" /></g>
+            <g class="nak" data-js="star-nak" data-n="18" style="--n:18"><path class="nak-line" pathLength="1" d="M-69.7 24.7L-79.9 28.9L-79.7 36.9" /><circle class="nak-star" cx="-69.7" cy="24.7" r="2.3" /><circle class="nak-star" cx="-79.9" cy="28.9" r="1.9" /><circle class="nak-star" cx="-79.7" cy="36.9" r="1.4" /></g>
+            <g class="nak" data-js="star-nak" data-n="19" style="--n:19"><path class="nak-line" pathLength="1" d="M-92.8 12.1L-86.5 9.4L-70.6 16.3L-82.9 21.3" /><circle class="nak-star" cx="-92.8" cy="12.1" r="1.5" /><circle class="nak-star" cx="-86.5" cy="9.4" r="1.5" /><circle class="nak-star" cx="-70.6" cy="16.3" r="1.1" /><circle class="nak-star" cx="-82.9" cy="21.3" r="1.6" /></g>
+            <g class="nak" data-js="star-nak" data-n="20" style="--n:20"><path class="nak-line" pathLength="1" d="M-77.2 -4.4L-90 -0.3L-82.1 2L-75.2 -0.1" /><circle class="nak-star" cx="-77.2" cy="-4.4" r="1.3" /><circle class="nak-star" cx="-90" cy="-0.3" r="2" /><circle class="nak-star" cx="-82.1" cy="2" r="1.7" /><circle class="nak-star" cx="-75.2" cy="-0.1" r="1.2" /></g>
+            <g class="nak" data-js="star-nak" data-n="21" style="--n:21"><path class="nak-line" pathLength="1" d="M-87.1 -27.9L-87.4 -29.7L-83.4 -24L-76.2 -21.4" /><circle class="nak-star" cx="-87.1" cy="-27.9" r="1.4" /><circle class="nak-star" cx="-87.4" cy="-29.7" r="2.1" /><circle class="nak-star" cx="-83.4" cy="-24" r="2" /><circle class="nak-star" cx="-76.2" cy="-21.4" r="2.2" /></g>
+            <g class="nak" data-js="star-nak" data-n="22" style="--n:22"><path class="nak-line" pathLength="1" d="M-72.7 -39.7L-80.4 -38.9L-78.9 -47.3" /><circle class="nak-star" cx="-72.7" cy="-39.7" r="1.8" /><circle class="nak-star" cx="-80.4" cy="-38.9" r="1.8" /><circle class="nak-star" cx="-78.9" cy="-47.3" r="1.2" /></g>
+            <g class="nak" data-js="star-nak" data-n="23" style="--n:23"><path class="nak-line" pathLength="1" d="M-67.1 -57.1L-71.1 -60L-57.7 -53.6" /><circle class="nak-star" cx="-67.1" cy="-57.1" r="1.8" /><circle class="nak-star" cx="-71.1" cy="-60" r="1.7" /><circle class="nak-star" cx="-57.7" cy="-53.6" r="1.5" /></g>
+            <g class="nak" data-js="star-nak" data-n="24" style="--n:24"><path class="nak-line" pathLength="1" d="M-50.4 -69L-55.2 -71L-43 -77.1" /><circle class="nak-star" cx="-50.4" cy="-69" r="2.1" /><circle class="nak-star" cx="-55.2" cy="-71" r="1.7" /><circle class="nak-star" cx="-43" cy="-77.1" r="1.9" /></g>
+            <g class="nak" data-js="star-nak" data-n="25" style="--n:25"><path class="nak-line" pathLength="1" d="M-33.6 -81.8L-25.4 -81.6L-29 -67" /><circle class="nak-star" cx="-33.6" cy="-81.8" r="2" /><circle class="nak-star" cx="-25.4" cy="-81.6" r="1.4" /><circle class="nak-star" cx="-29" cy="-67" r="1.6" /></g>
+            <g class="nak" data-js="star-nak" data-n="26" style="--n:26"><path class="nak-line" pathLength="1" d="M-12.2 -89.1L-6.3 -93.4" /><circle class="nak-star" cx="-12.2" cy="-89.1" r="1.4" /><circle class="nak-star" cx="-6.3" cy="-93.4" r="1.7" /></g>
+          </g>
+          <g class="moon-arm" data-js="star-moon"><path class="moon-trail" pathLength="1" d="M-57 -98.7A114 114 0 0 1 0 -114" /><circle class="moon-glow" cy="-114" r="15" /><circle class="moon" cy="-114" r="6.5" /></g>
+        </svg>
+        <span class="star-dial__pointer" aria-hidden="true"></span>
+      </div>
+
+      <p class="trivia" data-js="star-trivia">[초안] 베다는 계절이 아니라 실제 별의 위치를 기준으로 해요. 그래서 서양 별자리와 약 24° 차이가 나요.</p>
+      <div class="ritual-timer" aria-hidden="true"><span class="ritual-timer__bar"></span></div>
+      <div class="ritual__horizon" aria-hidden="true"></div>
+    </section>
+
+    <!-- ═════════ 3-S′. 별의 방: 시각 모름 → 후보 고르기 (2개 또는 3개) ═════════ -->
+    <section class="screen star-choose" id="screen-star-choose" data-js="screen-star-choose" data-room="star" data-preview="3′. 별의 방 — 후보 고르기 (가장 긴 경우: 후보 3개)">
+      <header class="room-head room-head--compact">
+        <p class="eyebrow">[초안] A RARE DAY</p>
+        <h1 class="room-head__title">[초안] 그날, 달이 집을 옮겼어요</h1>
+        <p class="room-head__lead">[초안] 당신이 태어난 날 달이 하루 사이에 세 집을 지나갔어요. 태어난 시각을 모르니, 어느 쪽이 더 당신 같은지 직접 골라 주세요.</p>
+      </header>
+
+      <figure class="day-line" data-js="star-dayline">
+        <div class="day-line__track">
+          <span class="day-line__seg" data-js="star-dayline-seg" style="--share:0.08"><span class="day-line__n">1</span></span>
+          <span class="day-line__seg" data-js="star-dayline-seg" style="--share:0.85"><span class="day-line__n">2</span></span>
+          <span class="day-line__seg" data-js="star-dayline-seg" style="--share:0.07"><span class="day-line__n">3</span></span>
+        </div>
+        <div class="day-line__ticks" aria-hidden="true"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div>
+        <figcaption class="visually-hidden">[초안] 그날 하루 동안 달이 머문 집의 시간 구간</figcaption>
+      </figure>
+
+      <div class="choices" data-js="star-choices">
+        <button class="choice" type="button" data-js="star-choice" data-i="0">
+          <span class="choice__n" aria-hidden="true">1</span>
+          <span class="choice__body">
+            <span class="choice__when" data-js="star-choice-when">[초안] 0:00 ~ 1:52 · 새벽</span>
+            <span class="choice__name" data-js="star-choice-name">[초안] 크리티카 · 불꽃을 든 집</span>
+            <span class="choice__trait">[초안] "싫은 건 싫다고 말하고 나서, 집에 와서 조금 후회하는 편이에요."</span>
+            <span class="choice__trait">[초안] "요리든 일이든 한번 시작하면 끝을 봐야 잠이 와요."</span>
+          </span>
+        </button>
+        <button class="choice" type="button" data-js="star-choice" data-i="1">
+          <span class="choice__n" aria-hidden="true">2</span>
+          <span class="choice__body">
+            <span class="choice__when" data-js="star-choice-when">[초안] 1:52 ~ 22:14 · 하루 대부분</span>
+            <span class="choice__name" data-js="star-choice-name">[초안] 로히니 · 붉은 소의 집</span>
+            <span class="choice__trait">[초안] "좋아하는 카페의 자리까지 정해 두고, 그 자리가 비어 있으면 하루가 괜찮아져요."</span>
+            <span class="choice__trait">[초안] "선물 고르는 데 남들보다 세 배쯤 오래 걸려요."</span>
+          </span>
+        </button>
+        <button class="choice" type="button" data-js="star-choice" data-i="2">
+          <span class="choice__n" aria-hidden="true">3</span>
+          <span class="choice__body">
+            <span class="choice__when" data-js="star-choice-when">[초안] 22:14 ~ 24:00 · 밤늦게</span>
+            <span class="choice__name" data-js="star-choice-name">[초안] 므리가시라 · 사슴 머리의 집</span>
+            <span class="choice__trait">[초안] "검색창에 하나를 찾으러 들어갔다가 전혀 다른 걸 세 시간 읽고 나와요."</span>
+            <span class="choice__trait">[초안] "여행 계획 세울 때가 여행 그 자체보다 더 설레요."</span>
           </span>
         </button>
       </div>
-
-      <div class="stones" id="stones" hidden></div>
-      <p class="norn-hint" id="norn-hint" hidden></p>
+      <p class="star-choose__note">[초안] 고른 집은 나중에 "다른 날짜로 보기"에서 언제든 바꿀 수 있어요.</p>
     </section>
 
-    <!-- ───────── 룬: 결과 ───────── -->
-    <section class="screen" id="screen-rune-result">
-      <button class="back" data-go="home" data-t="common.back"></button>
-      <div id="rune-result"></div>
-    </section>
+    <!-- ═════════ 4-S. 별의 방: 결과 ═════════ -->
+    <section class="screen result" id="screen-star-result" data-js="screen-star-result" data-room="star" data-preview="4. 별의 방 — 결과">
 
-    <!-- ───────── 별: 소개 ───────── -->
-    <section class="screen" id="screen-star-intro">
-      <button class="back" data-go="home" data-t="common.back"></button>
-      <p class="eyebrow" data-t="star.intro.eyebrow"></p>
-      <h2 data-t="star.intro.title"></h2>
-      <div class="lore" data-list="star.intro.lore"></div>
-
-      <label class="field">
-        <span><span data-t="star.intro.nameLabel"></span> <small data-t="star.intro.nameHint"></small></span>
-        <input id="star-name" type="text" maxlength="10" data-ph="star.intro.namePlaceholder" autocomplete="off" />
-      </label>
-      <label class="field">
-        <span data-t="star.intro.dateLabel"></span>
-        <input id="star-date" type="date" min="1900-01-01" max="2100-12-31" />
-      </label>
-      <label class="field">
-        <span><span data-t="star.intro.timeLabel"></span> <small data-t="star.intro.timeHint"></small></span>
-        <input id="star-time" type="time" />
-      </label>
-      <label class="check">
-        <input id="star-time-unknown" type="checkbox" /> <span data-t="star.intro.unknownTime"></span>
-      </label>
-      <p class="error" id="star-error" hidden></p>
-
-      <button class="primary" id="star-go" data-t="star.intro.go"></button>
-    </section>
-
-    <!-- ───────── 별: 의식 ───────── -->
-    <section class="screen" id="screen-star-ritual">
-      <p class="ritual-guide"><span data-t="star.ritual.rewindBefore"></span><b id="rewind-year"></b><span data-t="star.ritual.rewindAfter"></span></p>
-      <div class="wheel-wrap">
-        <svg viewBox="-160 -160 320 320" class="wheel" id="wheel" aria-hidden="true"></svg>
-        <span class="wheel-pointer" aria-hidden="true">▼</span>
+      <div class="capture" data-js="result-capture">
+        <svg class="seal" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="seal__ring" cx="100" cy="100" r="94" pathLength="1" />
+          <circle class="seal__ring seal__ring--inner" cx="100" cy="100" r="80" pathLength="1" />
+          <path class="seal__marks" pathLength="1" d="M100 6V20M100 180V194M6 100H20M180 100H194M33.5 33.5L43 43M157 157L166.5 166.5M166.5 33.5L157 43M43 157L33.5 166.5" />
+        </svg>
+        <span class="capture__flash" aria-hidden="true"></span>
+        <p class="capture__eyebrow">[초안] 낯선 점술관 · 별의 방</p>
+        <div class="moon-emblem" aria-hidden="true" data-js="result-glyphs">
+          <svg class="moon-emblem__svg" viewBox="0 0 120 120">
+            <circle class="moon-emblem__orbit" cx="60" cy="60" r="56" pathLength="1" />
+            <path class="moon-emblem__moon" pathLength="1" d="M74 24a38 38 0 1 0 0 72a30 30 0 1 1 0-72Z" />
+            <circle class="moon-emblem__star" cx="60" cy="4" r="3" />
+          </svg>
+          <span class="moon-emblem__n" data-js="result-nak-number">[초안] 4 / 27</span>
+        </div>
+        <h1 class="capture__title" data-js="result-title">[초안] 로히니</h1>
+        <p class="capture__names"><span class="latin" data-js="result-names">Rohini</span> · <span data-js="result-house">[초안] 붉은 소의 집</span></p>
+        <p class="capture__key" data-js="result-key">[초안] 한번 마음 붙인 것은 오래 아끼는 사람. 당신의 속마음은 생각보다 훨씬 한결같아요.</p>
+        <p class="capture__meta" data-js="result-meta">[초안] 김서윤님이 태어난 순간의 달 · 나의 이야기 2장</p>
       </div>
-      <p class="trivia" id="star-trivia"></p>
+
+      <button class="btn btn--secondary btn--small capture-share" type="button" data-js="result-share-top">[초안] 이 카드 저장 · 공유</button>
+
+      <aside class="turn" data-js="result-turn">
+        <p class="eyebrow">[초안] PLOT TWIST</p>
+        <p class="turn__title">[초안] 당신이 알던 별자리, 사실은…</p>
+        <div class="twist">
+          <span class="twist__from" data-js="twist-from">[초안] 양자리</span>
+          <span class="twist__arrow" aria-hidden="true">→</span>
+          <span class="twist__to" data-js="twist-to">[초안] 물고기자리</span>
+        </div>
+        <p class="turn__text">[초안] 서양 점성술은 계절(춘분)을 기준으로 별자리를 나누지만, 베다는 실제로 하늘에 떠 있는 별을 기준으로 해요. 2,000년 동안 둘 사이가 약 24° 벌어져서, 베다에서 당신의 태양은 미나(물고기자리)에 있어요.</p>
+        <p class="turn__note" data-js="result-time-note">[초안] 태어난 시각을 모르면 고른 집의 시간대로 계산해요.</p>
+      </aside>
+
+      <nav class="toc" aria-label="[초안] 이 결과의 목차" data-js="result-toc">
+        <p class="toc__meta" data-js="result-length">[초안] 네 개의 장 · 약 10분</p>
+        <ol class="toc__list">
+          <li><a class="toc__link" href="#star-ch-1"><span class="toc__num">I</span><span class="toc__name">[초안] 정체</span><span class="toc__title">[초안] 붉은 소의 집에 사는 사람</span></a></li>
+          <li><a class="toc__link" href="#star-ch-2"><span class="toc__num">II</span><span class="toc__name">[초안] 사건</span><span class="toc__title">[초안] 늘 앉던 자리가 비어 있던 날</span></a></li>
+          <li><a class="toc__link" href="#star-ch-3"><span class="toc__num">III</span><span class="toc__name">[초안] 그림자</span><span class="toc__title">[초안] 한결같음이 고집이 될 때</span></a></li>
+          <li><a class="toc__link" href="#star-ch-4"><span class="toc__num">IV</span><span class="toc__name">[초안] 다음</span><span class="toc__title">[초안] 새 자리를 하나 더 만드는 법</span></a></li>
+        </ol>
+      </nav>
+
+      <div class="chapters" data-js="result-chapters">
+        <section class="chapter" id="star-ch-1" data-js="result-chapter" data-chapter="1" aria-labelledby="star-ch-1-title">
+          <header class="chapter__head">
+            <p class="chapter__num" aria-hidden="true">I</p>
+            <p class="chapter__label">[초안] 첫째 장 · 정체</p>
+            <h2 class="chapter__title" id="star-ch-1-title" data-js="chapter-title">[초안] 붉은 소의 집에 사는 사람</h2>
+            <p class="chapter__time" data-js="chapter-time">[초안] 약 2분</p>
+          </header>
+          <div class="prose" data-js="chapter-body">
+            <p class="prose__lede">[초안] 로히니는 스물일곱 달의 집 가운데 네 번째 집이에요. 인도 신화에서 달의 신 찬드라가 가장 사랑해 가장 오래 머물렀다는 집이죠.</p>
+            <dl class="fact-list" data-js="star-facts">
+              <div class="fact-list__row"><dt>[초안] 상징</dt><dd>[초안] 소가 끄는 수레</dd></div>
+              <div class="fact-list__row"><dt>[초안] 하늘에서는</dt><dd>[초안] 황소자리의 붉은 별 알데바란</dd></div>
+              <div class="fact-list__row"><dt>[초안] 지키는 신</dt><dd>[초안] 창조의 신 프라자파티</dd></div>
+              <div class="fact-list__row"><dt>[초안] 다스리는 별</dt><dd>[초안] 달 (찬드라)</dd></div>
+              <div class="fact-list__row"><dt>[초안] 마음의 별자리</dt><dd>[초안] 브리샤바 (황소자리)</dd></div>
+            </dl>
+            <p>[초안] 옛 인도의 별 박사들은 이 집에 태어난 사람을 '자라게 하는 사람'이라고 불렀어요. 씨앗이 싹트고 가축이 늘어나듯, 손이 닿는 것마다 천천히 풍성해진다는 뜻이에요. 이 해석은 전해지는 상징을 바탕으로 이 점술관이 쉬운 말로 풀어 쓴 것이에요.</p>
+          </div>
+          <p class="chapter__hook" data-reveal data-js="chapter-hook">[초안] 이 '천천히'가 당신의 하루에서는 어떤 모습일까요.</p>
+        </section>
+
+        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
+
+        <section class="chapter" id="star-ch-2" data-js="result-chapter" data-chapter="2" aria-labelledby="star-ch-2-title">
+          <header class="chapter__head">
+            <p class="chapter__num" aria-hidden="true">II</p>
+            <p class="chapter__label">[초안] 둘째 장 · 사건</p>
+            <h2 class="chapter__title" id="star-ch-2-title" data-js="chapter-title">[초안] 늘 앉던 자리가 비어 있던 날</h2>
+            <p class="chapter__time" data-js="chapter-time">[초안] 약 3분</p>
+          </header>
+          <div class="prose" data-js="chapter-body">
+            <p class="prose__lede">[초안] 자주 가는 카페에 들어섰는데 늘 앉던 창가 자리가 비어 있으면, 그날은 이상하게 일이 잘 풀릴 것 같죠.</p>
+            <p>[초안] 반대로 그 자리에 누가 앉아 있으면, 괜히 한 바퀴 둘러보고 결국 테이크아웃을 해서 나와요. 그렇다고 기분이 크게 상한 건 아닌데, 오늘의 순서가 한 칸 어긋난 느낌이 남아요. 로히니의 사람들은 좋아하는 것을 '장소'와 '순서'로 기억해요.</p>
+            <aside class="inset inset--traits" data-js="star-traits">
+              <p class="inset__label">[초안] 이거 완전 내 얘기?</p>
+              <ul class="trait-list">
+                <li class="trait"><span class="trait__text">[초안] 좋아하는 노래는 질릴 때까지 한 곡만 반복해서 들어요.</span><button class="trait__btn is-selected" type="button" aria-pressed="true" data-js="star-trait" data-i="0">[초안] 맞아요</button></li>
+                <li class="trait"><span class="trait__text">[초안] 선물 고르는 데 남들보다 세 배쯤 오래 걸려요.</span><button class="trait__btn" type="button" aria-pressed="false" data-js="star-trait" data-i="1">[초안] 맞아요</button></li>
+                <li class="trait"><span class="trait__text">[초안] 오래된 친구의 생일은 달력 없이도 기억해요.</span><button class="trait__btn" type="button" aria-pressed="false" data-js="star-trait" data-i="2">[초안] 맞아요</button></li>
+              </ul>
+              <p class="inset__count" data-js="star-trait-count" aria-live="polite">[초안] 하나쯤은 맞았군요. 달은 조용히 당신을 보고 있었어요.</p>
+            </aside>
+            <p>[초안] 작년 이맘때쯤, 오래 쓰던 물건 하나가 망가졌을 때를 떠올려 보세요. 새로 사면 그만인데, 같은 모델을 찾느라 며칠을 검색했을 거예요. 결국 단종된 걸 알고 비슷한 걸 샀지만, 한동안 손에 잘 붙지 않았죠.</p>
+            <blockquote class="pull-quote" data-reveal data-js="chapter-quote">[초안] 당신에게 '익숙함'은 게으름이 아니라, 오래 아낀 시간의 증거예요.</blockquote>
+          </div>
+          <p class="chapter__hook" data-reveal data-js="chapter-hook">[초안] 그런데 그 한결같음이, 가끔은 당신을 제자리에 묶어 두기도 해요.</p>
+        </section>
+
+        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
+
+        <section class="chapter" id="star-ch-3" data-js="result-chapter" data-chapter="3" aria-labelledby="star-ch-3-title">
+          <header class="chapter__head">
+            <p class="chapter__num" aria-hidden="true">III</p>
+            <p class="chapter__label">[초안] 셋째 장 · 그림자</p>
+            <h2 class="chapter__title" id="star-ch-3-title" data-js="chapter-title">[초안] 한결같음이 고집이 될 때</h2>
+            <p class="chapter__time" data-js="chapter-time">[초안] 약 2분</p>
+          </header>
+          <div class="prose" data-js="chapter-body">
+            <p class="prose__lede">[초안] 새로운 제안을 받으면 "좋긴 한데…" 하고 한 박자 늦게 대답하는 편이죠.</p>
+            <p>[초안] 싫어서가 아니라, 지금의 순서를 흔들 만큼 좋은 건지 따져 볼 시간이 필요해서예요. 문제는 그 시간 동안 기회가 먼저 지나가 버릴 때가 있다는 거예요. 나중에 "그때 해 볼 걸" 하고 떠올리는 일이 하나둘 쌓여 있다면, 그게 이 집의 그림자예요.</p>
+          </div>
+          <p class="chapter__hook" data-reveal data-js="chapter-hook">[초안] 순서를 지키면서도 새 자리를 만드는 방법이 있어요.</p>
+        </section>
+
+        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
+
+        <div class="ad-slot ad-slot--between" data-js="ad-slot" data-ad="result-mid"></div>
+
+        <section class="chapter" id="star-ch-4" data-js="result-chapter" data-chapter="4" aria-labelledby="star-ch-4-title">
+          <header class="chapter__head">
+            <p class="chapter__num" aria-hidden="true">IV</p>
+            <p class="chapter__label">[초안] 넷째 장 · 다음</p>
+            <h2 class="chapter__title" id="star-ch-4-title" data-js="chapter-title">[초안] 새 자리를 하나 더 만드는 법</h2>
+            <p class="chapter__time" data-js="chapter-time">[초안] 약 3분</p>
+          </header>
+          <div class="prose" data-js="chapter-body">
+            <p class="prose__lede">[초안] 이번 달에는 늘 가던 곳 옆집에 한 번만 들어가 보세요.</p>
+            <p>[초안] 완전히 새로운 곳이 아니라 '옆집'이면 충분해요. 로히니의 사람은 낯선 것을 한 번에 받아들이기보다, 익숙한 것 옆에 조금씩 붙여 가며 넓혀 갈 때 가장 잘 자라요. 그렇게 붙인 자리가 몇 달 뒤에는 또 하나의 '늘 앉던 자리'가 돼 있을 거예요.</p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="fact-card" data-js="result-fact">
+        <p class="eyebrow">[초안] DID YOU KNOW?</p>
+        <p class="fact-card__text">[초안] 인도에서는 아기 이름의 첫 글자를 태어난 날 달의 집에 맞춰 짓기도 해요. 로히니의 첫소리는 '오, 바, 비, 부'예요.</p>
+      </aside>
+
+      <div class="disclaimer-slot" data-js="disclaimer-slot"><p class="disclaimer">재미로 보는 콘텐츠이며, 중요한 결정의 근거로 삼지 마세요.</p></div>
+
+      <div class="result-actions">
+        <button class="btn btn--primary btn--block" type="button" data-js="result-share">[초안] 결과 카드 저장 · 공유하기</button>
+        <button class="btn btn--secondary btn--block" type="button" data-js="result-retry">[초안] 다른 날짜로 보기</button>
+      </div>
+
+      <aside class="archetype-line" data-js="result-archetype">
+        <span class="archetype-line__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
+        </span>
+        <p class="archetype-line__text"><span class="archetype-line__label">[초안] 이 방에서 얻은 원형</span> <b data-js="result-archetype-name">[초안] 창조자</b> — <span data-js="result-archetype-why">[초안] 천천히 키우고 가꾸는 로히니는 상상을 완성으로 옮기는 창조자에 가까워요.</span></p>
+      </aside>
+
+      <section class="next-rooms" aria-labelledby="star-next-title">
+        <h2 class="next-rooms__title" id="star-next-title">[초안] 다음 방이 궁금하다면</h2>
+        <div class="next-rooms__list" data-js="next-rooms">
+          <button class="next-room" type="button" data-room="rune" data-go="rune-intro" data-js="next-room">
+            <span class="next-room__glyph" aria-hidden="true"><svg viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></span>
+            <span class="next-room__text">
+              <span class="next-room__name">[초안] 룬의 방 <span class="next-room__chapter">[초안] 나의 이야기 6장 · 과거·현재·미래</span></span>
+              <span class="next-room__hook">[초안] 마음결을 읽었으니, 이제 세 개의 돌로 지나온 길과 다가올 길을 한 줄로 이어 볼까요?</span>
+            </span>
+            <span class="next-room__arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+        <button class="btn btn--secondary btn--block next-rooms__story" type="button" data-go="story" data-js="result-go-story">[초안] 나의 이야기 보기 · 2/6장</button>
+      </section>
+
+      <div class="page-end" aria-hidden="true"><span>☾</span></div>
+
+      <div class="ad-slot" data-js="ad-slot" data-ad="result-end"></div>
     </section>
 
-    <!-- ───────── 별: 두 후보 중 고르기 ───────── -->
-    <section class="screen" id="screen-star-choose">
-      <p class="eyebrow" data-t="star.choose.eyebrow"></p>
-      <h2 data-t="star.choose.title"></h2>
-      <p class="lead small" data-t="star.choose.lead"></p>
-      <div class="choices" id="star-choices"></div>
-    </section>
+    <!-- ═════════ 5. 나의 이야기 (통합 결과) ═════════ -->
+    <section class="screen story" id="screen-story" data-js="screen-story" data-room="hall" data-preview="5. 나의 이야기 (1개 방만 방문: 완료·열 수 있음·다음에 열림 세 상태가 모두 보임)">
+      <header class="story-head">
+        <p class="eyebrow">[초안] MY STORY</p>
+        <h1 class="story-head__title" data-js="story-title">[초안] 김서윤님의 이야기</h1>
+        <p class="story-head__lead">[초안] 낯선 방을 하나 지날 때마다, 당신의 이야기가 한 장씩 채워져요</p>
+        <!-- 들어오면 JS가 .is-revealed → 채워진 아치에 차례로 불이 켜진다 -->
+        <div class="story-progress" data-js="story-progress">
+          <ol class="story-progress__marks" aria-hidden="true">
+            <li class="arch-mark arch-mark--lg" style="--i:0"><span>1</span></li>
+            <li class="arch-mark arch-mark--lg" style="--i:1"><span>2</span></li>
+            <li class="arch-mark arch-mark--lg" style="--i:2"><span>3</span></li>
+            <li class="arch-mark arch-mark--lg" style="--i:3"><span>4</span></li>
+            <li class="arch-mark arch-mark--lg" style="--i:4"><span>5</span></li>
+            <li class="arch-mark arch-mark--lg is-done" style="--i:5"><span>6</span></li>
+          </ol>
+          <p class="story-progress__count" data-js="story-count"><b>[초안] 1</b> / 6장</p>
+        </div>
+      </header>
 
-    <!-- ───────── 별: 결과 ───────── -->
-    <section class="screen" id="screen-star-result">
-      <button class="back" data-go="home" data-t="common.back"></button>
-      <div id="star-result"></div>
+      <!-- 원형 카드 (캡처 영역). 들어오면 JS가 .is-revealed → 문장이 별자리처럼 그려진다. 방 0개: .is-empty / 6개: .is-complete -->
+      <div class="archetype-card" data-js="story-archetype">
+        <div class="archetype-card__emblem" aria-hidden="true">
+          <svg viewBox="0 0 120 120">
+            <circle class="archetype-card__ring" cx="60" cy="60" r="54" pathLength="1" />
+            <path class="archetype-card__web" pathLength="1" d="M60 6L98.2 21.8L114 60L98.2 98.2L60 114L21.8 98.2L6 60L21.8 21.8Z M60 6L60 114M6 60L114 60M21.8 21.8L98.2 98.2M98.2 21.8L21.8 98.2" />
+            <path class="archetype-card__star" pathLength="1" d="M60 20 L68 44 L88 32 L76 52 L100 60 L76 68 L88 88 L68 76 L60 100 L52 76 L32 88 L44 68 L20 60 L44 52 L32 32 L52 44 Z" />
+            <g class="archetype-card__dots">
+              <circle style="--i:0" cx="60" cy="6" r="3"/><circle style="--i:1" cx="98.2" cy="21.8" r="3"/><circle style="--i:2" cx="114" cy="60" r="3"/><circle style="--i:3" cx="98.2" cy="98.2" r="3"/>
+              <circle style="--i:4" cx="60" cy="114" r="3"/><circle style="--i:5" cx="21.8" cy="98.2" r="3"/><circle style="--i:6" cx="6" cy="60" r="3"/><circle style="--i:7" cx="21.8" cy="21.8" r="3"/>
+            </g>
+            <circle class="archetype-card__core" cx="60" cy="60" r="5" />
+          </svg>
+        </div>
+        <p class="archetype-card__lead" data-js="story-archetype-lead">[초안] 지금까지 나의 원형은</p>
+        <p class="archetype-card__name" data-js="story-archetype-name">[초안] 전사</p>
+        <p class="archetype-card__status" data-js="story-archetype-status">[초안] 지금까지는 전사 원형이에요. 아직 5개 방이 남아 있어요.</p>
+        <p class="archetype-card__desc" data-js="story-archetype-desc">[초안] 전사는 도전과 돌파의 원형이에요. 지켜야 할 것이 생기면 누구보다 먼저 앞에 서고, 버티는 힘으로 길을 여는 사람이죠. 방을 더 돌수록 이 원형은 더 또렷해지거나, 전혀 다른 얼굴로 바뀔 수도 있어요.</p>
+        <ul class="evidence" data-js="story-evidence">
+          <li class="evidence__item"><span class="evidence__glyph runic" aria-hidden="true">ᚱ</span><span class="evidence__room">[초안] 룬의 방</span><span class="evidence__type">[초안] 페후 · 오달라 · 알기즈</span><span class="evidence__tag">[초안] 전사</span></li>
+        </ul>
+      </div>
+
+      <button class="btn btn--secondary btn--small capture-share" type="button" data-js="story-share-top">[초안] 이 카드 저장 · 공유</button>
+
+      <div class="story-empty" data-js="story-empty">
+        <p class="story-empty__title">[초안] 아직 첫 장이 비어 있어요</p>
+        <p class="story-empty__text">[초안] 아무 방이나 하나 들러 보세요. 방 하나만으로도 한 장짜리 이야기가 완성돼요.</p>
+        <div class="story-empty__doors">
+          <button class="btn btn--secondary" type="button" data-room="rune" data-go="rune-intro">[초안] 룬의 방</button>
+          <button class="btn btn--secondary" type="button" data-room="star" data-go="star-intro">[초안] 별의 방</button>
+        </div>
+      </div>
+
+      <!-- 고정 순서 1~6장. 상태: .is-done / .is-available / .is-upcoming. 스크롤로 들어오면 .is-in (완료 장은 불이 켜짐) -->
+      <ol class="spine" data-js="story-chapters">
+        <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="1">
+          <span class="spine-item__node" aria-hidden="true">1</span>
+          <div class="spine-item__body">
+            <p class="spine-item__label">[초안] 1장 · 뿌리</p>
+            <p class="spine-item__room">[초안] 오검의 방</p>
+            <p class="spine-item__teaser">[초안] 아직 열리지 않음 — 다음에 열려요</p>
+          </div>
+        </li>
+        <li class="spine-item is-available" data-js="story-chapter" data-chapter="2" data-room="star">
+          <span class="spine-item__node" aria-hidden="true">2</span>
+          <div class="spine-item__body">
+            <p class="spine-item__label">[초안] 2장 · 마음결</p>
+            <p class="spine-item__room">[초안] 별의 방</p>
+            <p class="spine-item__teaser">[초안] 아직 열리지 않음 — 별의 방에서 열 수 있어요</p>
+            <button class="btn btn--secondary btn--small spine-item__go" type="button" data-go="star-intro" data-js="story-chapter-go">[초안] 별의 방에서 열기 →</button>
+          </div>
+        </li>
+        <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="3">
+          <span class="spine-item__node" aria-hidden="true">3</span>
+          <div class="spine-item__body">
+            <p class="spine-item__label">[초안] 3장 · 숨은 재능</p>
+            <p class="spine-item__room">[초안] 데칸의 방</p>
+            <p class="spine-item__teaser">[초안] 아직 열리지 않음 — 다음에 열려요</p>
+          </div>
+        </li>
+        <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="4">
+          <span class="spine-item__node" aria-hidden="true">4</span>
+          <div class="spine-item__body">
+            <p class="spine-item__label">[초안] 4장 · 다가올 순환</p>
+            <p class="spine-item__room">[초안] 촐킨의 방</p>
+            <p class="spine-item__teaser">[초안] 아직 열리지 않음 — 다음에 열려요</p>
+          </div>
+        </li>
+        <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="5">
+          <span class="spine-item__node" aria-hidden="true">5</span>
+          <div class="spine-item__body">
+            <p class="spine-item__label">[초안] 5장 · 오늘의 질문</p>
+            <p class="spine-item__room">[초안] 시빌라 신탁의 방</p>
+            <p class="spine-item__teaser">[초안] 아직 열리지 않음 — 다음에 열려요</p>
+          </div>
+        </li>
+        <li class="spine-item is-done" data-js="story-chapter" data-chapter="6" data-room="rune">
+          <span class="spine-item__node" aria-hidden="true">6</span>
+          <div class="spine-item__body">
+            <p class="spine-item__label">[초안] 6장 · 과거·현재·미래</p>
+            <p class="spine-item__room">[초안] 룬의 방 <span class="spine-item__type" data-js="story-chapter-type">[초안] 페후 · 오달라 · 알기즈</span></p>
+            <div class="spine-item__summary" data-js="story-chapter-summary">
+              <p>[초안] 당신의 이야기를 마무리하는 세 개의 돌은 모두 '지킴'을 향해 있었어요. 지나온 자리의 페후는 손에 쥔 것을 세어 보는 조용한 계산을, 지금 자리의 오달라는 '내 사람'의 울타리를 새로 그리는 중이라는 걸, 다가올 자리의 알기즈는 그 울타리를 지키는 힘이 더 커질 거라는 걸 말해 줬죠.</p>
+              <p>[초안] 새벽에 온 메시지에 답장을 쓰다 지우던 밤, 바깥사람에게는 계산이 빠르지만 안쪽 사람에게는 한없이 너그러운 당신의 모습이 이 장의 한가운데 있어요. 다만 지키는 힘이 너무 커지면 안쪽 사람도 당신을 도울 기회를 잃는다는 것, 그래서 이번 주에는 "그냥 똑같지 뭐" 대신 진짜 요즘 이야기를 한 문장만 꺼내 보라는 것이 룬이 남긴 마지막 말이었어요. 페후는 흘려보낸 것이 돌아온다고 말하는 룬이에요. 마음도 조금 꺼내 놓으면, 그만큼 돌아와요.</p>
+            </div>
+            <button class="btn btn--text spine-item__reread" type="button" data-go="rune-result" data-js="story-chapter-reread">[초안] 전체 다시 보기 →</button>
+          </div>
+        </li>
+      </ol>
+
+      <aside class="paid-card" data-js="story-paid">
+        <p class="eyebrow">[초안] DEEPER STORY</p>
+        <h2 class="paid-card__title">[초안] 더 깊은 이야기</h2>
+        <p class="paid-card__lead">[초안] 여기서부터는, 아직 아무도 못 본 당신의 이야기예요. 무료로 본 내용을 다시 싣지 않고 새 문장만 담아요.</p>
+        <ul class="paid-card__list">
+          <li>[초안] 인생 서사 심화 — 방마다 새 사건 2~3개</li>
+          <li>[초안] 나이·시기별 흐름 — 일·관계·배움·이동</li>
+          <li>[초안] 궁합 — 나와 상대의 원형</li>
+          <li>[초안] 원형 심층 해설과 소장 카드</li>
+        </ul>
+        <p class="paid-card__price"><span data-js="story-paid-price">[초안] 3,900원</span> · <span data-js="story-paid-status">[초안] 곧 열려요</span></p>
+        <button class="btn btn--secondary btn--block" type="button" disabled data-js="story-paid-go">[초안] 곧 열려요</button>
+      </aside>
+
+      <div class="result-actions">
+        <button class="btn btn--primary btn--block" type="button" data-js="story-share">[초안] 나의 이야기 카드 저장 · 공유하기</button>
+      </div>
+
+      <div class="page-end" aria-hidden="true"><span>✦</span></div>
+
+      <div class="ad-slot" data-js="ad-slot" data-ad="story-end"></div>
     </section>
   </main>
+
+  <!-- ═════════ 내 정보 지우기 확인 ═════════ -->
+  <dialog class="dialog" data-js="clear-dialog" aria-labelledby="clear-title" open>
+    <div class="dialog__body">
+      <h2 class="dialog__title" id="clear-title">[초안] 내 정보를 지울까요?</h2>
+      <p class="dialog__text">[초안] 이름·생년월일과 지금까지 채운 나의 이야기가 이 탭에서 모두 지워져요. 지운 뒤에는 되돌릴 수 없어요.</p>
+      <div class="dialog__actions">
+        <button class="btn btn--danger btn--block" type="button" data-js="clear-confirm">[초안] 모두 지우기</button>
+        <button class="btn btn--ghost btn--block" type="button" data-js="clear-cancel">[초안] 그대로 두기</button>
+      </div>
+    </div>
+  </dialog>
+
+  <p class="toast is-active" data-js="toast" role="status" aria-live="polite">[초안] 모두 지웠어요. 입구로 돌아갈게요</p>
 
   <script src="../../common/share-card.js"></script>
   <script src="../../common/disclaimer.js"></script>
   <script src="data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js" integrity="sha384-LTVHvxfbG3XHla4Lu0C0s9U18B2sBOuzJIeOoVHm2t05SOOORvMbBMEVjXrGau9g" crossorigin="anonymous"></script>
   <script src="astro.js"></script>
   <script src="app.js"></script>
 </body>

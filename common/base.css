@@ -1,0 +1,524 @@
+/* ==========================================================================
+   앱 공장 공통 스타일 (common/base.css)
+   - 모든 제품이 먼저 이 파일을 불러오고, 그다음 제품 style.css를 불러온다.
+   - 토큰(색·간격·글자)을 바꾸면 모든 제품이 영향을 받는다. 바꾸기 전에 운영자 확인.
+   - 설명서: docs/design-system.md
+   ========================================================================== */
+
+/* ───────── 1. 토큰: 형태 (테마와 무관) ───────── */
+:root {
+  /* 간격 (4px 단위) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --gutter: var(--space-5);          /* 화면 좌우 여백 (360px 기준 20px) */
+  --page-max: 480px;                  /* PC에서 가운데 정렬 최대 폭 */
+
+  /* 모서리 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* 글꼴 (제품이 덮어쓴다. 기본은 시스템 글꼴) */
+  --font-serif: "Noto Serif KR", "AppleMyungjo", "Batang", serif;
+  --font-sans: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --font-latin: var(--font-serif);    /* 영문 장식 문구 */
+  --font-symbol: var(--font-sans);    /* 룬 문자 등 기호 전용 */
+
+  /* 글자 크기 (rem = 사용자 글자 크기 설정을 따른다) */
+  --fs-2xs: 0.75rem;    /* 12px — 영문 장식 라벨 전용. 한글 문장에는 쓰지 않는다 */
+  --fs-xs: 0.8125rem;   /* 13px — 보조 캡션 */
+  --fs-sm: 0.875rem;    /* 14px — 보조 설명, 작은 버튼 */
+  --fs-md: 1rem;        /* 16px — UI 기본, 입력칸(iOS 확대 방지) */
+  --fs-read: 1.0625rem; /* 17px — 긴 글 본문 */
+  --fs-lg: 1.1875rem;   /* 19px — 강조 문단, 카드 제목 */
+  --fs-xl: 1.375rem;    /* 22px — 장 제목 */
+  --fs-2xl: 1.75rem;    /* 28px — 화면 제목 */
+  --fs-3xl: 2.25rem;    /* 36px — 결과 유형 이름 */
+  --fs-display: 2.75rem;/* 44px — 로고 */
+
+  /* 줄 간격 */
+  --lh-tight: 1.3;
+  --lh-ui: 1.55;
+  --lh-read: 1.85;      /* 한국어 긴 글 */
+
+  /* 읽기 폭: 한 줄 최대 글자 수 (한글 1자 ≈ 1em) */
+  --measure: 34em;
+
+  /* 버튼·터치 */
+  --tap: 48px;          /* 주요 버튼 최소 높이 */
+  --tap-min: 44px;      /* 작은 버튼 최소 터치 영역 */
+
+  /* 움직임 */
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 700ms;
+  --dur-reveal: 650ms;   /* 스크롤·결과 공개 한 번 */
+  --dur-ritual: 1200ms;  /* 의식 연출의 한 동작 */
+  --stagger: 90ms;       /* 차례로 나타날 때 간격 */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.6, 0, 0.3, 1);
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);   /* 빠르게 나와 천천히 멈춤 */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* 살짝 튕김 */
+
+  /* 쌓임 순서 */
+  --z-bg: 0;
+  --z-content: 1;
+  --z-sticky: 10;
+  --z-overlay: 50;
+  --z-toast: 60;
+
+  /* 강조색 색상(hue) 목록 — 동명도 팔레트: 명도(L)·채도(C)는 테마가 정하고 hue만 바꾼다 */
+  --hue-gold: 85;      /* 금빛 (기본 브랜드) */
+  --hue-ice: 230;      /* 얼음 푸른빛 */
+  --hue-moon: 295;     /* 달빛 보랏빛 */
+  --hue-forest: 150;   /* 숲 초록 */
+  --hue-sand: 65;      /* 사막 모래 주황 */
+  --hue-jade: 190;     /* 터키석 청록 */
+  --hue-candle: 35;    /* 촛불 장밋빛 */
+  --hue-danger: 20;    /* 오류 */
+  --hue-neutral: 285;  /* 무채색 쪽 색조 (밤하늘 남보라) */
+
+  /* 제품·방이 바꾸는 값: 강조색 hue */
+  --accent-h: var(--hue-gold);
+  --accent-c-scale: 1; /* 방마다 채도 미세 조정 (0.7~1.1) */
+}
+
+/* ───────── 2. 토큰: 색 — 밝은 테마 (기본) ───────── */
+:root {
+  color-scheme: light;
+  --c-bg: oklch(0.985 0.005 var(--hue-neutral));
+  --c-bg-deep: oklch(0.96 0.008 var(--hue-neutral));
+  --c-surface-1: oklch(1 0 0);
+  --c-surface-2: oklch(0.955 0.01 var(--hue-neutral));
+  --c-surface-3: oklch(0.92 0.012 var(--hue-neutral));
+  --c-line: oklch(0.86 0.015 var(--hue-neutral));        /* 장식선 (대비 요구 없음) */
+  --c-line-strong: oklch(0.62 0.02 var(--hue-neutral));  /* 입력칸 테두리 등 UI 경계: 배경 대비 3:1 이상 */
+  --c-text-strong: oklch(0.2 0.03 var(--hue-neutral));
+  --c-text: oklch(0.25 0.03 var(--hue-neutral));
+  --c-text-muted: oklch(0.46 0.03 var(--hue-neutral));
+  --c-text-faint: oklch(0.52 0.03 var(--hue-neutral));
+  --accent-l: 0.5;
+  --accent-c: calc(0.11 * var(--accent-c-scale));
+  --accent-dim-l: 0.45;
+  --c-on-accent: oklch(0.99 0.005 var(--hue-neutral));
+  --c-danger: oklch(0.5 0.15 25);
+  --c-scrim: oklch(0.2 0.03 var(--hue-neutral) / 0.45);
+  --shadow-1: 0 2px 10px oklch(0.2 0.03 var(--hue-neutral) / 0.08);
+  --shadow-2: 0 10px 40px oklch(0.2 0.03 var(--hue-neutral) / 0.14);
+}
+
+/* ───────── 3. 토큰: 색 — 어두운 테마 ─────────
+   (a) 기기 설정이 다크 모드일 때, (b) 제품이 <html data-theme="night">로 밤 테마를 고정할 때 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --c-bg: oklch(0.17 0.04 var(--hue-neutral));
+    --c-bg-deep: oklch(0.14 0.035 var(--hue-neutral));
+    --c-surface-1: oklch(0.215 0.04 var(--hue-neutral));
+    --c-surface-2: oklch(0.26 0.04 var(--hue-neutral));
+    --c-surface-3: oklch(0.31 0.04 var(--hue-neutral));
+    --c-line: oklch(0.4 0.04 var(--hue-neutral));
+    --c-line-strong: oklch(0.58 0.05 var(--hue-neutral));
+    --c-text-strong: oklch(0.96 0.012 90);
+    --c-text: oklch(0.91 0.015 90);
+    --c-text-muted: oklch(0.79 0.03 var(--hue-neutral));
+    --c-text-faint: oklch(0.7 0.035 var(--hue-neutral));
+    --accent-l: 0.84;
+    --accent-c: calc(0.1 * var(--accent-c-scale));
+    --accent-dim-l: 0.7;
+    --c-on-accent: oklch(0.21 0.035 var(--hue-neutral));
+    --c-danger: oklch(0.8 0.1 var(--hue-danger));
+    --c-scrim: oklch(0.1 0.03 var(--hue-neutral) / 0.72);
+    --shadow-1: 0 2px 12px oklch(0.05 0.02 var(--hue-neutral) / 0.4);
+    --shadow-2: 0 12px 48px oklch(0.05 0.02 var(--hue-neutral) / 0.55);
+  }
+}
+:root[data-theme="night"] {
+  color-scheme: dark;
+  --c-bg: oklch(0.17 0.04 var(--hue-neutral));
+  --c-bg-deep: oklch(0.14 0.035 var(--hue-neutral));
+  --c-surface-1: oklch(0.215 0.04 var(--hue-neutral));
+  --c-surface-2: oklch(0.26 0.04 var(--hue-neutral));
+  --c-surface-3: oklch(0.31 0.04 var(--hue-neutral));
+  --c-line: oklch(0.4 0.04 var(--hue-neutral));
+  --c-line-strong: oklch(0.58 0.05 var(--hue-neutral));
+  --c-text-strong: oklch(0.96 0.012 90);
+  --c-text: oklch(0.91 0.015 90);
+  --c-text-muted: oklch(0.79 0.03 var(--hue-neutral));
+  --c-text-faint: oklch(0.7 0.035 var(--hue-neutral));
+  --accent-l: 0.84;
+  --accent-c: calc(0.1 * var(--accent-c-scale));
+  --accent-dim-l: 0.7;
+  --c-on-accent: oklch(0.21 0.035 var(--hue-neutral));
+  --c-danger: oklch(0.8 0.1 var(--hue-danger));
+  --c-scrim: oklch(0.1 0.03 var(--hue-neutral) / 0.72);
+  --shadow-1: 0 2px 12px oklch(0.05 0.02 var(--hue-neutral) / 0.4);
+  --shadow-2: 0 12px 48px oklch(0.05 0.02 var(--hue-neutral) / 0.55);
+}
+
+/* 강조색 파생값: 어떤 요소든 --accent-h만 바꾸면 같은 명도로 색만 바뀐다 */
+:root, [data-accent], [data-room] {
+  --accent: oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+  --accent-dim: oklch(var(--accent-dim-l) calc(var(--accent-c) * 0.9) var(--accent-h));
+  --accent-soft: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.14);
+  --accent-line: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.35);
+  --accent-glow: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.55);
+}
+
+/* ───────── 4. 기본 요소 ───────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-ui);
+  word-break: keep-all;          /* 한국어: 단어 중간에서 줄바꿈하지 않음 */
+  overflow-wrap: anywhere;       /* 아주 긴 영문·숫자는 끊어서라도 넘치지 않게 */
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p, ol, ul, dl, dd, figure, blockquote { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+::selection { background: var(--accent-soft); color: var(--c-text-strong); }
+
+/* ───────── 5. 상태 class (JS는 이 class만 붙였다 뗀다) ───────── */
+.is-hidden { display: none !important; }
+.is-disabled, [disabled] { opacity: 0.45; pointer-events: none; }
+.is-loading { position: relative; pointer-events: none; color: transparent !important; }
+.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--c-on-accent);
+  border-right-color: transparent;
+  animation: base-spin 0.8s linear infinite;
+}
+@keyframes base-spin { to { transform: rotate(360deg); } }
+
+/* ───────── 6. 도우미 ───────── */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.page {
+  position: relative;
+  z-index: var(--z-content);
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ───────── 7. 글자 ───────── */
+.eyebrow {
+  font-family: var(--font-latin);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+}
+
+/* 긴 글 읽기 (결과 본문) */
+.prose {
+  max-width: var(--measure);
+  font-family: var(--font-serif);
+  font-size: var(--fs-read);
+  line-height: var(--lh-read);
+  color: var(--c-text);
+  text-wrap: pretty;
+}
+.prose > * + * { margin-top: 1.1em; }
+.prose b, .prose strong { color: var(--c-text-strong); font-weight: 700; }
+.prose em { font-style: normal; box-shadow: inset 0 -0.45em 0 var(--accent-soft); }
+
+/* ───────── 8. 버튼 ───────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  text-align: center;
+  text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-base), border-color var(--dur-base);
+}
+.btn:active { transform: scale(0.98); }
+.btn--block { display: flex; width: 100%; }
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--c-on-accent);
+  box-shadow: 0 6px 28px var(--accent-soft);
+}
+.btn--secondary {
+  background: transparent;
+  color: var(--c-text-strong);
+  border: 1px solid var(--c-line-strong);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--c-text-muted);
+  font-weight: 400;
+}
+.btn--danger {
+  background: var(--c-danger);
+  color: var(--c-on-accent);
+}
+.btn--small {
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--fs-sm);
+}
+/* 글자만 있는 작은 버튼 (터치 영역은 44px 유지) */
+.btn--text {
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-1);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--c-text-muted);
+}
+
+/* ───────── 9. 입력 ───────── */
+.field { display: grid; gap: var(--space-2); }
+.field + .field { margin-top: var(--space-5); }
+.field__label {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--c-text-strong);
+}
+.field__hint {
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--c-text-muted);
+}
+.field__row { display: flex; gap: var(--space-2); align-items: center; }
+.field__unit { font-size: var(--fs-sm); color: var(--c-text-muted); flex-shrink: 0; }
+
+.input {
+  width: 100%;
+  min-height: var(--tap);
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--radius-md);
+  color: var(--c-text-strong);
+  font-size: var(--fs-md);      /* 16px 미만이면 iOS가 확대한다 */
+  font-family: var(--font-sans);
+}
+.input::placeholder { color: var(--c-text-faint); }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.input--num { text-align: center; font-variant-numeric: tabular-nums; }
+
+.field.is-error .input { border-color: var(--c-danger); }
+.field__error {
+  font-size: var(--fs-sm);
+  color: var(--c-danger);
+}
+
+/* 선택 칩 (하나 고르기) */
+.chip-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
+.chip {
+  min-height: var(--tap);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-line-strong);
+  background: transparent;
+  color: var(--c-text);
+  font-size: var(--fs-md);
+  transition: background-color var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+.chip.is-selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--c-on-accent);
+  font-weight: 700;
+}
+
+/* 체크 토글 (예: "태어난 시각을 몰라요") */
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap);
+  font-size: var(--fs-md);
+  color: var(--c-text);
+  cursor: pointer;
+}
+.check input { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); flex-shrink: 0; }
+
+/* ───────── 10. 카드·안내 ───────── */
+.card {
+  background: var(--c-surface-1);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+/* 개인정보 안내 등 작은 알림 */
+.notice {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--c-surface-2);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-ui);
+  color: var(--c-text-muted);
+}
+.notice__icon { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; color: var(--accent); }
+
+/* 면책 문구 (common/disclaimer.js가 넣는 <p class="disclaimer">) */
+.disclaimer {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-ui);
+  color: var(--c-text-muted);
+  text-align: center;
+}
+
+/* 장식 구분선 */
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--accent-dim);
+  font-size: var(--fs-sm);
+}
+.ornament::before, .ornament::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
+}
+
+/* ───────── 11. 광고 자리 (ads.js 전용) ─────────
+   - 광고처럼 보이지 않게 따로 꾸미지 않는다. 버튼·결과 문구와 --space-12 이상 떨어뜨린다.
+   - ads.js가 광고를 넣으면 .is-filled를 붙인다. 비어 있으면 자리를 차지하지 않는다. */
+.ad-slot {
+  display: none;
+  margin: var(--space-12) 0;
+}
+.ad-slot.is-filled {
+  display: block;
+  min-height: 100px;
+}
+.ad-slot__label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--fs-2xs);
+  color: var(--c-text-faint);
+  text-align: center;
+}
+
+/* ───────── 12. 토스트·대화상자 ───────── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+  z-index: var(--z-toast);
+  transform: translate(-50%, 0);
+  max-width: calc(100% - 2 * var(--gutter));
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--c-surface-3);
+  color: var(--c-text-strong);
+  font-size: var(--fs-sm);
+  box-shadow: var(--shadow-2);
+  transition: opacity var(--dur-base), transform var(--dur-base) var(--ease-out);
+}
+.toast:not(.is-active) { opacity: 0; transform: translate(-50%, 12px); pointer-events: none; }
+
+/* <dialog class="dialog"> — JS가 showModal()/close()로 연다 */
+.dialog {
+  width: min(100% - 2 * var(--gutter), 400px);
+  padding: 0;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-xl);
+  background: var(--c-surface-1);
+  color: var(--c-text);
+  box-shadow: var(--shadow-2);
+}
+.dialog::backdrop { background: var(--c-scrim); }
+.dialog__body { padding: var(--space-6) var(--space-5) var(--space-5); display: grid; gap: var(--space-3); }
+.dialog__title { font-size: var(--fs-lg); line-height: var(--lh-tight); color: var(--c-text-strong); }
+.dialog__text { font-size: var(--fs-sm); color: var(--c-text-muted); }
+.dialog__actions { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+
+/* ───────── 13. 공용 움직임 ─────────
+   - transform·opacity 위주 (모바일 성능). 모두 한 번만 재생.
+   - 스크롤 등장: 부모에 .js-reveal(JS가 붙임)이 있을 때만 [data-reveal] 요소가 숨어 있다가
+     .is-in을 받으면 나타난다. JS가 없으면 처음부터 보인다. */
+@keyframes base-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes base-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes base-draw {           /* SVG 선 그리기: 대상에 pathLength="1" */
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes base-pop {
+  0% { opacity: 0; transform: scale(0.4); }
+  70% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.js-reveal [data-reveal]:not(.is-in) { opacity: 0; transform: translateY(16px); }
+.js-reveal [data-reveal].is-in { animation: base-fade-up var(--dur-reveal) var(--ease-reveal) both; }
+
+/* ───────── 14. 움직임 줄이기 ───────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .js-reveal [data-reveal]:not(.is-in) { opacity: 1; transform: none; }
+}

@@ -39,6 +39,8 @@ reports/qa-<slug>.md      검수 보고서 (qa-reviewer)
 - 이미지는 WebP, 한 장 200KB 이하. 첫 화면 로딩 3초 이내 목표.
 - 제품 폴더 필수 파일: index.html, style.css, app.js, data.js, meta.json, og-image.png(1200x630), CREDITS.md
 - 화면에 보이는 모든 문구(결과, 설명, 버튼 문구)는 data.js에 모은다. 코드를 몰라도 문구를 고칠 수 있어야 한다.
+  - 문구 분량이 많으면 data-<주제>.js(예: data-runes.js)로 나눌 수 있다. 나눈 파일에도 문구 외의 로직은 넣지 않는다.
+- 출시되는 화면에 [초안] 표시가 남아 있으면 안 된다. 모든 제품은 실제 서비스 수준으로 완성한다.
 
 ## 4. meta.json 형식
 ```json
