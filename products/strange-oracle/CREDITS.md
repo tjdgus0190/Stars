@@ -30,3 +30,12 @@ Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키
 |---|---|---|---|---|
 | Astronomy Engine (Don Cross) | 2.1.19 | 달·태양 황경, 장동, ΔT | MIT | https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js (SRI sha384 고정) |
 - 출처: https://github.com/cosinekitty/astronomy , npm `astronomy-engine`.
+
+## 2단계 계산 방법 (calc.js)
+- 촐킨(마야 260일력): 외부 라이브러리 없이 날짜 산술로 직접 계산.
+  - 상관 계수: **GMT(Goodman–Martinez–Thompson) 584283** — 장주기 0.0.0.0.0 = 율리우스 적일 584283. 출처: Wikipedia "Mesoamerican Long Count calendar" (https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar — "The generally accepted correlation constant is the Modified Thompson 2, 'Goodman–Martinez–Thompson', or GMT correlation of 584,283 days", 2026-09-27 조회), Wikipedia "Maya calendar" (https://en.wikipedia.org/wiki/Maya_calendar). 운영자 결정 25번으로 확정.
+  - 그레고리력 → 율리우스 적일: Fliegel & Van Flandern (1968), *Communications of the ACM* 11(10)의 정수 공식.
+  - 문양 이름 순서(Imix … Ajaw): Wikipedia "Tzolkʼin" (https://en.wikipedia.org/wiki/Tzolk%CA%BCin).
+- 데칸: 태양 열대 황경은 위 Astronomy Engine(astro.js `sunLongitude`) 재사용. 검증 참고(제품에 포함 안 됨): 미 해군천문대(USNO) Astronomical Applications API 절기 시각 (https://aa.usno.navy.mil/api/seasons).
+- 오검: 오검 20자(feda) 순서와 유니코드(U+1681~U+1694)는 Unicode 표준 Ogham 블록. 한글 → 로마자 → 오검 대응과 선택 규칙("오검 둘레 걷기")은 직접 만든 규칙(tests.md 「2단계 계산」).
+- 시빌라: 브라우저 내장 `crypto.getRandomValues`.
