@@ -1259,7 +1259,7 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
   color: var(--c-text-strong);
   text-shadow: 0 0 18px var(--accent-soft);
 }
-.capture__meta { margin-top: var(--space-5); font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
+.capture__meta { max-width: 26em; margin: var(--space-5) auto 0; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); text-wrap: balance; } /* 이름 10자로 28자를 넘으면 두 줄로 고르게 꺾인다 */
 .capture-share { display: flex; margin: var(--space-3) auto 0; }
 
 /* 봉인: 쉬는 상태에서는 보이지 않고, .is-revealed에서 그려졌다가 부서지며 사라진다 */
@@ -1660,6 +1660,11 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
   .pouch.is-shaking .pouch__bag { filter: brightness(1.25); }
   .pouch.is-shaking .pouch__aura { opacity: 1; }
   .ritual--star.is-running .rewind__num { text-shadow: 0 0 30px var(--accent-glow); }
+  /* 등장 전 숨김 상태를 되돌린다: 장 머리는 스크롤과 상관없이 바로 보인다 (UI 점검 1차) */
+  .js-reveal .chapter:not(.is-in) :is(.chapter__num, .chapter__label, .chapter__title, .chapter__time) { opacity: 1; }
+  .js-reveal .chapter:not(.is-in) .chapter__num::before,
+  .js-reveal .chapter:not(.is-in) .chapter__num::after { transform: none; }
+  .ritual--star.is-running .ritual-timer__bar { transform: scaleX(1); }
 }
 
 /* ═════════ 정적 검토 모드 (body.is-static-preview) — developer가 class를 지우면 모두 꺼진다 ═════════ */

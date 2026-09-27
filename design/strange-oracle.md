@@ -529,3 +529,50 @@
 - 상단 막대 반투명 위 글자 대비, 로고 그라데이션 글자
 - 다크/라이트 기기 설정 모두에서 밤 테마로 보이는지, 움직임 줄이기 켰을 때 의식 화면
 - 정적 검토 모드의 광고 자리 점선 상자 위치(허브 1, 결과 2, 나의 이야기 1)
+
+## UI 점검 (2026-09-27, 1차)
+### 판정: 통과
+- 조건: 아래 "designer가 직접 고친 것" 반영본으로 운영자가 룬·별 결과를 **움직임 줄이기 켬/끔** 두 조건에서 한 번 더 캡처해 확인할 것. 남은 developer 요청은 없음.
+- 근거 자료: 운영자 헤드리스 Edge 캡처(flow-rune.png = 룬 결과, flow.png 가운데 열 = 별 결과, 둘 다 360px·움직임 줄이기 켬), designer가 헤드리스 Edge(`--force-prefers-reduced-motion` 켬/끔)로 만든 최소 재현 페이지 캡처, index.html·style.css·app.js 해당 부분 코드 읽기.
+
+| 항목 | 결과 | 비고 |
+|---|---|---|
+| 명세와 화면 일치 | 통과 | 캡처 카드·운명의 실·목차·장 구성·인셋이 명세 순서대로. 장 안 인셋·요약·떡밥 카드는 JS가 designer class 그대로 만들어 넣음(코드 확인) |
+| 360px / 480px 레이아웃 | 360px 통과 / 480px 미확인 | 360px는 운영자 캡처로 확인. `.ritual` 가로 넘침은 developer가 `overflow-x: clip`으로 막음(승인). 480px 캡처는 없음 |
+| 상태별 화면 (로딩, 오류, 빈값) | 코드 판단 통과 | 오류는 `.field__error` + `.is-hidden`(developer 변경, 승인). 빈값(나의 이야기 방 0개) 캡처 없음 — 미확인 |
+| 버튼 크기와 위치 | 통과 | 캡처상 "이 카드 저장·공유" 44px 이상, 주요 버튼은 결과 아래. 상단 막대 "내 정보 지우기" 한 줄 확인 |
+| 글자 대비 | 통과(계산값) | 토큰 대비는 1차 계산값 유지. 캡처상 본문·보조 글자 읽힘 |
+| 가장 긴 문구에서 깨짐 여부 | 수정함 | copywriter 지적: `star.result.meta`가 이름 10자면 28자 초과 → 캡처 카드 메타를 가운데 두 줄로 고르게 꺾이게 고침(아래). 다른 요소는 copywriter 글자 수 스크립트 통과 |
+| 공유 카드 안전 영역 | 미확인 | 이번 캡처에 공유 이미지 없음. share-card.js 레이아웃은 developer 구현 확인 후 다음 점검에서 |
+| developer가 바꾼 시각 요소 | 승인 | 아래 "developer 변경 검토" |
+
+### 발견한 문제와 원인
+1. **룬 결과 캡처 카드의 돌 3개에 룬이 안 보임** — 원인은 **CSS(designer)**, JS 아님. `result-glyph`의 `href="#rune-<code>"` 연결은 맞다(app.js 623줄, data-runes.js code 24개와 index.html `<symbol>` 24개 이름 일치 확인). 최소 재현 페이지에서 **움직임 끔: 획 보임 / 움직임 줄이기 켬: 획 안 보임**으로 재현됨. 예전 base.css의 움직임 줄이기 규칙(길이만 0.01ms로 줄임)에서 선 그리기(`stroke-dashoffset` 1→0) 애니메이션의 끝값이 `<use>`로 부른 SVG 획(그림자 트리)에 반영되지 않고 시작값(획 숨김)에 머묾(Chromium 동작으로 추정, 원인 세부는 미확인).
+2. **첫째 장 머리(로마 숫자·라벨·제목·시간)가 비어 보임** — 원인 두 가지. ① 움직임 줄이기에서도 `animation-delay`(0.2~0.5초)가 남아 지연 동안 숨김(developer 지적과 같음). ② 장 머리는 `.js-reveal` 아래에서 장이 화면에 들어와 `.is-in`을 받기 전까지 숨김인데, 움직임 줄이기 블록에서 이 숨김을 되돌리지 않았음. 전체 페이지 캡처는 스크롤 없이 찍혀 첫째 장이 "화면에 들어온" 적이 없음.
+3. **별 결과 장 머리** — 운영자 캡처(flow.png 가운데 열)에서 I·II 장 머리가 보임. 같은 원인의 영향을 받는 구조라 위 수정이 똑같이 적용됨. flow.png 왼쪽 열(상단 막대만 있고 본문이 빈 화면)은 무엇을 찍은 것인지 알 수 없어 미확인.
+
+### designer가 직접 고친 것 (style.css, 마크업)
+- **common/base.css 움직임 줄이기**: `animation-duration: 0.01ms` 방식 → `animation: none !important; transition: none !important`. 지연·획 그리기 문제가 함께 사라진다. 원칙("애니메이션 없는 기본 스타일 = 최종 모습")을 docs/design-system.md에 적음. base.css를 쓰는 제품은 strange-oracle뿐(grep 확인). 이 원칙에 맞는지 제품 키프레임을 다시 봤다: 봉인·빛 번짐·빛줄기·포털 진입 빛은 기본이 투명(움직임 줄이기에서는 나타나지 않음 = 의도), 바퀴·달은 기본이 착지 위치, 아치·노드 점등은 기본이 점등 상태.
+- **style.css 움직임 줄이기 블록**: 장 머리 숨김(`.js-reveal .chapter:not(.is-in)`)과 장식선 `scaleX(0)`을 되돌림, 별 의식 진행 막대는 가득 찬 모습으로.
+- **캡처 카드 메타**(`.capture__meta`): 최대 폭 26em + 가운데 정렬 + `text-wrap: balance` + 줄 간격 — 이름이 길어도 두 줄로 고르게 꺾이고 넘치지 않는다.
+- 재현 확인(designer, 헤드리스 Edge): 수정 뒤 움직임 줄이기 켬에서 룬 획·장 머리·10자 이름 메타가 모두 보임. 움직임 끔에서는 기존대로 획이 그려지고, 장 머리는 스크롤로 들어올 때 나타남(정상 동작).
+- 주의: 움직임을 켠 상태로 **스크롤 없이 전체 페이지를 한 장으로 캡처**하면 첫째 장 아래의 장 머리·문단은 여전히 비어 보인다(아직 "보인 적이 없어서"). 오류가 아니라 스크롤 등장 효과다. 캡처는 움직임 줄이기를 켜고 찍으면 전부 보인다.
+
+### developer 변경 검토 ("designer 확인 필요" 6건)
+| # | 내용 | 판정 |
+|---|---|---|
+| 1 | `.ritual`에 `overflow-x: hidden; overflow-x: clip;` | 승인. 룬 고리 흩어짐·별 궤적이 좌우로 잘리는 것은 의도와 맞음 |
+| 2 | 새 data-js 11개(room-chapter-num, thread-word, turn-text, toc-title, fact-text, star-name-field, star-time-error, star-choose-lead, star-choice-trait, story-chapter-body, story-paid-list) | 승인. 명세 목록에 추가로 본다. 반대로 인셋·요약용 이름 14개(rune-name-*, star-facts/traits/trait/trait-count, chapter-quote, next-room, story-chapter-summary/type/go/reread)는 마크업에서 빠지고 JS가 같은 class로 만들어 넣음 — 승인 |
+| 3 | 검토 전용 상단 막대 견본 제거, `.field__error`는 `.is-hidden` | 승인(정적 검토 모드 정리 요청대로) |
+| 4 | 움직임 줄이기에서 animation-delay 미초기화 | 위 base.css 수정으로 해결 |
+| 5 | IntersectionObserver threshold 0 + 아래 −12% 여백 | 승인. 장이 화면보다 길어 비율 기준은 맞지 않음. 명세의 "threshold 0.15 권장"을 이것으로 바꿔 본다 |
+| 6 | `<link rel="icon" href="data:,">` | 승인(파비콘 요청 오류 방지, 화면 영향 없음) |
+
+### developer 요청 (JS 수정이 필요한 것)
+- 없음.
+
+### 운영자가 화면으로 직접 확인할 것
+- 룬·별 결과를 **움직임 줄이기 켬**으로 다시 캡처: 캡처 카드의 돌 3개에 룬 획, 첫째 장 머리(로마 숫자·제목·시간)가 보이는지
+- **움직임 끔**으로 실제로 스크롤하며: 봉인 풀기 뒤 룬 획, 장이 들어올 때 머리 등장, 떡밥 ✦ 반짝임
+- 이름 10자 + 별 결과에서 캡처 카드 메타가 두 줄로 고르게 꺾이는지
+- 480px(PC) 결과·허브, 나의 이야기 방 0개 화면, 공유 카드 이미지(안전 영역) — 이번 점검에서 못 봄

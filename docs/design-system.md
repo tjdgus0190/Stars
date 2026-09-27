@@ -48,7 +48,8 @@
 - 터치: `--tap` 48px(주요 버튼), `--tap-min` 44px(작은 버튼).
 - 움직임: `--dur-fast` 150ms / `base` 300ms / `slow` 700ms / `reveal` 650ms(한 번 등장) / `ritual` 1200ms, `--stagger` 90ms(차례로 나타날 때 간격).
 - 이징: `--ease-out` (0.2,0.8,0.2,1) / `--ease-in-out` (0.6,0,0.3,1) / `--ease-reveal` (0.16,1,0.3,1) 빠르게 나와 천천히 멈춤 / `--ease-spring` (0.34,1.56,0.64,1) 살짝 튕김.
-- `prefers-reduced-motion`이면 모든 애니메이션·전환이 즉시 끝나 최종 모습이 보인다. 계속 도는 장식은 제품 CSS에서 숨긴다.
+- `prefers-reduced-motion`이면 base.css가 모든 애니메이션·전환을 **끈다**(`animation: none`, `transition: none`, 2026-09-27 변경). 따라서 **애니메이션이 없는 기본 스타일이 곧 최종 모습**이 되게 만든다: 키프레임은 `from`에 시작 모습을 두고 끝 모습은 기본 스타일과 같게, 등장 전 숨김(`opacity: 0` 등)은 움직임 줄이기 블록에서 되돌린다. 계속 도는 장식은 제품 CSS에서 숨긴다.
+  - 바꾼 이유: 예전 방식(길이만 0.01ms로 줄임)은 `animation-delay`가 남아 지연 동안 요소가 안 보였고, Chromium에서 `<use>`로 부른 SVG 획의 선 그리기가 끝값(획 보임)으로 바뀌지 않아 룬이 사라졌다. 쓰는 제품: strange-oracle뿐(확인함).
 
 ## 2-1. 공용 움직임 (base.css)
 - 원칙: transform·opacity 위주(모바일 성능). 긴 글 본문 뒤에서 계속 움직이는 효과 금지.
