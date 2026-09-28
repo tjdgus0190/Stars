@@ -47,3 +47,12 @@ let count = 0;
   for (const e of fs.readdirSync(d, { withFileTypes: true })) e.isDirectory() ? walk(path.join(d, e.name)) : count++;
 })(DIST);
 console.log(`dist/ 생성 완료 — 파일 ${count}개`);
+
+// 중간 공유본 점검: 아직 [초안]이 남은 파일을 알려 준다 (정식 배포 전에는 0이어야 한다)
+for (const slug of PRODUCTS) {
+  const dir = path.join(DIST, "products", slug);
+  const left = fs.readdirSync(dir).filter((f) => /\.(js|html)$/.test(f))
+    .map((f) => [f, (fs.readFileSync(path.join(dir, f), "utf8").match(/\[초안\]/g) || []).length])
+    .filter(([, n]) => n);
+  console.log(left.length ? `  [초안] 남음 (중간 공유본): ${left.map(([f, n]) => `${f} ${n}`).join(", ")}` : "  [초안] 없음");
+}

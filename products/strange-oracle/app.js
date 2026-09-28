@@ -1489,7 +1489,9 @@
   enter["sibyl-input"] = sibCount;
   js("sibyl-input-go").addEventListener("click", () => {
     sib.question = sibQ.value.replace(/\s+/g, " ").trim().slice(0, 60);
-    sib.pick = Calc.pickOracle(ORACLES.length);
+    // 문구 작업 중간 공유본: 아직 [초안]인 신탁은 뽑지 않는다 (모두 완성되면 32개 전부에서 고르게 뽑힘)
+    const ready = ORACLES.map((o, i) => i).filter((i) => !ORACLES[i].line.includes("[초안]"));
+    sib.pick = ready.length ? ready[Calc.pickOracle(ready.length)] : Calc.pickOracle(ORACLES.length);
     go("sibyl-ritual");
   });
 
