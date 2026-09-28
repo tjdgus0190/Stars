@@ -244,6 +244,20 @@
         <span class="story-teaser__arrow" aria-hidden="true">→</span>
       </button>
 
+      <!-- (6단계) 결제 켜짐일 때만: 내 리포트 다시 보기(같은 탭에 코드가 있을 때) + 영수증 코드로 열기 -->
+      <div class="hub-paid is-hidden" data-js="hub-paid">
+        <button class="btn btn--secondary btn--block is-hidden" type="button" data-js="hub-report" data-t="receipt.reopen">[초안] 내 리포트 다시 보기</button>
+        <form class="receipt-open receipt-open--hub" data-js="receipt-open" novalidate>
+          <label class="receipt-open__label" for="receipt-open-hub" data-t="receipt.open.label">[초안] 영수증 코드로 열기</label>
+          <div class="receipt-open__row">
+            <input class="input receipt-open__input" id="receipt-open-hub" data-js="receipt-open-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="SO1A-B2C3-D4E5-…" data-ph="receipt.open.placeholder" />
+            <button class="btn btn--secondary receipt-open__go" type="submit" data-js="receipt-open-go" data-t="receipt.open.go">[초안] 다시 열기</button>
+          </div>
+          <p class="receipt-open__how" data-t="receipt.open.how">[초안] 결제 직후 받은 코드를 넣으면 이름·생년월일 없이 리포트 전체가 다시 열려요.</p>
+          <p class="field__error is-hidden" data-js="receipt-open-error" role="alert"></p>
+        </form>
+      </div>
+
       <!-- 광고 심사용 소개 글 (300자 이상) — 시작 버튼(문) 아래 -->
       <section class="about" aria-labelledby="about-title">
         <h2 class="about__title" id="about-title" data-t="hub.aboutTitle"></h2>
@@ -496,6 +510,7 @@
         <h2 class="next-rooms__title" id="rune-next-title" data-t="result.nextTitle"></h2>
         <div class="next-rooms__list" data-js="next-rooms"></div>
         <button class="btn btn--secondary btn--block next-rooms__story" type="button" data-go="story" data-js="result-go-story"></button>
+        <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 숨은 장은 '더 깊은 이야기'에 있어요</span> <span aria-hidden="true">→</span></button>
       </section>
 
       <div class="page-end" aria-hidden="true"><span>ᛟ</span></div>
@@ -836,6 +851,7 @@
         <h2 class="next-rooms__title" id="star-next-title" data-t="result.nextTitle"></h2>
         <div class="next-rooms__list" data-js="next-rooms"></div>
         <button class="btn btn--secondary btn--block next-rooms__story" type="button" data-go="story" data-js="result-go-story"></button>
+        <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 숨은 장은 '더 깊은 이야기'에 있어요</span> <span aria-hidden="true">→</span></button>
       </section>
 
       <div class="page-end" aria-hidden="true"><span>☾</span></div>
@@ -1072,6 +1088,7 @@
         <h2 class="next-rooms__title" id="ogham-next-title" data-t="result.nextTitle"></h2>
         <div class="next-rooms__list" data-js="next-rooms"></div>
         <button class="btn btn--secondary btn--block next-rooms__story" type="button" data-go="story" data-js="result-go-story"></button>
+        <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 숨은 장은 '더 깊은 이야기'에 있어요</span> <span aria-hidden="true">→</span></button>
       </section>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></div>
@@ -1386,6 +1403,7 @@
         <h2 class="next-rooms__title" id="decan-next-title" data-t="result.nextTitle"></h2>
         <div class="next-rooms__list" data-js="next-rooms"></div>
         <button class="btn btn--secondary btn--block next-rooms__story" type="button" data-go="story" data-js="result-go-story"></button>
+        <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 숨은 장은 '더 깊은 이야기'에 있어요</span> <span aria-hidden="true">→</span></button>
       </section>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></div>
@@ -1645,6 +1663,7 @@
         <h2 class="next-rooms__title" id="tzolkin-next-title" data-t="result.nextTitle"></h2>
         <div class="next-rooms__list" data-js="next-rooms"></div>
         <button class="btn btn--secondary btn--block next-rooms__story" type="button" data-go="story" data-js="result-go-story"></button>
+        <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 숨은 장은 '더 깊은 이야기'에 있어요</span> <span aria-hidden="true">→</span></button>
       </section>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></div>
@@ -1867,6 +1886,7 @@
         <h2 class="next-rooms__title" id="sibyl-next-title" data-t="result.nextTitle"></h2>
         <div class="next-rooms__list" data-js="next-rooms"></div>
         <button class="btn btn--secondary btn--block next-rooms__story" type="button" data-go="story" data-js="result-go-story"></button>
+        <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 숨은 장은 '더 깊은 이야기'에 있어요</span> <span aria-hidden="true">→</span></button>
       </section>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></div>
@@ -1942,13 +1962,26 @@
         <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="6"><span class="spine-item__node" aria-hidden="true">6</span><div class="spine-item__body" data-js="story-chapter-body"></div></li>
       </ol>
 
+      <!-- 상태: 기본 = "곧 열려요"(결제 꺼짐) / .is-on = 결제 켜짐(버튼 "무엇이 들어 있는지 보기") / .is-owned = 이 탭에 영수증 코드 있음("내 리포트 다시 보기") -->
       <aside class="paid-card" data-js="story-paid">
+        <svg class="paid-card__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
         <p class="eyebrow" data-t="story.paid.eyebrow"></p>
         <h2 class="paid-card__title" data-t="story.paid.title"></h2>
         <p class="paid-card__lead" data-t="story.paid.lead"></p>
         <ul class="paid-card__list" data-js="story-paid-list"></ul>
         <p class="paid-card__price"><span data-js="story-paid-price" data-t="story.paid.price"></span> · <span data-js="story-paid-status" data-t="story.paid.status"></span></p>
         <button class="btn btn--secondary btn--block" type="button" disabled data-js="story-paid-go" data-t="story.paid.go"></button>
+        <div class="paid-card__reopen is-hidden" data-js="story-paid-reopen">
+        <form class="receipt-open" data-js="receipt-open" novalidate>
+          <label class="receipt-open__label" for="receipt-open-story" data-t="receipt.open.label">[초안] 영수증 코드로 열기</label>
+          <div class="receipt-open__row">
+            <input class="input receipt-open__input" id="receipt-open-story" data-js="receipt-open-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="SO1A-B2C3-D4E5-…" data-ph="receipt.open.placeholder" />
+            <button class="btn btn--secondary receipt-open__go" type="submit" data-js="receipt-open-go" data-t="receipt.open.go">[초안] 다시 열기</button>
+          </div>
+          <p class="receipt-open__how" data-t="receipt.open.how">[초안] 결제 직후 받은 코드를 넣으면 이름·생년월일 없이 리포트 전체가 다시 열려요.</p>
+          <p class="field__error is-hidden" data-js="receipt-open-error" role="alert"></p>
+        </form>
+        </div>
       </aside>
 
       <div class="result-actions">
@@ -1958,6 +1991,321 @@
       <div class="page-end" aria-hidden="true"><span>✦</span></div>
 
       <div class="ad-slot" data-js="ad-slot" data-ad="story-end"></div>
+    </section>
+
+    <!-- ═════════ 6단계: 유료 리포트 (결제가 꺼져 있으면 JS가 이 세 화면으로 가는 길을 만들지 않는다) ═════════
+         문구는 전부 data-t 키. 마크업의 [초안] 글자는 길이 견본이며 data.js에 키가 생기면 덮어쓴다.
+         유료 문장은 이 파일에 한 글자도 넣지 않는다 (spec 6-3·D-4). 봉인 칸의 흐린 줄은 글자가 아닌 도형이다. -->
+    <svg class="rune-sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-seal" viewBox="0 0 48 48">
+        <path class="wax" style="fill: var(--wax)" d="M24 3c4 0 5 3 8 4s7-1 9 2 0 6 1 9 4 5 3 8-4 4-5 7 1 7-2 9-6 0-9 1-5 4-8 4-5-3-8-4-7 1-9-2 0-6-1-9-4-5-3-8 4-4 5-7-1-7 2-9 6 0 9-1 5-4 8-4z"/>
+        <circle class="wax-rim" style="fill: none; stroke: var(--wax-rim); stroke-width: 1.5" cx="24" cy="24" r="14"/>
+        <path class="sigil" style="fill: var(--accent)" d="M24 13l2.4 8.6L35 24l-8.6 2.4L24 35l-2.4-8.6L13 24l8.6-2.4z"/>
+      </symbol>
+    </svg>
+
+    <!-- ═════════ 6-P. 더 깊은 이야기: 미리보기·고지·결제 (#deeper) ═════════ -->
+    <section class="screen deeper" id="screen-deeper" data-js="screen-deeper" data-room="hall" data-preview="6-P. 더 깊은 이야기 — 결제 전 미리보기 (광고 없음)">
+      <p class="pay-band" data-js="pay-band" data-mode="mock"><span class="pay-band__mark" aria-hidden="true">◇</span><span data-t="pay.band.mock">[초안] 테스트 결제 — 실제로 돈이 나가지 않아요</span></p>
+
+      <header class="deeper-head">
+        <p class="eyebrow" data-t="deeper.eyebrow">[초안] 더 깊은 이야기</p>
+        <h1 class="deeper-head__title" data-t="deeper.title">[초안] 아직 아무도 못 본 당신의 이야기</h1>
+        <p class="deeper-head__lead" data-t="deeper.lead">[초안] 지금까지 들른 방과 당신의 원형으로 엮은, 한 사람만을 위한 긴 이야기예요. 무엇이 들어 있는지 먼저 보여 드릴게요.</p>
+      </header>
+
+      <!-- 나에게 맞춘 목차. 장 제목·분량은 JS가 방문 기록으로 채운다. 상태: .is-sealed(유료) / .is-open(견본·무료) -->
+      <section class="toc" aria-labelledby="deeper-toc-title">
+        <h2 class="toc__title" id="deeper-toc-title"><span data-t="deeper.toc.title">[초안] 당신의 리포트 목차</span> <span class="toc__total" data-js="deeper-total">[초안] 약 8,500자</span></h2>
+        <ol class="toc__list" data-js="deeper-toc">
+          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="open">
+            <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">✦</span><span class="toc-item__name" data-js="toc-name">[초안] 여는 글</span><span class="toc-item__vol" data-js="toc-vol">[초안] 약 300자</span></div>
+            <p class="toc-item__teaser" data-js="toc-teaser">[초안] 여덟 원형 가운데 당신이 먼저 걸어 들어온 문에 대하여.</p>
+            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
+            <span class="visually-hidden" data-t="deeper.sealedSr">[초안] 결제하면 열려요</span>
+          </li>
+          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="hidden">
+            <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">1</span><span class="toc-item__name" data-js="toc-name">[초안] 1장 · 숨은 장 — 오검·데칸·룬·별·촐킨·시빌라</span><span class="toc-item__vol" data-js="toc-vol">[초안] 약 3,900자</span></div>
+            <p class="toc-item__teaser" data-js="toc-teaser">[초안] 자작나무 껍질에 새겨진 글자 뒤에는, 방에서 말하지 않은 사건이 하나 더 있었어요.</p>
+            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
+            <span class="visually-hidden" data-t="deeper.sealedSr">[초안] 결제하면 열려요</span>
+          </li>
+          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="timeline">
+            <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">2</span><span class="toc-item__name" data-js="toc-name">[초안] 2장 · 서른 초반부터 마흔 초반까지</span><span class="toc-item__vol" data-js="toc-vol">[초안] 약 1,800자</span></div>
+            <p class="toc-item__teaser" data-js="toc-teaser">[초안] 일·관계·배움·이동, 네 갈래 길이 구간마다 다른 빛을 띠어요.</p>
+            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
+            <span class="visually-hidden" data-t="deeper.sealedSr">[초안] 결제하면 열려요</span>
+          </li>
+          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="match">
+            <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">3</span><span class="toc-item__name" data-js="toc-name">[초안] 3장 · 전사와 연인의 궁합</span><span class="toc-item__vol" data-js="toc-vol">[초안] 약 2,300자</span></div>
+            <p class="toc-item__teaser" data-js="toc-teaser">[초안] 서로 다른 속도로 걷는 두 사람이, 같은 길 위에서 만나는 법.</p>
+            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
+            <span class="visually-hidden" data-t="deeper.sealedSr">[초안] 결제하면 열려요</span>
+          </li>
+          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="deep">
+            <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">4</span><span class="toc-item__name" data-js="toc-name">[초안] 4장 · 전사, 더 깊이</span><span class="toc-item__vol" data-js="toc-vol">[초안] 약 1,500자</span></div>
+            <p class="toc-item__teaser" data-js="toc-teaser">[초안] 당신의 강점이 그림자가 되는 순간과, 그걸 다시 빛으로 돌리는 방법.</p>
+            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
+            <span class="visually-hidden" data-t="deeper.sealedSr">[초안] 결제하면 열려요</span>
+          </li>
+          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="close">
+            <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">✦</span><span class="toc-item__name" data-js="toc-name">[초안] 닫는 글과 소장 카드</span><span class="toc-item__vol" data-js="toc-vol">[초안] 약 300자 · 카드 1장</span></div>
+            <p class="toc-item__teaser" data-js="toc-teaser">[초안] 여섯 개의 문을 지나 여기까지 온 당신에게 남기는 마지막 한 장.</p>
+            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
+            <span class="visually-hidden" data-t="deeper.sealedSr">[초안] 결제하면 열려요</span>
+          </li>
+        </ol>
+      </section>
+
+      <!-- 견본 한 장: 가상 조합의 3장 궁합 전문 (data.js, 무료). 봉인 없이 펼친 모습 = .is-open -->
+      <section class="sample is-open" aria-labelledby="deeper-sample-title">
+        <p class="sample__badge" data-t="deeper.sample.badge">[초안] 견본</p>
+        <h2 class="sample__title" id="deeper-sample-title" data-t="deeper.sample.title">[초안] 3장 · 탐험가와 현자의 궁합 (가상의 두 사람)</h2>
+        <p class="sample__note" data-t="deeper.sample.note">[초안] 실제 리포트에서는 이 자리에 당신과 상대의 원형이 들어가요.</p>
+        <div class="sample__body prose" data-js="deeper-sample" data-list="deeper.sample.body">
+          <p>[초안] 탐험가는 문을 열고 나서야 방 안을 봅니다. 현자는 방 안을 다 본 뒤에야 문을 엽니다. 두 사람이 같은 문 앞에 서면 한 사람은 손잡이를 잡고, 한 사람은 열쇠 구멍을 들여다보죠. 이 차이가 처음엔 답답함으로 느껴질 수 있어요.</p>
+          <p>[초안] 그러나 오검의 나무 문자로 보면 두 사람은 뿌리와 가지의 관계에 가깝습니다. 한쪽이 멀리 뻗어 나가는 동안, 다른 한쪽은 깊이 내려가 둘이 선 땅을 붙잡아 줍니다. 약속을 정할 때 탐험가가 방향을, 현자가 속도를 정하면 서로의 장점이 맞물려요.</p>
+          <p>[초안] 이번 달에 해 볼 한 가지: 다음 계획을 세울 때 "어디로"는 한 사람이, "언제"는 다른 한 사람이 정해 보세요. 작은 역할 나눔이 둘 사이의 속도 차이를 즐거운 리듬으로 바꿔 줄 거예요.</p>
+        </div>
+      </section>
+
+      <!-- 내 리포트에 필요한 입력 -->
+      <section class="deeper-input" aria-labelledby="deeper-input-title">
+        <h2 class="deeper-input__title" id="deeper-input-title" data-t="deeper.input.title">[초안] 리포트에 쓸 정보</h2>
+
+        <!-- 프로필에 생년월일이 있으면: 확인 카드만 (입력칸은 .is-hidden) -->
+        <div class="saved-info" data-js="deeper-saved">
+          <p class="saved-info__label" data-t="deeper.input.savedLabel">[초안] 나의 생년월일</p>
+          <p class="saved-info__value" data-js="deeper-saved-value">[초안] 1995년 3월 21일</p>
+          <p class="saved-info__ask" data-t="deeper.input.savedAsk">[초안] 이 정보로 2장 시기별 흐름을 계산할까요?</p>
+          <button class="btn btn--text saved-info__edit" type="button" data-js="deeper-saved-edit" data-t="deeper.input.savedEdit">[초안] 다시 입력하기</button>
+        </div>
+
+        <fieldset class="field" data-js="deeper-date-field">
+          <legend class="field__label"><span data-t="deeper.input.dateLabel">[초안] 나의 생년월일</span> <span class="field__hint" data-t="deeper.input.dateHint">[초안] (필수 · 2장 계산용)</span></legend>
+          <div class="field__row">
+            <input class="input input--num date-y" data-js="deeper-year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="1995" data-aria="deeper.input.yearAria" />
+            <span class="field__unit" data-t="common.units.y"></span>
+            <input class="input input--num date-md" data-js="deeper-month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="3" data-aria="deeper.input.monthAria" />
+            <span class="field__unit" data-t="common.units.m"></span>
+            <input class="input input--num date-md" data-js="deeper-day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="21" data-aria="deeper.input.dayAria" />
+            <span class="field__unit" data-t="common.units.d"></span>
+          </div>
+          <p class="field__error is-hidden" data-js="deeper-date-error" role="alert"></p>
+        </fieldset>
+
+        <!-- 궁합 상대 (선택). 본인 정보와 다른 테두리·아이콘으로 구분한다 -->
+        <fieldset class="partner" data-js="deeper-partner">
+          <legend class="partner__legend"><span data-t="deeper.partner.legend">[초안] 궁합을 볼 상대</span> <span class="field__hint" data-t="deeper.partner.optional">[초안] (선택)</span></legend>
+          <div class="field">
+            <label class="field__label" for="deeper-partner-name" data-t="deeper.partner.nameLabel">[초안] 상대의 이름</label>
+            <input class="input" id="deeper-partner-name" data-js="deeper-partner-name" type="text" maxlength="10" autocomplete="off" spellcheck="false" data-ph="deeper.partner.namePlaceholder" />
+          </div>
+          <div class="field">
+            <p class="field__label" id="deeper-partner-date-label" data-t="deeper.partner.dateLabel">[초안] 상대의 생년월일</p>
+            <div class="field__row" role="group" aria-labelledby="deeper-partner-date-label">
+              <input class="input input--num date-y" data-js="deeper-partner-year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="1994" data-aria="deeper.partner.yearAria" />
+              <span class="field__unit" data-t="common.units.y"></span>
+              <input class="input input--num date-md" data-js="deeper-partner-month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="11" data-aria="deeper.partner.monthAria" />
+              <span class="field__unit" data-t="common.units.m"></span>
+              <input class="input input--num date-md" data-js="deeper-partner-day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="2" data-aria="deeper.partner.dayAria" />
+              <span class="field__unit" data-t="common.units.d"></span>
+            </div>
+            <p class="field__error is-hidden" data-js="deeper-partner-error" role="alert"></p>
+          </div>
+          <p class="notice notice--partner">
+            <svg class="notice__icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="13.5" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c.6-3 2.6-4.5 5-4.5s4.4 1.5 5 4.5M12 12.6c2.3-.4 4.9.6 5.6 3.9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span data-t="deeper.partner.notice">[초안] 상대방 정보는 코드 계산에만 쓰고 저장하지 않으며, 어디에도 전송되지 않아요. 상대방이 알고 있는지 한 번 확인해 주세요.</span>
+          </p>
+        </fieldset>
+
+        <p class="deeper-fact" data-t="deeper.fixNote">[초안] 방을 더 돌고 결제하면 1장이 길어져요. 결제한 뒤에는 그때까지 모은 방과 상대로 리포트가 고정돼요.</p>
+      </section>
+
+      <!-- 결제 전 고지: 결제 버튼 바로 위, 접지 않고 펼친 채 (D-2) -->
+      <section class="disclosure" aria-labelledby="deeper-disclosure-title">
+        <h2 class="disclosure__title" id="deeper-disclosure-title" data-t="deeper.disclosure.title">[초안] 결제 전에 꼭 확인해 주세요</h2>
+        <dl class="disclosure__list">
+          <div class="disclosure__row"><dt data-t="deeper.disclosure.itemsLabel">[초안] 받는 것</dt><dd data-js="deeper-items">[초안] 여는 글, 1장 숨은 장(방 6곳), 2장 시기별 흐름(3구간), 3장 궁합, 4장 원형 심층, 닫는 글, 소장 카드 1장</dd></div>
+          <div class="disclosure__row"><dt data-t="deeper.disclosure.volumeLabel">[초안] 분량</dt><dd data-js="deeper-volume">[초안] 약 10,300자 (지금 들른 방과 상대 입력 기준)</dd></div>
+          <div class="disclosure__row disclosure__row--price"><dt data-t="deeper.disclosure.priceLabel">[초안] 가격</dt><dd><b data-js="deeper-price">[초안] 3,900원</b> <span data-js="deeper-vat" data-t="deeper.disclosure.vat">[초안] (부가세 ◯◯)</span></dd></div>
+          <div class="disclosure__row"><dt data-t="deeper.disclosure.howLabel">[초안] 이용 방법</dt><dd data-t="deeper.disclosure.how">[초안] 로그인은 없어요. 결제 직후 보여 드리는 영수증 코드로 언제든 다시 열 수 있어요. 코드를 잃어버리면 다시 열 수 없을 수 있으니 꼭 적어 두세요(문의 시 결제 시각·금액으로 찾아 드려요).</dd></div>
+          <div class="disclosure__row"><dt data-t="deeper.disclosure.refundLabel">[초안] 청약철회·환불</dt><dd data-t="deeper.disclosure.refund">[초안] 디지털 콘텐츠는 결제 완료와 동시에 열람이 시작되어 청약철회가 제한됩니다. 다만 리포트가 열리지 않거나 내용이 표시·안내와 다르면 환불해 드립니다. 문의: ◯◯ · 처리 기간: ◯◯</dd></div>
+          <div class="disclosure__row" data-js="deeper-minor"><dt data-t="deeper.disclosure.minorLabel">[초안] 미성년자</dt><dd data-t="deeper.disclosure.minor">[초안] ◯◯ (운영자 확인 전)</dd></div>
+        </dl>
+        <label class="check consent">
+          <input type="checkbox" data-js="deeper-consent" />
+          <span data-t="deeper.consent">[초안] 결제 즉시 리포트가 열리며, 열린 뒤에는 청약철회가 제한된다는 것을 확인했어요.</span>
+        </label>
+      </section>
+
+      <!-- 결제 실패·취소로 돌아왔을 때 (.is-hidden 해제). 오류 코드는 보여 주지 않는다 -->
+      <div class="pay-alert is-hidden" data-js="pay-alert" role="alert">
+        <p class="pay-alert__title" data-js="pay-alert-title" data-t="pay.fail.title">[초안] 결제가 완료되지 않았어요. 돈은 나가지 않았어요.</p>
+        <p class="pay-alert__text" data-js="pay-alert-text" data-t="pay.fail.text">[초안] 결제창을 닫았거나 연결이 잠시 끊겼을 수 있어요. 아래 버튼으로 다시 시도해 주세요.</p>
+      </div>
+
+      <div class="pay-cta">
+        <!-- 동의 전: disabled. 결제창 여는 중: .is-loading + aria-busy -->
+        <button class="btn btn--primary btn--block pay-cta__btn" type="button" disabled data-js="deeper-pay" data-t="deeper.pay">[초안] 3,900원 결제하기</button>
+        <p class="pay-cta__status" data-js="deeper-pay-status" aria-live="polite" data-t="deeper.payHint">[초안] 위 확인란에 체크하면 결제 버튼이 켜져요.</p>
+      </div>
+
+      <!-- 사업자 정보·정책 링크 (◯◯ 빈칸은 운영자 입력. live에서 빈칸이 남으면 결제 버튼을 숨김 — developer) -->
+      <footer class="biz-info" data-js="biz-info">
+        <dl class="biz-info__list" data-js="biz-info-list">
+          <div><dt data-t="biz.nameLabel">[초안] 상호</dt><dd data-t="biz.name">◯◯</dd></div>
+          <div><dt data-t="biz.ceoLabel">[초안] 대표자</dt><dd data-t="biz.ceo">◯◯</dd></div>
+          <div><dt data-t="biz.regLabel">[초안] 사업자등록번호</dt><dd data-t="biz.reg">◯◯◯-◯◯-◯◯◯◯◯</dd></div>
+          <div><dt data-t="biz.salesLabel">[초안] 통신판매업 신고번호</dt><dd data-t="biz.sales">◯◯</dd></div>
+          <div><dt data-t="biz.addrLabel">[초안] 주소</dt><dd data-t="biz.addr">◯◯</dd></div>
+          <div><dt data-t="biz.contactLabel">[초안] 연락처</dt><dd data-t="biz.contact">◯◯</dd></div>
+          <div><dt data-t="biz.hostLabel">[초안] 호스팅 제공자</dt><dd data-t="biz.host">◯◯</dd></div>
+        </dl>
+        <nav class="legal-links" data-js="legal-links" data-aria="legal.links.aria">
+          <a href="legal/refund.html" data-t="legal.links.refund">[초안] 환불 정책</a>
+          <a href="legal/terms.html" data-t="legal.links.terms">[초안] 이용약관</a>
+          <a href="legal/privacy.html" data-t="legal.links.privacy">[초안] 개인정보처리방침</a>
+        </nav>
+      </footer>
+    </section>
+
+    <!-- ═════════ 6-U. 봉인 해제 의식 (successUrl 복귀, 약 3초, 누르면 건너뛰기) ═════════
+         여섯 방 의식과 다른 연출: 별자리 고리에 놓인 밀랍 인장 여섯 개가 차례로 갈라지고, 그 자리에 별이 켜진다.
+         .is-running 동안만 움직임. 애니메이션이 없을 때(움직임 줄이기·정적 검토)의 기본 모습 = 모두 갈라진 최종 모습 -->
+    <section class="screen ritual ritual--unseal" id="screen-unseal" data-js="screen-unseal" data-room="hall" data-preview="6-U. 봉인 해제 의식 (정적 검토: 여섯 인장이 모두 갈라진 최종 모습)">
+      <p class="pay-band" data-js="pay-band" data-mode="test"><span class="pay-band__mark" aria-hidden="true">◇</span><span data-t="pay.band.test">[초안] 테스트 결제 — 실제로 돈이 나가지 않아요</span></p>
+      <p class="ritual-hint" data-js="unseal-status" aria-live="polite" data-t="unseal.status">[초안] 봉인을 여는 중이에요</p>
+      <div class="unseal-ring" aria-hidden="true">
+        <svg class="unseal-ring__lines" viewBox="0 0 200 200"><polygon points="100,20 169,60 169,140 100,180 31,140 31,60" /></svg>
+        <span class="unseal-seal" style="--i:0"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
+        <span class="unseal-seal" style="--i:1"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
+        <span class="unseal-seal" style="--i:2"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
+        <span class="unseal-seal" style="--i:3"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
+        <span class="unseal-seal" style="--i:4"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
+        <span class="unseal-seal" style="--i:5"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
+        <span class="unseal-ring__core"></span>
+      </div>
+      <button class="btn btn--ghost btn--small" type="button" data-js="unseal-skip" data-t="unseal.skip">[초안] 건너뛰기</button>
+
+      <!-- 승인 확인 실패 (.is-hidden 해제 + 화면에 .is-error). 결제는 됐을 수 있으므로 영수증 코드로 열기를 함께 안내 -->
+      <div class="unseal-error is-hidden" data-js="unseal-error" role="alert">
+        <p class="unseal-error__title" data-t="unseal.error.title">[초안] 봉인을 여는 중에 연결이 끊겼어요</p>
+        <p class="unseal-error__text" data-t="unseal.error.text">[초안] 결제가 됐다면 리포트는 안전하게 남아 있어요. 다시 시도하거나, 아래 코드로 열어 주세요.</p>
+        <p class="unseal-error__code" data-js="unseal-error-code">[초안] SO1A-B2C3-D4E5-F6G7-H8J9</p>
+        <button class="btn btn--primary btn--block" type="button" data-js="unseal-retry" data-t="unseal.error.retry">[초안] 다시 시도하기</button>
+      </div>
+    </section>
+
+    <!-- ═════════ 6-R. 유료 리포트 읽기 (광고 없음) ═════════
+         부분(.report-part) 상태: .is-sealed(해제 전) → .is-unsealing(JS가 차례로, --i 지연) → 기본(열림).
+         기본 스타일이 열린 모습이라 움직임 줄이기·정적 검토에서는 처음부터 모두 열려 있다 -->
+    <section class="screen report" id="screen-report" data-js="screen-report" data-room="hall" data-preview="6-R. 유료 리포트 — 영수증 코드 카드 + 본문 (광고 없음)">
+      <p class="pay-band" data-js="pay-band" data-mode="test"><span class="pay-band__mark" aria-hidden="true">◇</span><span data-t="pay.band.test">[초안] 테스트 결제 — 실제로 돈이 나가지 않아요</span></p>
+
+      <!-- 영수증 코드 카드 (맨 위). 아래쪽에 한 번 더 (.receipt--end) -->
+      <aside class="receipt" data-js="receipt" aria-labelledby="receipt-title">
+        <p class="receipt__label" id="receipt-title" data-t="receipt.label">[초안] 영수증 코드</p>
+        <p class="receipt__code" data-js="receipt-code"><span>SO1A</span><span>B2C3</span><span>D4E5</span><span>F6G7</span><span>H8J9</span><span>K2M4</span></p>
+        <div class="receipt__actions">
+          <button class="btn btn--secondary btn--small" type="button" data-js="receipt-copy" data-t="receipt.copy">[초안] 코드 복사</button>
+          <a class="receipt__toss is-hidden" data-js="receipt-toss" href="#" target="_blank" rel="noopener" data-t="receipt.toss">[초안] 결제 영수증 보기</a>
+        </div>
+        <p class="receipt__text" data-t="receipt.text">[초안] 이 코드가 있으면 다른 기기에서도 다시 열 수 있어요. 코드를 아는 사람은 누구나 이 리포트를 볼 수 있으니 공유하지 마세요.</p>
+        <button class="btn btn--text receipt__forget" type="button" data-js="receipt-forget" data-t="receipt.forget">[초안] 이 탭에서 코드 지우기</button>
+      </aside>
+
+      <header class="report-head">
+        <p class="report-head__badge" data-t="report.badge">[초안] 소장판</p>
+        <h1 class="report-head__title" data-js="report-title">[초안] 전사, 여섯 개의 문을 지나다</h1>
+        <p class="report-head__meta" data-js="report-meta">[초안] 방 6곳 · 상대와의 궁합 · 약 10,300자</p>
+      </header>
+
+      <!-- 여는 글 -->
+      <article class="report-part" data-js="report-part" data-part="open" style="--i:0">
+        <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.open">[초안] 여는 글</p></header>
+        <div class="report-part__body prose" data-js="report-open"><p>[초안] (유료 문구는 서버에서 받아 JS가 채움 · 약 300자)</p></div>
+      </article>
+
+      <!-- 1장 숨은 장: 방마다 소제목 + 문단 (JS가 .hidden-room 반복 생성) -->
+      <article class="report-part" data-js="report-part" data-part="hidden" style="--i:1">
+        <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.hidden">[초안] 1장 · 숨은 장</p></header>
+        <div class="report-part__body" data-js="report-hidden">
+          <section class="hidden-room" data-room="ogham">
+            <h3 class="hidden-room__title"><span class="hidden-room__glyph runic" aria-hidden="true">ᚁ</span><span data-js="hidden-room-name">[초안] 오검의 방 — 자작나무 뒤편</span></h3>
+            <div class="prose" data-js="hidden-room-body"><p>[초안] (약 700자)</p></div>
+          </section>
+          <section class="hidden-room" data-room="rune">
+            <h3 class="hidden-room__title"><span class="hidden-room__glyph runic" aria-hidden="true">ᚱ</span><span data-js="hidden-room-name">[초안] 룬의 방 — 가운데 돌 아래</span></h3>
+            <div class="prose" data-js="hidden-room-body"><p>[초안] (약 700자)</p></div>
+          </section>
+        </div>
+      </article>
+
+      <!-- 2장 시기별 흐름: 3구간 × 4영역 -->
+      <article class="report-part" data-js="report-part" data-part="timeline" style="--i:2">
+        <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.timeline">[초안] 2장 · 시기별 흐름</p></header>
+        <ol class="timeline" data-js="report-timeline">
+          <li class="timeline__stage is-now">
+            <p class="timeline__age" data-js="timeline-age">[초안] 서른 초반 · 지금</p>
+            <dl class="timeline__areas">
+              <div><dt data-t="report.areas.work">[초안] 일</dt><dd data-js="timeline-work">[초안] (약 150자)</dd></div>
+              <div><dt data-t="report.areas.relation">[초안] 관계</dt><dd data-js="timeline-relation">[초안] (약 150자)</dd></div>
+              <div><dt data-t="report.areas.learn">[초안] 배움</dt><dd data-js="timeline-learn">[초안] (약 150자)</dd></div>
+              <div><dt data-t="report.areas.move">[초안] 이동</dt><dd data-js="timeline-move">[초안] (약 150자)</dd></div>
+            </dl>
+          </li>
+          <li class="timeline__stage"><p class="timeline__age" data-js="timeline-age">[초안] 서른 중반 무렵</p><dl class="timeline__areas"><div><dt data-t="report.areas.work">[초안] 일</dt><dd>[초안] (약 150자)</dd></div></dl></li>
+          <li class="timeline__stage"><p class="timeline__age" data-js="timeline-age">[초안] 마흔 초반 무렵</p><dl class="timeline__areas"><div><dt data-t="report.areas.work">[초안] 일</dt><dd>[초안] (약 150자)</dd></div></dl></li>
+        </ol>
+      </article>
+
+      <!-- 3장 궁합: 쌍 머리 + 본문 + 방별 관계 목록. 상대 없음이면 "여덟 원형 지도"(.match--map) -->
+      <article class="report-part" data-js="report-part" data-part="match" style="--i:3">
+        <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.match">[초안] 3장 · 궁합</p></header>
+        <p class="match-pair" data-js="report-match-pair"><span class="match-pair__me">[초안] 전사</span><span class="match-pair__x" aria-hidden="true">×</span><span class="match-pair__you">[초안] 연인</span></p>
+        <div class="report-part__body prose" data-js="report-match"><p>[초안] (약 1,200~2,300자)</p></div>
+        <ul class="match-rooms" data-js="report-match-rooms">
+          <li><span class="match-rooms__room" data-t="rooms.ogham.name">[초안] 오검의 방</span><span data-js="match-room-text">[초안] 뿌리와 가지 (약 60자)</span></li>
+        </ul>
+      </article>
+
+      <!-- 4장 원형 심층: 강점·그림자·성장 조언 + 근거(무료 데이터로 조립) -->
+      <article class="report-part" data-js="report-part" data-part="deep" style="--i:4">
+        <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.deep">[초안] 4장 · 원형, 더 깊이</p></header>
+        <div class="deep-block"><h3 class="deep-block__title" data-t="report.deep.strength">[초안] 강점</h3><div class="prose" data-js="report-deep-strength"><p>[초안] (약 500자)</p></div></div>
+        <div class="deep-block deep-block--shadow"><h3 class="deep-block__title" data-t="report.deep.shadow">[초안] 그림자</h3><div class="prose" data-js="report-deep-shadow"><p>[초안] (약 500자)</p></div></div>
+        <div class="deep-block"><h3 class="deep-block__title" data-t="report.deep.growth">[초안] 성장을 위한 조언</h3><div class="prose" data-js="report-deep-growth"><p>[초안] (약 500자)</p></div></div>
+        <ul class="evidence" data-js="report-evidence"></ul>
+      </article>
+
+      <!-- 닫는 글 -->
+      <article class="report-part" data-js="report-part" data-part="close" style="--i:5">
+        <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.close">[초안] 닫는 글</p></header>
+        <div class="report-part__body prose" data-js="report-close"><p>[초안] (약 300자)</p></div>
+      </article>
+
+      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
+
+      <div class="result-actions">
+        <button class="btn btn--primary btn--block" type="button" data-js="report-share" data-t="report.share">[초안] 소장 카드 저장·공유</button>
+        <button class="btn btn--secondary btn--block" type="button" data-go="story" data-js="report-go-story" data-t="report.toStory">[초안] 나의 이야기로 돌아가기</button>
+      </div>
+
+      <aside class="receipt receipt--end" aria-labelledby="receipt-end-title">
+        <p class="receipt__label" id="receipt-end-title" data-t="receipt.labelEnd">[초안] 다시 열 때 필요한 영수증 코드</p>
+        <p class="receipt__code" data-js="receipt-code-end"><span>SO1A</span><span>B2C3</span><span>D4E5</span><span>F6G7</span><span>H8J9</span><span>K2M4</span></p>
+        <button class="btn btn--secondary btn--small" type="button" data-js="receipt-copy-end" data-t="receipt.copy">[초안] 코드 복사</button>
+      </aside>
+
+      <div class="page-end" aria-hidden="true"><span>✦</span></div>
+      <!-- 광고 자리 없음 (spec 6-1, D-12) -->
     </section>
   </main>
   <!-- ═════════ 내 정보 지우기 확인 ═════════ -->

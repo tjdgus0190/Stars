@@ -2652,3 +2652,266 @@ body:not(.is-static-preview) [data-preview-only] { display: none; }
 .is-static-preview .ad-slot::before { content: "광고 자리 (" attr(data-ad) ") — ads.js가 채움, 1단계는 비어 있음"; font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-faint); }
 .is-static-preview .dialog { position: static; display: block; margin: var(--space-16) auto; }
 .is-static-preview .toast { position: static; display: table; margin: var(--space-6) auto var(--space-16); transform: none; }
+
+/* ═════════════════════════════════════════════════════════════════
+   6단계: 유료 리포트 — 미리보기(#deeper) · 봉인 해제(#unseal) · 리포트(#report) · 진입점 · 영수증 코드
+   무료 = 금빛 테두리로 "펼친" 카드 / 유료 = 밀랍 인장 + 흐린 별자리 줄로 "봉인된" 칸 (글자 없음, D-4)
+   광고 자리 없음 (D-12). 색은 hall(금) 강조 + 인장 전용 밀랍색 2개(장식, 글자 없음)
+   ═════════════════════════════════════════════════════════════════ */
+:root {
+  --wax: oklch(0.42 0.13 25);       /* 밀랍 (장식, 글자 없음) */
+  --wax-rim: oklch(0.52 0.14 25);   /* 밀랍 가장자리 눌린 선 */
+  --seal: 40px;
+  --unseal-ring: min(280px, 78vw);
+  --unseal-ms: 3000ms;              /* 봉인 해제 전체 길이 (JS 타이머와 맞춘다) */
+}
+.wax-seal { width: var(--seal); height: var(--seal); overflow: visible; }
+
+
+
+
+/* 테스트/모의 결제 띠: 세 화면 맨 위. mock·test 모양 같음, 문구만 다름 */
+.pay-band {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  margin: 0 0 var(--space-6); padding: var(--space-2) var(--space-4);
+  border: 1px dashed var(--accent-line); border-radius: var(--radius-pill);
+  background: var(--c-surface-2);
+  font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--c-text-strong); text-align: center;
+}
+.pay-band__mark { color: var(--accent); }
+
+/* ───────── 6-P. 미리보기 ───────── */
+.deeper-head { text-align: center; }
+.deeper-head__title { margin: var(--space-2) 0 var(--space-3); font-size: var(--fs-2xl); line-height: var(--lh-tight); color: var(--c-text-strong); }
+.deeper-head__lead { font-size: var(--fs-md); line-height: var(--lh-ui); color: var(--c-text-muted); }
+
+.toc { margin-top: var(--space-8); }
+.toc__title { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-4); font-size: var(--fs-lg); color: var(--c-text-strong); }
+.toc__total { font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--accent); }
+.toc__list { display: grid; gap: var(--space-3); list-style: none; margin: 0; padding: 0; }
+.toc-item {
+  position: relative;
+  padding: var(--space-4) calc(var(--space-4) + var(--seal) + var(--space-2)) var(--space-4) var(--space-4);
+  border: 1px solid var(--c-line); border-radius: var(--radius-lg);
+  /* 봉인 칸 바탕: 흐린 별자리 점 (의미 없는 장식) */
+  background:
+    radial-gradient(circle at 78% 30%, var(--accent-soft) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 64% 72%, var(--accent-soft) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 90% 82%, var(--accent-soft) 0 1.5px, transparent 2px),
+    var(--c-surface-1);
+}
+.toc-item__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2); }
+.toc-item__num { flex-shrink: 0; min-width: 1.2em; font-family: var(--font-latin); color: var(--accent); }
+.toc-item__name { flex: 1 1 12em; min-width: 0; font-size: var(--fs-md); font-weight: 700; line-height: var(--lh-ui); color: var(--c-text-strong); overflow-wrap: anywhere; }
+.toc-item__vol { font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); white-space: nowrap; }
+.toc-item__teaser { margin-top: var(--space-2); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); }
+/* 흐린 줄: 글자가 아닌 점선 막대 3줄 = "별자리로 잠긴 문단" */
+.seal-lines { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+.seal-lines span {
+  display: block; height: 6px; border-radius: var(--radius-pill); opacity: 0.55;
+  background: repeating-linear-gradient(90deg, var(--c-line-strong) 0 22px, transparent 22px 28px, var(--c-line-strong) 28px 34px, transparent 34px 42px);
+}
+.seal-lines span:nth-child(2) { width: 86%; }
+.seal-lines span:nth-child(3) { width: 58%; }
+.toc-item > .wax-seal { position: absolute; top: var(--space-4); right: var(--space-4); filter: drop-shadow(0 2px 3px oklch(0 0 0 / 0.45)); }
+.toc-item.is-open { border-color: var(--accent-line); }
+.toc-item.is-open :is(.wax-seal, .seal-lines) { display: none; }
+
+/* 견본: 봉인 없이 펼친 무료 블록 */
+.sample {
+  margin-top: var(--space-8); padding: var(--space-5);
+  border: 1px solid var(--accent-line); border-radius: var(--radius-lg);
+  background: linear-gradient(170deg, oklch(0.25 0.04 var(--accent-h)), var(--c-surface-1) 60%);
+}
+.sample__badge {
+  display: inline-block; padding: 2px var(--space-3); border-radius: var(--radius-pill);
+  background: var(--accent); color: var(--c-on-accent);
+  font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 700;
+}
+.sample__title { margin: var(--space-3) 0 var(--space-1); font-size: var(--fs-lg); line-height: var(--lh-tight); color: var(--c-text-strong); }
+.sample__note { font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-muted); }
+.sample__body { margin-top: var(--space-4); }
+
+/* 입력 */
+.deeper-input { display: grid; gap: var(--space-5); margin-top: var(--space-10); }
+.deeper-input__title { font-size: var(--fs-lg); color: var(--c-text-strong); }
+.deeper-input .field { margin: 0; }
+.partner { display: grid; gap: var(--space-4); min-width: 0; margin: 0; padding: var(--space-4); border: 1px dashed var(--c-line-strong); border-radius: var(--radius-lg); }
+.partner__legend { padding: 0 var(--space-2); font-size: var(--fs-md); font-weight: 700; color: var(--c-text-strong); }
+.notice--partner { border-left: 3px solid oklch(0.84 0.09 var(--hue-candle)); }
+.notice--partner .notice__icon { color: oklch(0.84 0.09 var(--hue-candle)); }
+.deeper-fact { display: flex; gap: var(--space-2); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-muted); }
+.deeper-fact::before { content: "✦"; flex-shrink: 0; color: var(--accent); }
+
+/* 결제 전 고지: 접지 않음 (D-2) */
+.disclosure { margin-top: var(--space-8); padding: var(--space-5); border: 1px solid var(--c-line-strong); border-radius: var(--radius-lg); background: var(--c-surface-1); }
+.disclosure__title { margin-bottom: var(--space-4); font-size: var(--fs-md); color: var(--c-text-strong); }
+.disclosure__list { display: grid; gap: var(--space-3); margin: 0; }
+.disclosure__row dt { font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
+.disclosure__row dd { margin: var(--space-1) 0 0; font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); overflow-wrap: anywhere; }
+.disclosure__row--price dd b { font-size: var(--fs-lg); color: var(--c-text-strong); }
+.consent { align-items: flex-start; margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--c-line); font-size: var(--fs-sm); line-height: var(--lh-ui); }
+.consent input { margin-top: 2px; }
+
+.pay-alert { margin-top: var(--space-5); padding: var(--space-4); border: 1px solid oklch(0.7 0.14 25 / 0.6); border-radius: var(--radius-md); background: oklch(0.24 0.05 25); }
+.pay-alert__title { font-size: var(--fs-md); font-weight: 700; color: var(--c-text-strong); }
+.pay-alert__text { margin-top: var(--space-1); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); }
+.pay-cta { margin-top: var(--space-5); }
+.pay-cta__btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.pay-cta__status { margin-top: var(--space-2); font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); text-align: center; }
+
+.biz-info { margin-top: var(--space-10); padding-top: var(--space-5); border-top: 1px solid var(--c-line); font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); }
+.biz-info__list { display: grid; gap: var(--space-1); margin: 0; }
+.biz-info__list div { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); }
+.biz-info__list dt { font-weight: 700; }
+.biz-info__list dd { margin: 0; overflow-wrap: anywhere; }
+.legal-links { display: flex; flex-wrap: wrap; gap: 0 var(--space-4); margin-top: var(--space-3); }
+.legal-links a { display: inline-flex; align-items: center; min-height: var(--tap-min); color: var(--c-text); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ───────── 진입점 (조르지 않기) ───────── */
+/* 방 결과: "나의 이야기" 버튼 아래 글자 링크 한 줄 (D-3). 버튼 모양·배경 없음 */
+.deeper-link {
+  display: flex; justify-content: center; align-items: center; gap: var(--space-1); width: 100%;
+  min-height: var(--tap-min); margin-top: var(--space-3); padding: var(--space-2) 0;
+  border: 0; background: none; cursor: pointer;
+  font-family: var(--font-serif); font-size: var(--fs-sm); color: var(--c-text-muted);
+  text-decoration: underline; text-decoration-color: var(--accent-line); text-underline-offset: 4px;
+}
+.deeper-link:hover, .deeper-link:focus-visible { color: var(--c-text-strong); }
+/* 나의 이야기 유료 카드: 인장 장식 + 상태 */
+.paid-card { position: relative; }
+.paid-card__seal { position: absolute; top: var(--space-5); right: var(--space-5); }
+.paid-card .eyebrow, .paid-card__title { padding-right: calc(var(--seal) + var(--space-2)); }
+.paid-card.is-on { border-color: var(--accent); }
+.paid-card__reopen { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--c-line); }
+/* 허브 하단 */
+.hub-paid { display: grid; gap: var(--space-4); margin-top: var(--space-6); }
+
+/* 영수증 코드로 열기 */
+.receipt-open { display: grid; gap: var(--space-2); }
+.receipt-open__label { font-size: var(--fs-sm); font-weight: 700; color: var(--c-text-strong); }
+.receipt-open__row { display: flex; gap: var(--space-2); }
+.receipt-open__input { flex: 1 1 auto; min-width: 0; font-family: var(--font-sans); letter-spacing: 0.06em; text-transform: uppercase; }
+.receipt-open__go { flex-shrink: 0; }
+.receipt-open__how { font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); }
+.receipt-open--hub { padding: var(--space-4); border: 1px solid var(--c-line); border-radius: var(--radius-lg); background: var(--c-surface-1); }
+
+/* ───────── 6-U. 봉인 해제 의식 — 별자리 고리의 인장 여섯 개가 차례로 갈라지고 별이 켜진다 ─────────
+   기본 스타일 = 최종(갈라진) 모습. .is-running일 때만 "온전한 인장 → 갈라짐"을 재생 (움직임 줄이기는 base.css가 애니메이션을 끔) */
+.ritual--unseal.is-active { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: var(--space-4); }
+.unseal-ring { position: relative; width: var(--unseal-ring); aspect-ratio: 1; margin: var(--space-8) auto var(--space-6); }
+.unseal-ring__lines { position: absolute; inset: 0; width: 100%; height: 100%; }
+.unseal-ring__lines polygon { fill: none; stroke: var(--accent-line); stroke-width: 1; stroke-dasharray: 2 5; }
+.unseal-ring__core {
+  position: absolute; left: 50%; top: 50%; width: 38%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-soft), transparent 70%);
+}
+.unseal-seal {
+  --r: calc(var(--unseal-ring) * -0.4);
+  --d: calc(300ms + var(--i) * 380ms);
+  position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px;
+  transform: rotate(calc(var(--i) * 60deg)) translateY(var(--r)) rotate(calc(var(--i) * -60deg));
+}
+.unseal-seal .wax-seal { position: absolute; inset: 0; width: 100%; height: 100%; }
+.unseal-seal .wax-seal--l { clip-path: polygon(0 0, 54% 0, 44% 38%, 58% 62%, 47% 100%, 0 100%); transform: translate(-7px, 5px) rotate(-16deg); opacity: 0.3; }
+.unseal-seal .wax-seal--r { clip-path: polygon(54% 0, 100% 0, 100% 100%, 47% 100%, 58% 62%, 44% 38%); transform: translate(7px, -4px) rotate(13deg); opacity: 0.3; }
+.unseal-seal__star {
+  position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 14px 4px var(--accent-glow);
+}
+.ritual--unseal.is-running .unseal-seal .wax-seal { animation: seal-crack 560ms var(--ease-out) both; animation-delay: var(--d); }
+.ritual--unseal.is-running .unseal-seal__star { animation: seal-star 600ms var(--ease-out) both; animation-delay: calc(var(--d) + 200ms); }
+.ritual--unseal.is-running .unseal-ring__core { animation: core-breathe 1400ms var(--ease-in-out) infinite alternate; }
+@keyframes seal-crack { from { transform: none; opacity: 1; } }
+@keyframes seal-star { from { opacity: 0; transform: scale(0.2); } }
+@keyframes core-breathe { to { opacity: 0.5; scale: 0.9; } }
+.ritual--unseal.is-error .unseal-ring { opacity: 0.35; }
+.unseal-error { display: grid; gap: var(--space-3); width: 100%; margin-top: var(--space-6); padding: var(--space-5); border: 1px solid var(--c-line-strong); border-radius: var(--radius-lg); background: var(--c-surface-1); }
+.unseal-error__title { font-size: var(--fs-md); font-weight: 700; color: var(--c-text-strong); }
+.unseal-error__text { font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); }
+.unseal-error__code { font-family: ui-monospace, "Consolas", monospace; font-size: var(--fs-md); letter-spacing: 0.06em; color: var(--c-text-strong); overflow-wrap: anywhere; user-select: all; }
+
+/* ───────── 6-R. 유료 리포트 ───────── */
+.receipt {
+  display: grid; justify-items: center; gap: var(--space-3); padding: var(--space-5);
+  border: 1px solid var(--accent-line); border-radius: var(--radius-lg); background: var(--c-surface-1); text-align: center;
+}
+.receipt__label { font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
+.receipt__code { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); font-family: ui-monospace, "Consolas", monospace; font-size: var(--fs-lg); font-weight: 700; color: var(--c-text-strong); user-select: all; }
+.receipt__code span { padding: 2px var(--space-2); border-radius: var(--radius-sm); background: var(--c-surface-2); letter-spacing: 0.08em; }
+.receipt__actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--space-4); }
+.receipt__toss { display: inline-flex; align-items: center; min-height: var(--tap-min); font-size: var(--fs-sm); color: var(--c-text); text-decoration: underline; text-underline-offset: 3px; }
+.receipt__text { font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-muted); }
+.receipt--end { margin-top: var(--space-10); }
+
+.report-head { margin-top: var(--space-10); text-align: center; }
+.report-head__badge { display: inline-block; padding: 2px var(--space-3); border: 1px solid var(--accent-line); border-radius: var(--radius-pill); font-size: var(--fs-xs); color: var(--accent); }
+.report-head__title { margin: var(--space-3) 0 var(--space-2); font-size: var(--fs-2xl); line-height: var(--lh-tight); color: var(--c-text-strong); }
+.report-head__meta { font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--c-text-muted); }
+
+.report-part { margin-top: var(--space-10); }
+.report-part__head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); padding-bottom: var(--space-3); border-bottom: 1px solid var(--accent-line); }
+.report-part__seal { flex-shrink: 0; display: flex; --seal: 30px; }
+.report-part__label { font-size: var(--fs-lg); font-weight: 700; color: var(--c-text-strong); }
+/* 봉인 해제 연출: JS가 모든 부분에 .is-sealed → 차례로 .is-unsealing으로 바꾼다 */
+.report-part.is-sealed > :not(.report-part__head) { opacity: 0; }
+.report-part.is-unsealing > :not(.report-part__head) { animation: part-open 700ms var(--ease-reveal) both; animation-delay: calc(var(--i) * 450ms + 250ms); }
+.report-part.is-unsealing .report-part__seal .wax-seal { animation: seal-pop 500ms var(--ease-out) both; animation-delay: calc(var(--i) * 450ms); }
+@keyframes part-open { from { opacity: 0; transform: translateY(12px); clip-path: inset(0 0 100% 0); } }
+@keyframes seal-pop { 40% { transform: scale(1.3) rotate(-8deg); filter: brightness(1.8); } }
+
+.hidden-room { margin-top: var(--space-6); }
+.hidden-room:first-child { margin-top: 0; }
+.hidden-room__title { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); font-size: var(--fs-md); color: var(--c-text-strong); }
+.hidden-room__glyph { color: var(--accent); }
+
+.timeline { position: relative; margin: 0; padding: 0 0 0 var(--space-6); list-style: none; border-left: 1px dashed var(--accent-line); }
+.timeline__stage { position: relative; padding-bottom: var(--space-6); }
+.timeline__stage::before {
+  content: ""; position: absolute; left: calc(-1 * var(--space-6) - 6px); top: 4px; width: 11px; height: 11px; border-radius: 50%;
+  border: 1px solid var(--accent); background: var(--c-bg);
+}
+.timeline__stage.is-now::before { background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+.timeline__age { font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--accent); }
+.timeline__areas { display: grid; gap: var(--space-3); margin: var(--space-3) 0 0; }
+.timeline__areas dt { font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 700; color: var(--c-text-muted); }
+.timeline__areas dd { margin: var(--space-1) 0 0; font-size: var(--fs-read); line-height: var(--lh-read); color: var(--c-text); }
+
+.match-pair { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-5); font-size: var(--fs-xl); font-weight: 700; color: var(--c-text-strong); }
+.match-pair__me, .match-pair__you { padding: var(--space-1) var(--space-4); border: 1px solid var(--accent-line); border-radius: var(--radius-pill); }
+.match-pair__x { font-family: var(--font-latin); color: var(--accent); }
+.match-rooms { display: grid; gap: var(--space-2); margin: var(--space-5) 0 0; padding: 0; list-style: none; }
+.match-rooms li { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--c-surface-2); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); }
+.match-rooms__room { font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
+
+.deep-block { margin-top: var(--space-5); }
+.deep-block:first-of-type { margin-top: 0; }
+.deep-block__title { margin-bottom: var(--space-2); font-size: var(--fs-md); color: var(--accent); }
+.deep-block--shadow { padding: var(--space-4); border-radius: var(--radius-md); background: var(--c-surface-2); }
+
+/* ───────── legal/ 세 페이지 (legal/*.html이 ../style.css를 불러 씀) ───────── */
+.legal { padding: var(--space-8) 0 var(--space-16); }
+.legal__back { display: inline-flex; align-items: center; min-height: var(--tap-min); font-size: var(--fs-sm); color: var(--c-text-muted); text-decoration: underline; text-underline-offset: 3px; }
+.legal__title { margin: var(--space-4) 0 var(--space-2); font-size: var(--fs-2xl); line-height: var(--lh-tight); color: var(--c-text-strong); }
+.legal__meta { font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
+.legal__toc { margin: var(--space-6) 0; padding: var(--space-4) var(--space-5); border: 1px solid var(--c-line); border-radius: var(--radius-lg); background: var(--c-surface-1); }
+.legal__toc ol { display: grid; gap: var(--space-1); margin: 0; padding-left: var(--space-5); font-size: var(--fs-sm); line-height: var(--lh-ui); }
+.legal__toc a { color: var(--c-text); }
+.legal__section { margin-top: var(--space-8); scroll-margin-top: var(--space-6); }
+.legal__section h2 { margin-bottom: var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--c-line); font-size: var(--fs-lg); color: var(--c-text-strong); }
+.legal__section p, .legal__section li { font-size: var(--fs-md); line-height: var(--lh-read); color: var(--c-text); }
+.legal__section ul, .legal__section ol { display: grid; gap: var(--space-2); padding-left: var(--space-5); }
+.legal__table-wrap { overflow-x: auto; }
+.legal__table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); line-height: var(--lh-ui); }
+.legal__table th, .legal__table td { padding: var(--space-2) var(--space-3); border: 1px solid var(--c-line); text-align: left; vertical-align: top; color: var(--c-text); overflow-wrap: anywhere; }
+.legal__table th { background: var(--c-surface-2); color: var(--c-text-strong); }
+.legal__blank { padding: 0 var(--space-1); border-radius: var(--radius-sm); background: oklch(0.84 0.1 var(--hue-candle) / 0.18); color: var(--c-text-strong); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* 봉인 해제: 애니메이션이 꺼지면 기본 = 모두 갈라진 최종 모습. 리포트 부분은 처음부터 열림 */
+  .report-part.is-sealed > :not(.report-part__head) { opacity: 1; }
+}
+
+/* 정적 검토 모드: 결제 켜짐일 때만 보이는 진입점과 오류 상태를 펼쳐 보여 준다 */
+.is-static-preview .deeper-link.is-hidden { display: flex !important; }
+.is-static-preview :is(.hub-paid, .paid-card__reopen, .pay-alert, .unseal-error).is-hidden { display: grid !important; }

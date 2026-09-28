@@ -815,3 +815,168 @@
 - 허브 문 출신 라벨(카피라이터가 줄인 것): "켈트 · 나무 문자"(10자) / "이집트 · 별자리"(9자) / "마야 · 촐킨"(7자) / "로마 · 신탁"(7자) — 모두 명세 10자 제한 안, 문 폭에서 한 줄로 보임.
 - 쓰이지 않는 `.closed-rooms` CSS: index.html에서 해당 section이 이미 지워졌는데 style.css에 `.closed-rooms`/`.closed-room*` 규칙(약 27줄)만 남아 있어 **이번에 삭제**(app.js도 참조 없음 확인).
 - 남은 것: 시빌라 신탁 18~32번은 아직 집필 중 — 같은 틀(레이아웃)이라 이번 점검 범위이며 문제 없음. 문구 자체는 copywriter 담당이라 손대지 않음.
+
+
+---
+
+# 6단계: 유료 리포트 (2026-09-28, designer — 디자인 단계)
+
+기준: specs/strange-oracle.md 6-1~6-6, specs/selling-strange-oracle.md 「유료: 더 깊은 이야기」. meta.json status는 "검수통과" 유지(운영자 결정 30).
+
+## 디자인 방향
+- 무료 = **펼친 두루마리**(금빛 테두리, 글자가 보임) / 유료 = **밀랍 인장으로 봉인된 칸**(인장 + 흐린 별자리 점선 줄, 글자 없음). 같은 hall(금) 강조색 안에서 열림과 닫힘만 다르게 보인다.
+- 봉인 해제 의식은 여섯 방 의식과 겹치지 않게 **별자리 고리 위 인장 여섯 개가 차례로 갈라지고 그 자리에 별이 켜진다**(약 3초). 방의 재료(돌·달·나무·해시계·톱니·촛불)는 쓰지 않는다.
+- 조르지 않기: 방 결과에는 글자 링크 한 줄, "나의 이야기"에는 기존 카드 하나만 둔다. 팝업·배너·남은 시간·할인은 없다. 미리보기·결제·리포트 화면에는 광고 자리가 없다.
+
+## 사용자 흐름
+| 화면 | 목적 | 단 하나의 행동 | 다음 |
+|---|---|---|---|
+| 나의 이야기 유료 카드 / 방 결과 글자 링크 | 존재를 알림 | "무엇이 들어 있는지 보기" | 6-P |
+| 6-P 미리보기 `#screen-deeper` | 무엇을 얼마에 받는지 확인 | 동의 체크 → "3,900원 결제하기" | 토스 결제창 → 6-U (실패·취소 시 6-P + 알림) |
+| 6-U 봉인 해제 `#screen-unseal` | `api/confirm`을 기다리는 동안 의식 | 기다림 (건너뛰기 가능) | 6-R |
+| 6-R 리포트 `#screen-report` | 읽기·코드 보관·소장 카드 | 코드 복사 / 소장 카드 저장 | 나의 이야기 |
+| 허브 하단·유료 카드의 "영수증 코드로 열기" | 다른 탭·기기에서 재열람 | 코드 입력 → 다시 열기 | 6-R |
+
+## 화면별 명세
+### 6-P 미리보기 (위→아래, 광고 0)
+1. `.pay-band` 테스트/모의 결제 띠 (mode가 mock·test일 때만 보인다. live면 JS가 숨긴다)
+2. `.deeper-head`: eyebrow·제목·한 줄 소개
+3. `.toc`: 목차 제목 + 총 분량(`deeper-total`) → `.toc-item.is-sealed` 6개(여는 글·1~4장·닫는 글+소장 카드). 칸마다 번호, 장 이름(JS), 분량(JS), 맛보기 한 줄(무료 문구), `.seal-lines`(점선 막대 3줄, **글자 없음**), 오른쪽 위 밀랍 인장, 스크린리더용 "결제하면 열려요"
+4. `.sample.is-open` 견본: "견본" 배지 + 가상 조합 제목 + 안내 + 문단 3개(data-list)
+5. `.deeper-input`: 생년월일 확인 카드(`deeper-saved`, 기존 `.saved-info` 재사용) 또는 입력칸 / 궁합 상대 `.partner`(선택. 점선 테두리와 촛불빛 왼쪽 선 안내로 본인 안내와 구분) / 고정 안내 한 줄 `.deeper-fact`
+6. `.disclosure` 결제 전 고지(**접지 않음**, `<details>` 금지): 받는 것·분량·가격(+부가세 ◯◯)·이용 방법·청약철회·환불·미성년자(필요 없으면 JS가 `deeper-minor`를 숨김) → 동의 체크 `.check.consent`
+7. `.pay-alert`(실패·취소 때만) → `.pay-cta`: 결제 버튼 + 상태 한 줄(aria-live)
+8. `.biz-info`: 사업자 정보 dl(◯◯) + 정책 링크 3개
+- 상태: 버튼 `disabled`(미동의·입력 오류) / `.is-loading`+`aria-busy`(결제창 여는 중) / `.pay-alert` 보임(실패·취소, 오류 코드는 보이지 않음). 입력 오류는 기존 `.field__error` 문구 규칙을 따른다.
+- D-2: 고지 블록과 결제 버튼 사이에는 `.pay-alert`(실패 때만) 말고는 아무것도 두지 않는다.
+
+### 6-U 봉인 해제 의식
+- 띠 → 상태 문구(aria-live) → `.unseal-ring`(점선 육각 별자리 + 인장 6개 `--i:0~5` + 가운데 빛) → 건너뛰기.
+- 타이밍: 인장 i는 `300ms + i×380ms`에 갈라지고(560ms), 200ms 뒤 별이 켜진다. 전체 약 3.0초 = `--unseal-ms`.
+- **기본 스타일 = 최종 모습**(모두 갈라지고 별 6개 켜짐). `.is-running`일 때만 "온전 → 갈라짐"을 재생한다. 그래서 움직임 줄이기(base.css가 애니메이션을 끔)에서는 곧바로 최종 모습이 보인다.
+- 오류: 화면에 `.is-error` + `unseal-error`가 보인다(고리가 흐려지고, 주문번호=영수증 코드 표시, 다시 시도 버튼).
+
+### 6-R 리포트 (광고 0)
+- 띠 → `.receipt` 영수증 코드 카드(4자씩 `<span>` 묶음, 복사, 토스 영수증 링크(값이 오면), 경고 문구, "이 탭에서 코드 지우기") → `.report-head`(소장판 배지·제목·메타) → `.report-part` 6개:
+  - 여는 글
+  - 1장: `.hidden-room` 반복. 방의 data-room 값으로 글리프가 그 방 색이 된다
+  - 2장: `.timeline` 3구간(지금 구간 `.is-now`) × 4영역 dl
+  - 3장: `.match-pair`(나 × 상대) + 본문 + `.match-rooms`
+  - 4장: `.deep-block` 강점·그림자(`--shadow` 바탕)·성장 + 근거 `.evidence`(기존 컴포넌트)
+  - 닫는 글
+- 그다음 면책 `disclaimer-slot` → 소장 카드 저장·나의 이야기 버튼 → `.receipt--end`(코드 한 번 더).
+- 열림 연출: JS가 모든 `.report-part`에 `.is-sealed`를 붙이고, 의식이 끝나면 차례로 `.is-unsealing`으로 바꾼다(지연 `--i×450ms`). 움직임 줄이기에서는 `.is-sealed` 상태여도 본문이 보인다(CSS가 보장).
+
+### 진입점
+- 방 결과 6곳: `next-rooms`의 "나의 이야기" 버튼 **아래**에 `.deeper-link`를 둔다. 글자 링크 한 줄, 밑줄, 배경·테두리 없음, 탭 높이 44px. 결제가 꺼져 있으면 `.is-hidden`을 유지한다. 그 아래로 `page-end` 장식 뒤에 광고 자리가 온다(버튼·링크 바로 옆이 아님).
+- 나의 이야기 `.paid-card`: 오른쪽 위에 인장 장식. 상태는 `.is-on`(결제 켜짐, 금 테두리) / `.is-owned`(같은 탭에 코드 있음, 버튼 문구만 바뀜) / 기본("곧 열려요"). `.paid-card__reopen`(영수증 코드로 열기)은 결제가 켜졌을 때만 보인다.
+- 허브: 이야기 카드 아래·소개 글 위에 `.hub-paid`(결제 켜짐일 때만): "내 리포트 다시 보기"(코드가 있을 때) + `.receipt-open--hub`.
+
+### legal/ 3페이지 (`legal/refund.html`, `terms.html`, `privacy.html`)
+- `../../../common/base.css` + `../style.css`만 쓰고 JS는 없다. 뒤로 링크 → 제목 → 시행일 메타 → 목차 카드 → 조항(`.legal__section`: h2 + 문단·목록, 필요하면 가로 스크롤로 감싼 `.legal__table`). 빈칸은 `<span class="legal__blank">◯◯</span>`(촛불빛 바탕으로 눈에 띄게). `noindex`.
+- 조항 자리: 환불 6조 / 약관 10조 / 개인정보 8조. copywriter와 운영자가 조항을 늘리거나 줄여도 레이아웃은 그대로다.
+
+## 공유 카드: 유료 소장판 (1080×1920, share-card.js 테마 "keepsake" — 명세만)
+- 바탕: 무료 이야기 카드와 같은 밤하늘 + 이중 테두리. 다른 점: 테두리 안쪽 금선을 **두 겹**으로 하고, 네 모서리에 작은 밀랍 인장(지름 72px, 갈라진 모습)을 둔다.
+- 위→아래(안전 영역 좌우 96px, 위 160px, 아래 200px, 기존과 같음):
+  1. "소장판" 배지(32px, 금 테두리 알약)
+  2. 원형 이름(96px 굵게)
+  3. 궁합 쌍 "전사 × 연인"(56px, ×는 금색 Cinzel. 상대가 없으면 "여덟 원형의 지도")
+  4. 지금 구간 키워드 한 줄(40px, 최대 20자)
+  5. 방 문양 6칸(3×2, 칸 120px. 채운 방은 방 색 글리프, 안 간 방은 흐린 테두리만)
+  6. 닫는 글 한 문장(44px, 최대 2줄·44자, 넘으면 말줄임)
+  7. 제품 이름(기존 위치)
+- 넣지 않는 것: 나와 상대의 이름·생일, 영수증 코드, 유료 본문 긴 인용(닫는 글 한 문장만 넣는다).
+
+## 텍스트 길이 제한 (copywriter용, 360px 기준)
+| 요소 | 최대 | 넘으면 |
+|---|---|---|
+| pay.band.* | 24자 | 2줄 (허용) |
+| deeper.title | 22자 | 3줄 이상이면 첫 화면에서 목차가 안 보임 |
+| deeper.lead | 80자 | 4줄 |
+| 목차 장 이름(JS 조립) | 30자 | 줄바꿈 (허용) |
+| 맛보기 한 줄(toc-teaser) | 45자 | 3줄 이상이면 봉인 줄이 밀림 |
+| deeper.sample.title / 견본 문단 | 30자 / 문단 3개 각 200자 | 깨지지는 않지만 분량이 과해짐 |
+| deeper.partner.notice | 90자 | 5줄 |
+| deeper.fixNote | 70자 | 4줄 |
+| 고지 dd | 받는 것 70자 / 이용 방법 120자 / 환불 150자 | 줄이 늘어남 (접지 않으므로 허용) |
+| deeper.consent | 60자 | 4줄 |
+| deeper.pay (버튼) | 14자 | 한 줄을 넘으면 버튼 높이가 커짐 |
+| pay.fail.title / text | 30자 / 70자 | 줄이 늘어남 |
+| result.deeperLink | 28자 | **한 줄 유지 필수(D-3)**. 넘으면 2줄이 됨 |
+| unseal.status | 16자 | 2줄 |
+| receipt.text | 80자 | 4줄 |
+| receipt.open.how | 60자 | 3줄 |
+| 리포트 제목(JS) | 20자 | 2줄 |
+| report.parts.* | 14자 | 줄바꿈 |
+| 사업자 정보 dd | 40자 | 줄바꿈 |
+
+## 새 data-t / data-ph / data-aria 키
+data.js에 아직 없어서 지금은 JS가 빈 글자로 채운다. 마크업의 [초안]은 길이 견본이다.
+- pay: `pay.band.mock` `pay.band.test` `pay.fail.title` `pay.fail.text`
+- deeper:
+  - `deeper.eyebrow` `.title` `.lead` `.toc.title` `.sealedSr` `.sample.badge|title|note` + data-list `deeper.sample.body`
+  - `.input.title|savedLabel|savedAsk|savedEdit|dateLabel|dateHint`, aria `deeper.input.yearAria|monthAria|dayAria`
+  - `.partner.legend|optional|nameLabel|dateLabel|notice`, ph `deeper.partner.namePlaceholder`, aria `deeper.partner.yearAria|monthAria|dayAria`
+  - `.fixNote`, `.disclosure.title|itemsLabel|volumeLabel|priceLabel|vat|howLabel|how|refundLabel|refund|minorLabel|minor`, `.consent` `.pay` `.payHint`
+- biz: `biz.nameLabel|name|ceoLabel|ceo|regLabel|reg|salesLabel|sales|addrLabel|addr|contactLabel|contact|hostLabel|host`
+- legal: `legal.links.refund|terms|privacy`, aria `legal.links.aria`
+- unseal: `unseal.status` `.skip` `.error.title|text|retry`
+- receipt: `receipt.label` `.labelEnd` `.copy` `.toss` `.text` `.forget` `.reopen` `.open.label|go|how`, ph `receipt.open.placeholder`
+- report: `report.badge` `.parts.open|hidden|timeline|match|deep|close` `.areas.work|relation|learn|move` `.deep.strength|shadow|growth` `.share` `.toStory`
+- 방 결과: `result.deeperLink`
+- 재사용하는 기존 키: `common.units.y|m|d`, `rooms.*.name`
+
+## developer 전달 사항 (6단계)
+### data-js
+| 이름 | 역할 |
+|---|---|
+| screen-deeper / screen-unseal / screen-report | 새 화면 3개. 방 결과 링크는 `data-go="deeper"` |
+| pay-band (화면마다 1개) | mode에 따라 문구 키와 표시를 바꾼다. `data-mode="mock|test"` |
+| deeper-total, deeper-toc, deeper-toc-item[data-part], toc-name, toc-vol, toc-teaser | 목차 채우기 (방문 기록·상대 유무) |
+| deeper-sample | 견본 문단(data-list) |
+| deeper-saved, deeper-saved-value, deeper-saved-edit, deeper-date-field, deeper-year/month/day, deeper-date-error | 본인 생년월일 확인/입력 |
+| deeper-partner, deeper-partner-name/year/month/day, deeper-partner-error | 상대 입력 (sessionStorage 금지, 코드를 만든 뒤 값 지우기) |
+| deeper-items, deeper-volume, deeper-price, deeper-vat, deeper-minor | 고지의 사용자별 값 |
+| deeper-consent, deeper-pay, deeper-pay-status, pay-alert, pay-alert-title, pay-alert-text | 동의·결제·실패 |
+| biz-info, biz-info-list, legal-links | 사업자 정보·정책 링크 (결제가 꺼지면 화면째 안 보임) |
+| unseal-status, unseal-skip, unseal-error, unseal-error-code, unseal-retry | 의식·오류 |
+| receipt, receipt-code, receipt-copy, receipt-toss, receipt-forget, receipt-code-end, receipt-copy-end | 영수증 코드 카드 |
+| report-title, report-meta, report-part[data-part], report-open, report-hidden(+hidden-room-name/-body), report-timeline(+timeline-age/-work/-relation/-learn/-move), report-match-pair, report-match, report-match-rooms(+match-room-text), report-deep-strength/-shadow/-growth, report-evidence, report-close, report-share, report-go-story | 리포트 본문. 마크업 안의 1장 방 2개, 2장 구간 3개, 궁합 방 1개는 **모양 견본**이다. 템플릿으로 복제해 채우고 견본은 지운다 |
+| result-deeper (6곳) | 방 결과 글자 링크 |
+| story-paid-reopen, hub-paid, hub-report, receipt-open, receipt-open-input, receipt-open-go, receipt-open-error | 재열람 진입 |
+
+### 상태 class
+| class | 붙는 곳 | 뜻 |
+|---|---|---|
+| .is-sealed / .is-open | .toc-item | 봉인 칸 / 펼친 칸 (인장·줄 숨김) |
+| .is-running | .ritual--unseal | 봉인 해제 재생 (JS 타이머는 `--unseal-ms`) |
+| .is-error | .ritual--unseal | 승인 확인 실패 |
+| .is-sealed → .is-unsealing | .report-part | 열림 연출 (움직임 줄이기: 곧바로 열림) |
+| .is-now | .timeline__stage | 지금 나이 구간 |
+| .is-on / .is-owned | .paid-card | 결제 켜짐 / 이 탭에 코드 있음 |
+| .is-hidden | deeper-link, hub-paid, hub-report, story-paid-reopen, pay-alert, unseal-error, receipt-toss | 결제가 꺼졌거나 조건이 없으면 유지 |
+| .is-loading (+aria-busy) | deeper-pay | 결제창 여는 중 |
+
+### developer 요청
+1. 결제가 꺼져 있으면(`api/config`가 없음·실패·off) 새 요소는 모두 `.is-hidden` 그대로 두고, 세 화면으로 가는 길을 만들지 않는다(D-9).
+2. 마크업의 `[초안]` 중 data-t가 **없는** 자리(목차 이름·분량·맛보기, 영수증 코드 견본, 리포트 본문 견본)는 JS가 반드시 덮어쓰거나 지운다. 유료 문장은 절대 마크업이나 data.js에 넣지 않는다(D-4).
+3. 1장·2장·궁합 방 목록의 견본은 `<template>`로 옮겨도 된다(class 이름은 유지).
+4. 영수증 코드는 4자씩 `<span>`으로 끊어 넣는다. 복사하는 값은 원문 코드다(하이픈 포함 여부는 developer가 정한다).
+5. 봉인 해제 시간 `--unseal-ms: 3000ms`와 JS 타이머를 맞춘다. 건너뛰기나 움직임 줄이기면 곧바로 6-R로 간다.
+6. 소장 카드는 위 "공유 카드: 유료 소장판" 명세대로 share-card.js에 테마를 추가한다(공통 부품 변경이므로 쓰는 제품을 확인하고 보고).
+7. 인장 `<symbol id="i-seal">`은 `#screen-deeper` 바로 앞 스프라이트에 있다. `<use>` 안쪽에는 CSS 선택자가 닿지 않으므로 색은 symbol 안의 style 속성(`var(--wax)` 등)으로 준다. 기존 결과 캡처의 `.seal`과 이름이 겹치지 않게 새 인장은 `.wax-seal`을 쓴다.
+
+## 캡처 기록 (6단계 디자인, 360px, 움직임 줄이기, headless Edge)
+- 스크립트: scratchpad의 `p6-shots.js`, `p6-crops.js`. data.js에 키가 없으므로 [초안] 견본을 원본 HTML에서 되살려서 찍었다.
+- D-1 가로 넘침 없음: 미리보기·봉인 해제·리포트·나의 이야기 유료 카드·방 결과 링크·허브 하단·legal 3페이지 모두 360/360.
+- D-2 고지 블록이 결제 버튼 바로 위에 접지 않은 채로 있음: 통과.
+- D-3 방 결과 진입은 배경 없는 글자 링크 1줄 × 6곳: 통과.
+- D-12 미리보기·리포트 화면의 광고 자리 0개: 통과. 봉인 칸의 흐린 줄에 들어간 글자 0개: 통과.
+- 움직임 줄이기: 봉인 해제의 첫 모습이 곧 최종 모습(인장 6개 갈라짐, 별 6개)이다. 리포트는 `.is-sealed` 상태에서도 본문이 보인다.
+- 기존 화면: `test-stage2.js reduced` 222항목 모두 PASS.
+- 미확인: 움직임 있는 모드에서 봉인 해제 중간 프레임(이번에는 찍지 않음). 실제 문구가 들어간 뒤의 길이는 UI 점검 단계에서 본다.
+
+## 운영자 확인할 것 (6단계 디자인)
+- legal 3페이지는 긴 법률 문서라서 data.js가 아니라 **HTML에 직접** 쓰도록 설계했다. CLAUDE.md 3장 "문구는 data.js" 규칙의 예외로 둘지 판단이 필요하다.
+- 미성년자 안내 줄(`deeper-minor`)과 부가세 표기(`deeper-vat`)는 자리만 만들어 두었다. 필요 없으면 JS가 숨긴다.
