@@ -1,10 +1,14 @@
 // 낯선 점술관 — 화면 동작.
-// 문구는 모두 data.js(TEXT)·data-runes.js(RUNES)·data-stars.js(NAKSHATRAS·RASHIS·PLANETS)에서 가져온다.
+// 문구는 모두 data.js(TEXT)·data-runes.js(RUNES)·data-stars.js(NAKSHATRAS·RASHIS·PLANETS)
+// ·data-ogham.js(OGHAM)·data-decans.js(DECANS)·data-tzolkin.js(TZOLKIN_SIGNS·TZOLKIN_NUMBERS)·data-oracles.js(ORACLES·ORACLE_TOPICS)에서 가져온다.
+// 계산: astro.js(별), calc.js(오검·데칸·촐킨·시빌라 뽑기, 한글 로마자).
 // 요소는 id 또는 data-js로 찾는다(class 이름에 기능을 걸지 않음). 상태는 is-* class를 붙였다 뗀다.
 //
 // 개인정보 (CLAUDE.md 6장 sessionStorage 예외):
 //  - 이 탭의 sessionStorage 한 칸("strange-oracle")에만 저장한다. 탭을 닫으면 사라진다.
-//  - 저장하는 값: profile = 이름, 생년월일, 태어난 시각(모르면 null) / visits = 방마다 결과 유형 코드와 원형 태그
+//  - 저장하는 값: profile = 이름, 생년월일, 태어난 시각(모르면 null, 묻지 않았으면 없음) / visits = 방마다 결과 유형 코드와 원형 태그
+//  - 시빌라 신탁의 방 질문(자유 입력)은 어디에도 저장하지 않는다(sessionStorage 포함). 이 스크립트 안 변수와 화면에만 있다.
+//    공유 카드·나의 이야기·URL에도 넣지 않는다. 오검 로마자·오검 글자 줄도 저장하지 않고 이름에서 매번 계산한다.
 //  - 처음 저장하기 전 입력칸 아래에 "이 기기의 이 탭에만 잠시 보관되며 어디에도 전송되지 않는다" 안내를 보인다.
 //  - "내 정보 지우기"(모든 화면 상단) → 확인 대화상자 → 모두 지움.
 //  - 네트워크 전송·localStorage·쿠키·URL에는 어떤 입력값도 넣지 않는다. (URL 해시는 읽기만 하고, 방 이름만 쓴다)
@@ -15,6 +19,13 @@
   const NAKS = window.NAKSHATRAS;
   const RASHIS = window.RASHIS;
   const PLANETS = window.PLANETS;
+  const OGHAM = window.OGHAM;
+  const DECANS = window.DECANS;
+  const TZ_SIGNS = window.TZOLKIN_SIGNS;
+  const TZ_NUMBERS = window.TZOLKIN_NUMBERS;
+  const ORACLES = window.ORACLES;
+  const ORACLE_TOPICS = window.ORACLE_TOPICS;
+  const Calc = window.Calc;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const root = document.documentElement;
   const body = document.body;
@@ -50,16 +61,25 @@
   // ───────── 방 구성 (기획서 고정값) ─────────
   // 나의 이야기 장 순서 (방문 순서와 무관). 동점일 때도 이 순서로 앞선 장이 이긴다
   const CHAPTER_ORDER = ["ogham", "star", "decan", "tzolkin", "sibyl", "rune"];
-  const OPEN_ROOMS = ["rune", "star"]; // 1단계에 열린 방
+  const OPEN_ROOMS = CHAPTER_ORDER; // 2단계: 여섯 방 모두 열림
   // 방을 마치면 이어지는 방 2곳 (기획서 "방 간 이동(떡밥) 설계")
   const LINKS = {
     ogham: ["sibyl", "decan"], star: ["tzolkin", "ogham"], decan: ["rune", "star"],
     tzolkin: ["decan", "sibyl"], sibyl: ["rune", "tzolkin"], rune: ["ogham", "star"],
   };
   const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
+  // 1~39 로마 숫자 (신탁 번호 I~XXXII)
+  const roman = (n) => "X".repeat(Math.floor(n / 10)) + ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n % 10];
   const chapterOf = (room) => CHAPTER_ORDER.indexOf(room) + 1;
   const MOON_SVG = '<svg viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg>';
-  const ROOM_ICON = { rune: '<svg viewBox="0 0 40 60"><use href="#rune-raidho" /></svg>', star: MOON_SVG };
+  const ROOM_ICON = {
+    rune: '<svg viewBox="0 0 40 60"><use href="#rune-raidho" /></svg>',
+    star: MOON_SVG,
+    ogham: '<svg viewBox="0 0 40 80"><use href="#ogham-beith" /></svg>',
+    decan: '<svg viewBox="0 0 40 40"><use href="#icon-decan" /></svg>',
+    tzolkin: '<svg viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg>',
+    sibyl: '<svg viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg>',
+  };
   const RUNE_BY_CODE = Object.fromEntries(RUNES.map((r, i) => [r.code, Object.assign({ index: i }, r)]));
   const ARCHETYPES = Object.keys(T.archetypes);
   const FONTS = { serif: "'Gowun Batang', serif", latin: "'Cinzel', 'Gowun Batang', serif", glyph: "'Noto Sans Runic', 'Segoe UI Historic', sans-serif" };
@@ -67,7 +87,13 @@
     rune: { bgTop: "#080717", bgBottom: "#042234", accent: "#93d5f5", text: "#f5f2e9", muted: "#b8b8ce" },
     star: { bgTop: "#080717", bgBottom: "#221838", accent: "#cec1fa", text: "#f5f2e9", muted: "#b8b8ce" },
     story: { bgTop: "#080717", bgBottom: "#261a3a", accent: "#ebc573", text: "#f5f2e9", muted: "#b8b8ce" },
+    // (2단계) design/strange-oracle.md "공유 카드 레이아웃" 표
+    ogham: { bgTop: "#080717", bgBottom: "#002a17", accent: "#a3dbad", text: "#f5f2e9", muted: "#b8b8ce" },
+    decan: { bgTop: "#080717", bgBottom: "#2e1706", accent: "#fcbc7c", text: "#f5f2e9", muted: "#b8b8ce" },
+    tzolkin: { bgTop: "#080717", bgBottom: "#00282a", accent: "#80ded7", text: "#f5f2e9", muted: "#b8b8ce" },
+    sibyl: { bgTop: "#080717", bgBottom: "#2c1026", accent: "#fab8a8", text: "#f5f2e9", muted: "#b8b8ce" },
   };
+  const SIBYL_TOPIC_KEYS = Object.keys(T.sibyl.topics);
 
   // ───────── 저장 (sessionStorage, 이 탭 한정) ─────────
   const STORE_KEY = "strange-oracle";
@@ -76,6 +102,10 @@
     if (!v || !ARCHETYPES.includes(v.archetype)) return false;
     if (room === "rune") return Array.isArray(v.picks) && v.picks.length === 3 && v.picks.every((c) => RUNE_BY_CODE[c]) && T.rune.topics[v.topic];
     if (room === "star") return Number.isInteger(v.nak) && NAKS[v.nak] && RASHIS[v.west] && RASHIS[v.sunRashi] && RASHIS[v.moonRashi];
+    if (room === "ogham") return Number.isInteger(v.ogham) && Boolean(OGHAM[v.ogham]);
+    if (room === "decan") return Number.isInteger(v.decan) && Boolean(DECANS[v.decan]);
+    if (room === "tzolkin") return Number.isInteger(v.number) && v.number >= 1 && v.number <= 13 && Number.isInteger(v.sign) && Boolean(TZ_SIGNS[v.sign]);
+    if (room === "sibyl") return Number.isInteger(v.sors) && Boolean(ORACLES[v.sors]) && SIBYL_TOPIC_KEYS.includes(v.topic);
     return false;
   }
   function load() {
@@ -106,8 +136,9 @@
       /* 무시 */
     }
     state = emptyState();
-    editing.rune = editing.star = false;
-    $$("input[data-js]").forEach((el) => (el.type === "checkbox" ? (el.checked = false) : (el.value = "")));
+    Object.keys(editing).forEach((k) => (editing[k] = false));
+    $$("input[data-js], textarea[data-js]").forEach((el) => (el.type === "checkbox" ? (el.checked = false) : (el.value = "")));
+    resetSibyl();
     [js("star-hour"), js("star-minute")].forEach((el) => (el.disabled = false));
   }
   const filledRooms = () => CHAPTER_ORDER.filter((r) => state.visits[r]);
@@ -134,9 +165,8 @@
     $$("[data-list]").forEach((el) => (el.innerHTML = (get(el.dataset.list) || []).map((p) => `<p>${p}</p>`).join("")));
     jsAll("room-chapter-num").forEach((el) => (el.textContent = fill(T.storyChapter, { n: el.dataset.n })));
     jsAll("rashi-label").forEach((el, i) => (el.textContent = RASHIS[i].ko.replace("자리", "")));
-    js("hub-closed").innerHTML = CHAPTER_ORDER.filter((r) => !OPEN_ROOMS.includes(r))
-      .map((r) => `<li class="closed-room"><span class="closed-room__num" aria-hidden="true">${ROMAN[chapterOf(r) - 1]}</span><span class="closed-room__name">${T.rooms[r].name}</span><span class="closed-room__origin">${T.rooms[r].origin}</span></li>`)
-      .join("");
+    // 촐킨 톱니 카르투슈 20개: 유카텍 이름 대문자 (SVG text)
+    jsAll("tzolkin-sign-label").forEach((el, i) => (el.textContent = TZ_SIGNS[i].latin.toUpperCase()));
     js("story-paid-list").innerHTML = T.story.paid.list.map((li) => `<li>${li}</li>`).join("");
     document.title = T.meta.title;
     const desc = $('meta[name="description"]');
@@ -202,13 +232,20 @@
   };
   const enter = {};
   const leave = {};
-  const READING = new Set(["rune-result", "star-result"]);
+  const READING = new Set(CHAPTER_ORDER.map((r) => `${r}-result`));
   // 뒤로 버튼: [목적지, 문구 키]
   const BACK = {
     "rune-intro": ["hub", "toHub"], "rune-input": ["rune-intro", "toIntro"], "rune-ritual": ["rune-input", "toInput"], "rune-result": ["hub", "toHub"],
     "star-intro": ["hub", "toHub"], "star-input": ["star-intro", "toIntro"], "star-ritual": ["star-input", "toInput"], "star-choose": ["star-input", "toInput"],
     "star-result": ["hub", "toHub"], story: ["hub", "toHub"],
+    "decan-choose": ["decan-input", "toInput"],
   };
+  ["ogham", "decan", "tzolkin", "sibyl"].forEach((r) => {
+    BACK[`${r}-intro`] = ["hub", "toHub"];
+    BACK[`${r}-input`] = [`${r}-intro`, "toIntro"];
+    BACK[`${r}-ritual`] = [`${r}-input`, "toInput"];
+    BACK[`${r}-result`] = ["hub", "toHub"];
+  });
 
   function setTopbar(name) {
     const back = js("topbar-back");
@@ -376,7 +413,7 @@
   enter.hub = renderHub;
 
   // ───────── 입력 화면 공통 ─────────
-  const editing = { rune: false, star: false };
+  const editing = { rune: false, star: false, ogham: false, decan: false, tzolkin: false };
   function digitsOnly(el, next) {
     el.addEventListener("input", () => {
       const clean = el.value.replace(/\D/g, "");
@@ -582,7 +619,7 @@
     const order = [...cands.filter((r) => !state.visits[r]), ...cands.filter((r) => state.visits[r])].slice(0, 2);
     js("next-rooms", scr).innerHTML = order
       .map((r) => {
-        const hook = (T.next[from] && T.next[from][r]) || "";
+        const hook = (T.next[from] && T.next[from][r]) || (T.next.any && T.next.any[r]) || "";
         const chapter = fill(T.result.nextChapter, { n: chapterOf(r), chapter: T.rooms[r].chapterName });
         return `<button class="next-room" type="button" data-room="${r}" data-go="${r}-intro" data-js="next-room">
             <span class="next-room__glyph" aria-hidden="true">${ROOM_ICON[r]}</span>
@@ -641,7 +678,7 @@
       ch1 = ch1.concat(r.identity);
     });
     if (name) {
-      const latin = romanize(name);
+      const latin = Calc.romanize(name);
       ch1.push({
         html: `<aside class="inset inset--name" data-js="rune-name-runes" data-reveal>
             <p class="inset__label">${R.nameLabel}</p>
@@ -680,19 +717,7 @@
   };
   js("result-retry", screens["rune-result"]).addEventListener("click", () => go("rune-ritual"));
 
-  // ───────── 한글 이름 → 로마자 → 룬 (이름 인셋) ─────────
-  const CHO = ["g", "kk", "n", "d", "tt", "r", "m", "b", "pp", "s", "ss", "", "j", "jj", "ch", "k", "t", "p", "h"];
-  const JUNG = ["a", "ae", "ya", "yae", "eo", "e", "yeo", "ye", "o", "wa", "wae", "oe", "yo", "u", "wo", "we", "wi", "yu", "eu", "ui", "i"];
-  const JONG = ["", "k", "k", "k", "n", "n", "n", "t", "l", "k", "m", "l", "l", "l", "p", "l", "m", "p", "p", "t", "t", "ng", "t", "t", "k", "t", "p", "t"];
-  function romanize(text) {
-    let out = "";
-    for (const ch of text) {
-      const code = ch.charCodeAt(0) - 0xac00;
-      if (code >= 0 && code <= 11171) out += CHO[Math.floor(code / 588)] + JUNG[Math.floor((code % 588) / 28)] + JONG[code % 28];
-      else if (/[a-z]/i.test(ch)) out += ch.toLowerCase();
-    }
-    return out;
-  }
+  // ───────── 한글 이름 → 로마자(Calc.romanize, calc.js의 표 하나만 쓴다) → 룬 (이름 인셋) ─────────
   const LETTER_RUNE = {
     a: "ᚨ", b: "ᛒ", c: "ᚲ", d: "ᛞ", e: "ᛖ", f: "ᚠ", g: "ᚷ", h: "ᚺ", i: "ᛁ", j: "ᛃ", k: "ᚲ", l: "ᛚ", m: "ᛗ",
     n: "ᚾ", o: "ᛟ", p: "ᛈ", q: "ᚲ", r: "ᚱ", s: "ᛊ", t: "ᛏ", u: "ᚢ", v: "ᚹ", w: "ᚹ", x: "ᚲᛊ", y: "ᛃ", z: "ᛉ",
@@ -736,7 +761,8 @@
   enter["star-input"] = () => {
     const p = state.profile;
     const hasName = Boolean(p.name);
-    const hasBirth = Boolean(p.birth);
+    // 데칸·촐킨에서 날짜만 넣었으면(시각은 묻지 않음 → p.time 없음) 별의 방에서는 시각을 새로 묻는다
+    const hasBirth = Boolean(p.birth) && p.time !== undefined;
     const useSaved = (hasName || hasBirth) && !editing.star;
     setFieldError("star-date-field", "star-error", "");
     setFieldError("star-time-field", "star-time-error", "");
@@ -1005,6 +1031,587 @@
     go("star-input");
   });
 
+  // ═════════ 2단계 네 방 공통 ═════════
+  // 첫째 장 사실 목록 (값이 빈 줄은 뺀다)
+  function factListHtml(rows) {
+    const shown = rows.filter(([, dd]) => dd);
+    if (!shown.length) return "";
+    return `<dl class="fact-list" data-reveal>${shown.map(([dt, dd]) => `<div class="fact-list__row"><dt>${dt}</dt><dd>${dd}</dd></div>`).join("")}</dl>`;
+  }
+  // 별의 방과 같은 네 장 조립. e = 데이터 항목(identity·event·shadow·advice), facts = [[항목명, 값]], tail = 넷째 장 끝 단락(선택)
+  function entryChapters(e, facts, interpretNote, tail) {
+    const ch1 = [{ lede: e.identity.lede }, { html: factListHtml(facts) }, ...e.identity.body, interpretNote];
+    const eb = e.event.body;
+    const ch2 = [{ lede: e.event.lede }, ...insertAt(eb, Math.min(2, eb.length), { quote: e.event.quote })];
+    const ch3 = [{ lede: e.shadow.lede }, ...insertAt(e.shadow.body, 1, { quote: e.shadow.quote })];
+    const ch4 = [{ lede: e.advice.lede }, ...e.advice.body, tail];
+    return [
+      { title: e.identity.title, html: prose(ch1), hook: e.event.hook },
+      { title: e.event.title, html: prose(ch2), hook: e.shadow.hook },
+      { title: e.shadow.title, html: prose(ch3), hook: e.advice.hook },
+      { title: e.advice.title, html: prose(ch4) },
+    ];
+  }
+  // 결과 아래쪽 공통: 상식 카드·고증 한 줄·면책·원형 한 줄·떡밥
+  function finishResult(scr, room, e, R) {
+    js("fact-text", scr).innerHTML = e.fact;
+    js("result-source-note", scr).textContent = strip(R.sourceNote);
+    Disclaimer.mount(js("disclaimer-slot", scr));
+    renderArchetypeLine(scr, e.archetype, e.archetypeWhy);
+    renderNextRooms(scr, room);
+  }
+  const metaLine = (R) => strip(fill(R.meta, { who: whoOf(state.profile.name || "") }));
+  // 의식 화면 아래 상식 한 줄 (2.4초마다 바뀜, 화면을 떠나면 later 타이머와 함께 멈춤)
+  function rotateTrivia(el, list) {
+    let i = Math.floor(Math.random() * list.length);
+    el.textContent = list[i];
+    const next = () => {
+      i = (i + 1) % list.length;
+      el.textContent = list[i];
+      later(next, 2400);
+    };
+    later(next, 2400);
+  }
+
+  // ═════════ 오검의 방 (1장) ═════════
+  const oghamInput = screens["ogham-input"];
+  const oghamName = js("ogham-name");
+  const setOghamError = (msg) => setFieldError("ogham-name-field", "ogham-error", msg);
+  enter["ogham-input"] = () => {
+    const name = state.profile.name;
+    // 저장된 이름이 있어도 오검으로 옮길 글자가 없으면(숫자만 등) 입력칸을 보인다
+    const useSaved = Boolean(name) && Boolean(Calc.ogham(name)) && !editing.ogham;
+    setOghamError("");
+    show(js("saved-info", oghamInput), useSaved);
+    if (useSaved) js("saved-info-value", oghamInput).textContent = name;
+    show(js("ogham-name-field"), !useSaved);
+    show(js("privacy-notice", oghamInput), !useSaved);
+    if (!useSaved) oghamName.value = name || "";
+  };
+  js("saved-info-edit", oghamInput).addEventListener("click", () => {
+    editing.ogham = true;
+    enter["ogham-input"]();
+    oghamName.focus();
+  });
+  // 입력칸 하나짜리 form이라 Enter를 누르면 브라우저가 제출(새로고침)하려 한다 → 버튼과 같게
+  js("ogham-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    js("ogham-input-go").click();
+  });
+  let oghamCalc = null;
+  js("ogham-input-go").addEventListener("click", () => {
+    let name = state.profile.name || "";
+    if (!js("ogham-name-field").classList.contains("is-hidden")) name = oghamName.value.trim().slice(0, 10);
+    const r = name ? Calc.ogham(name) : null;
+    if (!r) {
+      setOghamError(T.ogham.errors.name);
+      return oghamName.focus();
+    }
+    setOghamError("");
+    state.profile.name = name;
+    save();
+    editing.ogham = false;
+    oghamCalc = r;
+    go("ogham-ritual");
+  });
+
+  // 의식: 껍질 위를 아래로 쓸어내린 비율 = --carve (최댓값 유지, 되돌아가지 않음). 누를 때마다 한 글자(움직임 줄이기면 한 번에 모두)
+  const oghamRitual = screens["ogham-ritual"];
+  const bark = js("ogham-bark");
+  const og = { carve: 0, count: 1, done: false, drag: null, moved: false };
+  function setCarve(v) {
+    if (og.done) return;
+    og.carve = Math.max(og.carve, Math.min(1, v));
+    bark.style.setProperty("--carve", og.carve.toFixed(4));
+    if (og.carve >= 0.9999) carved();
+  }
+  enter["ogham-ritual"] = () => {
+    if (!oghamCalc) return go("ogham-input", { instant: true });
+    const r = oghamCalc;
+    const root = OGHAM[r.index];
+    Object.assign(og, { carve: 0, count: r.letters.length, done: false, drag: null, moved: false });
+    oghamRitual.classList.remove("is-carved");
+    bark.style.setProperty("--carve", "0");
+    bark.style.setProperty("--count", String(og.count));
+    js("ogham-letters").innerHTML = r.letters
+      .map((i, k) => `<li class="bark__letter" style="--k:${k}"><svg viewBox="0 0 40 80"><use href="#ogham-${OGHAM[i].code}" /></svg></li>`)
+      .join("");
+    js("ogham-root-glyph").setAttribute("href", `#ogham-${root.code}`);
+    js("ogham-root-name").textContent = strip(fill(T.ogham.ritual.rootName, { latin: root.latin, name: root.name }));
+    js("ogham-ritual-latin").textContent = r.letters.map((i) => OGHAM[i].sound).join(T.ogham.ritual.letterSep);
+    js("ogham-ritual-guide").innerHTML = T.ogham.ritual.guide;
+    js("ogham-ritual-hint").textContent = strip(T.ogham.ritual.hint);
+  };
+  leave["ogham-ritual"] = () => {
+    og.drag = null;
+    oghamRitual.classList.remove("is-carved");
+  };
+  bark.addEventListener("pointerdown", (e) => {
+    if (og.done) return;
+    og.drag = { y: e.clientY, from: og.carve, h: bark.getBoundingClientRect().height || 1 };
+    og.moved = false;
+    try {
+      bark.setPointerCapture(e.pointerId);
+    } catch (err) {
+      /* 캡처를 못 해도 껍질 위에서는 동작 */
+    }
+  });
+  bark.addEventListener("pointermove", (e) => {
+    if (!og.drag || og.done) return;
+    const dy = e.clientY - og.drag.y;
+    if (Math.abs(dy) > 6) og.moved = true;
+    if (dy > 0) setCarve(og.drag.from + dy / og.drag.h);
+  });
+  ["pointerup", "pointercancel"].forEach((ev) => bark.addEventListener(ev, () => (og.drag = null)));
+  bark.addEventListener("contextmenu", (e) => e.preventDefault());
+  // 누르기(마우스 클릭·터치 탭·Enter·Space): 쓸어내린 직후의 클릭은 무시
+  bark.addEventListener("click", () => {
+    if (og.done) return;
+    if (og.moved) {
+      og.moved = false;
+      return;
+    }
+    if (reduceMotion) return setCarve(1);
+    const next = Math.min(og.count, Math.floor(og.carve * og.count + 1e-6) + 1);
+    buzz(15);
+    setCarve(next / og.count);
+  });
+  function carved() {
+    og.done = true;
+    og.drag = null;
+    bark.style.setProperty("--carve", "1");
+    oghamRitual.classList.add("is-carved");
+    js("ogham-ritual-guide").innerHTML = T.ogham.ritual.carved;
+    js("ogham-ritual-hint").textContent = strip(T.ogham.ritual.carvedHint);
+    buzz([30, 50, 30]);
+    const idx = oghamCalc.index;
+    later(() => {
+      renderOgham({ ogham: idx }, true);
+      go("ogham-result");
+    }, reduceMotion ? 1000 : 3400);
+  }
+
+  // 결과. v = { ogham: 0~19 }. 이름 가지 줄은 저장하지 않고 지금 이름에서 다시 계산(이름이 바뀌었으면 줄을 뺀다)
+  let oghamView = null;
+  function renderOgham(v, fresh) {
+    const scr = screens["ogham-result"];
+    const R = T.ogham.result;
+    const e = OGHAM[v.ogham];
+    const name = state.profile.name || "";
+    const mine = name ? Calc.ogham(name) : null;
+    const letters = mine && mine.index === v.ogham ? mine : null;
+    oghamView = { v, e };
+    if (fresh) {
+      state.visits.ogham = { ogham: v.ogham, archetype: e.archetype };
+      save();
+    }
+    const LATIN = e.latin.toUpperCase();
+    js("result-glyph", scr).setAttribute("href", `#ogham-${e.code}`);
+    js("result-ogham-latin", scr).textContent = LATIN;
+    js("result-title", scr).textContent = strip(e.title);
+    js("result-names", scr).textContent = strip(fill(R.names, { LATIN, meaning: strip(e.facts.meaning) }));
+    js("result-key", scr).innerHTML = e.key;
+    js("result-meta", scr).textContent = metaLine(R);
+
+    const lettersEl = js("ogham-name-letters", scr);
+    const latinEl = js("ogham-name-latin", scr);
+    show(lettersEl, Boolean(letters));
+    show(latinEl, Boolean(letters));
+    lettersEl.innerHTML = letters
+      ? letters.letters.map((i) => `<li class="name-branch__letter"><svg viewBox="0 0 40 80"><use href="#ogham-${OGHAM[i].code}" /></svg><span>${OGHAM[i].sound}</span></li>`).join("")
+      : "";
+    latinEl.textContent = letters ? letters.latin.toUpperCase() : "";
+    js("turn-text", scr).innerHTML = (letters ? fill(R.turnLead, { count: letters.letters.length, latin: esc(e.latin) }) + " " : "") + e.turn;
+
+    const F = R.facts;
+    fillChapters(scr, entryChapters(e, [
+      [F.latin, e.latin], [F.sound, e.sound], [F.aicme, T.ogham.aicme[e.aicme]], [F.meaning, e.facts.meaning], [F.tree, e.facts.tree],
+    ], R.interpretNote));
+    finishResult(scr, "ogham", e, R);
+  }
+  js("result-retry", screens["ogham-result"]).addEventListener("click", () => {
+    editing.ogham = true;
+    go("ogham-input");
+  });
+
+  // ═════════ 데칸·촐킨 공통 입력 (생년월일만, 시각은 받지 않음) ═════════
+  function birthRoom(room, onGo) {
+    const scr = screens[`${room}-input`];
+    const fy = js(`${room}-year`), fm = js(`${room}-month`), fd = js(`${room}-day`);
+    digitsOnly(fy, fm);
+    digitsOnly(fm, fd);
+    digitsOnly(fd);
+    enter[`${room}-input`] = () => {
+      const p = state.profile;
+      const useSaved = Boolean(p.birth) && !editing[room];
+      setFieldError(`${room}-date-field`, `${room}-error`, "");
+      show(js("saved-info", scr), useSaved);
+      if (useSaved) js("saved-info-value", scr).textContent = fill(T.common.date, p.birth);
+      show(js(`${room}-date-field`), !useSaved);
+      show(js("privacy-notice", scr), !useSaved);
+      if (p.birth) {
+        fy.value = p.birth.y;
+        fm.value = p.birth.m;
+        fd.value = p.birth.d;
+      }
+    };
+    js("saved-info-edit", scr).addEventListener("click", () => {
+      editing[room] = true;
+      enter[`${room}-input`]();
+      fy.focus();
+    });
+    js(`${room}-input-go`).addEventListener("click", () => {
+      const p = state.profile;
+      let birth = p.birth;
+      if (!js(`${room}-date-field`).classList.contains("is-hidden")) {
+        const y = Number(fy.value), m = Number(fm.value), d = Number(fd.value);
+        const ok = fy.value.length === 4 && Calc.validDate(y, m, d);
+        setFieldError(`${room}-date-field`, `${room}-error`, ok ? "" : T[room].errors.date);
+        if (!ok) return fy.focus();
+        birth = { y, m, d };
+      }
+      // 날짜가 바뀌면 전에 별의 방에서 받은 시각은 버린다 (별의 방에서 다시 묻는다)
+      if (!p.birth || p.birth.y !== birth.y || p.birth.m !== birth.m || p.birth.d !== birth.d) delete p.time;
+      p.birth = birth;
+      save();
+      editing[room] = false;
+      onGo(birth);
+    });
+  }
+
+  // ═════════ 데칸의 방 (3장) ═════════
+  let decanCalc = null;
+  birthRoom("decan", (b) => {
+    decanCalc = Object.assign({ birth: b }, Calc.decan(b.y, b.m, b.d));
+    go("decan-ritual");
+  });
+  const partName = (part0) => T.decan.partNames[part0];
+  // 의식: 원반은 멈춰 있고 그림자만 열흘씩 똑딱 (4.4초 착지, 5.2초 뒤 결과. 움직임 줄이기 1.2초)
+  const decanRitual = screens["decan-ritual"];
+  enter["decan-ritual"] = () => {
+    if (!decanCalc) return go("decan-input", { instant: true });
+    const target = decanCalc.noon; // 경계일이면 정오의 칸에 먼저 멈추고 후보 고르기로
+    decanRitual.classList.remove("is-running", "is-landed");
+    js("decan-dial").style.setProperty("--decan-deg", `${target.index * 10 + 5}deg`);
+    jsAll("decan-cell").forEach((g) => g.classList.toggle("is-home", Number(g.dataset.n) === target.index));
+    js("decan-ritual-date").textContent = strip(fill(T.decan.ritual.date, decanCalc.birth));
+    js("decan-ritual-name").textContent = strip(fill(T.decan.ritual.name, { sign: DECANS[target.index].sign, part: partName(target.part) }));
+    rotateTrivia(js("decan-ritual-note"), T.decan.ritual.trivia);
+    void decanRitual.offsetWidth;
+    decanRitual.classList.add("is-running");
+    later(() => decanRitual.classList.add("is-landed"), reduceMotion ? 0 : 4400);
+    later(() => {
+      if (decanCalc.candidates.length > 1) go("decan-choose");
+      else {
+        renderDecan({ decan: target.index, when: null }, true);
+        go("decan-result");
+      }
+    }, reduceMotion ? 1200 : 5200);
+  };
+  leave["decan-ritual"] = () => decanRitual.classList.remove("is-running", "is-landed");
+
+  // 후보 고르기 (그날 태양이 데칸 경계를 넘음: 2개). 별의 방 후보 화면과 같은 방식
+  const decanWhen = (c) => fill(T.decan.choose.when, { from: hhmm(c.startMin), to: hhmm(c.endMin), part: partOfDay(c) });
+  enter["decan-choose"] = () => {
+    if (!decanCalc || decanCalc.candidates.length < 2) return go("decan-input", { instant: true });
+    const scr = screens["decan-choose"];
+    const C = T.decan.choose;
+    const cands = decanCalc.candidates;
+    js("decan-choose-lead", scr).textContent = strip(fill(C.lead, { date: fill(C.date, decanCalc.birth), time: hhmm(cands[0].endMin) }));
+    jsAll("decan-dayline-seg", scr).forEach((seg, i) => seg.style.setProperty("--share", cands[i].share.toFixed(4)));
+    jsAll("decan-choice", scr).forEach((card, i) => {
+      const c = cands[i];
+      const e = DECANS[c.decan.index];
+      const when = decanWhen(c);
+      const name = strip(fill(C.name, { sign: e.sign, part: partName(c.decan.part) }));
+      card.classList.remove("is-selected");
+      js("decan-choice-when", card).textContent = when;
+      js("decan-choice-name", card).textContent = name;
+      jsAll("decan-choice-trait", card).forEach((el, k) => (el.textContent = strip(fill(C.trait, { text: e.traits[k] || "" }))));
+      card.setAttribute("aria-label", strip(fill(C.cardAria, { n: i + 1, name, when })));
+    });
+  };
+  js("decan-choices").addEventListener("click", (e) => {
+    const card = e.target.closest('[data-js="decan-choice"]');
+    if (!card || !decanCalc) return;
+    const c = decanCalc.candidates[Number(card.dataset.i)];
+    if (!c) return;
+    card.classList.add("is-selected");
+    later(() => {
+      renderDecan({ decan: c.decan.index, when: decanWhen(c) }, true);
+      go("decan-result");
+    }, reduceMotion ? 0 : 260);
+  });
+
+  // 결과. v = { decan: 0~35, when: 후보를 골랐으면 시간 구간 글자, 아니면 null }
+  let decanView = null;
+  function renderDecan(v, fresh) {
+    const scr = screens["decan-result"];
+    const R = T.decan.result;
+    const e = DECANS[v.decan];
+    const n = v.decan + 1;
+    const part = partName(e.part - 1);
+    const from = (v.decan % 3) * 10;
+    decanView = { v, e };
+    if (fresh) {
+      state.visits.decan = { decan: v.decan, when: v.when || null, archetype: e.archetype };
+      save();
+    }
+    js("result-decan-dial", scr).style.setProperty("--decan-deg", `${v.decan * 10 + 5}deg`);
+    js("result-decan-number", scr).textContent = fill(R.number, { n });
+    js("result-title", scr).textContent = strip(e.title);
+    js("result-names", scr).textContent = strip(fill(R.names, { n, sign: e.sign, from, to: from + 10 }));
+    js("result-key", scr).innerHTML = e.key;
+    js("result-meta", scr).textContent = metaLine(R);
+    js("twist-from", scr).textContent = e.sign;
+    js("twist-to", scr).textContent = strip(fill(R.twistTo, { part }));
+    js("turn-text", scr).innerHTML = e.turn;
+    const note = js("result-choice-note", scr);
+    show(note, Boolean(v.when));
+    note.textContent = v.when ? strip(fill(R.choiceNote, { when: v.when })) : "";
+    const F = R.facts;
+    fillChapters(scr, entryChapters(e, [
+      [F.sign, `${e.sign} · ${part}`], [F.degrees, fill(R.degrees, { sign: e.sign, from, to: from + 10 })],
+      [F.ruler, e.facts.ruler], [F.egyptian, e.facts.egyptian],
+    ], R.interpretNote));
+    finishResult(scr, "decan", e, R);
+  }
+  js("result-retry", screens["decan-result"]).addEventListener("click", () => {
+    editing.decan = true;
+    go("decan-input");
+  });
+
+  // ═════════ 촐킨의 방 (4장) ═════════
+  let tzCalc = null;
+  birthRoom("tzolkin", (b) => {
+    tzCalc = Calc.tzolkin(b.y, b.m, b.d);
+    go("tzolkin-ritual");
+  });
+  // 의식: 맞물린 두 톱니가 반대로 돌다 멈춤 (4.2초 착지, 5.2초 뒤 결과. 움직임 줄이기 1.2초)
+  const tzRitual = screens["tzolkin-ritual"];
+  enter["tzolkin-ritual"] = () => {
+    if (!tzCalc) return go("tzolkin-input", { instant: true });
+    const { number, sign, dayIndex } = tzCalc;
+    const s = TZ_SIGNS[sign];
+    tzRitual.classList.remove("is-running", "is-landed");
+    const gears = js("tzolkin-gears");
+    gears.style.setProperty("--sign-deg", `${-sign * 18}deg`);
+    gears.style.setProperty("--num-deg", `${((number - 1) * 27.6923).toFixed(4)}deg`);
+    jsAll("tzolkin-sign").forEach((g) => g.classList.toggle("is-home", Number(g.dataset.n) === sign));
+    jsAll("tzolkin-num").forEach((g) => g.classList.toggle("is-home", Number(g.dataset.n) === number));
+    js("tzolkin-ritual-num").setAttribute("href", `#maya-${number}`);
+    js("tzolkin-ritual-sign").textContent = strip(s.name);
+    js("tzolkin-ritual-day").textContent = strip(fill(T.tzolkin.ritual.day, { number, name: s.name, LATIN: s.latin.toUpperCase() }));
+    const tablet = js("tzolkin-tablet");
+    tablet.style.setProperty("--col", String(sign));
+    tablet.style.setProperty("--row", String(Math.floor(dayIndex / 20)));
+    js("tzolkin-ritual-count").textContent = strip(fill(T.tzolkin.ritual.count, { n: dayIndex + 1 }));
+    js("tzolkin-ritual-guide").innerHTML = T.tzolkin.ritual.guide;
+    void tzRitual.offsetWidth;
+    tzRitual.classList.add("is-running");
+    later(() => tzRitual.classList.add("is-landed"), reduceMotion ? 0 : 4200);
+    later(() => {
+      renderTzolkin({ number, sign }, true);
+      go("tzolkin-result");
+    }, reduceMotion ? 1200 : 5200);
+  };
+  leave["tzolkin-ritual"] = () => tzRitual.classList.remove("is-running", "is-landed");
+
+  // 숫자·문양으로 260일 순번(0~259) 되찾기 (저장에는 숫자·문양만 있다)
+  const tzDayIndex = (number, sign) => {
+    for (let d = sign; d < 260; d += 20) if (d % 13 === number - 1) return d;
+    return 0;
+  };
+  // 결과. v = { number: 1~13, sign: 0~19 }. 네 장은 문양 기준, 반전 카드는 열세 숫자
+  let tzView = null;
+  function renderTzolkin(v, fresh) {
+    const scr = screens["tzolkin-result"];
+    const R = T.tzolkin.result;
+    const e = TZ_SIGNS[v.sign];
+    const num = TZ_NUMBERS[v.number - 1];
+    const day = tzDayIndex(v.number, v.sign) + 1;
+    const LATIN = e.latin.toUpperCase();
+    tzView = { v, e, day };
+    if (fresh) {
+      state.visits.tzolkin = { number: v.number, sign: v.sign, archetype: e.archetype };
+      save();
+    }
+    js("result-maya-number", scr).setAttribute("href", `#maya-${v.number}`);
+    js("result-sign-label", scr).textContent = LATIN;
+    js("result-tzolkin-number", scr).textContent = fill(R.count, { n: day });
+    js("result-title", scr).textContent = strip(fill(R.title, { number: v.number, name: e.name }));
+    js("result-names", scr).textContent = strip(fill(R.names, { number: v.number, LATIN, meaning: strip(e.facts.meaning) }));
+    js("result-key", scr).innerHTML = e.key;
+    js("result-meta", scr).textContent = metaLine(R);
+    js("tzolkin-number-title", scr).textContent = strip(fill(R.numberTitle, { n: v.number, title: num.title }));
+    js("tzolkin-number-glyph", scr).setAttribute("href", `#maya-${v.number}`);
+    js("tzolkin-sign-name", scr).textContent = strip(e.name);
+    js("turn-text", scr).innerHTML = num.text;
+    const F = R.facts;
+    fillChapters(scr, entryChapters(e, [
+      [F.latin, e.latin], [F.kiche, e.facts.kiche], [F.meaning, e.facts.meaning],
+      [F.order, fill(R.order, { n: v.sign + 1 })], [F.day, fill(R.day, { n: day })],
+    ], R.interpretNote));
+    finishResult(scr, "tzolkin", e, R);
+  }
+  js("result-retry", screens["tzolkin-result"]).addEventListener("click", () => {
+    editing.tzolkin = true;
+    go("tzolkin-input");
+  });
+
+  // ═════════ 시빌라 신탁의 방 (5장) ═════════
+  // 질문(자유 입력)은 sib.question 변수와 화면 글자에만 있다. state(=sessionStorage)·공유 카드·URL에는 절대 넣지 않는다.
+  const sib = { topic: "exam", question: "", pick: null, near: 0, drag: null, moved: false, done: false };
+  const sibQ = js("sibyl-question");
+  const sibCount = () => (js("sibyl-question-count").textContent = fill(T.sibyl.input.count, { n: sibQ.value.length }));
+  sibQ.addEventListener("input", sibCount);
+  function selectTopic(topic) {
+    jsAll("sibyl-topic").forEach((c) => {
+      const on = c.dataset.topic === topic;
+      c.classList.toggle("is-selected", on);
+      c.setAttribute("aria-checked", String(on));
+    });
+    sib.topic = topic;
+  }
+  js("sibyl-topics").addEventListener("click", (e) => {
+    const chip = e.target.closest('[data-js="sibyl-topic"]');
+    if (chip) selectTopic(chip.dataset.topic);
+  });
+  // 내 정보 지우기: 질문·뽑은 신탁도 잊는다
+  function resetSibyl() {
+    sib.question = "";
+    sib.pick = null;
+    selectTopic("exam");
+    sibCount();
+    js("sibyl-ritual-question").textContent = "";
+    js("sibyl-result-question", screens["sibyl-result"]).textContent = "";
+  }
+  enter["sibyl-input"] = sibCount;
+  js("sibyl-input-go").addEventListener("click", () => {
+    sib.question = sibQ.value.replace(/\s+/g, " ").trim().slice(0, 60);
+    sib.pick = Calc.pickOracle(ORACLES.length);
+    go("sibyl-ritual");
+  });
+
+  // 의식: 두루마리를 아래로 끌기(172px = --near 1) → 0.8 이상에서 놓거나, 한 번 누르면 .is-warming → 4.4초 뒤 결과(움직임 줄이기 1초)
+  const sibRitual = screens["sibyl-ritual"];
+  const stage = js("sibyl-stage");
+  const scroll = js("sibyl-scroll");
+  const TRAVEL = 172;
+  const setNear = (v) => {
+    sib.near = Math.max(0, Math.min(1, v));
+    stage.style.setProperty("--near", sib.near.toFixed(3));
+  };
+  enter["sibyl-ritual"] = () => {
+    if (sib.pick == null) return go("sibyl-input", { instant: true });
+    const o = ORACLES[sib.pick];
+    Object.assign(sib, { near: 0, drag: null, moved: false, done: false });
+    stage.classList.remove("is-dragging", "is-warming");
+    setNear(0);
+    js("sibyl-ritual-category").textContent = strip(T.sibyl.topics[sib.topic].label);
+    js("sibyl-ritual-question").textContent = sib.question ? fill(T.sibyl.result.question, { q: sib.question }) : "";
+    js("sibyl-scroll-num").textContent = fill(T.sibyl.ritual.num, { roman: roman(sib.pick + 1) });
+    js("sibyl-scroll-text").textContent = strip(o.line);
+    js("sibyl-ritual-guide").innerHTML = T.sibyl.ritual.guide;
+    js("sibyl-ritual-hint").textContent = strip(T.sibyl.ritual.hint);
+  };
+  leave["sibyl-ritual"] = () => {
+    sib.drag = null;
+    stage.classList.remove("is-dragging", "is-warming");
+  };
+  scroll.addEventListener("pointerdown", (e) => {
+    if (sib.done) return;
+    sib.drag = { y: e.clientY, from: sib.near };
+    sib.moved = false;
+    stage.classList.add("is-dragging");
+    try {
+      scroll.setPointerCapture(e.pointerId);
+    } catch (err) {
+      /* 무시 */
+    }
+  });
+  scroll.addEventListener("pointermove", (e) => {
+    if (!sib.drag || sib.done) return;
+    const dy = e.clientY - sib.drag.y;
+    if (Math.abs(dy) > 6) sib.moved = true;
+    setNear(sib.drag.from + dy / TRAVEL);
+  });
+  const releaseScroll = () => {
+    if (!sib.drag) return;
+    sib.drag = null;
+    stage.classList.remove("is-dragging");
+    if (sib.done) return;
+    if (sib.near >= 0.8) warm();
+    else if (sib.moved) setNear(0); // 덜 끌었으면 제자리로 (CSS 0.3초)
+  };
+  scroll.addEventListener("pointerup", releaseScroll);
+  scroll.addEventListener("pointercancel", releaseScroll);
+  scroll.addEventListener("contextmenu", (e) => e.preventDefault());
+  scroll.addEventListener("click", () => {
+    if (sib.done) return;
+    if (sib.moved) {
+      sib.moved = false;
+      return;
+    }
+    warm();
+  });
+  function warm() {
+    sib.done = true;
+    stage.classList.remove("is-dragging");
+    setNear(1);
+    stage.classList.add("is-warming");
+    js("sibyl-ritual-guide").innerHTML = T.sibyl.ritual.warming;
+    js("sibyl-ritual-hint").textContent = strip(T.sibyl.ritual.warmingHint);
+    buzz([20, 40, 20]);
+    const pick = sib.pick, topic = sib.topic, question = sib.question;
+    later(() => {
+      renderSibyl({ sors: pick, topic }, true, question);
+      go("sibyl-result");
+    }, reduceMotion ? 1000 : 4400);
+  }
+
+  // 결과. v = { sors: 0~31, topic }. question은 화면 표시용 인자일 뿐 저장·공유하지 않는다 ("전체 다시 보기"에서는 빈 글자)
+  let sibylView = null;
+  function renderSibyl(v, fresh, question = "") {
+    const scr = screens["sibyl-result"];
+    const R = T.sibyl.result;
+    const o = ORACLES[v.sors];
+    const rn = roman(v.sors + 1);
+    const topic = strip(T.sibyl.topics[v.topic].label);
+    sibylView = { v, o, rn, topic }; // 공유 카드용. 질문은 넣지 않는다
+    if (fresh) {
+      state.visits.sibyl = { sors: v.sors, topic: v.topic, archetype: o.archetype };
+      save();
+    }
+    js("result-sors-number", scr).textContent = rn;
+    js("result-title", scr).textContent = strip(o.title);
+    js("result-names", scr).textContent = strip(fill(R.names, { roman: rn, topic }));
+    js("result-key", scr).innerHTML = o.key;
+    js("result-meta", scr).textContent = metaLine(R);
+    js("sibyl-result-category", scr).textContent = topic;
+    js("sibyl-result-question", scr).textContent = question ? fill(R.question, { q: question }) : "";
+    js("sibyl-scroll-quote", scr).textContent = strip(o.line);
+    js("turn-text", scr).innerHTML = o.turn;
+    fillChapters(scr, entryChapters(o, [], R.interpretNote, `${ORACLE_TOPICS[v.topic].lens} ${o.topics[v.topic] || ""}`));
+    finishResult(scr, "sibyl", o, R);
+  }
+  js("result-retry", screens["sibyl-result"]).addEventListener("click", () => go("sibyl-input"));
+
+  // 결과 화면 들어올 때 (네 방 공통: 룬·별과 같음)
+  ["ogham", "decan", "tzolkin", "sibyl"].forEach((room) => {
+    enter[`${room}-result`] = () => {
+      const scr = screens[`${room}-result`];
+      replay(js("result-capture", scr));
+      watchReveal(scr);
+      updateReading();
+    };
+  });
+  // "전체 다시 보기"·테스트용: 저장된 결과 코드로 결과를 다시 그린다 (fresh=false면 저장하지 않음)
+  const RENDER = {
+    rune: renderRune, star: renderStar, ogham: renderOgham, decan: renderDecan, tzolkin: renderTzolkin,
+    sibyl: (v, fresh) => renderSibyl(v, fresh, ""),
+  };
+
   // ═════════ 5. 나의 이야기 ═════════
   const storyScr = screens.story;
   function runeSummary(v) {
@@ -1013,11 +1620,26 @@
   }
   function visitType(room) {
     const v = state.visits[room];
+    const E = T.story.evidenceType;
     if (room === "rune") {
       const [p, n, x] = v.picks.map((c) => RUNE_BY_CODE[c]);
       return fill(T.story.evidenceRuneType, { past: p.name, now: n.name, next: x.name });
     }
+    if (room === "ogham") return fill(E.ogham, { latin: OGHAM[v.ogham].latin, name: OGHAM[v.ogham].name });
+    if (room === "decan") return fill(E.decan, { sign: DECANS[v.decan].sign, part: T.decan.partNames[DECANS[v.decan].part - 1] });
+    if (room === "tzolkin") return fill(E.tzolkin, { number: v.number, name: TZ_SIGNS[v.sign].name });
+    if (room === "sibyl") return fill(E.sibyl, { roman: roman(v.sors + 1), title: ORACLES[v.sors].title });
     return NAKS[v.nak].name;
+  }
+  // 나의 이야기 요약 (문단 배열)
+  function visitSummary(room) {
+    const v = state.visits[room];
+    if (room === "rune") return runeSummary(v);
+    if (room === "ogham") return OGHAM[v.ogham].summary;
+    if (room === "decan") return DECANS[v.decan].summary;
+    if (room === "tzolkin") return TZ_SIGNS[v.sign].summary;
+    if (room === "sibyl") return ORACLES[v.sors].summary;
+    return NAKS[v.nak].summary;
   }
   function renderStory() {
     const filled = filledRooms();
@@ -1039,7 +1661,7 @@
           : fill(S.archetype.status, { name: A.name, left: CHAPTER_ORDER.length - n });
     js("story-archetype-desc", storyScr).textContent = A ? A.desc : S.archetype.emptyDesc;
     js("story-evidence", storyScr).innerHTML = filled
-      .map((room) => `<li class="evidence__item" data-room="${room}"><span class="evidence__glyph${room === "rune" ? " runic" : ""}" aria-hidden="true">${T.rooms[room].glyph}</span><span class="evidence__room">${T.rooms[room].name}</span><span class="evidence__type">${visitType(room)}</span><span class="evidence__tag">${T.archetypes[state.visits[room].archetype].name}</span></li>`)
+      .map((room) => `<li class="evidence__item" data-room="${room}"><span class="evidence__glyph" aria-hidden="true">${ROOM_ICON[room]}</span><span class="evidence__room">${T.rooms[room].name}</span><span class="evidence__type">${visitType(room)}</span><span class="evidence__tag">${T.archetypes[state.visits[room].archetype].name}</span></li>`)
       .join("");
     show(js("story-empty", storyScr), n === 0);
     show(js("story-share-top", storyScr), n > 0);
@@ -1050,25 +1672,21 @@
     jsAll("story-chapter", storyScr).forEach((li, i) => {
       const room = CHAPTER_ORDER[i];
       const done = Boolean(state.visits[room]);
-      const open = OPEN_ROOMS.includes(room);
       li.classList.toggle("is-done", done);
-      li.classList.toggle("is-available", !done && open);
-      li.classList.toggle("is-upcoming", !done && !open);
-      if (done || open) li.dataset.room = room;
-      else delete li.dataset.room;
+      li.classList.toggle("is-available", !done);
+      li.classList.remove("is-upcoming"); // 2단계: 여섯 방이 모두 열려 "다음에 열려요" 장은 없다
+      li.dataset.room = room;
       const R = T.rooms[room];
       const label = `<p class="spine-item__label">${fill(S.chapterLabel, { n: i + 1, chapter: R.chapterName })}</p>`;
       let html;
       if (done) {
-        const summary = room === "rune" ? runeSummary(state.visits.rune) : NAKS[state.visits.star.nak].summary;
+        const summary = visitSummary(room);
         html = `${label}<p class="spine-item__room">${R.name} <span class="spine-item__type" data-js="story-chapter-type">${visitType(room)}</span></p>
           <div class="spine-item__summary" data-js="story-chapter-summary">${summary.map((p) => `<p>${p}</p>`).join("")}</div>
           <button class="btn btn--text spine-item__reread" type="button" data-js="story-chapter-reread" data-room="${room}">${S.reread}</button>`;
-      } else if (open) {
+      } else {
         html = `${label}<p class="spine-item__room">${R.name}</p><p class="spine-item__teaser">${fill(S.teaserAvailable, { room: R.name })}</p>
           <button class="btn btn--secondary btn--small spine-item__go" type="button" data-go="${room}-intro" data-js="story-chapter-go">${fill(S.go, { room: R.name })}</button>`;
-      } else {
-        html = `${label}<p class="spine-item__room">${R.name}</p><p class="spine-item__teaser">${S.teaserUpcoming}</p>`;
       }
       js("story-chapter-body", li).innerHTML = html;
     });
@@ -1084,8 +1702,8 @@
     const b = e.target.closest('[data-js="story-chapter-reread"]');
     if (!b) return;
     const room = b.dataset.room;
-    if (room === "rune") renderRune(state.visits.rune, false);
-    else renderStar(state.visits.star, false);
+    if (!state.visits[room]) return;
+    RENDER[room](state.visits[room], false);
     go(`${room}-result`);
   });
 
@@ -1193,9 +1811,72 @@
       },
     };
   }
+  // ── (2단계) 네 방 카드: common/share-card.js의 bark·sundial·dayGlyph·laurel·parchment 옵션 (design "공유 카드 레이아웃")
+  const symbolPath = (id) => {
+    const p = document.querySelector(`#${id} path`);
+    return p ? p.getAttribute("d") : "";
+  };
+  function buildOghamCard() {
+    const { e } = oghamView;
+    const C = T.ogham.card;
+    return {
+      file: C.file, text: strip(fill(C.shareText, { latin: e.latin })),
+      opts: {
+        theme: CARD_THEME.ogham, eyebrow: strip(C.eyebrow), seed: 31 + OGHAM.indexOf(e),
+        bark: { path: symbolPath(`ogham-${e.code}`), label: e.latin.toUpperCase() },
+        title: strip(e.title), subtitle: strip(e.name),
+        lines: [strip(e.key)],
+        badges: [strip(C.badge)],
+      },
+    };
+  }
+  function buildDecanCard() {
+    const { v, e } = decanView;
+    const C = T.decan.card;
+    return {
+      file: C.file, text: strip(C.shareText),
+      opts: {
+        theme: CARD_THEME.decan, eyebrow: strip(C.eyebrow), seed: 71 + v.decan,
+        sundial: { index: v.decan, label: fill(C.number, { n: v.decan + 1 }), labelColor: "accent" },
+        title: strip(e.title), subtitle: strip(fill(T.decan.ritual.name, { sign: e.sign, part: partName(e.part - 1) })),
+        lines: [strip(e.key)],
+        badges: [strip(C.badge)],
+      },
+    };
+  }
+  function buildTzolkinCard() {
+    const { v, e, day } = tzView;
+    const C = T.tzolkin.card;
+    const LATIN = e.latin.toUpperCase();
+    return {
+      file: C.file, text: strip(fill(C.shareText, { day: `${v.number} ${e.latin}` })),
+      opts: {
+        theme: CARD_THEME.tzolkin, eyebrow: strip(C.eyebrow), seed: 113 + v.sign,
+        dayGlyph: { number: v.number, sign: LATIN, label: fill(C.count, { n: day }), labelColor: "accent" },
+        title: strip(fill(T.tzolkin.result.title, { number: v.number, name: e.name })), subtitle: `${v.number} ${LATIN}`,
+        lines: [strip(e.key)],
+        badges: [strip(C.badge)],
+      },
+    };
+  }
+  // 시빌라 카드: 주제(카테고리)만. 사용자가 적은 질문은 넣지 않는다 (sibylView에도 질문이 없다)
+  function buildSibylCard() {
+    const { v, o, rn, topic } = sibylView;
+    const C = T.sibyl.card;
+    return {
+      file: C.file, text: strip(C.shareText),
+      opts: {
+        theme: CARD_THEME.sibyl, eyebrow: strip(C.eyebrow), seed: 151 + v.sors,
+        laurel: { numeral: rn, label: C.label },
+        title: strip(o.title), subtitle: topic,
+        parchment: { text: strip(o.line) },
+        badges: [strip(C.badge)],
+      },
+    };
+  }
+  const CARD_BUILD = { rune: buildRuneCard, star: buildStarCard, ogham: buildOghamCard, decan: buildDecanCard, tzolkin: buildTzolkinCard, sibyl: buildSibylCard };
   ["result-share", "result-share-top"].forEach((name) => {
-    js(name, screens["rune-result"]).addEventListener("click", (e) => shareCard(e.currentTarget, buildRuneCard));
-    js(name, screens["star-result"]).addEventListener("click", (e) => shareCard(e.currentTarget, buildStarCard));
+    CHAPTER_ORDER.forEach((room) => js(name, screens[`${room}-result`]).addEventListener("click", (e) => shareCard(e.currentTarget, CARD_BUILD[room])));
   });
   ["story-share", "story-share-top"].forEach((name) => js(name, storyScr).addEventListener("click", (e) => {
     if (filledRooms().length) shareCard(e.currentTarget, buildStoryCard);
@@ -1206,12 +1887,17 @@
   renderHub();
   setTopbar("hub");
   // 방 주소로 바로 들어온 경우(예: index.html#rune): 허브를 거치지 않고 그 방 시작 화면. URL에는 방 이름만 있다
-  const START = { rune: "rune-intro", star: "star-intro", story: "story" };
+  const START = Object.fromEntries([...CHAPTER_ORDER.map((r) => [r, `${r}-intro`]), ["story", "story"]]);
   const hash = location.hash.replace("#", "");
   if (START[hash]) go(START[hash], { instant: true });
   else enter.hub();
 
   // 테스트·점검용으로 바깥에서 읽을 수 있게 둔다 (입력값은 내보내지 않음)
-  // renderRune/renderStar는 저장 없이(fresh=false) 결과 틀만 다시 그린다
-  window.StrangeOracle = { go, currentArchetype, filledRooms, renderRune: (v) => renderRune(v, false), renderStar: (v) => renderStar(v, false) };
+  // render*는 저장 없이(fresh=false) 결과 틀만 다시 그린다
+  window.StrangeOracle = {
+    go, currentArchetype, filledRooms,
+    renderRune: (v) => renderRune(v, false), renderStar: (v) => renderStar(v, false),
+    renderOgham: (v) => renderOgham(v, false), renderDecan: (v) => renderDecan(v, false),
+    renderTzolkin: (v) => renderTzolkin(v, false), renderSibyl: (v) => renderSibyl(v, false, ""),
+  };
 })();

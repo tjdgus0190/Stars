@@ -6,7 +6,7 @@
 | 파일 | 상태 | 쓰는 제품 |
 |---|---|---|
 | base.css | 있음 (designer, 사용법은 docs/design-system.md) | strange-oracle |
-| share-card.js | 있음 (2026-09-25 옵션 추가) | strange-oracle |
+| share-card.js | 있음 (2026-09-25 옵션 추가, 2026-09-28 그림 블록 추가) | strange-oracle |
 | disclaimer.js | 있음 | strange-oracle |
 | share-buttons.js, ads.js, affiliate.js, analytics.js | 아직 없음 | - |
 
@@ -50,14 +50,22 @@ const canvas = await ShareCard.render({
   hook: "본문 아래 강조색 한 줄",                            // 40px, accent
   badges: ["나의 이야기 6장 · 과거·현재·미래"],              // 테두리 알약(32px), 여러 개면 세로로
   footerY: 1630,                                            // footer 위치(기본 1700 = H-220). 주면 본문 아래 안전선도 그 위로 올라간다
+
+  // ── 2026-09-28 추가 옵션 (모두 선택. 안 넘기면 그리지 않는다). 그림 블록 아래 라벨: label(글자), labelColor("accent"면 강조색, 기본 muted), Cinzel 34px
+  bark: { path: "M20 76V4M20 40H34", label: "BEITH" },     // 흰 자작나무 껍질(200x400) + 획. path = SVG 경로(viewBox 40x80), 획 두께 14px·강조색 빛. ink = 획 색(기본 #3a2a1a)
+  sundial: { index: 10, label: "DECAN 11 / 36", labelColor: "accent" }, // 해시계(지름 400): 36칸·12궁 경계·집 칸(index 0~35, 12시에서 시계 방향)·그림자·해
+  dayGlyph: { number: 4, sign: "AJAW", label: "160 / 260", labelColor: "accent" }, // 마야 막대·점 숫자(1~13, 높이 150, numberColor 기본 #ebc573) + 카르투슈(340x110, Cinzel 56px)
+  laurel: { numeral: "XIV", label: "SORS" },               // 월계관(지름 380, leafColor 기본 #8fb58a) + 가운데 로마 숫자(Cinzel 110px, 강조색)
+  parchment: { text: "신탁 문장" },                         // 양피지 띠(900x300) 위 글자(46px, color 기본 #4a2a14, 최대 maxLines=4줄). lines 다음 자리에 그린다
 });
 const how = await ShareCard.share(canvas, "파일이름.png", "공유 시 함께 보낼 문구");
 // how: "shared" | "cancelled" | "downloaded"
 ```
-- 그리는 순서(위→아래): eyebrow → glyph → art → stones → progress → lead → title → subtitle → lines → hook → badges. 전체를 안전 영역(y 260 ~ 1600) 가운데에 놓고, 넘치면 **아래쪽 줄부터 버린다**.
+- 그리는 순서(위→아래): eyebrow → glyph → art → bark → sundial → dayGlyph → laurel → stones → progress → lead → title → subtitle → lines → parchment → hook → badges. 전체를 안전 영역(y 260 ~ 1600) 가운데에 놓고, 넘치면 **아래쪽 줄부터 버린다**.
 - 글꼴은 `document.fonts.ready`를 기다린 뒤 그린다. 웹폰트를 CSS로 먼저 불러 두어야 한다.
 - 개인정보: 이미지는 브라우저 안에서만 만들어진다. 이름 등 입력값을 넣을지는 제품이 정한다.
 - 변경 이력: 2026-09-25 옵션 추가. 쓰는 제품을 grep으로 확인(strange-oracle뿐). 기존 옵션만 쓰면 결과가 같다.
+- 2026-09-28: bark·sundial·dayGlyph·laurel·parchment 추가(새 블록 함수만 더하고 기존 블록·순서·기본값은 그대로). 쓰는 제품 grep 결과 strange-oracle뿐, 룬·별·나의 이야기 카드 이미지가 만들어지는 것을 헤드리스 Edge로 확인(이전 이미지와 픽셀 비교는 하지 않음).
 
 ## disclaimer.js
 운세·사주·타로 결과 하단에 CLAUDE.md 8장의 면책 문구를 넣는다. 문구는 부품 안에 고정돼 있다.

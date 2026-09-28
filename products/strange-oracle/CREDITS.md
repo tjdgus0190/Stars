@@ -39,3 +39,11 @@ Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키
 - 데칸: 태양 열대 황경은 위 Astronomy Engine(astro.js `sunLongitude`) 재사용. 검증 참고(제품에 포함 안 됨): 미 해군천문대(USNO) Astronomical Applications API 절기 시각 (https://aa.usno.navy.mil/api/seasons).
 - 오검: 오검 20자(feda) 순서와 유니코드(U+1681~U+1694)는 Unicode 표준 Ogham 블록. 한글 → 로마자 → 오검 대응과 선택 규칙("오검 둘레 걷기")은 직접 만든 규칙(tests.md 「2단계 계산」).
 - 시빌라: 브라우저 내장 `crypto.getRandomValues`.
+
+## 2단계 콘텐츠 자료 (data-ogham.js · data-decans.js · data-tzolkin.js · data-oracles.js)
+- 문구는 모두 [초안] 자리표시. copywriter가 직접 쓸 예정(외부 문장 가져오지 않음).
+- 오검 20자 이름(Beith … Idad)·네 무리(aicme) 이름: 중세 아일랜드 문헌에 전하는 이름. 뜻(facts.meaning)·후대 나무(facts.tree) 초안은 developer가 Wikipedia "Ogham"(https://en.wikipedia.org/wiki/Ogham) 표를 기억에 기대어 적은 것 — **원문 대조 미확인**, copywriter가 확인.
+- 촐킨 스무 문양 이름: 유카텍(Imix … Ajaw, 표기는 designer 마크업과 같게)·키체(Imox … Ajpu). Wikipedia "Tzolkʼin" 기준으로 적었으나 키체 표기와 뜻 초안은 **원문 대조 미확인**.
+- 데칸 이집트 이름(facts.egyptian): Wikipedia "Decan"(https://en.wikipedia.org/wiki/Decan) "Names of the Decans" 표의 Greco-Egyptian names 열. 2026-09-28 WebFetch 요약 도구로 읽음 — **원문 표와 한 칸씩 대조하지 않음(미확인)**. 확인 전에는 출시하지 않는다.
+- 데칸 다스리는 별(facts.ruler): 헬레니즘 점성술의 칼데아 순서(화성·태양·금성·수성·달·토성·목성 반복)로 채움.
+- 공유 카드의 껍질·해시계·마야 숫자·카르투슈·월계관·양피지: common/share-card.js가 canvas로 직접 그림(외부 이미지 없음).

@@ -1633,6 +1633,9 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
 .evidence { margin-top: var(--space-5); border-top: 1px solid var(--c-line); text-align: left; }
 .evidence__item { display: grid; grid-template-columns: 28px 1fr auto; grid-template-areas: "g room tag" "g type tag"; column-gap: var(--space-3); align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--c-line); }
 .evidence__glyph { grid-area: g; text-align: center; font-size: var(--fs-lg); color: var(--accent); }
+/* (2단계 developer, designer 확인 필요) 근거 목록 기호를 글자 대신 방 아이콘 SVG로 — .next-room__glyph svg와 같은 방식 */
+.evidence__glyph svg { width: 22px; height: 22px; overflow: visible; vertical-align: middle; }
+.evidence__glyph svg use { fill: none; stroke: currentColor; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
 .evidence__room { grid-area: room; font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
 .evidence__type { grid-area: type; font-size: var(--fs-sm); color: var(--c-text-strong); }
 .evidence__tag { grid-area: tag; padding: 2px var(--space-3); border-radius: var(--radius-pill); background: var(--accent-soft); font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }

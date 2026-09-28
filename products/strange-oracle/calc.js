@@ -8,7 +8,7 @@
   const OGHAM_GLYPHS = Array.from({ length: 20 }, (_, i) => String.fromCharCode(0x1681 + i));
   const O = { b: 0, l: 1, f: 2, s: 3, n: 4, h: 5, d: 6, t: 7, c: 8, q: 9, m: 10, g: 11, ng: 12, z: 13, r: 14, a: 15, o: 16, u: 17, e: 18, i: 19 };
 
-  // 한글 → 로마자 (app.js의 romanize와 같은 표. 룬의 방과 같은 로마자 표기를 쓴다)
+  // 한글 → 로마자 (제품 안의 유일한 표. 룬의 방 이름 인셋도 Calc.romanize로 이 표를 쓴다)
   const CHO = ["g", "kk", "n", "d", "tt", "r", "m", "b", "pp", "s", "ss", "", "j", "jj", "ch", "k", "t", "p", "h"];
   const JUNG = ["a", "ae", "ya", "yae", "eo", "e", "yeo", "ye", "o", "wa", "wae", "oe", "yo", "u", "wo", "we", "wi", "yu", "eu", "ui", "i"];
   const JONG = ["", "k", "k", "k", "n", "n", "n", "t", "l", "k", "m", "l", "l", "l", "p", "l", "m", "p", "p", "t", "t", "ng", "t", "t", "k", "t", "p", "t"];
@@ -69,6 +69,9 @@
     const index = (sum - 1) % 20;
     return { index, glyph: OGHAM_GLYPHS[index], letters, glyphs: letters.map((i) => OGHAM_GLYPHS[i]).join(""), latin, sum };
   }
+
+  // 이름 → 로마자 한 줄 (룬의 방 이름 인셋용). 계산은 nameToOgham과 같다
+  const romanize = (text) => nameToOgham(text).latin;
 
   // ───────── 데칸 (3장) ─────────
   // 태양의 열대 황경(참 춘분점 기준, astro.js sunLongitude)을 10°씩 36칸으로 나눈다.
@@ -149,5 +152,5 @@
     return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
   }
 
-  window.Calc = { ogham, nameToOgham, OGHAM_GLYPHS, decan, tzolkin, jdn, pickOracle, validDate };
+  window.Calc = { ogham, nameToOgham, romanize, OGHAM_GLYPHS, decan, tzolkin, jdn, pickOracle, validDate };
 })();

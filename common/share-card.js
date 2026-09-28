@@ -6,7 +6,8 @@
 //   const canvas = await ShareCard.render({ eyebrow, glyph, title, subtitle, lines, footer, theme, fonts });
 //   ShareCard.share(canvas, "result.png", "공유 문구");
 // 선택 옵션(2026-09-25 추가, 안 넘기면 예전과 똑같이 그린다): art, stones, progress, lead, titleSize,
-//   titleColor, titleGlow, hook, badges, footerY. 자세한 설명은 docs/common.md
+//   titleColor, titleGlow, hook, badges, footerY.
+// 2026-09-28 추가(역시 선택): bark, sundial, dayGlyph, laurel(그림 블록), parchment(양피지 띠 글자). 자세한 설명은 docs/common.md
 (function () {
   const W = 1080;
   const H = 1920;
@@ -196,6 +197,259 @@
     };
   }
 
+  // ── (2026-09-28 추가) 그림 블록 4종 + 양피지 띠. 모두 선택 옵션이고, 안 넘기면 그리지 않는다.
+  // 그림 아래 라벨(선택): label = 글자, labelColor = "accent"면 강조색(기본 muted). Cinzel 34px
+  const LABEL_H = 70;
+  function drawLabel(ctx, o, y, t, fonts) {
+    if (!o.label) return;
+    ctx.save();
+    ctx.font = `500 34px ${fonts.latin}`;
+    ctx.fillStyle = o.labelColor === "accent" ? t.accent : t.muted;
+    ctx.textAlign = "center";
+    ctx.fillText(o.label, W / 2, y + 50);
+    ctx.restore();
+  }
+  // 반투명 색 ("#rrggbb" + 알파)
+  const alpha = (hex, a) => {
+    const n = parseInt(String(hex).replace("#", ""), 16);
+    return Number.isNaN(n) ? hex : `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  };
+
+  // 흰 자작나무 껍질 조각(200x400) + 그 위에 새긴 획. bark: { path: "SVG path d (viewBox 40x80)", label, labelColor, ink }
+  function barkBlock(o, fonts) {
+    const bw = 200, bh = 400;
+    return {
+      height: bh + (o.label ? LABEL_H : 0),
+      draw(ctx, top, t) {
+        const x = (W - bw) / 2;
+        ctx.save();
+        ctx.shadowColor = alpha(t.accent, 0.45);
+        ctx.shadowBlur = 60;
+        roundRect(ctx, x, top, bw, bh, 70);
+        const g = ctx.createLinearGradient(x, 0, x + bw, 0);
+        g.addColorStop(0, "#8a8474");
+        g.addColorStop(0.2, "#e4e0d4");
+        g.addColorStop(0.5, "#f6f3ea");
+        g.addColorStop(0.78, "#e2ddcf");
+        g.addColorStop(1, "#827b6a");
+        ctx.fillStyle = g;
+        ctx.fill();
+        ctx.restore();
+        // 껍질눈(가로로 짧은 검은 줄)
+        ctx.save();
+        ctx.fillStyle = "rgba(40,34,26,0.7)";
+        [[0.26, 0.12, 36], [0.7, 0.26, 46], [0.36, 0.42, 26], [0.76, 0.57, 40], [0.22, 0.7, 30], [0.62, 0.84, 50], [0.4, 0.94, 22]].forEach(([fx, fy, w]) => {
+          ctx.beginPath();
+          ctx.ellipse(x + bw * fx, top + bh * fy, w / 2, 3, 0, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+        if (o.path && typeof Path2D === "function") {
+          const s = bh / 80; // viewBox 40x80 → 200x400
+          ctx.save();
+          ctx.translate(x, top);
+          ctx.scale(s, s);
+          ctx.strokeStyle = o.ink || "#3a2a1a";
+          ctx.lineWidth = 14 / s;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.shadowColor = t.accent;
+          ctx.shadowBlur = 24;
+          ctx.stroke(new Path2D(o.path));
+          ctx.restore();
+        }
+        drawLabel(ctx, o, top + bh, t, fonts);
+      },
+    };
+  }
+
+  // 해시계(지름 400): 테두리·36칸·12궁 경계·그림자·금빛 집 칸·해. sundial: { index: 0~35, label, labelColor }
+  // 칸 n은 위(12시)에서 시계 방향으로 n×10°~n×10+10°
+  function sundialBlock(o, fonts) {
+    const R = 200;
+    return {
+      height: 2 * R + (o.label ? LABEL_H : 0),
+      draw(ctx, top, t) {
+        const cx = W / 2, cy = top + R;
+        const rad = (deg) => ((deg - 90) * Math.PI) / 180;
+        const at = (deg, r) => [cx + r * Math.cos(rad(deg)), cy + r * Math.sin(rad(deg))];
+        ctx.save();
+        const disc = ctx.createRadialGradient(cx, cy, 20, cx, cy, R);
+        disc.addColorStop(0, alpha(t.accent, 0.22));
+        disc.addColorStop(1, alpha(t.accent, 0.06));
+        ctx.fillStyle = disc;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R - 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = t.accent;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        // 집 칸
+        const home = (((Number(o.index) || 0) % 36) + 36) % 36;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 186, rad(home * 10), rad(home * 10 + 10));
+        ctx.arc(cx, cy, 136, rad(home * 10 + 10), rad(home * 10), true);
+        ctx.closePath();
+        ctx.fillStyle = alpha(t.accent, 0.75);
+        ctx.shadowColor = t.accent;
+        ctx.shadowBlur = 30;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        // 고리 두 개 + 칸 구분선(12궁 경계는 길게)
+        ctx.strokeStyle = alpha(t.accent, 0.7);
+        ctx.lineWidth = 2;
+        [186, 136].forEach((r) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke(); });
+        for (let i = 0; i < 36; i++) {
+          const long = i % 3 === 0;
+          const [x1, y1] = at(i * 10, long ? 112 : 136);
+          const [x2, y2] = at(i * 10, long ? 196 : 186);
+          ctx.lineWidth = long ? 3 : 1.5;
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        }
+        // 그림자(가운데 → 집 칸)와 반대편의 해
+        const mid = home * 10 + 5;
+        const [tx, ty] = at(mid, 176);
+        const [lx, ly] = at(mid - 90, 12);
+        const [rx, ry] = at(mid + 90, 12);
+        ctx.fillStyle = "rgba(10,6,20,0.72)";
+        ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(tx, ty); ctx.lineTo(rx, ry); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = t.accent; ctx.shadowBlur = 24;
+        ctx.beginPath(); ctx.arc(tx, ty, 7, 0, Math.PI * 2); ctx.fill();
+        const [sx, sy] = at(mid + 180, 212);
+        ctx.fillStyle = t.accent;
+        ctx.shadowBlur = 40;
+        ctx.beginPath(); ctx.arc(sx, sy, 16, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        drawLabel(ctx, o, top + 2 * R, t, fonts);
+      },
+    };
+  }
+
+  // 마야 막대·점 숫자(높이 150) + 문양 이름 카르투슈(340x110). dayGlyph: { number: 1~13, sign: "AJAW", numberColor, label, labelColor }
+  function dayGlyphBlock(o, fonts) {
+    const nh = 150, cw = 340, ch = 110, gap = 30;
+    return {
+      height: nh + gap + ch + (o.label ? LABEL_H : 0),
+      draw(ctx, top, t) {
+        const n = Math.max(1, Math.min(13, Number(o.number) || 1));
+        const bars = Math.floor(n / 5), dots = n % 5;
+        const barW = 220, barH = 34, dotR = 20, rowGap = 16;
+        const rows = (dots ? 1 : 0) + bars;
+        const stackH = (dots ? dotR * 2 : 0) + bars * barH + (rows - 1) * rowGap;
+        let y = top + nh - stackH;
+        const color = o.numberColor || "#ebc573";
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 30;
+        if (dots) {
+          const step = 56, x0 = W / 2 - ((dots - 1) * step) / 2;
+          for (let i = 0; i < dots; i++) { ctx.beginPath(); ctx.arc(x0 + i * step, y + dotR, dotR, 0, Math.PI * 2); ctx.fill(); }
+          y += dotR * 2 + rowGap;
+        }
+        for (let i = 0; i < bars; i++) { roundRect(ctx, (W - barW) / 2, y, barW, barH, barH / 2); ctx.fill(); y += barH + rowGap; }
+        ctx.restore();
+        const cy = top + nh + gap;
+        ctx.save();
+        roundRect(ctx, (W - cw) / 2, cy, cw, ch, 36);
+        ctx.fillStyle = alpha(t.accent, 0.14);
+        ctx.fill();
+        ctx.strokeStyle = t.accent;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.font = `700 56px ${fonts.latin}`;
+        ctx.fillStyle = t.text;
+        ctx.textAlign = "center";
+        ctx.fillText(o.sign || "", W / 2, cy + ch / 2 + 20, cw - 40);
+        ctx.restore();
+        drawLabel(ctx, o, cy + ch, t, fonts);
+      },
+    };
+  }
+
+  // 월계관(지름 380) + 가운데 로마 숫자(Cinzel 110px, 강조색). laurel: { numeral: "XIV", leafColor, label, labelColor }
+  function laurelBlock(o, fonts) {
+    const R = 165, size = 380;
+    return {
+      height: size + (o.label ? LABEL_H : 0),
+      draw(ctx, top, t) {
+        const cx = W / 2, cy = top + size / 2;
+        const leaf = o.leafColor || "#8fb58a";
+        ctx.save();
+        ctx.strokeStyle = leaf;
+        ctx.fillStyle = leaf;
+        ctx.lineWidth = 4;
+        // 캔버스 각도: 0 = 오른쪽, 90° = 아래. 왼쪽 가지 105°→250°, 오른쪽 가지 75°→-70°
+        [[105, 250], [75, -70]].forEach(([a0, a1]) => {
+          const r0 = (a0 * Math.PI) / 180, r1 = (a1 * Math.PI) / 180;
+          ctx.beginPath();
+          ctx.arc(cx, cy, R, r0, r1, a1 < a0);
+          ctx.stroke();
+          const steps = 8;
+          for (let k = 0; k < steps; k++) {
+            const a = r0 + ((r1 - r0) * (k + 0.5)) / steps;
+            const px = cx + R * Math.cos(a), py = cy + R * Math.sin(a);
+            const tangent = a + (a1 < a0 ? -Math.PI / 2 : Math.PI / 2);
+            [-0.55, 0.55].forEach((side) => {
+              ctx.save();
+              ctx.translate(px, py);
+              ctx.rotate(tangent + side);
+              ctx.beginPath();
+              ctx.ellipse(0, -18, 9, 22, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            });
+          }
+        });
+        ctx.restore();
+        ctx.save();
+        ctx.font = `700 110px ${fonts.latin}`;
+        ctx.fillStyle = t.accent;
+        ctx.shadowColor = t.accent;
+        ctx.shadowBlur = 40;
+        ctx.textAlign = "center";
+        ctx.fillText(o.numeral || "", cx, cy + 38, 2 * R - 60);
+        ctx.restore();
+        drawLabel(ctx, o, top + size, t, fonts);
+      },
+    };
+  }
+
+  // 양피지 띠(900x300) 위 글자. parchment: { text, color(기본 #4a2a14), size(기본 46), maxLines(기본 4) }
+  function parchmentBlock(o, fonts) {
+    const pw = 900, ph = 300;
+    return {
+      height: ph,
+      draw(ctx, top) {
+        const x = (W - pw) / 2;
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.45)";
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetY = 10;
+        roundRect(ctx, x, top, pw, ph, 18);
+        const g = ctx.createLinearGradient(x, 0, x + pw, 0);
+        g.addColorStop(0, "#c9b184");
+        g.addColorStop(0.08, "#efe2c4");
+        g.addColorStop(0.92, "#ecdcba");
+        g.addColorStop(1, "#c4a978");
+        ctx.fillStyle = g;
+        ctx.fill();
+        ctx.restore();
+        const size = o.size || 46, lh = Math.round(size * 1.45);
+        ctx.save();
+        ctx.font = `500 ${size}px ${fonts.serif}`;
+        const lines = wrap(ctx, o.text || "", pw - 120).slice(0, o.maxLines || 4);
+        ctx.fillStyle = o.color || "#4a2a14";
+        ctx.textAlign = "center";
+        let y = top + (ph - lines.length * lh) / 2 + lh * 0.72;
+        for (const l of lines) { ctx.fillText(l, W / 2, y); y += lh; }
+        ctx.restore();
+      },
+    };
+  }
+
   async function render(opts) {
     const t = Object.assign({}, DEFAULT_THEME, opts.theme);
     const serif = opts.fonts?.serif || "serif";
@@ -247,6 +501,11 @@
       block({ height: opts.art.height, draw: (c, top, th) => opts.art.draw(c, { x: W / 2, y: top, w: W, theme: th }) });
       gap(40);
     }
+    // (2026-09-28) 방별 그림 블록. 여러 개를 넘기면 이 순서대로 쌓인다
+    if (opts.bark) { block(barkBlock(opts.bark, fonts)); gap(40); }
+    if (opts.sundial) { block(sundialBlock(opts.sundial, fonts)); gap(40); }
+    if (opts.dayGlyph) { block(dayGlyphBlock(opts.dayGlyph, fonts)); gap(40); }
+    if (opts.laurel) { block(laurelBlock(opts.laurel, fonts)); gap(40); }
     if (opts.stones?.length) { block(stonesBlock(opts.stones, fonts)); gap(50); }
     if (opts.progress) { block(progressBlock(opts.progress, fonts)); gap(60); }
     if (opts.lead) { add(opts.lead, `500 40px ${serif}`, t.muted, 64); gap(20); }
@@ -266,6 +525,7 @@
       for (const l of wrap(ctx, para, W - 260)) add(l, ctx.font, t.text, 70);
       gap(30);
     }
+    if (opts.parchment) { block(parchmentBlock(opts.parchment, fonts)); gap(40); }
     if (opts.hook) {
       gap(20);
       ctx.font = `500 40px ${serif}`;

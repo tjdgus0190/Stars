@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <!-- title·description은 data.js의 TEXT.meta와 같은 문장으로 맞춰 둔다 (검색·공유 미리보기는 JS 실행 전 값을 읽는다) -->
-  <title>낯선 점술관 — 바이킹 룬 점 · 인도 베다 점성술</title>
-  <meta name="description" content="바이킹의 룬 점, 인도의 베다 점성술. 사주도 타로도 아닌 아주 먼 곳의 방식으로 나를 읽어 보는 무료 운세." />
+  <title>[초안] 낯선 점술관 — 룬 · 베다 · 오검 · 데칸 · 촐킨 · 시빌라 신탁</title>
+  <meta name="description" content="[초안] 켈트 오검, 인도 베다 점성술, 이집트 데칸, 마야 촐킨, 로마 시빌라 신탁, 바이킹 룬. 사주도 타로도 아닌 여섯 낯선 방식으로 나를 읽어 보는 무료 운세." />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="낯선 점술관 — 바이킹 룬 점 · 인도 베다 점성술" />
-  <meta property="og:description" content="바이킹의 룬 점, 인도의 베다 점성술. 사주도 타로도 아닌 아주 먼 곳의 방식으로 나를 읽어 보는 무료 운세." />
+  <meta property="og:title" content="[초안] 낯선 점술관 — 룬 · 베다 · 오검 · 데칸 · 촐킨 · 시빌라 신탁" />
+  <meta property="og:description" content="[초안] 켈트 오검, 인도 베다 점성술, 이집트 데칸, 마야 촐킨, 로마 시빌라 신탁, 바이킹 룬. 사주도 타로도 아닌 여섯 낯선 방식으로 나를 읽어 보는 무료 운세." />
   <meta property="og:image" content="og-image.png" />
   <meta name="theme-color" content="#080717" />
   <!-- 파비콘 파일이 없어 브라우저가 /favicon.ico를 요청하고 404를 내지 않도록 빈 아이콘 지정 (developer) -->
@@ -243,14 +243,6 @@
         </span>
         <span class="story-teaser__arrow" aria-hidden="true">→</span>
       </button>
-
-      <!-- (2단계) 여섯 방이 모두 열려 "아직 봉인된 방" 목록은 쓰지 않는다. app.js가 hub-closed를 찾으므로(없으면 오류)
-           지금은 숨겨 두고, developer가 JS 코드와 함께 이 section을 지운다 (design/strange-oracle.md 2단계 developer 요청) -->
-      <section class="closed-rooms is-hidden" aria-labelledby="closed-title">
-        <h2 class="closed-rooms__title" id="closed-title" data-t="hub.closedTitle"></h2>
-        <ul class="closed-rooms__list" data-js="hub-closed"></ul>
-        <p class="closed-rooms__note" data-t="hub.closedNote"></p>
-      </section>
 
       <!-- 광고 심사용 소개 글 (300자 이상) — 시작 버튼(문) 아래 -->
       <section class="about" aria-labelledby="about-title">
@@ -1995,8 +1987,13 @@
   <script src="data.js"></script>
   <script src="data-runes.js"></script>
   <script src="data-stars.js"></script>
+  <script src="data-ogham.js"></script>
+  <script src="data-decans.js"></script>
+  <script src="data-tzolkin.js"></script>
+  <script src="data-oracles.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js" integrity="sha384-LTVHvxfbG3XHla4Lu0C0s9U18B2sBOuzJIeOoVHm2t05SOOORvMbBMEVjXrGau9g" crossorigin="anonymous"></script>
   <script src="astro.js"></script>
+  <script src="calc.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
