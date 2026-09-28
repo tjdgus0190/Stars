@@ -41,9 +41,9 @@ Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키
 - 시빌라: 브라우저 내장 `crypto.getRandomValues`.
 
 ## 2단계 콘텐츠 자료 (data-ogham.js · data-decans.js · data-tzolkin.js · data-oracles.js)
-- 문구는 모두 [초안] 자리표시. copywriter가 직접 쓸 예정(외부 문장 가져오지 않음).
+- 문구는 모두 copywriter가 직접 썼다(외부 문장 가져오지 않음). 시빌라 신탁 문장(line)은 이 서비스가 새로 지은 문장이며 고대 문헌 인용이 아니다.
 - 오검 20자 이름(Beith … Idad)·네 무리(aicme) 이름: 중세 아일랜드 문헌에 전하는 이름. 뜻(facts.meaning)·후대 나무(facts.tree) 초안은 developer가 Wikipedia "Ogham"(https://en.wikipedia.org/wiki/Ogham) 표를 기억에 기대어 적은 것 — **원문 대조 미확인**, copywriter가 확인.
 - 촐킨 스무 문양 이름: 유카텍(Imix … Ajaw, 표기는 designer 마크업과 같게)·키체(Imox … Ajpu). Wikipedia "Tzolkʼin" 기준으로 적었으나 키체 표기와 뜻 초안은 **원문 대조 미확인**.
-- 데칸 이집트 이름(facts.egyptian): Wikipedia "Decan"(https://en.wikipedia.org/wiki/Decan) "Names of the Decans" 표의 Greco-Egyptian names 열. 2026-09-28 WebFetch 요약 도구로 읽음 — **원문 표와 한 칸씩 대조하지 않음(미확인)**. 확인 전에는 출시하지 않는다.
+- 데칸 이집트 이름(facts.egyptian): Wikipedia "Decan"(https://en.wikipedia.org/wiki/Decan) "Names of the Decans" 표의 Greco-Egyptian names 열. 출처는 Budge(1904) pp.304–308 · Gundel(1936). 2026-09-28 Wikipedia 원문(wikitext)과 36칸을 한 칸씩 기계 대조해 모두 일치 확인.
 - 데칸 다스리는 별(facts.ruler): 헬레니즘 점성술의 칼데아 순서(화성·태양·금성·수성·달·토성·목성 반복)로 채움.
 - 공유 카드의 껍질·해시계·마야 숫자·카르투슈·월계관·양피지: common/share-card.js가 canvas로 직접 그림(외부 이미지 없음).
