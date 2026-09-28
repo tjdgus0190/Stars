@@ -11,7 +11,7 @@
 
 | 제품 | 쓰는 것 |
 |---|---|
-| strange-oracle | 전체 (밤 테마 고정 `data-theme="night"`, 강조 hue: gold·ice·moon·jade, 공용 움직임·스크롤 등장) |
+| strange-oracle | 전체 (밤 테마 고정 `data-theme="night"`, 강조 hue: gold·ice·moon·jade·forest·sand·candle — 2026-09-28 여섯 방, 공용 움직임·스크롤 등장) |
 
 ## 1. 색 (OKLCH, 동명도 팔레트)
 - 같은 역할의 색은 명도(L)·채도(C)를 맞추고 hue만 바꾼다. 강조색은 `--accent-h` 하나만 바꾸면 명도는 그대로 색만 바뀐다.

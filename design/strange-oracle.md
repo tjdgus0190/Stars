@@ -576,3 +576,231 @@
 - **움직임 끔**으로 실제로 스크롤하며: 봉인 풀기 뒤 룬 획, 장이 들어올 때 머리 등장, 떡밥 ✦ 반짝임
 - 이름 10자 + 별 결과에서 캡처 카드 메타가 두 줄로 고르게 꺾이는지
 - 480px(PC) 결과·허브, 나의 이야기 방 0개 화면, 공유 카드 이미지(안전 영역) — 이번 점검에서 못 봄
+
+---
+
+# 2단계: 네 방 (오검 · 데칸 · 촐킨 · 시빌라) — 2026-09-27~28, designer
+- 근거: specs/strange-oracle.md 「방 설계 상세」·운영자 결정 24~27번·「이번에 만들 것 (2단계 통합)」, specs/selling-strange-oracle.md 방별 셀링 포인트
+- 결과물: index.html(네 방 섹션 17개 + 허브 6문 + 스프라이트), style.css(맨 아래 "2단계" 블록 + 허브 문·방 토큰 수정), meta.json status "디자인"
+- 표시: **[캡처 확인]** = designer가 헤드리스 Edge 360×640(움직임 줄이기 켬)으로 찍어 본 것 / **[코드 판단]** / **[화면 확인 필요]**
+- 틀 재사용: 시작(.room-intro) → 입력(.room-input) → 의식(.ritual) → 결과(.result: 캡처 카드·목차·4장·상식·면책·공유·원형 한 줄·떡밥·나의 이야기)는 룬·별과 **같은 class·같은 data-js 이름**. 방마다 다른 것은 ① 강조 색조 ② 핵심 비주얼 ③ 의식 연출 ④ 반전 카드뿐.
+
+## 디자인 방향 (네 방)
+- **여섯 가지 손맛이 겹치지 않게**: 룬 = 쥐고 흔들고 뒤집기(누르고 있기), 별 = 하늘이 되감기는 걸 지켜보기, **오검 = 손끝으로 껍질에 긋기(쓸어내리는 속도가 곧 새기는 속도)**, **데칸 = 멈춘 돌 원반 위를 그림자만 똑딱 넘어가는 걸 지켜보기(도는 건 원반이 아니라 빛)**, **촐킨 = 맞물린 두 톱니가 서로 반대로 도는 기계적 순환**, **시빌라 = 두루마리를 집어 불꽃으로 옮겨 놓기 → 숨은 글자가 떠오름**.
+- 신비로움: 방마다 배경 층 — 오검 = 멀리 선 자작나무·안개·떠도는 빛 알갱이, 데칸 = 새벽→정오로 차오르는 금빛 하늘·모래 언덕·날리는 모래, 촐킨 = 위 모서리 정글 잎·청록 빛 알갱이, 시빌라 = 양옆 대리석 기둥·촛불이 바닥을 비추는 빛. 모두 CSS만.
+- 문화 존중: 촐킨의 스무 문양은 **그림을 지어내지 않고** 카르투슈 틀에 이름만 새긴다(살아 있는 달력의 도상을 임의로 그리지 않기 위해). 숫자는 실제 마야 막대·점 표기(점=1, 막대=5). 오검은 필사본식 획(줄기 + 획 1~5개, 4묶음).
+
+## 사용자 흐름 (추가분)
+| 화면 | 목적 | 단 하나의 행동 | 다음 |
+|---|---|---|---|
+| 0. 허브 | 여섯 방 중 하나 고르기 | 포털 하나 누르기 | 각 방 시작 |
+| 1-O/D/T/V. 방 시작 | 이 문화가 무엇인지, 몇 장인지 | 아래 버튼 | 입력 |
+| 2-O. 오검 입력 | 이름(필수, 성+이름, 최대 10자) | 버튼 | 3-O |
+| 2-D / 2-T. 데칸·촐킨 입력 | 생년월일 3칸(시각 받지 않음) | 버튼 | 3-D / 3-T |
+| 2-V. 시빌라 입력 | 주제 칩 5개(기본: 시험·도전) + 질문(선택, 60자) | 버튼 | 3-V |
+| 3-O. 오검 의식 | 이름을 껍질에 새기기 | 빛나는 점을 아래로 쓸어내리기(또는 누를 때마다 한 글자) | 결과 |
+| 3-D. 데칸 의식 | 정오의 그림자가 칸을 찾음(약 5초) | 지켜보기 | 결과 또는 3-D′ |
+| 3-D′. 데칸 후보 | 그날 태양이 경계를 넘음 → 두 쪽 중 선택 | 카드 누르기 | 결과 |
+| 3-T. 촐킨 의식 | 두 톱니가 그날을 찾음(약 5초) | 지켜보기 | 결과 |
+| 3-V. 시빌라 의식 | 두루마리를 촛불로 → 글자가 떠오름 | 두루마리를 아래로 끌기(또는 한 번 누르기) | 결과 |
+| 4. 결과 (네 방) | 4장 긴 글, 공유 | 공유 | 떡밥 2곳 / 나의 이야기 |
+- UX 목표: 탭 수는 룬·별과 같다(허브 1 + 시작 1 + 입력 1). 이름·생년월일이 저장돼 있으면 오검·데칸·촐킨 입력은 저장된 정보 카드 확인만. 의식 길이: 오검 사용자 속도(약 2~4초) + 공개 3.4초, 데칸 5.2초, 촐킨 5.2초, 시빌라 끌기 + 4.4초.
+
+## 화면별 명세
+
+### 0. 허브 (여섯 방) [캡처 확인]
+- 레이아웃: 달 문장(64→52px) → eyebrow → 로고 → 부제 → **포털 6개 2열×3행(장 순서 I~VI: 오검·별·데칸·촐킨·시빌라·룬)** → 나의 이야기 진행 카드(아치 6개, 기존) → 소개 글 → 광고.
+- 순서는 우선순위가 아니라 "나의 이야기" 장 번호(문 위 로마 숫자 I~VI로 표시).
+- 문: 포털 104→76px, 방 이름 22→19px(2줄까지, balance — "시빌라 신탁의 방"은 2줄), 출신 13px, 설명 14px 2줄. 같은 줄 두 문 높이는 grid가 맞춘다.
+- 360×640: 첫 줄 포털 2개 전체 + 둘째 줄 포털 윗부분이 첫 화면에 보여 스크롤을 부른다. 여섯 문 색이 서로 구분된다.
+- 포털 6개 동시 회전 부담 때문에 **소용돌이 blur 필터를 뺐다**(마스크로 가장자리 처리). 짝수 문은 반대로 돌고, 맥동은 문마다 0.53초씩 어긋남.
+- "아직 봉인된 방" 섹션은 `.is-hidden`(app.js가 `hub-closed`를 찾아 지우면 오류) → developer가 JS와 함께 삭제.
+
+### 1. 방 시작 (네 방) — 틀은 룬·별과 같음
+- 방 상징: 오검 = 자작나무 껍질 조각 위 오검 획(베흐) 그리기 / 데칸 = 해시계 아이콘 / 촐킨 = 톱니 아이콘(40초에 한 바퀴) / 시빌라 = 월계관 + 촛불.
+- 알약 "나의 이야기 N장 · 챕터"는 기존 `room-chapter-num`(data-n 1/3/4/5)이 채운다.
+
+### 2. 입력
+- 오검: 이름 1칸 + 안내 한 줄 + 오류 `ogham-error`. 개인정보 안내 `privacy.noticeName` 재사용.
+- 데칸·촐킨: 별의 방 날짜 3칸과 같은 마크업(시각 칸 없음) + 방별 안내(`<방>.input.dateHint`) + 오류 `<방>-error`. `privacy.noticeBirth` 재사용.
+- 시빌라: 주제 칩 5개(2열, 마지막 "나 자신"은 한 줄 전체) + 질문 textarea(2줄, maxlength 60, 글자 수 `sibyl-question-count`). 저장된 정보 카드 없음. 안내는 **새 문구** `privacy.noticeQuestion`. 질문은 sessionStorage에도 넣지 않는다(운영자 결정 25번).
+
+### 3-O. 오검 의식 — 자작나무 껍질에 새기기 [캡처 확인: 시작·중간·완료]
+- 레이아웃: 안내 2줄 → **껍질**(124×min(380px,50dvh), 흰 자작나무·검은 껍질눈) → 로마자 이름 한 줄 → 안내 한 줄.
+- 껍질 안: 점선(새길 길) → 이름 글자 수만큼 세로로 나눈 칸마다 새길 자리 점 → 빛나는 칼끝(처음엔 숨쉬며 아래 화살표).
+- 조작: 껍질 위에서 **아래로 쓸어내린 비율 = `--carve`(0~1)**. 칼끝이 따라 내려오고, 줄기가 파이고, 각 글자 획이 칼끝이 지나는 순간 그려진다(CSS가 글자마다 `--cut` 계산). 손을 떼도 되돌아가지 않음(룬 주머니와 다른 점). 누를 때마다 한 글자씩 새기는 방법도 제공(접근성).
+- 다 새기면 `.is-carved`: 글자가 위에서부터 80ms 간격으로 하얗게 빛남 → 껍질이 어두워짐 → **뿌리 글자**(결과 오검 한 자)가 떠오르며 획이 그려짐 → 이름 알약. 약 3.4초 뒤 결과.
+- 오검은 전통적으로 아래에서 위로 읽지만 이 의식은 쓸어내리는 동작에 맞춰 위→아래로 새긴다. 화면 문구에서 "전통 방식대로"라고 말하지 않는다(copywriter 전달).
+
+### 3-D. 데칸 의식 — 정오의 해시계 [캡처 확인: 착지 상태]
+- 레이아웃: 안내 + 날짜("1995. 3. 21. 정오") → **사암 원반**(min(320px,86vw)): 햇살 눈금 72개, 금빛 테두리, 36칸(12궁 경계는 긴 선), 칸마다 데칸 별, 해시계 시간선, 가운데 오벨리스크 → 데칸 이름 → 상식 카드 → 5초 진행 막대 → 모래 언덕.
+- 연출: **원반은 돌지 않는다.** 그림자(긴 쐐기)와 반대편의 해가 한 팔로 원반 둘레를 돈다. 360° 전부터 **한 칸(10° ≈ 열흘)씩 똑딱**, 점점 느려짐(18칸 73ms → 12칸 110ms → 5칸 220ms → 마지막 한 칸은 미끄러지듯). 동시에 하늘이 새벽빛→정오빛, 36개 별이 하나씩 켜짐. 4.4초 `.is-landed`: 그림자가 가리킨 칸이 금빛, 그림자 끝에 빛, 이름이 떠오름.
+
+### 3-D′. 데칸 후보 고르기
+- 별의 방 후보 화면과 같은 틀(`.star-choose .day-line .choice`), 2칸·2장. 색 1 = 호박빛(sand), 2 = 터키석(jade), 번호 함께 표시.
+
+### 3-T. 촐킨 의식 — 맞물린 두 돌 톱니 [캡처 확인: 착지 상태]
+- 레이아웃: 안내 2줄 → **톱니 한 쌍**(폭 min(340px,100%)): 왼쪽 작은 톱니(이 13, 금빛 막대·점 숫자), 오른쪽 큰 톱니(이 20, 카르투슈 20개에 문양 이름) — 맞물린 자리에 바늘과 빛 고리 → 그날 이름 → **260일 돌판**(가로 20문양 × 세로 13줄 = 점 260개) → "260일 가운데 N번째 날" → 진행 막대.
+- 연출: 40일 전 자리에서 **서로 반대 방향으로**(큰 것 720°, 작은 것 1107.69° = 20:13) 같은 이징으로 돌아 맞물린 채 멈춤(4.2초). 돌판 위로 빛 띠 3회. `.is-landed`: 맞물림 번쩍, 그날 카르투슈·숫자 점등, 톱니 가운데(돌지 않는 원)에 숫자와 문양 이름, 돌판에 세로·가로 띠와 그날 점.
+- 카르투슈 글자는 맞물린 자리(왼쪽)에서 똑바로 서도록 기울였다. 다른 자리 글자는 거꾸로 보일 수 있다(새긴 돌, 의도).
+
+### 3-V. 시빌라 의식 — 두루마리를 촛불로 [캡처 확인: 말림·끄는 중·펼친 최종]
+- 레이아웃: 안내 2줄 → 물어본 것 카드(카테고리 알약 + 질문, 비면 줄 사라짐, 최대 2줄) → **무대 372px**: 말린 두루마리(양피지 뭉치·나무 손잡이·붉은 봉랍), 점선 안내, 촛불(흔들리는 불꽃·후광), 대리석 제단 → 안내 한 줄.
+- 조작: 아래로 끌면 `--near`(0~1, 172px 기준)만큼 내려오고 불꽃·후광이 커지고 종이가 데워진다. 0.8 이상에서 놓거나 한 번 누르면 `.is-warming`: 불꽃 위에 자리 → 봉랍이 부서져 떨어짐 → 종이가 **아래(불꽃 쪽)에서 위로** 펼쳐짐 → 번호와 신탁 문장이 아래에서부터 흐린 갈색→불빛에 달아오름→짙은 갈색으로 떠오름(비밀 잉크). 약 4.4초 뒤 결과.
+- 오검(표면을 따라 긋기)과 다른 점: 물건을 옮겨 놓는 동작, 결과가 "새기는" 게 아니라 "이미 있던 글자가 드러나는" 것.
+
+### 4. 결과 (네 방) [캡처 확인: 네 방 캡처 카드]
+| 방 | 캡처 카드 비주얼 | 반전(공감) 카드 |
+|---|---|---|
+| 오검 | 껍질 조각의 뿌리 글자(획 그리기) + 라틴 이름 | **이름이 새긴 가지들**: 이름 글자 수만큼 세로 오검 글자 줄(아래 로마자) + 로마자 이름 + 문단 |
+| 데칸 | 작은 해시계(그림자가 가리킨 칸 금빛) + "DECAN n / 36" | **같은 별자리, 세 얼굴**: 별자리 → n번째 데칸(`.twist` 재사용) + 문단 + 후보 선택 안내 |
+| 촐킨 | 금빛 막대·점 숫자 + 문양 이름 카르투슈 + "n / 260" | **두 번째 톱니**: 숫자 × 문양 + 열세 숫자 한 문단(기획서 13숫자 보조 레이어) |
+| 시빌라 | 월계관 안 신탁 번호(로마 숫자) | **물어본 것**: 카테고리 + 질문(있을 때만) + 펼친 두루마리 인용(양피지 바탕 짙은 갈색) + 문단 |
+- 모든 방: 반전 카드 아래 **고증 한 줄 `.source-note`**(※ 13px) — 오검 "문헌 이름 vs 새 해석", 데칸 "헬레니즘 36데칸·열대 황경, 별의 방(항성)과 기준 다름", 촐킨 "지금도 지키는 신성한 달력을 빌려 씀", 시빌라 "제비뽑기 신탁은 실재, 형식은 시빌라 이미지를 빌림".
+- 시빌라 질문은 캡처 카드(=공유 이미지)에 넣지 않는다. 반전 카드에만, 저장하지 않으므로 "전체 다시 보기"에선 사라짐(빈 요소는 CSS가 숨김).
+
+### 5. 나의 이야기 (6장)
+- 틀은 그대로(아치 6개·등뼈 6장은 1단계에 있음). `.is-upcoming`은 더 쓰이지 않음(CSS 유지). 6장 모두 채우면 기존 `.is-complete`.
+- 방 0개 화면의 방 버튼: 2개 → **6개 2열×3행**(장 순서).
+
+## 색 (2단계 추가) — OKLCH, 강조 명도 0.84 고정 [코드 판단: OKLCH→sRGB 계산]
+| 방 | --accent-h | 채도 배율 | --room-h | sRGB | 강조/입력칸 | 버튼 글자/강조 |
+|---|---|---|---|---|---|---|
+| 오검 | forest 150 | 0.85 | 160 | #a3dbad | 9.89:1 | 11.25:1 |
+| 데칸 | sand 65 | 1.1 | 55 | #fcbc7c | 9.39:1 | 10.69:1 |
+| 촐킨 | jade 190 | 0.9 | 185 | #80ded7 | 9.93:1 | 11.30:1 |
+| 시빌라 | candle 35 | 0.8 | 340 | #fab8a8 | 9.33:1 | 10.61:1 |
+- `--accent-dim` / 입력칸 5.70~6.08:1, 본문 / 카드 윗부분 14.3~14.9:1. 모두 AA. base.css 토큰 값은 바꾸지 않았다(hue 토큰은 1단계에 이미 정의돼 있었음).
+- 재질색(껍질·사암·돌·양피지·대리석·밀랍)은 글자 바탕이 아니다. 예외: 양피지 위 신탁 글자 oklch(0.30 0.06 45) / 양피지 L≈0.93 → 약 9:1.
+
+## 핵심 비주얼 (모두 코드, 외부 이미지 없음)
+| 무엇 | 방식 |
+|---|---|
+| 오검 20자 | 스프라이트 `<symbol id="ogham-<이름>">`(pathLength 1 → 그리기 가능). 이름: beith luis fearn sail nion / uath dair tinne coll ceirt / muin gort ngetal straif ruis / ailm onn ur edad idad |
+| 마야 숫자 1~13 | `<symbol id="maya-1…13">` 채움 도형 |
+| 방 아이콘 | `icon-decan`, `icon-tzolkin`, `icon-sibyl`(선 도형) — 포털·방 상징·끝 장식·떡밥 카드 |
+| 월계관 | `<symbol id="laurel">` + 결과 카드엔 인라인(잎 등장 애니메이션) |
+| 껍질·숲·두루마리·촛불·제단 | CSS 도형·그라데이션 |
+| 해시계 원반 | 정적 SVG(36칸·72햇살·시간선·그림자 팔) + 사암 = CSS 원 |
+| 촐킨 톱니 | 정적 SVG 두 장, 260일 돌판 = CSS 배경 무늬(DOM 없음) |
+
+## 애니메이션 명세 (2단계)
+- 원칙 그대로. **움직임 줄이기 = 애니메이션 없는 기본 스타일이 최종 모습**: 상태 class(`is-carved`, `is-landed`, `is-warming`)가 붙은 모습 자체가 최종이고, 애니메이션·transition은 과정만. 계속 떠도는 장식(빛 알갱이·모래·돌판 빛 띠)은 숨김.
+
+| # | 방 | 무엇이 | 언제 | 얼마나 | 움직임 줄이기 |
+|---|---|---|---|---|---|
+| F-1 | 오검 | 칼끝 숨쉬기 + 아래 화살표 | 대기 | 1.6s 반복 | 정지, 화살표 숨김 |
+| F-2 | 오검 | 줄기·글자 획·칼끝·초록 번짐 | `--carve` 변할 때 | 즉시(JS 값) | 그대로 |
+| F-3 | 오검 | 글자 차례로 하얗게 | `.is-carved` 0s + k×80ms | 0.9s | 없음 |
+| F-4 | 오검 | 껍질 어두워짐 | 0.9s | 0.8s | 즉시 |
+| F-5 | 오검 | 뿌리 글자 떠오름 / 획 그리기 / 이름 | 1.1 / 1.2 / 2.3s | 1.2 / 1.3 / 0.65s | 즉시 최종 |
+| G-1 | 데칸 | 하늘 새벽→정오 | `.is-running` | 4.4s | 정오 |
+| G-2 | 데칸 | 테두리·시간선·햇살 / 별 36개 톡(0.2s + n×40ms) | `.is-running` | 1~1.4s / 0.4s | 완성 |
+| G-3 | 데칸 | 그림자+해 팔 steps 똑딱 | `.is-running` | 4.4s | 최종 각도 |
+| G-4 | 데칸 | 집 칸 점등 / 그림자 끝 빛 / 이름 | `.is-landed` | 1s / 1s / 0.9s | 점등 상태 |
+| H-1 | 촐킨 | 큰 톱니 +720°→0, 작은 톱니 −1107.69°→0 | `.is-running` | 4.2s (0.25,0.7,0.2,1) | 최종 위치 |
+| H-2 | 촐킨 | 돌판 빛 띠 3회 | `.is-running` | 1.3s×3 | 숨김 |
+| H-3 | 촐킨 | 맞물림 번쩍 / 점등 / 가운데 숫자·이름 / 돌판 띠·점 | `.is-landed` | 0.6~1s | 최종 |
+| I-1 | 시빌라 | 불꽃 흔들림 1.3s, 후광 2.6s | 항상 | | 정지 |
+| I-2 | 시빌라 | 두루마리 위치·불꽃·후광·종이 밝기 | `--near` | 끄는 중 즉시(`.is-dragging`), 놓으면 0.3s | 즉시 |
+| I-3 | 시빌라 | 봉랍 부서짐 / 종이 펼침 / 글자 떠오름 / 번호 | `.is-warming` 0.2 / 0.5 / 1.6 / 3.2s | 0.6 / 1.2 / 2.4 / 0.8s | 펼친 최종 |
+| J | 결과 | 오검 획 그리기, 데칸 팔이 90° 앞에서 돌아옴, 촐킨 숫자 톡·카르투슈, 시빌라 잎 80ms 간격 톡 | `.capture.is-revealed` | 1~1.5s | 최종 |
+
+### 트리거 (JS가 붙일 class·변수 — developer 요청)
+| class / 변수 | 붙일 곳 | 언제 | 뗄 때 |
+|---|---|---|---|
+| `--carve`(0~1), `--count`(글자 수) | `ogham-bark` | 끄는 동안 / 의식 전 | 다시 할 때 0 |
+| `--k` + `<svg><use href="#ogham-…">` | `ogham-letters` 안 `li.bark__letter`(JS 생성) | 의식 전 | |
+| `is-carved` | `#screen-ogham-ritual` | --carve 1 순간 → 3.4s 뒤 결과 | 화면 떠날 때 |
+| `--decan-deg`((번호×10+5)deg) | `decan-dial`, `result-decan-dial` | 의식 전 / 결과 그릴 때 | |
+| `is-home` | `decan-cell[data-n 0~35]`, `tzolkin-sign[data-n 0~19]`, `tzolkin-num[data-n 1~13]` | 의식 전 | 다음 계산 때 옮김 |
+| `is-running` → `is-landed` | `#screen-decan-ritual`(4.4s), `#screen-tzolkin-ritual`(4.2s) | 표시 즉시 / 착지 → 약 1초 뒤 결과 | 화면 떠날 때 |
+| `--sign-deg`(−문양×18deg), `--num-deg`((숫자−1)×27.6923deg) | `tzolkin-gears` | 의식 전 | |
+| `--col`(0~19), `--row`(floor(순번/20), 0~12) | `tzolkin-tablet` | 의식 전 | |
+| `--near`(0~1), `is-dragging` | `sibyl-stage` | 끄는 동안 | 놓을 때 |
+| `is-warming` | `sibyl-stage` | near≥0.8에서 놓음 또는 한 번 누름 → 4.4s 뒤 결과 | 화면 떠날 때 |
+
+## 공유 카드 레이아웃 (1080×1920) — 안전 영역·이중 테두리·별·제품 이름 위치는 기존과 같음(핵심 y 260~1640)
+| 카드 | bgTop | bgBottom | accent | text | muted |
+|---|---|---|---|---|---|
+| 오검 | #080717 | #002a17 | #a3dbad | #f5f2e9 | #b8b8ce |
+| 데칸 | #080717 | #2e1706 | #fcbc7c | #f5f2e9 | #b8b8ce |
+| 촐킨 | #080717 | #00282a | #80ded7 | #f5f2e9 | #b8b8ce |
+| 시빌라 | #080717 | #2c1026 | #fab8a8 | #f5f2e9 | #b8b8ce |
+
+| y | 오검 | 데칸 | 촐킨 | 시빌라 |
+|---|---|---|---|---|
+| 290 | eyebrow "낯선 점술관 · 오검의 방" 38px muted | 같은 형식 | 같은 형식 | 같은 형식 |
+| 360~760 | 흰 껍질 조각(200×400) + 뿌리 글자 획(두께 14, 강조색 빛) | 해시계(지름 400): 테두리·36칸·그림자·금빛 집 칸·해 | 막대·점 숫자(높이 150, #ebc573) + 카르투슈(340×110, 문양 이름 Cinzel 56px) | 월계관(지름 380, 잎 #8fb58a) + 로마 숫자 Cinzel 110px 강조색 |
+| 800 | "BEITH" Cinzel 34px muted | "DECAN 11 / 36" Cinzel 34px 강조색 | "160 / 260" Cinzel 34px 강조색 | "SORS" Cinzel 34px muted |
+| 900~1020 | 제목 80~96px bold, 최대 2줄 | 같음 | 같음 | 같음 |
+| 1080 | 부제 48px 강조색 | 같음 | 같음 | 부제 = 카테고리 |
+| 1170~1430 | 핵심 문장 44px, 폭 820, 최대 4줄 | 같음 | 같음 | 신탁 문장: 양피지 띠(900×300) 위 #4a2a14, 46px, 최대 4줄 |
+| 1510 | 알약 "나의 이야기 1장 · 뿌리" | "3장 · 숨은 재능" | "4장 · 다가올 순환" | "5장 · 오늘의 질문" |
+| 1630 | 제품 이름·주소 32px | | | |
+- 시빌라 카드에 **자유 입력 질문은 넣지 않는다**(카테고리만).
+- 나의 이야기 카드: 기존 형식(아치 6개). 6장 모두 채우면 훅 대신 "완성된 원형" 알약.
+
+## 텍스트 길이 제한 (2단계 추가, copywriter용) — 기준은 1단계와 같음
+| 요소 | 최대 | 넘으면 |
+|---|---|---|
+| 허브 문: 방 이름 / 출신 / 설명 | 9 / 10 / 16 | 문 폭 약 150px, 이름 2줄·설명 2줄까지. 넘으면 둘째 줄 포털이 첫 화면 밖으로 |
+| 의식 안내 (네 방) | 2줄, 줄당 16 | 3줄이면 360×640에서 무대가 잘림 |
+| 오검 입력 안내 / 로마자 줄 / 뿌리 이름 알약 | 36 / 글자 16개 / 12 | 2줄 |
+| 데칸 날짜 줄 / 데칸 이름 | 16 / 14 | 2줄 |
+| 촐킨 문양 이름(카르투슈·가운데) | 라틴 8자 / 한글 4자 | 카르투슈는 textLength로 눌림, 가운데 원 한글 5자 넘으면 3줄 |
+| 촐킨 그날 이름 / 순번 줄 / 숫자 제목 | 18 / 20 / 16 | 2줄 |
+| 시빌라 주제 칩 | 6 | 칩 2줄 |
+| 시빌라 신탁 문장(두루마리) | **44** | 양피지 19px 5줄, 넘으면 종이 밖으로 잘림 |
+| 캡처 카드 제목 / 부제 | 14 (2줄) / 22 | 3줄이면 카드가 첫 화면을 크게 넘음 |
+| 고증 한 줄 | 80 | 13px 4줄 |
+| 라틴 라벨 / 데칸 번호 / 촐킨 순번 / 신탁 번호 | 8 / 14 / 10 / 6 | 알약 한 줄 |
+| 나머지(목차·장·떡밥·상식·원형 근거·후보 카드) | 1단계 표와 같음. 결과 하나 3,000~4,000자(결정 26번) | |
+
+## developer 전달 사항 (2단계)
+- 화면 이름: `ogham-intro/input/ritual/result`, `decan-intro/input/ritual/choose/result`, `tzolkin-intro/input/ritual/result`, `sibyl-intro/input/ritual/result`. data-room = ogham / decan / tzolkin / sibyl(CHAPTER_ORDER 키와 같음).
+- 결과·입력 화면은 룬·별과 **같은 data-js 이름**(`saved-info`, `privacy-notice`, `result-*`, `chapter-*`, `toc-title`, `turn-text`, `twist-*`, `fact-text`, `next-rooms`, `result-go-story`, `result-share(-top)`, `result-retry`, `result-archetype*`, `disclaimer-slot`, `ad-slot`) → 반드시 화면 section 안에서 찾을 것.
+
+### 새 data-js
+| 이름 | 위치 | 역할 |
+|---|---|---|
+| `hub-door-ogham/decan/tzolkin/sibyl` (+ `hub-door-badge`) | 허브 | renderHub 그대로 |
+| `<방>-lore`, `<방>-intro-go` | 시작 | |
+| `ogham-form`, `ogham-name-field`, `ogham-name`, `ogham-error`, `ogham-input-go` | 오검 입력 | |
+| `decan-form`, `decan-date-field`, `decan-year/month/day`, `decan-error`, `decan-input-go` (촐킨은 `tzolkin-…`) | 데칸·촐킨 입력 | |
+| `sibyl-form`, `sibyl-topics`, `sibyl-topic`×5(`data-topic` exam/love/work/relation/self), `sibyl-question-field`, `sibyl-question`, `sibyl-question-count`, `sibyl-input-go` | 시빌라 입력 | |
+| `ogham-ritual-guide`, `ogham-bark`, `ogham-letters`, `ogham-root-glyph`(`<use>`), `ogham-root-name`, `ogham-ritual-latin`, `ogham-ritual-hint` | 오검 의식 | |
+| `decan-ritual-date`, `decan-dial`, `decan-cell`×36, `decan-ritual-name`, `decan-ritual-note` | 데칸 의식 | |
+| `decan-choose-lead`, `decan-dayline`, `decan-dayline-seg`×2, `decan-choices`, `decan-choice`×2, `decan-choice-when/name`, `decan-choice-trait`×2 | 데칸 후보 | 별 후보 코드와 같은 방식 |
+| `tzolkin-ritual-guide`, `tzolkin-gears`, `tzolkin-num`×13, `tzolkin-sign`×20, `tzolkin-sign-label`×20(SVG text), `tzolkin-ritual-num`(`<use>`), `tzolkin-ritual-sign`, `tzolkin-ritual-day`, `tzolkin-tablet`, `tzolkin-ritual-count` | 촐킨 의식 | 라벨은 data에서(지금은 Yucatec 자리표시) |
+| `sibyl-ritual-guide`, `sibyl-asked`, `sibyl-ritual-category`, `sibyl-ritual-question`, `sibyl-stage`, `sibyl-scroll`, `sibyl-scroll-num`, `sibyl-scroll-text`, `sibyl-candle`, `sibyl-ritual-hint` | 시빌라 의식 | |
+| `result-glyph`(오검 `<use>` 1개), `result-ogham-latin` / `result-decan-dial`, `result-decan-number` / `result-maya-number`, `result-sign-label`, `result-tzolkin-number` / `result-sors-number` | 캡처 카드 | |
+| `ogham-name-letters`(JS가 li.name-branch__letter > svg>use + span), `ogham-name-latin` / `result-choice-note` / `tzolkin-number-title`, `tzolkin-number-glyph`, `tzolkin-sign-name` / `sibyl-result-category`, `sibyl-result-question`, `sibyl-scroll-quote` | 반전 카드 | |
+| `result-source-note` | 네 방 결과 | 고증 한 줄 |
+
+### 새 data-t 키 (data.js에 없음 → 지금은 빈 글자. 마크업의 [초안] 글자는 길이 견본)
+`hub.doors.{ogham,decan,tzolkin,sibyl}.{origin,desc}`, `<방>.intro.{eyebrow,title,pitch,lore[],go}`, `<방>.input.{title,go}`, `ogham.input.{nameLabel,nameHint,namePlaceholder,nameNote}`, `{decan,tzolkin}.input.{dateLabel,dateHint}`, `sibyl.input.{topicLegend,questionLabel,questionHint,questionPlaceholder}`, `sibyl.topics.<5개>.label`, `privacy.noticeQuestion`, `ogham.ritual.barkLabel`, `decan.ritual.label`, `sibyl.ritual.scrollLabel`, `decan.choose.{eyebrow,title,caption,note}`, `<방>.result.{eyebrow,retry}`, `ogham.result.{nameEyebrow,nameTitle}`, `decan.result.{twistEyebrow,twistTitle}`, `tzolkin.result.{numberEyebrow,numberLabel,signLabel}`, `sibyl.result.askedEyebrow`. (재사용: `star.choose.ticks`, `star.input.*Aria`)
+
+### 새 상태 class
+`is-carved`(오검 의식), `is-running`/`is-landed`(데칸·촐킨), `is-home`(데칸 칸·촐킨 문양·숫자), `is-dragging`/`is-warming`(시빌라 무대).
+
+### developer 요청 (2단계)
+1. `OPEN_ROOMS` 여섯 방으로, `hub-closed` 코드와 `.closed-rooms` section(지금 `.is-hidden`) 함께 삭제. `ROOM_ICON`에 네 방 추가(`<svg viewBox="0 0 40 80"><use href="#ogham-beith"/></svg>`, `viewBox="0 0 40 40"`의 `#icon-decan|#icon-tzolkin|#icon-sibyl`).
+2. data.js `rooms.ogham.glyph` "ᚁ"(오검 유니코드)는 불러온 글꼴에 없다 → 나의 이야기 근거 목록에서 네모로 보일 수 있음. 근거 목록도 ROOM_ICON(SVG) 사용 권장. ☉ ◎ ✧ 기기별 모양 [화면 확인 필요].
+3. 의식 JS: 트리거 표. 오검은 껍질 위 세로 이동량 ÷ 껍질 높이 = --carve(최댓값 유지), 누를 때마다 한 글자(Enter/Space 포함). 시빌라는 세로 끌기 ÷ 172px = --near, 누르기만 해도 is-warming.
+4. 움직임 줄이기: 데칸·촐킨 의식 1.2초, 오검 is-carved·시빌라 is-warming 뒤 1초로 단축, 오검은 한 번 누르면 전부 새김 권장.
+5. share-card.js: 위 네 방 비주얼(껍질+획, 해시계, 숫자+카르투슈, 월계관, 양피지 띠) 그리기 옵션. 공통 부품 → 쓰는 제품 확인 후 보고.
+6. 개인정보: 시빌라 질문은 sessionStorage·분석·공유 이미지·URL에 넣지 않음(화면 표시만). 오검 로마자는 매번 계산.
+7. index.html `<title>`·description·og와 data.js TEXT.meta를 여섯 방 기준으로(문구 copywriter). 허브 소개 글의 "지금 열린 두 방"도 copywriter.
+8. 촐킨 표기(Yucatec/K'iche')는 copywriter·developer가 정해 data로.
+
+## 캡처 기록 (2단계 디자인 단계, 2026-09-28)
+- 헤드리스 Edge 360×640, 움직임 줄이기 켬으로 허브·네 방 시작·입력·의식(상태별)·결과 캡처 카드를 찍어 확인. 콘솔 오류 없음. 문구는 data.js에 없어 빈칸이거나 [초안].
+- **1단계 버그 발견·수정(style.css)**: 별의 방 `.moon-arm`이 `transform-box: view-box; transform-origin: 50% 50%`였는데, view-box 기준 상자는 viewBox의 (0,0)에서 시작해 50% 50% = (160,160)이었다. 측정 결과 `--moon-deg` 115°에서 달이 바퀴 밖(화면 위쪽 밖)에 있었다 → `transform-origin: 0 0`으로 수정, 0°·115° 모두 달이 바늘 아래 [측정 확인]. 1단계 QA 통과본에 해당 — 달의 황경이 0° 근처가 아닌 대부분의 날짜에서 착지한 달이 보이지 않았을 가능성. 데칸 그림자 팔·결과 해시계도 같은 방식으로 작성.
+- 그 밖에 고친 것: 월계 잎(SVG transform 속성과 CSS transform-origin 충돌로 흩어짐 → 절대 좌표 path), 멀리 선 자작나무(대나무 마디처럼 보임 → 짧은 껍질눈), 정글 잎(검은 타원 → 뾰족한 잎).
+
+## 화면 캡처로 확인할 것 (운영자) — 2단계
+- 움직임 켠 상태 실제 흐름: 오검 쓸어내리기 손맛, 데칸 그림자 "똑딱" 속도감, 촐킨 두 톱니 맞물림(이가 겹쳐 보이지 않는지), 시빌라 펼침·글자 떠오름.
+- 촐킨 오른쪽 정글 잎(마지막 수정 뒤 다시 찍지 못함).
+- 별의 방 의식에서 달이 바늘 아래 착지하는지(1단계 버그 수정 확인, 실제 JS 흐름으로).
+- 저사양 폰에서 허브 포털 6개 + 우주 배경 버벅임, 480px(PC)·360×568에서 시빌라 무대·오검 껍질이 한 화면에 드는지, 문구가 들어간 뒤 허브 문 높이.
