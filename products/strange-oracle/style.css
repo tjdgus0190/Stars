@@ -576,34 +576,6 @@ body.is-reading #sky { opacity: 0.2; }
 .story-teaser__desc { font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-muted); }
 .story-teaser__arrow { color: var(--accent); }
 
-.closed-rooms { margin-top: var(--space-10); text-align: center; }
-.closed-rooms__title { font-size: var(--fs-sm); font-weight: 400; letter-spacing: 0.1em; color: var(--c-text-muted); }
-.closed-rooms__list { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
-.closed-room {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 2px;
-  padding: var(--space-4) var(--space-2) var(--space-3);
-  border: 1px dashed var(--c-line);
-  border-radius: var(--space-12) var(--space-12) var(--radius-md) var(--radius-md);
-  background: oklch(0.16 0.035 var(--room-h) / 0.6);
-}
-.closed-room__num {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border: 1px dashed var(--c-line-strong);
-  border-radius: 50%;
-  font-family: var(--font-latin);
-  font-size: var(--fs-md);
-  color: var(--c-text-faint);
-}
-.closed-room__name { margin-top: var(--space-1); font-size: var(--fs-sm); color: var(--c-text-muted); }
-.closed-room__origin { font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-faint); }
-.closed-rooms__note { margin-top: var(--space-3); font-size: var(--fs-xs); color: var(--c-text-faint); }
-
 .about { margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid var(--c-line); }
 .about__title { margin-bottom: var(--space-4); font-size: var(--fs-lg); color: var(--c-text-strong); }
 .about__body { display: grid; gap: var(--space-4); font-size: var(--fs-sm); line-height: var(--lh-read); color: var(--c-text-muted); }
