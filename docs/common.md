@@ -6,7 +6,7 @@
 | 파일 | 상태 | 쓰는 제품 |
 |---|---|---|
 | base.css | 있음 (designer, 사용법은 docs/design-system.md) | strange-oracle |
-| share-card.js | 있음 (2026-09-25 옵션 추가, 2026-09-28 그림 블록 추가) | strange-oracle |
+| share-card.js | 있음 (2026-09-25 옵션 추가, 2026-09-28 그림 블록·소장판 옵션 추가) | strange-oracle |
 | disclaimer.js | 있음 | strange-oracle |
 | share-buttons.js, ads.js, affiliate.js, analytics.js | 아직 없음 | - |
 
@@ -57,14 +57,23 @@ const canvas = await ShareCard.render({
   dayGlyph: { number: 4, sign: "AJAW", label: "160 / 260", labelColor: "accent" }, // 마야 막대·점 숫자(1~13, 높이 150, numberColor 기본 #ebc573) + 카르투슈(340x110, Cinzel 56px)
   laurel: { numeral: "XIV", label: "SORS" },               // 월계관(지름 380, leafColor 기본 #8fb58a) + 가운데 로마 숫자(Cinzel 110px, 강조색)
   parchment: { text: "신탁 문장" },                         // 양피지 띠(900x300) 위 글자(46px, color 기본 #4a2a14, 최대 maxLines=4줄). lines 다음 자리에 그린다
+
+  // ── 2026-09-28 6단계 추가 옵션 (유료 소장판 카드용, 모두 선택. 안 넘기면 그리지 않는다)
+  frame: "keepsake",                                        // 기존 이중 테두리 안쪽 금선 두 겹 + 네 모서리 밀랍 인장(지름 72px, 갈라진 모습). theme.wax·waxRim으로 밀랍색 변경 가능
+  topBadge: "소장판",                                        // 제목 위 알약(32px). lead 다음·title 앞
+  pair: { left: "전사", right: "연인", mark: "×" },          // 제목 아래 쌍 한 줄(56px, 기호는 강조색 latin 글꼴). 상대가 없으면 { text: "여덟 원형의 지도" }
+  keyword: "지금 구간 한 줄",                                 // 40px 강조색, 한 줄(넘으면 말줄임)
+  roomGrid: { cells: [{ path: "M12 56V4…", vw: 40, vh: 60, fill: false, color: "#93d5f5", done: true }] }, // 3열 칸(120px). done이면 방 색 글리프, 아니면 흐린 테두리
+  closeLine: { text: "닫는 글 한 문장", size: 44, maxLines: 2 }, // 최대 2줄, 넘으면 말줄임
 });
 const how = await ShareCard.share(canvas, "파일이름.png", "공유 시 함께 보낼 문구");
 // how: "shared" | "cancelled" | "downloaded"
 ```
-- 그리는 순서(위→아래): eyebrow → glyph → art → bark → sundial → dayGlyph → laurel → stones → progress → lead → title → subtitle → lines → parchment → hook → badges. 전체를 안전 영역(y 260 ~ 1600) 가운데에 놓고, 넘치면 **아래쪽 줄부터 버린다**.
+- 그리는 순서(위→아래): eyebrow → glyph → art → bark → sundial → dayGlyph → laurel → stones → progress → lead → topBadge → title → subtitle → pair → keyword → roomGrid → closeLine → lines → parchment → hook → badges. 전체를 안전 영역(y 260 ~ 1600) 가운데에 놓고, 넘치면 **아래쪽 줄부터 버린다**.
 - 글꼴은 `document.fonts.ready`를 기다린 뒤 그린다. 웹폰트를 CSS로 먼저 불러 두어야 한다.
 - 개인정보: 이미지는 브라우저 안에서만 만들어진다. 이름 등 입력값을 넣을지는 제품이 정한다.
 - 변경 이력: 2026-09-25 옵션 추가. 쓰는 제품을 grep으로 확인(strange-oracle뿐). 기존 옵션만 쓰면 결과가 같다.
+- 2026-09-28 (6단계 유료 리포트): frame:"keepsake"·topBadge·pair·keyword·roomGrid·closeLine 추가. 새 블록 함수와 선택 옵션만 더했고 기존 옵션의 순서·기본값은 그대로(기존 카드는 새 옵션을 넘기지 않으므로 결과가 같다). 쓰는 제품 grep 결과 strange-oracle뿐. 유료 소장판에는 이름·생일·영수증 코드를 넣지 않는다(제품 규칙).
 - 2026-09-28: bark·sundial·dayGlyph·laurel·parchment 추가(새 블록 함수만 더하고 기존 블록·순서·기본값은 그대로). 쓰는 제품 grep 결과 strange-oracle뿐, 룬·별·나의 이야기 카드 이미지가 만들어지는 것을 헤드리스 Edge로 확인(이전 이미지와 픽셀 비교는 하지 않음).
 
 ## disclaimer.js

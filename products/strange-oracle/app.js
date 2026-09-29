@@ -1882,6 +1882,682 @@
     if (filledRooms().length) shareCard(e.currentTarget, buildStoryCard);
   }));
 
+  // ═════════ 6단계: 유료 리포트 "더 깊은 이야기" (spec 6-3·6-4, design 「6단계」) ═════════
+  // 켜지는 조건: pay.json의 api가 true(Vercel 배포본) → /api/config가 enabled:true. 그 밖(순수 정적 서버·파일·off)은 전부 꺼짐이고,
+  // 꺼져 있으면 새 요소는 .is-hidden 그대로, 세 화면(deeper·unseal·report)으로 가는 길이 없다 (D-9).
+  // 개인정보 (CLAUDE.md 6장, spec 6-4):
+  //  - 서버로 보내는 것: 결제 정보(paymentKey·orderId·amount)와 영수증 코드뿐. orderId 안에는 결과 코드 번호만 있다 (paycode.js).
+  //  - 이름·생년월일·태어난 시각·시빌라 질문·상대 정보는 보내지 않는다. 나이는 구간 코드(b1~b7)로만, 상대는 원형·관계 등급 코드로만 바뀐다.
+  //  - 상대의 이름·생년월일은 입력칸에만 있고 어디에도 저장하지 않는다(sessionStorage 포함). 코드를 만든 직후 입력칸을 비운다.
+  //  - 이 화면에서 새로 넣은 내 생년월일도 저장하지 않고 이번 계산에만 쓴다 (프로필에 이미 있으면 그 값을 쓴다).
+  //  - sessionStorage에는 영수증 코드만 따로 둔다(키 strange-oracle-receipt, 개인정보 아님). "내 정보 지우기"는 이것을 지우지 않는다.
+  //  - 유료 문구는 메모리(reportView)에만 두고 어떤 저장소에도 넣지 않는다.
+  const PAY_OFF = { enabled: false, mode: "off", clientKey: "", price: 3900, orderName: "" };
+  let Pay = PAY_OFF;
+  const RECEIPT_KEY = "strange-oracle-receipt";
+  const TOSS_SDK = "https://js.tosspayments.com/v2/standard"; // 토스 공식 주소(CLAUDE.md 3장 예외). 결제 버튼을 누른 뒤에만 불러온다
+  const deeperScr = screens.deeper;
+  const unsealScr = screens.unseal;
+  const reportScr = screens.report;
+  // 예상 분량 (spec 6-2 표. 서버 문구 한도와 같게 유지 — D-11)
+  const VOL = { open: 300, hidden: 700, hiddenSibyl: 400, stage: 600, summary: 150, matchBody: 800, side: 200, matchRoom: 350, deep: 1500, close: 300 };
+  const comma = (n) => Number(n).toLocaleString("ko-KR");
+  const readReceipt = () => {
+    try {
+      return PayCode.normalize(window.sessionStorage.getItem(RECEIPT_KEY) || "");
+    } catch (e) {
+      return "";
+    }
+  };
+  const writeReceipt = (code) => {
+    try {
+      if (code) window.sessionStorage.setItem(RECEIPT_KEY, code);
+      else window.sessionStorage.removeItem(RECEIPT_KEY);
+    } catch (e) {
+      /* 저장이 막힌 브라우저: 코드 카드로만 안내 */
+    }
+  };
+  // data-t가 붙은 요소를 한 덩어리 안에서만 다시 채운다 (복제한 틀에 쓴다)
+  const textIn = (el) => $$("[data-t]", el).forEach((x) => (x.textContent = get(x.dataset.t) ?? ""));
+  const paras = (el, list) => {
+    el.textContent = "";
+    for (const t of list || []) {
+      const p = document.createElement("p");
+      p.textContent = t;
+      el.append(p);
+    }
+  };
+
+  // ── 마크업의 모양 견본을 틀로 떼어 두고, data-t 없는 초안 표시 견본 글자는 지운다 (design developer 요청 2·3)
+  const tpl = {
+    hidden: js("report-hidden").firstElementChild.cloneNode(true),
+    stage: js("report-timeline").firstElementChild.cloneNode(true),
+    matchRoom: js("report-match-rooms").firstElementChild.cloneNode(true),
+  };
+  function clearPaidSamples() {
+    ["report-hidden", "report-timeline", "report-match-rooms", "report-open", "report-close", "report-match", "report-deep-strength", "report-deep-shadow", "report-deep-growth",
+      "report-title", "report-meta", "receipt-code", "receipt-code-end", "unseal-error-code", "deeper-total", "deeper-items", "deeper-volume", "deeper-price", "deeper-saved-value"]
+      .forEach((n) => (js(n).textContent = ""));
+    [...js("report-match-pair").children].forEach((s, i) => i !== 1 && (s.textContent = ""));
+    jsAll("deeper-toc-item").forEach((li) => ["toc-name", "toc-vol", "toc-teaser"].forEach((n) => (js(n, li).textContent = "")));
+  }
+
+  // ── 서버 호출 (같은 출처 /api/*). 본문에는 정해진 키만 담는다
+  async function apiCall(name, body) {
+    const ctl = "AbortController" in window ? new AbortController() : null;
+    const timer = setTimeout(() => ctl && ctl.abort(), 20000);
+    try {
+      const res = await fetch(`/api/${name}`, {
+        method: body ? "POST" : "GET",
+        headers: body ? { "Content-Type": "application/json" } : {},
+        body: body ? JSON.stringify(body) : undefined,
+        cache: "no-store",
+        credentials: "omit",
+        signal: ctl ? ctl.signal : undefined,
+      });
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        /* 빈 응답 */
+      }
+      return { ok: res.ok, status: res.status, data };
+    } catch (e) {
+      return { ok: false, status: 0, data: null };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  async function loadPayConfig() {
+    try {
+      const flag = await (await fetch("pay.json", { cache: "no-store" })).json();
+      if (!flag || flag.api !== true) return;
+      const r = await apiCall("config");
+      const c = r.ok && r.data;
+      if (c && c.enabled === true && ["mock", "test", "live"].includes(c.mode) && Number(c.price) > 0)
+        Pay = { enabled: true, mode: c.mode, clientKey: String(c.clientKey || ""), price: Number(c.price), orderName: String(c.orderName || "") };
+    } catch (e) {
+      Pay = PAY_OFF; // 설정을 못 받으면 결제만 조용히 꺼진다
+    }
+  }
+  const hasBlank = () => JSON.stringify([T.biz, T.deeper.disclosure]).includes("◯◯");
+
+  // ── 진입점 상태 (허브·나의 이야기·방 결과)
+  function applyPayUi() {
+    const on = Pay.enabled;
+    const owned = on && Boolean(readReceipt());
+    jsAll("result-deeper").forEach((el) => show(el, on));
+    const card = js("story-paid");
+    card.classList.toggle("is-on", on);
+    card.classList.toggle("is-owned", owned);
+    js("story-paid-status").textContent = on ? T.story.paid.statusOn : T.story.paid.status;
+    const goBtn = js("story-paid-go");
+    goBtn.disabled = !on;
+    goBtn.textContent = !on ? T.story.paid.go : owned ? T.story.paid.goOwned : T.story.paid.goOn;
+    show(js("story-paid-reopen"), on);
+    show(js("hub-paid"), on);
+    show(js("hub-report"), owned);
+    jsAll("pay-band").forEach((band) => {
+      const mode = Pay.mode === "mock" || Pay.mode === "test" ? Pay.mode : null;
+      show(band, Boolean(mode));
+      if (!mode) return;
+      band.dataset.mode = mode;
+      const label = $("[data-t]", band);
+      label.dataset.t = `pay.band.${mode}`;
+      label.textContent = T.pay.band[mode];
+    });
+  }
+  js("story-paid-go").addEventListener("click", () => {
+    if (!Pay.enabled) return;
+    const code = readReceipt();
+    if (code) reopen(code, js("story-paid-go"), null);
+    else go("deeper");
+  });
+  js("hub-report").addEventListener("click", (e) => {
+    const code = readReceipt();
+    if (Pay.enabled && code) reopen(code, e.currentTarget, null);
+  });
+
+  // ── 브라우저 쪽 계산: 나이 구간·상대 원형·관계 등급 (spec 6-2)
+  // 오늘 기준 만 나이 → b1(24세 이하) b2(25~29) … b7(50세 이상) = 0~6
+  function ageBand(b) {
+    const now = new Date();
+    let age = now.getFullYear() - b.y;
+    if (now.getMonth() + 1 < b.m || (now.getMonth() + 1 === b.m && now.getDate() < b.d)) age--;
+    return age <= 24 ? 0 : Math.min(6, Math.floor((age - 25) / 5) + 1);
+  }
+  // 원형 합산(무료 방과 같은 규칙): 가장 많이 나온 원형, 동점이면 앞선 장
+  function tallyArchetype(tags) {
+    const tally = {};
+    tags.forEach(([room, a]) => {
+      const t = (tally[a] = tally[a] || { count: 0, first: CHAPTER_ORDER.indexOf(room) });
+      t.count += 1;
+    });
+    return Object.entries(tally).sort((x, y) => y[1].count - x[1].count || x[1].first - y[1].first)[0][0];
+  }
+  // 상대: 이름 → 오검, 생년월일 → 데칸(한국 시간 정오, 후보 선택 없음)·촐킨. 별의 방은 시각이 필요해 뺀다
+  function partnerOf(name, b) {
+    const og = Calc.ogham(name);
+    if (!og) return null;
+    const decan = Calc.decan(b.y, b.m, b.d).noon.index;
+    const tz = Calc.tzolkin(b.y, b.m, b.d);
+    const arch = tallyArchetype([["ogham", OGHAM[og.index].archetype], ["decan", DECANS[decan].archetype], ["tzolkin", TZ_SIGNS[tz.sign].archetype]]);
+    return { arch, ogham: og.index, decan, tzSign: tz.sign };
+  }
+  // 나의 오검·데칸·촐킨: 방문 기록 우선, 없으면 프로필 이름·이번 생년월일로 같은 방식 계산 (방문 기록에는 넣지 않는다)
+  function mineForRelation(birth) {
+    const v = state.visits;
+    const og = v.ogham ? v.ogham.ogham : state.profile.name ? Calc.ogham(state.profile.name)?.index ?? null : null;
+    const decan = v.decan ? v.decan.decan : birth ? Calc.decan(birth.y, birth.m, birth.d).noon.index : null;
+    const tzSign = v.tzolkin ? v.tzolkin.sign : birth ? Calc.tzolkin(birth.y, birth.m, birth.d).sign : null;
+    return { ogham: og, decan, tzSign };
+  }
+  function relations(mine, p) {
+    const rel = { relOgham: null, relDecan: null, relTzolkin: null };
+    if (mine.ogham != null) rel.relOgham = mine.ogham === p.ogham ? 0 : OGHAM[mine.ogham].aicme === OGHAM[p.ogham].aicme ? 1 : 2;
+    if (mine.decan != null) {
+      const s1 = Math.floor(mine.decan / 3), s2 = Math.floor(p.decan / 3);
+      const e1 = s1 % 4, e2 = s2 % 4; // 0 불 · 1 흙 · 2 공기 · 3 물 (양자리부터 원소 순환)
+      rel.relDecan = s1 === s2 ? 0 : e1 === e2 ? 1 : (e1 + e2) % 2 === 0 ? 2 : 3; // 2 = 불-공기, 흙-물
+    }
+    if (mine.tzSign != null) rel.relTzolkin = mine.tzSign === p.tzSign ? 0 : mine.tzSign % 4 === p.tzSign % 4 ? 1 : 2;
+    return rel;
+  }
+  function myRoomCodes() {
+    const v = state.visits;
+    return {
+      rune: v.rune ? v.rune.picks.map((c) => RUNE_BY_CODE[c].index) : null,
+      star: v.star ? v.star.nak : null,
+      ogham: v.ogham ? v.ogham.ogham : null,
+      decan: v.decan ? v.decan.decan : null,
+      tzolkin: v.tzolkin ? { number: v.tzolkin.number, sign: v.tzolkin.sign } : null,
+      sibyl: v.sibyl ? v.sibyl.sors : null,
+    };
+  }
+
+  // ── 6-P 미리보기 입력 읽기
+  const dYear = js("deeper-year"), dMonth = js("deeper-month"), dDay = js("deeper-day");
+  const pName = js("deeper-partner-name"), pYear = js("deeper-partner-year"), pMonth = js("deeper-partner-month"), pDay = js("deeper-partner-day");
+  digitsOnly(dYear, dMonth);
+  digitsOnly(dMonth, dDay);
+  digitsOnly(dDay);
+  digitsOnly(pYear, pMonth);
+  digitsOnly(pMonth, pDay);
+  digitsOnly(pDay);
+  let deeperEditing = false;
+  let payFailed = false;
+  function readMyBirth(report) {
+    const useSaved = Boolean(state.profile.birth) && !deeperEditing;
+    if (useSaved) return state.profile.birth;
+    const y = Number(dYear.value), m = Number(dMonth.value), d = Number(dDay.value);
+    const ok = dYear.value.length === 4 && Calc.validDate(y, m, d);
+    if (report) setFieldError("deeper-date-field", "deeper-date-error", ok ? "" : T.deeper.errors.date);
+    return ok ? { y, m, d } : null;
+  }
+  // 상대: 넷 다 비었으면 none, 모두 맞으면 ok(+계산 결과), 아니면 오류 종류
+  function readPartner(report) {
+    const vals = [pName.value.trim(), pYear.value, pMonth.value, pDay.value];
+    let out;
+    if (vals.every((x) => !x)) out = { state: "none" };
+    else {
+      const y = Number(pYear.value), m = Number(pMonth.value), d = Number(pDay.value);
+      const dateOk = pYear.value.length === 4 && Calc.validDate(y, m, d);
+      if (!vals[0] || !dateOk) out = { state: "error", msg: T.deeper.errors.partnerBoth };
+      else {
+        const p = partnerOf(vals[0], { y, m, d });
+        out = p ? { state: "ok", p } : { state: "error", msg: T.deeper.errors.partnerName };
+      }
+    }
+    if (report) {
+      const err = js("deeper-partner-error");
+      err.textContent = out.state === "error" ? out.msg : "";
+      show(err, out.state === "error");
+    }
+    return out;
+  }
+  const clearPartner = () => [pName, pYear, pMonth, pDay].forEach((el) => (el.value = ""));
+
+  // 예상 분량·목차 (spec 6-2 표로 계산)
+  function plan() {
+    const rooms = filledRooms();
+    const me = currentArchetype();
+    const birth = readMyBirth(false);
+    const partner = readPartner(false);
+    const p = partner.state === "ok" ? partner.p : null;
+    const rel = p ? relations(mineForRelation(birth), p) : null;
+    const relCount = rel ? Object.values(rel).filter((g) => g != null).length : 0;
+    const vol = {
+      open: VOL.open,
+      hidden: rooms.reduce((s, r) => s + (r === "sibyl" ? VOL.hiddenSibyl : VOL.hidden), 0),
+      timeline: VOL.stage * 3,
+      match: p ? VOL.summary + VOL.matchBody + (p.arch === me ? 1 : 2) * VOL.side + relCount * VOL.matchRoom : VOL.summary * 8,
+      deep: VOL.deep,
+      close: VOL.close,
+    };
+    return { rooms, me, birth, p, vol, total: Object.values(vol).reduce((a, b) => a + b, 0) };
+  }
+  function renderToc() {
+    const P = plan();
+    const Tt = T.deeper.toc;
+    const meName = P.me ? T.archetypes[P.me].name : "";
+    const band = P.birth ? Math.min(ageBand(P.birth), 4) : null;
+    const names = {
+      open: Tt.open,
+      hidden: fill(Tt.hidden, { rooms: P.rooms.map((r) => T.deeper.roomShort[r]).join("·") }),
+      timeline: band == null ? T.report.parts.timeline : fill(Tt.timeline, { from: T.deeper.bands[band], to: T.deeper.bands[band + 2] }),
+      match: P.p ? fill(Tt.match, { me: meName, with: particle(meName || "나", "과/와"), you: T.archetypes[P.p.arch].name }) : fill(Tt.matchMap, { me: meName, with: particle(meName || "나", "과/와") }),
+      deep: fill(Tt.deep, { me: meName }),
+      close: Tt.close,
+    };
+    const teaser = {
+      open: T.deeper.teaser.open,
+      hidden: P.rooms.length ? T.deeper.teaser.room[P.rooms[0]] : "",
+      timeline: T.deeper.teaser.timeline,
+      match: P.p ? T.deeper.teaser.match : T.deeper.teaser.matchMap,
+      deep: P.me ? T.deeper.teaser.archetype[P.me] : "",
+      close: T.deeper.teaser.close,
+    };
+    jsAll("deeper-toc-item", deeperScr).forEach((li) => {
+      const part = li.dataset.part;
+      js("toc-name", li).textContent = names[part];
+      js("toc-vol", li).textContent = fill(part === "close" ? Tt.volClose : Tt.vol, { n: comma(P.vol[part]) });
+      js("toc-teaser", li).textContent = teaser[part];
+    });
+    js("deeper-total").textContent = fill(Tt.total, { n: comma(P.total) });
+    const D = T.deeper.disclosure;
+    js("deeper-items").textContent = fill(D.items, { rooms: P.rooms.length, match: P.p ? D.itemsMatch.partner : D.itemsMatch.map });
+    js("deeper-volume").textContent = fill(D.volume, { n: comma(P.total) });
+    return P;
+  }
+  function updatePayButton() {
+    const btn = js("deeper-pay");
+    const status = js("deeper-pay-status");
+    const blocked = Pay.mode === "live" && hasBlank();
+    show(btn, !blocked);
+    const rooms = filledRooms().length;
+    const consent = js("deeper-consent").checked;
+    btn.disabled = !consent || !rooms || btn.classList.contains("is-loading");
+    status.textContent = blocked ? T.deeper.blankLive : !rooms ? T.deeper.needRoom : consent ? T.deeper.payReady : T.deeper.payHint;
+  }
+  function renderDeeperInput() {
+    const saved = Boolean(state.profile.birth) && !deeperEditing;
+    show(js("deeper-saved"), saved);
+    show(js("deeper-date-field"), !saved);
+    if (state.profile.birth) {
+      js("deeper-saved-value").textContent = fill(T.common.date, state.profile.birth);
+      if (!dYear.value) [dYear.value, dMonth.value, dDay.value] = [state.profile.birth.y, state.profile.birth.m, state.profile.birth.d];
+    }
+    setFieldError("deeper-date-field", "deeper-date-error", "");
+  }
+  enter.deeper = () => {
+    if (!Pay.enabled) return go("hub", { instant: true });
+    deeperEditing = false;
+    js("deeper-consent").checked = false;
+    clearPartner();
+    readPartner(true);
+    show(js("pay-alert"), payFailed);
+    payFailed = false;
+    js("deeper-price").textContent = fill(T.deeper.disclosure.price, { price: comma(Pay.price) });
+    show(js("deeper-vat"), Boolean(T.deeper.disclosure.vat));
+    show(js("deeper-minor"), Boolean(T.deeper.disclosure.minor));
+    renderDeeperInput();
+    renderToc();
+    updatePayButton();
+  };
+  js("deeper-saved-edit").addEventListener("click", () => {
+    deeperEditing = true;
+    renderDeeperInput();
+    renderToc();
+    dYear.focus();
+  });
+  [dYear, dMonth, dDay, pName, pYear, pMonth, pDay].forEach((el) => el.addEventListener("input", () => renderToc()));
+  js("deeper-consent").addEventListener("change", updatePayButton);
+
+  // ── 결제 (결제 버튼을 누른 뒤에만 토스 SDK를 불러온다)
+  let sdkPromise = null;
+  function loadTossSdk() {
+    if (window.TossPayments) return Promise.resolve();
+    if (!sdkPromise)
+      sdkPromise = new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = TOSS_SDK;
+        s.onload = () => (window.TossPayments ? res() : rej(new Error("sdk")));
+        s.onerror = () => {
+          sdkPromise = null;
+          s.remove();
+          rej(new Error("sdk"));
+        };
+        document.head.append(s);
+      });
+    return sdkPromise;
+  }
+  const randomHex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, "0")).join("");
+  async function startPay() {
+    const btn = js("deeper-pay");
+    if (!Pay.enabled || btn.disabled) return;
+    show(js("pay-alert"), false);
+    const birth = readMyBirth(true);
+    if (!birth) return dYear.focus();
+    const partner = readPartner(true);
+    if (partner.state === "error") return pName.focus();
+    const arch = currentArchetype();
+    const rooms = myRoomCodes();
+    if (!arch || !filledRooms().length) return updatePayButton();
+    const p = partner.state === "ok" ? partner.p : null;
+    const rel = p ? relations(mineForRelation(birth), p) : { relOgham: null, relDecan: null, relTzolkin: null };
+    const orderId = PayCode.encode(Object.assign(rooms, { arch, band: ageBand(birth), partner: p ? p.arch : null }, rel));
+    clearPartner(); // 상대 정보는 코드로 바뀐 뒤 바로 지운다
+    const base = location.origin + location.pathname;
+    if (Pay.mode === "mock") {
+      // 모의 결제: 토스를 부르지 않고 successUrl 모양 그대로 돌아온다
+      location.assign(`${base}?pay=success&paymentKey=mock_${randomHex(12)}&orderId=${orderId}&amount=${Pay.price}`);
+      return;
+    }
+    btn.classList.add("is-loading");
+    btn.setAttribute("aria-busy", "true");
+    js("deeper-pay-status").textContent = T.deeper.payOpening;
+    try {
+      await loadTossSdk();
+    } catch (e) {
+      btn.classList.remove("is-loading");
+      btn.removeAttribute("aria-busy");
+      updatePayButton();
+      js("deeper-pay-status").textContent = T.pay.sdkFail;
+      return;
+    }
+    try {
+      const tp = window.TossPayments(Pay.clientKey);
+      const payment = tp.payment({ customerKey: window.TossPayments.ANONYMOUS });
+      // customerName·customerEmail·전화번호는 보내지 않는다 (spec 6-4)
+      await payment.requestPayment({
+        method: "CARD",
+        amount: { currency: "KRW", value: Pay.price },
+        orderId,
+        orderName: Pay.orderName,
+        successUrl: `${base}?pay=success`,
+        failUrl: `${base}?pay=fail`,
+      });
+    } catch (e) {
+      // 결제창을 닫았거나 열지 못함: 오류 코드는 보여 주지 않는다
+      show(js("pay-alert"), true);
+    } finally {
+      btn.classList.remove("is-loading");
+      btn.removeAttribute("aria-busy");
+      updatePayButton();
+    }
+  }
+  js("deeper-pay").addEventListener("click", startPay);
+
+  // ── 6-U 봉인 해제: 의식(약 3초)과 api/confirm을 함께. 둘 다 끝나야 리포트로 (건너뛰기 = 의식만 끝냄)
+  let unsealRun = 0;
+  let unsealSkip = () => {};
+  let lastConfirm = null;
+  const stripQuery = () => {
+    if (location.search) history.replaceState(null, "", location.pathname + location.hash);
+  };
+  function startUnseal(body) {
+    const run = ++unsealRun;
+    lastConfirm = body;
+    go("unseal", { instant: true });
+    unsealScr.classList.remove("is-error", "is-running");
+    show(js("unseal-error"), false);
+    const ms = reduceMotion ? 0 : parseFloat(getComputedStyle(unsealScr).getPropertyValue("--unseal-ms")) || 3000;
+    if (!reduceMotion) {
+      void unsealScr.offsetWidth;
+      unsealScr.classList.add("is-running");
+    }
+    let waited = ms === 0;
+    let result = null;
+    const finish = () => {
+      if (run !== unsealRun || !waited || !result) return;
+      unsealScr.classList.remove("is-running");
+      if (result.ok && result.data && result.data.report) {
+        writeReceipt(result.data.receipt);
+        applyPayUi();
+        showReport(result.data);
+      } else {
+        unsealScr.classList.add("is-error");
+        js("unseal-error-code").textContent = PayCode.pretty(PayCode.normalize(body.orderId) || "");
+        show(js("unseal-error"), true);
+      }
+    };
+    setTimeout(() => {
+      waited = true;
+      finish();
+    }, ms);
+    unsealSkip = () => {
+      waited = true;
+      finish();
+    };
+    apiCall("confirm", body).then((r) => {
+      result = r;
+      finish();
+    });
+  }
+  js("unseal-skip").addEventListener("click", () => unsealSkip());
+  js("unseal-retry").addEventListener("click", () => lastConfirm && startUnseal(lastConfirm));
+
+  // ── 영수증 코드로 다시 열기
+  function reopenError(status) {
+    const E = T.receipt.errors;
+    return status === 400 ? E.format : status === 404 ? E.notFound : status === 410 ? E.canceled : E.network;
+  }
+  async function reopen(code, btn, errEl) {
+    if (btn) btn.classList.add("is-loading");
+    const r = await apiCall("report", { receipt: code });
+    if (btn) btn.classList.remove("is-loading");
+    if (r.ok && r.data && r.data.report) {
+      writeReceipt(r.data.receipt);
+      applyPayUi();
+      showReport(r.data);
+    } else if (errEl) {
+      errEl.textContent = reopenError(r.status);
+      show(errEl, true);
+    } else toast(reopenError(r.status));
+  }
+  jsAll("receipt-open").forEach((form) => {
+    const input = js("receipt-open-input", form);
+    const err = js("receipt-open-error", form);
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const code = PayCode.normalize(input.value);
+      show(err, false);
+      if (!code || !PayCode.decode(code)) {
+        err.textContent = T.receipt.errors.format;
+        show(err, true);
+        return input.focus();
+      }
+      reopen(code, js("receipt-open-go", form), err);
+    });
+  });
+
+  // ── 6-R 리포트 그리기 (문단은 모두 textContent. 서버 문구에 HTML 없음)
+  let reportView = null;
+  const fillCode = (el, code) => {
+    el.textContent = "";
+    PayCode.groups(code).forEach((g) => {
+      const s = document.createElement("span");
+      s.textContent = g;
+      el.append(s);
+    });
+  };
+  function reportChars(rep) {
+    let n = 0;
+    const skip = new Set(["id", "room", "me", "you", "other", "band", "grade", "now", "past", "label", "title"]);
+    const add = (v) => {
+      if (typeof v === "string") n += [...v].length;
+      else if (Array.isArray(v)) v.forEach(add);
+      else if (v && typeof v === "object") Object.entries(v).forEach(([k, x]) => !skip.has(k) && add(x));
+    };
+    add(rep.chapters);
+    return n;
+  }
+  // 4장 근거: 영수증 코드 속 결과 번호 + 무료 데이터 (새 탭에서도 이름·생일 없이 조립된다)
+  function evidenceFromCodes(c) {
+    const E = T.story.evidenceType;
+    const rows = [];
+    for (const room of CHAPTER_ORDER) {
+      if (c[room] == null) continue;
+      let type, arch;
+      if (room === "rune") {
+        const [p, n, x] = c.rune.map((i) => RUNES[i]);
+        type = fill(T.story.evidenceRuneType, { past: p.name, now: n.name, next: x.name });
+        arch = x.archetype;
+      } else if (room === "star") [type, arch] = [NAKS[c.star].name, NAKS[c.star].archetype];
+      else if (room === "ogham") [type, arch] = [fill(E.ogham, { latin: OGHAM[c.ogham].latin, name: OGHAM[c.ogham].name }), OGHAM[c.ogham].archetype];
+      else if (room === "decan") [type, arch] = [fill(E.decan, { sign: DECANS[c.decan].sign, part: T.decan.partNames[DECANS[c.decan].part - 1] }), DECANS[c.decan].archetype];
+      else if (room === "tzolkin") [type, arch] = [fill(E.tzolkin, { number: c.tzolkin.number, name: TZ_SIGNS[c.tzolkin.sign].name }), TZ_SIGNS[c.tzolkin.sign].archetype];
+      else [type, arch] = [fill(E.sibyl, { roman: roman(c.sibyl + 1), title: ORACLES[c.sibyl].title }), ORACLES[c.sibyl].archetype];
+      rows.push(`<li class="evidence__item" data-room="${room}"><span class="evidence__glyph" aria-hidden="true">${ROOM_ICON[room]}</span><span class="evidence__room">${esc(T.rooms[room].name)}</span><span class="evidence__type">${esc(strip(type))}</span><span class="evidence__tag">${esc(T.archetypes[arch].name)}</span></li>`);
+    }
+    return rows.join("");
+  }
+  function renderReport(data) {
+    const rep = data.report;
+    const c = rep.codes;
+    const ch = Object.fromEntries(rep.chapters.map((x) => [x.id, x]));
+    reportView = { receipt: data.receipt, rep };
+    const R = T.report;
+    fillCode(js("receipt-code"), data.receipt);
+    fillCode(js("receipt-code-end"), data.receipt);
+    const toss = js("receipt-toss");
+    show(toss, Boolean(data.receiptUrl));
+    toss.href = data.receiptUrl || "#";
+    const rooms = PayCode.roomsOf(c);
+    const me = T.archetypes[c.arch].name;
+    js("report-title").textContent = fill(R.title, { me, n: rooms.length });
+    js("report-meta").textContent = fill(R.meta, { rooms: rooms.length, match: c.partner ? R.metaMatch.partner : R.metaMatch.map, n: comma(reportChars(rep)) });
+    paras(js("report-open"), ch.open.paragraphs);
+    // 1장
+    const hidden = js("report-hidden");
+    hidden.textContent = "";
+    ch.hidden.rooms.forEach((h) => {
+      const el = tpl.hidden.cloneNode(true);
+      el.dataset.room = h.room;
+      const name = js("hidden-room-name", el);
+      name.textContent = fill(R.hiddenRoom, { room: T.rooms[h.room].name, title: h.title });
+      if (name.previousElementSibling) name.previousElementSibling.textContent = T.rooms[h.room].glyph;
+      paras(js("hidden-room-body", el), h.paragraphs);
+      hidden.append(el);
+    });
+    // 2장
+    const tl = js("report-timeline");
+    tl.textContent = "";
+    ch.timeline.stages.forEach((s) => {
+      const el = tpl.stage.cloneNode(true);
+      textIn(el);
+      el.classList.toggle("is-now", s.now);
+      js("timeline-age", el).textContent = fill(s.now ? R.stageNow : s.past ? R.stagePast : R.stageNext, { label: s.label });
+      ["work", "relation", "learn", "move"].forEach((k) => (js(`timeline-${k}`, el).textContent = s[k]));
+      tl.append(el);
+    });
+    // 3장
+    const m = ch.match;
+    const pair = js("report-match-pair").children;
+    pair[0].textContent = me;
+    pair[2].textContent = m.you ? T.archetypes[m.you].name : R.mapYou;
+    const body = js("report-match");
+    paras(body, m.you ? [m.summary].concat(m.paragraphs) : []);
+    show(body, Boolean(m.you));
+    const list = js("report-match-rooms");
+    list.textContent = "";
+    const rows = m.you ? m.rooms.map((r) => [`${T.rooms[r.room].name} · ${r.label}`, r.text]) : m.map.map((x) => [T.archetypes[x.other].name, x.summary]);
+    rows.forEach(([label, text]) => {
+      const li = tpl.matchRoom.cloneNode(true);
+      const head = li.firstElementChild;
+      head.removeAttribute("data-t");
+      head.textContent = label;
+      js("match-room-text", li).textContent = text;
+      list.append(li);
+    });
+    show(list, rows.length > 0);
+    // 4장
+    paras(js("report-deep-strength"), ch.deep.strength);
+    paras(js("report-deep-shadow"), ch.deep.shadow);
+    paras(js("report-deep-growth"), ch.deep.growth);
+    js("report-evidence").innerHTML = evidenceFromCodes(c);
+    paras(js("report-close"), ch.close.paragraphs);
+    Disclaimer.mount(js("disclaimer-slot", reportScr));
+  }
+  function showReport(data) {
+    renderReport(data);
+    const parts = jsAll("report-part", reportScr);
+    parts.forEach((p) => p.classList.remove("is-unsealing", "is-sealed"));
+    go("report", { instant: true });
+    if (reduceMotion) return;
+    parts.forEach((p) => p.classList.add("is-sealed"));
+    requestAnimationFrame(() => requestAnimationFrame(() => parts.forEach((p) => p.classList.replace("is-sealed", "is-unsealing"))));
+  }
+  leave.report = stripQuery;
+  BACK.deeper = ["hub", "toHub"];
+  BACK.report = ["hub", "toHub"];
+
+  // 영수증 코드 복사·지우기
+  function copyReceipt() {
+    if (!reportView) return;
+    const text = PayCode.pretty(reportView.receipt);
+    const done = () => toast(T.receipt.copied);
+    const fail = () => toast(T.receipt.copyFail);
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fail);
+    else fail();
+  }
+  js("receipt-copy").addEventListener("click", copyReceipt);
+  js("receipt-copy-end").addEventListener("click", copyReceipt);
+  js("receipt-forget").addEventListener("click", () => {
+    writeReceipt("");
+    applyPayUi();
+    toast(T.receipt.forgot);
+  });
+
+  // ── 소장 카드 (share-card.js frame "keepsake"). 이름·생일·영수증 코드·유료 본문 긴 인용은 넣지 않는다
+  const ROOM_GLYPH = {
+    rune: () => ({ path: symbolPath("rune-raidho"), vw: 40, vh: 60 }),
+    star: () => ({ path: "M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z", vw: 40, vh: 40, fill: true }),
+    ogham: () => ({ path: symbolPath("ogham-beith"), vw: 40, vh: 80 }),
+    decan: () => ({ path: symbolPath("icon-decan"), vw: 40, vh: 40 }),
+    tzolkin: () => ({ path: symbolPath("icon-tzolkin"), vw: 40, vh: 40 }),
+    sibyl: () => ({ path: symbolPath("icon-sibyl"), vw: 40, vh: 40 }),
+  };
+  function buildKeepsakeCard() {
+    const { rep } = reportView;
+    const c = rep.codes;
+    const K = T.keepsake;
+    const me = T.archetypes[c.arch].name;
+    return {
+      file: K.file, text: strip(K.shareText),
+      opts: {
+        theme: Object.assign({}, CARD_THEME.story, { wax: "#7c2a22", waxRim: "#9a3a2c" }), frame: "keepsake", seed: 211,
+        topBadge: strip(K.badge),
+        title: me, titleSize: 96,
+        pair: c.partner ? { left: me, right: T.archetypes[c.partner].name, mark: "×" } : { text: strip(K.map) },
+        keyword: rep.card.keyword,
+        roomGrid: { cells: CHAPTER_ORDER.map((room) => Object.assign(ROOM_GLYPH[room](), { color: CARD_THEME[room].accent, done: c[room] != null })) },
+        closeLine: { text: rep.card.closeLine, maxLines: 2 },
+      },
+    };
+  }
+  js("report-share").addEventListener("click", (e) => reportView && shareCard(e.currentTarget, buildKeepsakeCard));
+
+  // ── 시작: 결제 설정 → 진입점, successUrl·failUrl로 돌아온 경우 처리
+  async function paidBoot() {
+    clearPaidSamples();
+    const qs = new URLSearchParams(location.search);
+    const ret = qs.get("pay");
+    if (ret === "success") {
+      // 정해진 세 값만 보낸다. 새로고침·뒤로 가기로 다시 와도 서버가 같은 리포트를 준다(멱등)
+      startUnseal({ paymentKey: String(qs.get("paymentKey") || ""), orderId: String(qs.get("orderId") || ""), amount: Number(qs.get("amount")) });
+    }
+    await loadPayConfig();
+    applyPayUi();
+    if (ret === "fail") {
+      stripQuery();
+      if (Pay.enabled) {
+        payFailed = true;
+        go("deeper", { instant: true });
+      }
+    }
+  }
+
   // ═════════ 시작 ═════════
   applyText();
   renderHub();
@@ -1891,6 +2567,7 @@
   const hash = location.hash.replace("#", "");
   if (START[hash]) go(START[hash], { instant: true });
   else enter.hub();
+  paidBoot();
 
   // 테스트·점검용으로 바깥에서 읽을 수 있게 둔다 (입력값은 내보내지 않음)
   // render*는 저장 없이(fresh=false) 결과 틀만 다시 그린다

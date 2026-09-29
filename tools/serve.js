@@ -1,12 +1,13 @@
 // 로컬 미리보기 서버 (설치 필요 없음). 같은 와이파이의 휴대폰에서도 열 수 있다.
-// 사용: node tools/serve.js [폴더=dist] [포트=5173]
+// 사용: node tools/serve.js [폴더=dist/public] [포트=5173]  (결제 함수까지 보려면 tools/strange-oracle/mock-server.js)
 // 종료: Ctrl+C
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const ROOT = path.resolve(__dirname, "..", process.argv[2] || "dist");
+// 기본 폴더: dist/public (6단계부터 dist/는 Vercel 프로젝트이고 공개 정적 파일은 dist/public/에 있다)
+const ROOT = path.resolve(__dirname, "..", process.argv[2] || (fs.existsSync(path.resolve(__dirname, "..", "dist", "public")) ? "dist/public" : "dist"));
 const PORT = Number(process.argv[3]) || 5173;
 const TYPES = {
   ".html": "text/html; charset=utf-8",

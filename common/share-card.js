@@ -8,6 +8,7 @@
 // 선택 옵션(2026-09-25 추가, 안 넘기면 예전과 똑같이 그린다): art, stones, progress, lead, titleSize,
 //   titleColor, titleGlow, hook, badges, footerY.
 // 2026-09-28 추가(역시 선택): bark, sundial, dayGlyph, laurel(그림 블록), parchment(양피지 띠 글자). 자세한 설명은 docs/common.md
+// 2026-09-28 6단계 추가(역시 선택): frame:"keepsake"(금선 두 겹 + 모서리 인장), topBadge, pair, keyword, roomGrid, closeLine (유료 소장판 카드)
 (function () {
   const W = 1080;
   const H = 1920;
@@ -450,6 +451,151 @@
     };
   }
 
+  // ── (2026-09-28 6단계 추가) 유료 소장판(keepsake) 블록. 모두 선택 옵션이고, 안 넘기면 그리지 않는다.
+  // 원형 쌍 한 줄: pair: { left, right, mark: "×" } 또는 { text } (상대가 없을 때 한 문장). 56px, 가운데 기호는 강조색 latin 글꼴
+  function pairBlock(p, fonts) {
+    const size = 56;
+    return {
+      height: 84,
+      draw(ctx, top, t) {
+        ctx.save();
+        const y = top + 62;
+        ctx.font = `500 ${size}px ${fonts.serif}`;
+        if (p.text) {
+          ctx.fillStyle = t.text;
+          ctx.textAlign = "center";
+          ctx.fillText(p.text, W / 2, y);
+          ctx.restore();
+          return;
+        }
+        ctx.textAlign = "left";
+        const mark = ` ${p.mark || "×"} `;
+        const wl = ctx.measureText(p.left || "").width;
+        const wr = ctx.measureText(p.right || "").width;
+        ctx.font = `500 ${size}px ${fonts.latin}`;
+        const wm = ctx.measureText(mark).width;
+        let x = (W - (wl + wm + wr)) / 2;
+        ctx.font = `500 ${size}px ${fonts.serif}`;
+        ctx.fillStyle = t.text;
+        ctx.fillText(p.left || "", x, y);
+        x += wl;
+        ctx.font = `500 ${size}px ${fonts.latin}`;
+        ctx.fillStyle = t.accent;
+        ctx.fillText(mark, x, y);
+        x += wm;
+        ctx.font = `500 ${size}px ${fonts.serif}`;
+        ctx.fillStyle = t.text;
+        ctx.fillText(p.right || "", x, y);
+        ctx.restore();
+      },
+    };
+  }
+  // 방 문양 칸(3열, 칸 120px). roomGrid: { cells: [{ path: "SVG 경로 d", vw: 40, vh: 60, fill: false, color: "#rrggbb", done: true }] }
+  // done이면 방 색 글리프(획, fill:true면 채움), 아니면 흐린 테두리만
+  function roomGridBlock(g) {
+    const cell = 120, gapX = 36, gapY = 28, cols = 3;
+    const cells = g.cells || [];
+    const rows = Math.ceil(cells.length / cols);
+    return {
+      height: rows * cell + Math.max(0, rows - 1) * gapY,
+      draw(ctx, top, t) {
+        const left = (W - (cols * cell + (cols - 1) * gapX)) / 2;
+        cells.forEach((c, i) => {
+          const x = left + (i % cols) * (cell + gapX);
+          const y = top + Math.floor(i / cols) * (cell + gapY);
+          ctx.save();
+          roundRect(ctx, x, y, cell, cell, 18);
+          ctx.strokeStyle = c.done ? alpha(c.color || t.accent, 0.8) : alpha(t.muted, 0.35);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          if (c.done && c.path) {
+            const vw = c.vw || 40, vh = c.vh || 40;
+            const k = Math.min((cell - 40) / vw, (cell - 40) / vh);
+            ctx.translate(x + (cell - vw * k) / 2, y + (cell - vh * k) / 2);
+            ctx.scale(k, k);
+            const p = new Path2D(c.path);
+            ctx.shadowColor = c.color || t.accent;
+            ctx.shadowBlur = 18;
+            if (c.fill) {
+              ctx.fillStyle = c.color || t.accent;
+              ctx.fill(p);
+            } else {
+              ctx.strokeStyle = c.color || t.accent;
+              ctx.lineWidth = 6 / k;
+              ctx.lineCap = "round";
+              ctx.lineJoin = "round";
+              ctx.stroke(p);
+            }
+          }
+          ctx.restore();
+        });
+      },
+    };
+  }
+  // 최대 maxLines줄, 넘으면 마지막 줄 말줄임
+  function clampLines(ctx, text, width, maxLines) {
+    const lines = wrap(ctx, text, width);
+    if (lines.length <= maxLines) return lines;
+    const out = lines.slice(0, maxLines);
+    let last = out[maxLines - 1];
+    while (last && ctx.measureText(last + "…").width > width) last = last.slice(0, -1);
+    out[maxLines - 1] = last + "…";
+    return out;
+  }
+  // 소장판 틀: 기존 이중 테두리 안쪽에 금선 두 겹 + 네 모서리 밀랍 인장(지름 72px, 갈라진 모습)
+  function keepsakeFrame(ctx, t) {
+    ctx.save();
+    ctx.strokeStyle = t.accent;
+    ctx.globalAlpha = 0.85;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(80, 80, W - 160, H - 160);
+    ctx.strokeRect(90, 90, W - 180, H - 180);
+    ctx.globalAlpha = 1;
+    const wax = t.wax || "#7c2a22";
+    const rim = t.waxRim || "#9a3a2c";
+    for (const [cx, cy] of [[85, 85], [W - 85, 85], [85, H - 85], [W - 85, H - 85]]) {
+      const r = 36;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.beginPath();
+      for (let k = 0; k <= 24; k++) {
+        const a = (k / 24) * Math.PI * 2;
+        const rr = r * (k % 2 ? 0.9 : 1);
+        if (k) ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+        else ctx.moveTo(rr, 0);
+      }
+      ctx.closePath();
+      ctx.fillStyle = wax;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.6, 0, Math.PI * 2);
+      ctx.strokeStyle = rim;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2 - Math.PI / 2;
+        const rr = k % 2 ? r * 0.16 : r * 0.44;
+        if (k) ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+        else ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+      }
+      ctx.closePath();
+      ctx.fillStyle = t.accent;
+      ctx.fill();
+      // 갈라진 금
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.2, -r);
+      ctx.lineTo(r * 0.08, -r * 0.3);
+      ctx.lineTo(-r * 0.1, r * 0.2);
+      ctx.lineTo(r * 0.15, r);
+      ctx.strokeStyle = t.bgTop;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
   async function render(opts) {
     const t = Object.assign({}, DEFAULT_THEME, opts.theme);
     const serif = opts.fonts?.serif || "serif";
@@ -476,6 +622,7 @@
     ctx.strokeRect(48, 48, W - 96, H - 96);
     ctx.strokeRect(60, 60, W - 120, H - 120);
     ctx.globalAlpha = 1;
+    if (opts.frame === "keepsake") keepsakeFrame(ctx, t);
 
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
@@ -509,6 +656,7 @@
     if (opts.stones?.length) { block(stonesBlock(opts.stones, fonts)); gap(50); }
     if (opts.progress) { block(progressBlock(opts.progress, fonts)); gap(60); }
     if (opts.lead) { add(opts.lead, `500 40px ${serif}`, t.muted, 64); gap(20); }
+    if (opts.topBadge) { block(badgeBlock(opts.topBadge, fonts)); gap(40); }
 
     const titleSize = opts.titleSize || 92;
     ctx.font = `700 ${titleSize}px ${serif}`;
@@ -518,6 +666,21 @@
       gap(10);
       ctx.font = `500 50px ${serif}`;
       for (const l of wrap(ctx, opts.subtitle, W - 220)) add(l, ctx.font, t.accent, 70);
+    }
+    // (6단계 소장판) 쌍 → 키워드 한 줄 → 방 문양 칸 → 닫는 한 문장. 모두 선택
+    if (opts.pair) { gap(24); block(pairBlock(opts.pair, fonts)); }
+    if (opts.keyword) {
+      gap(20);
+      ctx.font = `500 40px ${serif}`;
+      for (const l of clampLines(ctx, opts.keyword, W - 260, 1)) add(l, ctx.font, t.accent, 60);
+    }
+    if (opts.roomGrid) { gap(60); block(roomGridBlock(opts.roomGrid)); gap(20); }
+    if (opts.closeLine) {
+      const size = opts.closeLine.size || 44;
+      gap(40);
+      ctx.font = `500 ${size}px ${serif}`;
+      const col = opts.closeLine.color === "accent" ? t.accent : t.text;
+      for (const l of clampLines(ctx, opts.closeLine.text || "", W - 260, opts.closeLine.maxLines || 2)) add(l, ctx.font, col, Math.round(size * 1.5));
     }
     gap(60);
     ctx.font = `400 46px ${serif}`;
