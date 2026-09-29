@@ -126,7 +126,7 @@ const SIBYL_Q = "비밀질문XYZ";
   check("mock: 토스 영수증 링크 숨김(값 없음)", await hidden("[data-js=receipt-toss]"));
   check("리포트 견본 [초안] 없음 (틀 문구 외)", !(await ev("[...document.querySelectorAll('#screen-report .hidden-room [data-js=hidden-room-body], #screen-report [data-js=timeline-work]')].some(e => e.textContent.includes('(약 700자)') || e.textContent.includes('(약 150자)'))")));
   const metaN = Number((await txt("[data-js=report-meta]")).replace(/.*약\s*/, "").replace(/\D/g, ""));
-  check("D-11 분량: 미리보기 예상 vs 받은 리포트 (문구 [초안] 상태라 참고값)", true, `예상 ${expectTotal} / 실제 ${metaN} — 문구 작성 후 ±15% 재확인`);
+  check("D-11 분량: 미리보기 예상 vs 받은 리포트 ±15%", metaN > 0 && Math.abs(expectTotal - metaN) / metaN <= 0.15, `예상 ${expectTotal} / 실제 ${metaN}`);
   const st2 = await storage();
   check("저장소: 영수증 코드만 추가, 유료 문구·상대 없음, localStorage·쿠키 0", st2.includes(receipt) && !st2.includes("[초안] 여는 글") && !st2.includes(PARTNER.name) && JSON.parse(st2).l === 0 && JSON.parse(st2).c === "", st2.slice(0, 160));
   await noHScroll("리포트");
