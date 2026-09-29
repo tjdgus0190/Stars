@@ -3010,6 +3010,7 @@ body:not(.is-static-preview) [data-preview-only] { display: none; }
 .intro__summary { max-width: 22em; margin: 0 auto var(--space-8); font-size: var(--fs-lg); line-height: var(--lh-ui); color: var(--c-text-strong); text-wrap: balance; }
 .intro__start { max-width: 320px; }
 .intro__note { margin-top: var(--space-4); font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
+.intro__receipt { display: block; margin: var(--space-2) auto 0; }
 
 /* ───────── 허브: 나의 이야기 N/6 ───────── */
 .hub-progress { margin: 0 0 var(--space-5); }
