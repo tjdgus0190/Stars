@@ -959,7 +959,7 @@ planner.md 규칙상 "이번에 만들 것"은 디자인 포함 3일 크기여�
 |---|---|---|---|
 | 1 | designer | design/strange-oracle.md에 9단계 절 추가. 안내자 실루엣 SVG 6개를 직접 제작해 방 시작 화면 배치(9-2 5-a) 위치·크기 명세 | 360px에서 실루엣이 room-emblem과 겹치지 않는다 / reduced-motion에서 실루엣에 애니메이션이 없다 |
 | 2 | developer | 인사·의식 문구 삽입/교체, 결과 여닫는말 치환 로직, 다리 문구 자리 유지, common/share-card.js에 옵션 인자(예: guideSignature) 추가 | 8-1 표의 블록 순서·자리가 바뀌지 않는다 / share-card.js 기존 옵션이 그대로 동작한다(사용 제품 확인·docs/common.md 갱신, CLAUDE.md 5장) / 입력값(생년월일·이름 등)이 안내자 로직에서 저장·전송되지 않는다 |
-| 3 | copywriter | 9-1 표의 이름·정체·시그니처 확정, 안내자별 인사·의식·여는말·닫는말 템플릿과 다리 6개 작성, reports/copy-strange-oracle.md 기록 | CLAUDE.md 8장 금지 표현 0건 / "반드시" 등 단정 표현 0건 / 안내자 대사에 결제·가격 언급 0건 / 새 문구 총량 3,000~5,000자 / [초안] 0개 |
+| 3 | copywriter | 9-1 표의 이름·정체·시그니처 확정, 안내자별 인사·의식·여는말·닫는말 템플릿과 다리 6개 작성, reports/copy-strange-oracle.md 기록 | CLAUDE.md 8장 금지 표현 0건 / "반드시" 등 단정 표현 0건 / 안내자 대사에 결제·가격 언급 0건 / 새 문구 총량 2,800~5,000자 / [초안] 0개 |
 | 4 | designer | UI 점검: 방 시작 인사+실루엣, 의식 문구, 결과 여닫는말, 다리, 공유 카드 서명을 360px·480px에서 확인 | 점검 통과 |
 | 5 | qa-reviewer → developer → qa-reviewer | reports/qa-strange-oracle.md에 9단계 절 추가. CLAUDE.md 8장 준수, 개인정보(9-4 2행), 결제 비언급을 확인 | "배포 가능", 재검수 최대 3회 |
 
