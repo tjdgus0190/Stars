@@ -1103,3 +1103,93 @@ data.js에 아직 없어서 지금은 JS가 빈 글자로 채운다. 마크업�
 - 결제 켜짐 상태의 인트로에서 "영수증 코드로 리포트 다시 열기" 버튼 간격이 실제로 괜찮은지 (자동 캡처 스크립트가 이 조합을 찍지 않아 코드로만 고쳤다)
 - 유료 미리보기 목차의 "방별 온전한 이야기" 항목이 최종 문구로 잘 보이는지 (가진 캡처가 카피 확정 전 것뿐이라 소스코드로만 확인함)
 - 480px 화면도 최종 문구 기준으로 한 번 더 캡처해 보는 것을 권장(이전 480 확인은 카피 확정 전 버전)
+
+
+## 8단계: 흐름 다듬기 (2026-09-29, 디자인)
+
+근거: specs/strange-oracle.md 8-1~8-5, 운영자 결정 44~49. 인트로 화면(`screen-intro`)과 그 마크업은 삭제했다(`.gate`·`.intro` CSS는 쓰는 곳이 없어 남아 있을 뿐이고 동작에 영향 없음).
+
+### 사용자 흐름 (갱신)
+| 화면 | 목적 | 주 행동 하나 | 다음 |
+|---|---|---|---|
+| 입구(첫 화면) | "이게 뭔데?"를 풀고 다음 문을 연다 | 주 버튼(상태별) | 상징 떠오름 → 다음 방 시작 |
+| 방 시작 | 방 소개, 저장값이 있으면 바로 의식 | 시작 | 의식 (값 없을 때만 입력) |
+| 방 결과 | 짧고 완결된 계시 | 다음 방 문 | 상징 떠오름 → 다음 방 / Ⅵ → 결말 |
+| 나의 이야기 | 여섯 조각 한 편 + 결제 주 진입 | 한 권의 책 카드 | 미리보기 |
+| 미리보기 | 무엇이 담기나 + 고지 | 6/6 전 "다음 문 열기" / 6/6 결제 | 봉인 해제 → 책 |
+| 책 | 긴 글을 지치지 않게 | 이어 읽기 / 목차 | - |
+
+### 화면별 명세
+**상단 막대(모든 화면)**: 왼쪽 "입구" 버튼(청동 테두리 알약, 입구 문 아이콘 + 글자, 높이 44px, 입구 화면에서만 숨김) · 가운데 라벨(방: "Ⅲ 데칸의 방 3/6", 책: "Ⅳ 촐킨의 방 · 5/9") · 오른쪽 [목차(책에서만)] + 내 정보 지우기. 방 화면의 네 칸 읽기 진행률은 없앴고, 진행률은 책 전용 9칸이다.
+
+**입구** (위→아래): ① 머리(문양·로고·요약 한 줄·자물쇠 아이콘 + 개인정보 한 줄) ② 주 버튼(로마 숫자 명판 + "Ⅲ 데칸의 방 열기", 높이 56px, 은은한 숨쉬기 빛) ③ 여정 한눈에: 칩 3개 → 여섯 방 줄(2열×3행, 방 색 상징 원 + 짧은 이름 + 무엇을 읽나) → "여섯 조각이 모여…" 한 줄 ④ "순서대로 하나씩" 한 줄 + 여섯 고대 문(7단계 스타일 그대로) ⑤ 지금까지의 이야기 카드(제목 + N/6 막대, 지금 원형, 마친 방 줄 = 상징·방 이름·결과 이름 + key 한 줄 말줄임, 안 연 방은 "?" 점선 원으로 흐리게, 맨 아래 "나의 이야기 전체 보기 →") ⑥ 한 권의 책 카드(책 그림 + 밀랍 인장, 제목·설명, 6/6 전 여섯 칸 핍 + "N/6", 버튼 하나) + 접힌 "영수증 코드가 있어요 ▾" ⑦ 자주 묻는 것 6문답(펼친 채, Q 표시) ⑧ 광고 1개 ⑨ 내 정보 지우기 안내 한 줄.
+360×800 첫 화면(스크롤 전)에 요약·주 버튼·칩·여섯 방 줄까지 보인다(캡처 확인).
+
+**방 시작**: 오검·별·데칸·촐킨에 "1995.3.21 기준으로 봅니다 · 바꾸기" 한 줄(`room-saved`, 값이 있을 때만). 별 엠블럼은 새 `#icon-star` symbol(획 도형)로 바꿨다.
+**의식**: 별·데칸·촐킨·시빌라·룬에 흐린 힌트 "누르면 바로 보기"(`ritual-skip`, 화면 아래 고정). 오검(직접 새기기)은 없음.
+**방 결과**(8-1 표 순서): 결과 카드 → 공유(카드 아래 하나, 보통 크기 보조 버튼) → 원형 한 줄(위로 올림) → 공감 카드 → **핵심 풀이**(가운데 선 제목, 17px/1.85, 첫 단락 강조, 사실 목록 상자, 맺음 문장 칸) → **책 한 줄**(책 아이콘 + 떡밥 + 안내, 위아래 점선, 링크는 ready·owned일 때만) → 문화 상식 → 면책 → 글자 링크 "결과 이미지 저장·공유 · 정보 바꿔 다시 보기"(룬은 공유만, 시빌라는 "다른 신탁 받기" 버튼 + 안내 + 공유 글자 링크) → 이야기 다리 + 다음 방 문 → 광고 1개(맨 끝). 장 목차·봉인 블록·장 사이 광고·"나의 이야기 보기" 보조 링크는 0개.
+**미리보기**: 제목·설명을 "한 권의 책"으로, 목차에서 숨은 장 항목 삭제(제1부 안으로), 번호를 "1부/2부"로. 기존 "방을 더 돌고 결제하면…" 문장을 `deeper.bookFix`로 교체. 6/6 전 잠금 블록 `book-gate`(핍 + "(N/6)" + 다음 문 열기)를 결제 버튼 자리 위에 두었다.
+**책**: 영수증 카드 → 표지(소장판·원형·여섯 상징·나눠 읽기 한 줄) → 이어 읽기 줄 → 목차(9항목: 여는 글·여섯 방·제2부·닫는 글, 읽는 시간, 체크 원) → 여는 글 → 제1부 머리 → 방 6개(상징 원·방 이름·결과 이름·key → Ⅰ~Ⅳ장 청동 번호판 → 숨은 장은 점선 상자 + 인장 → "목차 / 다음 방 →") → 제2부 머리 → 시기별 흐름·궁합·원형 심층 → 닫는 글 → 면책 → 소장 카드 공유(주) + "나의 이야기로"(글자) → 영수증 다시. 목차 시트는 아래에서 올라오는 dialog.
+긴 글 피로 대책: 본문 17px, 줄 간격 1.9, 34em 폭, keep-all, 단락 간격 1.2em, 방마다 큰 여백 + 가운데 머리, 장 번호판으로 위치 파악.
+
+### 상징 떠오름 (8-3)
+오버레이 `.sigil-rise` 하나(방별 상징 6개를 품고 `data-room`으로 하나만 보임). 1200ms: 0~250 문짝(기존) / 150~650 획 그리기(stroke-dashoffset 1→0, 문 안 상징 자리에서) / 650~1000 가운데(50vw, 42vh)로 1.45배 떠오르며 방 색 장막이 덮음 / 1000~1200 도착 엠블럼 자리로 착지, 장막 걷힘. 시빌라는 월계관이 늦게 페이드. 누르면 `.is-skipped`(200ms 착지). 마친 방 다시 보기 `.is-flash`(500ms 번쩍, 획 없음). 움직임 줄이기: 이동·확대·획 없음, 가운데 페이드 인 200 + 아웃 200 = 400ms, 기본 상태 = 오버레이 안 보임·엠블럼 제자리.
+
+### 상태 표
+| 요소 | 상태 | 표시 |
+|---|---|---|
+| 주 버튼 `hub-cta` | 처음 / 진행 중 / 6/6 | hub.cta.first / hub.cta.next / hub.cta.story, 번호판은 6/6에서 숨김 |
+| 여정 줄 `journey-step`, 문 | is-visited / is-next / is-locked | 채운 원 / 방 색 테두리 빛 / 상징 흐림(글자는 흐리지 않음) |
+| 지금까지 `hub-sofar` | 0방: is-hidden / 1방 이상 | 줄 is-done(버튼) · is-upcoming("?") |
+| 책 카드 `hub-book` | data-state locked / ready / owned | 핍+N/6 / 핍 숨김·테두리 빛 / 인장 숨김 |
+| 영수증 토글 | aria-expanded false/true | 폼 is-hidden 토글, ▾ 회전 |
+| 책 한 줄 `result-book-line` | 결제 꺼짐 is-hidden / locked / ready / owned | 글자만 / 링크 "미리보기" / 링크 "내 책에서 이 방 펼치기" |
+| 미리보기 | 6/6 전 / 6/6 | book-gate 보임·동의·결제 숨김 / 반대 |
+| 책 목차 항목 | is-read / is-current | 체크 원 채움 / 굵게 |
+| 이어 읽기 `book-resume` | bookmark 없음 is-hidden | - |
+
+### 새 data-t 키 (전부 [초안] 자리표시, copywriter용 · 360px 기준 최대 글자)
+| 키 | 최대 | 넘치면 |
+|---|---|---|
+| topbar.home "입구" | 3 | 고정 |
+| hub.cta.first / hub.cta.next("{num} {room} 열기") / hub.cta.story | 14 | 한 줄 넘으면 줄바꿈(버튼 높이 늘어남) |
+| hub.journey.title(숨김) · hub.journey.chips.0~2 | 각 12 | 칩이 3줄로 늘어남 |
+| rooms.{6방}.short (여정 줄 짧은 이름) | 4 | 줄바꿈 |
+| hub.journey.end | 26 | 2줄 |
+| hub.journey.order | 20 | 2줄 |
+| hub.sofar.title · archLabel · upcoming · all | 10 · 8 · 16 · 14 | 제목은 한 줄 고정(말줄임 없음 — 10자 지킬 것) |
+| hub.book.eyebrow · title · desc | 12 · 8 · 45 | desc 3줄까지 |
+| hub.book.go.locked / ready / owned, hub.book.hint("…· N/6") | 16 · 26 | 버튼 2줄 금지 |
+| hub.faq.title, hub.faq.items.0~5.q / .a | q 16 · a 80, **답 합계 300자 이상**(목표 400~550) | 늘어남 |
+| hub.clearNote | 45 | 2줄 |
+| room.saved.edit "바꾸기" (값 문장 "{값} 기준으로 봅니다"는 JS 조립 — 키 room.saved.value 제안) | 4 · 20 | 줄바꿈 |
+| ritual.skipHint | 12 | 한 줄 |
+| result.readingTitle | 8 | - |
+| result.bookLine.locked / ready / owned | 45 / 14 / 14 | 2줄 |
+| result.shareSub · result.retryLink | 12 · 12 | 링크가 두 줄로 나뉨 |
+| deeper.eyebrow · title · lead(기존 키, 문구 교체) | 12 · 18 · 80 | - |
+| deeper.toc.title(교체) · deeper.bookFix · deeper.gate.text · deeper.gate.next | 10 · 60 · 24 · 10 | - |
+| book.tocButton · book.toc.title · book.toc.open/flow/close | 2 · 6 · 22 | flow는 2줄 가능 |
+| book.pace · book.resume.before/after | 40 · 8/10 | - |
+| book.part1.num/title · book.part2.num/title | 4/14 · 4/10 | 2줄 |
+| book.hiddenChapter · book.toToc · book.nextRoom · book.roomNavAria · book.tocClose | 8 · 4 · 6 | - |
+| book.parts.timeline / match / deep (제2부 안 소제목, 장 번호 없이) | 10 | - |
+안 쓰게 된 키: hub.lead, hub.aboutTitle, hub.about(→FAQ), hub.progress.label, intro.eyebrow, intro.start, result.sealed.*, result.deeperLink, result.tocAria, result.chapterLabels, report.parts.rooms/hidden, deeper.fixNote, {방}.result.retry 중 오검·별·데칸·촐킨(→result.retryLink). intro.summary·intro.note·intro.receipt는 입구에서 계속 쓴다.
+
+### developer 전달 사항
+- 삭제된 훅: `screen-intro`, `intro-*`, `topbar-back`, `hub-report`, `hub-about`, `hub-story-marks/title/desc`, `result-toc`, `result-length`, `result-chapters`, `result-chapter`, `chapter-*`, `result-sealed`, `result-deeper`, `result-go-story`, 광고 `result-mid`, `report-rooms`, `full-room*`, `report-hidden`, `hidden-room*`. **지금 app.js는 361행(topbar-back)에서 멈춘다** — 5단계에서 새 훅으로 바꿀 것.
+- 새 훅: `topbar-home`(data-go="hub"), `book-toc-open`, `hub-cta`(+`hub-cta-num`, `hub-cta-label`, data-go·data-room 갱신), `journey-path`/`journey-step`, `hub-sofar`, `hub-progress`(카드 안으로 이동, 같은 --n 규칙), `hub-archetype`, `hub-sofar-list`/`sofar-line`/`sofar-result`/`sofar-key`, `hub-story`(전체 보기 링크), `hub-paid`/`hub-book`(data-state)/`hub-book-desc`/`hub-book-lock`/`hub-book-hint`/`hub-book-go`, `receipt-toggle`(aria-expanded + 폼 is-hidden), `hub-faq`, `room-emblem`(착지 목표, `.is-awaiting`), `room-saved`/`room-saved-value`/`room-saved-edit`, `ritual-skip`(.is-visible), `result-reading`/`reading-body`/`reading-close`, `result-book-line`(data-state)/`book-line-hook`/`book-line-note`/`result-book-link`/`book-line-link-label`, `sigil-rise`, `deeper-gate`/`deeper-gate-count`/`deeper-gate-next`, `deeper-consent-row`, `deeper-pay-cta`, `book-resume`/`book-resume-name`, `book-toc`/`book-toc-list`/`book-toc-item`/`book-toc-result`/`book-toc-time`, `book-total`, `book-rooms`/`book-room`(견본 6개, data-room)/`book-room-result`/`book-room-key`/`book-ch1~4`/`book-hidden`/`book-room-next`, `book-toc-sheet`/`book-toc-sheet-list`/`book-toc-close`.
+- 핍: 켜진 칸에 `.is-on`(CSS 변수로는 못 셈). 입구 책 카드·미리보기 잠금 블록 둘 다.
+- 상단 막대: 방 화면에 `.topbar.is-room` + 라벨 innerHTML "Ⅲ 데칸의 방 <span class="topbar__count">3/6</span>". 책은 `.is-reading` + 9칸 `read-progress-seg`(`.is-done`, 지금 칸 --fill).
+- 상징 떠오름: `sigil-rise`의 is-hidden을 풀고 `data-room`, `--from-x/--from-y`(문 안 `.door__glyph` 또는 `.next-door__glyph` 중심, px), `--to-x/--to-y`(도착 `.room-emblem` 중심 — 화면 전환 뒤 측정, 모르면 기본값), `--to-scale`(엠블럼 88px 기준 1)을 넣고 `.is-playing`. 1000ms에 화면을 바꾸고 1200ms에 오버레이를 숨기며 엠블럼의 `.is-awaiting`을 뗀다. 누르면 `.is-skipped`로 바꾸고 200ms 뒤 끝. 움직임 줄이기면 400ms에 끝. 기존 warp·450ms 포털은 이것으로 대체.
+- 책 방 6개는 견본으로 모두 마크업해 두었다(채우기만). 목차 시트는 `#book-toc` ol을 복제해 넣는다.
+- 룬 핵심 풀이는 `<h3 class="reading__sub">`, 첫 단락에 `class="reading__lede"`, 사실은 `<ul class="reading__facts">`.
+- 정적 검토 견본 상태: 입구 = 2/6 진행(문·여정 줄·지금까지 카드). JS가 실제 상태로 덮어쓴다.
+
+### 캡처 기록 (360px, 움직임 줄이기, headless Edge, app.js는 7단계 그대로라 화면은 class로 직접 전환)
+- 모든 화면 scrollWidth 360 = 가로 넘침 없음. 입구 첫 화면에 요약·주 버튼·칩·여섯 방 줄 보임. 방 결과에 목차·봉인·장 사이 광고 없음. 책 표지·목차·제1부 6방·제2부 순서 확인. 문구는 JS가 멈춰 비어 보이는 칸이 있음(로고 등) — 미확인, 5단계 뒤 UI 점검에서 재확인.
+- 상징 떠오름의 실제 움직임과 1.2초 타이밍은 JS 연결 전이라 **미확인**.
+
+### 운영자 확인할 것
+- 여섯 방 줄(여정)과 문 격자가 같은 정보를 두 번 보여 준다. 첫 화면에서 "어떤 방이 있나"를 스크롤 없이 보이려는 선택이다. 중복이 거슬리면 문의 origin·reads 글자를 뺄 수 있다.
+- 책 맨 위는 영수증 카드 → 표지 순서(기존 6-3 그대로)다.
