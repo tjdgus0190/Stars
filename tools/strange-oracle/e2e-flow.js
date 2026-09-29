@@ -60,6 +60,9 @@ function paidSentences() {
     const text = await ev(`document.querySelector('#screen-${room}-result').innerText`);
     return PAID.filter((s) => text.includes(s));
   };
+  const hookCards = () => ev(`(() => { window.__cards = []; window.__opts = []; const r = ShareCard.render; ShareCard.render = (o) => { window.__opts.push(JSON.stringify(o)); return r(o); }; ShareCard.share = async (c) => { window.__cards.push(c.toDataURL('image/png')); return 'downloaded'; }; })()`);
+  // (9단계) 안내자 대사 칸: scope 안 [data-js=name]의 .say__line이 화면에 보이고 글자가 있는지
+  const sayLine = (scope, name) => ev(`(() => { const b = document.querySelector(${JSON.stringify(scope)} + ' [data-js=' + ${JSON.stringify(name)} + ']'); const l = b && b.querySelector('.say__line'); return { shown: !!b && getComputedStyle(b).display !== 'none', text: (l ? l.textContent : (b ? b.textContent : '')).trim() }; })()`);
   const roomShape = (room) => ev(`(() => { const s = document.querySelector('#screen-${room}-result');
     return { chapters: s.querySelectorAll('[data-js=result-chapter], [data-js=result-toc], [data-js=result-sealed], [data-ad=result-mid]').length,
       reading: s.querySelector('[data-js=reading-body]').children.length, ads: s.querySelectorAll('[data-js=ad-slot]').length,
@@ -101,6 +104,8 @@ function paidSentences() {
   check(reduced ? "움직임 줄이기: 전환 400ms 이하(+측정 여유 250ms)" : "움직임: 건너뛰기로 1.2초 전에 도착", reduced ? dt <= 650 : dt < 1200, dt + "ms");
   check("방 화면 상단: 입구 버튼 + 'I 오검의 방 1/6'", !(await has("[data-js=topbar-home]", "is-hidden")) && (await txt("[data-js=read-label]")).replace(/\s+/g, " ").trim() === "I 오검의 방 1/6");
   check("주소 해시 = 화면 이름(#ogham-intro)", (await ev("location.hash")) === "#ogham-intro");
+  const greet = await sayLine("#screen-ogham-intro", "guide-greet");
+  check("9단계: 방 시작 인사(안내자) 보이고 글자 있음", greet.shown && greet.text.length > 0, greet.text);
 
   // ═══ 3. 오검 실제로 마치기 (입력 → 의식 → 결과) ═══
   await click("[data-js=ogham-intro-go]");
@@ -108,6 +113,8 @@ function paidSentences() {
   await ev(`(() => { const i = document.querySelector('[data-js=ogham-name]'); i.value = ${JSON.stringify(NAME)}; i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
   await click("[data-js=ogham-input-go]");
   await waitScreen("screen-ogham-ritual", 4000);
+  const ritualG = await sayLine("#screen-ogham-ritual", "guide-ritual");
+  check("9단계: 의식 중 안내자 한마디 보이고 글자 있음", ritualG.shown && ritualG.text.length > 0, ritualG.text);
   for (let i = 0; i < 40 && !(await ev("document.querySelector('#screen-ogham-ritual').classList.contains('is-carved')")); i++) { await click("[data-js=ogham-bark]"); await sleep(80); }
   check("오검 결과", await waitScreen("screen-ogham-result", 8000));
   await sleep(300);
@@ -119,6 +126,16 @@ function paidSentences() {
   check("D-4 확장: 무료 화면에 유료 문장(identity.rest·event.lede 포함) 0", leak1.length === 0, leak1.slice(0, 2).join(" | "));
   check("공유 = 카드 아래 주 1개 + 글자 링크, 다시 보기 = 글자 링크(U6)", (await ev("document.querySelector('#screen-ogham-result [data-js=result-retry]').classList.contains('text-link') && document.querySelector('#screen-ogham-result [data-js=result-share]').classList.contains('text-link')")));
   check("다음 문 바로 위아래 광고 없음", await ev(`(() => { const p = document.querySelector('#screen-ogham-result [data-js=result-passage]'); const n = (e) => e && e.dataset.js === 'ad-slot'; return !n(p.previousElementSibling) && !n(p.nextElementSibling); })()`));
+  const openG = await sayLine("#screen-ogham-result", "guide-open");
+  const closeG = await sayLine("#screen-ogham-result", "guide-close");
+  check("9단계: 결과 여는말 보이고 글자 있음(자리표시 {who} 남지 않음)", openG.shown && openG.text.length > 0 && !openG.text.includes("{who}"), openG.text);
+  check("9단계: 결과 닫는말 보이고 글자 있음", closeG.shown && closeG.text.length > 0, closeG.text);
+  check("9단계: 다음 문 위 바통(다리)에 안내자 이름 보임", await ev("(() => { const b = document.querySelector('#screen-ogham-result [data-js=guide-bridge]'); return !!b && getComputedStyle(b).display !== 'none' && b.querySelector('.say__name').textContent.trim().length > 0 && b.querySelector('[data-js=result-bridge]').textContent.trim().length > 0; })()"));
+  await hookCards();
+  await click("#screen-ogham-result [data-js=result-share]");
+  await waitFor("window.__opts.length > 0", 5000);
+  const shareOpts = await ev("window.__opts[0] || ''");
+  check("9단계: 방 공유 카드에 guideSignature 전달(안내자 이름 포함)", shareOpts.includes('"guideSignature"') && shareOpts.includes(await ev("TEXT.guides.ogham.name")));
   check("상단 읽기 막대 없음(방 화면)", !(await has("[data-js=topbar]", "is-reading")));
   await noHScroll("오검 결과");
   await shot(P + "02-ogham-result.png", true);
@@ -149,6 +166,8 @@ function paidSentences() {
   const t1 = Date.now();
   await click("[data-js=decan-intro-go]");
   check("탭 2번(주 버튼·시작) 만에 의식 시작(입력 화면 건너뜀)", await waitScreen("screen-decan-ritual", 2000));
+  const ritualDecan = await sayLine("#screen-decan-ritual", "guide-ritual");
+  check("9단계: 데칸 의식에 안내자 한마디 + 기존 상태 라벨 함께 보임", ritualDecan.shown && ritualDecan.text.length > 0 && (await ev("(document.querySelector('#screen-decan-ritual .decan-head__label')||{}).textContent || ''")).trim().length > 0, ritualDecan.text);
   check("의식 건너뛰기 힌트 1초 뒤 보임", await waitFor("document.querySelector('#screen-decan-ritual [data-js=ritual-skip]').classList.contains('is-visible')", 2500));
   await click("#screen-decan-ritual");
   check("아무 데나 누르면 바로 결과(5.2초 기다리지 않음)", (await waitScreen("screen-decan-result", 1500)) && (!reduced ? Date.now() - t1 < 4000 : true), (Date.now() - t1) + "ms");

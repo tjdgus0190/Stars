@@ -65,16 +65,20 @@ const canvas = await ShareCard.render({
   keyword: "지금 구간 한 줄",                                 // 40px 강조색, 한 줄(넘으면 말줄임)
   roomGrid: { cells: [{ path: "M12 56V4…", vw: 40, vh: 60, fill: false, color: "#93d5f5", done: true }] }, // 3열 칸(120px). done이면 방 색 글리프, 아니면 흐린 테두리
   closeLine: { text: "닫는 글 한 문장", size: 44, maxLines: 2 }, // 최대 2줄, 넘으면 말줄임
+
+  // ── 2026-09-29 9단계 추가 옵션 (안내자 서명, 선택. 안 넘기면 그리지 않는다)
+  guideSignature: { name: "룬", line: "바람이 돌을 고르게 두세요." }, // 흐름의 맨 마지막 줄. "{line}" — {name} 모양, line·따옴표는 muted, "— 이름"만 강조색(30px, 넘치면 26px까지 줄임. 최대 폭 820px를 넘어도 줄이지 않으니 문장을 줄여서 다시 넘길 것)
 });
 const how = await ShareCard.share(canvas, "파일이름.png", "공유 시 함께 보낼 문구");
 // how: "shared" | "cancelled" | "downloaded"
 ```
-- 그리는 순서(위→아래): eyebrow → glyph → art → bark → sundial → dayGlyph → laurel → stones → progress → lead → topBadge → title → subtitle → pair → keyword → roomGrid → closeLine → lines → parchment → hook → badges. 전체를 안전 영역(y 260 ~ 1600) 가운데에 놓고, 넘치면 **아래쪽 줄부터 버린다**.
+- 그리는 순서(위→아래): eyebrow → glyph → art → bark → sundial → dayGlyph → laurel → stones → progress → lead → topBadge → title → subtitle → pair → keyword → roomGrid → closeLine → lines → parchment → hook → badges → guideSignature. 전체를 안전 영역(y 260 ~ 1600) 가운데에 놓고, 넘치면 **아래쪽 줄부터 버린다**.
 - 글꼴은 `document.fonts.ready`를 기다린 뒤 그린다. 웹폰트를 CSS로 먼저 불러 두어야 한다.
 - 개인정보: 이미지는 브라우저 안에서만 만들어진다. 이름 등 입력값을 넣을지는 제품이 정한다.
 - 변경 이력: 2026-09-25 옵션 추가. 쓰는 제품을 grep으로 확인(strange-oracle뿐). 기존 옵션만 쓰면 결과가 같다.
 - 2026-09-28 (6단계 유료 리포트): frame:"keepsake"·topBadge·pair·keyword·roomGrid·closeLine 추가. 새 블록 함수와 선택 옵션만 더했고 기존 옵션의 순서·기본값은 그대로(기존 카드는 새 옵션을 넘기지 않으므로 결과가 같다). 쓰는 제품 grep 결과 strange-oracle뿐. 유료 소장판에는 이름·생일·영수증 코드를 넣지 않는다(제품 규칙).
 - 2026-09-28: bark·sundial·dayGlyph·laurel·parchment 추가(새 블록 함수만 더하고 기존 블록·순서·기본값은 그대로). 쓰는 제품 grep 결과 strange-oracle뿐, 룬·별·나의 이야기 카드 이미지가 만들어지는 것을 헤드리스 Edge로 확인(이전 이미지와 픽셀 비교는 하지 않음).
+- 2026-09-29 (9단계 방의 안내자): guideSignature 옵션 추가. badges 다음, 흐름의 맨 마지막 줄에만 그리고 안 넘기면 기존과 똑같이 그린다(기존 옵션·순서·기본값 그대로). 쓰는 제품 grep 결과 strange-oracle뿐, 여섯 방 결과 카드에서 안내자 이름·서명 문장을 넘겨 확인(나의 이야기·유료 소장판 카드는 넘기지 않음).
 
 ## disclaimer.js
 운세·사주·타로 결과 하단에 CLAUDE.md 8장의 면책 문구를 넣는다. 문구는 부품 안에 고정돼 있다.

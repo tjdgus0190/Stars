@@ -9,6 +9,7 @@
 //   titleColor, titleGlow, hook, badges, footerY.
 // 2026-09-28 추가(역시 선택): bark, sundial, dayGlyph, laurel(그림 블록), parchment(양피지 띠 글자). 자세한 설명은 docs/common.md
 // 2026-09-28 6단계 추가(역시 선택): frame:"keepsake"(금선 두 겹 + 모서리 인장), topBadge, pair, keyword, roomGrid, closeLine (유료 소장판 카드)
+// 2026-09-29 9단계 추가(역시 선택): guideSignature: { name, line } — 흐름의 마지막 줄에 안내자 서명 1줄. 안 넘기면 예전과 똑같이 그린다
 (function () {
   const W = 1080;
   const H = 1920;
@@ -490,6 +491,40 @@
       },
     };
   }
+  // (9단계) 안내자 서명: "{line}" — {name}. 따옴표·문장은 muted, "— 이름"만 강조색, lineH 48
+  // 최대 폭 820px를 넘으면 26px까지 줄인다. 그래도 넘치면 줄이지 않는다(말줄임 금지) — 문장을 줄이도록 copywriter에게 되돌릴 것
+  function signatureBlock(sig, fonts) {
+    return {
+      height: 64,
+      draw(ctx, top, t) {
+        ctx.save();
+        const quoted = `“${sig.line || ""}”`;
+        const dash = "  — ";
+        const name = sig.name || "";
+        let size = 30;
+        ctx.font = `500 ${size}px ${fonts.serif}`;
+        let w = ctx.measureText(quoted + dash + name).width;
+        if (w > 820) {
+          size = 26;
+          ctx.font = `500 ${size}px ${fonts.serif}`;
+          w = ctx.measureText(quoted + dash + name).width;
+        }
+        const y = top + 48;
+        ctx.textAlign = "left";
+        const wq = ctx.measureText(quoted).width;
+        const wd = ctx.measureText(dash).width;
+        let x = (W - w) / 2;
+        ctx.fillStyle = t.muted;
+        ctx.fillText(quoted, x, y);
+        x += wq;
+        ctx.fillText(dash, x, y);
+        x += wd;
+        ctx.fillStyle = t.accent;
+        ctx.fillText(name, x, y);
+        ctx.restore();
+      },
+    };
+  }
   // 방 문양 칸(3열, 칸 120px). roomGrid: { cells: [{ path: "SVG 경로 d", vw: 40, vh: 60, fill: false, color: "#rrggbb", done: true }] }
   // done이면 방 색 글리프(획, fill:true면 채움), 아니면 흐린 테두리만
   function roomGridBlock(g) {
@@ -696,6 +731,8 @@
       gap(30);
     }
     for (const b of opts.badges || []) { block(badgeBlock(b, fonts)); gap(24); }
+    // (9단계) 안내자 서명: 흐름의 마지막 줄. guideSignature: { name, line }. 없으면 지금과 동일하게 그린다
+    if (opts.guideSignature) { gap(12); block(signatureBlock(opts.guideSignature, fonts)); }
 
     const heightOf = (r) => r.gap || r.lineH || r.block.height;
     let total = rows.reduce((s, r) => s + heightOf(r), 0);

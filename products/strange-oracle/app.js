@@ -644,7 +644,6 @@
       s.classList.remove("is-next", "is-flipped");
       s.setAttribute("aria-label", fill(T.rune.ritual.stoneLabel, { norn: T.rune.norns[i].name }));
     });
-    js("rune-ritual-guide").innerHTML = T.rune.ritual.hold;
     js("rune-norn-hint").textContent = "";
   };
   leave["rune-ritual"] = () => {
@@ -710,7 +709,6 @@
       show(cloth, true);
       cloth.classList.add("is-cast");
       stones[0].classList.add("is-next");
-      js("rune-ritual-guide").innerHTML = T.rune.ritual.fallen;
       nornHint(0);
       stones[0].focus({ preventScroll: true });
     }, reduceMotion ? 150 : 700);
@@ -812,11 +810,23 @@
     js("result-archetype-why", scr).innerHTML = why;
   }
 
+  // (9단계) 결과 여는/닫는 말: 안내자 대사에 {who} 치환. 빈 값이면 .say 블록은 CSS(:has(.say__line:empty))가 숨긴다
+  function renderGuideText(scr, room) {
+    const g = T.guides && T.guides[room];
+    if (!g) return;
+    const who = whoOf(state.profile.name || "");
+    const openLine = $(".say__line", js("guide-open", scr));
+    const closeLine = $(".say__line", js("guide-close", scr));
+    if (openLine) openLine.textContent = fill(g.open, { who });
+    if (closeLine) closeLine.textContent = fill(g.close, { who });
+  }
+
   // ───────── 룬 결과 ─────────
   // v = { picks: [code × 3], topic }. fresh=true면 방금 던진 결과 → 저장(같은 방은 덮어씀)
   let runeView = null;
   function renderRune(v, fresh) {
     const scr = screens["rune-result"];
+    renderGuideText(scr, "rune");
     const R = T.rune.result;
     const [past, now, next] = v.picks.map((c) => RUNE_BY_CODE[c]);
     const topic = T.rune.topics[v.topic];
@@ -1107,6 +1117,7 @@
   let starView = null;
   function renderStar(v, fresh) {
     const scr = screens["star-result"];
+    renderGuideText(scr, "star");
     const R = T.star.result;
     const nak = NAKS[v.nak];
     const planet = PLANETS[v.nak % 9];
@@ -1272,7 +1283,6 @@
     js("ogham-root-glyph").setAttribute("href", `#ogham-${root.code}`);
     js("ogham-root-name").textContent = strip(fill(T.ogham.ritual.rootName, { latin: root.latin, name: root.name }));
     js("ogham-ritual-latin").textContent = r.letters.map((i) => OGHAM[i].sound).join(T.ogham.ritual.letterSep);
-    js("ogham-ritual-guide").innerHTML = T.ogham.ritual.guide;
     js("ogham-ritual-hint").textContent = strip(T.ogham.ritual.hint);
   };
   leave["ogham-ritual"] = () => {
@@ -1314,7 +1324,6 @@
     og.drag = null;
     bark.style.setProperty("--carve", "1");
     oghamRitual.classList.add("is-carved");
-    js("ogham-ritual-guide").innerHTML = T.ogham.ritual.carved;
     js("ogham-ritual-hint").textContent = strip(T.ogham.ritual.carvedHint);
     buzz([30, 50, 30]);
     const idx = oghamCalc.index;
@@ -1328,6 +1337,7 @@
   let oghamView = null;
   function renderOgham(v, fresh) {
     const scr = screens["ogham-result"];
+    renderGuideText(scr, "ogham");
     const R = T.ogham.result;
     const e = OGHAM[v.ogham];
     const name = state.profile.name || "";
@@ -1481,6 +1491,7 @@
   let decanView = null;
   function renderDecan(v, fresh) {
     const scr = screens["decan-result"];
+    renderGuideText(scr, "decan");
     const R = T.decan.result;
     const e = DECANS[v.decan];
     const n = v.decan + 1;
@@ -1540,7 +1551,6 @@
     tablet.style.setProperty("--col", String(sign));
     tablet.style.setProperty("--row", String(Math.floor(dayIndex / 20)));
     js("tzolkin-ritual-count").textContent = strip(fill(T.tzolkin.ritual.count, { n: dayIndex + 1 }));
-    js("tzolkin-ritual-guide").innerHTML = T.tzolkin.ritual.guide;
     void tzRitual.offsetWidth;
     tzRitual.classList.add("is-running");
     const W = waitMs("tzolkin", reduceMotion ? 1200 : 5200);
@@ -1561,6 +1571,7 @@
   let tzView = null;
   function renderTzolkin(v, fresh) {
     const scr = screens["tzolkin-result"];
+    renderGuideText(scr, "tzolkin");
     const R = T.tzolkin.result;
     const e = TZ_SIGNS[v.sign];
     const num = TZ_NUMBERS[v.number - 1];
@@ -1647,7 +1658,6 @@
     js("sibyl-ritual-question").textContent = sib.question ? fill(T.sibyl.result.question, { q: sib.question }) : "";
     js("sibyl-scroll-num").textContent = fill(T.sibyl.ritual.num, { roman: roman(sib.pick + 1) });
     js("sibyl-scroll-text").textContent = strip(o.line);
-    js("sibyl-ritual-guide").innerHTML = T.sibyl.ritual.guide;
     js("sibyl-ritual-hint").textContent = strip(T.sibyl.ritual.hint);
   };
   leave["sibyl-ritual"] = () => {
@@ -1695,7 +1705,6 @@
     stage.classList.remove("is-dragging");
     setNear(1);
     stage.classList.add("is-warming");
-    js("sibyl-ritual-guide").innerHTML = T.sibyl.ritual.warming;
     js("sibyl-ritual-hint").textContent = strip(T.sibyl.ritual.warmingHint);
     buzz([20, 40, 20]);
     const pick = sib.pick, topic = sib.topic, question = sib.question;
@@ -1709,6 +1718,7 @@
   let sibylView = null;
   function renderSibyl(v, fresh, question = "") {
     const scr = screens["sibyl-result"];
+    renderGuideText(scr, "sibyl");
     const R = T.sibyl.result;
     const o = ORACLES[v.sors];
     const rn = roman(v.sors + 1);
@@ -1922,6 +1932,7 @@
         subtitle: fill(C.subtitle, { keyword: next.keyword }),
         lines: [strip(now.key)],
         badges: [C.badge],
+        guideSignature: { name: T.guides.rune.name, line: strip(T.guides.rune.signature) },
       },
     };
   }
@@ -1976,6 +1987,7 @@
         subtitle: nak.title,
         lines: [strip(nak.key)],
         badges: [v.west === v.sunRashi ? fill(C.twistSame, { sign: west.ko }) : fill(C.twist, { west: west.ko, vedic: sun.ko }), C.badge],
+        guideSignature: { name: T.guides.star.name, line: strip(T.guides.star.signature) },
       },
     };
   }
@@ -2011,6 +2023,7 @@
         title: strip(e.title), subtitle: strip(e.name),
         lines: [strip(e.key)],
         badges: [strip(C.badge)],
+        guideSignature: { name: T.guides.ogham.name, line: strip(T.guides.ogham.signature) },
       },
     };
   }
@@ -2025,6 +2038,7 @@
         title: strip(e.title), subtitle: strip(fill(T.decan.ritual.name, { sign: e.sign, part: partName(e.part - 1) })),
         lines: [strip(e.key)],
         badges: [strip(C.badge)],
+        guideSignature: { name: T.guides.decan.name, line: strip(T.guides.decan.signature) },
       },
     };
   }
@@ -2040,6 +2054,7 @@
         title: strip(fill(T.tzolkin.result.title, { number: v.number, name: e.name })), subtitle: `${v.number} ${LATIN}`,
         lines: [strip(e.key)],
         badges: [strip(C.badge)],
+        guideSignature: { name: T.guides.tzolkin.name, line: strip(T.guides.tzolkin.signature) },
       },
     };
   }
@@ -2055,6 +2070,7 @@
         title: strip(o.title), subtitle: topic,
         parchment: { text: strip(o.line) },
         badges: [strip(C.badge)],
+        guideSignature: { name: T.guides.sibyl.name, line: strip(T.guides.sibyl.signature) },
       },
     };
   }

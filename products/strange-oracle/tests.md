@@ -366,3 +366,17 @@
   - `e2e-flow.js`(8단계로 새로 작성): reduced 58/0, motion 59/0. 움직임 줄이기 전환은 400ms 설계에 측정 여유 250ms 안이다.
   - `e2e-paid.js`: reduced 93/0, motion 93/0.
   - `http-check.js`: 23/0(6방 코드로 바꾸고 incomplete 시험 추가).
+
+### 9단계 실행 기록 — 방의 안내자 (2026-09-29)
+기준: specs/strange-oracle.md 「9단계」, design/strange-oracle.md 9단계 절. 마크업·CSS는 designer가 이미 만들었고, 이번은 문구 연결·치환 로직만.
+- 방 입장 인사(`.say--greet`)·의식 한마디(`.say--ritual`)는 `data-t="guides.<room>.*"`를 applyText()가 그대로 채운다. 룬·오검·촐킨·시빌라의 의식 칸은 이전에 app.js가 단계별(hold/fallen, guide/carved, guide/warming)로 덮어쓰던 것을 지워 고정 대사가 유지되게 했다(`js("<room>-ritual-guide").innerHTML = T.<room>.ritual.*` 7곳 삭제). 룬은 조작 안내(누르고 흔들기)를 이 고정 한 줄이 대신하고, 돌 순서 안내(뒤집을 차례)는 기존 `rune-norn-hint`가 그대로 맡는다(운영자 결정 51).
+- 별·데칸은 기존 상태 라벨(`decan-head__label` 등, "하늘을 되감는 중"류)을 그대로 두고 안내자 한마디를 나란히 추가했다(디자인 「판단이 필요한 것」에 대한 운영자 지시: 교체가 아니라 병기).
+- 결과 여는말(`guide-open`)은 `renderGuideText(scr, room)`(app.js)가 `T.guides.<room>.open`을 `{who}`(whoOf() 결과) 치환해 채운다. 닫는말(`guide-close`)도 같은 함수에서 채우며, 자리표시가 남지 않는지 e2e로 확인했다. 다리(`guide-bridge`/`result-bridge`)는 문구 자리를 그대로 두었다(문구 자체는 copywriter 몫).
+- 빈 안내자 줄은 CSS `.say:not(.say--bridge):has(.say__line:empty)`가 이미 블록을 숨긴다(designer 작업, 이번에 새로 만들지 않음).
+- `common/share-card.js`: `guideSignature: { name, line }` 옵션 추가(badges 다음, 흐름의 마지막 줄. "《line》 — name" 모양, 30px→(820px 넘으면)26px, 안 넘기면 기존과 동일하게 그린다). docs/common.md 갱신. 쓰는 제품은 strange-oracle뿐이라 다른 제품 확인은 필요 없었다. 여섯 방 결과 카드 build 함수(build*Card)에 `guideSignature`를 추가했고, "나의 이야기"·유료 소장판 카드에는 추가하지 않았다(9-2 5-b는 방 결과 카드 기준).
+- data.js에 `guides`(role·6방 name/greet/ritual/open/close/signature) 추가. name·role은 spec 9-1 확정안 그대로, 나머지는 [초안](copywriter가 채움). 더는 안 쓰는 옛 의식 문구 키(rune.ritual.hold/fallen, ogham.ritual.guide/carved, tzolkin.ritual.guide, sibyl.ritual.guide/warming)는 정리해 지웠다(hint·carvedHint 등 여전히 쓰는 키는 남김).
+- `node --test tools/strange-oracle/`: 17/17 통과(9단계로 바뀐 것 없음, 회귀만 확인).
+- mock-server(8787 mock, 8788 off) 재기동 → `node tools/build-dist.js` → 재실행 순으로 진행.
+  - `e2e-flow.js`에 9단계 시험 6개 추가(방 시작 인사·의식 한마디·데칸 상태 라벨 병기·결과 여닫는말·다리 안내자 이름·공유 카드 guideSignature 전달): reduced 65/0.
+  - `e2e-paid.js reduced`: 93/0(회귀 없음, 소장 카드는 guideSignature를 넘기지 않는 것도 기존 "이름·생일·영수증 코드 없음" 검사로 간접 확인).
+- 미확인: motion(움직임 있음) 모드 재실행은 이번에 하지 않았다(예산 제약). 480px 확인은 designer의 UI 점검(9-4 4행) 몫이라 여기서는 하지 않았다.
