@@ -3635,3 +3635,92 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 @keyframes sigil-rm { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes sigil-rm-veil { 0% { opacity: 0; } 50% { opacity: 0.9; } 100% { opacity: 0; } }
 .so-far__title { flex: 1; min-width: 0; white-space: nowrap; }
+
+/* ═════════ 9단계: 방의 안내자 (결정 51, 9-2) ═════════
+   - .guide-figure: 방 시작 화면 .room-emblem 오른쪽 옆의 안내자 실루엣(선 그림, 방 강조색). 상징 원과 겹치지 않는다.
+     8-3 상징 떠오름 동안(.room-emblem.is-awaiting)은 숨었다가, 끝나면 200ms 페이드로 나타난다. 기본 상태가 최종 모습.
+   - .say: 안내자 한마디(이름 라벨 + 인용형 한 줄). greet(방 시작) · ritual(의식) · open/close(결과 앞뒤) · bridge(다음 문 위) */
+.room-head { position: relative; }
+.guide-figure {
+  position: absolute;
+  top: calc(var(--space-6) + (var(--emblem) - 59px) / 2);
+  left: calc(50% + var(--emblem) / 2 + var(--space-5));
+  width: 44px;
+  height: 59px;
+  color: var(--accent);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 6px var(--accent-glow));
+  transition: opacity 200ms var(--ease-out);
+}
+.room-emblem--sibyl + .guide-figure { margin-left: var(--space-2); } /* 월계관이 원 밖으로 14px 나옴 */
+.room-emblem.is-awaiting + .guide-figure { opacity: 0; transition: none; }
+
+.say {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: start;
+  max-width: 26rem;
+  margin: var(--space-6) auto;
+  text-align: left;
+  animation: say-in 420ms var(--ease-out) both;
+}
+@keyframes say-in { from { opacity: 0; translate: 0 6px; } }
+.say__figure {
+  grid-row: span 2;
+  width: 30px;
+  height: 40px;
+  color: var(--accent);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.say__name {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-tight);
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+.say__name b { font-weight: 700; }
+.say__role { color: var(--c-text-muted); font-weight: 400; }
+.say__line {
+  margin-top: var(--space-1);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--accent-line);
+  font-family: var(--font-serif);
+  font-size: var(--fs-md);
+  line-height: var(--lh-ui);
+  color: var(--c-text-strong);
+  text-wrap: pretty;
+}
+/* 방 시작 인사: 큰 실루엣이 위에 있으므로 작은 실루엣 없이 가운데 정렬, 따옴표로 대사임을 표시 */
+.say--greet { grid-template-columns: minmax(0, 1fr); justify-items: center; margin: var(--space-5) auto 0; text-align: center; }
+.say--greet .say__line { padding: 0; border: 0; font-size: var(--fs-md); color: var(--c-text); }
+.say--greet .say__line::before { content: "\201C" / ""; color: var(--accent); }
+.say--greet .say__line::after { content: "\201D" / ""; color: var(--accent); }
+/* 의식: 기존 .ritual__guide 자리 그대로, 글자만 읽기 쉽게 */
+.say--ritual { margin: 0 auto var(--space-6); }
+.say--ritual .say__line.ritual__guide { min-height: 0; margin-bottom: 0; font-size: var(--fs-md); color: var(--c-text-strong); }
+.say--open { margin: 0 auto var(--space-5); }
+.say--close { margin: var(--space-8) auto var(--space-6); }
+/* 다리: 블록을 늘리지 않도록 기존 머리 장식(◆ 선)을 안내자 머리줄로 바꾼다 */
+.say--bridge { display: block; max-width: none; margin: 0; text-align: center; }
+.say__head { display: flex; align-items: center; justify-content: center; gap: var(--space-2); }
+.say__head .say__figure { width: 24px; height: 32px; }
+.say--bridge .passage__bridge { padding-top: var(--space-3); }
+.say--bridge .passage__bridge::before { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .say { animation: none; }
+  .guide-figure { transition: none; }
+}
+/* 빈 상태: 문구가 아직 없으면(데이터 키 누락) 따옴표·이름만 남지 않게 통째로 숨긴다 */
+.say:not(.say--bridge):has(.say__line:empty) { display: none; }

@@ -1214,3 +1214,69 @@ data.js에 아직 없어서 지금은 JS가 빈 글자로 채운다. 마크업�
 
 ### 운영자·개발자 확인할 것
 - 위 표의 "상태별 화면"과 "공유 카드 안전 영역"은 이번 점검에서 스크린샷으로 다시 보지 않았다(이전 단계 결과를 신뢰). 필요하면 별도로 다시 볼 것.
+
+## 9단계: 방의 안내자 (2026-09-29, 디자인)
+기준: specs/strange-oracle.md 「9단계」 9-1~9-4, 운영자 결정 51. 새 화면·새 기능 없음. 결과 본문 말투·8-1 블록 순서는 그대로.
+
+### 안내자 실루엣 SVG 6개 (index.html `<symbol id="guide-<room>">`, viewBox 0 0 48 64, designer 직접 제작)
+| 방 | symbol | 모티프 |
+|---|---|---|
+| Ⅰ 오검 | guide-ogham | 자작나무 껍질 조각(오검 획 3개) + 첨필을 쥔 손 |
+| Ⅱ 별 | guide-star | 칸 나뉜 밤하늘 반원(달의 집) + 칸을 짚는 검지 |
+| Ⅲ 데칸 | guide-decan | 해시계(바늘·눈금) + 눈금을 가리키는 손 |
+| Ⅳ 촐킨 | guide-tzolkin | **네모 석판**: 카르투슈 소용돌이 + 마야 숫자(점 3·막대 2). 손·얼굴·눈처럼 보이는 요소 없음 |
+| Ⅴ 룬 | guide-rune | 망토 자락 + 돌 두 개를 받친 손 |
+| Ⅵ 시빌라 | guide-sibyl | 월계관 쓴 옆얼굴 + 살짝 든 손 |
+- 선 그림(stroke=currentColor, 채움은 별·잎·점만), 색은 방 강조색 `--accent` 한 가지. 6개 합계 약 4KB, 외부 이미지 없음.
+
+### 배치
+- **방 시작 화면(5-a)**: `.room-head` 안, `.room-emblem` 바로 다음 형제 `svg.guide-figure`(44×59px). 상징 원 오른쪽 `left: 50% + emblem/2 + 20px`, 세로는 원 가운데. 시빌라는 월계관이 원 밖 14px로 나와서 8px 더 띄움.
+  360px 실측: 원과의 간격 20px(오검 32px, 시빌라 28px, 월계관 기준 14px), 실루엣 오른쪽 끝 288px(시빌라 296px) < 화면 폭 360px.
+- 8-3 상징 떠오름 중(`.room-emblem.is-awaiting`)에는 opacity 0, 끝나서 class가 빠지면 200ms 페이드로 나타난다. 8-3 타이밍에는 관여하지 않는다. reduced-motion에서는 transition 없음 = 바로 보임.
+
+### 말풍선 컴포넌트 `.say` (이름 라벨 + 인용형 한 줄)
+- 구조: `svg.say__figure`(30×40 작은 실루엣, 왼쪽) + `p.say__name`("안내자" 흐린 글자 + 이름 강조색 굵게, 13px) + `p.say__line`(명조 16px, `--c-text-strong`, 왼쪽 강조색 세로줄로 본문과 구분). 최대 폭 26rem, 가운데.
+- 대비: 대사 `--c-text-strong`, 이름 `--accent`(기존 `.door__origin`과 같은 글자색 용도) — AA 기준 기존 점검값과 같음.
+- 등장: `say-in` 420ms(투명→보임, 6px 위로). 기본 상태가 최종 모습이라 reduced-motion에서는 animation: none만으로 끝.
+- 빈 상태: `.say__line`이 비어 있으면(데이터 키 누락) 블록 전체를 숨긴다(따옴표·이름만 남지 않게).
+| 자리 | class | 위치 | 모양 |
+|---|---|---|---|
+| 1 방 입장 인사 | `.say--greet` | `.room-head__pitch` 바로 아래(헤더 안), 소개 목록·시작 버튼 위 | 작은 실루엣 없음(큰 실루엣이 위에 있음), 가운데 정렬, 강조색 “ ” |
+| 2 의식 한마디 | `.say--ritual` | 기존 `.ritual__guide` 자리(오검·촐킨·룬·시빌라). 별·데칸은 해당 칸이 없어 같은 위치(건너뛰기 안내 바로 다음)에 새로 둠 | 실루엣+이름+대사 |
+| 3 결과 여는 말 | `.say--open` | 결과 카드(`.capture`) 바로 위 — 캡처 영역 밖 | 실루엣+이름+대사 |
+| 3 결과 닫는 말 | `.say--close` | 문화 상식 카드 다음, 면책(`disclaimer-slot`) 앞 | 실루엣+이름+대사 |
+| 4 다리 | `.say--bridge` | 기존 `.passage__bridge`를 감싸고 머리줄(작은 실루엣 24×32 + 이름)만 추가. 기존 ◆ 선 장식을 머리줄로 바꿔 블록 높이는 거의 같음 | 가운데 정렬, 다리 문장 스타일은 그대로 |
+
+### 새 data-t 키 (전부 [초안] 자리표시, copywriter용 · 360px 기준)
+| 키 | 분량(9-2) | 360px 최대 줄 | 비고 |
+|---|---|---|---|
+| guides.role | 3자 내외 | 1줄 | 이름 앞 라벨 "안내자" |
+| guides.<room>.name | 5자 이하 | 1줄 | 오검·별·데칸·촐킨·룬·시빌라 |
+| guides.<room>.greet | 40~70자 | 3줄 | 가장 긴 경우(오검 66자) 3줄 확인 |
+| guides.<room>.ritual | 20~40자 | 2줄 | |
+| guides.<room>.open | 30~50자 | 2줄 | 템플릿. {이름}(결과 이름) 치환, JS가 채움 |
+| guides.<room>.close | 30~50자 | 2줄 | 템플릿 가능 |
+| guides.<room>.signature | 24자 이하 | 공유 카드 1줄 | 화면에는 안 씀. 시그니처 문장 재사용 |
+| bridges.<room> | 100~200자(기존) | 기존과 같음 | 키·자리 그대로, 문구만 다시 씀(떠나는 안내자 인사 + 다음 안내자 부르기) |
+- <room> = ogham, star, decan, tzolkin, rune, sibyl. 촐킨 대사는 "이 돌은"으로 자칭(9-1).
+
+### developer 전달 사항
+- data-js: `guide-greet`, `guide-ritual`, `guide-open`, `guide-close`, `guide-bridge`(각 `.say` 블록). 대사 칸은 data-t로 채우고, 여닫는 말은 `[data-js="guide-open"] .say__line`에 치환 결과를 넣는다.
+- 의식 대사 칸은 기존 hook `<room>-ritual-guide`를 그대로 두었다(별·데칸은 `star-ritual-guide`·`decan-ritual-guide` 신설). 지금 app.js가 룬(hold/fallen)·오검(guide/carved)·시빌라(guide/warming)·촐킨(guide)에서 이 칸을 단계별 문구로 덮어쓰므로, 9-2대로 고정 대사(`guides.<room>.ritual`)로 바꿀 것.
+- 다리 문장은 `data-js="result-bridge"` 그대로(감싸는 `.say--bridge`만 추가).
+- 실루엣은 정적. 방 시작 화면에서 `.is-awaiting` 처리는 기존 8-3 코드 그대로면 된다(실루엣은 형제 선택자로 따라감).
+
+### 공유 카드 서명 (1080×1920, share-card.js 옵션 — 명세만, 그리기는 developer)
+- 옵션 예: `guideSignature: { name: "룬", line: "바람이 돌을 고르게 두세요." }`. 없으면 지금과 똑같이 그린다(기존 옵션 영향 없음).
+- 자리: 흐름 배치의 **마지막 줄** — 알약(badges) 다음 gap 12 → 서명 1줄. 제품 이름(footerY 1630)과 아래 안전선(SAFE_BOTTOM = 1540)은 그대로라 기존 요소를 가리지 않는다.
+- 모양: 가운데 정렬 `“{line}” — {name}`. 문장 30px 명조 `muted`, "— 이름"만 강조색, lineH 48. 최대 폭 820px, 넘으면 26px까지 줄이고 그래도 넘으면 문장을 줄이도록 copywriter에게 되돌림(말줄임 금지). 장식 그림 없음(실루엣은 카드에 넣지 않음).
+- 흐름 높이가 안전 영역을 넘는 방(룬 돌 3개·시빌라 양피지)은 기존 축소 규칙을 따르고, UI 점검(9-4 4행)에서 6장 모두 확인.
+
+### 판단이 필요한 것
+- 별·데칸 의식에는 `.ritual__guide` 칸이 없다. 기존 상태 라벨("하늘을 되감는 중", "정오의 그림자를 따라가는 중")은 연도·날짜 표시와 한 묶음이라 **남겨 두고** 안내자 칸을 추가했다. 9-2의 "교체"를 이 라벨까지 지우는 뜻으로 볼지 운영자·planner 확인 필요.
+- 룬 의식의 "hold" 문구는 조작 안내(누르고 흔들기)다. 고정 대사로 바꾸면 조작 안내가 사라지므로 copywriter가 대사 안에 조작을 담을지 확인 필요.
+
+### 캡처 기록 (360px, 움직임 줄이기, headless Edge, 화면은 class로 직접 전환, [초안] 문구를 채워서 측정)
+- 여섯 방 시작·의식·결과 18화면 모두 가로 넘침 0(scrollWidth = clientWidth, 화면 밖으로 나간 요소 없음), 콘솔 오류 없음.
+- reduced-motion: `.say` animation none, `.guide-figure` transition 0s, 불투명도 1 확인.
+- 캡처: 오검·시빌라·촐킨 시작 화면, 별 의식, 시빌라 결과 여는 말. 480px는 UI 점검(9-4 4행)에서 확인.
