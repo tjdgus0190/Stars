@@ -150,7 +150,7 @@ const SIBYL_Q = "비밀질문XYZ";
   check("리포트를 떠나면 주소에서 결제 값 지움", (await ev("location.search")) === "");
   check("나의 이야기 카드 is-owned", await ev("document.querySelector('[data-js=story-paid]').classList.contains('is-owned')"));
   await ev("StrangeOracle.go('hub')");
-  await sleep(300);
+  await sleep(450);
   check("허브: 내 리포트 다시 보기 보임", !(await hidden("[data-js=hub-report]")));
   await click("[data-js=hub-report]");
   check("다시 보기 → 같은 리포트", (await waitScreen("screen-report", 6000)) && (await reportText()) === r1);
