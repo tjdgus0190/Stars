@@ -16,7 +16,10 @@
   const RANDOM_LEN = 14;
   const LEN = PREFIX.length + PAYLOAD_LEN + RANDOM_LEN + 1;
   const ARCHETYPES = ["warrior", "sage", "lover", "rebel", "caregiver", "explorer", "creator", "ruler"];
-  const ROOMS = ["ogham", "star", "decan", "tzolkin", "sibyl", "rune"];
+  // 나의 이야기 장 순서 Ⅰ~Ⅵ (spec 7-1, 결정 39). 브라우저(app.js)와 서버(api/_lib/core.js)가 이 배열 하나만 쓴다.
+  // 부호화(FIELDS)와는 무관하다 — 이 배열을 바꿔도 기존 영수증 코드는 그대로 해독된다.
+  const CHAPTER_ORDER = Object.freeze(["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
+  const ROOMS = CHAPTER_ORDER;
   // [이름, 기수]. 값 0 = 없음(방에 안 감·상대 없음·관계 없음), 1 이상 = 실제 값 + 1
   const FIELDS = [
     ["rune", 24 * 24 * 24 + 1], // 룬 세 개(과거·현재·미래) 번호 0~23 → p0*576 + p1*24 + p2 + 1
@@ -126,7 +129,7 @@
   const groups = (code) => String(code).match(/.{1,4}/g) || [];
   const pretty = (code) => groups(code).join("-");
 
-  const api = { encode, decode, normalize, groups, pretty, roomsOf, ARCHETYPES, ROOMS, FIELDS, LEN };
+  const api = { encode, decode, normalize, groups, pretty, roomsOf, ARCHETYPES, ROOMS, CHAPTER_ORDER, FIELDS, LEN };
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.PayCode = api;
 })(typeof window !== "undefined" ? window : globalThis);

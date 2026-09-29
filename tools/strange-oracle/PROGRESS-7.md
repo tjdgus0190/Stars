@@ -1,0 +1,15 @@
+# 7단계 기능 구현 진행 기록 (developer, 이어받기용)
+- [x] 1. 순서: paycode.js `CHAPTER_ORDER`(Ⅰ오검 Ⅱ별 Ⅲ데칸 Ⅳ촐킨 Ⅴ룬 Ⅵ시빌라) 추가, app.js·core.js가 이를 읽음. data.js 룬 5장·시빌라 6장 숫자, index.html room-chapter-num data-n(app.js가 CHAPTER_ORDER로 다시 계산).
+- [x] 2. 흐름: app.js `gate()`(go 안 문지기)·`roomTarget()`·`isDone/isUnlocked/nextRoom`, state.started(인트로 지남 플래그), 허브 문 is-next/is-locked/is-visited·aria-disabled·is-denied+toast.locked, 진행 막대, `renderPassage`·`openNextDoor`(650ms), 인트로(`intro-start`), 결말(`enter.finale`/`endFinale`, 움직임 줄이기 교차 페이드), 부팅(새 세션=intro, #방 딥링크). LINKS·T.next·renderNextRooms 삭제, index.html의 빈 template 7개와 `.chapters-paid`(III·IV장 마크업) 삭제. data.js 새 키([초안]): intro.*, finale.*, bridges.*, hub.doors.*.reads, hub.doorLocked, hub.progress.{label,count}, result.sealed.*, result.bridgeTitle, result.nextDoor.*, toast.locked, story.teaserLocked, deeper.toc.rooms, deeper.teaser.rooms, report.parts.rooms.
+- [x] 3. 룬 재던지기 제거(data.js rune.result.retry, app.js 리스너, gate가 룬 완료 뒤 룬 입력·의식 → 결과로). 시빌라 retry "[초안] 다른 신탁 받기"+retryNote. 최근 신탁만 유지(기존 덮어쓰기 그대로).
+- [ ] 4. 유료 이동 — 진행 중. fillChapters는 이미 섹션 없는 장(III·IV)은 목차 제목만 쓰게 바꿈. 렌더 함수들의 ch2~ch4 조립은 아직 옛 데이터 기준.
+- [x] 4a. 문구 이동 완료 (scratchpad move.js, 되돌릴 때는 git): api/_paid/full-{rune,star,ogham,decan,tzolkin,sibyl}.js (PAID_FULL_<ROOM>, code = 공개 code, 공개 파일과 같은 중첩 칸). 합계 598,282자 = 공개 208,301 + 유료 389,981 (병합 대조 일치, HTML 0). content-work/paid-template/에 복사함. 공개 data-*.js 머리에 안내 2줄.
+- [ ] 4b. 남은 것: app.js 렌더(II장=첫 문단만, 별은 맞아요 인셋), core.js rooms 파트 조립(+countChars topics 제외), app.js renderReport rooms·목차 VOL, build-dist 누출 검사.
+- [x] 4b. app.js 렌더: II장=첫 문단(별은 +맞아요 인셋), III·IV는 목차 제목만. core.js `fullRoom()`·rooms 파트(여는 글 뒤), countChars topics 제외. app.js renderReport rooms(`topicTail`: 룬·시빌라 주제 단락은 이 탭에 같은 결과가 있을 때만), VOL.room 실측(오검 2240 별 2190 데칸 2380 촐킨 2310 룬 2540 시빌라 1850), 목차 rooms. build-dist: 새 파일 자동 포함 + 무료 칸(key·summary)과 원래 같은 문장 11개 제외 → 누출 0.
+- [ ] 5. 시험: api.test.js·e2e-paid.js 갱신, e2e-flow.js 새로, tests.md 7단계.
+- [x] 5a. api.test.js: D-11 시험은 rooms 파트 빼고, 새 시험 4개(7-1 순서 단일화, 7-4 도달·빈 문단, VOL.room ±3%, 공개 파일 유료 칸 0). node --test 15/15 통과.
+- [~] 5b. e2e-paid.js 갱신(started 시드, 목차 7칸, rooms 파트 순서·주제 단락, 새 탭 재열람 = 주제 단락 2개만 빠짐, 궁합 목차 index 4). 아직 실행 전.
+- [x] 5b. e2e-paid reduced 72/0, motion 72/0 (mock-server 8787·8788 새로 켬). 새 탭 재열람은 인트로→오검 시작→뒤로→허브 경로로 바꿈.
+- [x] 5c. e2e-flow.js 새로 작성: reduced 63/0 (app.js endFinale의 $$ 오타 고침). motion 실행 중.
+- [x] 5d. tests.md 7단계 절 추가.
+- [x] 전체 완료 (2026-09-29). mock-server 두 개는 끔.

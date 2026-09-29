@@ -220,3 +220,63 @@
 - 나의 이야기: 고정 순서 1~6장, 안 간 장은 "이 방에서 열기" 버튼, 여섯 장 → `.is-complete`, 원형 합산 동점은 앞 장.
 - 룬·별(1단계) 흐름과 공유 카드도 다시 확인. 룬 이름 인셋은 calc.js의 로마자 표(Calc.romanize) 하나만 쓴다.
 - 공유 카드 6종(오검·데칸·촐킨·시빌라·룬·별) + 나의 이야기 카드 이미지 생성 확인.
+
+# 7단계 완성도 개편 기능 점검 (developer, 2026-09-29)
+
+## 7-1 순서 단일화
+- 순서 배열은 `paycode.js`의 `CHAPTER_ORDER` 하나: Ⅰ오검 Ⅱ별 Ⅲ데칸 Ⅳ촐킨 Ⅴ룬 Ⅵ시빌라. app.js(`window.PayCode.CHAPTER_ORDER`)와 api/_lib/core.js가 이것만 읽는다.
+  `PayCode.ROOMS`도 같은 배열이다. 영수증 코드 부호화(FIELDS)와 무관하므로 기존 코드는 그대로 해독된다.
+- 룬 "나의 이야기 5장", 시빌라 "6장" 숫자만 바꿈 (data.js). 방 시작 알약의 장 번호는 app.js가 CHAPTER_ORDER로 계산한다.
+- 시험: api.test.js "7-1 순서 단일화". 유료 리포트 rooms·hidden 방 나열이 CHAPTER_ORDER와 같은지, app.js·core.js에 순서 배열이 따로 적혀 있지 않은지 본다.
+
+## 7-2 강제 순차 진행 (app.js `gate()`·`roomTarget()`)
+| 경우 | 결과 |
+|---|---|
+| 새 세션(sessionStorage에 `started` 없음) + 아무 주소(#rune 포함) | 인트로. 시작하면 `.gate.is-opening` 700ms(움직임 줄이기 300ms) 뒤 다음 방(처음엔 Ⅰ 오검) 시작 화면 |
+| 같은 탭 다시 열기 | 인트로 건너뛰고 허브 |
+| 잠긴 방(앞 방 결과 없음)으로 가는 모든 길(딥링크·go·등뼈 버튼) | 허브 + 안내 토스트(`toast.locked`) |
+| 마친 방 딥링크·허브 문 | 저장된 결과 다시보기 |
+| 룬을 마친 뒤 룬 시작·입력·의식 | 룬 결과(다시 던지기 불가) |
+| 잠긴 허브 문 누름 | `.is-denied` 320ms + 토스트, 이동 없음 (`aria-disabled="true"`, disabled 속성 없음) |
+- 허브 문 상태: 마친 방 `.is-visited`, 첫 빈 방 `.is-next`, 그 뒤 `.is-locked`. 진행 막대 `--n`·aria-valuenow·"N/6".
+- 다음 문: `.is-opening` 650ms 뒤 다음 방(마친 방이면 결과 다시보기). 시빌라 문 → 결말. 옛 `LINKS`·떡밥 문구(`TEXT.next`)·`renderNextRooms` 삭제.
+- `state.started`는 인트로를 지났다는 표시일 뿐 입력값이 아니다. "내 정보 지우기" 뒤에는 메모리에서만 true로 두어 허브로 간다.
+- 이전 판에서 순서 없이 들른 기록(예: 룬만 있음)은 그대로 인정한다. 마친 방은 다시 볼 수 있고, 다음 방은 앞에서 첫 빈 방이다.
+
+## 7-4 무료/유료 경계 (문구 이동)
+- 이동: 이동 스크립트(scratchpad, 한 번만 실행)로 공개 data-*.js에서 칸을 그대로 잘라 `api/_paid/full-<방>.js`로 옮겼다.
+  칸 모양과 code는 공개 파일과 같다. 항목마다 "공개 + 유료 = 원래"를 병합 대조했고 모두 일치했다.
+| 공개 파일 | 유료 파일 | 항목 | 옮긴 칸 | 원래 글자 | 공개 남음 | 유료 |
+|---|---|---|---|---|---|---|
+| data-runes.js | full-rune.js (PAID_FULL_RUNE) | 24 | past.body, now.body·quote, shadow.hook·lede·body·quote, advice.hook·lede·body·topics | 90,938 | 20,179 | 70,759 |
+| data-stars.js | full-star.js | 27 | event.body·quote, shadow.(title 외), advice.(title 외) | 99,502 | 40,306 | 59,196 |
+| data-ogham.js | full-ogham.js | 20 | 〃 | 74,949 | 30,188 | 44,761 |
+| data-decans.js | full-decan.js | 36 | 〃 | 139,701 | 53,975 | 85,726 |
+| data-tzolkin.js | full-tzolkin.js | 20 | 〃 | 71,886 | 25,615 | 46,271 |
+| data-oracles.js | full-sibyl.js | 32 | topics + 〃 | 121,306 | 38,038 | 83,268 |
+| 합계 | | | | 598,282 | 208,301 | 389,981 |
+- 공개에 남긴 것: 제목·key·I장 전체·II장 첫 문단(lede, 룬은 past.lede)·II장 제목과 I장 끝 떡밥·III/IV장 제목(목차)·turn·fact·summary·공유 카드 칸. 별의 맞아요 인셋은 II장 첫 문단 바로 뒤에 둔다.
+- 무료 화면: I장, II장 첫 문단, 봉인 블록(장 이름만). III·IV장 섹션(`.chapters-paid`)은 마크업에서 지웠다. 상단 읽기 막대는 2칸만 보인다.
+- 유료 조립(core.js `fullRoom`): II장 나머지 = 옛 무료판과 같은 순서(인용 위치 포함) + 끝에 III장 떡밥. III장 끝에는 IV장 떡밥을 둔다.
+  룬은 지나온 룬 past.body → 지금 룬 now.body(첫 단락 뒤 인용) → 다가올 룬 shadow·advice 순서다. 리포트 파트 순서: 여는 글 → 방별 온전한 이야기 → 1장 … 닫는 글.
+- 룬·시빌라 IV장 끝 "고른 주제" 단락: 영수증 코드에 주제가 없어 서버가 주제별 단락(topics)을 모두 보낸다. 이 탭에 같은 결과가 있을 때만 브라우저가 하나를 붙인다.
+  새 탭에서 코드로 다시 열면 이 두 단락만 빠진다. e2e-paid로 확인했다.
+- 결제 전 분량 `VOL.room`(app.js, 방 하나 평균, 주제 단락 1개 포함): 오검 2,240 · 별 2,190 · 데칸 2,380 · 촐킨 2,310 · 룬 2,540 · 시빌라 1,850. api.test.js가 실측과 ±3% 안인지 본다.
+  e2e-paid(방 6·상대 있음): 예상 22,110자 / 실제 21,900자.
+- D-4 누출 검사 확장: build-dist.js는 `_paid` 폴더 전체를 읽으므로 full-*.js도 자동으로 대조한다. public/ 유료 문구 0건(유료 문장 5,369개 대조).
+  e2e-flow도 무료 결과 화면 6종의 innerText를 같은 목록과 대조해 0건이다.
+  - 예외 11개: 처음부터 무료 칸과 같은 문장으로 쓰인 유료 문장이다. 무료 화면에 원래 보이던 문장이라 대조에서 뺀다. **copywriter가 판단**할 목록:
+    full-rune.js raidho·kenaz·eihwaz·perthro·algiz·sowilo·tiwaz·berkano·othala `now.body[0]` = 같은 룬의 `key`.
+    full-decan.js decan-22 `shadow.lede` ⊂ 공개 summary. full-star.js jyeshtha `shadow.lede` ⊂ 공개 summary.
+- content-work/paid-template/에 full-*.js 6개를 복사했다. `node content-work/apply-paid.js full-star` 실행 결과: 0개 반영, 문제 0.
+
+## 7-5·7-6
+- 룬: `rune.result.retry` 키·버튼·리스너 없음. 시빌라: "[초안] 다른 신탁 받기" + retryNote. 새로 뽑으면 `visits.sibyl`을 덮어써 가장 최근 것만 남는다. 질문 글은 여전히 저장·전송하지 않는다.
+- 결말: `.finale.is-running` → 움직임 2,600ms 뒤, 움직임 줄이기 1,200ms 뒤 해제. 아무 데나 누르면 건너뛴다.
+  움직임 줄이기에서는 해제 순간 `element.animate()`로 opacity만 600ms 교차 페이드한다(조각 6개는 그리드 위치 고정). 끝나면 "나의 이야기 펼치기" 버튼.
+- 봉인 해제 의식의 인장 수는 6개 그대로 두었다(마크업 변경 없음). 파트 7개와 맞출지는 designer가 판단한다.
+
+## 실행 기록 (2026-09-29)
+- `node --test tools/strange-oracle/` 15/15 통과.
+- `node tools/build-dist.js`: public/ 유료 문구 0건.
+- mock-server(8787 mock, 8788 off)는 새로 켠 뒤 실행했다. `e2e-flow.js` reduced 63/0, motion 60/0. `e2e-paid.js` reduced 72/0, motion 72/0.

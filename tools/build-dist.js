@@ -85,6 +85,20 @@ for (const slug of PRODUCTS) {
   // 문구 칸만 모은다(code 같은 열쇠 칸은 공개 데이터와 겹칠 수 있어 뺀다)
   const collect = (v) => (typeof v === "string" ? v.length >= 12 && paidStrings.add(v) : Array.isArray(v) ? v.forEach(collect) : v && typeof v === "object" && Object.entries(v).forEach(([k, x]) => k !== "code" && collect(x)));
   for (const f of fs.readdirSync(path.join(apiSrc, "_paid"))) collect(require(path.join(apiSrc, "_paid", f)));
+  // (7단계) 방별 온전한 이야기(full-*.js)는 원래 무료였던 결과 문구를 옮긴 것이라, 처음부터 무료 칸(key 핵심 문장·summary 요약)과
+  // 같은 문장으로 쓰인 것이 있다(예: 룬 now.body 첫 단락 = key). 그 문장은 무료 화면에 원래 보이는 문장이므로 누출로 치지 않고 따로 센다.
+  const freeText = [];
+  const vm = require("vm");
+  const pubDir = path.join(apiSrc, "..");
+  for (const f of fs.readdirSync(pubDir).filter((n) => /^data-.*\.js$/.test(n))) {
+    const w = {};
+    vm.runInNewContext(fs.readFileSync(path.join(pubDir, f), "utf8"), { window: w });
+    const grab = (v, k) => (typeof v === "string" ? (k === "key" || k === "summary") && freeText.push(v) : Array.isArray(v) ? v.forEach((x) => grab(x, k)) : v && typeof v === "object" && Object.entries(v).forEach(([kk, x]) => grab(x, k === "summary" ? k : kk)));
+    Object.values(w).forEach((v) => grab(v, ""));
+  }
+  const dup = [...paidStrings].filter((s) => freeText.some((t) => t.includes(s)));
+  dup.forEach((s) => paidStrings.delete(s));
+  console.log(`  유료 문장 가운데 무료 칸(key·summary)과 원래 같은 문장 ${dup.length}개 — 누출 대조에서 뺌 (copywriter 판단용 목록: tests.md 7단계)`);
   const leaks = [];
   (function walk(d) {
     for (const e of fs.readdirSync(d, { withFileTypes: true })) {

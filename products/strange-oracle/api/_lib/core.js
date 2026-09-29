@@ -23,6 +23,15 @@ const C = {
     tzolkin: require("../_paid/hidden-tzolkin.js").PAID_HIDDEN_TZOLKIN,
     sibyl: require("../_paid/hidden-sibyl.js").PAID_HIDDEN_SIBYL,
   },
+  // (7단계) 방별 온전한 이야기: 공개 data-*.js에서 옮겨 온 II장 나머지·III·IV장 (spec 7-4)
+  full: {
+    rune: require("../_paid/full-rune.js").PAID_FULL_RUNE,
+    star: require("../_paid/full-star.js").PAID_FULL_STAR,
+    ogham: require("../_paid/full-ogham.js").PAID_FULL_OGHAM,
+    decan: require("../_paid/full-decan.js").PAID_FULL_DECAN,
+    tzolkin: require("../_paid/full-tzolkin.js").PAID_FULL_TZOLKIN,
+    sibyl: require("../_paid/full-sibyl.js").PAID_FULL_SIBYL,
+  },
   timeline: require("../_paid/timeline.js").PAID_TIMELINE,
   match: require("../_paid/match.js").PAID_MATCH,
   matchRooms: require("../_paid/match-rooms.js").PAID_MATCH_ROOMS,
@@ -39,8 +48,8 @@ const IDX = {
   open: byCode(C.open), timeline: byCode(C.timeline), match: byCode(C.match),
   matchRooms: byCode(C.matchRooms), deep: byCode(C.deep), close: byCode(C.close),
 };
-// 1장 순서 = 나의 이야기 장 순서
-const CHAPTER_ORDER = ["ogham", "star", "decan", "tzolkin", "sibyl", "rune"];
+// 방 나열 순서 = 나의 이야기 장 순서. paycode.js 한 곳에서 읽는다 (spec 7-1)
+const CHAPTER_ORDER = PayCode.CHAPTER_ORDER;
 
 // ───────── 모드·키 ─────────
 function modeOf(env) {
@@ -124,6 +133,35 @@ function hiddenEntry(room, codes) {
   if (room === "tzolkin") return list[codes.tzolkin.sign]; // 문양
   return list[codes[room]];
 }
+// 방별 온전한 이야기 한 방: 무료 화면(I장 + II장 첫 문단) 뒤를 예전 무료판과 같은 순서로 잇는다.
+// 각 장 끝의 떡밥(hook)은 다음 장으로 넘어가는 문장이라 앞 장의 마지막 문단으로 둔다. 인용(quote)은 문단 하나.
+// 룬·시빌라의 넷째 장 끝 "고른 주제" 단락은 영수증 코드에 주제가 없어 topics(주제별 단락)로 모두 보내고, 브라우저가 이 탭에 남은 주제로 하나를 고른다.
+const insertAt = (arr, i, item) => [...arr.slice(0, i), item, ...arr.slice(i)];
+function fullRoom(room, codes) {
+  const list = C.full[room];
+  if (room === "rune") {
+    const [past, now, next] = codes.rune.map((i) => list[i]);
+    return {
+      room,
+      ch2: [...past.past.body, ...insertAt(now.now.body, 1, now.now.quote), next.shadow.hook],
+      ch3: [next.shadow.lede, ...insertAt(next.shadow.body, 1, next.shadow.quote), next.advice.hook],
+      ch4: [next.advice.lede, ...next.advice.body],
+      topics: Object.assign({}, next.advice.topics),
+    };
+  }
+  const e = list[room === "tzolkin" ? codes.tzolkin.sign : codes[room]];
+  const eb = e.event.body;
+  // 별의 방은 II장 첫 단락 뒤 맞아요 인셋(무료) 다음에 인용이 둘째 단락 뒤였다 → 나머지 순서: 단락1, 단락2, 인용, 그 뒤
+  const ch2 = room === "star" ? [eb[0], eb[1], e.event.quote, ...eb.slice(2)] : insertAt(eb, Math.min(2, eb.length), e.event.quote);
+  const out = {
+    room,
+    ch2: [...ch2.filter((p) => p != null), e.shadow.hook],
+    ch3: [e.shadow.lede, ...insertAt(e.shadow.body, 1, e.shadow.quote), e.advice.hook],
+    ch4: [e.advice.lede, ...e.advice.body],
+  };
+  if (room === "sibyl") out.topics = Object.assign({}, e.topics);
+  return out;
+}
 function pairCode(a, b) {
   return ARCH.indexOf(a) <= ARCH.indexOf(b) ? `${a}-${b}` : `${b}-${a}`;
 }
@@ -140,6 +178,7 @@ function buildReport(codes) {
   const rooms = CHAPTER_ORDER.filter((r) => codes[r] != null);
   const chapters = [];
   chapters.push({ id: "open", paragraphs: paras(IDX.open[me].body) });
+  chapters.push({ id: "rooms", rooms: rooms.map((room) => fullRoom(room, codes)) });
   chapters.push({
     id: "hidden",
     rooms: rooms.map((room) => {
@@ -175,7 +214,7 @@ function countChars(report) {
   const add = (v) => {
     if (typeof v === "string") n += [...v].length;
     else if (Array.isArray(v)) v.forEach(add);
-    else if (v && typeof v === "object") Object.entries(v).forEach(([k, x]) => { if (!["id", "room", "me", "you", "other", "band", "grade", "now", "past", "label", "title"].includes(k)) add(x); });
+    else if (v && typeof v === "object") Object.entries(v).forEach(([k, x]) => { if (!["id", "room", "me", "you", "other", "band", "grade", "now", "past", "label", "title", "topics"].includes(k)) add(x); });
   };
   add(report.chapters);
   return n;

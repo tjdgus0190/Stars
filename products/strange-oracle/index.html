@@ -324,7 +324,7 @@
         <div class="room-emblem room-emblem--rune" aria-hidden="true"><svg class="room-emblem__rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></div>
         <p class="eyebrow" data-t="rune.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="rune.intro.title"></h1>
-        <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="6"></span> <span data-t="rooms.rune.chapterName"></span></p>
+        <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="5"></span> <span data-t="rooms.rune.chapterName"></span></p>
         <p class="room-head__pitch" data-t="rune.intro.pitch"></p>
       </header>
 
@@ -525,33 +525,6 @@
           <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
-        <!-- (7단계) III·IV장은 유료 "방별 온전한 이야기"로 옮겨 간다. 무료 화면에서는 숨김 — developer가 JS 정리 후 삭제해도 된다 -->
-        <div class="chapters-paid" data-paid-only>
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="rune-ch-3" data-js="result-chapter" data-chapter="3" aria-labelledby="rune-ch-3-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">III</p>
-            <p class="chapter__label" data-t="result.chapterLabels.2"></p>
-            <h2 class="chapter__title" id="rune-ch-3-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"></div>
-          <p class="chapter__hook" data-reveal data-js="chapter-hook"></p>
-        </section>
-
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="rune-ch-4" data-js="result-chapter" data-chapter="4" aria-labelledby="rune-ch-4-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">IV</p>
-            <p class="chapter__label" data-t="result.chapterLabels.3"></p>
-            <h2 class="chapter__title" id="rune-ch-4-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"></div>
-        </section>
-        </div>
       </div>
 
       <aside class="fact-card" data-js="result-fact">
@@ -563,8 +536,6 @@
 
       <div class="result-actions">
         <button class="btn btn--primary btn--block" type="button" data-js="result-share" data-t="result.share"></button>
-        <!-- (7단계) 다시 던지기 제거. 아래 빈 template은 app.js:718 연결이 멈추지 않게 남긴 자리 — developer가 JS와 함께 지운다 -->
-        <template data-js="result-retry"></template>
       </div>
 
       <aside class="archetype-line" data-js="result-archetype">
@@ -586,8 +557,6 @@
           <span class="next-door__name" data-t="rooms.sibyl.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
-        <!-- 옛 다음 방 추천 목록 자리 (LINKS 폐기). app.js:620이 멈추지 않게 남긴 빈 template — developer가 JS와 함께 지운다 -->
-        <template data-js="next-rooms"></template>
       </section>
 
       <div class="page-end" aria-hidden="true"><span>ᛟ</span></div>
@@ -894,33 +863,6 @@
           <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
-        <!-- (7단계) III·IV장은 유료 "방별 온전한 이야기"로 옮겨 간다. 무료 화면에서는 숨김 — developer가 JS 정리 후 삭제해도 된다 -->
-        <div class="chapters-paid" data-paid-only>
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="star-ch-3" data-js="result-chapter" data-chapter="3" aria-labelledby="star-ch-3-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">III</p>
-            <p class="chapter__label" data-t="result.chapterLabels.2"></p>
-            <h2 class="chapter__title" id="star-ch-3-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"></div>
-          <p class="chapter__hook" data-reveal data-js="chapter-hook"></p>
-        </section>
-
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="star-ch-4" data-js="result-chapter" data-chapter="4" aria-labelledby="star-ch-4-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">IV</p>
-            <p class="chapter__label" data-t="result.chapterLabels.3"></p>
-            <h2 class="chapter__title" id="star-ch-4-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"></div>
-        </section>
-        </div>
       </div>
 
       <aside class="fact-card" data-js="result-fact">
@@ -954,8 +896,6 @@
           <span class="next-door__name" data-t="rooms.decan.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
-        <!-- 옛 다음 방 추천 목록 자리 (LINKS 폐기). app.js:620이 멈추지 않게 남긴 빈 template — developer가 JS와 함께 지운다 -->
-        <template data-js="next-rooms"></template>
       </section>
 
       <div class="page-end" aria-hidden="true"><span>☾</span></div>
@@ -1157,33 +1097,6 @@
           <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
-        <!-- (7단계) III·IV장은 유료 "방별 온전한 이야기"로 옮겨 간다. 무료 화면에서는 숨김 — developer가 JS 정리 후 삭제해도 된다 -->
-        <div class="chapters-paid" data-paid-only>
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="ogham-ch-3" data-js="result-chapter" data-chapter="3" aria-labelledby="ogham-ch-3-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">III</p>
-            <p class="chapter__label" data-t="result.chapterLabels.2"></p>
-            <h2 class="chapter__title" id="ogham-ch-3-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"><p></p></div>
-          <p class="chapter__hook" data-reveal data-js="chapter-hook"></p>
-        </section>
-
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="ogham-ch-4" data-js="result-chapter" data-chapter="4" aria-labelledby="ogham-ch-4-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">IV</p>
-            <p class="chapter__label" data-t="result.chapterLabels.3"></p>
-            <h2 class="chapter__title" id="ogham-ch-4-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"><p></p></div>
-        </section>
-        </div>
       </div>
 
       <aside class="fact-card" data-js="result-fact">
@@ -1217,8 +1130,6 @@
           <span class="next-door__name" data-t="rooms.star.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
-        <!-- 옛 다음 방 추천 목록 자리 (LINKS 폐기). app.js:620이 멈추지 않게 남긴 빈 template — developer가 JS와 함께 지운다 -->
-        <template data-js="next-rooms"></template>
       </section>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></div>
@@ -1498,33 +1409,6 @@
           <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
-        <!-- (7단계) III·IV장은 유료 "방별 온전한 이야기"로 옮겨 간다. 무료 화면에서는 숨김 — developer가 JS 정리 후 삭제해도 된다 -->
-        <div class="chapters-paid" data-paid-only>
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="decan-ch-3" data-js="result-chapter" data-chapter="3" aria-labelledby="decan-ch-3-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">III</p>
-            <p class="chapter__label" data-t="result.chapterLabels.2"></p>
-            <h2 class="chapter__title" id="decan-ch-3-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"><p></p></div>
-          <p class="chapter__hook" data-reveal data-js="chapter-hook"></p>
-        </section>
-
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="decan-ch-4" data-js="result-chapter" data-chapter="4" aria-labelledby="decan-ch-4-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">IV</p>
-            <p class="chapter__label" data-t="result.chapterLabels.3"></p>
-            <h2 class="chapter__title" id="decan-ch-4-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"><p></p></div>
-        </section>
-        </div>
       </div>
 
       <aside class="fact-card" data-js="result-fact">
@@ -1558,8 +1442,6 @@
           <span class="next-door__name" data-t="rooms.tzolkin.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
-        <!-- 옛 다음 방 추천 목록 자리 (LINKS 폐기). app.js:620이 멈추지 않게 남긴 빈 template — developer가 JS와 함께 지운다 -->
-        <template data-js="next-rooms"></template>
       </section>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></div>
@@ -1784,33 +1666,6 @@
           <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
-        <!-- (7단계) III·IV장은 유료 "방별 온전한 이야기"로 옮겨 간다. 무료 화면에서는 숨김 — developer가 JS 정리 후 삭제해도 된다 -->
-        <div class="chapters-paid" data-paid-only>
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="tzolkin-ch-3" data-js="result-chapter" data-chapter="3" aria-labelledby="tzolkin-ch-3-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">III</p>
-            <p class="chapter__label" data-t="result.chapterLabels.2"></p>
-            <h2 class="chapter__title" id="tzolkin-ch-3-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"><p></p></div>
-          <p class="chapter__hook" data-reveal data-js="chapter-hook"></p>
-        </section>
-
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="tzolkin-ch-4" data-js="result-chapter" data-chapter="4" aria-labelledby="tzolkin-ch-4-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">IV</p>
-            <p class="chapter__label" data-t="result.chapterLabels.3"></p>
-            <h2 class="chapter__title" id="tzolkin-ch-4-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"><p></p></div>
-        </section>
-        </div>
       </div>
 
       <aside class="fact-card" data-js="result-fact">
@@ -1844,8 +1699,6 @@
           <span class="next-door__name" data-t="rooms.rune.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
-        <!-- 옛 다음 방 추천 목록 자리 (LINKS 폐기). app.js:620이 멈추지 않게 남긴 빈 template — developer가 JS와 함께 지운다 -->
-        <template data-js="next-rooms"></template>
       </section>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></div>
@@ -1859,7 +1712,7 @@
         <div class="room-emblem room-emblem--sibyl" aria-hidden="true"><svg class="room-emblem__laurel" viewBox="-60 -60 120 120"><use href="#laurel" /></svg><svg class="room-emblem__icon room-emblem__flame" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></div>
         <p class="eyebrow" data-t="sibyl.intro.eyebrow">SORTES · THE CANDLE ORACLE</p>
         <h1 class="room-head__title" data-t="sibyl.intro.title">시빌라 신탁의 방</h1>
-        <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="5"></span> <span data-t="rooms.sibyl.chapterName"></span></p>
+        <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="6"></span> <span data-t="rooms.sibyl.chapterName"></span></p>
         <p class="room-head__pitch" data-t="sibyl.intro.pitch">촛불에 떠오르는 글자로 듣는, 오늘의 답</p>
       </header>
 
@@ -2033,33 +1886,6 @@
           <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
-        <!-- (7단계) III·IV장은 유료 "방별 온전한 이야기"로 옮겨 간다. 무료 화면에서는 숨김 — developer가 JS 정리 후 삭제해도 된다 -->
-        <div class="chapters-paid" data-paid-only>
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="sibyl-ch-3" data-js="result-chapter" data-chapter="3" aria-labelledby="sibyl-ch-3-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">III</p>
-            <p class="chapter__label" data-t="result.chapterLabels.2"></p>
-            <h2 class="chapter__title" id="sibyl-ch-3-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"><p></p></div>
-          <p class="chapter__hook" data-reveal data-js="chapter-hook"></p>
-        </section>
-
-        <div class="chapter-break" aria-hidden="true"><span>✦</span></div>
-
-        <section class="chapter" id="sibyl-ch-4" data-js="result-chapter" data-chapter="4" aria-labelledby="sibyl-ch-4-title">
-          <header class="chapter__head">
-            <p class="chapter__num" aria-hidden="true">IV</p>
-            <p class="chapter__label" data-t="result.chapterLabels.3"></p>
-            <h2 class="chapter__title" id="sibyl-ch-4-title" data-js="chapter-title"></h2>
-            <p class="chapter__time" data-js="chapter-time"></p>
-          </header>
-          <div class="prose" data-js="chapter-body"><p></p></div>
-        </section>
-        </div>
       </div>
 
       <aside class="fact-card" data-js="result-fact">
@@ -2094,8 +1920,6 @@
           <span class="next-door__name" data-t="result.nextDoor.finaleName">[초안] 나의 이야기</span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
-        <!-- 옛 다음 방 추천 목록 자리 (LINKS 폐기). app.js:620이 멈추지 않게 남긴 빈 template — developer가 JS와 함께 지운다 -->
-        <template data-js="next-rooms"></template>
       </section>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></div>

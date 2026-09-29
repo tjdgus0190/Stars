@@ -220,7 +220,9 @@ test("분량 (D-11 구조 점검): 모든 칸을 한도만큼 채우면 조립 �
       ["방6·상대 있음(같은 원형)", Object.assign(baseCodes(), { partner: "sage" })],
     ];
     for (const [label, c] of cases) {
-      const got = core.countChars(core.buildReport(c));
+      // (7단계) 방별 온전한 이야기는 옮겨 온 실제 문구라 한도 채우기 대상이 아니다 → 아래 "방별 온전한 이야기 분량" 시험이 따로 본다
+      const rep = core.buildReport(c);
+      const got = core.countChars({ chapters: rep.chapters.filter((ch) => ch.id !== "rooms") });
       const est = estimate(c);
       assert.ok(Math.abs(got - est) / est <= 0.15, `${label}: 실제 ${got} / 예상 ${est}`);
       console.log(`  ${label}: 예상 ${est}자 · 조립 ${got}자`);
@@ -228,8 +230,80 @@ test("분량 (D-11 구조 점검): 모든 칸을 한도만큼 채우면 조립 �
   } finally {
     const orig = JSON.parse(saved);
     for (const k of Object.keys(orig)) {
-      if (k === "hidden") for (const r of Object.keys(orig.hidden)) orig.hidden[r].forEach((e, i) => Object.assign(C.hidden[r][i], e));
+      if (!Array.isArray(orig[k])) for (const r of Object.keys(orig[k])) orig[k][r].forEach((e, i) => Object.assign(C[k][r][i], e));
       else orig[k].forEach((e, i) => Object.assign(C[k][i], e));
     }
   }
+});
+
+// ───────── 7단계 (spec 7-1·7-4) ─────────
+const FULL_N = { rune: 24, star: 27, ogham: 20, decan: 36, tzolkin: 20, sibyl: 32 };
+const onlyRoom = (room, i) => {
+  const c = { rune: null, star: null, ogham: null, decan: null, tzolkin: null, sibyl: null, arch: "sage", band: 0, partner: null, relOgham: null, relDecan: null, relTzolkin: null };
+  c[room] = room === "rune" ? [i, (i + 1) % 24, (i + 2) % 24] : room === "tzolkin" ? { number: 1 + (i % 13), sign: i } : i;
+  return c;
+};
+test("7-1 순서 단일화: paycode.js CHAPTER_ORDER 하나를 브라우저·서버가 함께 쓴다", () => {
+  assert.deepEqual([...PayCode.CHAPTER_ORDER], ["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
+  const rep = core.buildReport(baseCodes());
+  assert.deepEqual(rep.chapters.map((c) => c.id), ["open", "rooms", "hidden", "timeline", "match", "deep", "close"]);
+  assert.deepEqual(rep.chapters.find((c) => c.id === "rooms").rooms.map((r) => r.room), [...PayCode.CHAPTER_ORDER]);
+  assert.deepEqual(rep.chapters.find((c) => c.id === "hidden").rooms.map((r) => r.room), [...PayCode.CHAPTER_ORDER]);
+  // 다른 곳에 순서 배열을 다시 적지 않았는지
+  const fs = require("fs");
+  for (const f of ["app.js", "api/_lib/core.js"]) {
+    const src = fs.readFileSync(path.join(P, f), "utf8");
+    assert.ok(/CHAPTER_ORDER = (window\.)?PayCode\.CHAPTER_ORDER/.test(src), f + "가 paycode.js 순서를 읽지 않음");
+    assert.ok(!/\["ogham", "star", "decan"/.test(src), f + "에 순서 배열이 따로 있음");
+  }
+});
+test("7-4 방별 온전한 이야기: 모든 결과에 도달, 빈 문단 없음, 들른 방만", () => {
+  const C = core.CONTENT;
+  assert.deepEqual(Object.fromEntries(Object.entries(C.full).map(([k, v]) => [k, v.length])), FULL_N);
+  for (const [room, n] of Object.entries(FULL_N))
+    for (let i = 0; i < n; i++) {
+      const rooms = core.buildReport(onlyRoom(room, i)).chapters.find((c) => c.id === "rooms").rooms;
+      assert.equal(rooms.length, 1);
+      const r = rooms[0];
+      assert.equal(r.room, room);
+      for (const k of ["ch2", "ch3", "ch4"]) {
+        assert.ok(r[k].length >= 2, `${room} ${i} ${k} 문단 수`);
+        r[k].forEach((p) => assert.ok(typeof p === "string" && p.trim().length > 0 && !/<[a-z/]/i.test(p), `${room} ${i} ${k} 빈 문단·태그`));
+      }
+      if (room === "rune" || room === "sibyl") assert.ok(Object.keys(r.topics).length >= 4);
+      else assert.equal(r.topics, undefined);
+    }
+});
+test("7-4 결제 전 분량: app.js VOL.room = 방별 실측 평균(±3%)", () => {
+  const src = require("fs").readFileSync(path.join(P, "app.js"), "utf8");
+  const m = /room: \{ ([^}]+) \}/.exec(src);
+  const VOLROOM = Object.fromEntries(m[1].split(",").map((x) => x.trim().split(": ")).map(([k, v]) => [k, Number(v)]));
+  const L = (v) => (typeof v === "string" ? [...v].length : Array.isArray(v) ? v.reduce((a, x) => a + L(x), 0) : 0);
+  for (const [room, n] of Object.entries(FULL_N)) {
+    let t = 0;
+    for (let i = 0; i < n; i++) {
+      const r = core.buildReport(onlyRoom(room, i)).chapters.find((c) => c.id === "rooms").rooms[0];
+      const topic = r.topics ? L(Object.values(r.topics)) / Object.keys(r.topics).length : 0;
+      t += L([r.ch2, r.ch3, r.ch4]) + topic;
+    }
+    const avg = t / n;
+    assert.ok(Math.abs(avg - VOLROOM[room]) / avg <= 0.03, `${room}: 실측 ${Math.round(avg)} / VOL ${VOLROOM[room]}`);
+    console.log(`  ${room}: 실측 평균 ${Math.round(avg)}자 · VOL ${VOLROOM[room]}`);
+  }
+});
+test("7-4 무료 파일에 유료 칸 없음 (공개 data-*.js)", () => {
+  const vm = require("vm");
+  const fs = require("fs");
+  const w = {};
+  for (const f of fs.readdirSync(P).filter((n) => /^data-.*\.js$/.test(n))) vm.runInNewContext(fs.readFileSync(path.join(P, f), "utf8"), { window: w });
+  const bad = [];
+  const chk = (e, where) => {
+    for (const s of ["shadow", "advice"]) if (e[s]) Object.keys(e[s]).forEach((k) => k !== "title" && bad.push(`${where}.${s}.${k}`));
+    if (e.event) ["body", "quote"].forEach((k) => k in e.event && bad.push(`${where}.event.${k}`));
+    if (e.past && "body" in e.past) bad.push(where + ".past.body");
+    if (e.now) ["body", "quote"].forEach((k) => k in e.now && bad.push(`${where}.now.${k}`));
+    if (e.topics && where.startsWith("ORACLES")) bad.push(where + ".topics");
+  };
+  for (const name of ["RUNES", "NAKSHATRAS", "OGHAM", "DECANS", "TZOLKIN_SIGNS", "ORACLES"]) w[name].forEach((e, i) => chk(e, `${name}[${i}]`));
+  assert.deepEqual(bad, []);
 });

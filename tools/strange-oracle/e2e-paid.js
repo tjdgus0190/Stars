@@ -1,4 +1,6 @@
 // 6단계 유료 흐름 점검 (모의 결제, 헤드리스 Edge). 계정·키·네트워크 결제 없음.
+// 7단계: 목차 7칸(방별 온전한 이야기), 리포트 rooms 파트(Ⅰ~Ⅵ 순서·주제 단락), 새 탭 재열람은 주제 단락 2개만 빠짐.
+// ※ mock-server는 시작할 때 api/_paid를 읽어 둔다 → _paid·build-dist를 바꿨으면 서버를 다시 켤 것
 // 준비: node tools/build-dist.js
 //       node tools/strange-oracle/mock-server.js --port 8787            (mock, dist 모양)
 //       node tools/strange-oracle/mock-server.js --port 8788 --mode off (결제 꺼짐 비교용)
@@ -45,7 +47,7 @@ const SIBYL_Q = "비밀질문XYZ";
     if (V.includes('tzolkin')) v.tzolkin = { number: 4, sign: 19, archetype: TZOLKIN_SIGNS[19].archetype };
     if (V.includes('sibyl')) v.sibyl = { sors: 12, topic: Object.keys(TEXT.sibyl.topics)[0], archetype: ORACLES[12].archetype };
     sessionStorage.clear();
-    sessionStorage.setItem('strange-oracle', JSON.stringify({ profile: ${JSON.stringify(profile)}, visits: v }));
+    sessionStorage.setItem('strange-oracle', JSON.stringify({ started: true, profile: ${JSON.stringify(profile)}, visits: v }));
   })()`);
 
   // ═══ 1. 결제 꺼짐(PAY_MODE=off) — 무료판과 같아야 한다 (D-9) ═══
@@ -80,7 +82,8 @@ const SIBYL_Q = "비밀질문XYZ";
   await sleep(300);
   check("모의 결제 띠 보임", !(await hidden("#screen-deeper [data-js=pay-band]")) && (await txt("#screen-deeper [data-js=pay-band]")).includes(await ev("TEXT.pay.band.mock")));
   const toc = await ev("[...document.querySelectorAll('[data-js=deeper-toc-item]')].map(li => li.querySelector('[data-js=toc-name]').textContent + ' | ' + li.querySelector('[data-js=toc-vol]').textContent)");
-  check("목차 6칸 채움(방 6곳)", toc.length === 6 && toc[1].includes("오검·별·데칸·촐킨·시빌라·룬"), toc.join(" / "));
+  check("목차 7칸 채움(방별 온전한 이야기·숨은 장 모두 Ⅰ~Ⅵ 순서)", toc.length === 7 && toc[1].includes("오검·별·데칸·촐킨·룬·시빌라") && toc[2].includes("오검·별·데칸·촐킨·룬·시빌라") && !toc[1].includes("[초안] 방별 온전한 이야기 — {"), toc.join(" / "));
+  check("결제 전 고지 받는 것에 방별 온전한 이야기", (await txt("[data-js=deeper-items]")).includes("방별 온전한 이야기"));
   check("봉인 칸에 글자 없음", await ev("[...document.querySelectorAll('.seal-lines')].every(e => e.textContent.trim() === '')"));
   check("견본 문단 3개", (await ev("document.querySelectorAll('[data-js=deeper-sample] p').length")) === 3);
   check("저장된 생년월일 확인 카드", !(await hidden("[data-js=deeper-saved]")) && (await hidden("[data-js=deeper-date-field]")));
@@ -120,6 +123,11 @@ const SIBYL_Q = "비밀질문XYZ";
   const r1 = await reportText();
   check("리포트 본문 채움 (여는 글·숨은 장 6·구간 3·궁합·심층·닫는 글)", (await ev("document.querySelectorAll('[data-js=report-hidden] .hidden-room').length")) === 6 && (await ev("document.querySelectorAll('[data-js=report-timeline] > li').length")) === 3 && (await ev("document.querySelectorAll('[data-js=report-timeline] > li.is-now').length")) === 1 && (await ev("document.querySelector('[data-js=report-open]').children.length")) > 0 && (await ev("document.querySelector('[data-js=report-close]').children.length")) > 0);
   check("궁합 쌍 = 내 원형 × 상대 원형(이름 아님)", !(await txt("[data-js=report-match-pair]")).includes(PARTNER.name) && (await ev("document.querySelector('[data-js=report-match-pair]').children[2].textContent")) !== "");
+  const fr = await ev(`[...document.querySelectorAll('[data-js=report-rooms] [data-js=full-room]')].map(el => ({ room: el.dataset.room, n: ['full-room-ch2','full-room-ch3','full-room-ch4'].map(k => el.querySelector('[data-js=' + k + ']').children.length), last: el.querySelector('[data-js=full-room-ch4]').lastElementChild.textContent }))`);
+  check("7-4 방별 온전한 이야기: 6방, Ⅰ~Ⅵ 순서, 장마다 문단", fr.length === 6 && fr.map((x) => x.room).join() === "ogham,star,decan,tzolkin,rune,sibyl" && fr.every((x) => x.n.every((n) => n >= 2)), JSON.stringify(fr.map((x) => x.room + x.n.join("/"))));
+  const lens = await ev("[TEXT.rune.topics[Object.keys(TEXT.rune.topics)[0]].lens, ORACLE_TOPICS[Object.keys(TEXT.sibyl.topics)[0]].lens]");
+  check("7-4 룬·시빌라 IV장 끝 = 이 탭의 주제 단락", fr[4].last.startsWith(lens[0]) && fr[5].last.startsWith(lens[1]));
+  check("7-4 방별 온전한 이야기 = 여는 글 바로 뒤", await ev("[...document.querySelectorAll('#screen-report [data-js=report-part]')].map(p => p.dataset.part).join() === 'open,rooms,hidden,timeline,match,deep,close'"));
   check("4장 근거 6줄 (코드로 조립)", (await ev("document.querySelectorAll('[data-js=report-evidence] li').length")) === 6);
   check("면책 문구", (await txt("#screen-report [data-js=disclaimer-slot]")).includes("재미로 보는 콘텐츠"));
   check("영수증 코드 4자 묶음 ×2곳", (await ev("document.querySelector('[data-js=receipt-code]').children.length")) === 8 && (await txt("[data-js=receipt-code]")) === receipt && (await txt("[data-js=receipt-code-end]")) === receipt);
@@ -161,6 +169,12 @@ const SIBYL_Q = "비밀질문XYZ";
   // ═══ 6. 새 탭(저장소 빈 상태)에서 영수증 코드로 열기 (D-8) ═══
   await ev("sessionStorage.clear()");
   await b.goto(BASE);
+  // (7단계) 새 탭 = 인트로부터. 시작하면 Ⅰ 오검의 방 → 뒤로(허브)에서 영수증 코드 입력
+  check("새 탭: 인트로부터", await waitScreen("screen-intro", 4000));
+  await click("[data-js=intro-start]");
+  await waitScreen("screen-ogham-intro", 4000);
+  await click("[data-js=topbar-back]");
+  await waitScreen("screen-hub", 4000);
   await waitFor("!document.querySelector('[data-js=hub-paid]').classList.contains('is-hidden')");
   await setVal("#receipt-open-hub", "SO1-HELLO");
   await click("[data-js=hub-paid] [data-js=receipt-open-go]");
@@ -169,7 +183,11 @@ const SIBYL_Q = "비밀질문XYZ";
   const pretty = receipt.match(/.{1,4}/g).join("-").toLowerCase();
   await setVal("#receipt-open-hub", pretty);
   await click("[data-js=hub-paid] [data-js=receipt-open-go]");
-  check("영수증 코드만으로 같은 리포트 (이름·생일 없음)", (await waitScreen("screen-report", 6000)) && (await reportText()) === r1);
+  const reopened = (await waitScreen("screen-report", 6000)) ? await reportText() : "";
+  // 주제(룬·시빌라)는 영수증 코드에 없어서, 이 탭에 결과가 없으면 IV장 끝 주제 단락 2개만 빠진다
+  const l1 = r1.split("\n"), l3 = reopened.split("\n");
+  const missing = l1.filter((x) => !l3.includes(x));
+  check("영수증 코드만으로 같은 리포트 (이름·생일 없음, 주제 단락 2개만 빠짐)", l3.length > 10 && l3.every((x) => l1.includes(x)) && missing.length === 2 && missing[0].startsWith(lens[0]) && missing[1].startsWith(lens[1]), `빠진 줄 ${missing.length}`);
   await shot(P + "04-reopen.png");
 
   // ═══ 7. 실패·취소로 돌아옴 ═══
@@ -193,7 +211,7 @@ const SIBYL_Q = "비밀질문XYZ";
   await setVal("[data-js=deeper-year]", 1961);
   await setVal("[data-js=deeper-month]", 1);
   await setVal("[data-js=deeper-day]", 5);
-  check("궁합 지도 목차", (await ev("document.querySelectorAll('[data-js=deeper-toc-item]')[3].textContent")).includes(await ev("TEXT.archetypes[StrangeOracle.currentArchetype()].name")));
+  check("궁합 지도 목차", (await ev("document.querySelectorAll('[data-js=deeper-toc-item]')[4].textContent")).includes(await ev("TEXT.archetypes[StrangeOracle.currentArchetype()].name")));
   await click("[data-js=deeper-pay]");
   check("방 1개·상대 없음 → 리포트", await waitScreen("screen-report", 12000));
   check("50세 이상 → 지나온 흐름 2구간 + 지금", (await ev("document.querySelectorAll('[data-js=report-timeline] > li').length")) === 3 && (await ev("document.querySelector('[data-js=report-timeline] > li:last-child').classList.contains('is-now')")));

@@ -60,17 +60,17 @@
 
   // ───────── 방 구성 (기획서 고정값) ─────────
   // 나의 이야기 장 순서 (방문 순서와 무관). 동점일 때도 이 순서로 앞선 장이 이긴다
-  const CHAPTER_ORDER = ["ogham", "star", "decan", "tzolkin", "sibyl", "rune"];
-  const OPEN_ROOMS = CHAPTER_ORDER; // 2단계: 여섯 방 모두 열림
-  // 방을 마치면 이어지는 방 2곳 (기획서 "방 간 이동(떡밥) 설계")
-  const LINKS = {
-    ogham: ["sibyl", "decan"], star: ["tzolkin", "ogham"], decan: ["rune", "star"],
-    tzolkin: ["decan", "sibyl"], sibyl: ["rune", "tzolkin"], rune: ["ogham", "star"],
-  };
+  // paycode.js(브라우저·서버 공용) 한 곳에서 읽는다 (spec 7-1): Ⅰ오검 Ⅱ별 Ⅲ데칸 Ⅳ촐킨 Ⅴ룬 Ⅵ시빌라
+  const CHAPTER_ORDER = window.PayCode.CHAPTER_ORDER;
+  const OPEN_ROOMS = CHAPTER_ORDER; // 2단계: 여섯 방 모두 출시됨 (출시 범위. 세션 진행 잠금은 아래 isUnlocked — 다른 축)
   const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
   // 1~39 로마 숫자 (신탁 번호 I~XXXII)
   const roman = (n) => "X".repeat(Math.floor(n / 10)) + ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n % 10];
   const chapterOf = (room) => CHAPTER_ORDER.indexOf(room) + 1;
+  // (7단계) 강제 순차 진행 (spec 7-2): 문 N은 문 N-1의 결과까지 마쳐야(state.visits[room]) 열린다
+  const isDone = (room) => Boolean(state.visits[room]);
+  const isUnlocked = (room) => CHAPTER_ORDER.slice(0, CHAPTER_ORDER.indexOf(room)).every(isDone);
+  const nextRoom = () => CHAPTER_ORDER.find((r) => !isDone(r)) || null;
   const MOON_SVG = '<svg viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg>';
   const ROOM_ICON = {
     rune: '<svg viewBox="0 0 40 60"><use href="#rune-raidho" /></svg>',
@@ -97,7 +97,8 @@
 
   // ───────── 저장 (sessionStorage, 이 탭 한정) ─────────
   const STORE_KEY = "strange-oracle";
-  const emptyState = () => ({ profile: {}, visits: {} });
+  // started: 이 탭에서 인트로를 지났는지 (개인정보 아님). 없으면 새 세션 → 인트로부터 (spec 7-2)
+  const emptyState = () => ({ started: false, profile: {}, visits: {} });
   function validVisit(room, v) {
     if (!v || !ARCHETYPES.includes(v.archetype)) return false;
     if (room === "rune") return Array.isArray(v.picks) && v.picks.length === 3 && v.picks.every((c) => RUNE_BY_CODE[c]) && T.rune.topics[v.topic];
@@ -114,6 +115,7 @@
       const s = raw ? JSON.parse(raw) : null;
       if (!s || typeof s !== "object") return emptyState();
       const out = emptyState();
+      out.started = s.started === true;
       if (s.profile && typeof s.profile === "object") out.profile = s.profile;
       for (const room of OPEN_ROOMS) if (s.visits && validVisit(room, s.visits[room])) out.visits[room] = s.visits[room];
       return out;
@@ -136,6 +138,7 @@
       /* 무시 */
     }
     state = emptyState();
+    state.started = true; // 같은 탭에서 지운 경우: 인트로로 돌리지 않고 허브로 (메모리에만, 다음 저장 때 함께 저장)
     Object.keys(editing).forEach((k) => (editing[k] = false));
     $$("input[data-js], textarea[data-js]").forEach((el) => (el.type === "checkbox" ? (el.checked = false) : (el.value = "")));
     resetSibyl();
@@ -163,7 +166,11 @@
     $$("[data-ph]").forEach((el) => (el.placeholder = get(el.dataset.ph) ?? ""));
     $$("[data-aria]").forEach((el) => el.setAttribute("aria-label", get(el.dataset.aria) ?? ""));
     $$("[data-list]").forEach((el) => (el.innerHTML = (get(el.dataset.list) || []).map((p) => `<p>${p}</p>`).join("")));
-    jsAll("room-chapter-num").forEach((el) => (el.textContent = fill(T.storyChapter, { n: el.dataset.n })));
+    // 장 번호는 CHAPTER_ORDER에서 (마크업 data-n은 예비값)
+    jsAll("room-chapter-num").forEach((el) => {
+      const room = el.closest("[data-room]")?.dataset.room;
+      el.textContent = fill(T.storyChapter, { n: CHAPTER_ORDER.includes(room) ? chapterOf(room) : el.dataset.n });
+    });
     jsAll("rashi-label").forEach((el, i) => (el.textContent = RASHIS[i].ko.replace("자리", "")));
     // 촐킨 톱니 카르투슈 20개: 유카텍 이름 대문자 (SVG text)
     jsAll("tzolkin-sign-label").forEach((el, i) => (el.textContent = TZ_SIGNS[i].latin.toUpperCase()));
@@ -260,7 +267,32 @@
     js("topbar").classList.toggle("is-reading", reading);
   }
 
+  // (7단계) 방 화면으로 가는 모든 길의 문지기: 잠긴 방 → 허브(현재 진행 지점), 룬을 마쳤으면 다시 던지기 대신 결과 다시보기
+  function gate(name) {
+    const room = screens[name] && screens[name].dataset.room;
+    if (!CHAPTER_ORDER.includes(room)) return name;
+    if (isDone(room)) {
+      if (room === "rune" && name !== "rune-result") {
+        RENDER.rune(state.visits.rune, false);
+        return "rune-result";
+      }
+      return name;
+    }
+    if (!isUnlocked(room)) {
+      toast(T.toast.locked);
+      return "hub";
+    }
+    return name === `${room}-result` ? `${room}-intro` : name; // 아직 결과가 없는 방의 결과 화면 → 그 방 시작
+  }
+  // 방 하나를 연다: 마친 방 = 저장된 결과 다시보기, 아니면 그 방 시작 화면 (잠겼으면 gate가 허브로)
+  function roomTarget(room) {
+    if (!isDone(room)) return `${room}-intro`;
+    RENDER[room](state.visits[room], false);
+    return `${room}-result`;
+  }
+
   function go(name, opts = {}) {
+    name = gate(name);
     const next = screens[name];
     if (!next) return;
     const prevName = currentName;
@@ -290,7 +322,18 @@
 
   // 포털 문: 누른 곳에서 빛이 번지며 빨려 들어간다 (450ms 뒤 화면 전환, 800ms 뒤 정리)
   function enterDoor(door, e) {
-    if (reduceMotion) return go(door.dataset.go);
+    const room = door.dataset.room;
+    if (!isDone(room) && !isUnlocked(room)) {
+      // 잠긴 문: 흔들림 + 안내 (disabled 대신 aria-disabled)
+      door.classList.remove("is-denied");
+      void door.offsetWidth;
+      door.classList.add("is-denied");
+      setTimeout(() => door.classList.remove("is-denied"), 320);
+      toast(T.toast.locked);
+      return;
+    }
+    const target = roomTarget(room);
+    if (reduceMotion) return go(target);
     const warp = js("warp");
     const x = e && e.clientX ? (e.clientX / innerWidth) * 100 : 50;
     const y = e && e.clientY ? (e.clientY / innerHeight) * 100 : 45;
@@ -301,7 +344,7 @@
     warp.classList.remove("is-active");
     void warp.offsetWidth;
     warp.classList.add("is-active");
-    setTimeout(() => go(door.dataset.go), 450);
+    setTimeout(() => go(target), 450);
     setTimeout(() => {
       door.classList.remove("is-entering");
       warp.classList.remove("is-active");
@@ -312,6 +355,7 @@
     const t = e.target.closest("[data-go]");
     if (!t) return;
     if ((t.dataset.js || "").startsWith("hub-door-")) enterDoor(t, e);
+    else if (t.dataset.js === "result-next-door") openNextDoor(t);
     else go(t.dataset.go);
   });
   js("topbar-back").addEventListener("click", (e) => go(e.currentTarget.dataset.target || "hub"));
@@ -339,6 +383,7 @@
     const segs = jsAll("read-progress-seg");
     const line = innerHeight * 0.35;
     let cur = 0;
+    segs.forEach((seg, i) => show(seg, i < chapters.length)); // (7단계) 무료 화면은 I·II장만 읽는다
     chapters.forEach((ch, i) => {
       const r = ch.getBoundingClientRect();
       let f = 0;
@@ -397,12 +442,24 @@
 
   // ───────── 0. 허브 ─────────
   function renderHub() {
+    const next = nextRoom();
     for (const room of OPEN_ROOMS) {
       const door = js(`hub-door-${room}`);
-      door.classList.toggle("is-visited", Boolean(state.visits[room]));
+      const done = isDone(room);
+      const locked = !done && !isUnlocked(room);
+      door.classList.toggle("is-visited", done);
+      door.classList.toggle("is-next", room === next);
+      door.classList.toggle("is-locked", locked);
+      if (locked) door.setAttribute("aria-disabled", "true");
+      else door.removeAttribute("aria-disabled");
       js("hub-door-badge", door).textContent = fill(T.hub.badge, { n: chapterOf(room) });
     }
     const filled = filledRooms();
+    // (7단계) 진행 막대 N/6
+    const prog = js("hub-progress");
+    prog.style.setProperty("--n", filled.length);
+    prog.setAttribute("aria-valuenow", String(filled.length));
+    js("hub-progress-count").textContent = fill(T.hub.progress.count, { n: filled.length, total: CHAPTER_ORDER.length });
     const teaser = js("hub-story");
     show(teaser, filled.length > 0);
     $$(".arch-mark", js("hub-story-marks")).forEach((m, i) => m.classList.toggle("is-done", Boolean(state.visits[CHAPTER_ORDER[i]])));
@@ -588,9 +645,9 @@
       })
       .join("");
   }
-  const insertAt = (arr, i, item) => [...arr.slice(0, i), item, ...arr.slice(i)];
 
-  // 장 4개 채우기: chapters = [{ title, html, hook }]
+  // 장 채우기: chapters = [{ title, html, hook }] 네 개. (7단계) 무료 화면에는 I·II장 섹션만 있고,
+  // III·IV장(과 II장 나머지)은 유료 "방별 온전한 이야기" — 여기서는 목차 제목만 쓴다 (html 없음)
   function fillChapters(scr, chapters) {
     resetReveal(scr);
     const secs = jsAll("result-chapter", scr);
@@ -598,8 +655,9 @@
     let total = 0;
     chapters.forEach((c, i) => {
       const sec = secs[i];
+      if (tocTitles[i]) tocTitles[i].textContent = strip(c.title);
+      if (!sec) return;
       js("chapter-title", sec).textContent = strip(c.title);
-      tocTitles[i].textContent = strip(c.title);
       js("chapter-body", sec).innerHTML = c.html;
       const hook = js("chapter-hook", sec);
       if (hook) {
@@ -613,25 +671,20 @@
     js("result-length", scr).textContent = fill(T.result.length, { n: total });
   }
 
-  function renderNextRooms(scr, from) {
-    const linked = LINKS[from].filter((r) => OPEN_ROOMS.includes(r) && r !== from);
-    const cands = linked.length ? linked : OPEN_ROOMS.filter((r) => r !== from);
-    const order = [...cands.filter((r) => !state.visits[r]), ...cands.filter((r) => state.visits[r])].slice(0, 2);
-    js("next-rooms", scr).innerHTML = order
-      .map((r) => {
-        const hook = (T.next[from] && T.next[from][r]) || (T.next.any && T.next.any[r]) || "";
-        const chapter = fill(T.result.nextChapter, { n: chapterOf(r), chapter: T.rooms[r].chapterName });
-        return `<button class="next-room" type="button" data-room="${r}" data-go="${r}-intro" data-js="next-room">
-            <span class="next-room__glyph" aria-hidden="true">${ROOM_ICON[r]}</span>
-            <span class="next-room__text">
-              <span class="next-room__name">${T.rooms[r].name} <span class="next-room__chapter">${chapter}</span></span>
-              <span class="next-room__hook">${hook}</span>
-            </span>
-            <span class="next-room__arrow" aria-hidden="true">→</span>
-          </button>`;
-      })
-      .join("");
+  // (7단계) 이야기 다리 + 다음 문: 다리 문구(bridges.<방>)와 문 목적지는 마크업에 고정. 여기서는 문 상태와 보조 링크 숫자만
+  function renderPassage(scr) {
+    js("result-next-door", scr).classList.remove("is-opening");
     js("result-go-story", scr).textContent = fill(T.result.goStory, { n: filledRooms().length });
+  }
+  // 다음 문: 문짝이 열린 뒤(약 650ms) 다음 방 시작 화면으로. 시빌라(Ⅵ)의 문은 수렴 결말(7-6)
+  function openNextDoor(btn) {
+    if (btn.classList.contains("is-opening")) return;
+    const to = btn.dataset.go;
+    const room = btn.dataset.room;
+    // 마지막 문인데 아직 비어 있는 장이 있으면(이전 판에서 순서 없이 들른 경우) 그 장부터
+    const target = to === "finale" ? (nextRoom() ? roomTarget(nextRoom()) : "finale") : CHAPTER_ORDER.includes(room) ? roomTarget(room) : to;
+    btn.classList.add("is-opening");
+    later(() => go(target), 650);
   }
 
   function renderArchetypeLine(scr, code, why) {
@@ -688,25 +741,20 @@
           </aside>`,
       });
     }
-    // 둘째 장: 지나온 자리의 장면 → 지금 자리의 장면 (인용은 지금 자리 첫 단락 뒤)
-    const ch2 = [{ lede: past.past.lede }, ...past.past.body, ...insertAt(now.now.body, 1, { quote: now.now.quote })];
-    // 셋째 장: 다가올 자리의 그림자
-    const ch3 = [{ lede: next.shadow.lede }, ...insertAt(next.shadow.body, 1, { quote: next.shadow.quote })];
-    // 넷째 장: 다가올 자리의 다음 걸음 + 고른 주제 한 단락
-    const ch4 = [{ lede: next.advice.lede }, ...next.advice.body, `${topic.lens} ${next.advice.topics[v.topic] || ""}`];
-
+    // 둘째 장: 무료는 첫 문단(지나온 자리 lede)까지. 나머지·셋째·넷째 장은 유료 "방별 온전한 이야기" (spec 7-4, 서버 full-rune.js)
+    const ch2 = [{ lede: past.past.lede }];
     fillChapters(scr, [
       { title: R.ch1Title, html: prose(ch1), hook: now.now.hook },
-      { title: now.now.title, html: prose(ch2), hook: next.shadow.hook },
-      { title: next.shadow.title, html: prose(ch3), hook: next.advice.hook },
-      { title: next.advice.title, html: prose(ch4) },
+      { title: now.now.title, html: prose(ch2) },
+      { title: next.shadow.title },
+      { title: next.advice.title },
     ]);
 
     const list = [past, now, next].map((r) => fill(R.factItem, { name: r.name, aett: R.aett[Math.floor(r.index / 8)] })).join(", ");
     js("fact-text", scr).innerHTML = fill(R.fact, { list });
     Disclaimer.mount(js("disclaimer-slot", scr));
     renderArchetypeLine(scr, next.archetype, next.archetypeWhy);
-    renderNextRooms(scr, "rune");
+    renderPassage(scr);
   }
 
   enter["rune-result"] = () => {
@@ -715,7 +763,6 @@
     watchReveal(scr);
     updateReading();
   };
-  js("result-retry", screens["rune-result"]).addEventListener("click", () => go("rune-ritual"));
 
   // ───────── 한글 이름 → 로마자(Calc.romanize, calc.js의 표 하나만 쓴다) → 룬 (이름 인셋) ─────────
   const LETTER_RUNE = {
@@ -986,7 +1033,7 @@
       .map(([dt, dd]) => `<div class="fact-list__row"><dt>${dt}</dt><dd>${dd}</dd></div>`)
       .join("")}</dl>`;
     const ch1 = [{ lede: nak.identity.lede }, { html: factList }, ...nak.identity.body, R.interpretNote];
-    // 둘째 장: 사건 (첫 단락 뒤에 맞아요 인셋, 둘째 단락 뒤에 인용)
+    // 둘째 장: 무료는 첫 문단(lede)까지 + 맞아요 인셋. 나머지는 유료 (spec 7-4, 서버 full-star.js)
     const traits = `<aside class="inset inset--traits" data-js="star-traits" data-reveal>
         <p class="inset__label">${R.traitsLabel}</p>
         <ul class="trait-list">${nak.traits
@@ -994,21 +1041,18 @@
           .join("")}</ul>
         <p class="inset__count" data-js="star-trait-count" aria-live="polite"></p>
       </aside>`;
-    const eb = nak.event.body;
-    const ch2 = [{ lede: nak.event.lede }, eb[0], { html: traits }, eb[1], { quote: nak.event.quote }, ...eb.slice(2)];
-    const ch3 = [{ lede: nak.shadow.lede }, ...insertAt(nak.shadow.body, 1, { quote: nak.shadow.quote })];
-    const ch4 = [{ lede: nak.advice.lede }, ...nak.advice.body];
+    const ch2 = [{ lede: nak.event.lede }, { html: traits }];
     fillChapters(scr, [
       { title: nak.identity.title, html: prose(ch1), hook: nak.event.hook },
-      { title: nak.event.title, html: prose(ch2), hook: nak.shadow.hook },
-      { title: nak.shadow.title, html: prose(ch3), hook: nak.advice.hook },
-      { title: nak.advice.title, html: prose(ch4) },
+      { title: nak.event.title, html: prose(ch2) },
+      { title: nak.shadow.title },
+      { title: nak.advice.title },
     ]);
 
     js("fact-text", scr).innerHTML = nak.fact || R.factFallback;
     Disclaimer.mount(js("disclaimer-slot", scr));
     renderArchetypeLine(scr, nak.archetype, nak.archetypeWhy);
-    renderNextRooms(scr, "star");
+    renderPassage(scr);
   }
   // 맞아요 누르기
   screens["star-result"].addEventListener("click", (e) => {
@@ -1038,18 +1082,15 @@
     if (!shown.length) return "";
     return `<dl class="fact-list" data-reveal>${shown.map(([dt, dd]) => `<div class="fact-list__row"><dt>${dt}</dt><dd>${dd}</dd></div>`).join("")}</dl>`;
   }
-  // 별의 방과 같은 네 장 조립. e = 데이터 항목(identity·event·shadow·advice), facts = [[항목명, 값]], tail = 넷째 장 끝 단락(선택)
-  function entryChapters(e, facts, interpretNote, tail) {
+  // 별의 방과 같은 네 장 조립. e = 데이터 항목(identity·event·shadow·advice), facts = [[항목명, 값]]
+  // (7단계) 무료 = I장 전체 + II장 첫 문단(lede). II장 나머지·III·IV장은 유료(서버 full-<방>.js) — III·IV는 목차 제목만
+  function entryChapters(e, facts, interpretNote) {
     const ch1 = [{ lede: e.identity.lede }, { html: factListHtml(facts) }, ...e.identity.body, interpretNote];
-    const eb = e.event.body;
-    const ch2 = [{ lede: e.event.lede }, ...insertAt(eb, Math.min(2, eb.length), { quote: e.event.quote })];
-    const ch3 = [{ lede: e.shadow.lede }, ...insertAt(e.shadow.body, 1, { quote: e.shadow.quote })];
-    const ch4 = [{ lede: e.advice.lede }, ...e.advice.body, tail];
     return [
       { title: e.identity.title, html: prose(ch1), hook: e.event.hook },
-      { title: e.event.title, html: prose(ch2), hook: e.shadow.hook },
-      { title: e.shadow.title, html: prose(ch3), hook: e.advice.hook },
-      { title: e.advice.title, html: prose(ch4) },
+      { title: e.event.title, html: prose([{ lede: e.event.lede }]) },
+      { title: e.shadow.title },
+      { title: e.advice.title },
     ];
   }
   // 결과 아래쪽 공통: 상식 카드·고증 한 줄·면책·원형 한 줄·떡밥
@@ -1058,7 +1099,7 @@
     js("result-source-note", scr).textContent = strip(R.sourceNote);
     Disclaimer.mount(js("disclaimer-slot", scr));
     renderArchetypeLine(scr, e.archetype, e.archetypeWhy);
-    renderNextRooms(scr, room);
+    renderPassage(scr);
   }
   const metaLine = (R) => strip(fill(R.meta, { who: whoOf(state.profile.name || "") }));
   // 의식 화면 아래 상식 한 줄 (2.4초마다 바뀜, 화면을 떠나면 later 타이머와 함께 멈춤)
@@ -1592,7 +1633,7 @@
     js("sibyl-result-question", scr).textContent = question ? fill(R.question, { q: question }) : "";
     js("sibyl-scroll-quote", scr).textContent = strip(o.line);
     js("turn-text", scr).innerHTML = o.turn;
-    fillChapters(scr, entryChapters(o, [], R.interpretNote, `${ORACLE_TOPICS[v.topic].lens} ${o.topics[v.topic] || ""}`));
+    fillChapters(scr, entryChapters(o, [], R.interpretNote));
     finishResult(scr, "sibyl", o, R);
   }
   js("result-retry", screens["sibyl-result"]).addEventListener("click", () => go("sibyl-input"));
@@ -1672,9 +1713,10 @@
     jsAll("story-chapter", storyScr).forEach((li, i) => {
       const room = CHAPTER_ORDER[i];
       const done = Boolean(state.visits[room]);
+      const locked = !done && !isUnlocked(room); // (7단계) 앞의 문을 지나야 열리는 장
       li.classList.toggle("is-done", done);
-      li.classList.toggle("is-available", !done);
-      li.classList.remove("is-upcoming"); // 2단계: 여섯 방이 모두 열려 "다음에 열려요" 장은 없다
+      li.classList.toggle("is-available", !done && !locked);
+      li.classList.toggle("is-upcoming", locked);
       li.dataset.room = room;
       const R = T.rooms[room];
       const label = `<p class="spine-item__label">${fill(S.chapterLabel, { n: i + 1, chapter: R.chapterName })}</p>`;
@@ -1684,6 +1726,8 @@
         html = `${label}<p class="spine-item__room">${R.name} <span class="spine-item__type" data-js="story-chapter-type">${visitType(room)}</span></p>
           <div class="spine-item__summary" data-js="story-chapter-summary">${summary.map((p) => `<p>${p}</p>`).join("")}</div>
           <button class="btn btn--text spine-item__reread" type="button" data-js="story-chapter-reread" data-room="${room}">${S.reread}</button>`;
+      } else if (locked) {
+        html = `${label}<p class="spine-item__room">${R.name}</p><p class="spine-item__teaser">${fill(S.teaserLocked, { room: R.name })}</p>`;
       } else {
         html = `${label}<p class="spine-item__room">${R.name}</p><p class="spine-item__teaser">${fill(S.teaserAvailable, { room: R.name })}</p>
           <button class="btn btn--secondary btn--small spine-item__go" type="button" data-go="${room}-intro" data-js="story-chapter-go">${fill(S.go, { room: R.name })}</button>`;
@@ -1901,7 +1945,8 @@
   const reportScr = screens.report;
   // 예상 분량 (spec 6-2 표. 서버 문구 한도와 같게 유지 — D-11)
   // 결제 전 고지 분량: 완성된 유료 문구의 실측 평균(2026-09-29, 항목별 평균). 문구를 크게 바꾸면 다시 잰다
-  const VOL = { open: 280, hidden: 610, hiddenSibyl: 380, stage: 490, summary: 130, matchBody: 680, side: 160, matchRoom: 300, deep: 1270, close: 280 };
+  // room = (7단계) 방별 온전한 이야기 한 방 평균(II장 나머지+III+IV, 룬·시빌라는 주제 단락 1개 포함). 2026-09-29 full-*.js 전 항목 실측
+  const VOL = { room: { ogham: 2240, star: 2190, decan: 2380, tzolkin: 2310, rune: 2540, sibyl: 1850 }, open: 280, hidden: 610, hiddenSibyl: 380, stage: 490, summary: 130, matchBody: 680, side: 160, matchRoom: 300, deep: 1270, close: 280 };
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   const readReceipt = () => {
     try {
@@ -1931,12 +1976,13 @@
 
   // ── 마크업의 모양 견본을 틀로 떼어 두고, data-t 없는 초안 표시 견본 글자는 지운다 (design developer 요청 2·3)
   const tpl = {
+    fullRoom: js("report-rooms").firstElementChild.cloneNode(true),
     hidden: js("report-hidden").firstElementChild.cloneNode(true),
     stage: js("report-timeline").firstElementChild.cloneNode(true),
     matchRoom: js("report-match-rooms").firstElementChild.cloneNode(true),
   };
   function clearPaidSamples() {
-    ["report-hidden", "report-timeline", "report-match-rooms", "report-open", "report-close", "report-match", "report-deep-strength", "report-deep-shadow", "report-deep-growth",
+    ["report-rooms", "report-hidden", "report-timeline", "report-match-rooms", "report-open", "report-close", "report-match", "report-deep-strength", "report-deep-shadow", "report-deep-growth",
       "report-title", "report-meta", "receipt-code", "receipt-code-end", "unseal-error-code", "deeper-total", "deeper-items", "deeper-volume", "deeper-price", "deeper-saved-value"]
       .forEach((n) => (js(n).textContent = ""));
     [...js("report-match-pair").children].forEach((s, i) => i !== 1 && (s.textContent = ""));
@@ -2129,6 +2175,7 @@
     const relCount = rel ? Object.values(rel).filter((g) => g != null).length : 0;
     const vol = {
       open: VOL.open,
+      rooms: rooms.reduce((s, r) => s + VOL.room[r], 0),
       hidden: rooms.reduce((s, r) => s + (r === "sibyl" ? VOL.hiddenSibyl : VOL.hidden), 0),
       timeline: VOL.stage * 3,
       match: p ? VOL.summary + VOL.matchBody + (p.arch === me ? 1 : 2) * VOL.side + relCount * VOL.matchRoom : VOL.summary * 8,
@@ -2144,6 +2191,7 @@
     const band = P.birth ? Math.min(ageBand(P.birth), 4) : null;
     const names = {
       open: Tt.open,
+      rooms: fill(Tt.rooms, { rooms: P.rooms.map((r) => T.deeper.roomShort[r]).join("·") }),
       hidden: fill(Tt.hidden, { rooms: P.rooms.map((r) => T.deeper.roomShort[r]).join("·") }),
       timeline: band == null ? T.report.parts.timeline : fill(Tt.timeline, { from: T.deeper.bands[band], to: T.deeper.bands[band + 2] }),
       match: P.p ? fill(Tt.match, { me: meName, with: particle(meName || "나", "과/와"), you: T.archetypes[P.p.arch].name }) : fill(Tt.matchMap, { me: meName, with: particle(meName || "나", "과/와") }),
@@ -2152,6 +2200,7 @@
     };
     const teaser = {
       open: T.deeper.teaser.open,
+      rooms: T.deeper.teaser.rooms,
       hidden: P.rooms.length ? T.deeper.teaser.room[P.rooms[0]] : "",
       timeline: T.deeper.teaser.timeline,
       match: P.p ? T.deeper.teaser.match : T.deeper.teaser.matchMap,
@@ -2384,7 +2433,7 @@
   };
   function reportChars(rep) {
     let n = 0;
-    const skip = new Set(["id", "room", "me", "you", "other", "band", "grade", "now", "past", "label", "title"]);
+    const skip = new Set(["id", "room", "me", "you", "other", "band", "grade", "now", "past", "label", "title", "topics"]);
     const add = (v) => {
       if (typeof v === "string") n += [...v].length;
       else if (Array.isArray(v)) v.forEach(add);
@@ -2413,6 +2462,17 @@
     }
     return rows.join("");
   }
+  // 룬·시빌라 넷째 장 끝 "고른 주제" 단락: 주제는 영수증 코드에 없어서, 이 탭에 같은 결과가 남아 있을 때만 붙인다 (없으면 생략)
+  function topicTail(fr, c) {
+    if (!fr.topics) return null;
+    const v = state.visits[fr.room];
+    if (!v) return null;
+    if (fr.room === "rune") {
+      const same = v.picks.every((code, i) => RUNE_BY_CODE[code].index === c.rune[i]);
+      return same && fr.topics[v.topic] ? `${T.rune.topics[v.topic].lens} ${fr.topics[v.topic]}` : null;
+    }
+    return v.sors === c.sibyl && fr.topics[v.topic] ? `${ORACLE_TOPICS[v.topic].lens} ${fr.topics[v.topic]}` : null;
+  }
   function renderReport(data) {
     const rep = data.report;
     const c = rep.codes;
@@ -2429,6 +2489,22 @@
     js("report-title").textContent = fill(R.title, { me, n: rooms.length });
     js("report-meta").textContent = fill(R.meta, { rooms: rooms.length, match: c.partner ? R.metaMatch.partner : R.metaMatch.map, n: comma(reportChars(rep)) });
     paras(js("report-open"), ch.open.paragraphs);
+    // (7단계) 방별 온전한 이야기: 들른 방마다 II장 나머지 + III + IV (서버가 Ⅰ~Ⅵ 순서로 보낸다)
+    const roomsEl = js("report-rooms");
+    roomsEl.textContent = "";
+    (ch.rooms ? ch.rooms.rooms : []).forEach((fr) => {
+      const el = tpl.fullRoom.cloneNode(true);
+      textIn(el);
+      el.dataset.room = fr.room;
+      const name = js("full-room-name", el);
+      name.textContent = T.rooms[fr.room].name;
+      if (name.previousElementSibling) name.previousElementSibling.textContent = ROMAN[chapterOf(fr.room) - 1];
+      paras(js("full-room-ch2", el), fr.ch2);
+      paras(js("full-room-ch3", el), fr.ch3);
+      const tail = topicTail(fr, c);
+      paras(js("full-room-ch4", el), tail ? fr.ch4.concat(tail) : fr.ch4);
+      roomsEl.append(el);
+    });
     // 1장
     const hidden = js("report-hidden");
     hidden.textContent = "";
@@ -2559,21 +2635,63 @@
     }
   }
 
+  // ═════════ 7단계: 인트로 (새 세션의 첫 화면) ═════════
+  const introGate = js("intro-gate");
+  enter.intro = () => introGate.classList.remove("is-opening");
+  js("intro-start").addEventListener("click", () => {
+    if (introGate.classList.contains("is-opening")) return;
+    state.started = true;
+    save();
+    renderHub();
+    introGate.classList.add("is-opening");
+    const target = nextRoom() ? roomTarget(nextRoom()) : "hub";
+    later(() => go(target), reduceMotion ? 300 : 700);
+  });
+
+  // ═════════ 7단계: 여섯 문이 모이는 결말 (spec 7-6) ═════════
+  // 움직임: .is-running 동안 CSS 3D 연출(--finale-ms). 움직임 줄이기: base.css가 animation을 끄므로 .is-running = 정적 그리드,
+  // 약 1.2초 뒤 class를 떼며 element.animate()로 opacity만 교차 페이드 → 카드. 아무 데나 누르면 건너뛰기
+  const finaleScr = screens.finale;
+  const FINALE_MS = 2600;
+  const FADE_MS = 600;
+  function endFinale() {
+    if (!finaleScr.classList.contains("is-running")) return;
+    if (!reduceMotion || !finaleScr.animate) return finaleScr.classList.remove("is-running");
+    const shards = $$(".converge__shard", finaleScr);
+    const grid = shards.map((el) => getComputedStyle(el).transform);
+    finaleScr.classList.remove("is-running");
+    const o = { duration: FADE_MS, easing: "ease-out" };
+    shards.forEach((el, i) => el.animate([{ opacity: 1, transform: grid[i] }, { opacity: 0, transform: grid[i] }], o));
+    $$(".converge__card, .finale__lead, .finale .btn", finaleScr).forEach((el) => el.animate([{ opacity: 0 }, { opacity: 1 }], o));
+  }
+  enter.finale = () => {
+    finaleScr.classList.remove("is-running");
+    void finaleScr.offsetWidth;
+    finaleScr.classList.add("is-running");
+    later(endFinale, reduceMotion ? 1200 : FINALE_MS);
+  };
+  leave.finale = () => finaleScr.classList.remove("is-running");
+  finaleScr.addEventListener("click", (e) => {
+    if (!e.target.closest("[data-go]")) endFinale();
+  });
+
   // ═════════ 시작 ═════════
   applyText();
   renderHub();
   setTopbar("hub");
-  // 방 주소로 바로 들어온 경우(예: index.html#rune): 허브를 거치지 않고 그 방 시작 화면. URL에는 방 이름만 있다
-  const START = Object.fromEntries([...CHAPTER_ORDER.map((r) => [r, `${r}-intro`]), ["story", "story"]]);
+  // 새 세션(이 탭에 진행 기록 없음)은 주소와 상관없이 인트로부터 (spec 7-2).
+  // 같은 탭: 방 주소(예: index.html#rune)면 그 방 — 마친 방은 결과 다시보기, 다음 방은 시작 화면, 잠긴 방은 허브. URL에는 방 이름만 있다
   const hash = location.hash.replace("#", "");
-  if (START[hash]) go(START[hash], { instant: true });
+  if (!state.started) go("intro", { instant: true });
+  else if (hash === "story") go("story", { instant: true });
+  else if (CHAPTER_ORDER.includes(hash)) go(roomTarget(hash), { instant: true });
   else enter.hub();
   paidBoot();
 
   // 테스트·점검용으로 바깥에서 읽을 수 있게 둔다 (입력값은 내보내지 않음)
   // render*는 저장 없이(fresh=false) 결과 틀만 다시 그린다
   window.StrangeOracle = {
-    go, currentArchetype, filledRooms,
+    go, currentArchetype, filledRooms, nextRoom, isUnlocked,
     renderRune: (v) => renderRune(v, false), renderStar: (v) => renderStar(v, false),
     renderOgham: (v) => renderOgham(v, false), renderDecan: (v) => renderDecan(v, false),
     renderTzolkin: (v) => renderTzolkin(v, false), renderSibyl: (v) => renderSibyl(v, false, ""),
