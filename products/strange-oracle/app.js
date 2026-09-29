@@ -1900,7 +1900,8 @@
   const unsealScr = screens.unseal;
   const reportScr = screens.report;
   // 예상 분량 (spec 6-2 표. 서버 문구 한도와 같게 유지 — D-11)
-  const VOL = { open: 300, hidden: 700, hiddenSibyl: 400, stage: 600, summary: 150, matchBody: 800, side: 200, matchRoom: 350, deep: 1500, close: 300 };
+  // 결제 전 고지 분량: 완성된 유료 문구의 실측 평균(2026-09-29, 항목별 평균). 문구를 크게 바꾸면 다시 잰다
+  const VOL = { open: 280, hidden: 610, hiddenSibyl: 380, stage: 490, summary: 130, matchBody: 680, side: 160, matchRoom: 300, deep: 1270, close: 280 };
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   const readReceipt = () => {
     try {
