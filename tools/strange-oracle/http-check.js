@@ -15,7 +15,8 @@ const post = async (p, body, raw) => {
   try { data = await r.json(); } catch (e) { /* */ }
   return { status: r.status, data, cache: r.headers.get("cache-control") };
 };
-const codes = { rune: null, star: 3, ogham: 1, decan: null, tzolkin: null, sibyl: null, arch: "ruler", band: 3, partner: null, relOgham: null, relDecan: null, relTzolkin: null };
+// (8단계) 결제는 여섯 방을 모두 마친 코드만 (spec 8-1)
+const codes = { rune: [1, 2, 3], star: 3, ogham: 1, decan: 7, tzolkin: { number: 2, sign: 5 }, sibyl: 9, arch: "ruler", band: 3, partner: null, relOgham: null, relDecan: null, relTzolkin: null };
 
 (async () => {
   // D-4: 서버 전용 경로가 200이 아님 + 공개 파일에 유료 문장 0건 (무작위 20문장)
@@ -52,6 +53,8 @@ const codes = { rune: null, star: 3, ogham: 1, decan: null, tzolkin: null, sibyl
   check("D-7 결제 기록 없는 주문번호 → 거절", r.status === 404, r.status);
   r = await post("/api/confirm", { paymentKey: "real_looking_key", orderId, amount: 3900 });
   check("mock: mock_ 아닌 paymentKey → 거절", r.status === 402, r.status);
+  r = await post("/api/confirm", { paymentKey: "mock_http9", orderId: PayCode.encode(Object.assign({}, codes, { rune: null, decan: null })), amount: 3900 });
+  check("8-1 방 6개 미만 주문번호 → 400 incomplete", r.status === 400 && r.data.error === "incomplete", r.status);
   // D-5 정해진 키 외 필드
   r = await post("/api/confirm", { paymentKey: "mock_http1", orderId, amount: 3900, name: "김서윤" });
   check("D-5 정해진 키 외 필드(name) → 400", r.status === 400, r.status);

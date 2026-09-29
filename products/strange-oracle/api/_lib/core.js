@@ -133,31 +133,38 @@ function hiddenEntry(room, codes) {
   if (room === "tzolkin") return list[codes.tzolkin.sign]; // 문양
   return list[codes[room]];
 }
-// 방별 온전한 이야기 한 방: 무료 화면(I장 + II장 첫 문단) 뒤를 예전 무료판과 같은 순서로 잇는다.
+// (8단계, spec 8-1) 책 제1부 한 방: Ⅰ장 나머지(ch1Rest) + Ⅱ장(첫 문단 lede부터) + Ⅲ + Ⅳ + 숨은 장(hidden).
+// Ⅰ장 앞부분(무료 핵심 풀이)은 브라우저가 영수증 코드 속 결과 코드로 공개 data에서 조립한다. identity.close(무료 맺음 문장)는 공개 칸이라 서버에 없다.
 // 각 장 끝의 떡밥(hook)은 다음 장으로 넘어가는 문장이라 앞 장의 마지막 문단으로 둔다. 인용(quote)은 문단 하나.
 // 룬·시빌라의 넷째 장 끝 "고른 주제" 단락은 영수증 코드에 주제가 없어 topics(주제별 단락)로 모두 보내고, 브라우저가 이 탭에 남은 주제로 하나를 고른다.
 const insertAt = (arr, i, item) => [...arr.slice(0, i), item, ...arr.slice(i)];
 function fullRoom(room, codes) {
   const list = C.full[room];
+  const h = hiddenEntry(room, codes);
+  const hidden = { title: h.title, paragraphs: paras(h.body) };
   if (room === "rune") {
     const [past, now, next] = codes.rune.map((i) => list[i]);
     return {
       room,
-      ch2: [...past.past.body, ...insertAt(now.now.body, 1, now.now.quote), next.shadow.hook],
+      ch1Rest: [past, now, next].map((r) => r.identity.rest.slice()), // 룬: 돌 셋(지나온·지금·다가올) 순서, 돌마다 둘째 단락부터
+      ch2: [past.past.lede, ...past.past.body, ...insertAt(now.now.body, 1, now.now.quote), next.shadow.hook],
       ch3: [next.shadow.lede, ...insertAt(next.shadow.body, 1, next.shadow.quote), next.advice.hook],
       ch4: [next.advice.lede, ...next.advice.body],
       topics: Object.assign({}, next.advice.topics),
+      hidden,
     };
   }
   const e = list[room === "tzolkin" ? codes.tzolkin.sign : codes[room]];
   const eb = e.event.body;
-  // 별의 방은 II장 첫 단락 뒤 맞아요 인셋(무료) 다음에 인용이 둘째 단락 뒤였다 → 나머지 순서: 단락1, 단락2, 인용, 그 뒤
-  const ch2 = room === "star" ? [eb[0], eb[1], e.event.quote, ...eb.slice(2)] : insertAt(eb, Math.min(2, eb.length), e.event.quote);
+  // 인용은 II장 둘째 본문 단락 뒤 (별의 방도 맞아요 인셋이 공감 카드로 옮겨 가 같은 규칙)
+  const ch2 = insertAt(eb, Math.min(2, eb.length), e.event.quote);
   const out = {
     room,
-    ch2: [...ch2.filter((p) => p != null), e.shadow.hook],
+    ch1Rest: e.identity.rest.slice(),
+    ch2: [e.event.lede, ...ch2.filter((p) => p != null), e.shadow.hook],
     ch3: [e.shadow.lede, ...insertAt(e.shadow.body, 1, e.shadow.quote), e.advice.hook],
     ch4: [e.advice.lede, ...e.advice.body],
+    hidden,
   };
   if (room === "sibyl") out.topics = Object.assign({}, e.topics);
   return out;
@@ -178,14 +185,8 @@ function buildReport(codes) {
   const rooms = CHAPTER_ORDER.filter((r) => codes[r] != null);
   const chapters = [];
   chapters.push({ id: "open", paragraphs: paras(IDX.open[me].body) });
+  // (8단계) 책 순서: 여는 글 → 제1부 여섯 방(방마다 Ⅰ~Ⅳ + 숨은 장) → 제2부(시기별 흐름·궁합·원형 심층) → 닫는 글
   chapters.push({ id: "rooms", rooms: rooms.map((room) => fullRoom(room, codes)) });
-  chapters.push({
-    id: "hidden",
-    rooms: rooms.map((room) => {
-      const e = hiddenEntry(room, codes);
-      return { room, title: e.title, paragraphs: paras(e.body) };
-    }),
-  });
   const stages = timelineStages(me, codes.band);
   chapters.push({ id: "timeline", stages: stages.map(({ keyword, ...s }) => s) });
   if (codes.partner) {
@@ -231,6 +232,9 @@ async function confirmPayment(body, env, fetchImpl) {
   const codes = PayCode.decode(orderId);
   if (!codes) throw new Fail(400, "bad_order");
   if (Number(amount) !== PRICE) throw new Fail(400, "bad_amount");
+  // (8단계, spec 8-1) 결제는 여섯 방을 모두 마친 뒤에만: 방 코드가 하나라도 없으면 토스를 부르기 전에 거절 (돈이 나가기 전).
+  // 재열람(reopenReport)은 6·7단계의 방 6개 미만 옛 코드도 막지 않는다
+  if (!CHAPTER_ORDER.every((r) => codes[r] != null)) throw new Fail(400, "incomplete");
   const toss = tossFor(mode, env, fetchImpl);
   let r = await toss.confirm({ paymentKey, orderId, amount: PRICE });
   if (!r.ok && r.code === "ALREADY_PROCESSED_PAYMENT") {

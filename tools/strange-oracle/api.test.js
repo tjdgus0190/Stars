@@ -1,4 +1,4 @@
-// 6단계 서버 로직 단위 시험 (Node 내장 node:test, 설치 없음). 토스 호출은 가짜 fetch로 바꿔 넣는다. 실제 키·네트워크 없음.
+// 6~8단계 서버 로직 단위 시험 (Node 내장 node:test, 설치 없음). 토스 호출은 가짜 fetch로 바꿔 넣는다. 실제 키·네트워크 없음.
 // 실행: node --test tools/strange-oracle/
 "use strict";
 const test = require("node:test");
@@ -125,6 +125,20 @@ test("위조 방지 (D-7): 금액·형식·기록 없음·취소", async () => {
   await rejects(core.reopenReport({ receipt: other }, TEST_ENV, t.fetch), 404);
 });
 
+test("8-1 결제는 6/6에서만: 방 코드가 하나라도 없으면 토스를 부르지 않고 400, 옛 코드 재열람은 그대로", async () => {
+  const t = fakeToss();
+  for (const room of PayCode.CHAPTER_ORDER) {
+    const orderId = PayCode.encode(Object.assign(baseCodes(), { [room]: null }));
+    await rejects(core.confirmPayment({ paymentKey: "pk", orderId, amount: 3900 }, TEST_ENV, t.fetch), 400, "incomplete");
+  }
+  assert.equal(t.calls.length, 0, "6방 미만은 돈이 나가기 전에 막힌다");
+  // 6·7단계 테스트 모드 영수증(방 3개): 재열람은 있는 방만으로 열린다
+  const old = PayCode.encode(Object.assign(baseCodes(), { rune: null, star: null, sibyl: null }));
+  const led = { [old]: { paymentKey: "pk_old", orderId: old, totalAmount: 3900, status: "DONE" } };
+  const r = await core.reopenReport({ receipt: old }, TEST_ENV, fakeToss(led).fetch);
+  assert.deepEqual(r.report.chapters.find((c) => c.id === "rooms").rooms.map((x) => x.room), ["ogham", "decan", "tzolkin"]);
+});
+
 test("정해진 키 외 필드 → 400 (D-5)", async () => {
   const t = fakeToss();
   const orderId = PayCode.encode(baseCodes());
@@ -192,11 +206,12 @@ test("리포트 조립: 모든 유료 항목에 도달, 구간·궁합 규칙", 
 
 test("분량 (D-11 구조 점검): 모든 칸을 한도만큼 채우면 조립 글자 수 = 미리보기 계산식", () => {
   // 브라우저 app.js의 VOL 계산식과 같은 식
-  const VOL = { open: 300, hidden: 700, hiddenSibyl: 400, stage: 600, summary: 150, matchBody: 800, side: 200, matchRoom: 350, deep: 1500, close: 300 };
+  const VOL = { open: 300, stage: 600, summary: 150, matchBody: 800, side: 200, matchRoom: 350, deep: 1500, close: 300 };
   const estimate = (c) => {
     const rooms = PayCode.roomsOf(c);
     const rel = [c.relOgham, c.relDecan, c.relTzolkin].filter((g) => g != null).length;
-    return VOL.open + rooms.reduce((s, r) => s + (r === "sibyl" ? VOL.hiddenSibyl : VOL.hidden), 0) + VOL.stage * 3 +
+    return VOL.open + VOL.stage * 3 + // (8단계) 숨은 장은 제1부 방 안(rooms)으로 들어가 아래 "방별 분량" 시험이 본다
+
       (c.partner ? VOL.summary + VOL.matchBody + (c.partner === c.arch ? 1 : 2) * VOL.side + rel * VOL.matchRoom : VOL.summary * 8) + VOL.deep + VOL.close;
   };
   // 복사본 내용을 한도 길이 문자열로 바꿔 끼운다 (원본 파일은 건드리지 않음)
@@ -246,9 +261,10 @@ const onlyRoom = (room, i) => {
 test("7-1 순서 단일화: paycode.js CHAPTER_ORDER 하나를 브라우저·서버가 함께 쓴다", () => {
   assert.deepEqual([...PayCode.CHAPTER_ORDER], ["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
   const rep = core.buildReport(baseCodes());
-  assert.deepEqual(rep.chapters.map((c) => c.id), ["open", "rooms", "hidden", "timeline", "match", "deep", "close"]);
+  // (8단계) 책 순서: 여는 글 → 제1부 여섯 방(숨은 장 포함) → 제2부 → 닫는 글. 별도 hidden 장 없음
+  assert.deepEqual(rep.chapters.map((c) => c.id), ["open", "rooms", "timeline", "match", "deep", "close"]);
   assert.deepEqual(rep.chapters.find((c) => c.id === "rooms").rooms.map((r) => r.room), [...PayCode.CHAPTER_ORDER]);
-  assert.deepEqual(rep.chapters.find((c) => c.id === "hidden").rooms.map((r) => r.room), [...PayCode.CHAPTER_ORDER]);
+  rep.chapters.find((c) => c.id === "rooms").rooms.forEach((r) => assert.ok(r.hidden && r.hidden.title && r.hidden.paragraphs.length, r.room + " 숨은 장"));
   // 다른 곳에 순서 배열을 다시 적지 않았는지
   const fs = require("fs");
   for (const f of ["app.js", "api/_lib/core.js"]) {
@@ -266,6 +282,10 @@ test("7-4 방별 온전한 이야기: 모든 결과에 도달, 빈 문단 없음
       assert.equal(rooms.length, 1);
       const r = rooms[0];
       assert.equal(r.room, room);
+      assert.ok(Array.isArray(r.ch1Rest), room + " ch1Rest");
+      if (room === "rune") assert.equal(r.ch1Rest.length, 3, "룬 ch1Rest = 돌 셋");
+      assert.ok(r.hidden.paragraphs.length >= 1 && r.hidden.paragraphs.every((p) => p.trim().length > 0));
+      assert.ok(!JSON.stringify(r).includes('"close"'), "책에 identity.close 없음 (R-1)");
       for (const k of ["ch2", "ch3", "ch4"]) {
         assert.ok(r[k].length >= 2, `${room} ${i} ${k} 문단 수`);
         r[k].forEach((p) => assert.ok(typeof p === "string" && p.trim().length > 0 && !/<[a-z/]/i.test(p), `${room} ${i} ${k} 빈 문단·태그`));
@@ -274,19 +294,29 @@ test("7-4 방별 온전한 이야기: 모든 결과에 도달, 빈 문단 없음
       else assert.equal(r.topics, undefined);
     }
 });
-test("7-4 결제 전 분량: app.js VOL.room = 방별 실측 평균(±3%)", () => {
+test("8-1 결제 전 분량: app.js VOL.room(책 제1부 한 방 새 문장) = 방별 실측 평균(±3%)", () => {
   const src = require("fs").readFileSync(path.join(P, "app.js"), "utf8");
   const m = /room: \{ ([^}]+) \}/.exec(src);
   const VOLROOM = Object.fromEntries(m[1].split(",").map((x) => x.trim().split(": ")).map(([k, v]) => [k, Number(v)]));
   const L = (v) => (typeof v === "string" ? [...v].length : Array.isArray(v) ? v.reduce((a, x) => a + L(x), 0) : 0);
+  const runeAvg = () => { // 룬은 돌 세 개 조합: 표본(겹치지 않는 조합 가운데 9개 중 1개)
+    let s = 0, k = 0;
+    for (let a = 0; a < 24; a++) for (let b = 0; b < 24; b++) for (let d = 0; d < 24; d++) {
+      if (a === b || b === d || a === d || (a * 7 + b * 3 + d) % 9) continue;
+      const c = onlyRoom("rune", 0); c.rune = [a, b, d];
+      const r = core.buildReport(c).chapters.find((x) => x.id === "rooms").rooms[0];
+      s += L([r.ch1Rest, r.ch2, r.ch3, r.ch4, r.hidden.paragraphs]) + L(Object.values(r.topics)) / Object.keys(r.topics).length; k++;
+    }
+    return s / k;
+  };
   for (const [room, n] of Object.entries(FULL_N)) {
     let t = 0;
     for (let i = 0; i < n; i++) {
       const r = core.buildReport(onlyRoom(room, i)).chapters.find((c) => c.id === "rooms").rooms[0];
       const topic = r.topics ? L(Object.values(r.topics)) / Object.keys(r.topics).length : 0;
-      t += L([r.ch2, r.ch3, r.ch4]) + topic;
+      t += L([r.ch1Rest, r.ch2, r.ch3, r.ch4, r.hidden.paragraphs]) + topic;
     }
-    const avg = t / n;
+    const avg = room === "rune" ? runeAvg() : t / n;
     assert.ok(Math.abs(avg - VOLROOM[room]) / avg <= 0.03, `${room}: 실측 ${Math.round(avg)} / VOL ${VOLROOM[room]}`);
     console.log(`  ${room}: 실측 평균 ${Math.round(avg)}자 · VOL ${VOLROOM[room]}`);
   }
@@ -299,11 +329,41 @@ test("7-4 무료 파일에 유료 칸 없음 (공개 data-*.js)", () => {
   const bad = [];
   const chk = (e, where) => {
     for (const s of ["shadow", "advice"]) if (e[s]) Object.keys(e[s]).forEach((k) => k !== "title" && bad.push(`${where}.${s}.${k}`));
-    if (e.event) ["body", "quote"].forEach((k) => k in e.event && bad.push(`${where}.event.${k}`));
-    if (e.past && "body" in e.past) bad.push(where + ".past.body");
+    if (e.event) ["body", "quote", "lede"].forEach((k) => k in e.event && bad.push(`${where}.event.${k}`)); // (8단계) II장 첫 문단도 서버로
+    if (e.past && ("body" in e.past || "lede" in e.past)) bad.push(where + ".past");
+    if (e.identity && "rest" in e.identity) bad.push(where + ".identity.rest");
+    // (8단계) 자르기 규칙: 룬은 돌마다 첫 단락 하나, 그 밖은 lede + body가 750자 이하(body 첫 단락은 늘 남김)
+    if (Array.isArray(e.identity)) { if (e.identity.length !== 1) bad.push(where + ".identity 단락 " + e.identity.length); }
+    else if (e.identity) { const n = [e.identity.lede, ...e.identity.body].reduce((a, x) => a + [...x].length, 0); if (e.identity.body.length > 1 && n > 750) bad.push(where + " 핵심 풀이 " + n + "자"); }
     if (e.now) ["body", "quote"].forEach((k) => k in e.now && bad.push(`${where}.now.${k}`));
     if (e.topics && where.startsWith("ORACLES")) bad.push(where + ".topics");
   };
   for (const name of ["RUNES", "NAKSHATRAS", "OGHAM", "DECANS", "TZOLKIN_SIGNS", "ORACLES"]) w[name].forEach((e, i) => chk(e, `${name}[${i}]`));
   assert.deepEqual(bad, []);
+});
+
+test("8-1 이동 손실 0: 공개 Ⅰ장(lede+body) + 서버 ch1Rest = 8단계 이전 원문(git HEAD), II장 lede도 같다", () => {
+  const { execFileSync } = require("child_process");
+  const vm = require("vm");
+  const fs = require("fs");
+  const FILES = { ogham: ["data-ogham.js", "OGHAM"], star: ["data-stars.js", "NAKSHATRAS"], decan: ["data-decans.js", "DECANS"], tzolkin: ["data-tzolkin.js", "TZOLKIN_SIGNS"], sibyl: ["data-oracles.js", "ORACLES"], rune: ["data-runes.js", "RUNES"] };
+  let before;
+  try { before = (f) => execFileSync("git", ["show", "e996e59:products/strange-oracle/" + f], { cwd: P, encoding: "utf8", maxBuffer: 1 << 26 }); before("data-ogham.js"); }
+  catch (e) { console.log("  git 없음 — 건너뜀"); return; }
+  for (const [room, [f, name]] of Object.entries(FILES)) {
+    const old = {}, now = {};
+    vm.runInNewContext(before(f), { window: old });
+    vm.runInNewContext(fs.readFileSync(path.join(P, f), "utf8"), { window: now });
+    const paid = core.CONTENT.full[room];
+    old[name].forEach((o, i) => {
+      const n = now[name][i], q = paid[i];
+      if (room === "rune") {
+        assert.equal(JSON.stringify(n.identity.concat(q.identity.rest)), JSON.stringify(o.identity), room + " " + o.code);
+        assert.equal(q.past.lede, o.past.lede);
+      } else {
+        assert.equal([n.identity.lede, ...n.identity.body, ...q.identity.rest].join("|"), [o.identity.lede, ...o.identity.body].join("|"), room + " " + o.code);
+        assert.equal(q.event.lede, o.event.lede);
+      }
+    });
+  }
 });
