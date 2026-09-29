@@ -96,7 +96,7 @@ for (const slug of PRODUCTS) {
     }
   })(PUBLIC);
   console.log(leaks.length ? "  경고: 공개 폴더에 서버 전용 내용이 있음 — " + leaks.join(", ") : `  public/에 유료 문구 0건 (유료 문장 ${paidStrings.size}개 대조, api/·_paid는 dist/api/에만)`);
-  const paidLeft = fs.readdirSync(path.join(apiSrc, "_paid")).map((f) => [f, (fs.readFileSync(path.join(apiSrc, "_paid", f), "utf8").match(/[초안]/g) || []).length]).filter(([, n]) => n);
+  const paidLeft = fs.readdirSync(path.join(apiSrc, "_paid")).map((f) => [f, (fs.readFileSync(path.join(apiSrc, "_paid", f), "utf8").split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n").match(/\[초안\]/g) || []).length]).filter(([, n]) => n);
   console.log(paidLeft.length ? "  유료 문구 [초안] 남음: " + paidLeft.map(([f, n]) => f + " " + n).join(", ") : "  유료 문구 [초안] 없음");
   if (leaks.length) process.exitCode = 1;
 }
