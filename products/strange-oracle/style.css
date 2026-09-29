@@ -2734,7 +2734,7 @@ body:not(.is-static-preview) [data-preview-only] { display: none; }
 
 /* 입력 */
 .deeper-input { display: grid; gap: var(--space-5); margin-top: var(--space-10); }
-.deeper-input__title { font-size: var(--fs-lg); color: var(--c-text-strong); }
+.deeper-input__title { font-size: var(--fs-lg); color: var(--c-text-strong); scroll-margin-top: calc(var(--topbar-h) + var(--space-4)); }
 .deeper-input .field { margin: 0; }
 .partner { display: grid; gap: var(--space-4); min-width: 0; margin: 0; padding: var(--space-4); border: 1px dashed var(--c-line-strong); border-radius: var(--radius-lg); }
 .partner__legend { padding: 0 var(--space-2); font-size: var(--fs-md); font-weight: 700; color: var(--c-text-strong); }
