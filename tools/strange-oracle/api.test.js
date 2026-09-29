@@ -176,7 +176,9 @@ test("리포트 조립: 모든 유료 항목에 도달, 구간·궁합 규칙", 
         const m = r.chapters.find((x) => x.id === "match");
         if (partner) {
           mark([arch, partner].sort((a, b) => PayCode.ARCHETYPES.indexOf(a) - PayCode.ARCHETYPES.indexOf(b)).join("-"));
-          assert.equal(m.paragraphs.length, 1 + (arch === partner ? 1 : 2));
+          // 본문(여러 단락 가능) + 각자의 쪽 단락(같은 원형 1, 다른 원형 2)
+          const pair = C.match.find((x) => x.code === [arch, partner].sort((a, b) => PayCode.ARCHETYPES.indexOf(a) - PayCode.ARCHETYPES.indexOf(b)).join("-"));
+          assert.equal(m.paragraphs.length, pair.body.length + (arch === partner ? 1 : 2));
           m.rooms.forEach((x) => mark(`${x.room}-g${x.grade}`));
         } else assert.equal(m.map.length, 8);
       }
