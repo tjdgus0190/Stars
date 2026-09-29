@@ -123,3 +123,44 @@
 - developer가 index.html body의 정적 미리보기 [초안] 표시를 정리하거나, 실제 런타임에서 JS가 100% 덮어쓰는지 확인.
 - designer가 이번에 새로 쓴 hub.doors.origin(단축본), next.* 떡밥 11+6개, 각 방 lore 2문단을 실제 360px 화면에서 줄바꿈·잘림 여부 확인(2단계 UI 점검 단계).
 - 네 방 결과 본문(content-work/*.js, data-ogham.js, data-decans.js, TZOLKIN_SIGNS, ORACLES)의 다른 담당 작업이 끝나면, TZOLKIN_NUMBERS·ORACLE_TOPICS와의 톤 일관성(사건 위주 서술, 8장 금지 표현)을 qa-reviewer 단계에서 함께 점검.
+
+---
+
+# 7단계 추가 기록 (인트로·허브·다리·수렴 결말·유료 목차 문구)
+
+작성: copywriter, 2026-09-29. 9장 7단계(개발 — 문구) 지시에 따라, 7단계 개편(방 순서 고정 Ⅰ오검→Ⅱ별→Ⅲ데칸→Ⅳ촐킨→Ⅴ룬→Ⅵ시빌라→나의 이야기, 방별 온전한 이야기를 유료로 이동)으로 새로 생긴 [초안] 34곳을 실제 문구로 교체했다.
+
+## 담당 범위
+- `products/strange-oracle/data.js`의 `intro.*`, `finale.*`, `bridges.<room>`, `hub.doors.<room>.reads`·`doorLocked`·`progress.label`, `result.sealed.*`·`bridgeTitle`·`nextDoor.*`·`deeperLink`, `sibyl.result.retry`/`retryNote`, `toast.locked`, `story.teaserLocked`, `deeper.toc.rooms`·`teaser.rooms`, `report.parts.rooms`, `disclosure.items`, `story.paid.list[0]`만 수정. 다른 항목·다른 파일은 손대지 않았다.
+
+## 주요 작업 내용
+- **인트로**: "여러 문화의 점을 하나로 엮어, 당신이라는 사람을 한 편의 이야기로 그려요"로 확정(운영자 문안 그대로, 44자 제한 이내).
+- **허브 문 한 줄 소개(reads)**: 각 방이 무엇을 읽는지 짧고 궁금하게 — 오검 "나의 뿌리", 별 "지금의 속마음", 데칸 "잠들어 있는 재능", 촐킨 "다가올 순환", 룬 "과거·현재·미래", 시빌라 "오늘 묻고 싶은 것" (모두 12자 제한 이내).
+- **이야기 다리(bridges)**: Ⅰ→Ⅵ→나의 이야기 순서로, 앞 방이 밝힌 것에서 다음 방이 궁금한 이유로 자연스럽게 이어지도록 새로 썼다. 결과 본문 문장은 재사용하지 않고 서사만 이었다. 길이는 122~130자로 모두 100~200자 범위 안(스크립트로 실측 확인).
+- **수렴 결말(finale)**: "여섯 문을 모두 지나 / 나의 이야기 / 여섯 장이 모였어요" 등 담백하게 정리하고, lead는 "뿌리에서 오늘의 질문까지, 여섯 문이 남긴 조각이 한 사람의 이야기로 이어졌어요."로 확정.
+- **봉인 블록(result.sealed)·다음 문(nextDoor)**: 장 이름만 안내하고 결과 내용을 미리 드러내지 않도록 유지("이 방의 남은 장은 봉인되어 있어요" / "사건, 그 뒷이야기"). 잠금·다음 문 문구에 불안 조장 표현 없음(8장 준수).
+- **시빌라 다시 받기**: "다른 신탁 받기" 버튼과 "받은 신탁은 무를 수 없어요. 다른 주제로 새로 물을 수 있어요." 안내로, 되돌릴 수 없음과 새 주제로 다시 물을 수 있다는 점을 함께 명시(운영자 지시 그대로, 40자 이내).
+- **유료 "방별 온전한 이야기"**: 여는 글 바로 뒤에 놓이는 항목이라 report.parts.rooms·deeper.toc.rooms·story.paid.list[0]·disclosure.items 네 곳 모두 같은 이름("방별 온전한 이야기")으로 통일했다.
+- **disclosure.items**: 원래 초안 문구(스크립트 실측 약 92자)가 70자 제한을 넘어서, "여는 글·방별 온전한 이야기({rooms}곳)·1장 숨은 장·2장 흐름·3장 {match}·4장 심층·닫는 글·소장카드"(66자)로 압축했다. "(3구간)"·"시기별"·"원형" 등 수식어를 줄였지만 8개 구성 항목은 모두 남겼다. 상세 항목명은 deeper.toc·report.parts에서 온전히 보여 주므로 이 한 줄은 결제 전 "받는 것" 요약으로만 기능한다.
+
+## 길이 제한 점검
+- Node 스크립트로 bridges 6개(100~200자)와 disclosure.items(70자 이내)를 실측했다. 나머지 항목은 모두 기존 [초안] 문구의 글자 수를 유지하며 접두만 제거했거나(주석 제한 이내 확인), reads·retry 등은 직접 세어 제한 이내를 확인했다.
+
+## 남은 [초안] 개수
+- `products/strange-oracle/data.js`: 0 (`grep -c "\[초안\]"` 재확인).
+- `node --check products/strange-oracle/data.js`: 통과.
+
+## 완료한 것
+- 7단계에서 새로 생긴 [초안] 34곳(intro·finale·bridges·hub.doors.reads 등)을 모두 실제 문구로 교체.
+- bridges 6개·disclosure.items 길이를 스크립트로 실측해 제한 준수 확인, `node --check` 통과.
+
+## 만들거나 수정한 파일
+- products/strange-oracle/data.js (문자열 값만 수정, 키 이름·구조·로직 변경 없음)
+- reports/copy-strange-oracle.md (이 항목 추가)
+
+## 운영자가 확인·판단할 것
+- disclosure.items를 70자 제한에 맞추며 "(3구간)"·"시기별"·"원형" 등 일부 수식어를 뺐다. 결제 전 고지로 충분히 명확한지 한 번 확인 바람(상세 항목은 deeper 미리보기·report 화면에 별도로 전부 나온다).
+
+## 다음 단계 제안
+- 9장 7단계(개발 — UI 점검)에서 designer가 인트로·허브 문·다리·수렴 결말 화면을 360px 기준으로 확인.
+- 이후 8단계 QA(qa-reviewer)에서 8장 금지 표현·면책 문구·잠금 흐름을 함께 재검수.

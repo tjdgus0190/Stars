@@ -162,11 +162,12 @@
         </span>
         <span class="gate__step"></span>
       </div>
-      <p class="eyebrow intro__eyebrow" data-t="intro.eyebrow">[초안] 여섯 개의 오래된 문</p>
+      <p class="eyebrow intro__eyebrow" data-t="intro.eyebrow">여섯 개의 오래된 문</p>
       <h1 class="logo intro__logo" data-t="hub.logo"></h1>
-      <p class="intro__summary" data-t="intro.summary">[초안] 여러 문화의 점을 하나로 엮어, 당신이라는 사람을 한 편의 이야기로 그린다</p>
-      <button class="btn btn--primary btn--block intro__start" type="button" data-js="intro-start" data-t="intro.start">[초안] 첫 번째 문 열기</button>
-      <p class="intro__note" data-t="intro.note">[초안] 입력한 정보는 이 탭 안에서만 쓰여요</p>
+      <p class="intro__summary" data-t="intro.summary">여러 문화의 점을 하나로 엮어, 당신이라는 사람을 한 편의 이야기로 그려요</p>
+      <button class="btn btn--primary btn--block intro__start" type="button" data-js="intro-start" data-t="intro.start">첫 번째 문 열기</button>
+      <button class="btn btn--text intro__receipt is-hidden" type="button" data-js="intro-receipt" data-t="intro.receipt">영수증 코드가 있어요</button>
+      <p class="intro__note" data-t="intro.note">입력한 정보는 이 탭 안에서만 쓰여요</p>
     </section>
 
     <!-- ═════════ 0. 허브 (입구) ═════════ -->
@@ -187,7 +188,7 @@
 
       <!-- (7단계) 나의 이야기 N/6 채움 막대. JS가 style="--n:N"과 aria-valuenow, 개수 글자를 갱신 -->
       <div class="hub-progress" data-js="hub-progress" style="--n:0" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-labelledby="hub-progress-label">
-        <p class="hub-progress__label" id="hub-progress-label"><span data-t="hub.progress.label">[초안] 나의 이야기</span> <b class="hub-progress__count" data-js="hub-progress-count">0/6</b></p>
+        <p class="hub-progress__label" id="hub-progress-label"><span data-t="hub.progress.label">나의 이야기</span> <b class="hub-progress__count" data-js="hub-progress-count">0/6</b></p>
         <span class="hub-progress__bar" aria-hidden="true"><span class="hub-progress__fill"></span><span class="hub-progress__ticks"><i></i><i></i><i></i><i></i><i></i></span></span>
       </div>
 
@@ -205,8 +206,8 @@
           </span>
           <span class="door__name" data-t="rooms.ogham.name"></span>
           <span class="door__origin" data-t="hub.doors.ogham.origin">켈트 · 나무 문자</span>
-          <span class="door__reads" data-t="hub.doors.ogham.reads">[초안] 나의 뿌리</span>
-          <span class="door__lock visually-hidden" data-t="hub.doorLocked">[초안] 잠긴 문 — 앞의 문을 지나면 열려요</span>
+          <span class="door__reads" data-t="hub.doors.ogham.reads">나의 뿌리</span>
+          <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
         <button class="door" type="button" data-room="star" data-go="star-intro" data-js="hub-door-star">
@@ -219,8 +220,8 @@
           </span>
           <span class="door__name" data-t="rooms.star.name"></span>
           <span class="door__origin" data-t="hub.doors.star.origin">인도 · 베다 별자리</span>
-          <span class="door__reads" data-t="hub.doors.star.reads">[초안] 지금의 속마음</span>
-          <span class="door__lock visually-hidden" data-t="hub.doorLocked">[초안] 잠긴 문 — 앞의 문을 지나면 열려요</span>
+          <span class="door__reads" data-t="hub.doors.star.reads">지금의 속마음</span>
+          <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
         <button class="door" type="button" data-room="decan" data-go="decan-intro" data-js="hub-door-decan">
@@ -233,8 +234,8 @@
           </span>
           <span class="door__name" data-t="rooms.decan.name"></span>
           <span class="door__origin" data-t="hub.doors.decan.origin">이집트 · 별자리</span>
-          <span class="door__reads" data-t="hub.doors.decan.reads">[초안] 잠들어 있는 재능</span>
-          <span class="door__lock visually-hidden" data-t="hub.doorLocked">[초안] 잠긴 문 — 앞의 문을 지나면 열려요</span>
+          <span class="door__reads" data-t="hub.doors.decan.reads">잠들어 있는 재능</span>
+          <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
         <button class="door" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="hub-door-tzolkin">
@@ -247,8 +248,8 @@
           </span>
           <span class="door__name" data-t="rooms.tzolkin.name"></span>
           <span class="door__origin" data-t="hub.doors.tzolkin.origin">마야 · 촐킨</span>
-          <span class="door__reads" data-t="hub.doors.tzolkin.reads">[초안] 다가올 순환의 흐름</span>
-          <span class="door__lock visually-hidden" data-t="hub.doorLocked">[초안] 잠긴 문 — 앞의 문을 지나면 열려요</span>
+          <span class="door__reads" data-t="hub.doors.tzolkin.reads">다가올 순환</span>
+          <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
         <button class="door" type="button" data-room="rune" data-go="rune-intro" data-js="hub-door-rune">
@@ -261,8 +262,8 @@
           </span>
           <span class="door__name" data-t="rooms.rune.name"></span>
           <span class="door__origin" data-t="hub.doors.rune.origin">북유럽 · 룬 문자</span>
-          <span class="door__reads" data-t="hub.doors.rune.reads">[초안] 과거 · 현재 · 미래</span>
-          <span class="door__lock visually-hidden" data-t="hub.doorLocked">[초안] 잠긴 문 — 앞의 문을 지나면 열려요</span>
+          <span class="door__reads" data-t="hub.doors.rune.reads">과거·현재·미래</span>
+          <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
         <button class="door" type="button" data-room="sibyl" data-go="sibyl-intro" data-js="hub-door-sibyl">
@@ -275,8 +276,8 @@
           </span>
           <span class="door__name" data-t="rooms.sibyl.name"></span>
           <span class="door__origin" data-t="hub.doors.sibyl.origin">로마 · 신탁</span>
-          <span class="door__reads" data-t="hub.doors.sibyl.reads">[초안] 오늘 묻고 싶은 것</span>
-          <span class="door__lock visually-hidden" data-t="hub.doorLocked">[초안] 잠긴 문 — 앞의 문을 지나면 열려요</span>
+          <span class="door__reads" data-t="hub.doors.sibyl.reads">오늘 묻고 싶은 것</span>
+          <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
       </nav>
@@ -514,15 +515,15 @@
         <!-- (7단계) 무료 절단부: II장 첫 단락 바로 아래. 유료 문장은 한 글자도 넣지 않는다 (제목은 공통 장 이름만) -->
         <section class="sealed-rest" data-js="result-sealed" aria-labelledby="rune-sealed-title">
           <svg class="sealed-rest__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-          <h3 class="sealed-rest__title" id="rune-sealed-title" data-t="result.sealed.title">[초안] 이 방의 남은 장은 봉인되어 있어요</h3>
+          <h3 class="sealed-rest__title" id="rune-sealed-title" data-t="result.sealed.title">이 방의 남은 장은 봉인되어 있어요</h3>
           <ol class="sealed-rest__list">
-            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">[초안] 사건, 그 뒷이야기</span></li>
+            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">사건, 그 뒷이야기</span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">III</span><span data-t="result.chapterNames.2"></span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">IV</span><span data-t="result.chapterNames.3"></span></li>
           </ol>
           <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
           <!-- 결제 켜짐일 때만 보이는 글자 링크 한 줄 (기존 result-deeper를 이리로 옮김). 결제 꺼짐이면 .is-hidden, 봉인 제목은 그대로 -->
-          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
+          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
       </div>
@@ -547,13 +548,13 @@
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
       <section class="passage" data-js="result-passage" aria-labelledby="rune-bridge-title">
-        <h2 class="visually-hidden" id="rune-bridge-title" data-t="result.bridgeTitle">[초안] 다음 문으로</h2>
-        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.rune">[초안] 앞 방의 결과를 다음 방으로 잇는 짧은 이야기가 여기에 놓입니다. 방금 새긴 뿌리 위로 오늘의 마음결이 어떻게 흐르는지, 다음 문 너머에서 이어서 읽게 됩니다. 약 100~200자 분량의 서사 다리입니다.</p>
+        <h2 class="visually-hidden" id="rune-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
+        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.rune">과거와 현재, 다가올 모습까지 세 개의 룬이 한 줄로 이어 주었어요. 이제 남은 것은 지금 이 순간, 당신 마음속의 질문 하나뿐이에요. 마지막 문 너머 촛불 앞에 그 질문을 내려놓으면, 시빌라의 신탁이 조용히 답을 건넬 거예요.</p>
         <button class="next-door" type="button" data-room="sibyl" data-go="sibyl-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></span>
           <span class="next-door__num" aria-hidden="true">VI</span>
-          <span class="next-door__label" data-t="result.nextDoor.open">[초안] 다음 문 열기</span>
+          <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.sibyl.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
@@ -852,15 +853,15 @@
         <!-- (7단계) 무료 절단부: II장 첫 단락 바로 아래. 유료 문장은 한 글자도 넣지 않는다 (제목은 공통 장 이름만) -->
         <section class="sealed-rest" data-js="result-sealed" aria-labelledby="star-sealed-title">
           <svg class="sealed-rest__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-          <h3 class="sealed-rest__title" id="star-sealed-title" data-t="result.sealed.title">[초안] 이 방의 남은 장은 봉인되어 있어요</h3>
+          <h3 class="sealed-rest__title" id="star-sealed-title" data-t="result.sealed.title">이 방의 남은 장은 봉인되어 있어요</h3>
           <ol class="sealed-rest__list">
-            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">[초안] 사건, 그 뒷이야기</span></li>
+            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">사건, 그 뒷이야기</span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">III</span><span data-t="result.chapterNames.2"></span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">IV</span><span data-t="result.chapterNames.3"></span></li>
           </ol>
           <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
           <!-- 결제 켜짐일 때만 보이는 글자 링크 한 줄 (기존 result-deeper를 이리로 옮김). 결제 꺼짐이면 .is-hidden, 봉인 제목은 그대로 -->
-          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
+          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
       </div>
@@ -886,13 +887,13 @@
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
       <section class="passage" data-js="result-passage" aria-labelledby="star-bridge-title">
-        <h2 class="visually-hidden" id="star-bridge-title" data-t="result.bridgeTitle">[초안] 다음 문으로</h2>
-        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.star">[초안] 앞 방의 결과를 다음 방으로 잇는 짧은 이야기가 여기에 놓입니다. 방금 새긴 뿌리 위로 오늘의 마음결이 어떻게 흐르는지, 다음 문 너머에서 이어서 읽게 됩니다. 약 100~200자 분량의 서사 다리입니다.</p>
+        <h2 class="visually-hidden" id="star-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
+        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.star">마음결을 가만히 읽었어요. 그 마음 안쪽에는 아직 꺼내 쓰지 않은 재능 하나가 잠들어 있을지도 몰라요. 태어난 날 하늘에 드리운 해시계 그림자가 그 재능이 어디 숨어 있는지 알고 있어요. 그림자를 따라 데칸의 방으로 걸어가 볼까요.</p>
         <button class="next-door" type="button" data-room="decan" data-go="decan-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></span>
           <span class="next-door__num" aria-hidden="true">III</span>
-          <span class="next-door__label" data-t="result.nextDoor.open">[초안] 다음 문 열기</span>
+          <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.decan.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
@@ -1086,15 +1087,15 @@
         <!-- (7단계) 무료 절단부: II장 첫 단락 바로 아래. 유료 문장은 한 글자도 넣지 않는다 (제목은 공통 장 이름만) -->
         <section class="sealed-rest" data-js="result-sealed" aria-labelledby="ogham-sealed-title">
           <svg class="sealed-rest__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-          <h3 class="sealed-rest__title" id="ogham-sealed-title" data-t="result.sealed.title">[초안] 이 방의 남은 장은 봉인되어 있어요</h3>
+          <h3 class="sealed-rest__title" id="ogham-sealed-title" data-t="result.sealed.title">이 방의 남은 장은 봉인되어 있어요</h3>
           <ol class="sealed-rest__list">
-            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">[초안] 사건, 그 뒷이야기</span></li>
+            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">사건, 그 뒷이야기</span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">III</span><span data-t="result.chapterNames.2"></span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">IV</span><span data-t="result.chapterNames.3"></span></li>
           </ol>
           <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
           <!-- 결제 켜짐일 때만 보이는 글자 링크 한 줄 (기존 result-deeper를 이리로 옮김). 결제 꺼짐이면 .is-hidden, 봉인 제목은 그대로 -->
-          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
+          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
       </div>
@@ -1120,13 +1121,13 @@
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
       <section class="passage" data-js="result-passage" aria-labelledby="ogham-bridge-title">
-        <h2 class="visually-hidden" id="ogham-bridge-title" data-t="result.bridgeTitle">[초안] 다음 문으로</h2>
-        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.ogham">[초안] 앞 방의 결과를 다음 방으로 잇는 짧은 이야기가 여기에 놓입니다. 방금 새긴 뿌리 위로 오늘의 마음결이 어떻게 흐르는지, 다음 문 너머에서 이어서 읽게 됩니다. 약 100~200자 분량의 서사 다리입니다.</p>
+        <h2 class="visually-hidden" id="ogham-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
+        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.ogham">이름 석 자가 새긴 뿌리를 확인했어요. 그 뿌리 위에 서서 보면, 당신이 어디서 왔는지 어렴풋이 보이죠. 이제 그 뿌리가 떠받치는 지금의 속마음은 어떤 모양일까요. 태어난 순간의 달이 기억하는 이야기를 들으러, 별의 방으로 건너가요.</p>
         <button class="next-door" type="button" data-room="star" data-go="star-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__moon" viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg></span>
           <span class="next-door__num" aria-hidden="true">II</span>
-          <span class="next-door__label" data-t="result.nextDoor.open">[초안] 다음 문 열기</span>
+          <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.star.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
@@ -1398,15 +1399,15 @@
         <!-- (7단계) 무료 절단부: II장 첫 단락 바로 아래. 유료 문장은 한 글자도 넣지 않는다 (제목은 공통 장 이름만) -->
         <section class="sealed-rest" data-js="result-sealed" aria-labelledby="decan-sealed-title">
           <svg class="sealed-rest__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-          <h3 class="sealed-rest__title" id="decan-sealed-title" data-t="result.sealed.title">[초안] 이 방의 남은 장은 봉인되어 있어요</h3>
+          <h3 class="sealed-rest__title" id="decan-sealed-title" data-t="result.sealed.title">이 방의 남은 장은 봉인되어 있어요</h3>
           <ol class="sealed-rest__list">
-            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">[초안] 사건, 그 뒷이야기</span></li>
+            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">사건, 그 뒷이야기</span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">III</span><span data-t="result.chapterNames.2"></span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">IV</span><span data-t="result.chapterNames.3"></span></li>
           </ol>
           <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
           <!-- 결제 켜짐일 때만 보이는 글자 링크 한 줄 (기존 result-deeper를 이리로 옮김). 결제 꺼짐이면 .is-hidden, 봉인 제목은 그대로 -->
-          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
+          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
       </div>
@@ -1432,13 +1433,13 @@
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
       <section class="passage" data-js="result-passage" aria-labelledby="decan-bridge-title">
-        <h2 class="visually-hidden" id="decan-bridge-title" data-t="result.bridgeTitle">[초안] 다음 문으로</h2>
-        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.decan">[초안] 앞 방의 결과를 다음 방으로 잇는 짧은 이야기가 여기에 놓입니다. 방금 새긴 뿌리 위로 오늘의 마음결이 어떻게 흐르는지, 다음 문 너머에서 이어서 읽게 됩니다. 약 100~200자 분량의 서사 다리입니다.</p>
+        <h2 class="visually-hidden" id="decan-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
+        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.decan">잠들어 있던 재능을 마침내 깨웠어요. 이 재능은 한자리에 머물지 않고, 시간이 흐르며 계속 모양을 바꿔 가요. 그 흐름이 어떤 순환을 그리는지, 마야인들이 260일을 세어 온 촐킨의 달력이 다음 방에서 짚어 줄 거예요.</p>
         <button class="next-door" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span>
           <span class="next-door__num" aria-hidden="true">IV</span>
-          <span class="next-door__label" data-t="result.nextDoor.open">[초안] 다음 문 열기</span>
+          <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.tzolkin.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
@@ -1655,15 +1656,15 @@
         <!-- (7단계) 무료 절단부: II장 첫 단락 바로 아래. 유료 문장은 한 글자도 넣지 않는다 (제목은 공통 장 이름만) -->
         <section class="sealed-rest" data-js="result-sealed" aria-labelledby="tzolkin-sealed-title">
           <svg class="sealed-rest__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-          <h3 class="sealed-rest__title" id="tzolkin-sealed-title" data-t="result.sealed.title">[초안] 이 방의 남은 장은 봉인되어 있어요</h3>
+          <h3 class="sealed-rest__title" id="tzolkin-sealed-title" data-t="result.sealed.title">이 방의 남은 장은 봉인되어 있어요</h3>
           <ol class="sealed-rest__list">
-            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">[초안] 사건, 그 뒷이야기</span></li>
+            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">사건, 그 뒷이야기</span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">III</span><span data-t="result.chapterNames.2"></span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">IV</span><span data-t="result.chapterNames.3"></span></li>
           </ol>
           <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
           <!-- 결제 켜짐일 때만 보이는 글자 링크 한 줄 (기존 result-deeper를 이리로 옮김). 결제 꺼짐이면 .is-hidden, 봉인 제목은 그대로 -->
-          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
+          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
       </div>
@@ -1689,13 +1690,13 @@
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
       <section class="passage" data-js="result-passage" aria-labelledby="tzolkin-bridge-title">
-        <h2 class="visually-hidden" id="tzolkin-bridge-title" data-t="result.bridgeTitle">[초안] 다음 문으로</h2>
-        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.tzolkin">[초안] 앞 방의 결과를 다음 방으로 잇는 짧은 이야기가 여기에 놓입니다. 방금 새긴 뿌리 위로 오늘의 마음결이 어떻게 흐르는지, 다음 문 너머에서 이어서 읽게 됩니다. 약 100~200자 분량의 서사 다리입니다.</p>
+        <h2 class="visually-hidden" id="tzolkin-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
+        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.tzolkin">다가올 순환의 흐름을 짚어 보았어요. 뿌리도 마음도 재능도, 결국 하나의 길 위에 놓여 있었죠. 이제 그 길을 지나온 과거와 지금 선 자리, 그리고 다가올 모습을 한 줄로 이어 볼 시간이에요. 세 개의 룬이 그 실을 쥐고 있어요.</p>
         <button class="next-door" type="button" data-room="rune" data-go="rune-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><span class="runic">ᚱ</span></span>
           <span class="next-door__num" aria-hidden="true">V</span>
-          <span class="next-door__label" data-t="result.nextDoor.open">[초안] 다음 문 열기</span>
+          <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.rune.name"></span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
@@ -1875,15 +1876,15 @@
         <!-- (7단계) 무료 절단부: II장 첫 단락 바로 아래. 유료 문장은 한 글자도 넣지 않는다 (제목은 공통 장 이름만) -->
         <section class="sealed-rest" data-js="result-sealed" aria-labelledby="sibyl-sealed-title">
           <svg class="sealed-rest__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-          <h3 class="sealed-rest__title" id="sibyl-sealed-title" data-t="result.sealed.title">[초안] 이 방의 남은 장은 봉인되어 있어요</h3>
+          <h3 class="sealed-rest__title" id="sibyl-sealed-title" data-t="result.sealed.title">이 방의 남은 장은 봉인되어 있어요</h3>
           <ol class="sealed-rest__list">
-            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">[초안] 사건, 그 뒷이야기</span></li>
+            <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">II</span><span data-t="result.sealed.ch2Rest">사건, 그 뒷이야기</span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">III</span><span data-t="result.chapterNames.2"></span></li>
             <li class="sealed-rest__item"><span class="sealed-rest__num" aria-hidden="true">IV</span><span data-t="result.chapterNames.3"></span></li>
           </ol>
           <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
           <!-- 결제 켜짐일 때만 보이는 글자 링크 한 줄 (기존 result-deeper를 이리로 옮김). 결제 꺼짐이면 .is-hidden, 봉인 제목은 그대로 -->
-          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">[초안] 이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
+          <button class="deeper-link is-hidden" type="button" data-go="deeper" data-js="result-deeper"><span data-t="result.deeperLink">이 방의 나머지 이야기는 더 깊은 이야기에 있어요</span> <span aria-hidden="true">→</span></button>
         </section>
 
       </div>
@@ -1897,8 +1898,8 @@
 
       <div class="result-actions">
         <button class="btn btn--primary btn--block" type="button" data-js="result-share" data-t="result.share"></button>
-        <button class="btn btn--secondary btn--block" type="button" data-js="result-retry" data-t="sibyl.result.retry">[초안] 다른 신탁 받기</button>
-        <p class="result-actions__note" data-t="sibyl.result.retryNote">[초안] 받은 신탁은 무를 수 없어요. 다른 질문으로 새 신탁을 받을 수 있어요.</p>
+        <button class="btn btn--secondary btn--block" type="button" data-js="result-retry" data-t="sibyl.result.retry">다른 신탁 받기</button>
+        <p class="result-actions__note" data-t="sibyl.result.retryNote">받은 신탁은 무를 수 없어요. 다른 주제로 새로 물을 수 있어요.</p>
       </div>
 
       <aside class="archetype-line" data-js="result-archetype">
@@ -1910,14 +1911,14 @@
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
       <section class="passage" data-js="result-passage" aria-labelledby="sibyl-bridge-title">
-        <h2 class="visually-hidden" id="sibyl-bridge-title" data-t="result.bridgeTitle">[초안] 다음 문으로</h2>
-        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.sibyl">[초안] 앞 방의 결과를 다음 방으로 잇는 짧은 이야기가 여기에 놓입니다. 방금 새긴 뿌리 위로 오늘의 마음결이 어떻게 흐르는지, 다음 문 너머에서 이어서 읽게 됩니다. 약 100~200자 분량의 서사 다리입니다.</p>
+        <h2 class="visually-hidden" id="sibyl-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
+        <p class="passage__bridge" data-js="result-bridge" data-t="bridges.sibyl">여섯 번째 문까지 모두 지났어요. 뿌리에서 마음결로, 재능에서 순환으로, 과거·현재·미래를 지나 오늘의 질문까지 — 여섯 방이 들려준 조각들이 이제 한자리에 모여요. 그 조각을 이어, 당신이라는 한 편의 이야기를 펼쳐 볼게요.</p>
         <button class="next-door" type="button" data-room="hall" data-go="finale" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph next-door__glyph--star" aria-hidden="true">✦</span>
           <span class="next-door__num" aria-hidden="true">I–VI</span>
-          <span class="next-door__label" data-t="result.nextDoor.finale">[초안] 여섯 문을 하나로 잇기</span>
-          <span class="next-door__name" data-t="result.nextDoor.finaleName">[초안] 나의 이야기</span>
+          <span class="next-door__label" data-t="result.nextDoor.finale">여섯 문을 하나로 잇기</span>
+          <span class="next-door__name" data-t="result.nextDoor.finaleName">나의 이야기</span>
         </button>
         <button class="passage__story" type="button" data-go="story" data-js="result-go-story"></button>
       </section>
@@ -1949,14 +1950,14 @@
             <span class="converge__sigil" data-room="rune" style="--i:4"><span class="runic">ᚱ</span></span>
             <span class="converge__sigil" data-room="sibyl" style="--i:5"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></span>
           </span>
-          <p class="converge__eyebrow" data-t="finale.eyebrow">[초안] 여섯 문을 모두 지나</p>
-          <h1 class="converge__title" data-t="finale.title">[초안] 나의 이야기</h1>
-          <p class="converge__count" data-t="finale.count">[초안] 여섯 장이 모였어요</p>
+          <p class="converge__eyebrow" data-t="finale.eyebrow">여섯 문을 모두 지나</p>
+          <h1 class="converge__title" data-t="finale.title">나의 이야기</h1>
+          <p class="converge__count" data-t="finale.count">여섯 장이 모였어요</p>
         </div>
       </div>
-      <p class="finale__lead" data-t="finale.lead">[초안] 뿌리에서 오늘의 질문까지, 여섯 문이 남긴 조각이 한 사람의 이야기로 이어졌어요.</p>
-      <button class="btn btn--primary btn--block" type="button" data-go="story" data-js="finale-go-story" data-t="finale.cta">[초안] 나의 이야기 펼치기</button>
-      <p class="finale__skip" data-js="finale-skip" data-t="finale.skipHint">[초안] 화면을 누르면 바로 넘어가요</p>
+      <p class="finale__lead" data-t="finale.lead">뿌리에서 오늘의 질문까지, 여섯 문이 남긴 조각이 한 사람의 이야기로 이어졌어요.</p>
+      <button class="btn btn--primary btn--block" type="button" data-go="story" data-js="finale-go-story" data-t="finale.cta">나의 이야기 펼치기</button>
+      <p class="finale__skip" data-js="finale-skip" data-t="finale.skipHint">화면을 누르면 바로 넘어가요</p>
     </section>
 
     <!-- ═════════ 5. 나의 이야기 (통합 결과) ═════════ -->
@@ -2304,7 +2305,7 @@
 
       <!-- (7단계) 방별 온전한 이야기: 방문한 방마다 II장 나머지 + III장 + IV장 (JS가 .full-room 반복 생성, Ⅰ~Ⅵ 새 순서) -->
       <article class="report-part" data-js="report-part" data-part="rooms" style="--i:1">
-        <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.rooms">[초안] 방별 온전한 이야기</p></header>
+        <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.rooms">방별 온전한 이야기</p></header>
         <div class="report-part__body" data-js="report-rooms">
           <section class="full-room" data-room="ogham" data-js="full-room">
             <h3 class="full-room__title"><span class="full-room__num" aria-hidden="true">I</span><span data-js="full-room-name"></span></h3>

@@ -2044,6 +2044,7 @@
     show(js("story-paid-reopen"), on);
     show(js("hub-paid"), on);
     show(js("hub-report"), owned);
+    show(js("intro-receipt"), on); // 새 탭에서 영수증 코드로 바로 다시 열기 (방 순서와 무관)
     jsAll("pay-band").forEach((band) => {
       const mode = Pay.mode === "mock" || Pay.mode === "test" ? Pay.mode : null;
       show(band, Boolean(mode));
@@ -2646,6 +2647,15 @@
     introGate.classList.add("is-opening");
     const target = nextRoom() ? roomTarget(nextRoom()) : "hub";
     later(() => go(target), reduceMotion ? 300 : 700);
+  });
+  // 영수증 코드가 있는 사람: 첫 방을 거치지 않고 허브의 "영수증 코드로 열기" 칸으로 (spec 6-3 재열람)
+  js("intro-receipt").addEventListener("click", () => {
+    state.started = true;
+    save();
+    renderHub();
+    go("hub");
+    const box = js("hub-paid");
+    later(() => { box.scrollIntoView({ block: "center" }); const input = $("input", box); if (input) input.focus(); }, 350);
   });
 
   // ═════════ 7단계: 여섯 문이 모이는 결말 (spec 7-6) ═════════
