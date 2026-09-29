@@ -1008,3 +1008,73 @@ data.js에 아직 없어서 지금은 JS가 빈 글자로 채운다. 마크업�
 1. **문구 변경 후 mock-server 재시작 습관화**: `_paid/*.js`나 data.js를 고친 뒤에는 떠 있던 mock-server(8787/8788)를 반드시 재시작해야 한다. 안 그러면 옛 문구가 계속 보여서 검수가 틀릴 수 있다(이번에 실제로 벌어짐).
 2. 글자 대비는 도구로 수치까지는 재지 못했다(미확인). 특히 disclosure의 회색조 부제(가격·이용 방법 등 라벨)와 partner 안내 박스(촛불빛 테두리) 색은 실제 화면에서 한 번 더 봐 주면 좋겠다.
 3. legal 3페이지의 `○○` 자리(부가세, 문의처, 처리 기간, 사업자 정보 등)는 여전히 비어 있다 — 배포 전 운영자가 채워야 할 항목.
+
+## 7단계: 완성도 개편 (2026-09-29, 디자인)
+기준: specs/strange-oracle.md 7-1~7-7. 디자인 언어 한 벌 = **낡은 청동 고대 문**. 토큰은 `--bronze`, `--bronze-dark`, `--bronze-hi`이고 봉인에는 기존 밀랍 `#i-seal`을 쓴다. 방별 색은 기존 `data-room` accent를 그대로 쓴다.
+
+### 화면
+| 화면 | 레이아웃 (위→아래) | 광고 |
+|---|---|---|
+| 00 인트로 `#screen-intro` (새로 만듦) | 닫힌 두 짝 청동 문(아치 안쪽 반원에 Ⅰ~Ⅵ 인장, 문틈으로 빛이 숨 쉼) → eyebrow → 로고(h1) → 요약 한 줄 → 시작 버튼 → 작은 안내 한 줄 | 없음 |
+| 0 허브 | 머리 → **나의 이야기 N/6 막대** → 문 6개(2×3, Ⅰ오검 Ⅱ별 Ⅲ데칸 Ⅳ촐킨 Ⅴ룬 Ⅵ시빌라) → 나의 이야기 카드 → (결제) → 300자 소개 글(data-t 키 유지) → 광고 1 | 소개 글 아래 1개 |
+| 방 결과 ×6 | 목차(III·IV는 밀랍 점, 봉인 블록으로 연결) → I장 → 광고 → II장(첫 단락) → **봉인 블록** → 사실 카드 → 면책 → 공유(+다시 하기) → 원형 줄 → **이야기 다리 → 다음 문** → 나의 이야기 보조 링크 → 장식 → 광고 | 장 사이 광고를 III/IV 사이에서 **I/II 사이**로 옮김(봉인 블록·다리·문 근처 0) + 맨 아래 1 = 2개 |
+| 7 결말 `#screen-finale` (새로 만듦) | 3D 무대(조각 6개 + 아치 카드) → 한 줄 → "나의 이야기 펼치기" → 건너뛰기 안내(.is-running일 때만) | 없음 |
+| 6-P 미리보기 목차 / 6-R 리포트 | 여는 글 바로 뒤에 **방별 온전한 이야기**(`data-part="rooms"`)를 넣음. 리포트의 `--i` 지연은 뒤 파트부터 하나씩 밀림 | 없음(기존) |
+
+- 룬 결과에서 "다시 던지기" 버튼을 없앴다. 시빌라는 "[초안] 다른 신탁 받기" 버튼 밑에 "무를 수 없음" 한 줄을 붙였다.
+- 무료 절단부 `.sealed-rest`: 인장, 제목, 봉인된 장 이름 3줄(II 뒷이야기·III·IV, 공통 장 이름만 쓰고 결과 문장은 0글자), 흐린 줄, 글자 링크 `result-deeper`(결제 꺼짐이면 .is-hidden)로 되어 있다. 배너·팝업은 없다.
+- III·IV장 마크업은 `.chapters-paid[data-paid-only]`로 감싸 **무료 화면에서 숨겼다**(display:none). JS 참조가 깨지지 않게 남겨 둔 것이다.
+
+### 상태 class
+| 요소 | class | 모습 |
+|---|---|---|
+| `.door` | (없음) | 열린 문. 소용돌이는 멈춘 상태 |
+| | `.is-next` | 밝은 청동 테두리가 숨 쉬고 소용돌이가 돈다. 움직임 줄이기에서는 고정된 빛 |
+| | `.is-visited` | 지나온 문. 빛은 고정되고 배지가 보인다(기존과 같음) |
+| | `.is-locked` (+`aria-disabled="true"`) | 어두운 바탕, 가운데 틈, 글리프 32%, 밀랍 봉인, 스크린리더용 `hub.doorLocked`. 이름·설명 글자색은 AA 유지(opacity를 쓰지 않음) |
+| | `.is-denied` | 잠긴 문을 눌렀을 때 320ms 흔들림 |
+| `.hub-progress` | `style="--n:N"` + aria-valuenow | 채움 = N/6 |
+| `.gate` (인트로) | `.is-opening` | 문짝이 700ms 동안 안쪽으로 열린다 |
+| `.next-door` | `.is-opening` | 문짝이 650ms 동안 열리고 글자는 사라진다. hover 때는 살짝 벌어진다 |
+| `.finale` | `.is-running` | 움직임: 조각 6개가 perspective 무대에서 rotateY·translateZ로 궤도를 돌다 가운데로 모이고 카드가 나타난다(`--finale-ms` 2600ms). **움직임 줄이기**: base.css가 animation을 모두 끄므로 `.is-running`은 정적 그리드(카드 숨김)이고, class를 떼면 카드가 된다. 기본 모습이 곧 최종 모습 |
+
+### 새 data-t 키 ([초안], copywriter용 최대 글자 수, 360px 기준)
+| 키 | 최대 | 넘으면 |
+|---|---|---|
+| intro.eyebrow | 14 | 자간이 넓어 2줄 |
+| intro.summary | 44 | 4줄 이상이면 시작 버튼이 첫 화면 밖 |
+| intro.start | 12 | 버튼 2줄 |
+| intro.note | 24 | 2줄 |
+| hub.progress.label | 10 | 개수와 겹침 |
+| hub.doors.<room>.reads ×6 | 12 | 3줄이면 문 높이 증가 |
+| hub.doorLocked | 30 | 화면에 안 보임(스크린리더 전용) |
+| result.sealed.title | 22 | 2줄 |
+| result.sealed.ch2Rest | 12 | 줄바꿈 |
+| result.bridgeTitle | 10 | 스크린리더 전용 |
+| bridges.ogham/star/decan/tzolkin/rune/sibyl | 200 | 7줄 이상이면 문이 첫 화면 밖 |
+| result.nextDoor.open | 10 | 문 안에서 2줄 |
+| result.nextDoor.finale / finaleName | 12 / 8 | 2줄 |
+| sibyl.result.retryNote | 40 | 3줄 |
+| finale.eyebrow / title / count | 14 / 8 / 14 | title은 1줄(카드 폭 188px) |
+| finale.lead | 50 | 3줄 |
+| finale.cta / skipHint | 12 / 18 | — |
+| report.parts.rooms | 12 | — |
+- 기존 키 문구를 바꿔야 하는 것(copywriter): `result.deeperLink`(→ "이 방의 나머지 이야기는 더 깊은 이야기에 있어요"), `sibyl.result.retry`(→ "다른 신탁 받기"). 이제 쓰지 않는 키: `rune.result.retry`, `result.nextTitle`, `hub.doors.<room>.desc`.
+- 알림: `[data-t]`는 data.js에 키가 없으면 빈칸이 된다(app.js:161). 새 키를 data.js에 넣기 전에는 [초안] 견본이 화면에 보이지 않는다.
+
+### developer 전달 사항
+- data-js(새로 만듦): `screen-intro`, `intro-gate`, `intro-start`, `hub-progress`, `hub-progress-count`, `result-sealed`, `result-passage`, `result-bridge`, `result-next-door`(data-go에 다음 방 intro가 들어 있고, 시빌라는 `finale`), `screen-finale`, `finale-stage`, `finale-go-story`, `finale-skip`, `report-rooms`, `full-room`(반복 틀), `full-room-name`, `full-room-ch2/3/4`, 목차 `deeper-toc-item[data-part="rooms"]`.
+- 옮긴 것: `result-deeper`는 봉인 블록 안으로, `result-go-story`는 `.passage__story` 글자 링크로 옮겼다.
+- **임시 자리**: 룬 `result-retry`(app.js:718)와 6개 방의 `next-rooms`(app.js:620)는 빈 `<template>`으로 남겼다. 앱이 멈추지 않게 하려는 것이므로 LINKS·룬 retry를 지울 때 함께 지워 달라.
+- 초기 화면: 지금은 app.js:395가 허브로 간다. 새 세션이면 `intro`로 보내고, 같은 탭을 다시 열면 허브로 보내 달라(7-2). 인트로 시작 버튼 동작은 `.gate.is-opening` 약 700ms 뒤 Ⅰ로 넘어가는 것이다.
+- 허브의 `hub-door-*` 순서는 새 순서로 바꿔 두었다. 문 상태 class를 세션 진행에 맞춰 붙여 달라. 잠긴 문에는 disabled 대신 aria-disabled를 쓰고, 누르면 `.is-denied`와 토스트를 띄운다.
+- `.chapters-paid`(III·IV장)는 유료 문구를 옮긴 뒤 JS와 함께 지워도 된다. 봉인 블록에는 유료 문장을 넣지 않는다.
+- 결말: 아무 데나 탭하면 `.is-running`을 떼고, 끝나면 `go("story")`로 간다(또는 버튼). 움직임 줄이기에서는 약 1.2초 뒤 `.is-running`을 뗀다. 교차 페이드를 넣으려면 `element.animate()`로 opacity만 바꾼다.
+- 봉인 해제 의식(6-U)의 인장 수는 파트 수(이제 7개)와 맞출지 판단해 달라. 마크업은 바꾸지 않았다.
+
+### 캡처 기록 (headless Edge, 움직임 줄이기, 360·480px)
+- 스크립트: scratchpad `p7-shots.js`. 없는 키는 원본 HTML의 [초안]으로 되살렸고, 결과 본문은 견본 문단을 넣었다. 파일은 `%TEMP%/strange-oracle-e2e/p7-360-*.png`, `p7-480-*.png`.
+- 인트로·허브·오검/룬/시빌라 결과·결말(최종·그리드)·미리보기·리포트 모두 scrollWidth가 360/480이다(가로 넘침 없음). 콘솔 오류 0.
+- 움직임 모드 중간 프레임(900ms)에서 조각이 원근 궤도로 기울어져 겹치는 것을 확인했다.
+- 캡처 뒤 고친 것: 다음 문의 빛줄기가 글자를 가려 위쪽 절반에서 멈추게 했다. 결말 카드의 인장 고리가 eyebrow와 겹쳐 카드 높이를 320으로 늘리고 제목을 xl로 줄였다. 봉인 블록 위 그늘이 네모 띠로 보여 없앴다.
+- 미확인: 대비 수치는 재지 않았다(육안). 잠긴 문 글자는 --c-text / --c-text-muted라서 기존 AA 토큰과 같다. 실제 문구 길이는 UI 점검 단계에서 확인한다.

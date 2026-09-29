@@ -2915,3 +2915,401 @@ body:not(.is-static-preview) [data-preview-only] { display: none; }
 /* 정적 검토 모드: 결제 켜짐일 때만 보이는 진입점과 오류 상태를 펼쳐 보여 준다 */
 .is-static-preview .deeper-link.is-hidden { display: flex !important; }
 .is-static-preview :is(.hub-paid, .paid-card__reopen, .pay-alert, .unseal-error).is-hidden { display: grid !important; }
+
+
+/* ═════════════════════════════════════════════════════════════════
+   7단계: 완성도 개편 — 인트로 · 허브 진행 막대 · 고대 문 · 절단 봉인 · 이야기 다리/다음 문 · 수렴 결말
+   공통 재료: 낡은 청동(--bronze*), 부조는 청동빛 옅은 선, 봉인은 기존 밀랍(--wax, #i-seal)
+   ═════════════════════════════════════════════════════════════════ */
+:root {
+  --bronze: oklch(0.66 0.075 75);        /* 낡은 청동 테두리 */
+  --bronze-dark: oklch(0.36 0.045 65);   /* 녹슨 그늘 */
+  --bronze-hi: oklch(0.84 0.07 85);      /* 모서리에 닿은 빛 */
+  --gate-w: min(232px, 64vw);
+  --finale-ms: 2600ms;                   /* 수렴 연출 길이 (JS 타이머와 맞춘다) */
+  --shard-w: 64px;
+  --shard-h: 84px;
+  --orbit-r: min(128px, 34vw);
+}
+/* 금속 테두리 한 벌: 안쪽 그늘 + 윗모서리 빛 */
+.door, .next-door__leaves, .gate__arch {
+  box-shadow:
+    inset 0 0 0 1px var(--bronze-dark),
+    inset 0 1px 0 1px oklch(0.84 0.07 85 / 0.28),
+    inset 0 -14px 28px oklch(0 0 0 / 0.45),
+    0 0 0 1px oklch(0 0 0 / 0.5);
+}
+
+/* ───────── 00. 인트로 ───────── */
+.intro.is-active {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: calc(100svh - var(--topbar-h)); padding-top: var(--space-4); text-align: center;
+}
+.gate { position: relative; width: var(--gate-w); aspect-ratio: 232 / 300; margin-bottom: var(--space-6); perspective: 900px; }
+.gate__halo {
+  position: absolute; inset: -18% -22% -6%; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--accent-soft), transparent 75%);
+}
+.gate__arch {
+  position: absolute; inset: 0 0 7%;
+  border: 3px solid var(--bronze);
+  border-radius: calc(var(--gate-w) / 2) calc(var(--gate-w) / 2) 6px 6px;
+  background:
+    repeating-linear-gradient(90deg, oklch(0 0 0 / 0.16) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, oklch(0.26 0.04 60), oklch(0.15 0.03 280));
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+/* 아치 안쪽 반원에 놓인 여섯 인장 (Ⅰ~Ⅵ 방 상징, --i 순서로 왼쪽→오른쪽) */
+.gate__ring { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.gate__sigil {
+  --ang: calc(-75deg + var(--i) * 30deg);
+  position: absolute; left: 50%; top: 44%;
+  display: grid; place-items: center; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+  border-radius: 50%; border: 1px solid var(--bronze);
+  background: oklch(0.2 0.03 60);
+  color: var(--accent);
+  transform: rotate(var(--ang)) translateY(calc(var(--gate-w) * -0.34)) rotate(calc(var(--ang) * -1));
+}
+.gate__sigil :is(.door__icon, .door__moon) { width: 15px; height: 15px; stroke-width: 3; filter: none; }
+.gate__sigil .door__icon--tall { width: 9px; height: 18px; stroke-width: 6; }
+.gate__sigil .door__moon { color: var(--accent); }
+.gate__sigil .runic { font-size: 0.9rem; line-height: 1; }
+.gate__leaf {
+  position: absolute; top: 50%; bottom: 0; width: 50%;
+  background:
+    linear-gradient(90deg, transparent 0 12%, oklch(0.84 0.07 85 / 0.18) 12% 13%, transparent 13% 87%, oklch(0.84 0.07 85 / 0.18) 87% 88%, transparent 88%),
+    repeating-linear-gradient(180deg, transparent 0 30%, oklch(0.66 0.075 75 / 0.55) 30% calc(30% + 2px), transparent calc(30% + 2px) 60%),
+    linear-gradient(180deg, oklch(0.3 0.045 55), oklch(0.19 0.035 40));
+  border-top: 2px solid var(--bronze);
+  transition: transform 700ms var(--ease-in-out);
+}
+.gate__leaf--l { left: 0; transform-origin: left center; border-right: 1px solid var(--bronze-dark); }
+.gate__leaf--r { right: 0; transform-origin: right center; border-left: 1px solid var(--bronze-dark); }
+.gate__knocker {
+  position: absolute; top: 40%; width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--bronze); box-shadow: inset 0 0 0 2px oklch(0 0 0 / 0.4);
+}
+.gate__leaf--l .gate__knocker { right: 12px; }
+.gate__leaf--r .gate__knocker { left: 12px; }
+/* 두 문짝이 맞닿은 틈으로 새는 빛 */
+.gate__seam {
+  position: absolute; left: 50%; top: 50%; bottom: 0; width: 2px; margin-left: -1px; z-index: 1;
+  background: linear-gradient(180deg, transparent, var(--accent) 30%, oklch(0.97 0.03 var(--accent-h)) 60%, transparent);
+  box-shadow: 0 0 14px 3px var(--accent-glow);
+  animation: seam-breathe 3.6s ease-in-out infinite;
+}
+.gate__step { position: absolute; left: -6%; right: -6%; bottom: 0; height: 7%; border-radius: 3px; background: linear-gradient(180deg, var(--bronze-dark), oklch(0.14 0.02 60)); }
+@keyframes seam-breathe { 50% { opacity: 0.45; } }
+/* 시작 버튼을 누른 순간 (JS: .gate.is-opening, 약 700ms 뒤 전환) */
+.gate.is-opening .gate__leaf--l { transform: rotateY(-78deg); }
+.gate.is-opening .gate__leaf--r { transform: rotateY(78deg); }
+.gate.is-opening .gate__seam { width: 60%; margin-left: -30%; transition: width 700ms, margin 700ms; animation: none; }
+.intro__eyebrow { margin-bottom: var(--space-2); }
+.intro__logo { margin-bottom: var(--space-4); }
+.intro__summary { max-width: 22em; margin: 0 auto var(--space-8); font-size: var(--fs-lg); line-height: var(--lh-ui); color: var(--c-text-strong); text-wrap: balance; }
+.intro__start { max-width: 320px; }
+.intro__note { margin-top: var(--space-4); font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
+
+/* ───────── 허브: 나의 이야기 N/6 ───────── */
+.hub-progress { margin: 0 0 var(--space-5); }
+.hub-progress__label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-2); font-size: var(--fs-sm); color: var(--c-text); }
+.hub-progress__count { font-family: var(--font-latin); font-size: var(--fs-md); color: var(--accent); letter-spacing: 0.08em; }
+.hub-progress__bar {
+  position: relative; display: block; height: 10px; overflow: hidden;
+  border: 1px solid var(--bronze-dark); border-radius: var(--radius-pill);
+  background: oklch(0.13 0.03 280);
+  box-shadow: inset 0 1px 3px oklch(0 0 0 / 0.6);
+}
+.hub-progress__fill {
+  position: absolute; inset: 0 auto 0 0; width: calc(var(--n, 0) / 6 * 100%);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--bronze), var(--accent));
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: width 600ms var(--ease-out);
+}
+/* 여섯 칸 눈금: 앞뒤 빈 가상 요소 + 선 5개를 양끝 정렬 → 1/6 간격 */
+.hub-progress__ticks { position: absolute; inset: 0; display: flex; justify-content: space-between; }
+.hub-progress__ticks::before, .hub-progress__ticks::after { content: ""; }
+.hub-progress__ticks i { width: 1px; background: oklch(0 0 0 / 0.55); }
+
+/* ───────── 허브: 고대 문 (기존 .door 위에 덮어쓴다) ───────── */
+.door {
+  border: 2px solid var(--bronze);
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 30%, oklch(0.3 0.06 var(--room-h) / 0.7), transparent 70%),
+    linear-gradient(180deg, oklch(0.23 0.04 var(--room-h)), oklch(0.14 0.03 var(--room-h)));
+  padding-top: var(--space-8);
+}
+.door::before { border-color: oklch(0.66 0.075 75 / 0.35); }
+.door > :not(.door__frame, .door__num, .door__lock) { position: relative; }
+.door__frame { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; overflow: hidden; }
+/* 부조: 방마다 다른 무늬를 문 윗부분에만 옅게 (글자 영역은 비움) */
+.door__relief {
+  position: absolute; inset: 10px 10px 45%;
+  border-radius: calc(var(--arch) - 10px) calc(var(--arch) - 10px) 0 0;
+  opacity: 0.2;
+  -webkit-mask: linear-gradient(180deg, #000 55%, transparent);
+  mask: linear-gradient(180deg, #000 55%, transparent);
+  background: var(--motif);
+}
+.door[data-room="ogham"]   { --motif: repeating-linear-gradient(90deg, transparent 0 9px, var(--bronze-hi) 9px 10px); }
+.door[data-room="star"]    { --motif: radial-gradient(circle at 20% 30%, var(--bronze-hi) 0 1.5px, transparent 2px) 0 0 / 22px 22px, radial-gradient(circle at 70% 70%, var(--bronze-hi) 0 1px, transparent 1.5px) 0 0 / 15px 15px; }
+.door[data-room="decan"]   { --motif: repeating-conic-gradient(from 0deg at 50% 100%, var(--bronze-hi) 0 1.5deg, transparent 1.5deg 12deg); }
+.door[data-room="tzolkin"] { --motif: repeating-linear-gradient(0deg, transparent 0 10px, var(--bronze-hi) 10px 11px), repeating-linear-gradient(90deg, transparent 0 16px, var(--bronze-hi) 16px 17px); }
+.door[data-room="rune"]    { --motif: repeating-linear-gradient(60deg, transparent 0 11px, var(--bronze-hi) 11px 12px), repeating-linear-gradient(-60deg, transparent 0 11px, var(--bronze-hi) 11px 12px); }
+.door[data-room="sibyl"]   { --motif: repeating-linear-gradient(90deg, var(--bronze-hi) 0 2px, transparent 2px 5px, oklch(0 0 0 / 0.6) 5px 7px, transparent 7px 12px); }
+/* 리벳: 양옆 아래쪽 세 개씩 */
+.door__rivets {
+  position: absolute; inset: auto 7px 14px; height: 46%;
+  background:
+    radial-gradient(circle, var(--bronze-hi) 0 1.6px, var(--bronze-dark) 2.4px, transparent 3px) left top / 6px 33.3% repeat-y,
+    radial-gradient(circle, var(--bronze-hi) 0 1.6px, var(--bronze-dark) 2.4px, transparent 3px) right top / 6px 33.3% repeat-y;
+  opacity: 0.8;
+}
+/* 쐐기돌: 아치 꼭대기의 장 번호 */
+.door__num {
+  top: -2px; padding: 3px 10px 4px;
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 16% 100%);
+  background: linear-gradient(180deg, var(--bronze-hi), var(--bronze));
+  color: oklch(0.2 0.03 60); font-weight: 700; font-size: var(--fs-xs);
+}
+.door__portal::after { border: 2px solid var(--bronze); box-shadow: 0 0 0 3px oklch(0.2 0.03 60), 0 0 0 4px var(--bronze-dark), inset 0 0 22px var(--accent-soft); }
+.door__reads { margin-top: var(--space-1); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); text-wrap: balance; }
+.door__origin { color: var(--c-text-muted); }
+.door__seal { display: none; position: absolute; width: 34px; height: 34px; right: -6px; bottom: -6px; filter: drop-shadow(0 2px 3px oklch(0 0 0 / 0.5)); }
+.door__lock { display: none; }
+/* 소용돌이는 "다음 문"만 돈다 (기본·지나온 문은 멈춘 빛) */
+.door .door__swirl, .door .door__portal::before, .door .door__swirl::after { animation-play-state: paused; }
+.door.is-next .door__swirl, .door.is-next .door__portal::before, .door.is-next .door__swirl::after { animation-play-state: running; }
+
+/* 상태: 다음 문 — 테두리가 은은히 숨 쉰다 */
+.door.is-next { border-color: var(--bronze-hi); animation: door-breathe 3.2s ease-in-out infinite; }
+@keyframes door-breathe {
+  0%, 100% { box-shadow: inset 0 0 0 1px var(--bronze-dark), inset 0 -14px 28px oklch(0 0 0 / 0.45), 0 0 14px var(--accent-soft); }
+  50%      { box-shadow: inset 0 0 0 1px var(--bronze-dark), inset 0 -14px 28px oklch(0 0 0 / 0.45), 0 0 34px var(--accent-glow); }
+}
+/* 상태: 지나온 문 — 빛이 고정, 배지 표시(기존 .is-visited) */
+.door.is-visited .door__portal::before { opacity: 0.6; }
+/* 상태: 잠긴 문 — 어둡고 봉인. 글자는 흐리게(opacity) 하지 않고 색만 한 단계 낮춰 AA 유지 */
+.door.is-locked {
+  border-color: var(--bronze-dark);
+  background:
+    linear-gradient(90deg, transparent 47%, oklch(0 0 0 / 0.35) 47% 53%, transparent 53%),
+    linear-gradient(180deg, oklch(0.17 0.015 var(--room-h)), oklch(0.12 0.01 var(--room-h)));
+}
+.door.is-locked:hover, .door.is-locked:focus-visible { transform: none; box-shadow: none; border-color: var(--bronze); }
+.door.is-locked .door__relief { opacity: 0.1; }
+.door.is-locked .door__num { background: linear-gradient(180deg, var(--bronze), var(--bronze-dark)); color: oklch(0.14 0.02 60); }
+.door.is-locked .door__portal::before, .door.is-locked .door__swirl { display: none; }
+.door.is-locked .door__portal::after { box-shadow: 0 0 0 3px oklch(0.15 0.02 60), 0 0 0 4px var(--bronze-dark); border-color: var(--bronze-dark); background: oklch(0.1 0.01 280); }
+.door.is-locked .door__glyph { z-index: 1; opacity: 0.32; text-shadow: none; }
+.door.is-locked .door__glyph svg { filter: none; }
+.door.is-locked .door__seal { display: block; z-index: 2; }
+.door.is-locked .door__name { color: var(--c-text); }
+.door.is-locked .door__reads { color: var(--c-text-muted); }
+.door.is-locked .door__lock { display: block; }
+/* 잠긴 문을 눌렀을 때 (JS: .is-denied 잠깐 → 토스트) */
+.door.is-denied { animation: door-rattle 320ms var(--ease-out); }
+@keyframes door-rattle { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+
+/* ───────── 방 결과: 목차의 봉인 장 · 무료 절단부 ───────── */
+.chapters-paid { display: none; }
+.toc__list li.is-sealed .toc__link { color: var(--c-text-muted); }
+.toc__list li.is-sealed .toc__title { display: none; }
+.toc__list li.is-sealed .toc__link::after {
+  content: ""; width: 16px; height: 16px; margin-left: auto; flex-shrink: 0; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, var(--wax-rim), var(--wax) 70%);
+}
+.sealed-rest {
+  position: relative; margin-top: var(--space-10, 40px); padding: var(--space-8) var(--space-5) var(--space-5);
+  border: 1px solid var(--c-line); border-radius: var(--radius-lg);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, var(--accent-soft), transparent 70%),
+    var(--c-surface-1);
+  text-align: center;
+}
+.sealed-rest__seal { position: absolute; top: calc(var(--seal) / -2); left: 50%; margin-left: calc(var(--seal) / -2); filter: drop-shadow(0 2px 4px oklch(0 0 0 / 0.5)); }
+.sealed-rest__title { font-size: var(--fs-md); line-height: var(--lh-ui); color: var(--c-text-strong); text-wrap: balance; }
+.sealed-rest__list { display: grid; gap: var(--space-2); margin: var(--space-4) 0 0; padding: 0; list-style: none; text-align: left; }
+.sealed-rest__item {
+  display: flex; align-items: baseline; gap: var(--space-3); padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md); border: 1px dashed var(--c-line-strong);
+  font-size: var(--fs-sm); color: var(--c-text);
+}
+.sealed-rest__num { min-width: 2em; font-family: var(--font-latin); color: var(--accent); }
+.sealed-rest .seal-lines { margin-top: var(--space-4); }
+.sealed-rest .deeper-link { margin-top: var(--space-3); }
+
+/* ───────── 방 결과: 이야기 다리 + 다음 문 ───────── */
+.result-actions__note { font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); text-align: center; }
+.passage { margin-top: var(--space-12); text-align: center; }
+.passage__bridge {
+  position: relative; margin: 0 0 var(--space-8); padding: var(--space-5) var(--space-2) 0;
+  font-size: var(--fs-md); line-height: var(--lh-read); color: var(--c-text); text-wrap: pretty;
+}
+.passage__bridge::before { /* 다리 머리 장식: 가는 선 + 마름모 */
+  content: "◆"; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 120px; font-size: 8px; line-height: 1; color: var(--accent);
+  background: linear-gradient(90deg, transparent, var(--accent-line) 30% 42%, transparent 42% 58%, var(--accent-line) 58% 70%, transparent) center / 100% 1px no-repeat;
+}
+.next-door {
+  --nd-w: min(248px, 72vw);
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  width: var(--nd-w); min-height: calc(var(--nd-w) * 1.1); margin: 0 auto; padding: var(--space-8) var(--space-4) var(--space-5);
+  border: 0; background: none; cursor: pointer; color: var(--c-text-strong);
+  perspective: 700px;
+}
+.next-door__leaves {
+  position: absolute; inset: 0; overflow: hidden;
+  border: 3px solid var(--bronze);
+  border-radius: calc(var(--nd-w) / 2) calc(var(--nd-w) / 2) 8px 8px;
+  background: radial-gradient(ellipse 60% 50% at 50% 55%, oklch(0.97 0.03 var(--accent-h)), var(--accent) 35%, oklch(0.2 0.05 var(--room-h)) 80%);
+  transform-style: preserve-3d;
+}
+.next-door__leaf {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background:
+    radial-gradient(ellipse 90% 45% at 50% 30%, oklch(0.3 0.06 var(--room-h) / 0.8), transparent 70%),
+    repeating-linear-gradient(90deg, oklch(0 0 0 / 0.14) 0 2px, transparent 2px 10px),
+    linear-gradient(180deg, oklch(0.25 0.045 var(--room-h)), oklch(0.13 0.03 var(--room-h)));
+  transition: transform 650ms var(--ease-in-out);
+  backface-visibility: hidden;
+}
+.next-door__leaf--l { left: 0; transform-origin: left center; border-right: 1px solid var(--bronze-dark); }
+.next-door__leaf--r { right: 0; transform-origin: right center; border-left: 1px solid var(--bronze-dark); }
+.next-door__light {
+  position: absolute; left: 50%; top: 14%; bottom: 50%; width: 2px; margin-left: -1px; /* 글자 영역 위에서 멈춘다 (가독성) */
+  background: linear-gradient(180deg, transparent, var(--accent) 25%, oklch(0.97 0.03 var(--accent-h)) 70%, transparent);
+  box-shadow: 0 0 12px 2px var(--accent-glow);
+  animation: seam-breathe 3.2s ease-in-out infinite;
+}
+.next-door > :not(.next-door__leaves) { position: relative; z-index: 1; }
+.next-door__glyph {
+  display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: auto;
+  border-radius: 50%; border: 2px solid var(--bronze);
+  background: oklch(0.14 0.03 var(--room-h));
+  box-shadow: 0 0 0 3px oklch(0.2 0.03 60), 0 0 22px var(--accent-glow);
+  font-size: 1.9rem; line-height: 1; color: oklch(0.98 0.02 var(--accent-h)); text-shadow: 0 0 10px var(--accent);
+}
+.next-door__glyph--star { font-family: var(--font-symbol); }
+.next-door__glyph :is(.door__icon, .door__moon) { width: 32px; height: 32px; }
+.next-door__glyph .door__icon--tall { width: 20px; height: 40px; }
+.next-door__num {
+  margin-top: var(--space-4); padding: 2px 12px 3px;
+  clip-path: polygon(0 0, 100% 0, 86% 100%, 14% 100%);
+  background: linear-gradient(180deg, var(--bronze-hi), var(--bronze));
+  font-family: var(--font-latin); font-size: var(--fs-xs); font-weight: 700; color: oklch(0.2 0.03 60);
+}
+.next-door__label { margin-top: var(--space-3); font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--c-text); }
+.next-door__name { margin-top: var(--space-1); font-size: var(--fs-xl); font-weight: 700; line-height: var(--lh-tight); color: var(--c-text-strong); text-wrap: balance; }
+.next-door:hover .next-door__leaves, .next-door:focus-visible .next-door__leaves { border-color: var(--bronze-hi); }
+.next-door:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: calc(var(--nd-w) / 2) calc(var(--nd-w) / 2) 10px 10px; }
+.next-door:hover .next-door__leaf--l { transform: rotateY(-12deg); }
+.next-door:hover .next-door__leaf--r { transform: rotateY(12deg); }
+/* 누른 순간 (JS: .is-opening, 약 650ms 뒤 다음 방으로) */
+.next-door.is-opening .next-door__leaf--l { transform: rotateY(-100deg); }
+.next-door.is-opening .next-door__leaf--r { transform: rotateY(100deg); }
+.next-door.is-opening > :not(.next-door__leaves) { animation: fade-away 300ms ease-out forwards; }
+.passage__story {
+  display: block; min-height: var(--tap-min); margin: var(--space-5) auto 0; padding: var(--space-2) var(--space-4);
+  border: 0; background: none; cursor: pointer;
+  font-family: var(--font-serif); font-size: var(--fs-sm); color: var(--c-text-muted);
+  text-decoration: underline; text-decoration-color: var(--c-line-strong); text-underline-offset: 4px;
+}
+.passage__story:hover, .passage__story:focus-visible { color: var(--c-text-strong); }
+/* 다음 문과 맨 아래 광고 사이 간격을 넉넉히 (바로 아래 금지) */
+.passage ~ .page-end { margin-top: var(--space-12); }
+.passage ~ .ad-slot { margin-top: var(--space-8); }
+
+/* ───────── 7. 수렴 결말 ───────── */
+.finale.is-active { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.converge { position: relative; width: 100%; height: 380px; perspective: 760px; perspective-origin: 50% 40%; }
+.converge__space { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(-10deg); }
+.converge__shard {
+  --a: calc(var(--i) * 60deg);
+  position: absolute; left: 50%; top: 50%;
+  display: grid; place-items: center; align-content: center; gap: 4px;
+  width: var(--shard-w); height: var(--shard-h); margin: calc(var(--shard-h) / -2) 0 0 calc(var(--shard-w) / -2);
+  border: 2px solid var(--bronze); border-radius: 32px 32px 6px 6px;
+  background: linear-gradient(180deg, oklch(0.26 0.05 var(--room-h)), oklch(0.15 0.03 var(--room-h)));
+  box-shadow: 0 0 18px var(--accent-glow);
+  color: oklch(0.98 0.02 var(--accent-h)); font-size: 1.5rem; line-height: 1;
+  opacity: 0; /* 기본(=최종) 모습: 조각은 카드 속으로 모여 사라진 뒤 */
+}
+.converge__num { font-family: var(--font-latin); font-size: var(--fs-2xs); color: var(--bronze-hi); }
+.converge__shard :is(.door__icon, .door__moon) { width: 26px; height: 26px; }
+.converge__shard .door__icon--tall { width: 14px; height: 28px; }
+.converge__card {
+  position: absolute; left: 50%; top: 50%; width: 220px; height: 320px; margin: -160px 0 0 -110px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: var(--space-6) var(--space-4);
+  border: 3px solid var(--bronze); border-radius: 110px 110px 12px 12px;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 38%, var(--accent-soft), transparent 70%),
+    linear-gradient(180deg, oklch(0.24 0.05 285), oklch(0.14 0.035 285));
+  box-shadow: 0 0 0 1px oklch(0 0 0 / 0.5), 0 0 60px var(--accent-glow), inset 0 0 0 1px var(--bronze-dark);
+}
+.converge__ring { position: absolute; left: 50%; top: 30%; width: 0; height: 0; }
+.converge__sigil {
+  --ang: calc(var(--i) * 60deg);
+  position: absolute; display: grid; place-items: center; width: 30px; height: 30px; margin: -15px 0 0 -15px;
+  border-radius: 50%; border: 1px solid var(--bronze); background: oklch(0.16 0.03 var(--room-h));
+  color: var(--accent); font-size: 0.95rem; line-height: 1;
+  transform: rotate(var(--ang)) translateY(-50px) rotate(calc(var(--ang) * -1));
+}
+.converge__sigil :is(.door__icon, .door__moon) { width: 16px; height: 16px; stroke-width: 3; filter: none; }
+.converge__sigil .door__icon--tall { width: 9px; height: 18px; stroke-width: 6; }
+.converge__eyebrow { font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
+.converge__title { margin: var(--space-1) 0; font-size: var(--fs-xl); line-height: var(--lh-tight); color: var(--c-text-strong); }
+.converge__count { font-size: var(--fs-sm); color: var(--accent); }
+.finale__lead { max-width: 22em; margin: var(--space-4) auto var(--space-6); font-size: var(--fs-md); line-height: var(--lh-ui); color: var(--c-text); text-wrap: balance; }
+.finale .btn { max-width: 320px; }
+.finale__skip { visibility: hidden; margin-top: var(--space-3); font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
+.finale.is-running .finale__skip { visibility: visible; }
+/* 움직임: 여섯 조각이 원근 속에서 한 바퀴 돌다가(Z축 앞뒤) 가운데로 모여 카드가 된다 */
+.finale.is-running .converge__shard { animation: converge-orbit var(--finale-ms) var(--ease-in-out) both; }
+.finale.is-running .converge__space { animation: converge-tilt var(--finale-ms) var(--ease-in-out) both; }
+.finale.is-running .converge__card { animation: converge-card var(--finale-ms) var(--ease-out) both; }
+.finale.is-running .finale__lead, .finale.is-running .btn { animation: fade-in-late var(--finale-ms) ease-out both; }
+@keyframes converge-orbit {
+  0%   { opacity: 0; transform: rotateY(var(--a)) translateZ(calc(var(--orbit-r) * 1.5)) rotateY(calc(var(--a) * -1)) rotateZ(var(--tilt)) rotateX(24deg) scale(0.7); }
+  14%  { opacity: 1; }
+  55%  { opacity: 1; transform: rotateY(calc(var(--a) + 200deg)) translateZ(var(--orbit-r)) rotateY(calc((var(--a) + 200deg) * -1)) rotateZ(calc(var(--tilt) * 0.6)) rotateX(10deg) scale(1); }
+  82%  { opacity: 1; transform: rotateY(calc(var(--a) + 320deg)) translateZ(calc(var(--orbit-r) * 0.25)) rotateY(calc((var(--a) + 320deg) * -1)) rotateZ(0deg) scale(0.8); }
+  100% { opacity: 0; transform: rotateY(calc(var(--a) + 360deg)) translateZ(0) rotateY(calc((var(--a) + 360deg) * -1)) scale(0.4); }
+}
+@keyframes converge-tilt { 0% { transform: rotateX(-22deg); } 100% { transform: rotateX(-10deg); } }
+@keyframes converge-card {
+  0%, 72% { opacity: 0; transform: translateZ(-240px) rotateY(-28deg) scale(0.7); }
+  100%    { opacity: 1; transform: none; }
+}
+@keyframes fade-in-late { 0%, 80% { opacity: 0; } 100% { opacity: 1; } }
+
+/* ───────── 유료 리포트: 방별 온전한 이야기 ───────── */
+.full-room + .full-room { margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid var(--c-line); }
+.full-room__title { display: flex; align-items: center; gap: var(--space-3); font-size: var(--fs-lg); color: var(--c-text-strong); }
+.full-room__num {
+  flex-shrink: 0; padding: 2px 10px 3px; clip-path: polygon(0 0, 100% 0, 84% 100%, 16% 100%);
+  background: linear-gradient(180deg, var(--bronze-hi), var(--bronze));
+  font-family: var(--font-latin); font-size: var(--fs-xs); font-weight: 700; color: oklch(0.2 0.03 60);
+}
+.full-room__chapter { margin-top: var(--space-5); }
+.full-room__chapter-name { margin-bottom: var(--space-2); font-size: var(--fs-md); color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gate__seam, .next-door__light { animation: none; }
+  .door.is-next { animation: none; box-shadow: inset 0 0 0 1px var(--bronze-dark), 0 0 28px var(--accent-glow); }
+  .door.is-next .door__swirl, .door.is-next .door__portal::before, .door.is-next .door__swirl::after { animation-play-state: paused; }
+  .door.is-denied { animation: none; }
+  .gate__leaf, .next-door__leaf { transition: opacity 300ms; }
+  .gate.is-opening .gate__leaf, .next-door.is-opening .next-door__leaf, .next-door:hover .next-door__leaf { transform: none; }
+  .gate.is-opening .gate__leaf, .next-door.is-opening .next-door__leaf { opacity: 0; }
+  .hub-progress__fill { transition: none; }
+  /* 결말: base.css가 움직임 줄이기에서 모든 animation·transition을 끈다(!important).
+     그래서 CSS 애니메이션 대신 상태로 나눈다 — .is-running 동안 = 여섯 아이콘 정적 그리드(카드 숨김),
+     JS가 약 1.2초 뒤 .is-running을 떼면 = 카드(기본=최종 모습). 교차 페이드는 JS가 element.animate()로 opacity만 (선택) */
+  .finale.is-running .converge__space { transform: none; }
+  .finale.is-running .converge__shard { opacity: 1; transform: translate(calc(var(--gx) * 80px), calc(var(--gy) * 104px)); box-shadow: none; }
+  .finale.is-running .converge__card { opacity: 0; }
+  .finale.is-running .finale__lead, .finale.is-running .btn { opacity: 0; }
+}
