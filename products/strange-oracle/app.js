@@ -2764,6 +2764,7 @@
       if (!code || !PayCode.decode(code)) {
         // (10단계) 이어가기 코드(SOG1…)는 이 칸이 아니다: 서버에 묻지 않고 안내 한 줄만. 유료 내용을 열지 않는다
         err.textContent = Resume.looksResume(input.value) ? T.receipt.errors.wrongBox : T.receipt.errors.format;
+        if (Resume.looksResume(input.value)) input.value = ""; // 이어가기 코드는 이 칸에 남기지 않는다
         show(err, true);
         return input.focus();
       }

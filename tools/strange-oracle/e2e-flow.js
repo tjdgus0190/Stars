@@ -284,7 +284,7 @@ function paidSentences() {
   check("10-1: 코드 만들기 → SOG1 + 4자 묶음(15자, 20자 이내)", /^SOG1-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{3}$/.test(code3), code3.replace(/[0-9A-Z]/g, "#"));
   const lay = await ev("(() => { const r = (n) => document.querySelector('[data-js=' + n + ']').getBoundingClientRect(); const c = r('resume-code'), w = r('resume-warn'), b = r('resume-copy'); return { codeTop: Math.round(c.top), warnTop: Math.round(w.top), warnBottom: Math.round(w.bottom), copyTop: Math.round(b.top), copyBottom: Math.round(b.bottom), h: innerHeight, warnLen: document.querySelector('[data-js=resume-warn]').textContent.trim().length }; })()");
   check("10-1: 360x640 — 코드 → 경고 → 복사 버튼 순서로 한 화면 안(접힘·스크롤 밖 아님)", lay.codeTop >= 0 && lay.warnTop >= lay.codeTop && lay.warnBottom <= lay.copyTop && lay.copyBottom <= lay.h && lay.warnLen > 20, JSON.stringify(lay));
-  check("10-1: 경고에 '태어난 날을 거의 알아낼 수 있' 포함, '개인정보 없음·안전'류 0", await ev("(() => { const t = TEXT.resume.make.warn; return t.includes('태어난 날을 거의 알아낼 수 있') && !/안전|개인정보가 없|개인정보 없/.test(t); })()"));
+  check("10-1: 경고에 '태어난 날을 알아낼 수 있' 포함, '개인정보 없음·안전'류 0", await ev("(() => { const t = TEXT.resume.make.warn; return t.includes('태어난 날을 알아낼 수 있') && !/안전|개인정보가 없|개인정보 없/.test(t); })()"));
   await noHScroll("코드 만들기 펼침");
   await shot(P + "10-resume-make.png");
   await click("[data-js=resume-copy]");
