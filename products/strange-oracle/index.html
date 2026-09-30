@@ -168,17 +168,6 @@
       </div>
     </div>
     <!-- (8단계) 책(#report)에서만 보이는 부 단위 진행률 9칸: 여는 글 · 여섯 방 · 제2부 · 닫는 글 (topbar에 .is-reading) -->
-    <div class="read-progress read-progress--book" data-js="read-progress" aria-hidden="true">
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-      <span class="read-progress__seg" data-js="read-progress-seg" style="--fill:0"></span>
-    </div>
   </header>
 
   <main id="app" class="page">
@@ -2444,71 +2433,29 @@
             </header>
           </div>
           <div class="book-cover-page__actions">
-            <button class="btn btn--primary btn--block" type="button" data-js="book-open-btn" data-t="book.openBook">[초안] 책 펼치기</button>
+            <button class="btn btn--primary btn--block" type="button" data-js="book-open-btn" data-t="book.openBook">책 펼치기</button>
             <!-- 이어 읽기: 이 탭에 저장된 쪽 번호가 있을 때만 .is-hidden 해제. 누르면 그 쪽을 펼친다 -->
             <button class="book-resume is-hidden" type="button" data-js="book-resume">
               <svg class="book-resume__icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3h8v14l-4-3-4 3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-              <span class="book-resume__text"><span data-t="book.resume.before">지난번 읽던</span> <b data-js="book-resume-name"></b> · <b data-js="book-resume-page"></b><span data-t="book.resume.pageAfter">[초안] 쪽부터 이어 읽기</span></span>
+              <span class="book-resume__text"><span data-t="book.resume.before">지난번 읽던</span> <b data-js="book-resume-name"></b> · <b data-js="book-resume-page"></b><span data-t="book.resume.pageAfter">쪽부터 이어 읽기</span></span>
               <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>
 
-        <!-- 책장: 한 쪽 = 한 화면. 쪽은 JS가 book-source의 블록을 재어 book-pages에 만든다(아래 견본 3쪽은 렌더 때 비운다) -->
-        <div class="book-stage" data-js="book-stage" role="region" aria-roledescription="[초안] 책" data-aria="book.stageAria" aria-label="[초안] 한 권의 책">
-          <div class="book-stage__pages" data-js="book-pages">
-            <!-- 견본 1: 방의 첫 쪽(큰 머리 + I장 제목 + 머리글자) -->
-            <article class="book-page is-chapter-start is-current" data-js="book-page" data-page="12" data-part="ogham" data-room="ogham" data-sample aria-label="12쪽 / 48쪽" tabindex="-1">
-              <header class="book-page__run" data-js="book-page-run"><span>제1부</span><span class="book-page__run-dot" aria-hidden="true">·</span><span>I 오검의 방</span></header>
-              <div class="book-page__body" data-js="book-page-body">
-                <div class="book-opening book-opening--room">
-                  <svg class="book-opening__orn" viewBox="0 0 160 20" aria-hidden="true"><use href="#i-fleuron"/></svg>
-                  <p class="book-opening__kicker"><span aria-hidden="true">I</span> 오검의 방</p>
-                  <h2 class="book-opening__title">버티는 방패 [초안]</h2>
-                  <p class="book-opening__key">당신은 부당한 자리에서 가장 먼저 나서서 버티는 사람이에요. [초안]</p>
-                  <p class="book-opening__ch"><span class="book-opening__num" aria-hidden="true">I</span>정체</p>
-                </div>
-                <p class="has-dropcap">오래 펼쳐 둔 책처럼, 이 쪽에는 한 장의 첫 이야기가 적혀요. 장 제목 아래 첫 글자는 붉은 잉크로 크게 시작하고, 두 줄 높이만큼 내려앉아요. [초안]</p>
-                <p>둘째 단락부터는 한 글자 들여 써요. 쪽 아래에는 지금 몇 쪽을 읽고 있는지 작은 숫자로 적혀요. [초안]</p>
-              </div>
-              <footer class="book-page__folio" data-js="book-page-folio"><span data-js="book-page-num">12</span> / <span data-js="book-page-total">48</span></footer>
-            </article>
-            <!-- 견본 2: 본문 쪽(앞 쪽에서 이어지는 단락은 .is-cont = 들여쓰기 없음) -->
-            <article class="book-page" data-js="book-page" data-page="13" data-part="ogham" data-room="ogham" data-sample aria-label="13쪽 / 48쪽" tabindex="-1">
-              <header class="book-page__run" data-js="book-page-run"><span>I 오검의 방</span><span class="book-page__run-dot" aria-hidden="true">·</span><span>정체</span></header>
-              <div class="book-page__body" data-js="book-page-body">
-                <p class="is-cont">앞 쪽에서 넘어온 단락은 들여쓰기 없이 이어져요. 한 쪽에는 화면 하나에 들어가는 만큼만 적고, 남은 글은 다음 쪽으로 넘어가요. [초안]</p>
-                <p>손가락으로 쪽을 옆으로 밀거나, 쪽의 오른쪽 가장자리를 누르거나, 아래의 다음 버튼을 누르면 종이가 넘어가요. [초안]</p>
-                <p>위쪽에는 지금 읽는 부와 방, 장 이름이 흐리게 적혀 있어 어디쯤인지 늘 알 수 있어요. 목차를 열면 원하는 장의 첫 쪽으로 바로 펼쳐져요. [초안]</p>
-                <p>읽다가 창을 닫아도, 같은 탭으로 돌아오면 마지막으로 펼친 쪽부터 이어 읽을 수 있어요. [초안]</p>
-              </div>
-              <footer class="book-page__folio" data-js="book-page-folio"><span data-js="book-page-num">13</span> / <span data-js="book-page-total">48</span></footer>
-            </article>
-            <!-- 견본 3: 방 안의 다음 장 시작 쪽(작은 머리) -->
-            <article class="book-page is-chapter-start" data-js="book-page" data-page="16" data-part="ogham" data-room="ogham" data-sample aria-label="16쪽 / 48쪽" tabindex="-1">
-              <header class="book-page__run" data-js="book-page-run"><span>I 오검의 방</span><span class="book-page__run-dot" aria-hidden="true">·</span><span>관계</span></header>
-              <div class="book-page__body" data-js="book-page-body">
-                <div class="book-opening book-opening--ch">
-                  <svg class="book-opening__orn" viewBox="0 0 160 20" aria-hidden="true"><use href="#i-fleuron"/></svg>
-                  <p class="book-opening__numeral" aria-hidden="true">II</p>
-                  <h3 class="book-opening__title">관계</h3>
-                </div>
-                <p class="has-dropcap">방 안의 다음 장도 늘 새 쪽에서 시작해요. 작은 장식선과 장 번호, 장 이름이 먼저 놓이고 그 아래로 글이 이어져요. [초안]</p>
-                <p>한 장이 쪽 중간에서 끝나면 남은 자리는 비워 두고, 다음 장은 다음 쪽에서 열려요. [초안]</p>
-              </div>
-              <footer class="book-page__folio" data-js="book-page-folio"><span data-js="book-page-num">16</span> / <span data-js="book-page-total">48</span></footer>
-            </article>
-          </div>
+        <!-- 책장: 한 쪽 = 한 화면. 쪽은 JS가 book-source의 블록을 재어 book-pages에 만든다 -->
+        <div class="book-stage" data-js="book-stage" role="region" aria-roledescription="책" data-aria="book.stageAria" aria-label="한 권의 책">
+          <div class="book-stage__pages" data-js="book-pages"></div>
           <!-- 가장자리 탭 영역: 손가락·마우스용. 키보드·화면낭독기는 아래 book-bar 버튼을 쓴다 -->
           <button class="book-stage__edge book-stage__edge--prev" type="button" data-js="book-edge-prev" tabindex="-1" aria-hidden="true"></button>
           <button class="book-stage__edge book-stage__edge--next" type="button" data-js="book-edge-next" tabindex="-1" aria-hidden="true"></button>
         </div>
 
         <!-- 쪽 넘기기 막대: 이전 · 얇은 진행 줄(9칸 진행률 대체) · 다음 -->
-        <nav class="book-bar" data-js="book-bar" data-aria="book.barAria" aria-label="[초안] 쪽 넘기기">
-          <button class="book-bar__btn book-bar__btn--prev" type="button" data-js="book-prev" data-aria="book.prevAria" aria-label="[초안] 이전 쪽"><span aria-hidden="true">‹</span><span data-t="book.prev">[초안] 이전</span></button>
+        <nav class="book-bar" data-js="book-bar" data-aria="book.barAria" aria-label="쪽 넘기기">
+          <button class="book-bar__btn book-bar__btn--prev" type="button" data-js="book-prev" data-aria="book.prevAria" aria-label="이전 쪽"><span aria-hidden="true">‹</span><span data-t="book.prev">이전</span></button>
           <span class="book-bar__track" aria-hidden="true"><span class="book-bar__fill" data-js="book-track-fill" style="--p:0.25"></span></span>
-          <button class="book-bar__btn book-bar__btn--next" type="button" data-js="book-next" data-aria="book.nextAria" aria-label="[초안] 다음 쪽"><span data-t="book.next">[초안] 다음</span><span aria-hidden="true">›</span></button>
+          <button class="book-bar__btn book-bar__btn--next" type="button" data-js="book-next" data-aria="book.nextAria" aria-label="다음 쪽"><span data-t="book.next">다음</span><span aria-hidden="true">›</span></button>
         </nav>
         <!-- 쪽이 바뀔 때마다 "12쪽 / 48쪽, I 오검의 방" 을 읽어 준다 -->
         <p class="visually-hidden" data-js="book-live" aria-live="polite"></p>
@@ -2737,18 +2684,18 @@
 
         <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
 
-        <div class="result-actions">
+        <div class="result-actions" data-js="book-end-actions">
           <button class="btn btn--primary btn--block" type="button" data-js="report-share" data-t="report.share">소장 카드 저장·공유</button>
           <button class="text-link" type="button" data-go="story" data-js="report-go-story" data-t="report.toStory">나의 이야기로 돌아가기</button>
         </div>
 
-        <aside class="receipt receipt--end" aria-labelledby="receipt-end-title">
+        <aside class="receipt receipt--end" data-js="receipt-end" aria-labelledby="receipt-end-title">
           <p class="receipt__label" id="receipt-end-title" data-t="receipt.labelEnd">다시 열 때 필요한 영수증 코드</p>
           <p class="receipt__code" data-js="receipt-code-end"><span>SO1A</span><span>B2C3</span><span>D4E5</span><span>F6G7</span><span>H8J9</span><span>K2M4</span></p>
           <button class="btn btn--secondary btn--small" type="button" data-js="receipt-copy-end" data-t="receipt.copy">코드 복사</button>
         </aside>
 
-        <div class="page-end" aria-hidden="true"><span>✦</span></div>
+        <div class="page-end" data-js="page-end" aria-hidden="true"><span>✦</span></div>
         <!-- 광고 자리 없음 (spec 6-1, D-12) -->
       </div>
     </section>

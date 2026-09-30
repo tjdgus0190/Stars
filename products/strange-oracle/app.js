@@ -441,7 +441,6 @@
       requestAnimationFrame(() => {
         scrollQueued = false;
         if (!reduceMotion) root.style.setProperty("--scroll", Math.round(window.scrollY));
-        if (currentName === "report") updateBook();
       });
     },
     { passive: true }
@@ -767,7 +766,7 @@
   CHAPTER_ORDER.forEach((room) => js("result-book-link", screens[`${room}-result`]).addEventListener("click", (e) => {
     const code = readReceipt();
     if (bookState() === "owned" && code) {
-      jumpTo = `book-${room}`;
+      jumpTo = room;
       reopen(code, e.currentTarget, null);
     } else go("deeper");
   }));
@@ -2698,9 +2697,6 @@
       el.append(p);
     });
   };
-  // 책의 부 9칸: 여는 글 · 여섯 방 · 제2부 · 닫는 글 (없는 방은 옛 영수증 코드)
-  const BOOK_PARTS = ["open", ...CHAPTER_ORDER, "flow", "close"];
-  const partEl = (id) => (id === "open" ? $("#book-open") : id === "flow" ? $("#book-flow") : id === "close" ? $("#book-close") : $(`#book-${id}`));
   const bookPartName = (id) =>
     CHAPTER_ORDER.includes(id) ? fill(T.topbar.room, { num: ROMAN[chapterOf(id) - 1], name: T.rooms[id].name })
       : id === "open" ? T.topbar.bookOpen : id === "flow" ? T.topbar.bookFlow : T.topbar.bookClose;
@@ -2737,8 +2733,6 @@
       const tail = topicTail(fr, c);
       paras(js("book-ch4", el), tail ? fr.ch4.concat(tail) : fr.ch4);
       paras(js("book-hidden", el), [fr.hidden.title].concat(fr.hidden.paragraphs));
-      const after = present[present.indexOf(room) + 1];
-      js("book-room-next", el).setAttribute("href", after ? `#book-${after}` : "#book-flow");
       vol[room] = ch1.reduce((a, x) => a + [...x.text].length, 0) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs]) + (tail ? [...tail].length : 0);
     });
     // 2장
@@ -2789,121 +2783,493 @@
       show(li, vol[id] != null);
       li.classList.remove("is-read", "is-current");
       if (vol[id] == null) return;
-      js("book-toc-time", li).textContent = fill(T.book.time, { n: minutes(vol[id]) });
+      js("book-toc-time", li).textContent = ""; // (결정 53) 시작 쪽 번호는 쪽 나누기(paginate) 뒤에
       const res = js("book-toc-result", li);
       if (res) res.textContent = headOf(id, c).title;
     });
-    jsAll("read-progress-seg").forEach((seg, i) => show(seg, vol[BOOK_PARTS[i]] != null));
     js("report-meta").textContent = fill(R.meta, { rooms: present.length, match: c.partner ? R.metaMatch.partner : R.metaMatch.map, n: comma(total) });
     js("report-title").textContent = fill(R.title, { me, n: present.length });
-    // 이어 읽기: 같은 탭에 지난번 부 id가 있으면 (다른 기기·새 탭은 처음부터)
-    const mark = readBookmark();
-    const resume = js("book-resume");
-    const canResume = mark && mark !== "open" && vol[mark] != null;
-    show(resume, Boolean(canResume));
-    if (canResume) {
-      resume.setAttribute("href", `#${partEl(mark).id}`);
-      js("book-resume-name", resume).textContent = bookPartName(mark);
-    }
-    lastPart = null;
+    book = null; // 새 내용: 다음 enter.report에서 쪽을 다시 나눈다 (표지부터)
+    js("book-reader").dataset.view = "cover";
   }
   function showReport(data) {
     renderReport(data);
-    const parts = [...jsAll("report-part", reportScr), ...jsAll("book-room", reportScr)];
-    parts.forEach((p) => p.classList.remove("is-unsealing", "is-sealed"));
-    go("report", { instant: true });
+    go("report", { instant: true }); // enter.report → 쪽 나누기
     if (jumpTo) {
-      const el = document.getElementById(jumpTo);
+      const room = jumpTo; // 방의 책 한 줄 → 그 방의 첫 쪽으로 바로 (연출 없이)
       jumpTo = null;
-      if (el) requestAnimationFrame(() => requestAnimationFrame(() => el.scrollIntoView({ block: "start", behavior: "instant" }))); // 책 속 그 방으로 바로
-    }
-    updateBook();
-    if (reduceMotion) return;
-    parts.forEach((p) => p.classList.add("is-sealed"));
-    requestAnimationFrame(() => requestAnimationFrame(() => parts.forEach((p) => p.classList.replace("is-sealed", "is-unsealing"))));
+      jumpToPart(room);
+    } else showCover();
   }
   leave.report = () => {
     stripQuery();
+    finishTurn();
     const sheet = js("book-toc-sheet");
     if (sheet.open) sheet.close();
   };
 
-  // ── (8단계) 책 읽기: 9칸 진행률·목차 체크·이어 읽기 bookmark
-  // bookmark: sessionStorage "strange-oracle-bookmark"에 마지막으로 지나간 부 id(open·ogham…·flow·close)만. 문장·개인정보는 넣지 않는다
+  // ═════════ (결정 53) 책을 넘기는 리더: book-source → 쪽 나누기 → 넘기기 ═════════
+  // 설계: design/strange-oracle.md "책을 넘기는 리더 (결정 53)". source 채우기(renderReport)는 그대로 두고,
+  // 여기서 source를 장(chapter) → 블록(open 머리 / p 단락 / unit 통째)으로 훑어 실제 쪽(book-page)에 넣으며 잰다.
+  //  - 장은 늘 새 쪽에서 시작. 단락은 넘치면 어절 경계에서 이분 탐색으로 쪼개 뒷부분을 다음 쪽 .is-cont로.
+  //  - unit은 통째로 다음 쪽. 빈 쪽보다 크면 자식 단위로 한 번 더 나눈다.
+  //  - 면지 영수증·목차·뒷면지(면책·공유·영수증 끝)는 복제하지 않고 옮겨 쓴다(훅·이벤트 그대로). 다시 나누기 전 source로 되돌린다.
+  // bookmark: sessionStorage "strange-oracle-bookmark"에 쪽 번호(숫자)만. 문장·개인정보는 넣지 않는다
   const BOOKMARK_KEY = "strange-oracle-bookmark";
   const readBookmark = () => {
     try {
-      const v = window.sessionStorage.getItem(BOOKMARK_KEY);
-      return BOOK_PARTS.includes(v) ? v : null;
+      const v = window.sessionStorage.getItem(BOOKMARK_KEY) || "";
+      return /^\d{1,4}$/.test(v) ? Number(v) : 0;
     } catch (e) {
-      return null;
+      return 0;
     }
   };
-  const writeBookmark = (id) => {
+  const writeBookmark = (n) => {
     try {
-      if (id) window.sessionStorage.setItem(BOOKMARK_KEY, id);
+      if (n) window.sessionStorage.setItem(BOOKMARK_KEY, String(n));
       else window.sessionStorage.removeItem(BOOKMARK_KEY);
     } catch (e) {
       /* 저장이 막힌 브라우저: 이어 읽기 없이 */
     }
   };
-  let lastPart = null;
-  function updateBook() {
-    const segs = jsAll("read-progress-seg");
-    const line = innerHeight * 0.35;
-    let cur = 0;
-    const shown = BOOK_PARTS.filter((id) => !partEl(id).classList.contains("is-hidden"));
-    BOOK_PARTS.forEach((id, i) => {
-      const el = partEl(id);
-      if (el.classList.contains("is-hidden")) return;
-      const r = el.getBoundingClientRect();
-      let f = 0;
-      if (r.bottom <= line) f = 1;
-      else if (r.top < line) f = (line - r.top) / (r.height || 1);
-      if (r.top < line) cur = i;
-      segs[i].classList.toggle("is-done", f >= 1);
-      segs[i].style.setProperty("--fill", f.toFixed(3));
-      const li = $(`[data-js="book-toc-item"][data-part="${id}"]`, js("book-toc"));
-      if (li) li.classList.toggle("is-read", f >= 1);
+  const reader = js("book-reader");
+  const bookStage = js("book-stage");
+  const pagesBox = js("book-pages");
+  const src = js("book-source");
+  const [srcReceipt, srcToc, ...srcEnd] = ["receipt", "book-toc", "disclaimer-slot", "book-end-actions", "receipt-end", "page-end"].map((k) => js(k, src));
+  const tocList = js("book-toc-list", srcToc);
+  const tocItems = jsAll("book-toc-item", tocList);
+  const TURN_SAFETY = 700; // animationend가 오지 않을 때의 안전장치 (--turn-dur 520ms)
+  let book = null; // { pages: [{ el, part, chap, label }], chapStart, chapLen, partStart, partEnd, key }
+  let cur = 0;
+  let turning = false;
+  let turnDone = null;
+  const seen = new Set();
+  bookStage.setAttribute("aria-roledescription", T.book.stageRole);
+  const sizeKey = () => `${innerWidth}x${innerHeight}`;
+
+  const mk = (tag, cls, html) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  };
+  const stripHooks = (n) => {
+    [n, ...n.querySelectorAll("[data-js], [id]")].forEach((x) => {
+      x.removeAttribute("data-js");
+      x.removeAttribute("id");
     });
-    const id = BOOK_PARTS[cur];
-    jsAll("book-toc-item", js("book-toc")).forEach((li) => li.classList.toggle("is-current", li.dataset.part === id));
-    js("read-label").innerHTML = esc(bookPartName(id)) + ` <span class="topbar__count">${esc(fill(T.topbar.readCount, { i: shown.indexOf(id) + 1, total: shown.length }))}</span>`;
-    if (id !== lastPart) {
-      lastPart = id;
-      writeBookmark(id);
+    return n;
+  };
+  const ORN = '<svg class="book-opening__orn" viewBox="0 0 160 20" aria-hidden="true"><use href="#i-fleuron"/></svg>';
+  const opening = (mod, inner) => mk("div", `book-opening book-opening--${mod}`, ORN + inner);
+  const chOpening = (title, numeral) =>
+    opening("ch", (numeral ? `<p class="book-opening__numeral" aria-hidden="true">${esc(numeral)}</p>` : "") + `<h3 class="book-opening__title">${esc(title)}</h3>`);
+  const partOpening = (num, title) => opening("part", `<p class="book-opening__kicker">${esc(num)}</p><h2 class="book-opening__title">${esc(title)}</h2>`);
+  const visible = (n) => n && !n.classList.contains("is-hidden");
+  const parasOf = (box) => (visible(box) ? [...box.children].filter((p) => p.textContent.trim()).map((p) => ({ kind: "p", node: stripHooks(p.cloneNode(true)) })) : []);
+  const wrapUnit = (parent, child) => {
+    const w = parent.cloneNode(false);
+    w.append(child.cloneNode(true));
+    return stripHooks(w);
+  };
+  const unitsOf = (list) => (visible(list) ? [...list.children].map((li) => ({ kind: "unit", node: wrapUnit(list, li) })) : []);
+
+  // 원본 → 장 목록 (순서: 면지 · 목차 · 여는 글 · 제1부 표제지 · 방마다 Ⅰ~Ⅳ장·숨은 장 · 제2부 표제지 · 흐름 · 궁합 · 심층 · 닫는 글 · 뒷면지)
+  function bookChapters() {
+    const B = T.book;
+    const R = T.report;
+    const CN = T.result.chapterNames;
+    const C = [];
+    const openBlk = (node) => ({ kind: "open", node });
+    C.push({ key: "front", part: "", label: B.front.title, run: [B.front.title], cls: "book-page--front", blocks: [{ kind: "unit", node: srcReceipt }] });
+    C.push({ key: "toc", part: "", label: B.toc.title, run: [B.toc.title], cls: "book-page--toc", blocks: [{ kind: "toc" }] });
+    const openName = bookPartName("open");
+    C.push({ key: "open", part: "open", label: openName, run: [openName], start: true, blocks: [openBlk(chOpening(R.parts.open)), ...parasOf(js("report-open", src))] });
+    const rooms = jsAll("book-room", src).filter(visible);
+    C.push({ key: "part1", part: "part1", label: B.part1.num, run: [B.part1.num], cls: "book-page--half", start: true, blocks: [openBlk(partOpening(B.part1.num, B.part1.title))] });
+    rooms.forEach((r) => {
+      const id = r.dataset.room;
+      const name = bookPartName(id);
+      const head = opening(
+        "room",
+        `<p class="book-opening__kicker"><span aria-hidden="true">${ROMAN[chapterOf(id) - 1]}</span> ${esc(T.rooms[id].name)}</p>` +
+          `<h2 class="book-opening__title">${esc(js("book-room-result", r).textContent)}</h2>` +
+          `<p class="book-opening__key">${esc(js("book-room-key", r).textContent)}</p>` +
+          `<p class="book-opening__ch"><span class="book-opening__num" aria-hidden="true">I</span>${esc(CN[0])}</p>`
+      );
+      ["book-ch1", "book-ch2", "book-ch3", "book-ch4", "book-hidden"].forEach((k, i) => {
+        const title = i < 4 ? CN[i] : B.hiddenChapter;
+        const top = i === 0 ? head : chOpening(title, i < 4 ? ROMAN[i] : "");
+        C.push({ key: `${id}-${i}`, part: id, room: id, label: name, run: [name, title], start: true, blocks: [openBlk(top), ...parasOf(js(k, r))] });
+      });
+    });
+    const flowName = bookPartName("flow");
+    const p2 = (key, title, blocks) => C.push({ key, part: "flow", label: flowName, run: [B.part2.num, title], start: true, blocks: [openBlk(chOpening(title)), ...blocks] });
+    C.push({ key: "part2", part: "flow", label: flowName, run: [B.part2.num], cls: "book-page--half", start: true, blocks: [openBlk(partOpening(B.part2.num, B.part2.title))] });
+    p2("timeline", B.parts.timeline, unitsOf(js("report-timeline", src)));
+    p2("match", B.parts.match, [{ kind: "unit", node: stripHooks(js("report-match-pair", src).cloneNode(true)) }, ...parasOf(js("report-match", src)), ...unitsOf(js("report-match-rooms", src))]);
+    const deep = [];
+    ["report-deep-strength", "report-deep-shadow", "report-deep-growth"].forEach((k) => {
+      const box = js(k, src);
+      const blk = box.parentElement; // .deep-block: 제목 + 첫 단락은 한 덩어리, 나머지 단락은 쪼갤 수 있게
+      const [first, ...rest] = parasOf(box);
+      const w = blk.cloneNode(false);
+      const prose = box.cloneNode(false);
+      if (first) prose.append(first.node);
+      w.append(blk.firstElementChild.cloneNode(true), prose);
+      deep.push({ kind: "unit", node: stripHooks(w) }, ...rest);
+    });
+    p2("deep", B.parts.deep, deep.concat(unitsOf(js("report-evidence", src))));
+    const closeName = bookPartName("close");
+    C.push({ key: "close", part: "close", label: closeName, run: [closeName], start: true, blocks: [openBlk(chOpening(R.parts.close)), ...parasOf(js("report-close", src))] });
+    C.push({ key: "end", part: "close", label: closeName, run: [closeName], cls: "book-page--end", blocks: srcEnd.map((node) => ({ kind: "unit", node })) });
+    return C;
+  }
+
+  const over = (bd) => bd.scrollHeight > bd.clientHeight + 1;
+  function newPage(ch) {
+    const p = mk("article", "book-page" + (ch.cls ? " " + ch.cls : ""));
+    p.dataset.js = "book-page";
+    p.tabIndex = -1;
+    if (ch.part) p.dataset.part = ch.part;
+    if (ch.room) p.dataset.room = ch.room;
+    const run = mk("header", "book-page__run", ch.run.map((x) => `<span>${esc(x)}</span>`).join('<span class="book-page__run-dot" aria-hidden="true">·</span>'));
+    run.dataset.js = "book-page-run";
+    const bd = mk("div", "book-page__body");
+    bd.dataset.js = "book-page-body";
+    const fo = mk("footer", "book-page__folio", '<span data-js="book-page-num"></span> / <span data-js="book-page-total"></span>');
+    fo.dataset.js = "book-page-folio";
+    p.append(run, bd, fo);
+    p.style.contain = "layout size style"; // 재는 동안 쪽마다 배치를 가둬 빠르게 (그림자는 자르지 않도록 paint 제외). 다 재면 뗀다
+    pagesBox.append(p);
+    return p;
+  }
+  // 넘친 단락: 들어가는 만큼(어절 단위)만 남기고 나머지를 돌려준다. [나머지, 이어지는 단락인지]
+  function splitPara(node, bd) {
+    const text = node.textContent;
+    const words = text.match(/\S+\s*/g) || [text];
+    let lo = 0;
+    let hi = words.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      node.textContent = words.slice(0, mid).join("");
+      if (over(bd)) hi = mid - 1;
+      else lo = mid;
+    }
+    if (lo === 0) {
+      node.textContent = text;
+      if (bd.children.length > 1) {
+        node.remove();
+        return [node, false]; // 한 어절도 안 들어감 → 단락째 다음 쪽
+      }
+      return [null, false]; // 빈 쪽에도 한 어절이 안 들어가는 극단: 그대로 둔다
+    }
+    node.textContent = words.slice(0, lo).join("").trimEnd();
+    const rest = node.cloneNode(false);
+    rest.textContent = words.slice(lo).join("");
+    return [rest, true];
+  }
+  // 빈 쪽보다 큰 unit → 자식마다 같은 껍데기로 감싼 작은 unit들 (자식이 하나면 한 겹 더 들어간다)
+  function splitUnit(n) {
+    const kids = [...n.children];
+    if (!kids.length) return null;
+    if (kids.length === 1) {
+      const inner = splitUnit(kids[0]);
+      return inner && inner.map((c) => {
+        const w = n.cloneNode(false);
+        w.append(c);
+        return w;
+      });
+    }
+    return kids.map((c) => {
+      const w = n.cloneNode(false);
+      w.append(c.cloneNode(true));
+      return w;
+    });
+  }
+
+  function paginate() {
+    const t0 = performance.now();
+    tocItems.forEach((li) => tocList.append(li)); // 옮겨 쓴 노드를 원본 자리로
+    src.prepend(srcToc);
+    src.prepend(srcReceipt);
+    srcEnd.forEach((n) => src.append(n));
+    pagesBox.textContent = "";
+    tocItems.forEach((li) => (js("book-toc-time", li).textContent = fill(T.book.tocPage, { n: "000" }))); // 폭 자리 잡기
+    const view = reader.dataset.view;
+    reader.dataset.view = "pages"; // 재려면 무대가 보여야 한다 (같은 작업 안에서 되돌리므로 화면에 그려지지 않음)
+    const pages = [];
+    const chapStart = {};
+    const chapLen = {};
+    bookChapters().forEach((ch) => {
+      chapStart[ch.key] = pages.length;
+      let bd = null;
+      const start = () => {
+        const page = newPage(ch);
+        if (ch.start && pages.length === chapStart[ch.key]) page.classList.add("is-chapter-start");
+        bd = js("book-page-body", page);
+        pages.push({ el: page, part: ch.part, chap: ch.key, label: ch.label });
+      };
+      const place = (node, kind) => {
+        bd.append(node);
+        if (!over(bd)) return;
+        if (kind === "p" && !node.children.length) {
+          const [rest, cont] = splitPara(node, bd);
+          if (!rest) return;
+          start();
+          if (cont) {
+            rest.classList.add("is-cont");
+            rest.classList.remove("has-dropcap");
+          }
+          place(rest, "p");
+          return;
+        }
+        if (bd.children.length > 1) {
+          node.remove();
+          start();
+          place(node, kind);
+          return;
+        }
+        const parts = kind === "unit" ? splitUnit(node) : null;
+        if (parts) {
+          node.remove();
+          parts.forEach((x) => place(x, "unit"));
+        }
+      };
+      start();
+      let afterOpen = false;
+      ch.blocks.forEach((b) => {
+        if (b.kind === "toc") return placeToc(start, () => bd);
+        if (b.kind === "p" && afterOpen) b.node.classList.add("has-dropcap");
+        afterOpen = b.kind === "open";
+        place(b.node, b.kind);
+      });
+      chapLen[ch.key] = pages.length - chapStart[ch.key];
+    });
+    const total = pages.length;
+    pages.forEach((pg) => pg.el.style.removeProperty("contain"));
+    const partStart = {};
+    const partEnd = {};
+    pages.forEach((pg, i) => {
+      const n = i + 1;
+      pg.el.dataset.page = n;
+      pg.el.setAttribute("aria-label", fill(T.book.pageAria, { n, total }));
+      js("book-page-num", pg.el).textContent = n;
+      js("book-page-total", pg.el).textContent = total;
+      if (pg.part && !(pg.part in partStart)) partStart[pg.part] = i;
+      if (pg.part) partEnd[pg.part] = i;
+    });
+    tocItems.forEach((li) => (js("book-toc-time", li).textContent = li.dataset.part in partStart ? fill(T.book.tocPage, { n: partStart[li.dataset.part] + 1 }) : ""));
+    reader.dataset.view = view;
+    seen.clear();
+    book = { pages, chapStart, chapLen, partStart, partEnd, key: sizeKey() };
+    reader.dataset.pagedMs = Math.round(performance.now() - t0); // 점검용 (e2e: 쪽 나누기 시간)
+  }
+  // 목차 쪽: 넘치면 넘친 항목을 다음 쪽의 새 목록으로 옮긴다 (640 높이에서 2쪽)
+  function placeToc(start, getBd) {
+    getBd().append(srcToc);
+    let list = tocList;
+    while (over(getBd())) {
+      const vis = [...list.children].filter(visible);
+      if (vis.length < 2) break;
+      const moved = [];
+      while (over(getBd()) && vis.length > 1) {
+        const li = vis.pop();
+        li.remove();
+        moved.unshift(li);
+      }
+      start();
+      const nav = srcToc.cloneNode(false);
+      nav.removeAttribute("id");
+      nav.removeAttribute("data-js");
+      nav.removeAttribute("aria-labelledby");
+      list = tocList.cloneNode(false);
+      list.removeAttribute("data-js");
+      list.append(...moved);
+      nav.append(list);
+      getBd().append(nav);
     }
   }
-  // 책 안 이동(목차·이어 읽기·방 끝 링크): 주소 해시를 바꾸지 않고 그 자리로 스크롤 (뒤로 가기 기록을 어지럽히지 않게)
-  function jumpToHash(href) {
-    const el = href && href.startsWith("#") ? document.getElementById(href.slice(1)) : null;
-    if (el) el.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+
+  function relayout() {
+    if (!reportView || currentName !== "report") {
+      if (book) book.key = ""; // 책 화면으로 돌아올 때 다시 나눈다
+      return;
+    }
+    finishTurn();
+    const pg = book && book.pages[cur];
+    const anchor = pg ? { chap: pg.chap, off: cur - book.chapStart[pg.chap] } : null;
+    paginate();
+    let i = 0;
+    if (anchor && anchor.chap in book.chapStart) i = book.chapStart[anchor.chap] + Math.min(anchor.off, book.chapLen[anchor.chap] - 1);
+    setPage(i, { quiet: true });
+    if (reader.dataset.view === "cover") updateResume();
   }
-  reportScr.addEventListener("click", (e) => {
-    const a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    e.preventDefault();
-    jumpToHash(a.getAttribute("href"));
+  enter.report = () => {
+    if (reportView && (!book || book.key !== sizeKey())) relayout();
+  };
+  // 다시 나누기: 크기(가로·세로) 변화, 글꼴 도착(본문 글꼴은 쓰일 때 내려받으므로 첫 나누기 뒤에 올 수 있다). 150ms 디바운스
+  let resizeTimer = 0;
+  const scheduleRelayout = (force) => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => book && (force || book.key !== sizeKey()) && relayout(), 150);
+  };
+  addEventListener("resize", () => scheduleRelayout(false));
+  if (document.fonts) {
+    if (document.fonts.ready) document.fonts.ready.then(() => scheduleRelayout(true));
+    if (document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", () => scheduleRelayout(true));
+  }
+
+  function setPage(i, { focus = false, quiet = false } = {}) {
+    if (!book) return;
+    const P = book.pages;
+    const total = P.length;
+    i = Math.max(0, Math.min(total - 1, i));
+    P.forEach((x, k) => x.el.classList.toggle("is-current", k === i));
+    cur = i;
+    const pg = P[i];
+    const reading = reader.dataset.view === "pages";
+    bookStage.classList.toggle("is-first", i === 0);
+    bookStage.classList.toggle("is-last", i === total - 1);
+    js("book-prev").disabled = i === 0;
+    js("book-next").disabled = i === total - 1;
+    js("book-track-fill").style.setProperty("--p", ((i + 1) / total).toFixed(4));
+    js("read-label").textContent = reading ? pg.label : "";
+    if (reading) {
+      seen.add(i);
+      writeBookmark(i + 1);
+      if (!quiet) js("book-live").textContent = fill(T.book.live, { n: i + 1, total, chapter: pg.label });
+      if (focus) pg.el.focus({ preventScroll: true });
+    }
+    tocItems.forEach((li) => {
+      const p = li.dataset.part;
+      li.classList.toggle("is-current", reading && p === pg.part);
+      li.classList.toggle("is-read", p in book.partEnd && seen.has(book.partEnd[p]));
+    });
+  }
+  function openBook(i) {
+    if (!book) return;
+    finishTurn();
+    reader.dataset.view = "pages";
+    setPage(i, { focus: true });
+  }
+  function showCover() {
+    finishTurn();
+    reader.dataset.view = "cover";
+    js("read-label").textContent = "";
+    updateResume();
+  }
+  function updateResume() {
+    const mark = readBookmark();
+    const resume = js("book-resume");
+    const ok = Boolean(book) && mark > 1;
+    show(resume, ok);
+    if (!ok) return;
+    const i = Math.min(mark, book.pages.length) - 1;
+    js("book-resume-name", resume).textContent = book.pages[i].label;
+    js("book-resume-page", resume).textContent = i + 1;
+  }
+  js("book-open-btn").addEventListener("click", () => openBook(0));
+  js("book-resume").addEventListener("click", () => book && openBook(Math.min(readBookmark(), book.pages.length) - 1));
+  function jumpToPart(part) {
+    if (!book || !(part in book.partStart)) return;
+    openBook(book.partStart[part]); // 멀리 뛰는 이동은 연출 없이 즉시
+  }
+
+  // 한 쪽 넘기기: 넘기는 동안 들어온 입력은 버린다. 움직임 줄이기는 turn class 없이 is-current만
+  function finishTurn() {
+    if (turnDone) turnDone();
+  }
+  function turn(dir) {
+    if (!book || turning || reader.dataset.view !== "pages") return;
+    const to = cur + dir;
+    if (to < 0 || to >= book.pages.length) return;
+    if (reduceMotion) return setPage(to);
+    const a = book.pages[cur].el;
+    const b = book.pages[to].el;
+    const mover = dir > 0 ? a : b;
+    const under = dir > 0 ? b : a;
+    const name = dir > 0 ? "page-turn-away" : "page-turn-back";
+    turning = true;
+    bookStage.classList.add("is-turning");
+    bookStage.classList.toggle("is-turning-prev", dir < 0);
+    a.classList.remove("is-current");
+    under.classList.add("is-under");
+    mover.classList.add(dir > 0 ? "is-turn-next" : "is-turn-prev");
+    let timer = 0;
+    const onEnd = (e) => e.target === mover && e.animationName === name && turnDone && turnDone();
+    turnDone = () => {
+      turnDone = null;
+      clearTimeout(timer);
+      mover.removeEventListener("animationend", onEnd);
+      [a, b].forEach((x) => x.classList.remove("is-under", "is-turn-next", "is-turn-prev"));
+      bookStage.classList.remove("is-turning", "is-turning-prev");
+      turning = false;
+      setPage(to);
+    };
+    mover.addEventListener("animationend", onEnd);
+    timer = setTimeout(() => turnDone && turnDone(), TURN_SAFETY);
+  }
+  js("book-prev").addEventListener("click", () => turn(-1));
+  js("book-next").addEventListener("click", () => turn(1));
+  // 가장자리 탭 · 좌우 스와이프(가로 40px 이상이고 가로 > 세로). 세로 움직임은 브라우저에 맡긴다(touch-action: pan-y)
+  let swipedAt = 0;
+  js("book-edge-prev").addEventListener("click", () => Date.now() - swipedAt > 400 && turn(-1));
+  js("book-edge-next").addEventListener("click", () => Date.now() - swipedAt > 400 && turn(1));
+  let down = null;
+  bookStage.addEventListener("pointerdown", (e) => {
+    if (e.isPrimary) down = { x: e.clientX, y: e.clientY };
   });
+  bookStage.addEventListener("pointercancel", () => (down = null));
+  bookStage.addEventListener("pointerup", (e) => {
+    if (!down) return;
+    const dx = e.clientX - down.x;
+    const dy = e.clientY - down.y;
+    down = null;
+    if (Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)) return;
+    swipedAt = Date.now();
+    turn(dx < 0 ? 1 : -1);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (currentName !== "report" || reader.dataset.view !== "pages" || !book || e.altKey || e.ctrlKey || e.metaKey) return;
+    if ($("dialog[open]")) return;
+    const t = e.target instanceof Element ? e.target : body;
+    if (t.closest("input, textarea, select, [contenteditable]")) return;
+    const k = e.key;
+    let act = null;
+    if (k === "ArrowLeft" || k === "PageUp") act = () => turn(-1);
+    else if (k === "ArrowRight" || k === "PageDown") act = () => turn(1);
+    else if (k === " " && !t.closest("button, a")) act = () => turn(e.shiftKey ? -1 : 1);
+    else if (k === "Home") act = () => !turning && setPage(0, { focus: true });
+    else if (k === "End") act = () => !turning && setPage(book.pages.length - 1, { focus: true });
+    if (!act) return;
+    e.preventDefault();
+    act();
+  });
+
+  // 목차(목차 쪽·상단 막대 시트): 링크 기본 이동을 막고 그 장의 시작 쪽으로 즉시
   const tocSheet = js("book-toc-sheet");
+  const tocClick = (e) => {
+    const a = e.target.closest("a");
+    const li = a && a.closest("li[data-part]");
+    if (!li) return;
+    e.preventDefault();
+    if (tocSheet.open) tocSheet.close();
+    jumpToPart(li.dataset.part);
+  };
+  pagesBox.addEventListener("click", tocClick);
+  tocSheet.addEventListener("click", tocClick);
   js("book-toc-open").addEventListener("click", () => {
     const list = js("book-toc-sheet-list");
     list.textContent = "";
-    const ol = js("book-toc-list").cloneNode(true);
-    ol.removeAttribute("data-js");
-    $$("[data-js]", ol).forEach((x) => x.removeAttribute("data-js"));
-    list.append(ol);
+    const ol = tocList.cloneNode(false);
+    tocItems.forEach((li) => ol.append(li.cloneNode(true)));
+    list.append(stripHooks(ol));
     if (tocSheet.showModal) tocSheet.showModal();
     else tocSheet.setAttribute("open", "");
   });
   js("book-toc-close").addEventListener("click", () => tocSheet.close());
-  tocSheet.addEventListener("click", (e) => {
-    const a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    e.preventDefault();
-    tocSheet.close();
-    jumpToHash(a.getAttribute("href"));
-  });
 
   // 영수증 코드 복사·지우기
   function copyReceipt() {

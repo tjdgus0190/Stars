@@ -1019,7 +1019,7 @@ window.TEXT = {
     total: "약 {n}자 · {min}분", // 목차 제목 옆. {n}="2만 8천" 모양, {min}=읽는 시간(분당 500자 가정)
     time: "{n}분",              // 목차 항목 읽는 시간
     pace: "천천히 나눠 읽어도 돼요. 영수증 코드로 언제든 다시 열려요.", // (최대 40자)
-    resume: { before: "지난번 읽던", after: "부터 이어 읽기" },
+    resume: { before: "지난번 읽던", after: "부터 이어 읽기", pageAfter: "쪽부터 이어 읽기" }, // pageAfter: 앞에 쪽 번호 (최대 10자)
     part1: { num: "제1부", title: "여섯 방의 온전한 이야기" },
     part2: { num: "제2부", title: "나의 흐름" },
     hiddenChapter: "숨은 장",
@@ -1028,6 +1028,19 @@ window.TEXT = {
     roomNavAria: "방 끝 이동",
     tocClose: "목차 닫기",
     parts: { timeline: "시기별 흐름", match: "궁합", deep: "원형, 더 깊이" },
+    // (결정 53) 책을 넘기는 리더. {n}=쪽 번호, {total}=총 쪽 수, {chapter}=지금 부·방 이름 (자동)
+    openBook: "책 펼치기",          // 표지 주 버튼 (최대 8자)
+    prev: "이전",                   // 쪽 넘기기 막대 (최대 3자)
+    next: "다음",                   // (최대 3자)
+    prevAria: "이전 쪽",            // 화면낭독기 (최대 8자)
+    nextAria: "다음 쪽",            // (최대 8자)
+    barAria: "쪽 넘기기",           // (최대 8자)
+    stageAria: "한 권의 책",        // 쪽 무대 이름 (최대 10자)
+    stageRole: "책",                // 쪽 무대 역할 설명 aria-roledescription (최대 10자)
+    pageAria: "{n}쪽 / {total}쪽",  // 쪽마다 aria-label
+    live: "{n}쪽 / {total}쪽, {chapter}", // 쪽이 바뀔 때 한 번 읽어 줌
+    tocPage: "{n}쪽",               // 목차 항목 오른쪽 시작 쪽 번호
+    front: { title: "이 책에 대하여" }, // 1쪽(면지) 머리글 (최대 10자)
   },
 
   // ── 소장 카드 (share-card.js 테마 keepsake). 이름·생일·영수증 코드·유료 본문 긴 인용은 넣지 않는다

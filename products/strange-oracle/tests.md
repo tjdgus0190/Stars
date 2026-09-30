@@ -380,3 +380,17 @@
   - `e2e-flow.js`에 9단계 시험 6개 추가(방 시작 인사·의식 한마디·데칸 상태 라벨 병기·결과 여닫는말·다리 안내자 이름·공유 카드 guideSignature 전달): reduced 65/0.
   - `e2e-paid.js reduced`: 93/0(회귀 없음, 소장 카드는 guideSignature를 넘기지 않는 것도 기존 "이름·생일·영수증 코드 없음" 검사로 간접 확인).
 - 미확인: motion(움직임 있음) 모드 재실행은 이번에 하지 않았다(예산 제약). 480px 확인은 designer의 UI 점검(9-4 4행) 몫이라 여기서는 하지 않았다.
+
+### 결정 53 실행 기록 — 책을 넘기는 리더 (2026-09-30, developer)
+- 서버 리포트 API·renderReport의 원본 채우기는 그대로. `paginate()`(app.js)가 hidden `book-source`를 장 → 블록(open 머리 / p 단락 / unit)으로 훑어 실제 쪽에 넣으며 `body.scrollHeight > clientHeight`로 잰다(별도 측정 쪽 없이 실제 쪽 크기 그대로, 재는 동안만 `contain: layout size style`).
+  - 장은 늘 새 쪽. 넘친 단락은 어절 경계 이분 탐색으로 쪼개고 뒷부분은 `.is-cont`. unit은 통째로 넘기고 빈 쪽보다 크면 자식 단위로 다시 나눈다. 목차는 넘치면 항목을 다음 쪽 새 목록으로 옮긴다.
+  - 영수증 카드(1쪽 면지)·목차·면책·공유 버튼·끝 영수증 코드(뒷면지)는 옮겨 쓰고, 다시 나누기 전에 원본 자리로 되돌린다.
+  - 다시 나누기: resize(가로·세로, 150ms 디바운스)·글꼴 도착(`fonts.ready`·`loadingdone`). 지금 쪽의 장 id + 장 안 쪽 수로 되돌아간다.
+  - bookmark: `strange-oracle-bookmark`에 쪽 번호(숫자)만. 다시 열 때 총 쪽 수를 넘으면 마지막 쪽.
+- 실측(헤드리스 Edge 360×800, 6방·상대 있음): 본문 상자 300×547(설계값과 같음), **114쪽**, 쪽 나누기 약 400ms(contain 전 602ms). 360×640은 160쪽, 넘침 0.
+- `node --test "tools/strange-oracle/*.test.js"` 17/17. (`node --test tools/strange-oracle/`처럼 디렉터리를 주면 Node 24.21에서 MODULE_NOT_FOUND로 실패해 glob으로 실행했다.)
+- build-dist → mock-server(8787 mock, 8788 off) 재기동 뒤:
+  - `e2e-paid.js`에 결정 53 시험을 더했다: 쪽 수>1·1초 안, 모든 쪽 본문 scrollHeight<=clientHeight, 원본 단락이 쪽에 빠짐없이, 표지→1쪽, 이전/다음, ←/→, 스와이프(세로 무시), 움직임/줄이기 넘김 class, 목차 시트·목차 쪽 이동, 상단 라벨, bookmark 숫자, 이어 읽기 복원, 640 다시 나누기 후 같은 장. `reportText()`는 book-source의 단락 textContent로 읽는다.
+  - 결과: reduced 106/0, motion 106/0(motion은 contain 추가 전 코드, reduced는 추가 후 코드로 다시 통과).
+  - **미실행**: `e2e-flow.js reduced`, 마지막 수정(contain) 뒤 build-dist → mock 재기동 → 전체 재실행. 도구 실행 권한 확인이 계속 실패해서 멈췄다.
+- 미확인: 실제 기기(사파리·안드로이드)의 스와이프·3D 넘김 성능, 480px 이상 화면, 화면낭독기 실사용.

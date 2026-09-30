@@ -1,4 +1,5 @@
 // 6단계 유료 흐름 점검 (모의 결제, 헤드리스 Edge). 계정·키·네트워크 결제 없음.
+// 결정 53: 책은 표지→쪽 넘기기(쪽 수·이전/다음·키·스와이프·목차 이동·이어 읽기 쪽 번호·다시 나누기·쪽 안 스크롤 없음).
 // 8단계: 결제는 6/6에서만(미리보기 잠금·서버 400), 한 권의 책(제1부 여섯 방 Ⅰ~Ⅳ+숨은 장 · 제2부), 목차 시트·9칸 진행률·이어 읽기,
 //        책 한 줄(방 안)·입구 책 카드, identity.close 책 제외(R-1), 새 탭 재열람은 주제 단락 2개만 빠짐.
 // ※ mock-server는 시작할 때 api/_paid를 읽어 둔다 → _paid·build-dist를 바꿨으면 서버를 다시 켤 것
@@ -37,7 +38,8 @@ const SIBYL_Q = "비밀질문XYZ";
   const noHScroll = async (label) => { const w = await ev("[document.documentElement.scrollWidth, window.innerWidth]"); check(`360px 가로 넘침 없음 (${label})`, w[0] <= w[1], w.join("/")); };
   const storage = () => ev("JSON.stringify({ s: Object.fromEntries(Object.keys(sessionStorage).map(k => [k, sessionStorage.getItem(k)])), l: Object.keys(localStorage).length, c: document.cookie })");
   const hookCards = () => ev(`(() => { window.__cards = []; window.__opts = []; const r = ShareCard.render; ShareCard.render = (o) => { window.__opts.push(JSON.stringify(o)); return r(o); }; ShareCard.share = async (c) => { window.__cards.push(c.toDataURL('image/png')); return 'downloaded'; }; })()`);
-  const reportText = () => ev(`[...document.querySelectorAll('#screen-report [data-js=report-part], #screen-report [data-js=book-room]')].filter(p => !p.classList.contains('is-hidden')).map(p => p.innerText).join('\\n')`);
+  // (결정 53) 원본 book-source는 hidden → innerText 대신 단락·항목 단위 textContent로 읽는다
+  const reportText = () => ev(`[...document.querySelectorAll('#screen-report [data-js=book-source] [data-js=report-part], #screen-report [data-js=book-source] [data-js=book-room]')].filter(p => !p.classList.contains('is-hidden')).map(p => [...p.querySelectorAll('p, dd, [data-js=match-room-text]')].map(x => x.textContent.trim()).filter(Boolean).join('\\n')).join('\\n')`);
   const seed = (visits, profile) => ev(`(() => {
     const V = ${JSON.stringify(visits)};
     const v = {};
@@ -155,16 +157,86 @@ const SIBYL_Q = "비밀질문XYZ";
   check("룬·시빌라 IV장 끝 = 이 탭의 주제 단락", fr[4].last.startsWith(lens[0]) && fr[5].last.startsWith(lens[1]));
   check("책 순서: 여는 글 → 여섯 방 → 시기별 흐름·궁합·심층 → 닫는 글", await ev("[...document.querySelectorAll('#screen-report [data-js=report-part], #screen-report [data-js=book-room]')].map(p => p.dataset.part).join() === 'open,ogham,star,decan,tzolkin,rune,sibyl,timeline,match,deep,close'"));
   check("목차 9칸 + 읽는 시간 + 전체 분량", (await ev("[...document.querySelectorAll('[data-js=book-toc-item]')].filter(li => !li.classList.contains('is-hidden') && /\\d/.test(li.querySelector('[data-js=book-toc-time]').textContent)).length")) === 9 && /만/.test(await txt("[data-js=book-total]")), await txt("[data-js=book-total]"));
-  check("상단: 입구 버튼·목차 버튼·9칸 진행률", !(await hidden("[data-js=topbar-home]")) && !(await hidden("[data-js=book-toc-open]")) && (await ev("[...document.querySelectorAll('[data-js=read-progress-seg]')].filter(s => !s.classList.contains('is-hidden')).length")) === 9);
-  await ev("document.getElementById('book-tzolkin').scrollIntoView({ block: 'start', behavior: 'instant' }); window.scrollBy({ top: 40, behavior: 'instant' })");
-  await sleep(300);
-  check("촐킨 방까지 읽으면 상단 'IV 촐킨의 방 5/9' · bookmark = tzolkin(부 id만)", (await txt("[data-js=read-label]")).replace(/\s+/g, " ").includes("IV 촐킨의 방 5/9") && (await ev("sessionStorage.getItem('strange-oracle-bookmark')")) === "tzolkin", await txt("[data-js=read-label]"));
-  check("지난 부 목차 체크(is-read)", await ev("document.querySelector('[data-js=book-toc-item][data-part=star]').classList.contains('is-read') && document.querySelector('[data-js=book-toc-item][data-part=tzolkin]').classList.contains('is-current')"));
+  // ── (결정 53) 책을 넘기는 리더: 표지 → 쪽 나누기 → 넘기기 · 목차 · 이어 읽기
+  const cur = () => ev("(() => { const p = document.querySelector('[data-js=book-pages] [data-js=book-page].is-current'); return p ? Number(p.dataset.page) : 0; })()");
+  const view = () => ev("document.querySelector('[data-js=book-reader]').dataset.view");
+  const pageCount = () => ev("document.querySelectorAll('[data-js=book-pages] [data-js=book-page]').length");
+  const overflowPages = () => ev("[...document.querySelectorAll('[data-js=book-pages] [data-js=book-page-body]')].filter(b => b.scrollHeight > b.clientHeight).map(b => b.parentElement.dataset.page)");
+  const turnWait = reduced ? 60 : 900;
+  await ev("document.fonts.ready.then(() => true)");
+  await sleep(600); // 글꼴이 늦게 도착하면 한 번 다시 나눈다 (loadingdone → 150ms 디바운스)
+  const nPages = await pageCount();
+  check("상단: 입구 버튼·목차 버튼, 9칸 진행률 은퇴(마크업 0)", !(await hidden("[data-js=topbar-home]")) && !(await hidden("[data-js=book-toc-open]")) && (await ev("document.querySelectorAll('[data-js=read-progress-seg], [data-js=read-progress]').length")) === 0);
+  check("표지부터(data-view=cover) · 마크업 견본 쪽 없음", (await view()) === "cover" && (await ev("document.querySelectorAll('[data-sample]').length")) === 0);
+  const pagedMs = await ev("Number(document.querySelector('[data-js=book-reader]').dataset.pagedMs)");
+  check("쪽 나누기: 쪽 수 > 1, 1초 안", nPages > 1 && pagedMs < 1000, `${nPages}쪽 · ${pagedMs}ms`);
+  const ov = await overflowPages();
+  check("모든 쪽 안쪽 스크롤 없음 (본문 scrollHeight <= clientHeight)", ov.length === 0, ov.join(","));
+  const lost = await ev(`(() => { const n = (s) => s.replace(/\\s+/g, ''); const pg = n([...document.querySelectorAll('[data-js=book-pages] [data-js=book-page-body] p')].map(p => p.textContent).join('')); return [...document.querySelectorAll('[data-js=book-source] [data-js=book-room] [data-js^=book-] > p, [data-js=report-open] > p, [data-js=report-close] > p, [data-js^=report-deep-] > p')].filter(p => p.textContent.trim() && !pg.includes(n(p.textContent))).length; })()`);
+  check("원본 단락이 쪽에 빠짐없이 (쪼갠 단락은 이어 붙여 대조)", lost === 0, `빠진 단락 ${lost}`);
+  await click("[data-js=book-open-btn]");
+  const box = await ev("(() => { const r = document.querySelector('[data-js=book-page].is-current [data-js=book-page-body]').getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); })()");
+  check("책 펼치기 → 1쪽 면지(영수증 코드 카드)", (await view()) === "pages" && (await cur()) === 1 && (await ev("!!document.querySelector('[data-js=book-page].is-current [data-js=receipt-code]')")), `본문 상자 ${box}`);
+  await shot(P + "03a-page1.png");
+  await click("[data-js=book-next]");
+  await sleep(turnWait);
+  const pA = await cur();
+  await click("[data-js=book-next]");
+  await sleep(turnWait);
+  const pB = await cur();
+  await click("[data-js=book-prev]");
+  await sleep(turnWait);
+  const pC = await cur();
+  check("다음·이전 버튼으로 쪽이 바뀜 (1→2→3→2)", pA === 2 && pB === 3 && pC === 2, `${pA},${pB},${pC}`);
+  check("쪽 번호 'N / M' · aria-label · aria-live", (await txt("[data-js=book-page].is-current [data-js=book-page-folio]")).replace(/\s+/g, " ").trim() === `2 / ${nPages}` && (await ev("document.querySelector('[data-js=book-page].is-current').getAttribute('aria-label')")).includes(String(nPages)) && (await txt("[data-js=book-live]")).includes(String(nPages)));
+  await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))");
+  await sleep(turnWait);
+  const pK = await cur();
+  await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))");
+  await sleep(turnWait);
+  check("←/→ 키로 넘김", pK === 3 && (await cur()) === 2, `${pK},${await cur()}`);
+  const swipe = (x0, y0, x1, y1) => ev(`(() => { const s = document.querySelector('[data-js=book-stage]'); s.dispatchEvent(new PointerEvent('pointerdown', { clientX: ${x0}, clientY: ${y0}, isPrimary: true, bubbles: true })); s.dispatchEvent(new PointerEvent('pointerup', { clientX: ${x1}, clientY: ${y1}, isPrimary: true, bubbles: true })); })()`);
+  await swipe(250, 300, 240, 420); // 세로 움직임: 넘기지 않음
+  await sleep(turnWait);
+  const pV = await cur();
+  await swipe(260, 300, 180, 310); // 왼쪽으로 80px → 다음
+  await sleep(turnWait);
+  const pS = await cur();
+  await swipe(150, 300, 250, 300); // 오른쪽 → 이전
+  await sleep(turnWait);
+  check("스와이프: 가로 40px 이상만 넘김(세로는 그대로)", pV === 2 && pS === 3 && (await cur()) === 2, `${pV},${pS},${await cur()}`);
+  if (reduced) {
+    await ev("document.querySelector('[data-js=book-next]').click()");
+    check("움직임 줄이기: turn class 없이 즉시 바뀜", (await cur()) === 3 && !(await ev("!!document.querySelector('.is-turn-next, .is-turn-prev, .is-under, [data-js=book-stage].is-turning')")));
+  } else {
+    await ev("document.querySelector('[data-js=book-next]').click(); document.querySelector('[data-js=book-next]').click()");
+    const mid = await ev("document.querySelector('[data-js=book-stage]').classList.contains('is-turning') && !!document.querySelector('[data-js=book-page].is-turn-next') && !!document.querySelector('[data-js=book-page].is-under')");
+    await sleep(260);
+    await shot(P + "03b-turn-mid.png");
+    await sleep(700);
+    check("움직임: 넘기는 중 is-turning·is-turn-next·is-under, 연타는 1쪽만", mid && (await cur()) === 3 && !(await ev("!!document.querySelector('.is-turn-next, .is-under')")), String(await cur()));
+  }
   await click("[data-js=book-toc-open]");
   check("목차 시트 열림(9항목 복제)", (await ev("document.querySelector('[data-js=book-toc-sheet]').open")) && (await ev("document.querySelectorAll('[data-js=book-toc-sheet-list] a').length")) === 9);
-  await click("[data-js=book-toc-sheet-list] a[href='#book-flow']");
-  await sleep(reduced ? 900 : 2500); // 움직임: CSS scroll-behavior smooth (5만 px 책)
-  check("시트 항목 → 닫히고 그 자리로(주소 해시 그대로)", !(await ev("document.querySelector('[data-js=book-toc-sheet]').open")) && (await ev("Math.abs(document.getElementById('book-flow').getBoundingClientRect().top) < 120")) && (await ev("location.hash")) === "#report");
+  await click("[data-js=book-toc-sheet-list] li[data-part=tzolkin] a");
+  await sleep(150);
+  const tzStart = Number((await txt("[data-js=book-pages] [data-js=book-toc-item][data-part=tzolkin] [data-js=book-toc-time]")).replace(/\D/g, ""));
+  check("목차 시트 → 촐킨 방 첫 쪽으로 즉시 (시트 닫힘·해시 그대로·목차의 쪽 번호와 같음)", !(await ev("document.querySelector('[data-js=book-toc-sheet]').open")) && (await ev("document.querySelector('[data-js=book-page].is-current').dataset.room")) === "tzolkin" && (await ev("document.querySelector('[data-js=book-page].is-current').classList.contains('is-chapter-start')")) && (await cur()) === tzStart && (await ev("location.hash")) === "#report", `${await cur()} / 목차 ${tzStart}`);
+  check("상단 라벨 'IV 촐킨의 방' · bookmark = 쪽 번호(숫자)만", (await txt("[data-js=read-label]")).includes("IV 촐킨의 방") && (await ev("sessionStorage.getItem('strange-oracle-bookmark')")) === String(tzStart), await txt("[data-js=read-label]"));
+  check("목차 is-current = 촐킨", await ev("document.querySelector('[data-js=book-toc-item][data-part=tzolkin]').classList.contains('is-current')"));
+  await shot(P + "03c-tzolkin.png");
+  // 다시 나누기: 360×640으로 줄였다가 되돌려도 같은 장(촐킨)에 머묾
+  await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 640, deviceScaleFactor: 2, mobile: true });
+  await sleep(600);
+  const n640 = await pageCount();
+  const ov640 = await overflowPages();
+  const room640 = await ev("document.querySelector('[data-js=book-page].is-current').dataset.room");
+  await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 800, deviceScaleFactor: 2, mobile: true });
+  await sleep(600);
+  check("크기 바뀜 → 다시 나누고 같은 장 유지 (640: 쪽 수 늘고 넘침 없음)", n640 > nPages && ov640.length === 0 && room640 === "tzolkin" && (await ev("document.querySelector('[data-js=book-page].is-current').dataset.room")) === "tzolkin" && (await pageCount()) === nPages, `640 ${n640}쪽(${room640}) · 800 ${await pageCount()}/${nPages}쪽(${await ev("document.querySelector('[data-js=book-page].is-current').dataset.room")}) · 넘침 ${ov640.join(",")}`);
+  await ev("document.querySelector('[data-js=book-pages] [data-js=book-toc-item][data-part=flow] a').click()");
+  await sleep(150);
+  check("목차 쪽 링크 → 제2부 표제지", (await ev("document.querySelector('[data-js=book-page].is-current').dataset.part")) === "flow" && (await ev("document.querySelector('[data-js=book-page].is-current').classList.contains('is-chapter-start')")));
   // R-1: identity.close(방 화면 맺음 문장)는 책에 넣지 않는다
   await ev("OGHAM[2].identity.close = '맺음문장XCLOSE'");
   await click("[data-js=topbar-home]");
@@ -173,7 +245,10 @@ const SIBYL_Q = "비밀질문XYZ";
   await click("[data-js=hub-book-go]");
   await waitScreen("screen-report", 6000);
   check("R-1: 책 조립에 identity.close 없음", !(await reportText()).includes("XCLOSE"));
-  check("같은 탭에서 다시 열면 이어 읽기 줄", !(await hidden("[data-js=book-resume]")) && (await txt("[data-js=book-resume-name]")).length > 0, await txt("[data-js=book-resume-name]"));
+  const bm = Number(await ev("sessionStorage.getItem('strange-oracle-bookmark')"));
+  check("같은 탭에서 다시 열면 표지 + 이어 읽기 줄(부 이름·쪽 번호)", (await view()) === "cover" && !(await hidden("[data-js=book-resume]")) && (await txt("[data-js=book-resume-name]")).length > 0 && (await txt("[data-js=book-resume-page]")) === String(bm), `${await txt("[data-js=book-resume-name]")} · ${bm}`);
+  await click("[data-js=book-resume]");
+  check("이어 읽기 → 저장된 쪽 복원", bm > 1 && (await view()) === "pages" && (await cur()) === bm, `${await cur()} / ${bm}`);
   await ev("StrangeOracle.renderOgham({ ogham: 2 }); StrangeOracle.go('ogham-result')");
   await waitScreen("screen-ogham-result");
   check("R-1: 방 화면에는 맺음 문장 칸이 보임", (await txt("#screen-ogham-result [data-js=reading-close]")).includes("XCLOSE") && !(await hidden("#screen-ogham-result [data-js=reading-close]")));
@@ -181,9 +256,8 @@ const SIBYL_Q = "비밀질문XYZ";
   check("결제 뒤 방 책 한 줄 = owned '내 책에서 이 방 펼치기'", (await ev("document.querySelector('#screen-ogham-result [data-js=result-book-line]').dataset.state")) === "owned");
   await click("#screen-ogham-result [data-js=result-book-link]");
   await waitScreen("screen-report", 6000);
-  await sleep(reduced ? 400 : 2500);
-  const ogTop = await ev("Math.round(document.getElementById('book-ogham').getBoundingClientRect().top)");
-  check("→ 책 속 오검 방 자리로(화면 위쪽 300px 안)", ogTop >= 0 && ogTop < 300, String(ogTop));
+  await sleep(150);
+  check("→ 책 속 오검 방 첫 쪽으로 바로 펼침", (await view()) === "pages" && (await ev("document.querySelector('[data-js=book-page].is-current').dataset.room")) === "ogham" && (await ev("document.querySelector('[data-js=book-page].is-current').classList.contains('is-chapter-start')")), String(await cur()));
   await ev("window.scrollTo(0, 0)");
   check("4장 근거 6줄 (코드로 조립)", (await ev("document.querySelectorAll('[data-js=report-evidence] li').length")) === 6);
   check("면책 문구", (await txt("#screen-report [data-js=disclaimer-slot]")).includes("재미로 보는 콘텐츠"));
@@ -193,7 +267,7 @@ const SIBYL_Q = "비밀질문XYZ";
   const metaN = Number((await txt("[data-js=report-meta]")).replace(/.*약\s*/, "").replace(/\D/g, ""));
   check("D-11 분량: 미리보기 예상 vs 받은 리포트 ±15%", metaN > 0 && Math.abs(expectTotal - metaN) / metaN <= 0.15, `예상 ${expectTotal} / 실제 ${metaN}`);
   const st2 = await storage();
-  check("저장소: 영수증 코드·bookmark(부 id)만 추가, 유료 문구·상대 없음, localStorage·쿠키 0", st2.includes(receipt) && Object.keys(JSON.parse(st2).s).sort().join() === "strange-oracle,strange-oracle-bookmark,strange-oracle-receipt" && /^[a-z]+$/.test(JSON.parse(st2).s["strange-oracle-bookmark"] || "") && !st2.includes(PARTNER.name) && JSON.parse(st2).l === 0 && JSON.parse(st2).c === "", st2.slice(0, 160));
+  check("저장소: 영수증 코드·bookmark(쪽 번호)만 추가, 유료 문구·상대 없음, localStorage·쿠키 0", st2.includes(receipt) && Object.keys(JSON.parse(st2).s).sort().join() === "strange-oracle,strange-oracle-bookmark,strange-oracle-receipt" && /^\d+$/.test(JSON.parse(st2).s["strange-oracle-bookmark"] || "") && !st2.includes(PARTNER.name) && JSON.parse(st2).l === 0 && JSON.parse(st2).c === "", Object.keys(JSON.parse(st2).s).join() + " " + JSON.parse(st2).s["strange-oracle-bookmark"]);
   await noHScroll("리포트");
   await shot(P + "03-report-top.png");
   await click("[data-js=report-share]");
