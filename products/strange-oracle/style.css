@@ -3372,23 +3372,6 @@ body:not(.is-static-preview) [data-preview-only] { display: none; }
   padding: 4px var(--space-3); border: 1px solid var(--c-line); border-radius: var(--radius-pill);
   background: oklch(0.2 0.04 285 / 0.6); font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text);
 }
-.journey__path { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-4); }
-.journey__step {
-  display: grid; grid-template-columns: 36px 1fr; grid-template-rows: auto auto; column-gap: var(--space-2); align-items: center;
-  min-width: 0; padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
-  border: 1px solid oklch(0.4 0.04 285 / 0.6); border-radius: var(--radius-md);
-  background: oklch(0.17 0.04 var(--room-h) / 0.75);
-}
-.journey__mark {
-  grid-row: 1 / 3; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
-  border: 1px solid var(--accent-line); background: radial-gradient(circle, var(--accent-soft), transparent 75%); color: var(--accent); --sig: 18px;
-}
-.journey__num { display: none; }
-.journey__name { min-width: 0; font-size: var(--fs-sm); font-weight: 700; line-height: var(--lh-tight); color: var(--c-text-strong); }
-.journey__reads { min-width: 0; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: 1.4; color: var(--c-text-muted); }
-.journey__step.is-visited .journey__mark { background: var(--accent-soft); border-color: var(--accent); }
-.journey__step.is-next { border-color: var(--accent-line); box-shadow: 0 0 16px var(--accent-soft); }
-.journey__step.is-locked .journey__mark { opacity: 0.55; }
 .journey__end { display: flex; justify-content: center; align-items: center; gap: var(--space-2); margin-top: var(--space-3); font-size: var(--fs-sm); color: var(--c-text-muted); text-align: center; }
 .journey__end-mark { color: var(--accent); }
 .doors-note { margin: var(--space-8) 0 var(--space-3); text-align: center; font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--c-text-muted); }
@@ -3416,9 +3399,6 @@ body:not(.is-static-preview) [data-preview-only] { display: none; }
 .so-far__key { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
 .so-far__go { color: var(--accent); font-size: var(--fs-lg); }
 button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so-far__room b { color: var(--accent); }
-.so-far__item.is-upcoming .so-far__mark { border-style: dashed; border-color: var(--c-line); color: var(--c-text-faint); }
-.so-far__item.is-upcoming .so-far__room { color: var(--c-text-muted); }
-.so-far__item.is-upcoming .so-far__key { color: var(--c-text-faint); }
 .so-far__all { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-1); width: 100%; min-height: var(--tap-min); border-top: 1px solid oklch(0.4 0.04 285 / 0.5); font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--accent); }
 
 /* ───────── 입구: 한 권의 책 카드 ───────── */
@@ -3848,8 +3828,7 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .hub-gate.is-entering .hub-gate__seal { opacity: 0; transform: scale(1.3); }
 .hub-gate.is-entering .hub-gate__motifs { opacity: 1; }
 
-/* ── 여섯 방: 한 줄 요약 + 작은 문 3×2 (여정 줄은 문과 겹쳐 숨김) ── */
-.journey__path[hidden] { display: none; }
+/* ── 여섯 방: 한 줄 요약 + 작은 문 3×2 ── */
 .hub .journey { margin-top: var(--space-10); text-align: center; }
 .hub .journey__chips { gap: 0; }
 .hub .journey__chip { padding: 0; border: 0; background: none; font-size: var(--fs-xs); color: var(--c-text); }
@@ -3887,7 +3866,6 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 }
 /* ── 지금까지의 이야기: 상자 없이, 마친 방만 (아직 안 연 방은 위 여섯 문이 보여 준다) ── */
 .hub .so-far { margin-top: var(--space-10); padding: 0; border: 0; border-radius: 0; background: none; }
-.hub .so-far__item.is-upcoming { display: none; }
 .hub .so-far__item { border-top-color: oklch(0.4 0.04 285 / 0.35); }
 .hub .so-far__all { margin-top: var(--space-2); }
 .hub .hub-paid { margin-top: var(--space-8); }
@@ -4244,6 +4222,10 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .resume-enter__toggle, .resume-make__toggle { font-size: var(--fs-xs); }
 .resume-enter__toggle[aria-expanded="true"] .receipt-toggle__caret,
 .resume-make__toggle[aria-expanded="true"] .receipt-toggle__caret { transform: rotate(180deg); }
+/* (UI 점검 10단계) 밑줄은 글자에만: 화살표(▾)까지 밑줄이 이어져, 펼치면(180도) 화살표 위에 줄이 떠 보였다 */
+.resume-enter__toggle, .resume-make__toggle, .receipt-toggle { text-decoration: none; }
+:is(.resume-enter__toggle, .resume-make__toggle, .receipt-toggle) > span:first-child { text-decoration: underline; text-decoration-color: var(--c-line); text-underline-offset: 4px; }
+:is(.resume-enter__toggle, .resume-make__toggle, .receipt-toggle):is(:hover, :focus-visible) > span:first-child { text-decoration-color: currentColor; }
 .resume-enter__panel, .resume-make__panel {
   display: grid; gap: var(--space-3); margin-top: var(--space-1); padding: var(--space-4);
   border: 1px solid var(--c-line); border-radius: var(--radius-lg); background: var(--c-surface-1); text-align: left;
@@ -4271,6 +4253,7 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .so-far__restored {
   margin-top: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--accent-soft);
   font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-strong);
+  word-break: keep-all; text-wrap: balance; /* (UI 점검 10단계) 360px에서 "이에요"만 다음 줄로 떨어지지 않게 */
 }
 .so-far__restored.is-hidden { display: none; }
 
@@ -4372,6 +4355,7 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .peek-page .sample__note { margin-top: var(--space-4); padding-top: var(--space-2); border-top: 1px solid var(--ink-line); font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--ink-soft); }
 .book-peek__hint { font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); text-align: center; }
 .toc__time { font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 400; color: var(--c-text-muted); white-space: nowrap; }
-.toc__time::before { content: "· "; }
+/* (UI 점검 10단계) 가운뎃점은 app.js가 글자에 붙여 넣는다 → CSS 점을 빼 "· ·" 겹침을 없앰. 글자 수와 읽는 시간은 오른쪽에 붙여 둔다 */
 .toc__time:empty { display: none; }
+.toc__title:has(.toc__time) .toc__total { margin-left: auto; }
 .deeper .book-peek + .toc { margin-top: var(--space-6); }
