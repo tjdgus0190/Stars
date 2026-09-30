@@ -1466,3 +1466,65 @@ div.book-source[data-js=book-source][hidden]  ← 기존 receipt · book-toc · 
 - **R53-1 시기별 흐름 제목이 홀로 남음**: 91·94·97쪽(360×800)이 "지금 · 30대 초반 · 통찰의 시기" 한 줄만 있고 나머지(일·관계…)는 다음 쪽. 한 구간이 빈 쪽보다 커서 `splitUnit`이 자식 단위로 나눌 때, **`.timeline__age`는 다음 자식(첫 dt+dd)과 묶어** 넘기기(장 머리의 "머리+첫 2줄" 규칙과 같은 방식).
 - **R53-2 장 끝 한 줄 쪽**(참고, 낮은 우선): 4쪽(여는 글)·68쪽(룬)이 채움 5%(1줄). 마지막 단락의 끝 1~2줄만 넘칠 때 앞 쪽 단락에서 한 줄을 함께 넘기는(과부 줄 방지) 처리를 검토. 급하지 않음.
 - **R53-3 궁합 짝 칸**(미확인): "현자" 알약 안 글자가 오른쪽으로 치우쳐 보임. `stripHooks` 복제 뒤 빈 요소나 공백이 남았는지 확인.
+
+## AI 생성 자산 (Clipwave) — 결정 54 (2026-09-30, designer)
+기준: specs/strange-oracle.md 운영자 결정 54·51, 「9단계」 9-1. **지금은 1단계 = 계획 + 시안 2장**이다. 나머지 생성과 화면 연결(index.html·style.css)은 운영자 확인 뒤에 한다. 영상은 만들지 않는다.
+
+### 화풍을 고른 이유
+- 지금 화면은 어두운 밤하늘 바탕 + 방 강조색 한 가지 + 가는 선 그림(SVG)이다. 선 그림은 "손·소품"까지만 그릴 수 있어 안내자가 누구인지(옷, 자세, 문화) 전해지지 않는다.
+- 사진풍은 실존 인물처럼 보이고 UI와 겉돈다. 만화풍은 문화를 희화화할 위험이 있다. 그래서 **옛 판화(가는 빗금 선) 위에 과슈로 엷게 칠한 삽화**로 정했다: 선이 살아 있어 기존 선 그림·금박 책 표지와 이어지고, 색 수가 적어 어두운 화면에 조용히 앉는다.
+- 색은 짙은 남색·검정 바탕 + 바랜 금색 + 방마다 강조색 하나. 가장자리는 검정에 가깝게 어두워져 화면 바탕과 경계 없이 섞인다(테두리·액자 없음).
+- 얼굴은 정면 초상이 아니라 두건·숄 그늘에 반쯤 가린 3/4 각도로 요청한다(실존 인물 닮음·뭉개진 얼굴 위험을 줄이고 "수수께끼" 분위기를 살림).
+
+### 공통 스타일 프롬프트 (모든 생성물 뒤에 그대로 붙인다)
+```
+Hand-painted gouache over fine ink engraving, delicate cross-hatched linework like an old book plate, limited palette: deep midnight indigo and near-black navy, muted antique gold highlights, plus one soft accent color. Single warm light source, gentle rim light. Subject centered, half-length, face partly in shadow in three-quarter view. Plain dark background that fades to near-black at every edge, calm empty space in the top fifth and bottom fifth. Matte paper grain. Quiet, mysterious, gentle and dignified mood, respectful fictional character, not a real person. No text, no letters, no writing, no numbers, no logos, no watermark, no frame, no border.
+```
+
+### 모델·설정
+- 모델: (시안 생성 뒤 아래 표에 확정 id 기록). 비율 **3:4**, 해상도 1K. 화면용은 576×768 WebP(표시 크기의 3배 이상)로 줄여 200KB 이하.
+- 크레딧 예산: 기획서에 숫자 상한 없음(결정 54 "이 범위로 한정") / 지금까지 사용: 아래 표 참고.
+
+### 시안 생성 시도 기록 (2026-09-30) — **막힘, 시안 0장**
+- `list_models`는 정상 응답. 그러나 `media_forge_generate`가 3번 모두 **"Subscription payment required."** 로 거절됐다(`fal-ai/nano-banana-2` 3:4·1K로 별·촐킨 각 1회, 저가 모델 `google/nano-banana-lite`로 별 1회). 모델과 무관한 계정 상태(구독 결제)로 보인다. job_id가 발급되지 않아 **사용 크레딧 0**(잔액은 도구로 확인할 수 없어 미확인).
+- 구독 결제·계정 작업은 운영자 몫이라 여기서 멈췄다. 아래 표의 "시안" 두 줄은 **프롬프트만 준비된 상태**이고 파일은 아직 없다(assets/ai/ 폴더도 만들지 않음).
+- 장당 크레딧: `list_models`가 가격을 알려 주지 않아 **미확인**. 첫 생성 응답에서 확인해 이 표에 적는다. 그래서 남은 장수의 예상은 "장수 × 장당 크레딧"으로만 적어 둔다: 안내자 6장(+다시 만들기 여유 2장), 2차 후보 21장.
+- 1순위로 쓸 모델: `fal-ai/nano-banana-2`(3:4 지원, 1K). 비용이 크면 `google/nano-banana-lite`(3:4, 1K)로 낮춘다.
+- 상업적 이용 조건: 도구 응답·서버 안내문 어디에도 표시가 없어 **미확인**. 운영자가 ManyMotions(Clipwave) 약관에서 확인해야 한다.
+- 변환 도구: ffmpeg 있음(WebP 변환 가능), cwebp 없음.
+- 확정 뒤 CREDITS.md에 적을 것: "Clipwave(ManyMotions)로 생성한 AI 이미지", 모델 id, 생성일, 파일 목록(assets/ai/guide-*.webp), 상업적 이용 근거(약관 조항).
+
+### 안내자 6장 (1순위)
+| 파일 경로 (products/strange-oracle/) | 용도 | 유형별 프롬프트 (공통 스타일 앞에 붙임) | 비율·해상도 | 사용 크레딧 | 상태 |
+|---|---|---|---|---|---|
+| assets/ai/guide-ogham.webp | Ⅰ 오검 안내자 | An old scribe of a birch forest in an early-medieval Irish setting, plain undyed wool cloak with a simple round brooch, grey beard, head bowed, carving short notches along the edge of a strip of birch bark with a small stylus, pale birch trunks faintly behind. Accent color: moss green. | 3:4 · 1K | 예상 1장분 | 계획 |
+| assets/ai/guide-star.webp | Ⅱ 별 안내자 | A mysterious astrologer who counts the houses of the moon at night, wrapped in a long Indian-style robe and a wide shawl draped over the head, face mostly shaded, one hand raised with the index finger pointing up at a thin crescent moon and a ring of small stars, a small brass oil lamp beside. Accent color: soft violet blue. | 3:4 · 1K | 0 (생성 거절) | 시안 대기(프롬프트만) |
+| assets/ai/guide-decan.webp | Ⅲ 데칸 안내자 | The keeper of a star clock in Hellenistic Alexandria, a calm figure in a draped linen tunic and mantle, short curled hair, one hand resting on a stone sundial with a slanted gnomon casting a long shadow, a few stars above a flat rooftop. Accent color: warm sand amber. | 3:4 · 1K | 예상 1장분 | 계획 |
+| assets/ai/guide-tzolkin.webp | Ⅳ 촐킨 안내자 (사람 아님) | Not a person: an upright rectangular carved limestone tablet in ancient Maya relief sculpture style, standing alone, its surface covered with abstract low-relief scrolls, spirals, rounded cartouche blocks and rows of dots and bars, a faint glow coming out of the carved grooves as if the stone is speaking, a little moss at the base. No face, no eyes, no human figure, no animal, no hands. Accent color: jade green. | 3:4 · 1K | 0 (생성 거절) | 시안 대기(프롬프트만) |
+| assets/ai/guide-rune.webp | Ⅴ 룬 안내자 | A seer on a cold northern seashore in a Norse early-medieval setting, heavy hooded wool cloak moving in the wind, holding a few small smooth pebbles in an open palm, grey waves and a low horizon behind. Pebbles are plain, without marks. Accent color: cold steel blue. | 3:4 · 1K | 예상 1장분 | 계획 |
+| assets/ai/guide-sibyl.webp | Ⅵ 시빌라 안내자 | A prophetess deep in a rock cave in a Greco-Roman antique setting, laurel wreath on her head, modest long draped robe and veil, seen in profile, one hand slightly raised as if listening to an echo, thin mist and a small bronze tripod lamp. Accent color: dusty rose. | 3:4 · 1K | 예상 1장분 | 계획 |
+- 돌·나무껍질·석판에 "글자"가 생기면 가짜 글자가 되므로, 새김은 **무늬(눈금, 소용돌이, 점과 막대)** 로만 요청한다. 오검·룬 글자는 기존처럼 화면의 SVG·HTML이 맡는다.
+- 방 강조색 표현은 2단계에서 style.css의 방별 `--accent-h` 값과 맞춰 다시 확인한다(지금 프롬프트의 색 이름은 어림값).
+
+### 넣을 자리와 표시 크기 (2단계 작업, 지금은 계획만)
+| 자리 | 지금 | 바꿀 모습 | 표시 크기(360px) |
+|---|---|---|---|
+| 방 시작 화면(5-a) | `.room-emblem` 옆 `svg.guide-figure` 44×59 | 상징 원 아래, 인사 말풍선(`.say--greet`) 위에 초상 1장. 위·아래 가장자리는 CSS mask로 바탕에 녹임. 시작 버튼이 스크롤 없이 보이는지 360×640에서 다시 잰다(안 되면 132×176으로 줄임) | 168×224 (3:4), 원본 576×768 |
+| 결과 여는 말(`.say--open`) | 작은 실루엣 30×40 | 둥근 모서리 작은 초상(같은 파일, 얼굴·상징 쪽으로 object-position) | 48×64 |
+| 의식·닫는 말·다리 | 작은 실루엣 | **그대로 SVG** (작아서 그림이 뭉개지고, 의식 중엔 가벼워야 함) | — |
+| 공유 카드 | 서명 글자만 | 이번엔 넣지 않음(2차 후보 참고) | — |
+- 글자 대비: 초상 위에는 글자를 얹지 않는다(글자는 초상 아래 말풍선). 그래서 기존 AA 값이 그대로 유지된다.
+- `<img loading="lazy" decoding="async" width height alt="">`(장식이므로 alt 빈 값, 이름은 옆 글자가 이미 말함). 한 방에 1장만 받으므로 첫 화면(허브) 로딩에는 영향 없음.
+- **불러오기 실패 시 대체**: `<img>`가 error면 숨기고 기존 SVG 실루엣(`guide-<room>`)을 그대로 보여 준다. SVG는 지우지 않고 남긴다. 바탕색은 `--c-surface` 그대로.
+
+### 2차 후보 — 도트·선 그림으로는 한계가 있는 곳 (계획만, 생성 안 함)
+| 우선 | 자리 | 왜 | 장수 | 비율 |
+|---|---|---|---|---|
+| 1 | og-image.png (1200×630) 배경 | 링크 미리보기가 첫인상. 여섯 문이 있는 점술관 복도 한 장 + 제목은 HTML/캔버스로 얹음 | 1 | 16:9 → 1.91:1로 자름 |
+| 2 | 공유 카드 배경(1080×1920), 방별 | 저장·공유되는 유일한 그림. 지금은 단색+별. 위아래 250px은 비워 달라고 요청 | 6 | 9:16 |
+| 3 | 허브의 여섯 방 문(door) 그림 | 문화가 가장 먼저 드러나는 자리인데 지금은 상징 선 그림뿐 | 6 | 3:4 |
+| 4 | 유료 책 표지 가운데 문장(紋章) | 가죽·금박은 CSS로 충분, 가운데 장식만 그림으로 | 1 | 1:1 |
+| 5 | 프로모션 페이지 히어로 | promo/ 첫 화면 | 1 | 9:16 |
+| 6 | "나의 이야기" 여섯 장 머리 삽화 | 장마다 작은 삽화. 효과는 낮고 장수는 많음 | 6 | 3:2 |
+- 합계 21장. 1~2순위(7장)만 해도 체감이 크다. 10장 넘게 한 번에 만들면 운영자 승인이 필요하다(designer 규칙).
+- 쓰지 않을 곳: 아이콘, 룬·오검 글자, 진행 표시, 버튼 장식, 의식 연출(모두 SVG·CSS가 가볍고 고치기 쉬움).
