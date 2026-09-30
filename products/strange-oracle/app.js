@@ -102,7 +102,8 @@
   function validVisit(room, v) {
     if (!v || !ARCHETYPES.includes(v.archetype)) return false;
     if (room === "rune") return Array.isArray(v.picks) && v.picks.length === 3 && v.picks.every((c) => RUNE_BY_CODE[c]) && T.rune.topics[v.topic];
-    if (room === "star") return Number.isInteger(v.nak) && NAKS[v.nak] && RASHIS[v.west] && RASHIS[v.sunRashi] && RASHIS[v.moonRashi];
+    // (10단계) 이어가기 코드로 복원한 별의 방: 나크샤트라 번호만 있고 서양 별자리·해/달 라시는 없다(restored)
+    if (room === "star") return Number.isInteger(v.nak) && NAKS[v.nak] && (v.restored === true || (RASHIS[v.west] && RASHIS[v.sunRashi] && RASHIS[v.moonRashi]));
     if (room === "ogham") return Number.isInteger(v.ogham) && Boolean(OGHAM[v.ogham]);
     if (room === "decan") return Number.isInteger(v.decan) && Boolean(DECANS[v.decan]);
     if (room === "tzolkin") return Number.isInteger(v.number) && v.number >= 1 && v.number <= 13 && Number.isInteger(v.sign) && Boolean(TZ_SIGNS[v.sign]);
@@ -117,6 +118,7 @@
       const out = emptyState();
       if (s.profile && typeof s.profile === "object") out.profile = s.profile;
       for (const room of OPEN_ROOMS) if (s.visits && validVisit(room, s.visits[room])) out.visits[room] = s.visits[room];
+      if (s.restored === true) out.restored = true; // 이어가기 코드로 불러온 세션 표시(참·거짓뿐, 코드 글자는 저장하지 않는다)
       return out;
     } catch (e) {
       return emptyState();
@@ -141,6 +143,7 @@
     $$("input[data-js], textarea[data-js]").forEach((el) => (el.type === "checkbox" ? (el.checked = false) : (el.value = "")));
     resetSibyl();
     [js("star-hour"), js("star-minute")].forEach((el) => (el.disabled = false));
+    closeResume(); // 펼쳐 둔 이어가기 코드 표시·입력 칸을 닫고 비운다 (입력 칸 값은 위에서 이미 비움)
   }
   const filledRooms = () => CHAPTER_ORDER.filter((r) => state.visits[r]);
 
@@ -333,6 +336,7 @@
       void next.offsetWidth; // 등장 애니메이션을 처음부터 다시
       next.classList.add("is-active");
       currentName = name;
+      ShareButtons.reset(); // 링크 복사 완료 줄은 화면을 옮기면 닫는다
       body.dataset.room = next.dataset.room;
       setTopbar(name);
       window.scrollTo(0, 0);
@@ -528,12 +532,8 @@
       cta.dataset.go = "story";
       js("hub-cta-label").textContent = H.story;
     }
-    // 여정 줄과 여섯 문: 같은 상태 class
+    // 여섯 문 상태 class
     const stateOf = (room) => (isDone(room) ? "is-visited" : room === next ? "is-next" : "is-locked");
-    jsAll("journey-step").forEach((li) => {
-      const st = stateOf(li.dataset.room);
-      ["is-visited", "is-next", "is-locked"].forEach((c) => li.classList.toggle(c, c === st));
-    });
     for (const room of OPEN_ROOMS) {
       const door = js(`hub-door-${room}`);
       const st = stateOf(room);
@@ -551,25 +551,137 @@
     const a = currentArchetype();
     js("hub-archetype").textContent = a ? T.archetypes[a].name : "";
     const codes = myRoomCodes();
-    const S = T.hub.sofar;
-    js("hub-sofar-list").innerHTML = CHAPTER_ORDER.map((room, i) => {
-      const num = `<span aria-hidden="true">${ROMAN[i]} · </span>`;
-      if (isDone(room)) {
-        const h = headOf(room, codes);
-        return `<li class="so-far__item is-done" data-room="${room}"><button class="so-far__line" type="button" data-js="sofar-line" data-room="${room}" data-go="${room}-result">
+    // 마친 방만 줄로 (아직 안 연 방의 "?" 줄은 입구에서 보이지 않아 10단계에서 만들지 않는다)
+    js("hub-sofar-list").innerHTML = filled.map((room) => {
+      const num = `<span aria-hidden="true">${ROMAN[chapterOf(room) - 1]} · </span>`;
+      const h = headOf(room, codes);
+      return `<li class="so-far__item is-done" data-room="${room}"><button class="so-far__line" type="button" data-js="sofar-line" data-room="${room}" data-go="${room}-result">
             <span class="so-far__mark" aria-hidden="true">${SIG[room]}</span>
             <span class="so-far__text"><span class="so-far__room">${num}${esc(T.rooms[room].name)} · <b data-js="sofar-result">${esc(h.title)}</b></span><span class="so-far__key" data-js="sofar-key">${esc(clip(h.key))}</span></span>
             <span class="so-far__go" aria-hidden="true">›</span>
           </button></li>`;
-      }
-      return `<li class="so-far__item is-upcoming" data-room="${room}"><span class="so-far__line">
-          <span class="so-far__mark" aria-hidden="true">?</span>
-          <span class="so-far__text"><span class="so-far__room">${num}${esc(T.rooms[room].name)}</span><span class="so-far__key">${esc(S.upcoming)}</span></span>
-        </span></li>`;
     }).join("");
+    // (10단계) 이어가기 코드: 0방 = 넣기 링크, 1방 이상 = 만들기 링크(so-far 안). 3방일 때만 절반 한 줄. 복원 직후 한 줄
+    show(js("resume-enter"), n === 0);
+    show(js("hub-half"), n === 3);
+    show(js("resume-restored"), justRestored && n > 0);
     renderBookCard();
   }
   enter.hub = renderHub;
+  leave.hub = () => {
+    justRestored = false;
+    closeResume();
+  };
+
+  // ───────── (10단계 10-1 b) 이어가기 코드 ─────────
+  // 코드 글자는 이 함수들 안의 지역 값과 화면(resume-code 글자·입력 칸)에만 있다. state·sessionStorage·localStorage·쿠키·주소·네트워크·분석·공유 카드·console에 넣지 않는다.
+  // 만들기: 버튼을 누른 순간에만 계산. 입구를 떠나거나 "내 정보 지우기"를 누르면 화면의 코드도 지운다.
+  // 넣기: <form>이 아니다(제출·주소 변화 없음). Enter와 확인 버튼을 JS로만 처리하고, 복원이 끝나면 입력 칸을 비운다.
+  const Resume = window.PayCode.Resume;
+  let justRestored = false;
+  const resumeEl = {
+    enterToggle: js("resume-enter-toggle"), enterPanel: js("resume-enter-panel"), input: js("resume-input"), error: js("resume-error"),
+    makeToggle: js("resume-make-toggle"), makePanel: js("resume-make-panel"), code: js("resume-code"), copied: js("resume-copied"),
+  };
+  function setPanel(toggle, panel, open) {
+    toggle.setAttribute("aria-expanded", String(open));
+    show(panel, open);
+    // 패널 위 끝이 상단 막대 바로 아래에 오게 (경고와 복사 버튼이 한 화면에 함께 보이도록)
+    if (open) window.scrollTo(0, Math.max(0, panel.getBoundingClientRect().top + window.scrollY - js("topbar").getBoundingClientRect().height - 12));
+  }
+  function resumeError(msg) {
+    resumeEl.error.textContent = msg;
+    show(resumeEl.error, Boolean(msg));
+    if (msg) resumeEl.input.setAttribute("aria-invalid", "true");
+    else resumeEl.input.removeAttribute("aria-invalid");
+  }
+  function closeResume() {
+    setPanel(resumeEl.enterToggle, resumeEl.enterPanel, false);
+    setPanel(resumeEl.makeToggle, resumeEl.makePanel, false);
+    resumeEl.input.value = "";
+    resumeEl.code.textContent = "";
+    show(resumeEl.copied, false);
+    resumeError("");
+  }
+  // 지금 방문 기록 → 이어가기 코드에 담을 값 (결과 번호와 주제 키뿐)
+  function resumeCodes() {
+    const v = state.visits;
+    return Object.assign(myRoomCodes(), { runeTopic: v.rune ? v.rune.topic : null, sibylTopic: v.sibyl ? v.sibyl.topic : null });
+  }
+  resumeEl.makeToggle.addEventListener("click", () => {
+    const open = resumeEl.makeToggle.getAttribute("aria-expanded") !== "true";
+    show(resumeEl.copied, false);
+    let code = "";
+    if (open) {
+      try {
+        code = Resume.pretty(Resume.encode(resumeCodes()));
+      } catch (e) {
+        return; // 순서가 어긋난 옛 기록 등: 코드를 만들지 않는다
+      }
+    }
+    resumeEl.code.textContent = code;
+    setPanel(resumeEl.makeToggle, resumeEl.makePanel, open);
+    if (open) js("resume-copy").focus({ preventScroll: true });
+  });
+  js("resume-copy").addEventListener("click", async () => {
+    const ok = await ShareButtons.copyText(resumeEl.code.textContent);
+    show(resumeEl.copied, ok); // 클립보드가 막힌 브라우저: 코드는 이미 고를 수 있는 글자라 그대로 둔다
+  });
+  resumeEl.enterToggle.addEventListener("click", () => {
+    const open = resumeEl.enterToggle.getAttribute("aria-expanded") !== "true";
+    setPanel(resumeEl.enterToggle, resumeEl.enterPanel, open);
+    if (open) resumeEl.input.focus({ preventScroll: true });
+  });
+  // 결과 번호 → 방문 기록. 원형 태그는 공개 데이터에서 다시 찾는다. 데이터에 없는 번호면 null
+  function visitsFromCodes(c) {
+    const v = {};
+    if (c.ogham != null) v.ogham = OGHAM[c.ogham] && { ogham: c.ogham, archetype: OGHAM[c.ogham].archetype };
+    if (c.star != null) v.star = NAKS[c.star] && { nak: c.star, restored: true, archetype: NAKS[c.star].archetype };
+    if (c.decan != null) v.decan = DECANS[c.decan] && { decan: c.decan, when: null, archetype: DECANS[c.decan].archetype };
+    if (c.tzolkin) v.tzolkin = TZ_SIGNS[c.tzolkin.sign] && { number: c.tzolkin.number, sign: c.tzolkin.sign, archetype: TZ_SIGNS[c.tzolkin.sign].archetype };
+    if (c.rune) v.rune = c.rune.every((i) => RUNES[i]) ? { picks: c.rune.map((i) => RUNES[i].code), topic: c.runeTopic, archetype: RUNES[c.rune[2]].archetype } : null;
+    if (c.sibyl != null) v.sibyl = ORACLES[c.sibyl] && { sors: c.sibyl, topic: c.sibylTopic, archetype: ORACLES[c.sibyl].archetype };
+    return Object.keys(v).every((room) => validVisit(room, v[room])) ? v : null;
+  }
+  function restoreFromCode() {
+    if (filledRooms().length) return; // 넣기는 마친 방이 없을 때만
+    const r = Resume.decode(resumeEl.input.value);
+    const visits = r.codes ? visitsFromCodes(r.codes) : null;
+    if (!visits) {
+      resumeError(T.resume.errors[r.error || "shape"]);
+      return resumeEl.input.focus();
+    }
+    state = { profile: {}, visits, restored: true };
+    save();
+    closeResume(); // 입력 칸을 비운다
+    justRestored = true;
+    renderHub();
+    window.scrollTo(0, 0);
+  }
+  js("resume-go").addEventListener("click", restoreFromCode);
+  resumeEl.input.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    restoreFromCode();
+  });
+  resumeEl.input.addEventListener("input", () => resumeError(""));
+  // 복원 상태 안내 한 줄(마크업의 별의 방 견본을 틀로 쓴다). text = 문구, room = 다시 입력할 방
+  const restoreTpl = js("restore-note");
+  function restoreNote(text, room) {
+    const el = restoreTpl.cloneNode(true);
+    el.classList.remove("is-hidden");
+    el.firstElementChild.removeAttribute("data-t");
+    el.firstElementChild.textContent = text;
+    const btn = js("restore-reinput", el);
+    btn.dataset.room = room;
+    btn.dataset.go = `${room}-input`;
+    return el;
+  }
+  // 다시 입력: 그 방 입력 화면을 입력칸이 보이는 상태로 (문서 click 위임보다 먼저 실행된다)
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest('[data-js="restore-reinput"]');
+    if (b && b.dataset.room in editing) editing[b.dataset.room] = true;
+  }, true);
 
   // ───────── 입력 화면 공통 ─────────
   const editing = { rune: false, star: false, ogham: false, decan: false, tzolkin: false };
@@ -862,14 +974,18 @@
     });
     if (name) {
       const latin = Calc.romanize(name);
+      // 라벨이 "영문 · 한글" 모양이면 영문 부분에만 lang="en" (10-7)
+      const label = esc(R.nameLabel).replace(/^([\x20-\x7e]*[A-Za-z][\x20-\x7e]*?)( · )/, '<span lang="en">$1</span>$2');
       parts.push(`<aside class="inset inset--name" data-js="rune-name-runes" data-reveal>
-            <p class="inset__label">${R.nameLabel}</p>
+            <p class="inset__label">${label}</p>
             <p class="name-runes runic" data-js="rune-name-glyphs">${toRunes(latin)}</p>
             <p class="inset__fact"><span data-js="rune-name-source">${esc(name)}</span> → <span class="latin" data-js="rune-name-latin">${esc(latin.toUpperCase())}</span></p>
             <p class="inset__fact">${R.nameFact}</p>
           </aside>`);
     }
     renderReading(scr, parts, "");
+    // (10단계) 복원 상태: 이름을 룬으로 새긴 인셋은 이름이 있어야 그릴 수 있다 → 그 자리에 안내 한 줄 (룬은 다시 던지지 않으므로 이름은 오검의 방에서 다시 넣는다)
+    if (state.restored && !name) js("reading-body", scr).append(restoreNote(T.resume.needName, "ogham"));
     renderBookLine(scr, now.now.hook);
 
     const list = [past, now, next].map((r) => fill(R.factItem, { name: r.name, aett: R.aett[Math.floor(r.index / 8)] })).join(", ");
@@ -1120,9 +1236,12 @@
     const R = T.star.result;
     const nak = NAKS[v.nak];
     const planet = PLANETS[v.nak % 9];
-    const west = RASHIS[v.west];
-    const sun = RASHIS[v.sunRashi];
-    const moon = RASHIS[v.moonRashi];
+    // (10단계) 이어가기 코드로 복원한 결과(v.restored): 서양 별자리·해/달 라시·시각 안내는 생일이 있어야 그릴 수 있다.
+    // → 반전 카드의 그 부분과 '마음' 사실 줄을 숨기고(빈칸·틀린 값으로 채우지 않는다) 안내 한 줄 + 다시 입력 링크를 보인다
+    const restored = v.restored === true;
+    const west = restored ? null : RASHIS[v.west];
+    const sun = restored ? null : RASHIS[v.sunRashi];
+    const moon = restored ? null : RASHIS[v.moonRashi];
     const who = whoOf(state.profile.name || "");
     starView = { v, nak, west, sun };
 
@@ -1139,18 +1258,26 @@
     js("result-meta", scr).textContent = strip(fill(R.meta, { who }));
 
     const same = v.west === v.sunRashi;
-    js("twist-from", scr).textContent = west.ko;
-    js("twist-to", scr).textContent = sun.ko;
-    js("turn-text", scr).innerHTML = same ? fill(R.twistSame, { sign: west.ko }) : fill(R.twistDiff, { sanskrit: sun.name, sign: sun.ko });
+    const turn = js("result-turn", scr);
     const note = js("result-time-note", scr);
-    show(note, !v.exact);
-    note.textContent = v.when ? fill(R.timeNoteChosen, { when: v.when }) : R.timeNoteNoon;
+    [$('[data-t="star.result.twistEyebrow"]', turn), $('[data-t="star.result.twistTitle"]', turn), js("twist-from", scr).parentElement, js("turn-text", scr)].forEach((el) => show(el, !restored));
+    show(js("restore-note", scr), restored);
+    if (restored) {
+      js("twist-from", scr).textContent = js("twist-to", scr).textContent = js("turn-text", scr).textContent = note.textContent = "";
+      show(note, false);
+    } else {
+      js("twist-from", scr).textContent = west.ko;
+      js("twist-to", scr).textContent = sun.ko;
+      js("turn-text", scr).innerHTML = same ? fill(R.twistSame, { sign: west.ko }) : fill(R.twistDiff, { sanskrit: sun.name, sign: sun.ko });
+      show(note, !v.exact);
+      note.textContent = v.when ? fill(R.timeNoteChosen, { when: v.when }) : R.timeNoteNoon;
+    }
 
     // 핵심 풀이: lede → body 앞 단락 → 사실 목록 → 해석 안내 (8-1)
     const F = R.facts;
     const facts = [
       [F.symbol, nak.symbol], [F.sky, nak.star], [F.deity, nak.deity], [F.planet, planet.name],
-      [F.mind, fill(R.mindValue, { sanskrit: moon.name, sign: moon.ko })],
+      [F.mind, restored ? "" : fill(R.mindValue, { sanskrit: moon.name, sign: moon.ko })],
     ];
     renderReading(scr, [rLede(nak.identity.lede), ...nak.identity.body.map(rP), factsUl(facts), rP(R.interpretNote)], nak.identity.close);
     // 공감 카드 안 맞아요 인셋 (8-1 표 3번: 별은 traits)
@@ -1364,6 +1491,9 @@
       : "";
     latinEl.textContent = letters ? letters.latin.toUpperCase() : "";
     js("turn-text", scr).innerHTML = (letters ? fill(R.turnLead, { count: letters.letters.length, latin: esc(e.latin) }) + " " : "") + e.turn;
+    // (10단계) 복원 상태: 이름 글자 줄은 이름이 있어야 그릴 수 있다 → 그 자리에 안내 한 줄 + 다시 입력
+    js("restore-note", scr)?.remove();
+    if (state.restored && !name) latinEl.after(restoreNote(T.resume.needName, "ogham"));
 
     const F = R.facts;
     entryReading(scr, e, [
@@ -1900,14 +2030,25 @@
     go(`${room}-result`);
   });
 
+  // ═════════ (10단계 10-2) 링크 복사·카카오톡 자리 (common/share-buttons.js) ═════════
+  // 서비스 주소는 이 값 하나만 쓴다: data.js site.url, 비어 있으면 지금 주소(쿼리·해시 없음). 입력값·결과 코드는 넣지 않는다.
+  // 카카오톡: kakao.jsKey·sdkUrl이 비어 있으면 버튼을 만들지 않고 SDK도 부르지 않는다. 공유 내용은 제목·설명·og-image·주소뿐
+  const SITE_URL = ShareButtons.siteUrl(T.site.url);
+  ShareButtons.init({
+    url: SITE_URL,
+    kakao: { jsKey: T.kakao.jsKey, sdkUrl: T.kakao.sdkUrl, label: T.share.kakao, title: T.meta.title, description: T.meta.description, imageUrl: new URL("og-image.png", SITE_URL).href, onFail: () => toast(T.toast.shareFail) },
+  });
+
   // ═════════ 공유 카드 ═════════
   async function shareCard(btn, build) {
     if (btn.classList.contains("is-loading")) return;
     btn.classList.add("is-loading");
     try {
       const { opts, file, text } = build();
-      const canvas = await ShareCard.render(Object.assign({ fonts: FONTS, footer: T.card.footer, footerY: 1630 }, opts));
-      const how = await ShareCard.share(canvas, file, text);
+      // (10단계 10-2) 공유 글 끝에 표시용 주소를 붙이고, 공유 시트에는 url도 넘긴다. 카드 하단 주소 줄은 site.url을 넣었을 때만
+      const showUrl = ShareButtons.displayUrl(SITE_URL);
+      const canvas = await ShareCard.render(Object.assign({ fonts: FONTS, footer: T.card.footer, footerY: 1630, footerUrl: T.site.url ? showUrl : "" }, opts));
+      const how = await ShareCard.share(canvas, file, `${text} ${showUrl}`, SITE_URL);
       if (how === "downloaded") toast(T.toast.saved);
     } catch (err) {
       toast(T.toast.shareFail);
@@ -1985,7 +2126,8 @@
         title: nak.name, titleSize: 110,
         subtitle: nak.title,
         lines: [strip(nak.key)],
-        badges: [v.west === v.sunRashi ? fill(C.twistSame, { sign: west.ko }) : fill(C.twist, { west: west.ko, vedic: sun.ko }), C.badge],
+        // 복원한 결과에는 서양 별자리·해 라시가 없다 → 반전 알약을 뺀다
+        badges: (v.restored ? [] : [v.west === v.sunRashi ? fill(C.twistSame, { sign: west.ko }) : fill(C.twist, { west: west.ko, vedic: sun.ko })]).concat([C.badge]),
         guideSignature: { name: T.guides.star.name, line: strip(T.guides.star.signature) },
       },
     };
@@ -2142,8 +2284,9 @@
   };
   function clearPaidSamples() {
     ["report-timeline", "report-match-rooms", "report-open", "report-close", "report-match", "report-deep-strength", "report-deep-shadow", "report-deep-growth",
-      "report-title", "report-meta", "receipt-code", "receipt-code-end", "unseal-error-code", "deeper-total", "deeper-items", "deeper-volume", "deeper-price", "deeper-saved-value"]
+      "report-title", "report-meta", "receipt-code", "receipt-code-end", "unseal-error-code", "deeper-total", "deeper-items", "deeper-volume", "deeper-price", "deeper-saved-value", "deeper-peek-arch"]
       .forEach((n) => (js(n).textContent = ""));
+    jsAll("deeper-read-time").forEach((el) => (el.textContent = ""));
     [...js("report-match-pair").children].forEach((s, i) => i !== 1 && (s.textContent = ""));
     jsAll("deeper-toc-item").forEach((li) => ["toc-name", "toc-vol", "toc-teaser"].forEach((n) => (js(n, li).textContent = "")));
   }
@@ -2402,9 +2545,15 @@
       js("toc-teaser", li).textContent = teaser[part];
     });
     js("deeper-total").textContent = fill(Tt.total, { n: comma(P.total) });
+    // (10단계 10-3 c) 읽는 시간: 글자 수 ÷ 500(분당 500자 가정)을 올림. 속표지·목차 제목 옆·고지 표 분량 칸 세 곳에 같은 값
+    const readTime = fill(T.deeper.readTime, { n: Math.ceil(P.total / READ_PER_MIN) });
+    jsAll("deeper-read-time", deeperScr).forEach((el) => (el.textContent = el.closest('[data-js="deeper-peek"]') ? readTime : T.common.sep.trim() + " " + readTime));
+    const peekArch = js("deeper-peek-arch");
+    peekArch.textContent = meName;
+    show(peekArch, Boolean(meName));
     const D = T.deeper.disclosure;
     js("deeper-items").textContent = fill(D.items, { rooms: P.rooms.length, match: P.p ? D.itemsMatch.partner : D.itemsMatch.map });
-    js("deeper-volume").textContent = fill(D.volume, { n: bigNum(P.total), fresh: bigNum(P.fresh) });
+    js("deeper-volume").textContent = fill(D.volume, { n: bigNum(P.total), fresh: bigNum(P.fresh) }) + T.common.sep + readTime;
     return P;
   }
   // 결제는 여섯 문을 모두 지난 뒤에만 (8-1). 그전에는 잠금 블록(핍 + N/6 + 다음 문 열기)만, 동의 체크·결제 버튼은 숨긴다
@@ -2613,7 +2762,8 @@
       const code = PayCode.normalize(input.value);
       show(err, false);
       if (!code || !PayCode.decode(code)) {
-        err.textContent = T.receipt.errors.format;
+        // (10단계) 이어가기 코드(SOG1…)는 이 칸이 아니다: 서버에 묻지 않고 안내 한 줄만. 유료 내용을 열지 않는다
+        err.textContent = Resume.looksResume(input.value) ? T.receipt.errors.wrongBox : T.receipt.errors.format;
         show(err, true);
         return input.focus();
       }

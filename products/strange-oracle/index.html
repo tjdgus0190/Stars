@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <!-- title·description은 data.js의 TEXT.meta와 같은 문장으로 맞춰 둔다 (검색·공유 미리보기는 JS 실행 전 값을 읽는다) -->
-  <title>낯선 점술관 — 룬 · 베다 · 오검 · 데칸 · 촐킨 · 시빌라 신탁</title>
-  <meta name="description" content="켈트 오검, 인도 베다 점성술, 이집트 데칸, 마야 촐킨, 로마 시빌라 신탁, 바이킹 룬. 사주도 타로도 아닌 여섯 낯선 방식으로 나를 읽어 보는 무료 운세." />
+  <title>낯선 점술관 — 오검 · 베다 · 데칸 · 촐킨 · 룬 · 시빌라 신탁</title>
+  <meta name="description" content="켈트 오검, 인도 베다 점성술, 이집트 데칸, 마야 촐킨, 바이킹 룬, 로마 시빌라 신탁. 사주도 타로도 아닌 여섯 낯선 방식으로 나를 읽어 보는 무료 운세." />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="낯선 점술관 — 룬 · 베다 · 오검 · 데칸 · 촐킨 · 시빌라 신탁" />
-  <meta property="og:description" content="켈트 오검, 인도 베다 점성술, 이집트 데칸, 마야 촐킨, 로마 시빌라 신탁, 바이킹 룬. 사주도 타로도 아닌 여섯 낯선 방식으로 나를 읽어 보는 무료 운세." />
+  <meta property="og:title" content="낯선 점술관 — 오검 · 베다 · 데칸 · 촐킨 · 룬 · 시빌라 신탁" />
+  <meta property="og:description" content="켈트 오검, 인도 베다 점성술, 이집트 데칸, 마야 촐킨, 바이킹 룬, 로마 시빌라 신탁. 사주도 타로도 아닌 여섯 낯선 방식으로 나를 읽어 보는 무료 운세." />
   <meta property="og:image" content="og-image.png" />
   <meta name="theme-color" content="#080717" />
   <!-- 파비콘 파일이 없어 브라우저가 /favicon.ico를 요청하고 404를 내지 않도록 빈 아이콘 지정 (developer) -->
@@ -248,48 +248,9 @@
         </div>
       </div>
 
-      <!-- (8단계) 여정 한눈에. (결정 52) 칩 3개는 점으로 이은 한 줄로. 여섯 방 줄(journey-path)은 바로 아래 여섯 문과 겹쳐 hidden.
-           journey-step 마크업은 JS가 상태 class를 계속 붙이므로 남겨 둔다 -->
+      <!-- (8단계) 여정 한눈에. (결정 52) 칩 3개는 점으로 이은 한 줄로. 여섯 방 줄(journey-path)은 여섯 문과 겹쳐 10단계(10-6)에서 지웠다 -->
       <section class="journey" aria-labelledby="journey-title">
         <h2 class="visually-hidden" id="journey-title" data-t="hub.journey.title">여정 한눈에</h2>
-        <ol class="journey__path" data-js="journey-path" hidden>
-          <li class="journey__step is-visited" data-room="ogham" data-js="journey-step">
-            <span class="journey__mark" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
-            <span class="journey__num" aria-hidden="true">I</span>
-            <span class="journey__name" data-t="rooms.ogham.short">오검</span>
-            <span class="journey__reads" data-t="hub.doors.ogham.reads"></span>
-          </li>
-          <li class="journey__step is-visited" data-room="star" data-js="journey-step">
-            <span class="journey__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span>
-            <span class="journey__num" aria-hidden="true">II</span>
-            <span class="journey__name" data-t="rooms.star.short">별</span>
-            <span class="journey__reads" data-t="hub.doors.star.reads"></span>
-          </li>
-          <li class="journey__step is-next" data-room="decan" data-js="journey-step">
-            <span class="journey__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></span>
-            <span class="journey__num" aria-hidden="true">III</span>
-            <span class="journey__name" data-t="rooms.decan.short">데칸</span>
-            <span class="journey__reads" data-t="hub.doors.decan.reads"></span>
-          </li>
-          <li class="journey__step is-locked" data-room="tzolkin" data-js="journey-step">
-            <span class="journey__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span>
-            <span class="journey__num" aria-hidden="true">IV</span>
-            <span class="journey__name" data-t="rooms.tzolkin.short">촐킨</span>
-            <span class="journey__reads" data-t="hub.doors.tzolkin.reads"></span>
-          </li>
-          <li class="journey__step is-locked" data-room="rune" data-js="journey-step">
-            <span class="journey__mark" aria-hidden="true"><svg class="sig sig--rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></span>
-            <span class="journey__num" aria-hidden="true">V</span>
-            <span class="journey__name" data-t="rooms.rune.short">룬</span>
-            <span class="journey__reads" data-t="hub.doors.rune.reads"></span>
-          </li>
-          <li class="journey__step is-locked" data-room="sibyl" data-js="journey-step">
-            <span class="journey__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></span>
-            <span class="journey__num" aria-hidden="true">VI</span>
-            <span class="journey__name" data-t="rooms.sibyl.short">시빌라</span>
-            <span class="journey__reads" data-t="hub.doors.sibyl.reads"></span>
-          </li>
-        </ol>
         <p class="doors-note" data-t="hub.journey.order">문은 순서대로 하나씩 열려요</p>
       </section>
 
@@ -410,22 +371,6 @@
             <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">II · </span><span data-t="rooms.star.name"></span> · <b data-js="sofar-result"></b></span><span class="so-far__key" data-js="sofar-key"></span></span>
             <span class="so-far__go" aria-hidden="true">›</span>
           </button></li>
-          <li class="so-far__item is-upcoming" data-room="decan"><span class="so-far__line">
-            <span class="so-far__mark" aria-hidden="true">?</span>
-            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">III · </span><span data-t="rooms.decan.name"></span></span><span class="so-far__key" data-t="hub.sofar.upcoming">아직 열리지 않은 이야기</span></span>
-          </span></li>
-          <li class="so-far__item is-upcoming" data-room="tzolkin"><span class="so-far__line">
-            <span class="so-far__mark" aria-hidden="true">?</span>
-            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">IV · </span><span data-t="rooms.tzolkin.name"></span></span><span class="so-far__key" data-t="hub.sofar.upcoming">아직 열리지 않은 이야기</span></span>
-          </span></li>
-          <li class="so-far__item is-upcoming" data-room="rune"><span class="so-far__line">
-            <span class="so-far__mark" aria-hidden="true">?</span>
-            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">V · </span><span data-t="rooms.rune.name"></span></span><span class="so-far__key" data-t="hub.sofar.upcoming">아직 열리지 않은 이야기</span></span>
-          </span></li>
-          <li class="so-far__item is-upcoming" data-room="sibyl"><span class="so-far__line">
-            <span class="so-far__mark" aria-hidden="true">?</span>
-            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">VI · </span><span data-t="rooms.sibyl.name"></span></span><span class="so-far__key" data-t="hub.sofar.upcoming">아직 열리지 않은 이야기</span></span>
-          </span></li>
         </ol>
         <button class="so-far__all" type="button" data-go="story" data-js="hub-story"><span data-t="hub.sofar.all">나의 이야기 전체 보기</span> <span aria-hidden="true">→</span></button>
         <!-- (10단계 10-1 b) 이어가기 코드 만들기: 마친 방 1개 이상(=이 영역이 보일 때). 누를 때만 그 자리에서 계산해 resume-code에 넣는다.
@@ -473,7 +418,7 @@
             <input class="input receipt-open__input" id="receipt-open-hub" data-js="receipt-open-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="SO1A-B2C3-D4E5-…" data-ph="receipt.open.placeholder" />
             <button class="btn btn--secondary receipt-open__go" type="submit" data-js="receipt-open-go" data-t="receipt.open.go">다시 열기</button>
           </div>
-          <p class="receipt-open__how" data-t="receipt.open.how">결제 직후 받은 코드를 넣으면 이름·생년월일 없이 리포트 전체가 다시 열려요.</p>
+          <p class="receipt-open__how" data-t="receipt.open.how">결제 직후 받은 코드를 넣으면 이름·생년월일 없이 책 전체가 다시 열려요.</p>
           <p class="field__error is-hidden" data-js="receipt-open-error" role="alert"></p>
         </form>
       </div>
@@ -2232,7 +2177,7 @@
             <input class="input receipt-open__input" id="receipt-open-story" data-js="receipt-open-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="SO1A-B2C3-D4E5-…" data-ph="receipt.open.placeholder" />
             <button class="btn btn--secondary receipt-open__go" type="submit" data-js="receipt-open-go" data-t="receipt.open.go">다시 열기</button>
           </div>
-          <p class="receipt-open__how" data-t="receipt.open.how">결제 직후 받은 코드를 넣으면 이름·생년월일 없이 리포트 전체가 다시 열려요.</p>
+          <p class="receipt-open__how" data-t="receipt.open.how">결제 직후 받은 코드를 넣으면 이름·생년월일 없이 책 전체가 다시 열려요.</p>
           <p class="field__error is-hidden" data-js="receipt-open-error" role="alert"></p>
         </form>
         </div>
@@ -2368,7 +2313,7 @@
 
       <!-- 내 리포트에 필요한 입력 -->
       <section class="deeper-input" aria-labelledby="deeper-input-title">
-        <h2 class="deeper-input__title" id="deeper-input-title" data-t="deeper.input.title">리포트에 쓸 정보</h2>
+        <h2 class="deeper-input__title" id="deeper-input-title" data-t="deeper.input.title">책에 쓸 정보</h2>
 
         <!-- 프로필에 생년월일이 있으면: 확인 카드만 (입력칸은 .is-hidden) -->
         <div class="saved-info" data-js="deeper-saved">
@@ -2427,12 +2372,12 @@
           <div class="disclosure__row"><dt data-t="deeper.disclosure.volumeLabel">분량</dt><dd data-js="deeper-volume"></dd></div>
           <div class="disclosure__row disclosure__row--price"><dt data-t="deeper.disclosure.priceLabel">가격</dt><dd><b data-js="deeper-price"></b> <span data-js="deeper-vat" data-t="deeper.disclosure.vat">(부가세 ◯◯)</span></dd></div>
           <div class="disclosure__row"><dt data-t="deeper.disclosure.howLabel">이용 방법</dt><dd data-t="deeper.disclosure.how">로그인은 없어요. 결제 직후 보여 드리는 영수증 코드로 언제든 다시 열 수 있어요. 코드를 잃어버리면 다시 열 수 없을 수 있으니 꼭 적어 두세요(문의 시 결제 시각·금액으로 찾아 드려요).</dd></div>
-          <div class="disclosure__row"><dt data-t="deeper.disclosure.refundLabel">청약철회·환불</dt><dd data-t="deeper.disclosure.refund">디지털 콘텐츠는 결제 완료와 동시에 열람이 시작되어 청약철회가 제한됩니다. 다만 리포트가 열리지 않거나 내용이 표시·안내와 다르면 환불해 드립니다. 문의: ◯◯ · 처리 기간: ◯◯</dd></div>
+          <div class="disclosure__row"><dt data-t="deeper.disclosure.refundLabel">청약철회·환불</dt><dd data-t="deeper.disclosure.refund">디지털 콘텐츠는 결제 완료와 동시에 열람이 시작되어 청약철회가 제한됩니다. 다만 책이 열리지 않거나 내용이 표시·안내와 다르면 환불해 드립니다. 문의: ◯◯ · 처리 기간: ◯◯</dd></div>
           <div class="disclosure__row" data-js="deeper-minor"><dt data-t="deeper.disclosure.minorLabel">미성년자</dt><dd data-t="deeper.disclosure.minor">◯◯ (운영자 확인 전)</dd></div>
         </dl>
         <label class="check consent" data-js="deeper-consent-row">
           <input type="checkbox" data-js="deeper-consent" />
-          <span data-t="deeper.consent">결제 즉시 리포트가 열리며, 열린 뒤에는 청약철회가 제한된다는 것을 확인했어요.</span>
+          <span data-t="deeper.consent">결제 즉시 책이 열리며, 열린 뒤에는 청약철회가 제한된다는 것을 확인했어요.</span>
         </label>
       </section>
 
@@ -2495,7 +2440,7 @@
       <!-- 승인 확인 실패 (.is-hidden 해제 + 화면에 .is-error). 결제는 됐을 수 있으므로 영수증 코드로 열기를 함께 안내 -->
       <div class="unseal-error is-hidden" data-js="unseal-error" role="alert">
         <p class="unseal-error__title" data-t="unseal.error.title">봉인을 여는 중에 연결이 끊겼어요</p>
-        <p class="unseal-error__text" data-t="unseal.error.text">결제가 됐다면 리포트는 안전하게 남아 있어요. 다시 시도하거나, 아래 코드로 열어 주세요.</p>
+        <p class="unseal-error__text" data-t="unseal.error.text">결제가 됐다면 책은 안전하게 남아 있어요. 다시 시도하거나, 아래 코드로 열어 주세요.</p>
         <p class="unseal-error__code" data-js="unseal-error-code"></p>
         <button class="btn btn--primary btn--block" type="button" data-js="unseal-retry" data-t="unseal.error.retry">다시 시도하기</button>
       </div>
@@ -2516,7 +2461,7 @@
             <span class="leather__corner leather__corner--tl" aria-hidden="true"></span><span class="leather__corner leather__corner--tr" aria-hidden="true"></span><span class="leather__corner leather__corner--bl" aria-hidden="true"></span><span class="leather__corner leather__corner--br" aria-hidden="true"></span>
             <!-- (8단계) 표지: 소장판 · 원형 이름 · 여섯 방 문양 -->
             <header class="report-head book-cover" id="book-top">
-              <p class="report-head__badge" data-t="report.badge">소장판</p>
+              <p class="report-head__badge" data-t="report.badge">한 권의 책</p>
               <h1 class="report-head__title" data-js="report-title"></h1>
               <p class="report-head__meta" data-js="report-meta"></p>
               <ul class="book-cover__marks" aria-hidden="true">
@@ -2570,7 +2515,7 @@
             <button class="btn btn--secondary btn--small" type="button" data-js="receipt-copy" data-t="receipt.copy">코드 복사</button>
             <a class="receipt__toss is-hidden" data-js="receipt-toss" href="#" target="_blank" rel="noopener" data-t="receipt.toss">결제 영수증 보기</a>
           </div>
-          <p class="receipt__text" data-t="receipt.text">이 코드가 있으면 다른 기기에서도 다시 열 수 있어요. 코드를 아는 사람은 누구나 이 리포트를 볼 수 있으니 공유하지 마세요.</p>
+          <p class="receipt__text" data-t="receipt.text">이 코드가 있으면 다른 기기에서도 다시 열 수 있어요. 코드를 아는 사람은 누구나 이 책을 볼 수 있으니 공유하지 마세요.</p>
           <button class="btn btn--text receipt__forget" type="button" data-js="receipt-forget" data-t="receipt.forget">이 탭에서 코드 지우기</button>
         </aside>
 
@@ -2824,6 +2769,7 @@
   <p class="toast" data-js="toast" role="status" aria-live="polite"></p>
 
   <script src="../../common/share-card.js"></script>
+  <script src="../../common/share-buttons.js"></script>
   <script src="../../common/disclaimer.js"></script>
   <script src="data.js"></script>
   <script src="data-runes.js"></script>

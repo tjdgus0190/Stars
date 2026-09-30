@@ -147,7 +147,7 @@ function paidSentences() {
   await ev("history.back()");
   await sleep(700);
   check("한 번 더 뒤로 → 입구", (await active()) === "screen-hub" && (await ev("location.href.startsWith('http://127.0.0.1:8788/')")));
-  check("입구: 1/6 · 지금까지 줄(오검 결과 이름) + ? 줄 5개", (await txt("[data-js=hub-progress-count]")) === "1/6" && (await ev("document.querySelectorAll('[data-js=sofar-line]').length")) === 1 && (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 5 && (await txt("[data-js=sofar-result]")) === (await ev("OGHAM[JSON.parse(sessionStorage.getItem('strange-oracle')).visits.ogham.ogham].title")));
+  check("입구: 1/6 · 지금까지 줄(오검 결과 이름) 1개, '?' 줄은 만들지 않음(10-6)", (await txt("[data-js=hub-progress-count]")) === "1/6" && (await ev("document.querySelectorAll('[data-js=sofar-line]').length")) === 1 && (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await txt("[data-js=sofar-result]")) === (await ev("OGHAM[JSON.parse(sessionStorage.getItem('strange-oracle')).visits.ogham.ogham].title")));
   check("주 버튼 = II 별의 방 열기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "star" && (await txt("[data-js=hub-cta-num]")) === "II");
   await click("[data-js=sofar-line]");
   check("지금까지 줄 → 결과 다시 보기(번쩍)", await waitScreen("screen-ogham-result", 3000));
@@ -215,7 +215,192 @@ function paidSentences() {
   check("6/6: '?' 줄 없음, 결제 꺼짐이면 책 카드 숨김", (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await has("[data-js=hub-paid]", "is-hidden")));
   await shot(P + "03-hub-done.png");
 
+  // ═══ 10단계: 이어가기 코드·링크 복사·찌꺼기 정리·이름 미리 채움 (spec 10-1·10-2·10-6·10-7) ═══
+  const setVal = (sel, v) => ev(`(() => { const i = document.querySelector(${JSON.stringify(sel)}); i.value = ${JSON.stringify(String(v))}; i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const hiddenEl = (sel) => ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); return !e || e.offsetParent === null; })()`);
+  const stubClip = (ok) => ev(`(() => { window.__clip = null; navigator.clipboard.writeText = async (t) => { if (!${ok}) throw new Error('blocked'); window.__clip = t; }; })()`);
+  const pressEnter = (sel) => ev(`document.querySelector(${JSON.stringify(sel)}).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))`);
+  const snap = () => ev("JSON.stringify({ rooms: StrangeOracle.filledRooms(), arch: StrangeOracle.currentArchetype(), lines: [...document.querySelectorAll('[data-js=sofar-result]')].map(e => e.textContent) })");
+  const CODES = []; // 이 시험에서 만든 이어가기 코드 (어디에도 남으면 안 된다)
+  const makeCode = async () => {
+    await click("[data-js=resume-make-toggle]");
+    const c = await txt("[data-js=resume-code]");
+    CODES.push(c, c.replace(/-/g, ""));
+    return c;
+  };
+  const enterCode = async (code, how = "button") => {
+    if (await hiddenEl("[data-js=resume-enter-panel]")) await click("[data-js=resume-enter-toggle]");
+    await setVal("[data-js=resume-input]", code);
+    if (how === "enter") await pressEnter("[data-js=resume-input]");
+    else await click("[data-js=resume-go]");
+    await sleep(150);
+  };
+
+  // (a) 0/6 입구: 넣기 링크만, 입력 칸 규칙
+  await ev("sessionStorage.clear()");
+  await b.goto(BASE);
+  await waitScreen("screen-hub", 3000);
+  check("10-1: 0/6 — '이어가기 코드가 있어요' 보임, 패널 접힘, 3/6 한 줄·만들기 없음", !(await hiddenEl("[data-js=resume-enter-toggle]")) && (await hiddenEl("[data-js=resume-enter-panel]")) && (await hiddenEl("[data-js=hub-half]")) && (await hiddenEl("[data-js=resume-make-toggle]")));
+  check("10-1: 입력 칸 autocomplete=off, name 없음, form 밖", await ev("(() => { const i = document.querySelector('[data-js=resume-input]'); return i.getAttribute('autocomplete') === 'off' && !i.hasAttribute('name') && !i.closest('form') && document.querySelector('[data-js=resume-go]').type === 'button'; })()"));
+  check("10-2: 카카오 키가 비어 있으면 자리 7곳 모두 비어 있음(버튼 없음)", await ev("TEXT.kakao.jsKey === '' && document.querySelectorAll('[data-js=share-kakao-slot]').length === 7 && [...document.querySelectorAll('[data-js=share-kakao-slot]')].every(s => s.childNodes.length === 0) && !window.Kakao"));
+  check("10-6: 숨긴 여정 줄(journey-path·journey-step) 마크업 0", (await ev("document.querySelectorAll('[data-js=journey-step], [data-js=journey-path], .journey__path').length")) === 0);
+  check("10-3 a: 화면 문구(data.js)에 리포트·소장판·더 깊은 이야기·DEEPER STORY 0건", await ev("!/리포트|소장판|더 깊은 이야기|DEEPER STORY/.test(JSON.stringify(TEXT))"));
+  check("10-7: 영문뿐인 윗줄은 모두 lang=en 또는 aria-hidden", await ev("[...document.querySelectorAll('[data-t]')].filter(e => /yebrow$/.test(e.dataset.t) && /^[\\x20-\\x7e]+$/.test(e.textContent.trim()) && /[A-Za-z]/.test(e.textContent)).every(e => e.closest('[lang=en]') || e.closest('[aria-hidden=true]'))"));
+  const url0 = await ev("location.href");
+  const req0 = b.log.requests.length;
+  await enterCode("SOG1-0000-0000-000");
+  check("10-1: 틀린 코드 → 모양 오류 한 줄, 복원 안 됨", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.shape")) && (await store()) === "" && (await ev("document.querySelector('[data-js=resume-input]').getAttribute('aria-invalid')")) === "true");
+  await enterCode("SO1A-B2C3-D4E5-F6G7-H8J9-K0MN-PQRS-TV", "enter");
+  check("10-1: 영수증 코드(SO1…)를 넣음 → '이 칸이 아니에요' 오류", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.receipt")) && (await store()) === "");
+  // Ⅰ·Ⅲ만 있는 코드(순서 어긋남): 시험용으로 직접 짠다
+  const badOrder = await ev(`(() => { const R = PayCode.Resume, A = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; let n = 0n; const d = { ogham: 3, decan: 11 };
+    for (const [k, r] of R.FIELDS) n = n * BigInt(r) + BigInt(d[k] || 0); let pl = ""; for (let i = 0; i < 10; i++) { pl = A[Number(n % 32n)] + pl; n /= 32n; }
+    let c = 0; for (let i = 0; i < 10; i++) c += (2 * i + 1) * A.indexOf(pl[i]); return R.PREFIX + pl + A[c % 32]; })()`);
+  await enterCode(badOrder);
+  check("10-1: 순서가 안 맞는 코드(Ⅰ·Ⅲ) → 순서 오류, 복원 안 됨", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.order")) && (await store()) === "");
+  check("10-1: 오류 뒤에도 주소 변화·페이지 이동·요청 없음", (await ev("location.href")) === url0 && b.log.requests.length === req0 && (await active()) === "screen-hub");
+
+  // (b) 3/6: 절반 한 줄 + 코드 만들기 (360x640에서 경고가 복사 버튼 위에 함께 보임)
+  for (const n of [2, 4]) {
+    await seed(ORDER.slice(0, n));
+    await b.goto(BASE);
+    await waitScreen("screen-hub", 3000);
+    check(`10-1 c: ${n}/6 — 절반 한 줄 숨김`, await hiddenEl("[data-js=hub-half]"));
+  }
+  await seed(ORDER.slice(0, 3));
+  await b.goto(BASE);
+  await waitScreen("screen-hub", 3000);
+  check("10-1 c: 3/6 — 절반 한 줄 + 링크 복사 글자 링크 보임, 넣기 링크 숨김", !(await hiddenEl("[data-js=hub-half]")) && !(await hiddenEl("[data-js=hub-half] [data-js=share-link-copy]")) && (await hiddenEl("[data-js=resume-enter-toggle]")));
+  await stubClip(true);
+  await click("[data-js=hub-half] [data-js=share-link-copy]");
+  await sleep(150);
+  const here = await ev("location.origin + location.pathname");
+  check("10-2: 3/6 링크 복사 = 서비스 주소(site.url 빈 값 → 지금 주소, ?·# 없음) + 완료 한 줄", (await ev("window.__clip")) === here && !/[?#]/.test(here) && !(await hiddenEl("#screen-hub [data-js=share-link-msg]")) && (await hiddenEl("#screen-hub [data-js=share-link-url]")));
+  const before3 = await snap();
+  await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 640, deviceScaleFactor: 2, mobile: true });
+  const reqMake = b.log.requests.length;
+  const code3 = await makeCode();
+  await sleep(200);
+  check("10-1: 코드 만들기 → SOG1 + 4자 묶음(15자, 20자 이내)", /^SOG1-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{3}$/.test(code3), code3.replace(/[0-9A-Z]/g, "#"));
+  const lay = await ev("(() => { const r = (n) => document.querySelector('[data-js=' + n + ']').getBoundingClientRect(); const c = r('resume-code'), w = r('resume-warn'), b = r('resume-copy'); return { codeTop: Math.round(c.top), warnTop: Math.round(w.top), warnBottom: Math.round(w.bottom), copyTop: Math.round(b.top), copyBottom: Math.round(b.bottom), h: innerHeight, warnLen: document.querySelector('[data-js=resume-warn]').textContent.trim().length }; })()");
+  check("10-1: 360x640 — 코드 → 경고 → 복사 버튼 순서로 한 화면 안(접힘·스크롤 밖 아님)", lay.codeTop >= 0 && lay.warnTop >= lay.codeTop && lay.warnBottom <= lay.copyTop && lay.copyBottom <= lay.h && lay.warnLen > 20, JSON.stringify(lay));
+  check("10-1: 경고에 '태어난 날을 거의 알아낼 수 있' 포함, '개인정보 없음·안전'류 0", await ev("(() => { const t = TEXT.resume.make.warn; return t.includes('태어난 날을 거의 알아낼 수 있') && !/안전|개인정보가 없|개인정보 없/.test(t); })()"));
+  await noHScroll("코드 만들기 펼침");
+  await shot(P + "10-resume-make.png");
+  await click("[data-js=resume-copy]");
+  await sleep(150);
+  check("10-1: 복사 버튼 → 클립보드 = 화면의 코드 + 복사 완료 한 줄", (await ev("window.__clip")) === code3 && !(await hiddenEl("[data-js=resume-copied]")));
+  await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 800, deviceScaleFactor: 2, mobile: true });
+  const leakHere = async () => { const st = await ev("JSON.stringify(Object.fromEntries(Object.keys(sessionStorage).map(k => [k, sessionStorage.getItem(k)]))) + '|' + JSON.stringify(Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))) + '|' + document.cookie + '|' + location.href + '|' + JSON.stringify(history.state)"); return CODES.filter((c) => st.includes(c)); };
+  check("10-1: 코드를 만드는 동안 요청 0건, 저장소·쿠키·주소·history에 코드 없음", b.log.requests.length === reqMake && (await leakHere()).length === 0 && (await ev("localStorage.length")) === 0 && (await ev("document.cookie")) === "");
+  await click("[data-js=topbar-home]").catch(() => {});
+  await ev("StrangeOracle.go('story')");
+  await waitScreen("screen-story", 3000);
+  await ev("StrangeOracle.go('hub')");
+  await waitScreen("screen-hub", 3000);
+  check("10-1: 입구를 떠났다 오면 패널 닫히고 화면의 코드 지워짐", (await hiddenEl("[data-js=resume-make-panel]")) && (await txt("[data-js=resume-code]")) === "");
+
+  // (c) 새 탭(저장소 빈 상태)에서 복원 — Enter 키
+  await ev("sessionStorage.clear()");
+  await b.goto(BASE);
+  await waitScreen("screen-hub", 3000);
+  const urlR = await ev("location.href");
+  const reqR = b.log.requests.length;
+  await enterCode(code3.toLowerCase(), "enter");
+  const after3 = await snap();
+  check("10-1: 코드 복원(Enter) → 같은 방 3개 마침·같은 원형·같은 결과 줄", after3 === before3, after3);
+  check("10-1: 복원 뒤 다음 문 = Ⅳ 촐킨, 복원 완료 한 줄 보임(출처 문구)", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "tzolkin" && !(await hiddenEl("[data-js=resume-restored]")) && (await txt("[data-js=resume-restored]")) === (await ev("TEXT.resume.restored")));
+  check("10-1: 복원 직후 입력 칸 비어 있음·넣기 링크 숨김", (await ev("document.querySelector('[data-js=resume-input]').value")) === "" && (await hiddenEl("[data-js=resume-enter-toggle]")));
+  check("10-1: 복원하는 동안 요청 0건·주소 변화 없음·코드가 저장소에 없음", b.log.requests.length === reqR && (await ev("location.href")) === urlR && (await leakHere()).length === 0);
+  const st3 = JSON.parse(await store());
+  check("10-1: sessionStorage에는 결과 코드만(이름·생일 없음, 별은 nak·restored만)", Object.keys(st3.profile).length === 0 && st3.restored === true && Object.keys(st3.visits).join() === "ogham,star,decan" && Object.keys(st3.visits.star).sort().join() === "archetype,nak,restored", JSON.stringify(st3).replace(/[0-9]/g, "#").slice(0, 160));
+  await shot(P + "11-resume-restored.png");
+  // 복원 상태의 방 결과: 이름 자리 = "당신", 입력값이 필요한 부분은 숨기고 안내 한 줄
+  await click("[data-js=sofar-line][data-room=star]");
+  await waitScreen("screen-star-result", 3000);
+  const starR = await ev("(() => { const s = document.querySelector('#screen-star-result'); const vis = (e) => !!e && e.offsetParent !== null; return { note: vis(s.querySelector('[data-js=restore-note]')), noteText: s.querySelector('[data-js=restore-note] span').textContent, twist: vis(s.querySelector('[data-js=twist-from]')), turnText: vis(s.querySelector('[data-js=turn-text]')), traits: vis(s.querySelector('[data-js=star-traits]')), facts: s.querySelectorAll('.reading__facts li').length, meta: s.querySelector('[data-js=result-meta]').textContent, open: s.querySelector('[data-js=guide-open] .say__line').textContent, bad: /undefined|null|NaN|\\{who\\}/.test(s.innerText) }; })()");
+  check("10-1: 복원한 별의 방 — 반전 카드(서양 별자리→라시)·'마음' 줄 숨김 + '생일을 다시 넣으면' 한 줄, 맞아요 인셋은 그대로", starR.note && starR.noteText === (await ev("TEXT.resume.needInput")) && !starR.twist && !starR.turnText && starR.traits && starR.facts === 4, JSON.stringify(starR).slice(0, 200));
+  check("10-1: 복원 상태 이름 자리 = '당신', 빈칸·undefined 없음", starR.meta.includes("당신") && starR.open.includes("당신") && !starR.bad, starR.meta);
+  await hookCards();
+  await ev("ShareCard.share = async (c, f, text, url) => { window.__share = { text, url }; return 'downloaded'; }");
+  await click("#screen-star-result [data-js=result-share]");
+  await waitFor("window.__share", 5000);
+  const shareArgs = await ev("JSON.stringify(window.__share)");
+  const cardOpts = await ev("window.__opts[window.__opts.length - 1]");
+  check("10-2: 공유 글 끝에 표시용 주소(https:// 뗌) + url 전달, site.url 빈 값이면 카드 하단 주소 줄 없음", JSON.parse(shareArgs).url === here && JSON.parse(shareArgs).text.endsWith(" " + here.replace(/^https?:\/\//, "")) && JSON.parse(cardOpts).footerUrl === "" && JSON.parse(cardOpts).footer === (await ev("TEXT.card.footer")), shareArgs);
+  check("10-1: 복원한 별 공유 카드 — 반전 알약 없이 만들어짐, 코드 없음", JSON.parse(cardOpts).badges.length === 1 && !CODES.some((c) => cardOpts.includes(c) || shareArgs.includes(c)));
+  await stubClip(false);
+  await click("#screen-star-result [data-js=share-link-copy]");
+  await sleep(150);
+  check("10-2: 클립보드가 막히면 주소를 고를 수 있는 글자로 보여 줌", (await txt("#screen-star-result [data-js=share-link-url]")) === here && !(await hiddenEl("#screen-star-result [data-js=share-link-url]")) && (await hiddenEl("#screen-star-result [data-js=share-link-msg]")));
+  await noHScroll("복원한 별 결과");
+  await click("#screen-star-result [data-js=restore-reinput]");
+  check("10-1: '다시 입력' → 별의 방 입력 화면(입력칸 보임)", (await waitScreen("screen-star-input", 3000)) && !(await hiddenEl("[data-js=star-year]")));
+  await b.goto(BASE + "#ogham");
+  await waitScreen("screen-ogham-result", 3000);
+  const ogR = await ev("(() => { const s = document.querySelector('#screen-ogham-result'); const n = s.querySelector('[data-js=restore-note]'); return { note: !!n && n.offsetParent !== null && n.querySelector('span').textContent === TEXT.resume.needName, go: n ? n.querySelector('[data-js=restore-reinput]').dataset.go : '', bad: /undefined|NaN|\\{who\\}/.test(s.innerText), meta: s.querySelector('[data-js=result-meta]').textContent }; })()");
+  check("10-1: 복원한 오검의 방 — 이름 글자 줄 자리에 '이름을 다시 넣으면' 한 줄(→ 오검 입력), 빈칸 없음", ogR.note && ogR.go === "ogham-input" && !ogR.bad, JSON.stringify(ogR));
+  await ev("StrangeOracle.go('story')");
+  await waitScreen("screen-story", 3000);
+  check("10-1: 복원 상태 나의 이야기 — '당신의 이야기', 3장 조립", (await txt("[data-js=story-title]")) === "당신의 이야기" && (await ev("document.querySelectorAll('[data-js=story-chapter].is-done').length")) === 3 && !(await ev("/undefined|\\{who\\}/.test(document.querySelector('#screen-story').innerText)")));
+  check("10-2: 나의 이야기에도 링크 복사 글자 링크", !(await hiddenEl("#screen-story [data-js=share-link-copy]")));
+  // "내 정보 지우기": 코드 표시·입력 칸 비움
+  await click("[data-js=topbar-home]");
+  await waitScreen("screen-hub", 3000);
+  await makeCode();
+  await click("[data-js=clear-open]");
+  await click("[data-js=clear-confirm]");
+  await sleep(300);
+  check("10-1: 내 정보 지우기 → 방문 기록 지움, 코드 표시 닫힘·비움, 입력 칸 비어 있음", (await ev("StrangeOracle.filledRooms().length")) === 0 && (await txt("[data-js=resume-code]")) === "" && (await hiddenEl("[data-js=resume-make-panel]")) && (await ev("document.querySelector('[data-js=resume-input]').value")) === "" && (await leakHere()).length === 0);
+  await ev("StrangeOracle.go('story')");
+  await sleep(500);
+  check("10-6: 방 0개로 나의 이야기에 닿을 수 있음(지운 뒤 뒤로 가기 등) → 빈 화면 안내 유지", (await active()) === "screen-story" && !(await hiddenEl("[data-js=story-empty]")));
+
+  // (d) 마친 방 1~6개 왕복
+  let rt = 0;
+  for (let n = 1; n <= 6; n++) {
+    await seed(ORDER.slice(0, n));
+    await b.goto(BASE);
+    await waitScreen("screen-hub", 3000);
+    const before = await snap();
+    const code = await makeCode();
+    await ev("sessionStorage.clear()");
+    await b.goto(BASE);
+    await waitScreen("screen-hub", 3000);
+    await enterCode(code);
+    if ((await snap()) === before && JSON.parse(before).rooms.length === n) rt++;
+  }
+  check("10-1: 마친 방 1~6개 각각 — 코드로 복원하면 같은 방·같은 원형·같은 결과 이름", rt === 6, rt + "/6");
+  check("10-1: 복원으로 6/6 → 주 버튼 = 나의 이야기 보기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.go")) === "story");
+  await b.goto(BASE + "#rune");
+  await waitScreen("screen-rune-result", 3000);
+  check("10-1: 복원한 룬의 방 — 주제가 코드에서 복원됨, 이름 인셋 자리에 안내 한 줄", (await txt("#screen-rune-result [data-js=result-meta]")).includes(await ev("TEXT.rune.topics.me.label")) && (await ev("(() => { const n = document.querySelector('#screen-rune-result [data-js=reading-body] [data-js=restore-note]'); return !!n && n.offsetParent !== null && !document.querySelector('#screen-rune-result [data-js=rune-name-runes]'); })()")));
+  await b.goto(BASE + "#sibyl");
+  await waitScreen("screen-sibyl-result", 3000);
+  check("10-1: 복원한 시빌라 — 주제 복원, 질문 자리는 비어 있음(원래도 저장하지 않음)", (await txt("#screen-sibyl-result [data-js=sibyl-result-category]")) === (await ev("TEXT.sibyl.topics.love.label")) && (await txt("#screen-sibyl-result [data-js=sibyl-result-question]")) === "");
+
+  // (e) 10-7 이름 미리 채움: 오검에서 넣은 이름이 별·룬 입력에 보인다
+  await seed(["ogham"], { name: NAME });
+  await b.goto(BASE);
+  await ev("StrangeOracle.go('star-input')");
+  await waitScreen("screen-star-input", 3000);
+  const savedStar = await txt("#screen-star-input [data-js=saved-info-value]");
+  await click("#screen-star-input [data-js=saved-info-edit]");
+  check("10-7: 별의 방 입력 — 앞 방 이름이 저장된 정보로 보이고, 다시 입력하면 이름 칸에 미리 채워짐", savedStar.includes(NAME) && (await ev("document.querySelector('[data-js=star-name]').value")) === NAME);
+  await seed(["ogham", "star", "decan", "tzolkin"], { name: NAME, birth: { y: 1995, m: 3, d: 25 } });
+  await b.goto(BASE);
+  await ev("StrangeOracle.go('rune-input')");
+  await waitScreen("screen-rune-input", 3000);
+  const savedRune = await txt("#screen-rune-input [data-js=saved-info-value]");
+  await click("#screen-rune-input [data-js=saved-info-edit]");
+  check("10-7: 룬의 방 입력 — 앞 방 이름이 보이고, 다시 입력하면 이름 칸에 미리 채워짐", savedRune === NAME && (await ev("document.querySelector('[data-js=rune-name]').value")) === NAME);
+  await ev("StrangeOracle.go('ogham-input')");
+  await waitScreen("screen-ogham-input", 3000);
+  check("10-7: 오검의 방 입력 — 저장된 이름 보임", (await txt("#screen-ogham-input [data-js=saved-info-value]")) === NAME);
+
   // ═══ 8. 개인정보·오류 ═══
+  const allReq = b.log.bodies.map((x) => x.url + " " + x.body).join("\n");
+  check("10-1: 모든 요청 주소·본문과 console에 이어가기 코드 없음", CODES.length >= 8 && !CODES.some((c) => allReq.includes(c) || b.log.console.join("\n").includes(c)), CODES.length + "개 대조");
   const all = b.log.bodies.map((x) => x.url + " " + x.body).join("\n");
   check("요청 주소·본문에 이름 없음", !all.includes(NAME) && !all.includes(encodeURIComponent(NAME)));
   check("주소 해시에 입력값 없음(화면 이름만)", /^#?[a-z-]*$/.test(await ev("location.hash")));

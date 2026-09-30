@@ -9,6 +9,7 @@
 //   titleColor, titleGlow, hook, badges, footerY.
 // 2026-09-28 추가(역시 선택): bark, sundial, dayGlyph, laurel(그림 블록), parchment(양피지 띠 글자). 자세한 설명은 docs/common.md
 // 2026-09-28 6단계 추가(역시 선택): frame:"keepsake"(금선 두 겹 + 모서리 인장), topBadge, pair, keyword, roomGrid, closeLine (유료 소장판 카드)
+// 2026-09-30 10단계 추가(역시 선택): footerUrl — footer 아래 서비스 주소 한 줄(표시용 글자). share()의 넷째 인자 url(선택)
 // 2026-09-29 9단계 추가(역시 선택): guideSignature: { name, line } — 흐름의 마지막 줄에 안내자 서명 1줄. 안 넘기면 예전과 똑같이 그린다
 (function () {
   const W = 1080;
@@ -666,7 +667,20 @@
     // 스토리 화면 위아래(약 250px)는 인스타그램 UI에 가려진다.
     // footerY를 넘기면 아래 안전선을 그 위로 올린다(제품 이름이 본문과 겹치지 않게).
     const SAFE_TOP = 260;
-    const SAFE_BOTTOM = opts.footerY ? Math.min(H - 320, opts.footerY - 90) : H - 320;
+    // (10단계) footerUrl: footer 아래 주소 한 줄. 44자를 넘으면 24px, 그래도 가로 900px를 넘으면 그리지 않는다(이때 footer 자리도 그대로).
+    // 그릴 때는 footer 줄을 40px 올려 주소 줄 아래 끝이 원래 footer 자리(안전 영역)를 넘지 않게 한다
+    const sans = opts.fonts?.sans || "system-ui, -apple-system, 'Segoe UI', sans-serif";
+    let urlLine = null;
+    if (opts.footer && opts.footerUrl) {
+      const text = String(opts.footerUrl);
+      const size = [...text].length > 44 ? 24 : 28;
+      ctx.save();
+      ctx.font = `400 ${size}px ${sans}`;
+      try { ctx.letterSpacing = "0.02em"; } catch (e) { /* 지원하지 않는 브라우저 */ }
+      if (ctx.measureText(text).width <= 900) urlLine = { text, size };
+      ctx.restore();
+    }
+    const SAFE_BOTTOM = (opts.footerY ? Math.min(H - 320, opts.footerY - 90) : H - 320) - (urlLine ? 40 : 0);
     const rows = []; // { text, font, color, lineH, glow } | { gap } | { block }
     const add = (text, font, color, lineH, glow) => rows.push({ text, font, color, lineH, glow });
     const gap = (h) => rows.push({ gap: h });
@@ -761,17 +775,27 @@
       ctx.fillStyle = t.muted;
       ctx.font = `500 ${opts.footerY ? 32 : 36}px ${serif}`;
       ctx.textAlign = "center";
-      ctx.fillText(opts.footer, W / 2, opts.footerY || H - 220);
+      const fy = opts.footerY || H - 220;
+      ctx.fillText(opts.footer, W / 2, urlLine ? fy - 40 : fy);
+      if (urlLine) {
+        ctx.save();
+        ctx.globalAlpha = 0.8;
+        ctx.font = `400 ${urlLine.size}px ${sans}`;
+        try { ctx.letterSpacing = "0.02em"; } catch (e) { /* 지원하지 않는 브라우저 */ }
+        ctx.fillText(urlLine.text, W / 2, fy);
+        ctx.restore();
+      }
     }
     return canvas;
   }
 
-  async function share(canvas, filename, text) {
+  // url(선택): 공유 시트에 함께 넘길 주소. 안 넘기면 예전과 같다
+  async function share(canvas, filename, text, url) {
     const blob = await new Promise((r) => canvas.toBlob(r, "image/png"));
     const file = new File([blob], filename, { type: "image/png" });
     if (navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], text });
+        await navigator.share(url ? { files: [file], text, url } : { files: [file], text });
         return "shared";
       } catch (e) {
         if (e.name === "AbortError") return "cancelled";

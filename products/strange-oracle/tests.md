@@ -399,3 +399,61 @@
 - R53-1 시기별 나이 제목을 첫 dt+dd와 묶어 넘김, R53-2 장 끝 한 줄 쪽 방지(과부 줄), R53-3 궁합 짝 알약 글자 치우침(원인: 단락 들여쓰기 상속 → style.css에서 match-pair만 0).
 - e2e-paid 검사 추가: "나이 제목이 쪽 끝에 홀로 남지 않음", "이어진 단락 한 줄만 있는 쪽 없음"(360×800, 책 펼친 뒤 측정).
 - 결과: build-dist `[초안] 없음`·`public/에 유료 문구 0건` / node --test 17 pass 0 fail / e2e-paid reduced 108/0, motion 108/0 / e2e-flow reduced 65/0. 360×800 **113쪽**(변화 없음), 쪽 나누기 약 300ms.
+
+## 10단계: 출시 전 다듬기 (2026-09-30, developer, 작업 A2)
+
+### 10단계 · 이어가기 코드 (paycode.js `PayCode.Resume`)
+- 모양: `SOG1` + 결과 코드 10자 + 검사 1자 = **15자**(영문 대문자·숫자). 화면에는 4자씩 하이픈(`SOG1-XXXX-XXXX-XXX`). 무작위 부분 없음(같은 결과면 같은 코드).
+- 글자표(Crockford Base32)·혼합 기수·검사 글자(홀수 가중 합 mod 32)는 영수증 코드와 같은 함수를 쓴다. O→0, I·L→1 고쳐 읽기도 같다.
+- 필드 표(이 순서로 혼합 기수. 값 0 = 없음, 1 이상 = 실제 값 + 1). 순서·기수·주제 배열 순서를 바꾸면 기존 코드가 모두 깨진다.
+
+| 순서 | 필드 | 기수 | 담는 값 |
+|---|---|---|---|
+| 1 | ogham | 21 | 오검 0~19 |
+| 2 | star | 28 | 나크샤트라 0~26 |
+| 3 | decan | 37 | 데칸 0~35 |
+| 4 | tzolkin | 261 | (숫자-1)×20 + 문양 |
+| 5 | rune | 13,825 | 룬 세 개 번호 p0×576 + p1×24 + p2 |
+| 6 | runeTopic | 5 | 룬 주제 번호: me·love·work·money 순 (키 번호, 문구 아님) |
+| 7 | sibyl | 33 | 신탁 0~31 |
+| 8 | sibylTopic | 6 | 시빌라 주제 번호: exam·love·work·relation·self 순 |
+
+- 기수 곱 약 7.8×10^13 < 32^10 → 10자. 담지 않는 것: 이름, 생년월일, 시각, 성별, 시빌라 질문, 상대, 나이 구간, 원형, 서양 별자리·해/달 라시, 데칸 when, 룬의 방향, 영수증·결제 여부, 책 쪽 번호.
+- 검증: 접두어·길이·글자표·검사 글자·범위(`shape`) → 강제 순서 Ⅰ부터 빠짐없이(`order`) / 영수증 코드(SO1…)를 넣음(`receipt`). 주제는 그 방이 있을 때만, 룬 세 돌은 서로 달라야 한다(아니면 `shape`).
+- 다루는 곳(app.js): 버튼을 누를 때만 계산해 `resume-code` 글자로 보이고, 복사 버튼의 클립보드 쓰기만 한다. state·sessionStorage·localStorage·쿠키·주소·history·fetch·공유 카드·공유 글·console에 넣지 않는다. 입구를 떠나거나 "내 정보 지우기"를 누르면 화면의 코드와 입력 칸을 비운다. 복원하면 sessionStorage에는 결과 코드와 `restored: true`만 들어간다.
+- 서버: 이 코드를 받는 곳이 없다. 영수증 칸은 `PayCode.normalize`가 SOG1을 코드로 보지 않아 요청이 나가지 않고, "이 칸이 아니에요" 한 줄(`receipt.errors.wrongBox`)만 보인다.
+
+### 복원 상태에서 입력값이 필요한 부분 (방마다 확인)
+| 방 | 입력값 없이는 못 그리는 부분 | 복원 상태 처리 |
+|---|---|---|
+| 오검 | 이름 글자 가지 줄(글자·로마자)과 그 앞 문장(turnLead) — 이름에서 매번 계산 | 숨기고 그 자리에 `resume.needName` 한 줄 + 다시 입력(오검 입력) |
+| 별 | 반전 카드(서양 별자리 → 해 라시: 윗줄·제목·화살표·설명), 시각 안내 줄, 사실 목록의 '마음'(달 라시), 공유 카드의 반전 알약 | 숨기고 `resume.needInput` 한 줄 + 다시 입력(별 입력). 맞아요 인셋·핵심 풀이는 그대로 |
+| 데칸 | 후보를 골랐을 때의 시간 구간 안내(`when`) | 기획서대로 코드에 없음 → 안내 줄이 나오지 않는다(안내 한 줄 없음) |
+| 촐킨 | 없음 (숫자·문양으로 모두 그린다) | 원래와 같음 |
+| 룬 | 이름을 룬으로 새긴 인셋 | 그 자리에 `resume.needName` 한 줄. 룬은 다시 던지지 않으므로 링크는 오검 입력으로 간다 |
+| 시빌라 | 질문 글(원래도 저장하지 않아 다시 보기에는 없다) | 원래 다시 보기와 같음 |
+- 호칭은 모두 "당신"(`common.you`). 나의 이야기 제목 "당신의 이야기".
+- 오검·룬의 "이름을 다시 넣으면" 문구(`resume.needName`)와 영수증 칸 거부 문구(`receipt.errors.wrongBox`)는 기획서 문구 자리 목록에 없다 → 운영자·planner 확인.
+
+### 10-2 공유 고리
+- `site.url`(data.js 맨 위, 기본 "") 한 줄을 `ShareButtons.siteUrl()`로 읽어 링크 복사·공유 글 끝·`navigator.share`의 url·카드 하단 주소 줄(값이 있을 때만)에 쓴다. 비어 있으면 `location.origin + pathname`.
+- `tools/build-dist.js` + `tools/og-tags.js`: site.url이 있으면 dist 복사본에만 og:image 절대 경로·og:url·canonical을 넣고 루트 이동 쪽에도 같은 태그를 넣는다. 비어 있으면 경고 한 줄, 루트 쪽에는 title·description만. 모양이 틀리면 만들기 전에 오류로 멈춘다(exit 1). 제품 원본 index.html은 읽기만 한다.
+- og-image.png: `node --experimental-websocket tools/strange-oracle/make-og.js`로 다시 만듦. 1200x630, 144KB. 글자는 data.js `og.title`·`og.sub`([초안]은 떼고 그림) — 문구가 확정되면 다시 실행해야 한다.
+- 카카오톡: `kakao.jsKey`·`kakao.sdkUrl` 빈 값 → 자리 7곳이 비어 있고 SDK 요청 없음. 키를 넣은 뒤 동작은 미확인(운영자 결정 32번 뒤).
+
+### 10-3 · 10-4 · 10-6 · 10-7
+- 읽는 시간: `Math.ceil(예상 글자 수 / 500)`(분당 500자 가정), `deeper.readTime` 틀. 속표지·목차 제목 옆·고지 표 분량 칸 세 곳.
+- title·description·og:title·og:description·meta.json keywords의 방 순서를 오검 → 베다(별) → 데칸 → 촐킨 → 룬 → 시빌라로 맞춤(단위 시험).
+- 지운 data.js 키: `hub.eyebrow`, `hub.lead`, `hub.about`, `hub.aboutTitle`(about의 제목, 참조 0건), `hub.storyTitle`, `hub.storyDesc`, `hub.progress.label`, `hub.sofar.upcoming`, `intro.eyebrow`, `topbar.back`, `result.sealed`, `result.deeperLink`, `rooms.*.origin`, `rooms.*.glyph`. `hub.progress.count`는 입구 진행 개수에 쓰여 남겼다.
+- 지운 마크업·코드: `ol.journey__path`와 `journey-step` 6개 + app.js 반복, 입구 so-far의 "?" 줄(정적 4줄 + JS 생성). `read-progress`는 이미 없었다.
+- `story-empty`: 방 0개로 나의 이야기에 닿을 수 있다("내 정보 지우기" 뒤 브라우저 뒤로 가기 → popstate가 story로 보낸다. e2e에서는 `go('story')`로 확인) → 마크업 유지, `story.empty.text`만 강제 순서에 맞는 [초안]으로 바꿈.
+- 이름 미리 채움: 오검에서 넣은 이름이 별·룬 입력 화면에 저장된 정보로 보이고, "다시 입력"을 누르면 이름 칸에 채워져 있다(기존 동작 확인, 고친 것 없음).
+- 영문 윗줄: `[data-t$=eyebrow]` 가운데 영문뿐인 것은 모두 lang="en"(e2e). 룬 이름 인셋 라벨은 영문 부분만 `<span lang="en">`로 감싼다.
+- 룬 "돈" 주제(문구는 고치지 않음, copywriter 검토용): 무료 쪽은 주제 라벨 "돈"과 lens "재물의 흐름으로 읽으면…"(data.js rune.topics.money)뿐. 단락 24개는 서버 파일 api/_paid/full-rune.js의 `advice.topics.money`. 투자·수익·횡재·도박·로또·주식·코인·대박·손실·재테크·빚·대출 낱말 0건. 걸린 낱말은 "손해" 2곳([2], [7] — 돈 얘기·모임 비용의 생활 습관 문맥), "큰돈" 1곳([4] — "흐름을 바꾸는 건 큰돈이 아니라 작은 시도"). 낱말 검색일 뿐 문장을 모두 읽은 것은 아니다.
+
+### 실행 기록 (2026-09-30)
+- `node tools/build-dist.js`: public/에 유료 문구 0건(5,629문장 대조), 유료 문구 [초안] 없음. 공개 파일 [초안] 남음 data.js 39, index.html 40(정적 자리 글자) — 문구 단계(A3) 전이라 예상된 값.
+- `node --test "tools/strange-oracle/*.test.js"`: 30 pass / 0 fail (기존 17 + 새 13: 이어가기 코드 9, og 태그 3, 방 순서 1).
+- `e2e-paid.js reduced`: 119 PASS / 0 FAIL (새 검사: 읽는 시간, 책 두 쪽, 영수증 칸의 이어가기 코드 거부, 이어가기 칸의 영수증 코드 거부, 복원 → 6/6 → 생일 다시 입력 → 모의 결제 → 책, 코드가 저장소·요청·console에 없음).
+- `e2e-flow.js reduced`: 111 PASS / 0 FAIL (새 검사: 넣기·만들기·오류 3종·Enter, 360x640 경고 위치, 3/6 한 줄, 링크 복사 성공·막힘, 1~6방 왕복, 복원 상태 방 화면, 내 정보 지우기, 이름 미리 채움, lang, 죽은 마크업 0).
+- 미확인·미실행: motion 모드 e2e, site.url에 실제 값을 넣은 전체 빌드(og 함수 단위 시험으로만 확인), 공유 카드에 주소 줄이 그려진 모습, 실제 기기의 클립보드·공유 시트(files+url), 카카오 공유, 480px 화면, 화면낭독기.

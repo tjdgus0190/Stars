@@ -111,6 +111,10 @@ const SIBYL_Q = "비밀질문XYZ";
   check("결제 전 고지: 핵심 풀이 포함·분량(새 문장) 표시", (await txt("[data-js=deeper-items]")).includes("핵심 풀이") && /만.*새 문장/.test(await txt("[data-js=deeper-volume]")), await txt("[data-js=deeper-volume]"));
   check("고지: 결제 시점의 여섯 결과로 엮임", (await ev("document.body.innerText.includes(TEXT.deeper.bookFix)")) && !(await ev("document.body.innerText.includes(TEXT.deeper.fixNote)")));
   check("봉인 칸에 글자 없음", await ev("[...document.querySelectorAll('.seal-lines')].every(e => e.textContent.trim() === '')"));
+  // (10단계 10-3) 책 모양 두 쪽 + 읽는 시간(글자 수 ÷ 500 올림, "약")
+  const rt = await ev("(() => { const total = Number(document.querySelector('[data-js=deeper-total]').textContent.replace(/[^0-9]/g, '')); const want = TEXT.deeper.readTime.replace('{n}', Math.ceil(total / 500)); const els = [...document.querySelectorAll('[data-js=deeper-read-time]')]; return { total, want, n: els.length, ok: els.every(e => e.textContent.includes(want)) && document.querySelector('[data-js=deeper-volume]').textContent.includes(want) && want.includes('약'), arch: document.querySelector('[data-js=deeper-peek-arch]').textContent, me: TEXT.archetypes[StrangeOracle.currentArchetype()].name, pages: document.querySelectorAll('[data-js=deeper-peek] article').length, peekText: document.querySelector('[data-js=deeper-peek]').innerText }; })()");
+  check("10-3: 읽는 시간 = 올림(글자 수 ÷ 500), '약' 포함, 속표지·목차 옆·분량 칸 세 곳", rt.ok && rt.n === 2 && rt.total > 0, rt.want + " / " + rt.total);
+  check("10-3: 책 두 쪽 — 속표지에 내 원형 이름 + '한 권의 책', 쪽 수 표시 없음", rt.pages === 2 && rt.arch === rt.me && rt.peekText.includes("한 권의 책") && !/[0-9]+ *쪽/.test(rt.peekText));
   check("견본 문단 3개", (await ev("document.querySelectorAll('[data-js=deeper-sample] p').length")) === 3);
   check("저장된 생년월일 확인 카드", !(await hidden("[data-js=deeper-saved]")) && (await hidden("[data-js=deeper-date-field]")));
   check("D-2 고지 블록 바로 뒤 = 결제 알림/버튼", await ev("(() => { const d = document.querySelector('#screen-deeper .disclosure'); const n = d.nextElementSibling; const gate = n.nextElementSibling; return n.dataset.js === 'pay-alert' && gate.dataset.js === 'deeper-gate' && gate.classList.contains('is-hidden') && gate.nextElementSibling.querySelector('[data-js=deeper-pay]') !== null && !d.closest('details'); })()"));
@@ -353,6 +357,52 @@ const SIBYL_Q = "비밀질문XYZ";
   const PayCode = require(path.join(__dirname, "..", "..", "products", "strange-oracle", "paycode.js"));
   const five = (await fetch("http://127.0.0.1:8787/api/confirm", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paymentKey: "mock_zz", orderId: PayCode.encode({ rune: null, star: 1, ogham: 2, decan: 3, tzolkin: { number: 1, sign: 2 }, sibyl: 4, arch: "sage", band: 1, partner: null, relOgham: null, relDecan: null, relTzolkin: null }), amount: 3900 }) })).status;
   check("서버: 6방 미만 주문번호 confirm → 400 (버튼을 우회해도, Node에서 직접)", five === 400, String(five));
+
+  // ═══ 8b. (10단계) 이어가기 코드: 유료를 열지 않는다 / 복원 → 6/6 → 결제 전 화면(생일 다시 입력) → 모의 결제 ═══
+  const hiddenEl = (sel) => ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); return !e || e.offsetParent === null; })()`);
+  await seed(["ogham", "star", "decan", "tzolkin", "sibyl", "rune"], {});
+  await b.goto(BASE);
+  await waitScreen("screen-hub", 4000);
+  const arch6 = await ev("StrangeOracle.currentArchetype()");
+  await click("[data-js=resume-make-toggle]");
+  const resumeCode = await txt("[data-js=resume-code]");
+  const RESUME = [resumeCode, resumeCode.replace(/-/g, "")];
+  check("10-1: 6/6에서 이어가기 코드 만들기", /^SOG1-/.test(resumeCode));
+  await ev("sessionStorage.clear()");
+  await b.goto(BASE);
+  await waitScreen("screen-hub", 4000);
+  await waitFor("!document.querySelector('[data-js=hub-paid]').classList.contains('is-hidden')");
+  // 영수증 칸에 이어가기 코드 → 거부, 서버 요청 없음, 책이 열리지 않음
+  const reqBefore = b.log.requests.filter((r) => r.includes("/api/report")).length;
+  await click("[data-js=receipt-toggle]");
+  await setVal("#receipt-open-hub", resumeCode);
+  await click("[data-js=hub-paid] [data-js=receipt-open-go]");
+  await sleep(400);
+  check("10-1: 영수증 칸에 이어가기 코드 → '이 칸이 아니에요' 한 줄, 서버 요청 0건, 책 안 열림", (await txt("[data-js=hub-paid] [data-js=receipt-open-error]")) === (await ev("TEXT.receipt.errors.wrongBox")) && b.log.requests.filter((r) => r.includes("/api/report")).length === reqBefore && (await active()) === "screen-hub");
+  await setVal("#receipt-open-hub", "");
+  // 이어가기 칸에 영수증 코드 → 거부
+  await click("[data-js=resume-enter-toggle]");
+  await setVal("[data-js=resume-input]", receipt);
+  await click("[data-js=resume-go]");
+  await sleep(200);
+  check("10-1: 이어가기 칸에 영수증 코드 → 거부(복원·요청 없음)", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.receipt")) && (await ev("StrangeOracle.filledRooms().length")) === 0 && b.log.requests.filter((r) => r.includes("/api/report")).length === reqBefore);
+  await setVal("[data-js=resume-input]", resumeCode);
+  await click("[data-js=resume-go]");
+  await sleep(300);
+  check("10-1: 복원 → 6/6·같은 원형, 책은 열리지 않음(ready, owned 아님)", (await ev("StrangeOracle.filledRooms().length")) === 6 && (await ev("StrangeOracle.currentArchetype()")) === arch6 && (await ev("document.querySelector('[data-js=hub-book]').dataset.state")) === "ready" && !(await storage()).includes("strange-oracle-receipt"));
+  await click("[data-js=hub-book-go]");
+  check("10-1: 복원 뒤 책 카드 → 결제 전 화면", await waitScreen("screen-deeper"));
+  await sleep(300);
+  check("10-1: 복원 상태 결제 전 화면 — 생일 입력칸(저장된 생일 없음), 결제 블록 보임, 속표지 원형 이름", !(await hiddenEl("[data-js=deeper-date-field]")) && !(await hidden("[data-js=deeper-pay]")) && (await txt("[data-js=deeper-peek-arch]")) === (await ev("TEXT.archetypes[StrangeOracle.currentArchetype()].name")));
+  await setVal("[data-js=deeper-year]", 1990);
+  await setVal("[data-js=deeper-month]", 7);
+  await setVal("[data-js=deeper-day]", 9);
+  await click("[data-js=deeper-consent]");
+  await click("[data-js=deeper-pay]");
+  check("10-1: 복원 → 6/6 → 생일 다시 입력 → 모의 결제 → 책", await waitScreen("screen-report", 12000));
+  check("10-1: 결제 주문번호는 영수증 코드(SO1…)이고 이어가기 코드가 아님", /orderId=SO1[0-9A-Z]{27}/.test(await ev("location.search")));
+  const stR = await storage();
+  check("10-1: 이어가기 코드가 저장소·주소·요청·console 어디에도 없음", !RESUME.some((c) => stR.includes(c) || b.log.bodies.some((x) => (x.url + " " + x.body).includes(c)) || b.log.console.join(" ").includes(c)) && !RESUME.some((c) => b.log.requests.join(" ").includes(c)));
 
   // ═══ 9. 네트워크 기록 점검 (D-5) ═══
   const api = b.log.bodies.filter((x) => x.url.includes("/api/"));

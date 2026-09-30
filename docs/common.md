@@ -8,7 +8,8 @@
 | base.css | 있음 (designer, 사용법은 docs/design-system.md) | strange-oracle |
 | share-card.js | 있음 (2026-09-25 옵션 추가, 2026-09-28 그림 블록·소장판 옵션 추가) | strange-oracle |
 | disclaimer.js | 있음 | strange-oracle |
-| share-buttons.js, ads.js, affiliate.js, analytics.js | 아직 없음 | - |
+| share-buttons.js | 있음 (2026-09-30, 링크 복사 + 카카오톡 자리) | strange-oracle |
+| ads.js, affiliate.js, analytics.js | 아직 없음 | - |
 
 ---
 
@@ -79,6 +80,38 @@ const how = await ShareCard.share(canvas, "파일이름.png", "공유 시 함께
 - 2026-09-28 (6단계 유료 리포트): frame:"keepsake"·topBadge·pair·keyword·roomGrid·closeLine 추가. 새 블록 함수와 선택 옵션만 더했고 기존 옵션의 순서·기본값은 그대로(기존 카드는 새 옵션을 넘기지 않으므로 결과가 같다). 쓰는 제품 grep 결과 strange-oracle뿐. 유료 소장판에는 이름·생일·영수증 코드를 넣지 않는다(제품 규칙).
 - 2026-09-28: bark·sundial·dayGlyph·laurel·parchment 추가(새 블록 함수만 더하고 기존 블록·순서·기본값은 그대로). 쓰는 제품 grep 결과 strange-oracle뿐, 룬·별·나의 이야기 카드 이미지가 만들어지는 것을 헤드리스 Edge로 확인(이전 이미지와 픽셀 비교는 하지 않음).
 - 2026-09-29 (9단계 방의 안내자): guideSignature 옵션 추가. badges 다음, 흐름의 맨 마지막 줄에만 그리고 안 넘기면 기존과 똑같이 그린다(기존 옵션·순서·기본값 그대로). 쓰는 제품 grep 결과 strange-oracle뿐, 여섯 방 결과 카드에서 안내자 이름·서명 문장을 넘겨 확인(나의 이야기·유료 소장판 카드는 넘기지 않음).
+
+- 2026-09-30 (10단계 공유 고리): 선택 옵션 `footerUrl: "example.com/products/…"`(표시용 주소, https:// 뗀 글자)와 `ShareCard.share(canvas, 파일, 문구, url)`의 넷째 인자 `url`(선택) 추가.
+  - `footerUrl`을 넘기면 footer 줄을 40px 올리고 그 아래(원래 footer 자리)에 주소 한 줄을 그린다(본문 sans 28px, 불투명도 0.8, 44자를 넘으면 24px, 그래도 가로 900px를 넘으면 그리지 않고 footer도 그대로). 본문 아래 안전선도 40px 올라간다.
+  - 안 넘기거나 빈 글자면 예전과 똑같이 그린다. `url`을 안 넘기면 `navigator.share`에 예전처럼 files·text만 넘긴다. 기존 옵션·순서·기본값 그대로.
+  - 쓰는 제품 grep 결과 strange-oracle뿐. site.url이 빈 상태(footerUrl "")에서 방 카드가 만들어지는 것을 헤드리스 Edge로 확인. 주소 줄이 실제로 그려진 모습과 기기 공유 시트에서 files+url을 함께 넘겼을 때의 동작은 미확인.
+
+## share-buttons.js
+링크 복사와 카카오톡 공유 자리. 문구는 넣지 않는다(제품 마크업·data.js). 요소는 data-js로만 찾는다.
+
+```html
+<button type="button" data-js="share-link-copy">링크 복사</button>
+<span data-js="share-kakao-slot"></span>                       <!-- 빈 자리. 키가 없으면 비어 있는 채로 둔다 -->
+<p class="is-hidden" data-js="share-link-status" role="status">
+  <span data-js="share-link-msg">주소를 복사했어요</span>       <!-- 복사 성공 -->
+  <span class="is-hidden" data-js="share-link-url"></span>      <!-- 클립보드가 막혔을 때 주소를 글자로 -->
+</p>
+```
+```js
+const url = ShareButtons.siteUrl(TEXT.site.url); // 설정값, 비어 있으면 location.origin + pathname. 쿼리·해시는 항상 뺀다
+ShareButtons.init({
+  url,
+  kakao: { jsKey: "", sdkUrl: "", label: "카카오톡으로 보내기", title, description, imageUrl, onFail() {} }, // 선택
+  onCopy(ok) {},   // 선택
+});
+ShareButtons.displayUrl(url);   // "https://" 뗀 표시용 글자
+await ShareButtons.copyText(글자); // 클립보드 쓰기 → true/false (버튼을 누른 동작 안에서만)
+ShareButtons.reset();            // 완료 줄 모두 닫기 (화면을 옮길 때)
+```
+- 링크 복사: `share-link-copy`를 누르면 주소를 클립보드에 넣고, 그 버튼에서 위로 올라가며 처음 만나는 `share-link-status`를 연다. 성공이면 `share-link-msg`, 막혔으면 `share-link-url`에 주소를 넣어 보인다. 버튼이 여러 곳에 있어도 init은 한 번만 부른다.
+- 카카오톡: `jsKey`와 `sdkUrl`이 **둘 다** 있을 때만 `share-kakao-slot` 안에 `<button class="text-link">`를 넣는다. 하나라도 비면 버튼도 SDK 요청도 없다. SDK는 버튼을 누른 순간에만 불러온다. 공유 내용은 title·description·imageUrl·주소뿐.
+  - SDK 주소는 운영자 결정(strange-oracle 기획서 32번) 전이라 넣지 않았다. **키·주소를 넣은 뒤의 실제 공유 동작은 미확인**(빈 키 분기까지만 시험). 키는 운영자가 넣는다.
+- 개인정보: 주소에 입력값·결과 코드를 넣지 않는다(쿼리·해시를 뺀다). 이 부품은 입력값을 받지 않는다.
 
 ## disclaimer.js
 운세·사주·타로 결과 하단에 CLAUDE.md 8장의 면책 문구를 넣는다. 문구는 부품 안에 고정돼 있다.

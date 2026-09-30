@@ -18,6 +18,20 @@ const HOME = "strange-oracle"; // dist 첫 화면이 이동할 제품
 const PRODUCT_EXCLUDE = new Set(["meta.json", "tests.md", "api"]);
 const PUBLIC = path.join(DIST, "public");
 const API_PRODUCT = "strange-oracle"; // dist/api/에 함수를 올릴 제품 (한 프로젝트에 하나)
+const og = require("./og-tags.js");
+
+// (10단계 10-2) 서비스 주소: 제품 data.js 맨 위 site.url 한 줄. 모양이 틀리면 아무것도 만들지 않고 멈춘다.
+// 비어 있으면 og:url·canonical을 넣지 않고 og:image는 상대 경로로 둔다. 고치는 것은 dist 안의 복사본뿐이다(제품 원본은 그대로).
+const SITE = {};
+for (const slug of PRODUCTS) {
+  const url = og.readSiteUrl(fs.readFileSync(path.join(ROOT, "products", slug, "data.js"), "utf8"));
+  const problem = og.siteUrlProblem(url);
+  if (problem) {
+    console.error(`오류: products/${slug}/data.js — ${problem} (지금 값: "${url}")`);
+    process.exit(1);
+  }
+  SITE[slug] = url;
+}
 
 function copyDir(src, dest, exclude = new Set()) {
   fs.mkdirSync(dest, { recursive: true });
@@ -50,19 +64,14 @@ if (!STATIC_ONLY) {
   );
 }
 
-fs.writeFileSync(
-  path.join(PUBLIC, "index.html"),
-  `<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=products/${HOME}/" />
-  <title>이동 중…</title>
-</head>
-<body><a href="products/${HOME}/">바로가기</a></body>
-</html>
-`
-);
+// 제품 index.html 복사본: og:image 절대 경로, og:url·canonical 추가 (site.url이 있을 때만)
+for (const slug of PRODUCTS) {
+  const file = path.join(PUBLIC, "products", slug, "index.html");
+  if (SITE[slug]) fs.writeFileSync(file, og.injectOg(fs.readFileSync(file, "utf8"), SITE[slug]));
+  else console.log(`  경고: products/${slug}/data.js의 site.url이 비어 있어 og:url·canonical을 넣지 않았고 og:image는 상대 경로입니다 (배포 전에 채울 것)`);
+}
+// 루트 이동 페이지: 제품과 같은 title·description(+ site.url이 있으면 og 태그·canonical)
+fs.writeFileSync(path.join(PUBLIC, "index.html"), og.rootPage(HOME, og.readHead(fs.readFileSync(path.join(ROOT, "products", HOME, "index.html"), "utf8")), SITE[HOME]));
 
 let count = 0;
 (function walk(d) {
