@@ -361,3 +361,63 @@
 ## 다음 단계 제안
 - meta.json "검수통과"로 변경 완료. 배포 가능 기준(CLAUDE.md 11장) 항목은 모두 충족(og-image.png·소개 글(FAQ)·면책 문구·CREDITS.md 존재 기확인, 이번엔 8단계 변경분만 재확인). 실결제 키 연동은 운영자 몫.
 
+---
+
+# 9단계 검수: 방의 안내자 (2026-09-30, 1차)
+
+검수 범위: specs/strange-oracle.md 9-1~9-4(여섯 안내자 인사·의식·여닫는말·다리, share-card.js guideSignature 옵션). 이전 단계는 재검수하지 않음.
+
+사전 조치: 기존 mock-server(8787·8788) 프로세스 종료(PowerShell `Get-CimInstance`, mock-server.js 커맨드라인만 필터) → `node tools/build-dist.js` 재빌드 → mock-server 재기동(8787 mock, 8788 off) 후 검수.
+
+## 판정: 수정 필요
+
+## 검수 방법 요약
+- 테스트: `node --test tools/strange-oracle/` 17/17 통과, `e2e-flow.js reduced` 65 PASS/0 FAIL(9단계 항목 3개: 결과 닫는말·다리 안내자 이름·공유 카드 guideSignature 전달 포함), `e2e-paid.js reduced` 93 PASS/0 FAIL(회귀 없음).
+- 문구 점검: scratchpad/check-guides.js(신규 작성, 읽기 전용)로 data.js의 `guides.*`·`bridges.*`를 정규식으로 전수 검사 — 금지·압박 표현(반드시·결제·가격·원·죽음·질병·위험·100%·적중 등) 0건, signature 6개 모두 24자 이하(최대 19자, 최소 11자), open 6개 모두 `{who}` 포함, rune.ritual에 조작 안내("돌을 손끝으로 눌러 쥐었다가, 흔들거나 놓아서 던져 보세요") 포함, tzolkin 블록에 "저는" 자칭·"날 지킴이"/키체족 언급 0건("이 돌은"으로만 지칭) — 모두 통과.
+- share-card.js: `common/share-card.js:734-735`에서 `if (opts.guideSignature)`로만 분기해 기존 옵션 그대로 동작(하위 호환), `docs/common.md:70,75,81`에 guideSignature 옵션·그리는 순서·쓰는 제품(strange-oracle뿐) 갱신 확인.
+- CREDITS.md: `products/strange-oracle/CREDITS.md:17`에 "(9단계) 방의 안내자 실루엣 SVG 6개... designer가 index.html 안에 코드로 직접 그림. 외부 이미지·참고 그림 없음" 기록 확인.
+
+## 결과표
+| 번호 | 항목 | 결과 | 근거 | 비고 |
+|---|---|---|---|---|
+| 테스트 | node --test / e2e-flow reduced / e2e-paid reduced | 통과 | 위 요약 | |
+| 8장 | guides.*·bridges.* 금지·압박 표현 | 통과 | check-guides.js 결과 "문제 0건" | |
+| 9-1 | signature 24자 이하 | 통과 | 6개 모두 11~19자 | |
+| 9-2 | open 전부 {who} 포함 | 통과 | 6개 전부 확인 | |
+| 9-3 | rune.ritual 조작 안내 포함 | 통과 | data.js:173 | |
+| 9-1 | 촐킨 비인격화(사람·날 지킴이 아님) | 통과 | data.js:162-169, "이 돌은"으로만 지칭, 키체족·날 지킴이 언급 없음 | |
+| 5장 | share-card.js 하위 호환 + docs/common.md 갱신 | 통과 | common/share-card.js:734-735, docs/common.md:70,75,81 | |
+| 8장 | CREDITS.md에 안내자 SVG 6개 기록 | 통과 | CREDITS.md:17 | |
+| 규칙 | [초안] 0건(주석 제외) | **수정 필요** | `products/strange-oracle/index.html`에 24건 — 아래 상세 | 제품 폴더 전체 grep 기준 |
+
+## 수정 필요 항목 상세
+1. **index.html에 guides.* 자리표시 "[초안]"이 24곳 그대로 남아 있다** (예: `index.html:455` `<p ... data-t="guides.rune.greet">[초안] 바닷바람이 부는 곳에 잘 오셨어요...</p>`, 그 외 rune·star·ogham·decan·tzolkin·sibyl 각 4곳=greet/ritual/open/close). 이 요소는 `data-t` 속성으로 app.js가 data.js의 실제 문구로 갈아끼우는 구조이고, `e2e-flow.js`가 실제로 화면에 최종 문구("새긴 결은 이 숲이 오래도록 기억합니다..." 등)가 보임을 확인했으므로 **런타임에는 사용자에게 [초안]이 노출되지 않는 것으로 보인다**(확인함). 다만 (a) `node tools/build-dist.js` 출력이 스스로 "[초안] 남음 (중간 공유본): index.html 24"라고 경고하고 있고, (b) CLAUDE.md 3장 "출시되는 화면에 [초안] 표시가 남아 있으면 안 된다"·이번 검수 기준("주석 제외 0건")은 소스에 남은 자리표시 문구 자체를 겨냥한 규칙으로 읽히며, (c) JS 오류·느린 네트워크·페이지 소스 보기 등에서는 그대로 노출될 수 있어, developer가 index.html의 정적 자리표시문을 실제 최종 문구로 바꾸거나(권장) data-t 힌트만 남기고 표시 문구는 비워 JS 렌더링에만 의존하도록 정리해야 한다.
+
+## 권장 사항
+없음(위 1건 외 추가 권고 없음).
+
+## 확인하지 못한 것과 이유
+- 실제 브라우저에서 JS 실행 전 "[초안]" 문구가 한 프레임이라도 시각적으로 노출되는지(플래시 여부)는 헤드리스 자동화로는 확인하지 못함 — 코드 구조(정적 텍스트 + data-t 치환)로 추정만 함.
+- CREDITS.md:45(오검 facts.meaning/tree)·46(촐킨 facts.kiche/meaning) 등 이전 단계부터 남아 있던 "미확인" 항목은 이번 9단계 범위가 아니라 재확인하지 않음.
+
+## 운영자가 브라우저로 직접 확인할 것
+- 위 수정 필요 1건 해소 후 재검수 필요.
+
+## 완료한 것
+- mock-server 재기동·재빌드 후 node --test·e2e-flow(reduced)·e2e-paid(reduced) 전부 통과 확인.
+- data.js guides.*·bridges.* 문구를 신규 스크립트(check-guides.js)로 금지어·signature 길이·{who}·룬 조작 안내·촐킨 비인격화 전수 점검.
+- common/share-card.js 하위 호환·docs/common.md 갱신·CREDITS.md SVG 기록 확인.
+- 제품 폴더 전체 "[초안]" grep으로 index.html 24건(비주석) 발견.
+
+## 만들거나 수정한 파일
+- reports/qa-strange-oracle.md (이 섹션 추가)
+- meta.json: 변경하지 않음(이미 "검수통과"이며, 이번 9단계는 수정 필요 판정이라 상태를 새로 올리지 않음. 되돌리지도 않음 — 배포 자체를 막는 것은 운영자 판단)
+- 제품 코드·문구는 수정하지 않음. 삭제한 파일 없음.
+- scratchpad/check-guides.js: 제품 코드 밖 임시 검수 스크립트(읽기 전용, 제품 폴더에 없음)
+
+## 운영자가 확인·판단할 것
+- 수정 필요 1건(index.html 정적 [초안] 자리표시 24곳)을 developer가 해소한 뒤 재검수(최대 3회 규칙, 이번이 1차).
+
+## 다음 단계 제안
+- developer가 index.html의 guides.* 자리표시 문구를 정리한 뒤 qa-reviewer가 재검수.
+
