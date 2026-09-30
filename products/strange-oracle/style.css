@@ -4140,11 +4140,37 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .book-page .book-toc__check { border-color: var(--ink-line); }
 .book-page .book-toc__item.is-read .book-toc__check { border-color: var(--ink-rubric); background: var(--ink-rubric); color: var(--paper); }
 .book-page .book-toc__link:focus-visible { outline: 2px solid var(--ink-rubric); outline-offset: 2px; border-radius: 4px; }
-.book-page--end .book-page__body { display: grid; align-content: center; gap: var(--space-5); text-align: center; }
+.book-page--end .book-page__body { display: grid; align-content: center; gap: var(--space-3); text-align: center; } /* (UI 점검 53) space-5 → 3: 끝 표시 ✦가 빈 쪽으로 홀로 밀리지 않게 */
 .book-page--end .book-page__body > * + * { margin-top: 0; }
 .book-page .disclaimer-slot, .book-page .disclaimer { color: var(--ink-soft); }
-.book-page .page-end { color: var(--ink-rubric); }
+.book-page .page-end { padding-top: 0; color: var(--ink-rubric); } /* (UI 점검 53) 위 48px 여백 빼서 뒷면지 쪽에 함께 들어가게 */
 .book-page .result-actions .text-link { color: var(--ink-rubric); }
+
+/* (UI 점검 53) 종이 위 색 토큰: 영수증 칸·시기별 흐름·궁합·원형 심층·근거 목록이 밤 테마 토큰(밝은 글자)을 그대로 써서
+   종이 위 대비가 1.1~1.5:1이었다. 쪽 안에서만 토큰을 종이·잉크 값으로 바꾼다. 강조색은 명도만 낮춰 방 색조(hue)는 유지.
+   [data-room] 요소는 base.css가 --accent를 다시 계산하므로 --accent-l·--accent-c만 내려 주면 따라온다. */
+.book-page {
+  --c-text-strong: var(--ink-strong);
+  --c-text: var(--ink);
+  --c-text-muted: var(--ink-soft);
+  --c-text-faint: var(--ink-soft);
+  --c-line: var(--ink-line);
+  --c-line-strong: oklch(0.5 0.05 55);
+  --c-surface-1: oklch(0.95 0.02 85 / 0.55);
+  --c-surface-2: oklch(0.83 0.04 74 / 0.45);
+  --c-surface-3: oklch(0.8 0.045 72 / 0.5);
+  --accent-l: 0.39;
+  --accent-c: calc(0.12 * var(--accent-c-scale));
+  --accent-dim-l: 0.35;
+  --c-on-accent: oklch(0.96 0.02 85);
+  --accent: oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+  --accent-dim: oklch(var(--accent-dim-l) calc(var(--accent-c) * 0.9) var(--accent-h));
+  --accent-soft: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.1);
+  --accent-line: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.4);
+  --accent-glow: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.3);
+}
+/* 쪽 나누기가 근거 목록을 한 줄씩 ul.evidence로 감싸므로, 이어진 줄은 윗선·간격 없이 한 목록처럼 */
+.book-page__body > .evidence + .evidence { margin-top: 0; border-top: 0; }
 
 /* ── 가장자리 탭 영역 (보이지 않음, 쪽 폭의 22%) ── */
 .book-stage__edge { position: absolute; top: 0; bottom: 0; z-index: 5; width: 22%; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
