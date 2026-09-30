@@ -186,13 +186,13 @@
         <!-- (10단계 10-5) 영문 윗줄(hub.eyebrow)은 지웠다. 첫 화면 순서: 제목 → 무엇을 받는지(요약) → 칩 한 줄(여섯 방 무료·전체 시간·완결) → 무엇을 넣는지 → 문.
              요소 수는 그대로다(윗줄 1개 삭제, 칩 줄은 문 아래에서 위로 이동). 문구 길이는 design 10단계 표 -->
         <h1 class="logo" data-t="hub.logo"></h1>
-        <p class="hub-summary" data-t="intro.summary">[초안] 사주도 타로도 아닌 여섯 낯선 점술로, 나만의 이야기 한 편을 받아요</p>
+        <p class="hub-summary" data-t="intro.summary">사주도 타로도 아닌 여섯 낯선 점술로, 나만의 이야기 한 편을 받아요</p>
         <ul class="journey__chips hub-chips">
-          <li class="journey__chip" data-t="hub.journey.chips.0">[초안] 여섯 방 모두 무료</li>
-          <li class="journey__chip" data-t="hub.journey.chips.1">[초안] 읽는 데 약 14분</li>
-          <li class="journey__chip" data-t="hub.journey.chips.2">[초안] 나눠 봐도 돼요</li>
+          <li class="journey__chip" data-t="hub.journey.chips.0">여섯 방 무료</li>
+          <li class="journey__chip" data-t="hub.journey.chips.1">읽기 약 14분</li>
+          <li class="journey__chip" data-t="hub.journey.chips.2">나눠 봐도 돼요</li>
         </ul>
-        <p class="hub-privacy"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 7V5.5a4 4 0 0 1 8 0V7M3 7h10v7H3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span data-t="intro.note">[초안] 이름·생일만 넣어요. 밖으로 나가지 않아요</span></p>
+        <p class="hub-privacy"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 7V5.5a4 4 0 0 1 8 0V7M3 7h10v7H3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span data-t="intro.note">이름·생일만 넣어요. 밖으로 나가지 않아요</span></p>
       </header>
 
       <!-- (8단계) 주 버튼 하나. 상태별 문구(JS): 처음 hub.cta.first / 진행 중 hub.cta.next("{num} {room} 열기") / 6/6 hub.cta.story.
@@ -230,19 +230,19 @@
       </button>
 
       <!-- (10단계 10-1 a) 완결 안내 한 줄: 여섯 문 아래에 있던 journey__end 줄을 문 바로 아래로 옮겨 문구만 바꾼다(요소 수 그대로, 키 hub.journey.end 유지) -->
-      <p class="journey__end hub-end hub-assure"><span class="journey__end-mark" aria-hidden="true">✦</span><span data-t="hub.journey.end">[초안] 중간에 멈춰도 괜찮아요. 방 하나만 봐도 이야기 한 장이 완결돼요</span></p>
+      <p class="journey__end hub-end hub-assure"><span class="journey__end-mark" aria-hidden="true">✦</span><span data-t="hub.journey.end">중간에 멈춰도 괜찮아요. 방 하나만 봐도 이야기 한 장이 완결돼요</span></p>
 
       <!-- (10단계 10-1 b) 이어가기 코드 넣기: 마친 방이 0개일 때만 JS가 .is-hidden 해제. 주 버튼보다 조용한 글자 링크.
            새는 길 막기: 제출되는 폼이 아니라 div 묶음이다. 입력 칸에 name 없음 + autocomplete="off". Enter·확인은 JS로만 처리한다.
            코드를 주소·저장소·console·분석에 넣지 않는다. 복원 뒤와 "내 정보 지우기" 뒤에는 입력 칸을 비운다 -->
       <div class="resume-enter is-hidden" data-js="resume-enter">
-        <button class="text-link resume-enter__toggle" type="button" data-js="resume-enter-toggle" aria-expanded="false" aria-controls="resume-enter-panel"><span id="resume-enter-link" data-t="resume.enter.link">[초안] 이어가기 코드가 있어요</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
+        <button class="text-link resume-enter__toggle" type="button" data-js="resume-enter-toggle" aria-expanded="false" aria-controls="resume-enter-panel"><span id="resume-enter-link" data-t="resume.enter.link">이어가기 코드가 있어요</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
         <div class="resume-enter__panel is-hidden" id="resume-enter-panel" data-js="resume-enter-panel" role="group" aria-labelledby="resume-enter-link">
           <div class="receipt-open__row">
             <input class="input receipt-open__input" id="resume-enter-input" data-js="resume-input" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="40" enterkeyhint="done" aria-labelledby="resume-enter-link" aria-describedby="resume-enter-help" data-ph="resume.enter.placeholder" />
-            <button class="btn btn--secondary receipt-open__go" type="button" data-js="resume-go" data-t="resume.enter.go">[초안] 불러오기</button>
+            <button class="btn btn--secondary receipt-open__go" type="button" data-js="resume-go" data-t="resume.enter.go">불러오기</button>
           </div>
-          <p class="receipt-open__how" id="resume-enter-help" data-t="resume.enter.help">[초안] 복사해 둔 코드를 그대로 붙여 넣어 주세요</p>
+          <p class="receipt-open__how" id="resume-enter-help" data-t="resume.enter.help">복사해 둔 코드를 그대로 붙여 넣어 주세요</p>
           <!-- 오류 3종(JS가 문구를 넣고 .is-hidden 해제): resume.errors.shape / order / receipt -->
           <p class="field__error is-hidden" data-js="resume-error" role="alert"></p>
         </div>
@@ -356,10 +356,10 @@
         </header>
         <p class="so-far__arch"><span class="so-far__arch-label" data-t="hub.sofar.archLabel">지금의 원형</span> <b data-js="hub-archetype"></b></p>
         <!-- (10단계 10-1 b) 코드로 복원한 직후에만 .is-hidden 해제 (출처가 드러나는 한 줄) -->
-        <p class="so-far__restored is-hidden" data-js="resume-restored" role="status" data-t="resume.restored">[초안] 코드에 담긴 결과를 불러왔어요. 호칭은 ‘당신’으로 나와요</p>
+        <p class="so-far__restored is-hidden" data-js="resume-restored" role="status" data-t="resume.restored">코드에 담긴 결과를 불러왔어요. 호칭은 ‘당신’이에요</p>
         <!-- (10단계 10-1 c) 마친 방이 정확히 3개일 때만 .is-hidden 해제. 글자 링크 = 10-2의 링크 복사(서비스 주소). 완료 한 줄은 아래 share-link-status -->
-        <p class="so-far__half is-hidden" data-js="hub-half"><span data-t="hub.half.text">[초안] 벌써 절반이에요. 같이 볼 사람에게 알려 볼까요?</span> <button class="text-link" type="button" data-js="share-link-copy" data-t="hub.half.link">[초안] 점술관 링크 복사</button></p>
-        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        <p class="so-far__half is-hidden" data-js="hub-half"><span data-t="hub.half.text">벌써 절반이에요. 같이 볼 사람에게 알려 볼까요?</span> <button class="text-link" type="button" data-js="share-link-copy" data-t="hub.half.link">점술관 링크 복사</button></p>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
         <ol class="so-far__list" data-js="hub-sofar-list">
           <li class="so-far__item is-done" data-room="ogham"><button class="so-far__line" type="button" data-js="sofar-line" data-room="ogham" data-go="ogham-result">
             <span class="so-far__mark" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
@@ -377,15 +377,15 @@
              순서 고정: 코드 → 경고(접지 않음) → 복사 버튼. 경고는 복사 버튼보다 위에 항상 보여야 한다.
              코드는 화면 표시와 복사 버튼의 클립보드 쓰기만. "내 정보 지우기"를 누르면 패널을 닫고 resume-code를 비운다 -->
         <div class="resume-make" data-js="resume-make">
-          <button class="text-link resume-make__toggle" type="button" data-js="resume-make-toggle" aria-expanded="false" aria-controls="resume-make-panel"><span data-t="resume.make.link">[초안] 이어가기 코드 만들기</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
+          <button class="text-link resume-make__toggle" type="button" data-js="resume-make-toggle" aria-expanded="false" aria-controls="resume-make-panel"><span data-t="resume.make.link">이어가기 코드 만들기</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
           <div class="resume-make__panel is-hidden" id="resume-make-panel" data-js="resume-make-panel">
             <p class="resume-code" data-js="resume-code" data-aria="resume.make.codeAria"></p>
             <p class="resume-warn" data-js="resume-warn">
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 18 16.5H2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v4M10 14.2v.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              <span data-t="resume.make.warn">[초안] 이름과 생일이 글자 그대로 들어 있지는 않아요. 하지만 이 코드를 아는 사람은 내 결과와 태어난 날을 거의 알아낼 수 있으니 남에게 보여 주지 마세요. 코드는 어디에도 저장·전송되지 않으니 직접 보관해 주세요.</span>
+              <span data-t="resume.make.warn">이름과 생일이 글자 그대로 들어 있지는 않아요. 하지만 이 코드를 아는 사람은 내 결과와 태어난 날을 거의 알아낼 수 있어요. 어디에도 저장·전송되지 않으니, 남에게 보여 주지 말고 직접 보관해 주세요.</span>
             </p>
-            <button class="btn btn--secondary btn--block" type="button" data-js="resume-copy" data-t="resume.make.copy">[초안] 코드 복사</button>
-            <p class="share-status is-hidden" data-js="resume-copied" role="status" data-t="resume.make.copied">[초안] 코드를 복사했어요</p>
+            <button class="btn btn--secondary btn--block" type="button" data-js="resume-copy" data-t="resume.make.copy">코드 복사</button>
+            <p class="share-status is-hidden" data-js="resume-copied" role="status" data-t="resume.make.copied">코드를 복사했어요</p>
           </div>
         </div>
       </section>
@@ -659,8 +659,8 @@
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
         <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
-        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
-        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -961,7 +961,7 @@
       </aside>
       <!-- (10단계 10-1 b) 코드로 복원한 상태: 생일이 있어야 그릴 수 있는 부분(위 반전 카드 등, 범위는 developer가 tests.md에 기록)을 숨기고 이 한 줄을 그 자리에 보인다.
            다른 방에도 같은 부분이 있으면 이 블록을 그대로 복사해 쓴다(data-go만 그 방 입력 화면으로) -->
-      <p class="restore-note is-hidden" data-js="restore-note"><span data-t="resume.needInput">[초안] 이 부분은 생일을 다시 넣으면 보여요</span> <button class="text-link" type="button" data-js="restore-reinput" data-room="star" data-go="star-input" data-t="resume.reinput">[초안] 다시 입력</button></p>
+      <p class="restore-note is-hidden" data-js="restore-note"><span data-t="resume.needInput">이 부분은 생일을 다시 넣으면 보여요</span> <button class="text-link" type="button" data-js="restore-reinput" data-room="star" data-go="star-input" data-t="resume.reinput">다시 입력</button></p>
 
       <!-- (8단계) 핵심 풀이 한 덩어리 (장 번호·제목 없음). JS: identity.lede + body 앞 단락들(누적 750자 규칙) + facts + identity.close.
            단락은 <p>, 사실 목록은 <ul class="reading__facts"> -->
@@ -1001,10 +1001,10 @@
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
         <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
-        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
         <span class="result-more__dot" aria-hidden="true">·</span>
         <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
-        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -1236,10 +1236,10 @@
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
         <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
-        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
         <span class="result-more__dot" aria-hidden="true">·</span>
         <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
-        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -1552,10 +1552,10 @@
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
         <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
-        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
         <span class="result-more__dot" aria-hidden="true">·</span>
         <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
-        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -1812,10 +1812,10 @@
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
         <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
-        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
         <span class="result-more__dot" aria-hidden="true">·</span>
         <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
-        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -2035,8 +2035,8 @@
         <p class="result-actions__note" data-t="sibyl.result.retryNote">받은 신탁은 무를 수 없어요. 다른 주제로 새로 물을 수 있어요.</p>
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
         <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
-        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
-        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -2187,8 +2187,8 @@
         <button class="btn btn--primary btn--block" type="button" data-js="story-share" data-t="story.share"></button>
         <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리 -->
         <div class="result-more result-more--share">
-          <span class="share-links share-links--solo"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
-          <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+          <span class="share-links share-links--solo"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+          <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
         </div>
       </div>
 
@@ -2217,7 +2217,7 @@
       <header class="deeper-head">
         <p class="eyebrow" data-t="deeper.eyebrow">여섯 문 끝의 한 권</p>
         <h1 class="deeper-head__title" data-t="deeper.title">당신만을 위한 한 권의 책</h1>
-        <p class="deeper-head__lead" data-t="deeper.lead">[초안] 여섯 방의 네 장 전체와 숨은 장, 시기별 흐름과 궁합까지 쪽을 넘기며 읽는 책으로 엮어요.</p>
+        <p class="deeper-head__lead" data-t="deeper.lead">여섯 방의 네 장 전체와 숨은 장, 시기별 흐름과 궁합까지 쪽을 넘기며 읽는 한 권의 책으로 엮어요.</p>
       </header>
 
       <!-- (10단계 10-3 b) 책 모양 두 쪽: 결정 53 리더의 종이 모양을 그대로 쓴 정적 미리보기. 가로로 밀어 넘긴다(scroll-snap, JS 없음).
@@ -2229,9 +2229,9 @@
             <p class="peek-page__run" aria-hidden="true"></p>
             <div class="peek-page__body">
               <svg class="peek-page__fleuron" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#i-fleuron" /></svg>
-              <p class="peek-page__eyebrow" data-t="deeper.peek.coverEyebrow">[초안] 여섯 문이 엮은</p>
+              <p class="peek-page__eyebrow" data-t="deeper.peek.coverEyebrow">여섯 문이 엮은</p>
               <!-- JS: 지금의 원형 이름(무료 data). 비어 있으면 이 줄만 숨긴다 -->
-              <p class="peek-page__arch" data-js="deeper-peek-arch">[초안] 길을 여는 탐험가</p>
+              <p class="peek-page__arch" data-js="deeper-peek-arch"></p>
               <p class="peek-page__book" data-t="deeper.peek.bookName">한 권의 책</p>
               <ul class="peek-page__marks" aria-hidden="true">
                 <li data-room="ogham"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></li>
@@ -2242,22 +2242,22 @@
                 <li data-room="sibyl"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></li>
               </ul>
               <!-- JS: deeper.readTime("읽는 데 약 {n}분"), n = 올림(글자 수 ÷ 500). 손으로 쓴 숫자 금지 -->
-              <p class="peek-page__time" data-js="deeper-read-time">[초안] 읽는 데 약 56분</p>
+              <p class="peek-page__time" data-js="deeper-read-time"></p>
             </div>
             <p class="peek-page__folio" aria-hidden="true">i</p>
           </article>
           <article class="peek-page peek-page--sample">
-            <p class="peek-page__run"><span class="sample__badge" data-t="deeper.sample.badge">견본</span><span data-t="deeper.peek.sampleMark">[초안] 가상의 두 사람으로 쓴 견본 쪽</span></p>
+            <p class="peek-page__run"><span class="sample__badge" data-t="deeper.sample.badge">견본</span><span data-t="deeper.peek.sampleMark">가상의 두 사람으로 쓴 견본 쪽</span></p>
             <div class="peek-page__body">
               <h2 class="peek-page__title" id="deeper-sample-title" data-t="deeper.sample.title">3장 · 탐험가와 현자의 궁합 (가상의 두 사람)</h2>
               <div class="sample__body prose" data-js="deeper-sample" data-list="deeper.sample.body">
               </div>
-              <p class="sample__note" data-t="deeper.sample.note">[초안] 실제 책에서는 이 자리에 당신과 상대의 원형이 들어가요.</p>
+              <p class="sample__note" data-t="deeper.sample.note">실제 책에서는 이 자리에 당신과 상대의 원형이 들어가요.</p>
             </div>
             <p class="peek-page__folio" aria-hidden="true">ii</p>
           </article>
         </div>
-        <p class="book-peek__hint" data-t="deeper.peek.hint">[초안] 옆으로 밀면 견본 쪽이 보여요</p>
+        <p class="book-peek__hint" data-t="deeper.peek.hint">옆으로 밀면 견본 쪽이 보여요</p>
       </section>
 
       <!-- 나에게 맞춘 목차. 장 제목·분량은 JS가 방문 기록으로 채운다. 상태: .is-sealed(유료) / .is-open(견본·무료) -->

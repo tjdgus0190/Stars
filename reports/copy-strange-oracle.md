@@ -231,3 +231,77 @@
 ### 다음 단계 제안
 - 9-4 순서 4: designer가 방 시작 인사+실루엣, 의식 문구, 결과 여닫는말, 다리, 공유 카드 서명을 360px·480px에서 UI 점검.
 - 이어서 9-4 순서 5: qa-reviewer가 reports/qa-strange-oracle.md에 9단계 절을 추가해 8장 준수·개인정보·결제 비언급을 재검수.
+
+## 10단계: 출시 전 다듬기 (작업 A3)
+작성: copywriter, 2026-09-30. 기준: specs/strange-oracle.md 10-1~10-7, design/strange-oracle.md 「10단계 · 확정 길이 / 텍스트 길이 제한」. 글자 수는 공백 포함, Node 스크립트로 실측.
+
+### 새 문구 (data.js [초안] 39개 → 0개)
+| 키 | 최종 문구 | 글자 수 | 최대 |
+|---|---|---|---|
+| intro.summary | 사주도 타로도 아닌 여섯 낯선 점술로, 나만의 이야기 한 편을 받아요 | 38 | 40 |
+| intro.note | 이름·생일만 넣어요. 밖으로 나가지 않아요 | 23 | 26 |
+| hub.journey.chips.0 | 여섯 방 무료 | 7 | 9 |
+| hub.journey.chips.1 | 읽기 약 14분 | 8 | 9 |
+| hub.journey.chips.2 | 나눠 봐도 돼요 | 8 | 8 |
+| (칩 셋 합계) | | 23 | 26 |
+| hub.journey.end | 중간에 멈춰도 괜찮아요. 방 하나만 봐도 이야기 한 장이 완결돼요 | 36 | 40 |
+| hub.half.text | 벌써 절반이에요. 같이 볼 사람에게 알려 볼까요? | 27 | 30 |
+| hub.half.link | 점술관 링크 복사 | 9 | 12 |
+| story.empty.text | 첫 번째 문부터 열면 첫 장이 채워져요. | 22 | 30 |
+| story.paid.eyebrow | 여섯 문 끝에서 | 8 | 12 |
+| resume.make.link | 이어가기 코드 만들기 | 11 | 14 |
+| resume.make.warn | 이름과 생일이 글자 그대로 들어 있지는 않아요. 하지만 이 코드를 아는 사람은 내 결과와 태어난 날을 거의 알아낼 수 있어요. 어디에도 저장·전송되지 않으니, 남에게 보여 주지 말고 직접 보관해 주세요. | 113 | 120 |
+| resume.make.copy | 코드 복사 | 5 | 8 |
+| resume.make.copied | 코드를 복사했어요 | 9 | 14 |
+| resume.make.codeAria | 이어가기 코드 | 7 | 10 |
+| resume.enter.link | 이어가기 코드가 있어요 | 12 | 16 |
+| resume.enter.help | 복사해 둔 코드를 그대로 붙여 넣어 주세요 | 23 | 24 |
+| resume.enter.go | 불러오기 | 4 | 8 |
+| resume.errors.shape | 코드 모양이 맞지 않아요. 다시 확인해 주세요. | 26 | 30 |
+| resume.errors.order | 방 순서가 맞지 않는 코드예요. 다시 만들어 주세요. | 29 | 30 |
+| resume.errors.receipt | 영수증 코드예요. 영수증 코드 칸에 넣어 주세요. | 27 | 30 |
+| resume.restored | 코드에 담긴 결과를 불러왔어요. 호칭은 ‘당신’이에요 | 29 | 30 |
+| resume.needInput | 이 부분은 생일을 다시 넣으면 보여요 | 20 | 30 |
+| resume.needName | 이 부분은 이름을 다시 넣으면 보여요 | 20 | 30 |
+| resume.reinput | 다시 입력 | 5 | 8 |
+| share.copyLink | 링크 복사 | 5 | 8 |
+| share.copied | 주소를 복사했어요 | 9 | 16 |
+| share.kakao | 카카오톡으로 보내기 | 10 | 12 |
+| og.title | 여섯 방, 나의 이야기 한 편 | 16 | 16 |
+| og.sub | 오검 · 별 · 데칸 · 촐킨 · 룬 · 시빌라 | 26 | 28 |
+| deeper.lead | 여섯 방의 네 장 전체와 숨은 장, 시기별 흐름과 궁합까지 쪽을 넘기며 읽는 한 권의 책으로 엮어요. | 56 | 60 |
+| deeper.peek.coverEyebrow | 여섯 문이 엮은 | 8 | 12 |
+| deeper.peek.sampleMark | 가상의 두 사람으로 쓴 견본 쪽 | 17 | 20 |
+| deeper.peek.hint | 옆으로 밀면 견본 쪽이 보여요 | 16 | 20 |
+| deeper.peek.aria | 책 미리보기 두 쪽 | 10 | 16 |
+| deeper.readTime | 읽는 데 약 {n}분 | 11 | 16 |
+| deeper.sample.note | 실제 책에서는 이 자리에 당신과 상대의 원형이 들어가요. | 31 | 40 |
+| receipt 칸의 wrongBox | 이어가기 코드예요. 입구의 이어가기 칸에 넣어 주세요. | 30 | 30 |
+
+### 초안에서 바꾼 것 (나머지는 초안 문장을 그대로 확정)
+| 키 | 전 | 후 | 이유 |
+|---|---|---|---|
+| hub.journey.chips.0 | 여섯 방 모두 무료 (10자) | 여섯 방 무료 | 칩 9자·합계 26자 초과 |
+| hub.journey.chips.1 | 읽는 데 약 14분 (10자) | 읽기 약 14분 | 같은 이유. "읽기" 기준임이 드러남, "약" 유지 |
+| story.empty.text | 첫 번째 문부터 열어 보세요. 방 하나만으로도 한 장이 완성돼요. (37자) | 첫 번째 문부터 열면 첫 장이 채워져요. | 30자 초과 |
+| resume.make.warn | …알아낼 수 있으니 남에게 보여 주지 마세요. 코드는 어디에도… | 위 표 | ②를 "알아낼 수 있어요"로 끊어 단정하게, 3문장 유지 |
+| resume.errors.receipt | 아래 영수증 칸에 | 영수증 코드 칸에 | 칸 위치("아래")를 확인하지 못해 위치 말을 뺌 |
+| resume.restored | …호칭은 ‘당신’으로 나와요 (32자) | …호칭은 ‘당신’이에요 | 30자 초과 |
+| deeper.lead | …읽는 책으로 엮어요. | …읽는 한 권의 책으로 엮어요. | 상품 이름 통일 |
+
+### 이름 바꾼 키 점검 (A2의 기계적 치환분)
+- 확인한 키: intro.receipt, story.paid.title·goOwned, deeper.input.title, deeper.fixNote, deeper.disclosure.refund, deeper.consent, unseal.error.text, receipt.text·reopen·open.how·errors.notFound, report.badge, keepsake.eyebrow·badge·shareText. 조사(책이/책을/책은) 어색한 곳 0건.
+- 고친 것 2건: unseal.error.text "책은 안전하게 남아 있어요" → "책은 그대로 남아 있어요"("안전" 표현 제거) / keepsake.shareText "…받은 나의 한 권의 책" → "낯선 점술관에서 엮은 나만의 한 권의 책"("의" 겹침).
+- legal/terms.html·privacy.html·refund.html: "유료 리포트 ‘더 깊은 이야기’" → "유료 콘텐츠 ‘한 권의 책’", "유료 리포트" → "‘한 권의 책’", "리포트" → "책"(조사 맞춤). 법적 내용·◯◯ 빈칸 개수(8·10·9)는 그대로. 남은 "리포트"·"더 깊은 이야기" 0건.
+
+### 마크업 정리 (index.html)
+- data-t 요소 38곳을 최종 문구로 채움, data-js 견본 2곳(deeper-peek-arch, deeper-read-time)은 가장 안쪽 글자만 비움. 요소·훅 삭제 0건.
+- data.js og 주석의 "[초안]" 언급 한 구절 삭제(값·키 변경 없음).
+
+### 규칙 점검
+- [초안]: data.js 0, index.html 0 (app.js는 주석 1건만).
+- 길이: 39개 모두 제한 이내, 입구 칩 합계 23/26.
+- 8장: 새 문구에 "반드시"·정확도 주장·결제 압박·"개인정보 없음"·"안전" 0건. "무료"는 "여섯 방"으로 한정. 시간은 tests.md 기준 "약 14분"만 사용.
+- 화면 문구의 "리포트"·"소장판"·"더 깊은 이야기" 0건(data.js에는 주석 3곳만 남음).
+- 시험: make-og(1200x630, 144KB) / build-dist "[초안] 없음"·"public/에 유료 문구 0건" / node --test 30 통과 0 실패 / e2e-flow reduced 111 PASS 0 FAIL / e2e-paid reduced 119 PASS 0 FAIL.
+- **하지 않은 것**: 10-7 룬 "돈" 주제 단락 검토(data-runes.js)는 이번 지시 범위에 없어 읽지 않았다 — 미확인.
