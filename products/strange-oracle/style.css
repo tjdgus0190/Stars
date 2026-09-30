@@ -4097,7 +4097,7 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .book-page__body > p { margin: 0; text-indent: 1em; }
 .book-page__body > * + * { margin-top: calc(var(--book-line) / 2); }
 .book-page__body > p.is-cont { text-indent: 0; }             /* 앞 쪽에서 이어진 단락 */
-.book-page__body > p.match-pair { text-indent: 0; }          /* (R53-3) 궁합 짝 칸: 들여쓰기가 flex 알약 글자에 상속되어 오른쪽으로 밀리던 것 */
+.book-page__body > p.match-pair { text-indent: 0; margin-bottom: var(--space-5); } /* (R53-3) 궁합 짝 칸: 들여쓰기가 flex 알약 글자에 상속되어 오른쪽으로 밀리던 것 / (R53-4) 위 p 규칙의 margin: 0이 짝 칸 아래 간격을 지우던 것 */
 .book-page__body b, .book-page__body strong { color: var(--ink-strong); }
 /* 머리글자(drop cap): 두 줄 높이, 붉은 잉크 */
 .book-page__body > p.has-dropcap { text-indent: 0; }
