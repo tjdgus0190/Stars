@@ -1312,3 +1312,133 @@ data.js에 아직 없어서 지금은 JS가 빈 글자로 채운다. 마크업�
 - 360·480px, 0/6·3/6 캡처 확인. 가로 넘침 없음(360/360, 480/480), 콘솔 오류 없음.
 - data-js·data-t 훅 삭제 0건(git diff 대조). e2e(reduced) 65 PASS / 0 FAIL, 수정한 검사 없음.
 - 미확인: 움직임 켜진 상태에서 문짝 벌어짐의 실제 체감(캡처는 정지 화면), 실기기 스크린리더 낭독.
+
+## 책을 넘기는 리더 (결정 53, 2026-09-30, 디자인)
+
+### 이전 (360×800 캡처, 모의 결제 6/6 → #report)
+- 책 전체가 한 줄로 이어진 세로 스크롤: 문서 높이 **54,014px ≈ 68화면**. 상단 9칸 진행률만으로 위치를 알 수 있었고, 방 머리·장 번호판 사이를 계속 내려야 했다. 운영자 말대로 "계속 내려야 해서 부담"이 그대로 보였다.
+
+### 디자인 방향
+- "내 이야기가 적힌 낡은 책": 우주 배경(바깥)은 그대로, 그 위에 **가죽 표지 → 바랜 종이 쪽**이 한 장씩 놓인다. 쪽을 넘기는 손맛(종이가 제본 쪽을 축으로 넘어가며 그늘이 지나감)으로 길이 부담을 "몇 쪽 남았나"로 바꾼다.
+- 종이·가죽은 CSS 그라데이션·그림자만(이미지 0장, CREDITS.md 기록). 글꼴은 기존 Gowun Batang(본문)·Cinzel(쪽 번호·로마 숫자) 그대로.
+- 분량·순서·서버 전달 구조는 그대로. 바뀌는 것은 **보여 주는 방식**뿐.
+
+### 화면 구성 (#screen-report)
+위→아래(한 화면 고정, 바깥 스크롤 없음): 상단 막대(입구 · 라벨 · 목차 · 지우기) → 결제 띠(테스트·모의일 때만) → **book-reader**
+- `data-view="cover"` **표지**: 가죽(결·얼룩 그라데이션, 왼쪽 책등 16px, 금박 이중 테두리, 네 모서리 쇠, 오른쪽에 종이 단면 2겹) 안에 기존 표지 내용(소장판 배지 · 제목 `report-title` · `report-meta` · 여섯 상징 · 나눠 읽기 한 줄) → 아래 **"책 펼치기"(주 버튼)** + **이어 읽기**(저장된 쪽이 있을 때만: "지난번 읽던 Ⅳ 촐킨의 방 · 23쪽부터 이어 읽기").
+- `data-view="pages"` **책장**: 쪽 무대(book-stage) → 쪽 넘기기 막대(book-bar: ‹ 이전 · 얇은 진행 줄 · 다음 ›).
+- 쪽의 순서: **1쪽 면지**(영수증 코드 카드 `receipt` + 나눠 읽기 안내) → **목차 쪽**(기존 `#book-toc`를 종이 위 색으로. 오른쪽 숫자는 읽는 시간 대신 **시작 쪽 번호**, 9항목이 360×800에서 한 쪽에 들어감, 640 높이에서는 2쪽으로 이어짐) → 여는 글 → **제1부 표제지** → 방 6개 → **제2부 표제지** → 시기별 흐름 · 궁합 · 원형 심층 → 닫는 글 → **마지막 쪽 뒷면지**(면책 `disclaimer-slot` → 소장 카드 공유(주) + 나의 이야기로 → `receipt--end` → ✦). 광고 0(기존 D-12 그대로).
+
+### 쪽 치수 (developer가 재어 나눌 값)
+| 항목 | 값 |
+|---|---|
+| 책 폭 | 화면 폭 − 16px(좌우 8px만 우주 배경). 360 → **344px**, 480 이상 → 464px(`--page-max` 안) |
+| 쪽 높이 | `100dvh − 상단 막대 53px − 결제 띠(있으면) − 무대 위 8px − book-bar 60px`. 360×800 모의 결제 띠 포함 → **344×631** |
+| 쪽 안 여백 | 위 12 · 오른쪽 20 · 아래 12 · **왼쪽 24**(제본 홈 쪽) |
+| 쪽 격자 | 머리글 22px · 간격 8 · **본문(1fr)** · 간격 8 · 쪽 번호 22px |
+| 본문 상자 | 360×800에서 **300×547px** (18줄), 360×640에서 300×387px (12줄) |
+| 본문 글자 | 17px(`--fs-read`) / 줄 높이 **30px**(`--book-line`), keep-all, 단락 사이 15px(반 줄), 둘째 단락부터 들여쓰기 1em |
+| 넘김 | `--turn-dur` 520ms, `--turn-ease` cubic-bezier(.3,.1,.2,1) |
+
+### 쪽 나누기 모델 (developer)
+1. **원본**: 지금처럼 JS가 `book-source`(hidden) 안의 기존 훅(report-open, book-ch1~4, book-hidden, report-timeline, report-match, report-deep-*, report-close …)을 채운다. 채우는 코드는 그대로 둔다.
+2. **블록 목록**: 원본을 위→아래로 훑어 블록 배열을 만든다. 블록 = `{ kind, html, part, room, run }`.
+   - kind `open`(장 시작: 부 표제지 / 방 첫 쪽 / 방 안 장 / 여는·닫는 글·제2부 각 장) → 항상 **새 쪽**에서 시작, 그 쪽에 `.is-chapter-start`, 머리는 `.book-opening--half/--room/--ch/--part`, 이어지는 첫 단락에 `.has-dropcap`.
+   - kind `p`(단락) → 쪼갤 수 있음. kind `unit`(timeline 한 구간, match-rooms 한 줄, deep-block 제목+첫 단락, evidence 한 줄, 영수증 카드, 목차 한 항목, 뒷면지 묶음) → 쪼개지 않음.
+3. **재기**: 보이지 않는 측정용 쪽(`.book-page.is-measure`, 실제 쪽과 같은 크기·class, `visibility:hidden`) 본문에 블록을 하나씩 넣으며 `body.scrollHeight > body.clientHeight`가 되면:
+   - `p`면 넘치기 직전까지 글자를 이분 탐색(어절 경계로 되돌림)해 앞부분은 이번 쪽, 뒷부분은 다음 쪽 첫 단락 `.is-cont`(들여쓰기 없음).
+   - `unit`이면 통째로 다음 쪽. 한 unit이 빈 쪽보다 크면 그 안의 자식 단위로 한 번 더 나눈다.
+   - 장 시작 머리 바로 뒤에서 넘치면 머리만 홀로 남기지 않게 머리+첫 2줄을 함께 넘긴다.
+4. **다시 나누기**: `document.fonts.ready` 뒤 처음 1회, `resize`(가로·세로 폭 변화, 150ms 디바운스) 때. 다시 나눈 뒤에는 **지금 쪽 첫 블록**이 들어간 새 쪽으로 돌아간다.
+5. **쪽 번호**: 표지는 번호 없음, 면지 = 1쪽. 총 쪽 수는 기기 높이에 따라 달라진다(예: 360×800에서 대략 90쪽 안팎 — 미확인, 구현 뒤 측정).
+
+### 쪽을 담는 DOM
+```
+div.book-reader[data-js=book-reader][data-view=cover|pages]
+  div.book-cover-page[data-js=book-cover]  … .leather > header.report-head.book-cover(기존 훅) / 책 펼치기 / 이어 읽기
+  div.book-stage[data-js=book-stage][role=region][aria-roledescription=책]
+    div.book-stage__pages[data-js=book-pages]          ← 여기에 쪽을 만든다(견본 3쪽 `[data-sample]`은 렌더 때 비운다)
+      article.book-page[data-js=book-page][data-page=N][data-part][data-room][aria-label="N쪽 / 총쪽"][tabindex=-1]
+        header.book-page__run[data-js=book-page-run]    제1부 · Ⅰ 오검의 방 · 정체 (장 시작 쪽은 숨김)
+        div.book-page__body[data-js=book-page-body]     블록들
+        footer.book-page__folio[data-js=book-page-folio] <span book-page-num> / <span book-page-total>
+    button.book-stage__edge--prev / --next [data-js=book-edge-prev|next] (탭 영역, 쪽 폭 22%, tabindex=-1 aria-hidden)
+  nav.book-bar[data-js=book-bar]  button[book-prev] · span.book-bar__fill[book-track-fill](--p: 0~1) · button[book-next]
+  p.visually-hidden[data-js=book-live][aria-live=polite]
+div.book-source[data-js=book-source][hidden]  ← 기존 receipt · book-toc · 여는 글~닫는 글 · disclaimer-slot · result-actions · receipt--end
+```
+- 쪽 노드는 모두 DOM에 두되 보이는 것은 `is-current`(+넘길 때 `is-under`/`is-turn-*`)뿐(`visibility:hidden`). 쪽이 너무 많아 느리면 지금 쪽 ±2만 본문을 넣어도 된다(측정 결과 배열은 유지).
+- 면지·목차·뒷면지는 원본 노드를 **복제하지 말고 옮겨서**(`append`) 훅(receipt-copy, book-toc-item, report-share …)과 이벤트를 그대로 쓴다. 특수 쪽 class: `.book-page--front`, `.book-page--toc`, `.book-page--half`(부 표제지), `.book-page--end`.
+
+### 넘김 상태 class와 순서
+| 대상 | class | 뜻 |
+|---|---|---|
+| 쪽 | `is-current` | 보이는 쪽 (z 2) |
+| 쪽 | `is-under` | 넘어가는 종이 아래 깔린 쪽 (z 1, 왼쪽에서 걷히는 그늘) |
+| 쪽 | `is-turn-next` | 다음으로: 지금 쪽이 제본 축(왼쪽)으로 0→−102° 넘어가며 사라짐 (z 3) |
+| 쪽 | `is-turn-prev` | 이전으로: 앞 쪽이 −102°→0으로 덮으며 들어옴 (z 3) |
+| 쪽 | `is-chapter-start` | 장 시작 쪽 (머리글 숨김) |
+| 무대 | `is-turning` / `is-turning-prev` | 넘기는 중(입력 막음) / 이전 방향 |
+| 무대 | `is-first` / `is-last` | 가장자리 탭 영역 숨김 (버튼은 `disabled`) |
+
+- **다음**: 무대 `is-turning` → 새 쪽 `is-under`, 지금 쪽 `is-turn-next` → 넘긴 쪽의 `animationend`(animationName `page-turn-away`, 안전장치 700ms 타이머) → 새 쪽 `is-current`, 나머지 class 제거.
+- **이전**: 무대 `is-turning is-turning-prev` → 지금 쪽 `is-under`, 앞 쪽 `is-turn-prev` → `animationend`(`page-turn-back`) → 앞 쪽 `is-current`.
+- 넘기는 중 들어온 입력은 버린다(연타 시 1쪽씩). 목차 이동·이어 읽기처럼 **멀리 뛰는 이동은 연출 없이 즉시** 바꾼다.
+
+### 조작과 이벤트
+| 조작 | 이벤트 | 동작 |
+|---|---|---|
+| 좌우 스와이프 | book-stage `pointerdown/pointerup`(touch-action: pan-y) | 가로 이동 ≥ 40px이고 가로 > 세로면: 왼쪽으로 밀면 다음, 오른쪽이면 이전 |
+| 가장자리 탭 | `book-edge-prev/next` click | 이전 / 다음 |
+| 버튼 | `book-prev` / `book-next` click | 이전 / 다음. 처음·끝에서 `disabled` |
+| 키보드 | document `keydown` (책 화면이 활성, dialog 닫힘, 입력칸 포커스 아님) | ←/PageUp 이전, →/PageDown/Space 다음, Home 1쪽, End 마지막 쪽 |
+| 목차 | `book-toc-open`(상단 막대) → `book-toc-sheet`, 목차 쪽의 링크 | 링크 기본 이동 막고 그 장의 시작 쪽으로 즉시 이동, 시트 닫기, 포커스는 그 쪽(`tabindex=-1`) |
+| 표지 | `book-open-btn` / `book-resume` click | `data-view="pages"`, 1쪽 / 저장된 쪽 |
+| 이어 읽기 저장 | 쪽이 바뀔 때마다 | sessionStorage에 **쪽 번호만**(결정 53). 다시 열 때 총 쪽 수를 넘으면 마지막 쪽으로 |
+
+- 화면낭독기: 쪽마다 `aria-label="12쪽 / 48쪽"`(키 `book.pageAria`), 쪽이 바뀌면 `book-live`에 "12쪽 / 48쪽, Ⅰ 오검의 방" 한 번. 버튼 `aria-label` "이전 쪽"/"다음 쪽". 탭 영역은 `aria-hidden`+`tabindex=-1`(같은 기능을 버튼이 가짐).
+- 보이는 포커스: 버튼·쪽은 청동 2px 외곽선, 종이 위 목차 링크는 붉은 잉크 2px 외곽선(모두 `:focus-visible`).
+- 상단 라벨 `read-label`: 지금 쪽의 부·방 이름만(쪽 번호는 쪽 아래에 있으므로 뺀다).
+- 진행 줄 `book-track-fill`: `--p = 지금 쪽 / 총 쪽`.
+
+### 움직임 줄이기 (prefers-reduced-motion: reduce)
+- JS는 `matchMedia('(prefers-reduced-motion: reduce)')`가 참이면 turn class를 **붙이지 않고** `is-current`만 바꾼다(animationend가 오지 않으므로 기다리지 않는다).
+- CSS도 방어: turn·그늘 애니메이션 `none`, `is-turn-next`는 즉시 숨김, 진행 줄 전환 없음. 모든 쪽의 기본 상태가 최종 모습.
+- `body.is-reading`의 배경 정지 규칙은 그대로.
+
+### 색과 대비 (OKLCH → sRGB 계산, 알파 합성 전 최악값)
+| 글자 / 바탕 | 종이 중앙 L .91 | 따뜻한 부분 L .88 | 바랜 가장자리 L .80 |
+|---|---|---|---|
+| 본문 잉크 `--ink` L .29 | 10.9 | 9.9 | 7.6 |
+| 머리글·쪽 번호 `--ink-soft` L .40 (13px) | 7.1 | 6.5 | 5.0 |
+| 붉은 잉크 `--ink-rubric` L .43 (머리글자·장 번호, 큰 글자 위주) | 6.6 | 6.0 | 4.6 |
+| 표지 제목 `--bronze-hi` / 가죽 L .30 | 8.5 | | |
+- 가장 어두운 제본 홈(L≈.74, 왼쪽 9%)에는 글자가 오지 않는다(왼쪽 여백 24px ≈ 7%, 그 지점 그늘 알파 약 0.05). 모두 AA 이상.
+
+### data-js 훅 목록
+**새로 생김**: book-reader, book-cover, book-open-btn, book-resume-page, book-stage, book-pages, book-page, book-page-run, book-page-body, book-page-folio, book-page-num, book-page-total, book-edge-prev, book-edge-next, book-bar, book-prev, book-next, book-track-fill, book-live, book-source
+**그대로(위치만 이동)**: report-title, report-meta(표지 안) · book-resume, book-resume-name(표지 아래, `<a>` → `<button>`) · receipt*, book-toc*, report-part, book-room*, book-ch1~4, book-hidden, report-*, timeline-*, match-*, disclaimer-slot, report-share, report-go-story, receipt-code-end, receipt-copy-end(모두 `book-source` 안 → 렌더 때 쪽으로 옮김) · book-toc-open, book-toc-sheet, book-toc-sheet-list, read-label
+**은퇴(developer가 코드·마크업 삭제)**: `read-progress`/`read-progress-seg`(9칸, CSS로 이미 숨김), `book-room-next`·`book.toToc` 방 끝 링크(쪽 넘김이 대신함, 원본에는 남아 있으나 블록 목록에서 뺀다), `book-toc-time`의 읽는 시간 문구 → 같은 훅에 **"N쪽"**을 넣는다, 목차 `href="#book-…"` 스크롤 이동, 스크롤 기반 is-current/is-read 판정(→ 쪽 기준: 그 장의 마지막 쪽을 본 적 있으면 is-read).
+**주의**: `book-source`가 `hidden`이라 e2e-paid.js의 `reportText()`(innerText) 등 원본을 읽는 검사는 `textContent`나 쪽 본문으로 바꿔야 한다.
+
+### 새 data-t / data-aria 키 (copywriter, 360px 기준 최대 글자)
+| 키 | 자리표시 | 최대 |
+|---|---|---|
+| book.openBook | 책 펼치기 | 8 |
+| book.resume.pageAfter | 쪽부터 이어 읽기 (앞에 쪽 번호) | 10 |
+| book.prev / book.next | 이전 / 다음 | 3 |
+| book.prevAria / book.nextAria | 이전 쪽 / 다음 쪽 | 8 |
+| book.barAria | 쪽 넘기기 | 8 |
+| book.stageAria / 역할 설명 | 한 권의 책 / 책 | 10 |
+| book.pageAria | {n}쪽 / {total}쪽 | - |
+| book.live | {n}쪽 / {total}쪽, {chapter} | - |
+| book.tocPage | {n}쪽 | - |
+| book.front.title | (면지 머리글) 이 책에 대하여 | 10 |
+- 지금 data.js에 없는 키는 i18n이 글자를 비운다(캡처에서 확인) → developer/copywriter가 추가해야 버튼 글자가 보인다. 마크업 자리표시에는 [초안]을 붙였다.
+
+### 캡처 기록 (headless Edge, 360px, 마크업 견본 + 캡처 스크립트로 class만 바꿔 확인)
+- `d53-800-1-cover` 표지(가죽·금박·이어 읽기), `d53-800-2-page12` 방 첫 쪽(장식선·방 이름·결과 이름·Ⅰ장·머리글자), `-page13` 본문 쪽(머리글·들여쓰기·쪽 번호), `-page16` 방 안 Ⅱ장 시작, `-page2` 목차 쪽(9항목 한 쪽), `d53-800-3-turn-mid` 넘김 260ms 정지(종이가 제본 축으로 휘며 넘어가고 아래 쪽이 드러남), `d53-640-*`, `d53-800r-*`(움직임 줄이기: 애니메이션 없음, 넘기는 쪽 즉시 숨김).
+- 가로 넘침: 모든 캡처 scrollWidth 360 = innerWidth 360. 세로도 문서 높이 = 화면 높이(800/800, 640/640) → 바깥 스크롤 없음.
+- 견본 본문은 800 높이에서 547/547px로 딱 맞음. 640 높이에서는 견본이 넘치며(보이는 부분은 잘림) 실제로는 쪽 나누기가 다음 쪽으로 보낸다.
+- 견본 문장은 유료 본문이 아닌 설명용 문장으로 새로 썼다(build-dist의 "공개 폴더에 서버 전용 내용" 검사 통과).
+- 미확인: 실제 결제 흐름에서의 쪽 나누기·스와이프·키보드 포커스 모습(구현 전), 실제 기기 사파리의 3D 넘김 성능.
