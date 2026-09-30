@@ -201,13 +201,41 @@
       </header>
 
       <!-- (8단계) 주 버튼 하나. 상태별 문구(JS): 처음 hub.cta.first / 진행 중 hub.cta.next("{num} {room} 열기") / 6/6 hub.cta.story.
-           data-go·data-room을 JS가 다음 문으로 바꾼다. 누르면 8-3 상징 떠오름 -->
-      <button class="btn btn--primary btn--block hub-cta" type="button" data-js="hub-cta" data-room="decan" data-go="decan-intro">
-        <span class="hub-cta__num" data-js="hub-cta-num" aria-hidden="true">III</span>
-        <span class="hub-cta__label" data-js="hub-cta-label"></span>
+           data-go·data-room을 JS가 다음 문으로 바꾼다.
+           (결정 52) 주 버튼 = 고대의 문. 진짜 <button> 하나. 문짝·장식은 aria-hidden, 읽히는 이름은 hub-cta-label 문구.
+           누르면 JS가 .is-entering을 붙인다 → 문짝이 조금 벌어지고 빛이 새며 8-3 상징 떠오름으로 이어진다 -->
+      <button class="hub-cta hub-gate" type="button" data-js="hub-cta" data-room="decan" data-go="decan-intro">
+        <span class="hub-gate__door" aria-hidden="true">
+          <span class="hub-gate__light"></span>
+          <span class="hub-gate__leaf hub-gate__leaf--l"><span class="hub-gate__panel"></span><span class="hub-gate__panel hub-gate__panel--low"></span></span>
+          <span class="hub-gate__leaf hub-gate__leaf--r"><span class="hub-gate__panel"></span><span class="hub-gate__panel hub-gate__panel--low"></span></span>
+          <svg class="hub-gate__carve" viewBox="0 0 200 280" focusable="false">
+            <path class="hub-gate__arch" d="M6 280V100A94 94 0 0 1 194 100V280" />
+            <path class="hub-gate__arch hub-gate__arch--in" d="M16 280V100A84 84 0 0 1 184 100V280" />
+            <g class="hub-gate__motifs">
+              <use href="#ogham-beith" x="30" y="78" width="12" height="24" />
+              <use href="#icon-star" x="42" y="42" width="18" height="18" />
+              <use href="#icon-decan" x="72" y="24" width="18" height="18" />
+              <use href="#icon-tzolkin" x="110" y="24" width="18" height="18" />
+              <use href="#rune-raidho" x="142" y="40" width="14" height="21" />
+              <use href="#icon-sibyl" x="155" y="80" width="16" height="16" />
+            </g>
+            <g class="hub-gate__seal">
+              <circle cx="100" cy="158" r="20" />
+              <circle class="hub-gate__seal-in" cx="100" cy="158" r="14" />
+              <path class="hub-gate__keyhole" d="M100 149a4.5 4.5 0 0 1 2.6 8.2L105 168h-10l2.4-10.8A4.5 4.5 0 0 1 100 149Z" />
+            </g>
+          </svg>
+          <span class="hub-gate__dust"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        </span>
+        <span class="hub-gate__plate">
+          <span class="hub-cta__num" data-js="hub-cta-num" aria-hidden="true">III</span>
+          <span class="hub-cta__label" data-js="hub-cta-label"></span>
+        </span>
       </button>
 
-      <!-- (8단계) 여정 한눈에: 칩 3개 + 여섯 방 줄 (상태 class는 문과 같음: .is-visited / .is-next / .is-locked) -->
+      <!-- (8단계) 여정 한눈에. (결정 52) 칩 3개는 점으로 이은 한 줄로. 여섯 방 줄(journey-path)은 바로 아래 여섯 문과 겹쳐 hidden.
+           journey-step 마크업은 JS가 상태 class를 계속 붙이므로 남겨 둔다 -->
       <section class="journey" aria-labelledby="journey-title">
         <h2 class="visually-hidden" id="journey-title" data-t="hub.journey.title">여정 한눈에</h2>
         <ul class="journey__chips">
@@ -215,7 +243,7 @@
           <li class="journey__chip" data-t="hub.journey.chips.1">방마다 2~3분 남짓</li>
           <li class="journey__chip" data-t="hub.journey.chips.2">한 편의 이야기로</li>
         </ul>
-        <ol class="journey__path" data-js="journey-path">
+        <ol class="journey__path" data-js="journey-path" hidden>
           <li class="journey__step is-visited" data-room="ogham" data-js="journey-step">
             <span class="journey__mark" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
             <span class="journey__num" aria-hidden="true">I</span>
@@ -253,10 +281,8 @@
             <span class="journey__reads" data-t="hub.doors.sibyl.reads"></span>
           </li>
         </ol>
-        <p class="journey__end"><span class="journey__end-mark" aria-hidden="true">✦</span><span data-t="hub.journey.end">여섯 조각이 모여 나의 이야기 한 편이 돼요</span></p>
+        <p class="doors-note" data-t="hub.journey.order">문은 순서대로 하나씩 열려요</p>
       </section>
-
-      <p class="doors-note" data-t="hub.journey.order">문은 순서대로 하나씩 열려요</p>
 
       <!-- (7단계) 여섯 개의 고대 문. 순서 Ⅰ오검 → Ⅱ별 → Ⅲ데칸 → Ⅳ촐킨 → Ⅴ룬 → Ⅵ시빌라 (장 번호 = 진행 순서).
            상태 class (JS): .is-locked(봉인, aria-disabled="true") / .is-next(지금 열 수 있는 문, 은은히 빛남) / .is-visited(지나온 문)
@@ -347,6 +373,7 @@
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
       </nav>
+      <p class="journey__end hub-end"><span class="journey__end-mark" aria-hidden="true">✦</span><span data-t="hub.journey.end">여섯 조각이 모여 나의 이야기 한 편이 돼요</span></p>
 
       <!-- (8단계) 진행 + 지금까지의 이야기: 1방 이상 마쳤을 때만 (.is-hidden 해제). 기존 hub-progress·story-teaser를 합침.
            줄 상태: .is-done(누르면 그 방 결과 다시 보기) / .is-upcoming("?" 흐리게, 누를 수 없음). 결과 이름·key는 공개 data, 45~60자 말줄임 -->

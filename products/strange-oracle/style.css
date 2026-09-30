@@ -3724,3 +3724,189 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 }
 /* 빈 상태: 문구가 아직 없으면(데이터 키 누락) 따옴표·이름만 남지 않게 통째로 숨긴다 */
 .say:not(.say--bridge):has(.say__line:empty) { display: none; }
+
+/* ═════════ (결정 52) 입구 다듬기: 고대의 문 주 버튼 + 정보 위계 정리 ═════════
+   순서: 머리 → 고대의 문(주 버튼) → 여섯 방(한 줄 요약 + 작은 문 3×2) → 지금까지의 이야기 → 한 권의 책 → 자주 묻는 것 → 광고
+   상자·테두리는 줄이고, 구역 사이는 청동 장식 구분선 하나로 나눈다 */
+
+/* ── 고대의 문 ── */
+.hub-cta.hub-gate {
+  --gw: 184px;
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; align-items: center;
+  width: 100%; min-height: 0; margin: var(--space-1) 0 0; padding: var(--space-3) 0 var(--space-1);
+  border: 0; border-radius: 0; background: none; box-shadow: none; animation: none;
+  color: var(--c-text-strong); cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+/* 문 뒤 안개빛: 천천히 숨 쉰다 */
+.hub-gate::before {
+  content: ""; position: absolute; z-index: -1; left: 50%; top: -8%;
+  width: calc(var(--gw) * 1.7); height: calc(var(--gw) * 1.75); margin-left: calc(var(--gw) * -0.85);
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--accent-glow), oklch(0.5 0.08 var(--accent-h) / 0.08) 45%, transparent 70%);
+  opacity: 0.55; pointer-events: none;
+  animation: gate-breathe 4.8s ease-in-out infinite;
+}
+@keyframes gate-breathe { 50% { opacity: 0.95; transform: scale(1.04); } }
+.hub-gate__door {
+  position: relative; display: block; overflow: hidden;
+  width: var(--gw); height: calc(var(--gw) * 1.4);
+  border: 3px solid var(--bronze);
+  border-radius: calc(var(--gw) / 2) calc(var(--gw) / 2) 4px 4px;
+  /* 문짝 뒤에 고인 빛 (문이 벌어지면 보인다) */
+  background: radial-gradient(ellipse 45% 55% at 50% 55%, oklch(0.97 0.03 var(--accent-h)), var(--accent) 38%, oklch(0.2 0.05 var(--room-h)) 85%);
+  box-shadow: 0 0 0 3px oklch(0.14 0.02 60), 0 0 0 4px var(--bronze-dark), 0 18px 40px oklch(0 0 0 / 0.55);
+  perspective: 700px;
+  transition: border-color var(--dur-base);
+}
+.hub-gate__leaf {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background:
+    radial-gradient(ellipse 130% 38% at 50% 14%, oklch(0.36 0.05 70 / 0.5), transparent 70%),
+    repeating-linear-gradient(0deg, oklch(0 0 0 / 0.13) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, oklch(0.28 0.035 65), oklch(0.15 0.025 60));
+  transition: transform 700ms var(--ease-in-out);
+  backface-visibility: hidden;
+}
+.hub-gate__leaf--l { left: 0; transform-origin: left center; box-shadow: inset -1px 0 0 var(--bronze-dark), inset -6px 0 10px oklch(0 0 0 / 0.35); }
+.hub-gate__leaf--r { right: 0; transform-origin: right center; box-shadow: inset 1px 0 0 var(--bronze-dark), inset 6px 0 10px oklch(0 0 0 / 0.35); }
+/* 문짝의 오목한 널 두 칸 */
+.hub-gate__panel {
+  position: absolute; left: 20%; right: 14%; top: 67%; height: 13%;
+  border: 1px solid oklch(0.66 0.075 75 / 0.35); border-radius: 2px;
+  box-shadow: inset 0 2px 6px oklch(0 0 0 / 0.55), 0 1px 0 oklch(1 0 0 / 0.04);
+}
+.hub-gate__panel--low { top: 84%; height: 9%; }
+.hub-gate__leaf--r .hub-gate__panel { left: 14%; right: 20%; }
+/* 틈새로 새는 빛 */
+.hub-gate__light {
+  position: absolute; z-index: 1; left: 50%; top: 10%; bottom: 3%; width: 2px; margin-left: -1px;
+  background: linear-gradient(180deg, transparent, var(--accent) 18%, oklch(0.97 0.03 var(--accent-h)) 55%, var(--accent) 85%, transparent);
+  box-shadow: 0 0 10px 2px var(--accent-glow);
+  animation: seam-breathe 3.2s ease-in-out infinite;
+  transition: width 600ms var(--ease-in-out), margin 600ms var(--ease-in-out);
+}
+/* 아치 몰딩 · 여섯 방의 상징 · 열쇠 구멍 봉인 */
+.hub-gate__carve { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; pointer-events: none; }
+.hub-gate__arch { stroke: var(--bronze); stroke-width: 2; opacity: 0.8; }
+.hub-gate__arch--in { stroke: var(--bronze-dark); stroke-width: 1.2; opacity: 1; }
+.hub-gate__motifs {
+  stroke: var(--bronze-hi); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
+  opacity: 0.7; filter: drop-shadow(0 0 3px var(--accent-glow));
+  transition: opacity 400ms;
+}
+.hub-gate__seal { transition: opacity 400ms, transform 600ms var(--ease-in-out); transform-origin: 100px 158px; }
+.hub-gate__seal circle { fill: oklch(0.3 0.04 65); stroke: var(--bronze-hi); stroke-width: 1.5; }
+.hub-gate__seal .hub-gate__seal-in { fill: oklch(0.18 0.025 60); stroke: var(--bronze); stroke-width: 1; }
+.hub-gate__keyhole { fill: oklch(0.96 0.04 var(--accent-h)); filter: drop-shadow(0 0 4px var(--accent)); }
+/* 떠다니는 먼지(별가루) */
+.hub-gate__dust { position: absolute; z-index: 3; inset: 0; pointer-events: none; }
+.hub-gate__dust i {
+  position: absolute; bottom: 18%; left: 48%; width: 3px; height: 3px; border-radius: 50%;
+  background: oklch(0.96 0.04 var(--accent-h)); box-shadow: 0 0 6px var(--accent);
+  opacity: 0; animation: gate-dust 7s linear infinite;
+}
+.hub-gate__dust i:nth-child(2) { left: 38%; bottom: 30%; animation-delay: -1.2s; animation-duration: 8s; }
+.hub-gate__dust i:nth-child(3) { left: 60%; bottom: 10%; animation-delay: -2.6s; }
+.hub-gate__dust i:nth-child(4) { left: 30%; bottom: 8%; width: 2px; height: 2px; animation-delay: -3.9s; animation-duration: 9s; }
+.hub-gate__dust i:nth-child(5) { left: 66%; bottom: 36%; width: 2px; height: 2px; animation-delay: -5.1s; }
+.hub-gate__dust i:nth-child(6) { left: 52%; bottom: 44%; animation-delay: -6.3s; animation-duration: 8.5s; }
+@keyframes gate-dust {
+  0% { opacity: 0; transform: translate(0, 0); }
+  15% { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(10px, -120px); }
+}
+/* 새김 명판: 상태별 문구가 들어가는 자리 (문턱에 살짝 겹친다) */
+.hub-gate__plate {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-width: calc(var(--gw) + 56px); min-height: 50px; margin-top: -6px; padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--bronze); border-radius: 3px;
+  background: linear-gradient(180deg, oklch(0.26 0.03 65), oklch(0.17 0.025 60));
+  box-shadow: inset 0 1px 0 oklch(0.84 0.07 85 / 0.25), inset 0 -3px 8px oklch(0 0 0 / 0.45), 0 0 0 3px oklch(0.13 0.02 60), 0 0 0 4px var(--bronze-dark);
+  font-family: var(--font-serif); font-size: var(--fs-md); font-weight: 700; letter-spacing: 0.04em;
+  color: oklch(0.95 0.03 85); text-shadow: 0 1px 0 oklch(0 0 0 / 0.7);
+}
+.hub-gate .hub-cta__num {
+  padding: 1px 9px 2px; clip-path: polygon(0 0, 100% 0, 86% 100%, 14% 100%);
+  background: linear-gradient(180deg, var(--bronze-hi), var(--bronze));
+  font-family: var(--font-latin); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.06em;
+  color: oklch(0.2 0.03 60); text-shadow: none;
+}
+/* 손을 대면 문짝이 아주 조금 */
+@media (hover: hover) {
+  .hub-gate:hover .hub-gate__door { border-color: var(--bronze-hi); }
+  .hub-gate:hover .hub-gate__leaf--l { transform: rotateY(-9deg); }
+  .hub-gate:hover .hub-gate__leaf--r { transform: rotateY(9deg); }
+}
+.hub-gate:focus-visible { outline: none; }
+.hub-gate:focus-visible .hub-gate__plate { outline: 2px solid var(--accent); outline-offset: 5px; }
+.hub-gate:focus-visible .hub-gate__door { border-color: var(--bronze-hi); }
+/* 누른 순간 (JS: .is-entering) — 문짝이 벌어지고 봉인이 풀리며 빛이 샌다 → 상징 떠오름 */
+.hub-gate.is-entering .hub-gate__leaf--l { transform: rotateY(-40deg); }
+.hub-gate.is-entering .hub-gate__leaf--r { transform: rotateY(40deg); }
+.hub-gate.is-entering .hub-gate__light { width: 30%; margin-left: -15%; }
+.hub-gate.is-entering .hub-gate__seal { opacity: 0; transform: scale(1.3); }
+.hub-gate.is-entering .hub-gate__motifs { opacity: 1; }
+
+/* ── 여섯 방: 한 줄 요약 + 작은 문 3×2 (여정 줄은 문과 겹쳐 숨김) ── */
+.journey__path[hidden] { display: none; }
+.hub .journey { margin-top: var(--space-10); text-align: center; }
+.hub .journey__chips { gap: 0; }
+.hub .journey__chip { padding: 0; border: 0; background: none; font-size: var(--fs-xs); color: var(--c-text); }
+.hub .journey__chip + .journey__chip::before { content: "·"; margin: 0 0.5em; color: var(--bronze); }
+.hub .doors-note { margin: var(--space-1) 0 0; font-size: var(--fs-xs); }
+.hub .doors { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3) var(--space-2); margin-top: var(--space-5); }
+.hub .door {
+  --arch: calc((100cqi - 2 * var(--space-2)) / 6);
+  --portal: 44px;
+  min-height: 0; gap: 2px; padding: var(--space-6) 4px var(--space-3);
+  border-width: 1px;
+}
+.hub .door::before { inset: 4px; border-radius: calc(var(--arch) - 4px) calc(var(--arch) - 4px) calc(var(--radius-lg) - 4px) calc(var(--radius-lg) - 4px); }
+.hub .door__num { padding: 2px 8px 3px; font-size: var(--fs-2xs); }
+.hub .door__rivets { display: none; }
+.hub .door__portal { margin-bottom: var(--space-2); }
+.hub .door__portal::before { inset: -7px; }
+.hub .door__glyph { font-size: 1.5rem; }
+.hub .door__icon { width: 22px; height: 22px; stroke-width: 2.4; }
+.hub .door__icon--tall { width: 14px; height: 28px; stroke-width: 4; }
+.hub .door__moon { width: 22px; height: 22px; }
+.hub .door__seal { width: 22px; height: 22px; right: -6px; bottom: -4px; }
+.hub .door__name { font-size: var(--fs-sm); word-break: keep-all; }
+.hub .door__origin { display: none; }
+.hub .door__reads { margin-top: 0; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: 1.35; color: var(--c-text-muted); word-break: keep-all; }
+.hub .door.is-visited .door__badge { margin-top: var(--space-1); padding: 0 6px; font-size: var(--fs-2xs); }
+.hub .hub-end { margin-top: var(--space-4); font-size: var(--fs-xs); }
+
+/* ── 구역 구분: 상자 대신 청동 장식선 하나 ── */
+.hub :is(.so-far, .faq)::before {
+  content: ""; display: block; width: 72%; height: 12px; margin: 0 auto var(--space-6);
+  background:
+    radial-gradient(circle, var(--bronze) 0 2px, transparent 2.5px) center / 12px 12px no-repeat,
+    linear-gradient(90deg, transparent, oklch(0.66 0.075 75 / 0.45) 20% 44%, transparent 44% 56%, oklch(0.66 0.075 75 / 0.45) 56% 80%, transparent) center / 100% 1px no-repeat;
+}
+/* ── 지금까지의 이야기: 상자 없이, 마친 방만 (아직 안 연 방은 위 여섯 문이 보여 준다) ── */
+.hub .so-far { margin-top: var(--space-10); padding: 0; border: 0; border-radius: 0; background: none; }
+.hub .so-far__item.is-upcoming { display: none; }
+.hub .so-far__item { border-top-color: oklch(0.4 0.04 285 / 0.35); }
+.hub .so-far__all { margin-top: var(--space-2); }
+.hub .hub-paid { margin-top: var(--space-8); }
+/* ── 자주 묻는 것: 펼친 채로, 더 조용하게 ── */
+.hub .faq { margin-top: var(--space-12); padding-top: 0; border-top: 0; }
+.hub .faq__title { text-align: center; font-size: var(--fs-md); font-weight: 700; letter-spacing: 0.04em; color: var(--c-text); }
+.hub .faq__list { gap: var(--space-5); }
+.hub .faq__item dt { padding-left: 0; font-size: var(--fs-sm); color: var(--c-text); }
+.hub .faq__item dt::before { content: none; }
+.hub .faq__item dd { padding-left: 0; font-size: var(--fs-sm); line-height: 1.75; }
+.hub [data-ad="hub"] { margin-top: var(--space-10); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-gate::before, .hub-gate__light { animation: none; }
+  .hub-gate::before { opacity: 0.75; }
+  .hub-gate__dust { display: none; }
+  .hub-gate__leaf, .hub-gate__light, .hub-gate__seal, .hub-gate__motifs { transition: none; }
+  .hub-gate:hover .hub-gate__leaf--l, .hub-gate:hover .hub-gate__leaf--r,
+  .hub-gate.is-entering .hub-gate__leaf--l, .hub-gate.is-entering .hub-gate__leaf--r { transform: none; }
+  .hub-gate.is-entering .hub-gate__light { width: 2px; margin-left: -1px; }
+  .hub-gate.is-entering .hub-gate__seal { opacity: 1; transform: none; }
+}
