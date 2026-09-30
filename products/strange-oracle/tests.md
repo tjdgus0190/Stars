@@ -394,3 +394,8 @@
   - 결과: reduced 106/0, motion 106/0(motion은 contain 추가 전 코드, reduced는 추가 후 코드로 다시 통과).
   - **미실행**: `e2e-flow.js reduced`, 마지막 수정(contain) 뒤 build-dist → mock 재기동 → 전체 재실행. 도구 실행 권한 확인이 계속 실패해서 멈췄다.
 - 미확인: 실제 기기(사파리·안드로이드)의 스와이프·3D 넘김 성능, 480px 이상 화면, 화면낭독기 실사용.
+
+### 결정 53 UI 점검 요청 반영 (R53-1~3, 2026-09-30, developer)
+- R53-1 시기별 나이 제목을 첫 dt+dd와 묶어 넘김, R53-2 장 끝 한 줄 쪽 방지(과부 줄), R53-3 궁합 짝 알약 글자 치우침(원인: 단락 들여쓰기 상속 → style.css에서 match-pair만 0).
+- e2e-paid 검사 추가: "나이 제목이 쪽 끝에 홀로 남지 않음", "이어진 단락 한 줄만 있는 쪽 없음"(360×800, 책 펼친 뒤 측정).
+- 결과: build-dist `[초안] 없음`·`public/에 유료 문구 0건` / node --test 17 pass 0 fail / e2e-paid reduced 108/0, motion 108/0 / e2e-flow reduced 65/0. 360×800 **113쪽**(변화 없음), 쪽 나누기 약 300ms.

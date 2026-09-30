@@ -2982,11 +2982,59 @@
         return w;
       });
     }
-    return kids.map((c) => {
+    const out = [];
+    const wrap = (...cs) => {
       const w = n.cloneNode(false);
-      w.append(c.cloneNode(true));
-      return w;
-    });
+      cs.forEach((c) => w.append(c));
+      out.push(w);
+    };
+    for (let i = 0; i < kids.length; i++) {
+      const c = kids[i];
+      const nx = kids[i + 1];
+      // (R53-1) 시기별 흐름 나이 제목은 다음 자식의 첫 항목(dt+dd)과 묶어 쪽 끝에 홀로 남지 않게
+      if (c.matches(KEEP_WITH_NEXT) && nx && nx.children.length > 1) {
+        const [first, ...rest] = [...nx.children];
+        const head = nx.cloneNode(false);
+        head.append(first.cloneNode(true));
+        const tail = nx.cloneNode(false);
+        rest.forEach((k) => tail.append(k.cloneNode(true)));
+        wrap(c.cloneNode(true), head);
+        wrap(tail);
+        i++;
+        continue;
+      }
+      wrap(c.cloneNode(true));
+    }
+    return out;
+  }
+  const KEEP_WITH_NEXT = ".timeline__age";
+  // (R53-2) 장 끝 쪽이 앞 쪽에서 이어진 단락 한 줄뿐이면, 앞 쪽 단락 끝에서 한 줄 분량 어절을 함께 넘긴다 (앞 쪽은 2줄 이상 남김)
+  function fixWidow(pages, from) {
+    if (pages.length - from < 2) return;
+    const bd = js("book-page-body", pages[pages.length - 1].el);
+    const rest = bd.firstElementChild;
+    if (bd.children.length !== 1 || !rest.matches("p.is-cont") || rest.children.length) return;
+    const prev = js("book-page-body", pages[pages.length - 2].el).lastElementChild;
+    if (!prev || prev.tagName !== "P" || prev.children.length) return;
+    const lh = parseFloat(getComputedStyle(prev).lineHeight);
+    const lines = (e) => Math.round(e.getBoundingClientRect().height / lh);
+    if (!lh || lines(rest) > 1) return;
+    const before = lines(prev);
+    if (before < 3) {
+      // 앞 쪽 조각도 1~2줄뿐: 한 줄을 넘기면 앞 쪽에 외톨이 줄이 남으므로 단락을 통째로 다음 쪽으로
+      if (prev.parentElement.children.length < 2) return;
+      rest.textContent = prev.textContent.trimEnd() + " " + rest.textContent;
+      rest.className = prev.className;
+      prev.remove();
+      return;
+    }
+    const words = prev.textContent.match(/\S+\s*/g) || [];
+    let k = words.length;
+    while (k > 1 && lines(prev) > before - 1) {
+      k--;
+      prev.textContent = words.slice(0, k).join("").trimEnd();
+    }
+    rest.textContent = words.slice(k).join("").trimEnd() + " " + rest.textContent;
   }
 
   function paginate() {
@@ -3045,6 +3093,7 @@
         afterOpen = b.kind === "open";
         place(b.node, b.kind);
       });
+      fixWidow(pages, chapStart[ch.key]);
       chapLen[ch.key] = pages.length - chapStart[ch.key];
     });
     const total = pages.length;
