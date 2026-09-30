@@ -427,3 +427,12 @@
 - `node tools/build-dist.js` 결과: "[초안] 없음", "public/에 유료 문구 0건 (유료 문장 5629개 대조, api/·_paid는 dist/api/에만)" 확인
 - `tools/strange-oracle/out/e2e-flow-reduced.txt` 마지막 줄: "65 PASS / 0 FAIL (유료 문장 5629개 대조)"
 - **판정: 배포 가능**
+
+## 결정 52 검수 (입구 다듬기)
+- `node tools/build-dist.js`: "[초안] 없음", "public/에 유료 문구 0건" 확인
+- `node --experimental-websocket tools/strange-oracle/e2e-flow.js motion`: 66 PASS / 0 FAIL
+- `node --experimental-websocket tools/strange-oracle/e2e-paid.js reduced`: 93 PASS / 0 FAIL
+- 입구 주 버튼(`.hub-gate`, index.html:207~235): `<button>` 태그이며 `hub-cta__label`에 JS로 문 이름 채움 — e2e에서 "주 버튼 = 첫 번째 문 열기(Ⅰ 오검)", "주 버튼 = II 별의 방 열기" 등 실제 문구 노출 확인
+- FAQ: hidden 아님, 펼친 채 답 합계 341자 (e2e "자주 묻는 것: 펼친 채 답 합계 300자 이상 — 341")
+- 입구 광고: e2e "입구 광고 1개" — 1개로 규칙(최대 2개) 준수
+- **판정: 배포 가능**
