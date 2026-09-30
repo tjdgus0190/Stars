@@ -1485,7 +1485,7 @@ Hand-painted gouache over fine ink engraving, delicate cross-hatched linework li
 - 모델: (시안 생성 뒤 아래 표에 확정 id 기록). 비율 **3:4**, 해상도 1K. 화면용은 576×768 WebP(표시 크기의 3배 이상)로 줄여 200KB 이하.
 - 크레딧 예산: 기획서에 숫자 상한 없음(결정 54 "이 범위로 한정") / 지금까지 사용: 아래 표 참고.
 
-### 시안 생성 시도 기록 (2026-09-30) — **막힘, 시안 0장**
+### 시안 생성 시도 기록 (2026-09-30, 첫 시도) — **막힘, 시안 0장** (아래 "시안 생성 결과"에서 해결됨)
 - `list_models`는 정상 응답. 그러나 `media_forge_generate`가 3번 모두 **"Subscription payment required."** 로 거절됐다(`fal-ai/nano-banana-2` 3:4·1K로 별·촐킨 각 1회, 저가 모델 `google/nano-banana-lite`로 별 1회). 모델과 무관한 계정 상태(구독 결제)로 보인다. job_id가 발급되지 않아 **사용 크레딧 0**(잔액은 도구로 확인할 수 없어 미확인).
 - 구독 결제·계정 작업은 운영자 몫이라 여기서 멈췄다. 아래 표의 "시안" 두 줄은 **프롬프트만 준비된 상태**이고 파일은 아직 없다(assets/ai/ 폴더도 만들지 않음).
 - 장당 크레딧: `list_models`가 가격을 알려 주지 않아 **미확인**. 첫 생성 응답에서 확인해 이 표에 적는다. 그래서 남은 장수의 예상은 "장수 × 장당 크레딧"으로만 적어 둔다: 안내자 6장(+다시 만들기 여유 2장), 2차 후보 21장.
@@ -1494,17 +1494,88 @@ Hand-painted gouache over fine ink engraving, delicate cross-hatched linework li
 - 변환 도구: ffmpeg 있음(WebP 변환 가능), cwebp 없음.
 - 확정 뒤 CREDITS.md에 적을 것: "Clipwave(ManyMotions)로 생성한 AI 이미지", 모델 id, 생성일, 파일 목록(assets/ai/guide-*.webp), 상업적 이용 근거(약관 조항).
 
-### 안내자 6장 (1순위)
+### 시안 생성 결과 (2026-09-30, 재시도) — **시안 2장 완료**
+- 운영자가 구독 결제를 마쳐 생성이 됐다. **상업적 이용: 운영자가 생성물의 상업적 이용 가능을 확인함(2026-09-30).** 근거 약관 조항은 확정 단계에서 CREDITS.md에 적는다(지금은 CREDITS.md를 고치지 않음).
+- 확정 모델 id: **`fal-ai/nano-banana-2`** (Nano Banana 2). 설정: `type: image`, `aspect_ratio: 3:4`, `resolution: 1K`, `count: 1`. 결과 원본은 PNG 896×1200(약 1.6~2.0MB).
+- **장당 60 크레딧**(생성 응답의 `credits_consumed`). 이번 사용: 4회 × 60 = **240 크레딧**(별 3회, 촐킨 1회). 다시 만들기 2회를 모두 별에 썼다. 잔액은 도구로 볼 수 없어 미확인.
+- 남은 4장 예상: 4 × 60 = 240 크레딧(+다시 만들기 여유 2장 120).
+- 변환: ffmpeg `scale=576:768(lanczos)` + `libwebp -quality 82` → 별 32KB, 촐킨 42KB(둘 다 200KB 이하).
+- 원본: `assets/ai/original/guide-star.png`(채택, 3차), `guide-star-v1.png`·`guide-star-v2.png`(버린 시안, 비교용으로 남김), `guide-tzolkin.png`.
+
+| 시안 | 판정 | 본 것 |
+|---|---|---|
+| 별 1차 (공통+계획 프롬프트 그대로) | 버림 | 화풍·어두운 가장자리는 좋음. 그러나 눈이 검게 뚫린 구멍처럼 나와 으스스하고, 초승달을 별이 **원형 고리**로 둘러 깃발 문장(로고)처럼 보임. 등잔이 요술 램프 모양 |
+| 별 2차 (눈 보이게, 별은 흩뿌림, 디야 등잔) | 버림 | 얼굴·손은 깨끗. 그러나 **크림색 종이 여백(테두리)** 이 생겨 어두운 화면에 섞이지 않고, 구름 낀 밝은 하늘·환한 얼굴이라 수수께끼 분위기가 사라짐. 옷에 작은 기호 무늬 |
+| 별 3차 (아래 표의 최종 프롬프트) | **시안 채택** | 가장자리가 검정으로 녹음, 테두리·글자·로고 없음. 눈이 보이고 표정이 온화함. 가리키는 손 정상(검지+접은 세 손가락). 아쉬운 점: 등잔을 든 손이 소매에 가려 거의 안 보임(등잔이 소매 끝에 얹힌 듯), 인물이 나이 든 수도자처럼 읽혀 "인도풍"은 옷 테두리 정도로만 전해짐, 달이 왼쪽 위로 치우침(48×64 작은 자리에서는 얼굴 쪽으로 object-position 필요) |
+| 촐킨 1차 (계획 프롬프트 그대로) | **시안 채택(조건부)** | 사람·동물·손 없음, 테두리·로고 없음, 이끼·은은한 빛 좋음. 아쉬운 점: ① 새김이 무늬라기보다 **마야 글자(글리프) 흉내**로 읽힘 — 실제 글자가 아니라 아는 사람 눈에는 가짜 글자. 일반 사용자에겐 장식으로 보임 ② 둘째 줄 가운데 칸이 눈 달린 옆얼굴처럼 보일 수 있음(약함) ③ 별 시안보다 빗금 선이 적고 디지털 채색 느낌, 금색이 거의 없고 회녹색 위주 → **두 장의 화풍이 완전히 같지는 않음** ④ 석판이 화면을 크게 채워 위·아래 빈 공간이 별보다 좁음 |
+- 화풍 일치: 어두운 바탕·가는 외곽선·강조색 하나는 공통이지만 촐킨 쪽이 덜 "판화"답다. 공통 스타일의 "half-length, face partly in shadow" 문장이 사람 아닌 대상과 충돌한 것도 원인으로 보인다 → 아래 "남은 4장 프롬프트 고칠 점" 참고.
+- 다크 화면 대비: 두 장 모두 바탕이 검정에 가까워 `--c-surface` 위에 경계 없이 앉을 것으로 판단(코드·이미지로만 판단, 실제 화면 미확인).
+
+### 남은 4장 프롬프트 고칠 점 (확정 전 제안)
+1. 공통 스타일에 추가: `The dark background fills the whole canvas edge to edge, no paper margin, no clouds` / `no symbols on the clothes, no flag emblems`. (2차에서 종이 여백이 생긴 것 방지)
+2. 공통 스타일의 `face partly in shadow` → `upper face in soft shadow but both eyes still visible, calm and kind` 로 바꾼다. (1차의 검은 눈구멍 방지. 오검·룬처럼 두건 쓴 인물에 특히 필요)
+3. 손은 **한 손만 동작**시키고 다른 손은 "hidden inside the cloak"이라고 명시한다. (3차에서 등잔 든 손이 어정쩡)
+4. 별·점 등 작은 요소는 "scattered unevenly, no circle, no ring"처럼 배열을 말로 정한다. 룬의 조약돌은 "plain, no marks" 유지.
+5. 사람 아닌 대상(촐킨)은 공통 스타일에서 `half-length, face…three-quarter view`와 `fictional character, not a real person`을 빼고, 대신 `visible fine cross-hatched ink lines, muted antique gold in the carved grooves`를 넣어 화풍을 맞춘다. 새김은 `only plain geometric spirals, step-fret bands, dots and bars; no glyph blocks, no cartouches, nothing resembling writing or faces`로 바꾼다. → 촐킨을 확정 전에 이 프롬프트로 1회 다시 만드는 것을 권함(60 크레딧).
+6. 인물 나이·성별이 장마다 제멋대로 나온다. 여섯 안내자의 균형을 위해 장마다 나이대를 한 단어로 적는다(예: 별 "middle-aged").
+
+### 안내자 6장 (1순위) — **이전 계획·시안 표. 아래 "최종 생성 실행" 표가 이 표를 대신한다**
 | 파일 경로 (products/strange-oracle/) | 용도 | 유형별 프롬프트 (공통 스타일 앞에 붙임) | 비율·해상도 | 사용 크레딧 | 상태 |
 |---|---|---|---|---|---|
 | assets/ai/guide-ogham.webp | Ⅰ 오검 안내자 | An old scribe of a birch forest in an early-medieval Irish setting, plain undyed wool cloak with a simple round brooch, grey beard, head bowed, carving short notches along the edge of a strip of birch bark with a small stylus, pale birch trunks faintly behind. Accent color: moss green. | 3:4 · 1K | 예상 1장분 | 계획 |
-| assets/ai/guide-star.webp | Ⅱ 별 안내자 | A mysterious astrologer who counts the houses of the moon at night, wrapped in a long Indian-style robe and a wide shawl draped over the head, face mostly shaded, one hand raised with the index finger pointing up at a thin crescent moon and a ring of small stars, a small brass oil lamp beside. Accent color: soft violet blue. | 3:4 · 1K | 0 (생성 거절) | 시안 대기(프롬프트만) |
+| assets/ai/guide-star.webp | Ⅱ 별 안내자 | A mysterious astrologer who counts the houses of the moon at night, wrapped in a long Indian-style robe and a wide shawl draped over the head, face mostly shaded, one hand raised with the index finger pointing up at a thin crescent moon and a ring of small stars, a small brass oil lamp beside. Accent color: soft violet blue. **← 계획안(1차에 씀). 채택한 3차 최종 프롬프트:** A mysterious astrologer who counts the houses of the moon at night, wrapped in a long Indian-style robe and a wide shawl draped over the head, upper face in soft shadow under the shawl but both eyes still visible, calm and kind, glancing up, one hand raised with the index finger pointing up at a thin crescent moon, a few tiny faint stars scattered unevenly around the moon (no circle, no ring), a small round brass diya oil lamp with a tiny flame beside. Accent color: soft violet blue. **+ 공통 스타일(3차에서 바꾼 부분:** "face partly in shadow in" 삭제 → "three-quarter view"; "Plain dark background that fades…" → "The dark background fills the whole canvas edge to edge and fades to near-black at every edge, no paper margin, no vignette border, no clouds"; 금지 목록에 "no symbols on the clothes, no flag emblems" 추가) | 3:4 · 1K · `fal-ai/nano-banana-2` → 576×768 WebP 32KB | 180 (60 × 3회: 1·2차 버림, 3차 채택) | **시안** |
 | assets/ai/guide-decan.webp | Ⅲ 데칸 안내자 | The keeper of a star clock in Hellenistic Alexandria, a calm figure in a draped linen tunic and mantle, short curled hair, one hand resting on a stone sundial with a slanted gnomon casting a long shadow, a few stars above a flat rooftop. Accent color: warm sand amber. | 3:4 · 1K | 예상 1장분 | 계획 |
-| assets/ai/guide-tzolkin.webp | Ⅳ 촐킨 안내자 (사람 아님) | Not a person: an upright rectangular carved limestone tablet in ancient Maya relief sculpture style, standing alone, its surface covered with abstract low-relief scrolls, spirals, rounded cartouche blocks and rows of dots and bars, a faint glow coming out of the carved grooves as if the stone is speaking, a little moss at the base. No face, no eyes, no human figure, no animal, no hands. Accent color: jade green. | 3:4 · 1K | 0 (생성 거절) | 시안 대기(프롬프트만) |
+| assets/ai/guide-tzolkin.webp | Ⅳ 촐킨 안내자 (사람 아님) | Not a person: an upright rectangular carved limestone tablet in ancient Maya relief sculpture style, standing alone, its surface covered with abstract low-relief scrolls, spirals, rounded cartouche blocks and rows of dots and bars, a faint glow coming out of the carved grooves as if the stone is speaking, a little moss at the base. No face, no eyes, no human figure, no animal, no hands. Accent color: jade green. (+ 공통 스타일 그대로. 이것이 최종 프롬프트) | 3:4 · 1K · `fal-ai/nano-banana-2` → 576×768 WebP 42KB | 60 (1회) | **시안** (글리프 흉내 때문에 다시 만들기 권함) |
 | assets/ai/guide-rune.webp | Ⅴ 룬 안내자 | A seer on a cold northern seashore in a Norse early-medieval setting, heavy hooded wool cloak moving in the wind, holding a few small smooth pebbles in an open palm, grey waves and a low horizon behind. Pebbles are plain, without marks. Accent color: cold steel blue. | 3:4 · 1K | 예상 1장분 | 계획 |
 | assets/ai/guide-sibyl.webp | Ⅵ 시빌라 안내자 | A prophetess deep in a rock cave in a Greco-Roman antique setting, laurel wreath on her head, modest long draped robe and veil, seen in profile, one hand slightly raised as if listening to an echo, thin mist and a small bronze tripod lamp. Accent color: dusty rose. | 3:4 · 1K | 예상 1장분 | 계획 |
 - 돌·나무껍질·석판에 "글자"가 생기면 가짜 글자가 되므로, 새김은 **무늬(눈금, 소용돌이, 점과 막대)** 로만 요청한다. 오검·룬 글자는 기존처럼 화면의 SVG·HTML이 맡는다.
 - 방 강조색 표현은 2단계에서 style.css의 방별 `--accent-h` 값과 맞춰 다시 확인한다(지금 프롬프트의 색 이름은 어림값).
+
+### 최종 생성 실행 (2026-09-30, 운영자 피드백 반영) — **6장 생성됨, 그중 2장만 내려받음. 4장은 내려받기 막힘**
+운영자 피드백(2026-09-30): 화풍(어두운 판화 + 과슈) 승인. 사람 안내자는 **젊고 단정하게 아름다운 20대 중반 성인**(선정적이지 않게, 노출 없는 옷, 아이처럼 보이지 않게), 성별은 섞고, 방의 문화가 옷·소품으로 또렷이 읽히게. 촐킨은 사람이 아닌 석판으로 다시 만든다.
+
+- **성별(designer가 정함): 여 3 / 남 2** — Ⅰ 오검 남, Ⅱ 별 여, Ⅲ 데칸 남, Ⅴ 룬 여, Ⅵ 시빌라 여. (Ⅳ 촐킨은 석판)
+- 모델 `fal-ai/nano-banana-2`, `type: image`, `aspect_ratio: 3:4`, `resolution: 1K`, `count: 1`. 장당 60 크레딧.
+- **이번 실행 사용 크레딧: 6회 × 60 = 360.** 다시 만들기 0회(아래 이유로 쓰지 않음). 결정 54 누계: 240(시안) + 360 = **600**. 잔액 미확인.
+- **막힌 점**: 생성 6건 모두 `completed`였으나, 결과 주소가 오검·데칸 2건만 바로 받을 수 있는 전체 주소(fal.media)였고 **별·촐킨·룬·시빌라 4건은 `/api/media-forge/asset/<job_id>/image-0.png` 꼴의 상대 주소**로 돌아왔다. 이 주소는 Clipwave 서버 주소와 (아마도) 계정 인증이 있어야 받을 수 있는데, 서버 주소·키는 설정 파일에만 있어 designer가 읽지 않았다(읽기 시도는 권한 단계에서 거절됨, API 키를 다루지 않는 규칙). 그래서 **4장은 눈으로 확인하지 못했고(미확인) 파일도 없다.** 같은 문제가 다시 날 수 있어 크레딧을 더 쓰는 다시 만들기는 하지 않았다.
+  - 받지 못한 job_id (운영자가 Clipwave 화면의 생성 기록에서 내려받거나, 서버 주소를 알려 주면 이어서 작업): 별 `4be520ea-167a-43bb-928f-0c9ac1fe2ef9` · 촐킨 `8a7050ad-f71e-4fd6-8fc0-08a978fae448` · 룬 `bf6ec8b8-6a80-4b93-be93-dda32b0a7124` · 시빌라 `10ad55fe-183b-4a37-b3ff-55b11935b49e`. (작업 기록은 서버 메모리에만 있어 재배포되면 사라질 수 있다고 도구 설명에 적혀 있음)
+  - 받아 둘 자리: `assets/ai/original/guide-<star|tzolkin|rune|sibyl>.png` → ffmpeg `scale=576:768:flags=lanczos`, `libwebp -quality 82` → `assets/ai/guide-<이름>.webp`.
+- 지금 `guide-star.webp`·`guide-tzolkin.webp`(와 original의 같은 이름 png)는 **이전 시안 그대로**다(나이 든 수도자처럼 보이는 별, 글리프 흉내 촐킨). 새 그림으로 덮어쓰지 못했다.
+- `original/guide-star-v1.png`·`guide-star-v2.png`는 **지우지 않았다**(새 별 그림을 받지 못했고, designer 규칙상 Bash 삭제를 쓰지 않음). 새 별 확정 뒤 지울 것.
+
+**최종 공통 스타일 (사람 5장 뒤에 그대로 붙임)**
+```
+Hand-painted gouache over fine ink engraving, delicate cross-hatched linework like an old book plate, limited palette: deep midnight indigo and near-black navy, muted antique gold highlights, plus one soft accent color. Single warm light source, gentle rim light. Subject centered, half-length, three-quarter view, upper face in soft shadow but both eyes still visible, calm and kind. The dark background fills the whole canvas edge to edge and fades to near-black at every edge, no paper margin, no vignette border, no clouds, calm empty space in the top fifth and bottom fifth. Matte paper grain. Quiet, mysterious, gentle and dignified mood, respectful fictional character, not a real person. No text, no letters, no writing, no numbers, no logos, no watermark, no frame, no border, no symbols on the clothes, no flag emblems.
+```
+- 촐킨(사람 아님)은 위에서 `half-length, three-quarter view, upper face…kind`와 `respectful fictional character, not a real person`을 빼고 `Subject centered.`만 남겼으며, 끝에 `no emblems, no human figure, no hands`를 더했다. 데칸은 금지 목록에 `no hieroglyphs`, 룬은 `no runes`를 더했다.
+
+| 파일 경로 (products/strange-oracle/) | 안내자·성별 | 유형별 최종 프롬프트 (공통 스타일 앞에 붙임) | 설정 → 결과 | 크레딧 | 상태 |
+|---|---|---|---|---|---|
+| assets/ai/guide-ogham.webp | Ⅰ 오검 · 남 | A graceful young man in his mid-twenties, a scribe of a birch forest in an early-medieval Irish setting, handsome refined features, clean-shaven, shoulder-length wavy dark auburn hair, modest plain undyed wool cloak fastened at the shoulder with a simple bronze penannular ring brooch over a long linen tunic, one hand holding an upright slender wooden stave whose edge is cut with a few plain short straight notches (simple tally notches only, no letters), the other hand hidden inside the cloak, pale birch trunks faintly behind him in the dark. Accent color: moss green. | 3:4 · 1K → 576×768 WebP 46KB | 60 | **확정 후보(흠 있음)** |
+| assets/ai/guide-star.webp | Ⅱ 별 · 여 | A graceful young Indian woman in her mid-twenties, a mysterious astrologer who counts the houses of the moon at night, elegant refined features, long dark braided hair, dressed in classical Indian dress: a modest long-sleeved blouse and a sari-like draped cloth with its end drawn loosely over her head as a shawl, a narrow woven gold border along the edge of the cloth, modest jewelry (small gold earrings, one thin bangle, a small plain dot on the forehead), one hand raised with the index finger pointing up at a thin crescent moon, a few tiny faint stars scattered unevenly around the moon (no circle, no ring), the other hand hidden inside the draped cloth, a small round brass diya oil lamp with a tiny flame standing on a low stone ledge beside her. Accent color: soft violet blue. | 3:4 · 1K → **내려받지 못함** (파일은 이전 시안 32KB) | 60 | 생성됨 · **미확인** |
+| assets/ai/guide-decan.webp | Ⅲ 데칸 · 남 | A graceful young man in his mid-twenties, the keeper of a star clock in Hellenistic Alexandria, handsome refined features, clean-shaven, short dark curled hair, dressed in a modest white linen chiton with a himation mantle draped over one shoulder, one hand resting on a small bronze armillary sphere of plain interlocking rings standing on a stone pedestal, the other hand hidden inside the mantle, a few tiny faint stars scattered unevenly in the dark above, a plain smooth stone column faintly behind. The rings and the stone are plain, without any markings or inscriptions. Accent color: warm sand amber. | 3:4 · 1K → 576×768 WebP 42KB | 60 | **확정 후보** |
+| assets/ai/guide-tzolkin.webp | Ⅳ 촐킨 · 석판 | Not a person: a single upright rectangular carved limestone tablet with Maya sculptural feel, standing alone and small in the middle of the picture with wide empty dark space all around it, occupying only the central half of the canvas. Its surface is carved ONLY with plain geometric ornament: a few large simple spirals, stepped fret bands along the border, and rows of plain round dots and short straight bars. No glyph blocks, no cartouches, no pictograms, nothing resembling writing, nothing resembling faces, eyes, animals or figures. A faint soft glow comes out of the carved grooves as if the stone is quietly speaking, a little moss at the base. Visible fine cross-hatched ink lines shading the stone, muted antique gold in the carved grooves. Accent color: jade green. | 3:4 · 1K → **내려받지 못함** (파일은 이전 시안 42KB) | 60 | 생성됨 · **미확인** |
+| assets/ai/guide-rune.webp | Ⅴ 룬 · 여 | A graceful young woman in her mid-twenties, a seer on a cold northern seashore in a Norse early-medieval setting, elegant refined features, long pale blonde braid over one shoulder, dressed in a modest heavy hooded wool cloak with a grey fur trim at the collar over a long wool dress closed at the neck, hood resting loosely on her hair, one hand holding an upright plain wooden staff, the other hand hidden inside the cloak, a few plain smooth grey pebbles without any marks lying on a flat rock beside her, dark cold sea waves and a low horizon faintly behind. Accent color: cold steel blue. | 3:4 · 1K → **내려받지 못함** (파일 없음) | 60 | 생성됨 · **미확인** |
+| assets/ai/guide-sibyl.webp | Ⅵ 시빌라 · 여 | A graceful young woman in her mid-twenties, a prophetess deep in a rock cave in a Greco-Roman antique setting, elegant refined features, dark hair gathered up under a thin veil with a slender laurel wreath, dressed in a modest long draped peplos pinned at both shoulders that covers her fully, one hand slightly raised holding a small laurel sprig as if listening to an echo, the other hand hidden inside the folds of the veil, a small bronze tripod with a gentle flame beside her, thin mist, a soft glow from the cave mouth far behind. Accent color: dusty rose. | 3:4 · 1K → **내려받지 못함** (파일 없음) | 60 | 생성됨 · **미확인** |
+
+**직접 본 2장 판정 (576×768 WebP를 Read로 확인)**
+| 그림 | 판정 | 본 것 |
+|---|---|---|
+| 오검 | 확정 후보(흠 있음) — 다시 만들기 1회 권함 | 좋은 점: 20대 남성, 단정하고 온화함, 두 눈 또렷, 글자·로고 없음, 막대 눈금은 단순한 짧은 금이라 글자로 읽히지 않음, 망토·브로치·자작나무로 문화가 읽힘. 흠: ① **그림이 네모 칸 안에 들어가 있고 위(약 85px)·아래(약 100px)·양옆에 검은 여백이 곧은 경계로 남음** — 어두운 색이라 화면에는 묻히지만 "가장자리가 녹는" 데칸과 다르다(CSS mask로 위아래는 가릴 수 있으나 옆 경계는 남음) ② 숨기라고 한 둘째 손이 망토 자락을 쥔 채 보임(모양은 정상) ③ 브로치가 열린 고리가 아니라 **바퀴살 있는 고리**로 나와 작은 문장처럼 보일 수 있음(약함) ④ 이끼색 강조가 거의 없고 전체가 황토색 |
+| 데칸 | 확정 후보 | 20대 남성, 단정, 두 눈 또렷하고 온화. 키톤+히마티온(금색 줄 하나), 혼천의 고리에 글자·눈금 없음, 손 정상(한 손은 옷 속), 별은 흩어져 있고 고리 모양 아님, 가장자리가 검정으로 녹음. 아쉬운 점: 오른쪽 기둥이 화면 위 끝까지 닿아 위쪽 빈 공간이 기둥으로 끊김, 얼굴 그늘이 거의 없어 "수수께끼"보다는 맑은 인상 |
+- 두 장의 화풍(가는 빗금 + 엷은 채색, 남색 바탕)은 서로 맞는다. 나머지 4장과의 일치, 여섯 장의 구도 균형은 **미확인**.
+- 다시 만들기 3회 여유는 그대로 남아 있다(권함: 오검 1회 — 프롬프트에 `no inner picture frame, the forest dissolves into darkness on all four sides`, `plain open ring brooch without spokes` 추가).
+
+**planner·copywriter에게 요청 — 젊은 모습과 어긋나는 문구 (designer는 spec·data.js를 고치지 않음)**
+| 어디 | 지금 문구 | 왜 어긋나는지 |
+|---|---|---|
+| specs/strange-oracle.md 641행(결정 51 안내자 초안) | "Ⅰ 오검 = 자작나무 숲의 **늙은** 필경사" | 그림은 20대 남성 |
+| specs/strange-oracle.md 940행(9-1 표, 오검 정체 한 줄) | "나무껍질에 글자를 새기며 **살아온 늙은** 필경사" | 같음. "살아온"도 긴 세월을 암시 |
+| 같은 행, 말투 규칙 | "하십시오체, 쉼표로 숨을 고르는 긴 문장, **예스러운 어휘**" | 어긋남은 약함(젊은 필경사도 격식체를 쓸 수 있음). 유지할지 planner 판단 |
+| data.js `guides.ogham.ritual` | "**숨을 한 번 고르고**, 나무의 결을 따라 천천히 새기고 있습니다." | 노인의 느린 호흡으로 읽힐 수 있음(약함). copywriter 판단 |
+| specs 942행·data.js `guides.decan.*`·CREDITS.md 17행 | "별시계(**해시계**)", 반복 모티프 "**그림자**·**눈금**" ("그림자가 멈춰 선 눈금") | 나이 문제는 아니고 **소품 불일치**: 이번 그림은 운영자 지시(별시계·물시계·혼천의 꼴)에 따라 혼천의를 그렸고 그림자·눈금이 없다. 문구를 그대로 두려면 데칸을 해시계로 다시 그리거나, 문구의 소품 설명을 고쳐야 함 → 운영자·planner 판단 |
+| specs 938~945행 "SVG 모티프" 열, 오검 "첨필을 쥐고 나무껍질에 글자를 새기는 손" | — | 그림은 눈금 새긴 막대를 든 모습(운영자 지시). SVG는 작은 자리에 그대로 남으므로 충돌은 약함 |
+- 별·룬·시빌라·촐킨의 정체 한 줄과 data.js 대사에는 나이를 말하는 낱말이 없다("점성가", "예언자", "무녀", "이 돌은"). 성별을 말하는 낱말도 없어 이번 성별 선택과 부딪히지 않는다("무녀"=여성, 일치).
 
 ### 넣을 자리와 표시 크기 (2단계 작업, 지금은 계획만)
 | 자리 | 지금 | 바꿀 모습 | 표시 크기(360px) |
@@ -1528,3 +1599,54 @@ Hand-painted gouache over fine ink engraving, delicate cross-hatched linework li
 | 6 | "나의 이야기" 여섯 장 머리 삽화 | 장마다 작은 삽화. 효과는 낮고 장수는 많음 | 6 | 3:2 |
 - 합계 21장. 1~2순위(7장)만 해도 체감이 크다. 10장 넘게 한 번에 만들면 운영자 승인이 필요하다(designer 규칙).
 - 쓰지 않을 곳: 아이콘, 룬·오검 글자, 진행 표시, 버튼 장식, 의식 연출(모두 SVG·CSS가 가볍고 고치기 쉬움).
+
+### 실사풍 시안 (2026-09-30) — **2장 생성됨, 둘 다 내려받지 못함(눈으로 미확인). 상태: 시안**
+운영자 피드백(2026-09-30): "색감은 유지한 채 화풍만 바꾸자. 지금은 너무 카툰풍, 좀 더 실사풍으로." → 색·조명(짙은 남색·검정 바탕, 바랜 금색, 방 강조색 하나, 어두운 촛불·달빛, 가장자리가 어둠에 녹음, 테두리 없음)은 그대로 두고, 그리는 방식만 판화+과슈에서 **영화 같은 사실적 초상 / 사실적 디지털 회화**로 바꿨다. 위 "화풍을 고른 이유"의 "사진풍은 실존 인물처럼 보인다"는 걱정은 그대로 남으므로, 프롬프트에 "실존 인물·유명인을 닮지 않은 평범한 얼굴"을 넣고 받은 뒤 눈으로 확인해야 한다.
+
+**실사풍 공통 스타일 (사람 안내자 뒤에 그대로 붙임)**
+```
+Cinematic realistic portrait, photorealistic-leaning realistic digital painting, natural skin with subtle texture, real woven fabric texture with believable folds, soft volumetric light, shallow depth of field, fine film grain. Limited palette: deep midnight indigo and near-black navy, muted antique gold accents, plus one soft accent color. Dim warm candle light as the single key light with a faint cool moonlight rim. Subject centered, half-length, three-quarter view, upper face in soft shadow but both eyes clearly visible, calm and kind expression. The dark background fills the whole canvas edge to edge and every edge dissolves into near-black darkness, no paper margin, no vignette border, no inner picture frame, no clouds, calm empty dark space in the top fifth and bottom fifth. Quiet, mysterious, gentle and dignified mood. A respectful fictional person who does not resemble any real person or celebrity, an ordinary believable face, young adult, modest fully covering clothing, not sexualized, not scary. No ink outlines, no line art, no cross-hatching, no engraving, no cartoon, no comic, no anime, no illustration look, no glossy plastic skin. No text, no letters, no writing, no numbers, no logos, no watermark, no frame, no border, no symbols on the clothes, no emblems.
+```
+- 사람 아닌 대상(촐킨)은 첫 문장을 `Cinematic realistic still life, photorealistic-leaning realistic digital painting, real stone and moss texture, soft volumetric light, shallow depth of field, fine film grain.`으로 바꾸고, `half-length … calm and kind expression`과 `A respectful fictional person … not sexualized`를 빼고(`not scary`는 분위기 문장에 남김), `no glossy plastic skin`·`no symbols on the clothes`를 빼고 끝에 `no human figure, no hands`를 더했다.
+- 모델: **`fal-ai/nano-banana-2`** 유지. `type: image`, `aspect_ratio: 3:4`, `resolution: 1K`, `count: 1`. 이유: 사실적 표현이 되는 모델이고 장당 값(60)이 이미 확인돼 있다. `list_models`는 가격을 알려 주지 않아 실사에 강하다고 알려진 다른 모델(`fal-ai/flux-2-pro`, `bytedance/seedream/v5/pro/text-to-image` 등)의 값은 **미확인**이라 고르지 않았다.
+- 사용 크레딧: 2회 × 60 = **120** (다시 만들기 0회). 결정 54 누계: 600 + 120 = **720**. 잔액 미확인.
+
+| 시안 | 유형별 프롬프트 (공통 스타일 앞에 붙임) | job_id | 받을 자리 | 크레딧 | 상태 |
+|---|---|---|---|---|---|
+| Ⅱ 별 · 여 | A graceful young Indian woman in her mid-twenties, an astrologer who counts the houses of the moon at night, gentle natural features, long dark braided hair, dressed in classical Indian dress: a modest long-sleeved blouse and a sari-like draped cloth with its end drawn loosely over her head as a shawl, a narrow woven gold border along the edge of the cloth, modest jewelry (small gold earrings, one thin bangle, a small plain dot on the forehead), glancing calmly upward, one hand raised with the index finger pointing up at a thin crescent moon, a few tiny faint stars scattered unevenly around the moon (no circle, no ring), the other hand hidden inside the draped cloth, a small round brass diya oil lamp with a tiny flame standing on a low stone ledge beside her. Accent color: soft violet blue. | `8ca35d93-6916-464e-b0b4-b95d15d7ceda` | original/real-star.png → sample-real-star.webp | 60 | 시안 · 생성됨 · **미확인** |
+| Ⅳ 촐킨 · 석판 | Not a person: a single upright rectangular weathered carved limestone tablet with Maya sculptural feel, standing alone and small in the middle of the picture with wide empty dark space all around it, occupying only the central half of the canvas. Its surface is carved in low relief ONLY with plain geometric ornament: a few large simple spirals, stepped fret bands along the border, and rows of plain round dots and short straight bars. No glyph blocks, no cartouches, no pictograms, nothing resembling writing, nothing resembling faces, eyes, animals or figures. Realistic eroded stone with chips, pores and hairline cracks, a little damp moss at the base and in some grooves, a faint soft glow coming out of the carved grooves as if the stone is quietly speaking, muted antique gold light catching the carved edges. Accent color: jade green. | `a81299d1-674f-4abd-a268-e9e914137ccf` | original/real-tzolkin.png → sample-real-tzolkin.webp | 60 | 시안 · 생성됨 · **미확인** |
+
+- **막힌 점(앞과 같음)**: 두 건 모두 `completed`였지만 결과가 `/api/media-forge/asset/<job_id>/image-0.png` 꼴의 상대 주소로만 돌아왔다. 서버 주소·인증을 찾는 일은 하지 않았다(규칙). 그래서 파일이 없고 그림을 보지 못했다. 다시 만들어도 같은 꼴로 돌아올 가능성이 커서 다시 만들기는 쓰지 않았다.
+- **전체 주소가 돌아오는 조건: 미확인.** `media_forge_generate`의 params에는 출력·저장 위치를 정하는 항목이 없다(`prompt, count, quality, duration, aspect_ratio, image_url, image_urls, reference_urls, video_url`뿐). 같은 모델·같은 설정으로 앞서 오검·데칸 2건은 fal.media 전체 주소, 나머지 4건과 이번 2건은 상대 주소였으므로 호출 옵션이 아니라 서버 쪽 처리(결과를 자체 저장소로 옮기는지)에서 갈리는 것으로 보인다(추정).
+- **판단(그림을 보지 못한 상태)**: 실사풍이 되었는지, 색감이 기존 데칸 시안과 이어지는지, 얼굴이 실존 인물·유명인처럼 보이는지, 피부가 어색한지, 손 모양, 인도 복식이 존중하는 모습으로 읽히는지, 석판 새김이 글자·얼굴처럼 보이는지 — **모두 미확인**. 운영자가 Clipwave 화면의 생성 기록에서 위 두 job을 내려받아 "받을 자리"에 두면 designer가 변환(ffmpeg `scale=576:768:flags=lanczos`, `libwebp -quality 82`)과 판정을 이어서 한다. 작업 기록은 서버 메모리에만 있어 재배포되면 사라질 수 있다.
+- 여섯 장을 이 화풍으로 만들 때 예상: 6 × 60 = **360 크레딧**(이번 2장이 그대로 쓸 만하면 남은 4장 240) + 다시 만들기 여유 2~3장 120~180.
+- 확정 전까지 기존 `guide-*.webp`와 CREDITS.md는 그대로 둔다.
+
+### 회화풍 시안 (2026-09-30) — **2장 생성됨, 둘 다 내려받지 못함(눈으로 미확인). 상태: 시안**
+운영자 결정(2026-09-30): 화풍은 **"사실적인 회화풍"** (사진도 만화도 아님), 인물은 **좀 더 미형**, 그림은 나중에 **짧은 영상**으로도 쓴다. 실사풍 시안 `sample-real-star.webp`는 색감과 인도 복식은 좋았지만 실제 사람을 찍은 사진처럼 읽혔다 → 색·조명은 그대로 두고, 사진 낱말(cinematic, photorealistic, film grain, shallow depth of field)을 빼고 "붓질이 보이는 유화·컨셉아트 초상"으로 바꿨다. 아래가 여섯 장 모두에 쓰는 **최종 공통 스타일**이다(앞의 판화풍·실사풍 공통 스타일을 대신한다).
+
+**최종 공통 스타일 (유형별 프롬프트 뒤에 그대로 붙임)**
+```
+Realistic painterly fantasy character portrait, a finely painted oil and digital concept-art portrait, realistic anatomy, realistic skin and woven fabric rendered in paint, visible soft brushwork and painterly edges, subtle canvas-like paint texture, clearly a painting and not a photograph, no camera look, no film grain, no lens blur. Limited palette: deep midnight indigo and near-black navy background, muted antique gold accents, plus one soft accent color. Dim warm candle light as the key light with a faint cool moonlight rim. Tall vertical 9:16 composition: the figure is half-length, three-quarter view, centered and rather small, placed entirely inside the central area of the canvas, the whole head and both hands fully inside the frame with generous breathing room on every side, wide calm empty dark space above the head and below the figure and at both sides, simple plain dark background. The dark background fills the whole canvas edge to edge and every edge dissolves softly into near-black darkness, no paper margin, no border, no inner picture frame. Gently movable details: a small lamp flame, a few faint drifting stars or thin mist, loose cloth and loose strands of hair. A fictional person who does not resemble any real person or celebrity, young adult in the mid-twenties, strikingly beautiful and graceful with refined features, calm mysterious gentle expression, both eyes clearly visible, modest fully covering culture-appropriate clothing, dignified, not sexualized, not childlike, not scary. No ink outlines, no line art, no cross-hatching, no engraving, no cartoon, no comic, no anime, no glossy plastic skin. No text, no letters, no writing, no numbers, no logos, no watermark, no signature, no frame, no border, no symbols on the clothes, no emblems.
+```
+
+**영상 대비 규칙 (여섯 장 모두 적용)**
+- **9:16 원본(마스터)** 한 장을 만든다. 피사체(머리 전체·두 손·소품)는 **가운데 3:4 영역 안**에 다 들어가야 한다 → UI는 가운데를 3:4로 잘라 쓰고(576×768 WebP), 세로 영상은 9:16 전체를 쓴다.
+- 머리 전체와 두 손이 화면 안에 온전히 있고 사방에 여유가 있어야 한다(손을 옷 속에 숨기거나 화면 끝에서 잘리게 하지 않는다 — 영상에서 움직일 때 뭉개진다).
+- 배경은 단순한 어둠. 위·아래 띠(3:4 밖)는 빈 어둠으로 둔다(영상 자막·UI 자리).
+- 천천히 움직일 수 있는 요소를 반드시 넣는다: 등잔 불꽃, 떠도는 별·안개, 느슨한 천 자락이나 머리카락.
+- 글자·로고·문장(紋章) 없음은 그대로. 영상 생성은 designer 규칙대로 운영자 승인 후에만 한다.
+
+**모델·설정**: `fal-ai/nano-banana-2`, `type: image`, `aspect_ratio: 9:16`, `resolution: 1K`, `count: 1`. `list_models`가 2K·4K도 보여 주지만 값을 알려 주지 않아(60으로 확인된 것은 1K뿐) 1K를 유지했다. 두 건 모두 응답의 `credits_consumed: 60`.
+**사용 크레딧**: 2회 × 60 = **120** (다시 만들기 0회). 결정 54 누계: 720 + 120 = **840**. 잔액 미확인.
+
+| 시안 | 유형별 프롬프트 (최종 공통 스타일 앞에 붙임) | job_id | 받을 자리 | 크레딧 | 상태 |
+|---|---|---|---|---|---|
+| Ⅱ 별 · 여 | A strikingly beautiful, graceful young Indian woman in her mid-twenties, an astrologer who counts the houses of the moon at night, refined delicate features, long dark hair in a loose braid with a few loose strands, dressed in classical Indian dress: a modest long-sleeved blouse and a deep blue sari-like draped robe with its end drawn loosely over her head as a light shawl, a subtle woven gold border along the edge of the cloth, modest jewelry (small gold earrings, one thin bangle, a small plain dot on the forehead), glancing calmly upward toward a thin crescent moon high in the sky, one hand gently lifted with relaxed open fingers, the other hand resting on the fold of her shawl, both hands fully visible and well inside the picture, a small round brass oil lamp with a tiny flame on a low stone ledge beside her, a few tiny faint stars scattered unevenly (no circle, no ring), a thin drift of mist. Accent color: soft violet blue. | `4315c65a-b023-4234-873c-9dd19eacac50` | original/paint-star.png → sample-paint-star.webp | 60 | 시안 · 생성됨 · **미확인** |
+| Ⅰ 오검 · 남 | A strikingly handsome, graceful young man in his mid-twenties, a scribe of the birch forest, refined features, shoulder-length slightly wavy dark auburn hair with a few loose strands, dressed in early-medieval Irish clothing: a plain long-sleeved linen tunic and a heavy moss-green wool cloak fastened at the shoulder with a simple plain open-ring brooch (a penannular ring with a gap and a straight pin, no spokes, no decoration), holding upright in one hand a slender wooden stave cut with plain short straight notches along one edge (simple tally notches only, nothing resembling letters), the other hand resting lightly on the stave lower down, both hands fully visible and well inside the picture, pale birch trunks behind him fading into darkness, a thin drift of mist between the trunks, a small candle lantern glow from the lower side. Accent color: soft moss green. | `d985cd0d-8d88-4f78-8295-6675eb65db33` | original/paint-ogham.png → sample-paint-ogham.webp | 60 | 시안 · 생성됨 · **미확인** |
+
+- **막힌 점(앞과 같음)**: 두 건 모두 `completed`였지만 결과가 `/api/media-forge/asset/<job_id>/image-0.png` 꼴의 상대 주소로만 돌아왔다. 서버 주소·인증은 찾지 않았다(규칙). 파일이 없어 그림을 보지 못했다.
+- **미확인(그림을 보지 못함)**: 사진이 아니라 회화로 읽히는지, 미형인지, 실존 인물·유명인처럼 보이는지, 두 손 모양, 피사체가 가운데 3:4 안에 다 들어갔는지, 브로치가 열린 고리인지, 막대 눈금이 글자처럼 보이는지, 도트·금선 UI와 어울리는지.
+- **이어서 할 일**: 운영자가 Clipwave 생성 기록에서 두 job을 내려받아 "받을 자리"(`products/strange-oracle/assets/ai/original/`)에 두면 designer가 가운데 3:4 자르기(ffmpeg `crop=iw:iw*4/3,scale=576:768:flags=lanczos`, `libwebp -quality 82`, 200KB 이하)와 판정을 한다. 작업 기록은 서버 메모리에만 있어 재배포되면 사라질 수 있다.
+- 여섯 장 예상: 6 × 60 = **360**(이번 2장을 그대로 쓰면 남은 4장 240) + 다시 만들기 여유 2~3장 120~180. 촐킨(석판)은 사람 문장을 빼고 같은 회화풍·같은 9:16 규칙으로 만든다.
+- 확정 전까지 기존 `guide-*.webp`와 CREDITS.md는 그대로 둔다.
