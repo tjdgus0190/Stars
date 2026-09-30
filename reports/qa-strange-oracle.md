@@ -421,3 +421,9 @@
 ## 다음 단계 제안
 - developer가 index.html의 guides.* 자리표시 문구를 정리한 뒤 qa-reviewer가 재검수.
 
+
+## 9단계 재검수
+- index.html [초안] 개수: 0건 (products/strange-oracle 내 다른 파일은 정책 설명 주석(`// ... [초안]...`)만 있으며 실제 문구 아님)
+- `node tools/build-dist.js` 결과: "[초안] 없음", "public/에 유료 문구 0건 (유료 문장 5629개 대조, api/·_paid는 dist/api/에만)" 확인
+- `tools/strange-oracle/out/e2e-flow-reduced.txt` 마지막 줄: "65 PASS / 0 FAIL (유료 문장 5629개 대조)"
+- **판정: 배포 가능**
