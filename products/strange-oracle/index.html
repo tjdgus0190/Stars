@@ -183,10 +183,16 @@
             <circle class="hub-sigil__star" cx="60" cy="4" r="2.5" /><circle class="hub-sigil__star" cx="116" cy="60" r="2" /><circle class="hub-sigil__star" cx="20" cy="100" r="1.8" />
           </svg>
         </div>
-        <p class="eyebrow" data-t="hub.eyebrow"></p>
+        <!-- (10단계 10-5) 영문 윗줄(hub.eyebrow)은 지웠다. 첫 화면 순서: 제목 → 무엇을 받는지(요약) → 칩 한 줄(여섯 방 무료·전체 시간·완결) → 무엇을 넣는지 → 문.
+             요소 수는 그대로다(윗줄 1개 삭제, 칩 줄은 문 아래에서 위로 이동). 문구 길이는 design 10단계 표 -->
         <h1 class="logo" data-t="hub.logo"></h1>
-        <p class="hub-summary" data-t="intro.summary">여러 문화의 점을 하나로 엮어, 당신이라는 사람을 한 편의 이야기로 그려요</p>
-        <p class="hub-privacy"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 7V5.5a4 4 0 0 1 8 0V7M3 7h10v7H3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span data-t="intro.note">입력한 정보는 이 탭 안에서만 쓰여요</span></p>
+        <p class="hub-summary" data-t="intro.summary">[초안] 사주도 타로도 아닌 여섯 낯선 점술로, 나만의 이야기 한 편을 받아요</p>
+        <ul class="journey__chips hub-chips">
+          <li class="journey__chip" data-t="hub.journey.chips.0">[초안] 여섯 방 모두 무료</li>
+          <li class="journey__chip" data-t="hub.journey.chips.1">[초안] 읽는 데 약 14분</li>
+          <li class="journey__chip" data-t="hub.journey.chips.2">[초안] 나눠 봐도 돼요</li>
+        </ul>
+        <p class="hub-privacy"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 7V5.5a4 4 0 0 1 8 0V7M3 7h10v7H3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span data-t="intro.note">[초안] 이름·생일만 넣어요. 밖으로 나가지 않아요</span></p>
       </header>
 
       <!-- (8단계) 주 버튼 하나. 상태별 문구(JS): 처음 hub.cta.first / 진행 중 hub.cta.next("{num} {room} 열기") / 6/6 hub.cta.story.
@@ -223,15 +229,29 @@
         </span>
       </button>
 
+      <!-- (10단계 10-1 a) 완결 안내 한 줄: 여섯 문 아래에 있던 journey__end 줄을 문 바로 아래로 옮겨 문구만 바꾼다(요소 수 그대로, 키 hub.journey.end 유지) -->
+      <p class="journey__end hub-end hub-assure"><span class="journey__end-mark" aria-hidden="true">✦</span><span data-t="hub.journey.end">[초안] 중간에 멈춰도 괜찮아요. 방 하나만 봐도 이야기 한 장이 완결돼요</span></p>
+
+      <!-- (10단계 10-1 b) 이어가기 코드 넣기: 마친 방이 0개일 때만 JS가 .is-hidden 해제. 주 버튼보다 조용한 글자 링크.
+           새는 길 막기: 제출되는 폼이 아니라 div 묶음이다. 입력 칸에 name 없음 + autocomplete="off". Enter·확인은 JS로만 처리한다.
+           코드를 주소·저장소·console·분석에 넣지 않는다. 복원 뒤와 "내 정보 지우기" 뒤에는 입력 칸을 비운다 -->
+      <div class="resume-enter is-hidden" data-js="resume-enter">
+        <button class="text-link resume-enter__toggle" type="button" data-js="resume-enter-toggle" aria-expanded="false" aria-controls="resume-enter-panel"><span id="resume-enter-link" data-t="resume.enter.link">[초안] 이어가기 코드가 있어요</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
+        <div class="resume-enter__panel is-hidden" id="resume-enter-panel" data-js="resume-enter-panel" role="group" aria-labelledby="resume-enter-link">
+          <div class="receipt-open__row">
+            <input class="input receipt-open__input" id="resume-enter-input" data-js="resume-input" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="40" enterkeyhint="done" aria-labelledby="resume-enter-link" aria-describedby="resume-enter-help" data-ph="resume.enter.placeholder" />
+            <button class="btn btn--secondary receipt-open__go" type="button" data-js="resume-go" data-t="resume.enter.go">[초안] 불러오기</button>
+          </div>
+          <p class="receipt-open__how" id="resume-enter-help" data-t="resume.enter.help">[초안] 복사해 둔 코드를 그대로 붙여 넣어 주세요</p>
+          <!-- 오류 3종(JS가 문구를 넣고 .is-hidden 해제): resume.errors.shape / order / receipt -->
+          <p class="field__error is-hidden" data-js="resume-error" role="alert"></p>
+        </div>
+      </div>
+
       <!-- (8단계) 여정 한눈에. (결정 52) 칩 3개는 점으로 이은 한 줄로. 여섯 방 줄(journey-path)은 바로 아래 여섯 문과 겹쳐 hidden.
            journey-step 마크업은 JS가 상태 class를 계속 붙이므로 남겨 둔다 -->
       <section class="journey" aria-labelledby="journey-title">
         <h2 class="visually-hidden" id="journey-title" data-t="hub.journey.title">여정 한눈에</h2>
-        <ul class="journey__chips">
-          <li class="journey__chip" data-t="hub.journey.chips.0">여섯 개의 방</li>
-          <li class="journey__chip" data-t="hub.journey.chips.1">방마다 2~3분 남짓</li>
-          <li class="journey__chip" data-t="hub.journey.chips.2">한 편의 이야기로</li>
-        </ul>
         <ol class="journey__path" data-js="journey-path" hidden>
           <li class="journey__step is-visited" data-room="ogham" data-js="journey-step">
             <span class="journey__mark" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
@@ -362,7 +382,6 @@
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
       </nav>
-      <p class="journey__end hub-end"><span class="journey__end-mark" aria-hidden="true">✦</span><span data-t="hub.journey.end">여섯 조각이 모여 나의 이야기 한 편이 돼요</span></p>
 
       <!-- (8단계) 진행 + 지금까지의 이야기: 1방 이상 마쳤을 때만 (.is-hidden 해제). 기존 hub-progress·story-teaser를 합침.
            줄 상태: .is-done(누르면 그 방 결과 다시 보기) / .is-upcoming("?" 흐리게, 누를 수 없음). 결과 이름·key는 공개 data, 45~60자 말줄임 -->
@@ -375,6 +394,11 @@
           </div>
         </header>
         <p class="so-far__arch"><span class="so-far__arch-label" data-t="hub.sofar.archLabel">지금의 원형</span> <b data-js="hub-archetype"></b></p>
+        <!-- (10단계 10-1 b) 코드로 복원한 직후에만 .is-hidden 해제 (출처가 드러나는 한 줄) -->
+        <p class="so-far__restored is-hidden" data-js="resume-restored" role="status" data-t="resume.restored">[초안] 코드에 담긴 결과를 불러왔어요. 호칭은 ‘당신’으로 나와요</p>
+        <!-- (10단계 10-1 c) 마친 방이 정확히 3개일 때만 .is-hidden 해제. 글자 링크 = 10-2의 링크 복사(서비스 주소). 완료 한 줄은 아래 share-link-status -->
+        <p class="so-far__half is-hidden" data-js="hub-half"><span data-t="hub.half.text">[초안] 벌써 절반이에요. 같이 볼 사람에게 알려 볼까요?</span> <button class="text-link" type="button" data-js="share-link-copy" data-t="hub.half.link">[초안] 점술관 링크 복사</button></p>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
         <ol class="so-far__list" data-js="hub-sofar-list">
           <li class="so-far__item is-done" data-room="ogham"><button class="so-far__line" type="button" data-js="sofar-line" data-room="ogham" data-go="ogham-result">
             <span class="so-far__mark" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
@@ -404,6 +428,21 @@
           </span></li>
         </ol>
         <button class="so-far__all" type="button" data-go="story" data-js="hub-story"><span data-t="hub.sofar.all">나의 이야기 전체 보기</span> <span aria-hidden="true">→</span></button>
+        <!-- (10단계 10-1 b) 이어가기 코드 만들기: 마친 방 1개 이상(=이 영역이 보일 때). 누를 때만 그 자리에서 계산해 resume-code에 넣는다.
+             순서 고정: 코드 → 경고(접지 않음) → 복사 버튼. 경고는 복사 버튼보다 위에 항상 보여야 한다.
+             코드는 화면 표시와 복사 버튼의 클립보드 쓰기만. "내 정보 지우기"를 누르면 패널을 닫고 resume-code를 비운다 -->
+        <div class="resume-make" data-js="resume-make">
+          <button class="text-link resume-make__toggle" type="button" data-js="resume-make-toggle" aria-expanded="false" aria-controls="resume-make-panel"><span data-t="resume.make.link">[초안] 이어가기 코드 만들기</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
+          <div class="resume-make__panel is-hidden" id="resume-make-panel" data-js="resume-make-panel">
+            <p class="resume-code" data-js="resume-code" data-aria="resume.make.codeAria"></p>
+            <p class="resume-warn" data-js="resume-warn">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 18 16.5H2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v4M10 14.2v.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span data-t="resume.make.warn">[초안] 이름과 생일이 글자 그대로 들어 있지는 않아요. 하지만 이 코드를 아는 사람은 내 결과와 태어난 날을 거의 알아낼 수 있으니 남에게 보여 주지 마세요. 코드는 어디에도 저장·전송되지 않으니 직접 보관해 주세요.</span>
+            </p>
+            <button class="btn btn--secondary btn--block" type="button" data-js="resume-copy" data-t="resume.make.copy">[초안] 코드 복사</button>
+            <p class="share-status is-hidden" data-js="resume-copied" role="status" data-t="resume.make.copied">[초안] 코드를 복사했어요</p>
+          </div>
+        </div>
       </section>
 
       <!-- (8단계) 한 권의 책: 결제 켜짐일 때만 (hub-paid .is-hidden 해제). data-state (JS):
@@ -461,7 +500,7 @@
       <header class="room-head">
         <div class="room-emblem room-emblem--rune" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></div>
         <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-rune" /></svg>
-        <p class="eyebrow" data-t="rune.intro.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="rune.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="rune.intro.title"></h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="5"></span> <span data-t="rooms.rune.chapterName"></span></p>
         <p class="room-head__pitch" data-t="rune.intro.pitch"></p>
@@ -482,7 +521,7 @@
     <!-- ═════════ 2-R. 룬의 방: 입력 ═════════ -->
     <section class="screen screen--dock room-input" id="screen-rune-input" data-js="screen-rune-input" data-room="rune" data-preview="2. 룬의 방 — 입력 (저장된 정보 카드 + 입력칸을 함께 보여 줌)">
       <header class="room-head room-head--compact">
-        <p class="eyebrow" data-t="rune.intro.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="rune.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="rune.input.title"></h1>
       </header>
 
@@ -628,7 +667,7 @@
       </aside>
 
       <aside class="turn" data-js="result-turn">
-        <p class="eyebrow" data-t="rune.result.threadEyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="rune.result.threadEyebrow"></p>
         <ol class="thread">
           <li class="thread__step"><span class="thread__when" data-t="rune.result.when.0"></span><span class="thread__word" data-js="thread-word"></span></li>
           <li class="thread__step"><span class="thread__when" data-t="rune.result.when.1"></span><span class="thread__word" data-js="thread-word"></span></li>
@@ -658,7 +697,7 @@
       </div>
 
       <aside class="fact-card" data-js="result-fact">
-        <p class="eyebrow" data-t="result.factEyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="result.factEyebrow"></p>
         <p class="fact-card__text" data-js="fact-text"></p>
       </aside>
 
@@ -674,6 +713,9 @@
       <!-- (8단계, U6) 공유는 보조 글자 버튼 (룬은 다시 던지기 없음, 결정 40) -->
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
+        <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -704,7 +746,7 @@
       <header class="room-head">
         <div class="room-emblem room-emblem--star" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__icon room-emblem__moon" viewBox="0 0 40 40"><use href="#icon-star" /></svg></div>
         <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-star" /></svg>
-        <p class="eyebrow" data-t="star.intro.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="star.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="star.intro.title"></h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="2"></span> <span data-t="rooms.star.chapterName"></span></p>
         <p class="room-head__pitch" data-t="star.intro.pitch"></p>
@@ -727,7 +769,7 @@
     <!-- ═════════ 2-S. 별의 방: 입력 ═════════ -->
     <section class="screen screen--dock room-input" id="screen-star-input" data-js="screen-star-input" data-room="star" data-preview="2. 별의 방 — 입력">
       <header class="room-head room-head--compact">
-        <p class="eyebrow" data-t="star.intro.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="star.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="star.input.title"></h1>
       </header>
 
@@ -872,7 +914,7 @@
          JS: 후보 수만큼 칸·카드를 보이고 나머지는 .is-hidden. 칸 너비는 style="--share:하루 중 비율" -->
     <section class="screen star-choose" id="screen-star-choose" data-js="screen-star-choose" data-room="star" data-preview="3′. 별의 방 — 후보 고르기">
       <header class="room-head room-head--compact">
-        <p class="eyebrow" data-t="star.choose.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="star.choose.eyebrow"></p>
         <h1 class="room-head__title" data-t="star.choose.title"></h1>
         <p class="room-head__lead" data-js="star-choose-lead"></p>
       </header>
@@ -962,7 +1004,7 @@
       </aside>
 
       <aside class="turn" data-js="result-turn">
-        <p class="eyebrow" data-t="star.result.twistEyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="star.result.twistEyebrow"></p>
         <p class="turn__title" data-t="star.result.twistTitle"></p>
         <div class="twist">
           <span class="twist__from" data-js="twist-from"></span>
@@ -972,6 +1014,9 @@
         <p class="turn__text" data-js="turn-text"></p>
         <p class="turn__note" data-js="result-time-note"></p>
       </aside>
+      <!-- (10단계 10-1 b) 코드로 복원한 상태: 생일이 있어야 그릴 수 있는 부분(위 반전 카드 등, 범위는 developer가 tests.md에 기록)을 숨기고 이 한 줄을 그 자리에 보인다.
+           다른 방에도 같은 부분이 있으면 이 블록을 그대로 복사해 쓴다(data-go만 그 방 입력 화면으로) -->
+      <p class="restore-note is-hidden" data-js="restore-note"><span data-t="resume.needInput">[초안] 이 부분은 생일을 다시 넣으면 보여요</span> <button class="text-link" type="button" data-js="restore-reinput" data-room="star" data-go="star-input" data-t="resume.reinput">[초안] 다시 입력</button></p>
 
       <!-- (8단계) 핵심 풀이 한 덩어리 (장 번호·제목 없음). JS: identity.lede + body 앞 단락들(누적 750자 규칙) + facts + identity.close.
            단락은 <p>, 사실 목록은 <ul class="reading__facts"> -->
@@ -994,7 +1039,7 @@
       </div>
 
       <aside class="fact-card" data-js="result-fact">
-        <p class="eyebrow" data-t="result.factEyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="result.factEyebrow"></p>
         <p class="fact-card__text" data-js="fact-text"></p>
       </aside>
 
@@ -1010,8 +1055,11 @@
       <!-- (8단계, U6) 공유·다시 보기는 작은 글자 링크 (결과 끝의 주 동작은 다음 방 문 하나) -->
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
+        <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
         <span class="result-more__dot" aria-hidden="true">·</span>
         <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -1046,7 +1094,7 @@
       <header class="room-head">
         <div class="room-emblem room-emblem--ogham" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__ogham" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></div>
         <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg>
-        <p class="eyebrow" data-t="ogham.intro.eyebrow">OGHAM · THE TREE LETTERS</p>
+        <p class="eyebrow" lang="en" data-t="ogham.intro.eyebrow">OGHAM · THE TREE LETTERS</p>
         <h1 class="room-head__title" data-t="ogham.intro.title">오검의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="1"></span> <span data-t="rooms.ogham.chapterName"></span></p>
         <p class="room-head__pitch" data-t="ogham.intro.pitch">이름 하나로 새겨지는, 나의 뿌리 이야기</p>
@@ -1070,7 +1118,7 @@
     <!-- ═════════ 2. 오검의 방: 입력 ═════════ -->
     <section class="screen screen--dock room-input" id="screen-ogham-input" data-js="screen-ogham-input" data-room="ogham" data-preview="2. 오검의 방 — 입력">
       <header class="room-head room-head--compact">
-        <p class="eyebrow" data-t="ogham.intro.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="ogham.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="ogham.input.title">이름을 알려 주세요</h1>
       </header>
 
@@ -1185,7 +1233,7 @@
       </aside>
 
       <aside class="turn" data-js="result-turn">
-        <p class="eyebrow" data-t="ogham.result.nameEyebrow">YOUR NAME IN OGHAM</p>
+        <p class="eyebrow" lang="en" data-t="ogham.result.nameEyebrow">YOUR NAME IN OGHAM</p>
         <p class="turn__title" data-t="ogham.result.nameTitle">이름이 새긴 가지들</p>
         <div class="name-branch">
           <ol class="name-branch__letters" data-js="ogham-name-letters" aria-hidden="true">
@@ -1226,7 +1274,7 @@
       </div>
 
       <aside class="fact-card" data-js="result-fact">
-        <p class="eyebrow" data-t="result.factEyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="result.factEyebrow"></p>
         <p class="fact-card__text" data-js="fact-text"></p>
       </aside>
 
@@ -1242,8 +1290,11 @@
       <!-- (8단계, U6) 공유·다시 보기는 작은 글자 링크 (결과 끝의 주 동작은 다음 방 문 하나) -->
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
+        <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
         <span class="result-more__dot" aria-hidden="true">·</span>
         <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -1273,7 +1324,7 @@
       <header class="room-head">
         <div class="room-emblem room-emblem--decan" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></div>
         <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-decan" /></svg>
-        <p class="eyebrow" data-t="decan.intro.eyebrow">DECANS · THIRTY-SIX STARS</p>
+        <p class="eyebrow" lang="en" data-t="decan.intro.eyebrow">DECANS · THIRTY-SIX STARS</p>
         <h1 class="room-head__title" data-t="decan.intro.title">데칸의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="3"></span> <span data-t="rooms.decan.chapterName"></span></p>
         <p class="room-head__pitch" data-t="decan.intro.pitch">생일 속에 잠들어 있던, 아무도 몰랐던 재능</p>
@@ -1297,7 +1348,7 @@
     <!-- ═════════ 2. 데칸의 방: 입력 ═════════ -->
     <section class="screen screen--dock room-input" id="screen-decan-input" data-js="screen-decan-input" data-room="decan" data-preview="2. 데칸의 방 — 입력">
       <header class="room-head room-head--compact">
-        <p class="eyebrow" data-t="decan.intro.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="decan.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="decan.input.title">언제 태어났나요?</h1>
       </header>
 
@@ -1418,7 +1469,7 @@
     <!-- ═════════ 3-D′. 데칸의 방: 그날 태양이 데칸 경계를 넘음 → 두 후보 고르기 (별의 방 후보 고르기와 같은 틀·class) ═════════ -->
     <section class="screen star-choose decan-choose" id="screen-decan-choose" data-js="screen-decan-choose" data-room="decan" data-preview="3′. 데칸의 방 — 후보 고르기">
       <header class="room-head room-head--compact">
-        <p class="eyebrow" data-t="decan.choose.eyebrow">TWO FACES OF THE DAY</p>
+        <p class="eyebrow" lang="en" data-t="decan.choose.eyebrow">TWO FACES OF THE DAY</p>
         <h1 class="room-head__title" data-t="decan.choose.title">그날, 태양이 칸을 넘었어요</h1>
         <p class="room-head__lead" data-js="decan-choose-lead"></p>
       </header>
@@ -1504,7 +1555,7 @@
       </aside>
 
       <aside class="turn" data-js="result-turn">
-        <p class="eyebrow" data-t="decan.result.twistEyebrow">ONE SIGN, THREE FACES</p>
+        <p class="eyebrow" lang="en" data-t="decan.result.twistEyebrow">ONE SIGN, THREE FACES</p>
         <p class="turn__title" data-t="decan.result.twistTitle">같은 별자리라도, 세 얼굴이 있어요</p>
         <div class="twist">
           <span class="twist__from" data-js="twist-from"></span>
@@ -1539,7 +1590,7 @@
       </div>
 
       <aside class="fact-card" data-js="result-fact">
-        <p class="eyebrow" data-t="result.factEyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="result.factEyebrow"></p>
         <p class="fact-card__text" data-js="fact-text"></p>
       </aside>
 
@@ -1555,8 +1606,11 @@
       <!-- (8단계, U6) 공유·다시 보기는 작은 글자 링크 (결과 끝의 주 동작은 다음 방 문 하나) -->
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
+        <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
         <span class="result-more__dot" aria-hidden="true">·</span>
         <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -1586,7 +1640,7 @@
       <header class="room-head">
         <div class="room-emblem room-emblem--tzolkin" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__icon room-emblem__gear" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></div>
         <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-tzolkin" /></svg>
-        <p class="eyebrow" data-t="tzolkin.intro.eyebrow">TZOLK'IN · THE SACRED COUNT</p>
+        <p class="eyebrow" lang="en" data-t="tzolkin.intro.eyebrow">TZOLK'IN · THE SACRED COUNT</p>
         <h1 class="room-head__title" data-t="tzolkin.intro.title">촐킨의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="4"></span> <span data-t="rooms.tzolkin.chapterName"></span></p>
         <p class="room-head__pitch" data-t="tzolkin.intro.pitch">260일 신성한 달력이 짚어 주는, 다가올 흐름</p>
@@ -1610,7 +1664,7 @@
     <!-- ═════════ 2. 촐킨의 방: 입력 ═════════ -->
     <section class="screen screen--dock room-input" id="screen-tzolkin-input" data-js="screen-tzolkin-input" data-room="tzolkin" data-preview="2. 촐킨의 방 — 입력">
       <header class="room-head room-head--compact">
-        <p class="eyebrow" data-t="tzolkin.intro.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="tzolkin.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="tzolkin.input.title">언제 태어났나요?</h1>
       </header>
 
@@ -1762,7 +1816,7 @@
       </aside>
 
       <aside class="turn" data-js="result-turn">
-        <p class="eyebrow" data-t="tzolkin.result.numberEyebrow">THE SECOND WHEEL</p>
+        <p class="eyebrow" lang="en" data-t="tzolkin.result.numberEyebrow">THE SECOND WHEEL</p>
         <p class="turn__title" data-js="tzolkin-number-title"></p>
         <div class="gear-pair" aria-hidden="true">
           <span class="gear-pair__item"><svg class="gear-pair__num" viewBox="0 0 24 24"><use data-js="tzolkin-number-glyph" href="#maya-4" /></svg><span class="gear-pair__label" data-t="tzolkin.result.numberLabel">열세 숫자</span></span>
@@ -1796,7 +1850,7 @@
       </div>
 
       <aside class="fact-card" data-js="result-fact">
-        <p class="eyebrow" data-t="result.factEyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="result.factEyebrow"></p>
         <p class="fact-card__text" data-js="fact-text"></p>
       </aside>
 
@@ -1812,8 +1866,11 @@
       <!-- (8단계, U6) 공유·다시 보기는 작은 글자 링크 (결과 끝의 주 동작은 다음 방 문 하나) -->
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
+        <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
         <span class="result-more__dot" aria-hidden="true">·</span>
         <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -1843,7 +1900,7 @@
       <header class="room-head">
         <div class="room-emblem room-emblem--sibyl" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__laurel" viewBox="-60 -60 120 120"><use href="#laurel" /></svg><svg class="room-emblem__icon room-emblem__flame" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></div>
         <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-sibyl" /></svg>
-        <p class="eyebrow" data-t="sibyl.intro.eyebrow">SORTES · THE CANDLE ORACLE</p>
+        <p class="eyebrow" lang="en" data-t="sibyl.intro.eyebrow">SORTES · THE CANDLE ORACLE</p>
         <h1 class="room-head__title" data-t="sibyl.intro.title">시빌라 신탁의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="6"></span> <span data-t="rooms.sibyl.chapterName"></span></p>
         <p class="room-head__pitch" data-t="sibyl.intro.pitch">촛불에 떠오르는 글자로 듣는, 오늘의 답</p>
@@ -1865,7 +1922,7 @@
     <!-- ═════════ 2. 시빌라 신탁의 방: 입력 ═════════ -->
     <section class="screen screen--dock room-input" id="screen-sibyl-input" data-js="screen-sibyl-input" data-room="sibyl" data-preview="2. 시빌라 신탁의 방 — 입력">
       <header class="room-head room-head--compact">
-        <p class="eyebrow" data-t="sibyl.intro.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="sibyl.intro.eyebrow"></p>
         <h1 class="room-head__title" data-t="sibyl.input.title">무엇을 묻고 싶나요?</h1>
       </header>
 
@@ -1981,7 +2038,7 @@
       </aside>
 
       <aside class="turn" data-js="result-turn">
-        <p class="eyebrow" data-t="sibyl.result.askedEyebrow">YOUR QUESTION</p>
+        <p class="eyebrow" lang="en" data-t="sibyl.result.askedEyebrow">YOUR QUESTION</p>
         <p class="asked asked--result">
           <span class="asked__category" data-js="sibyl-result-category"></span>
           <span class="asked__question" data-js="sibyl-result-question"></span>
@@ -2014,7 +2071,7 @@
       </div>
 
       <aside class="fact-card" data-js="result-fact">
-        <p class="eyebrow" data-t="result.factEyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="result.factEyebrow"></p>
         <p class="fact-card__text" data-js="fact-text"></p>
       </aside>
 
@@ -2032,6 +2089,9 @@
         <button class="btn btn--secondary btn--block" type="button" data-js="result-retry" data-t="sibyl.result.retry">다른 신탁 받기</button>
         <p class="result-actions__note" data-t="sibyl.result.retryNote">받은 신탁은 무를 수 없어요. 다른 주제로 새로 물을 수 있어요.</p>
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
+        <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리. kakao.jsKey가 비어 있으면 share-kakao-slot은 빈 채로 둔다(CSS가 숨김, SDK도 부르지 않음) -->
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
       <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
@@ -2091,7 +2151,7 @@
     <!-- ═════════ 5. 나의 이야기 (통합 결과) ═════════ -->
     <section class="screen story" id="screen-story" data-js="screen-story" data-room="hall" data-preview="5. 나의 이야기">
       <header class="story-head">
-        <p class="eyebrow" data-t="story.eyebrow"></p>
+        <p class="eyebrow" lang="en" data-t="story.eyebrow"></p>
         <h1 class="story-head__title" data-js="story-title"></h1>
         <p class="story-head__lead" data-t="story.lead"></p>
         <!-- 들어오면 JS가 .is-revealed → 채워진 아치에 차례로 불이 켜진다 -->
@@ -2180,6 +2240,11 @@
 
       <div class="result-actions">
         <button class="btn btn--primary btn--block" type="button" data-js="story-share" data-t="story.share"></button>
+        <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리 -->
+        <div class="result-more result-more--share">
+          <span class="share-links share-links--solo"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">[초안] 링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+          <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">[초안] 주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        </div>
       </div>
 
       <div class="page-end" aria-hidden="true"><span>✦</span></div>
@@ -2207,12 +2272,52 @@
       <header class="deeper-head">
         <p class="eyebrow" data-t="deeper.eyebrow">여섯 문 끝의 한 권</p>
         <h1 class="deeper-head__title" data-t="deeper.title">당신만을 위한 한 권의 책</h1>
-        <p class="deeper-head__lead" data-t="deeper.lead">여섯 방의 네 장 전체와 숨은 장, 시기별 흐름과 궁합까지 한 화면에 순서대로 엮어요. 무엇이 담기는지 먼저 보여 드릴게요.</p>
+        <p class="deeper-head__lead" data-t="deeper.lead">[초안] 여섯 방의 네 장 전체와 숨은 장, 시기별 흐름과 궁합까지 쪽을 넘기며 읽는 책으로 엮어요.</p>
       </header>
+
+      <!-- (10단계 10-3 b) 책 모양 두 쪽: 결정 53 리더의 종이 모양을 그대로 쓴 정적 미리보기. 가로로 밀어 넘긴다(scroll-snap, JS 없음).
+           1쪽 = 속표지(내 원형 이름 + "한 권의 책" + 읽는 시간), 2쪽 = 무료 견본(data.js deeper.sample.body, 가상의 두 사람).
+           유료 문장은 한 글자도 넣지 않는다. 광고 자리 0 -->
+      <section class="book-peek" aria-labelledby="deeper-sample-title">
+        <div class="book-peek__strip" data-js="deeper-peek" tabindex="0" role="group" data-aria="deeper.peek.aria" aria-label="책 미리보기 두 쪽">
+          <article class="peek-page peek-page--title">
+            <p class="peek-page__run" aria-hidden="true"></p>
+            <div class="peek-page__body">
+              <svg class="peek-page__fleuron" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#i-fleuron" /></svg>
+              <p class="peek-page__eyebrow" data-t="deeper.peek.coverEyebrow">[초안] 여섯 문이 엮은</p>
+              <!-- JS: 지금의 원형 이름(무료 data). 비어 있으면 이 줄만 숨긴다 -->
+              <p class="peek-page__arch" data-js="deeper-peek-arch">[초안] 길을 여는 탐험가</p>
+              <p class="peek-page__book" data-t="deeper.peek.bookName">한 권의 책</p>
+              <ul class="peek-page__marks" aria-hidden="true">
+                <li data-room="ogham"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></li>
+                <li data-room="star"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></li>
+                <li data-room="decan"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></li>
+                <li data-room="tzolkin"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></li>
+                <li data-room="rune"><svg class="sig sig--rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></li>
+                <li data-room="sibyl"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></li>
+              </ul>
+              <!-- JS: deeper.readTime("읽는 데 약 {n}분"), n = 올림(글자 수 ÷ 500). 손으로 쓴 숫자 금지 -->
+              <p class="peek-page__time" data-js="deeper-read-time">[초안] 읽는 데 약 56분</p>
+            </div>
+            <p class="peek-page__folio" aria-hidden="true">i</p>
+          </article>
+          <article class="peek-page peek-page--sample">
+            <p class="peek-page__run"><span class="sample__badge" data-t="deeper.sample.badge">견본</span><span data-t="deeper.peek.sampleMark">[초안] 가상의 두 사람으로 쓴 견본 쪽</span></p>
+            <div class="peek-page__body">
+              <h2 class="peek-page__title" id="deeper-sample-title" data-t="deeper.sample.title">3장 · 탐험가와 현자의 궁합 (가상의 두 사람)</h2>
+              <div class="sample__body prose" data-js="deeper-sample" data-list="deeper.sample.body">
+              </div>
+              <p class="sample__note" data-t="deeper.sample.note">[초안] 실제 책에서는 이 자리에 당신과 상대의 원형이 들어가요.</p>
+            </div>
+            <p class="peek-page__folio" aria-hidden="true">ii</p>
+          </article>
+        </div>
+        <p class="book-peek__hint" data-t="deeper.peek.hint">[초안] 옆으로 밀면 견본 쪽이 보여요</p>
+      </section>
 
       <!-- 나에게 맞춘 목차. 장 제목·분량은 JS가 방문 기록으로 채운다. 상태: .is-sealed(유료) / .is-open(견본·무료) -->
       <section class="toc" aria-labelledby="deeper-toc-title">
-        <h2 class="toc__title" id="deeper-toc-title"><span data-t="deeper.toc.title">책의 목차</span> <span class="toc__total" data-js="deeper-total"></span></h2>
+        <h2 class="toc__title" id="deeper-toc-title"><span data-t="deeper.toc.title">책의 목차</span> <span class="toc__total" data-js="deeper-total"></span> <span class="toc__time" data-js="deeper-read-time"></span></h2>
         <ol class="toc__list" data-js="deeper-toc">
           <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="open">
             <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">✦</span><span class="toc-item__name" data-js="toc-name"></span><span class="toc-item__vol" data-js="toc-vol"></span></div>
@@ -2259,14 +2364,7 @@
         </ol>
       </section>
 
-      <!-- 견본 한 장: 가상 조합의 3장 궁합 전문 (data.js, 무료). 봉인 없이 펼친 모습 = .is-open -->
-      <section class="sample is-open" aria-labelledby="deeper-sample-title">
-        <p class="sample__badge" data-t="deeper.sample.badge">견본</p>
-        <h2 class="sample__title" id="deeper-sample-title" data-t="deeper.sample.title">3장 · 탐험가와 현자의 궁합 (가상의 두 사람)</h2>
-        <p class="sample__note" data-t="deeper.sample.note">실제 리포트에서는 이 자리에 당신과 상대의 원형이 들어가요.</p>
-        <div class="sample__body prose" data-js="deeper-sample" data-list="deeper.sample.body">
-        </div>
-      </section>
+      <!-- (10단계) 견본 한 장은 위 책 모양 2쪽으로 옮겼다 (훅 deeper-sample 그대로) -->
 
       <!-- 내 리포트에 필요한 입력 -->
       <section class="deeper-input" aria-labelledby="deeper-input-title">

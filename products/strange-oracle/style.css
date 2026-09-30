@@ -4217,3 +4217,161 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
   .book-page.is-under::after { opacity: 0; }
   .book-bar__fill { transition: none; }
 }
+
+/* ═════════════════════════════════════════════════════════════════
+   (10단계) 출시 전 다듬기 — 결정 55~61
+   명세: design/strange-oracle.md "10단계: 출시 전 다듬기 (디자인)"
+   ═════════════════════════════════════════════════════════════════ */
+
+/* ── 입구 머리 (10-1 a, 10-5): 제목 → 요약 → 칩 한 줄 → 무엇을 넣는지 → 문. 영문 윗줄은 지웠다 ── */
+.hub .hub-head { padding-bottom: var(--space-3); }
+.hub .hub-chips { margin-top: var(--space-2); row-gap: 2px; }
+.hub .hub-chips .journey__chip { white-space: nowrap; }
+.hub .hub-chips .journey__chip + .journey__chip::before { margin: 0 0.35em; }
+.hub .hub-chips .journey__chip:first-child { font-weight: 700; color: var(--accent); } /* "여섯 방 모두 무료" */
+.hub .hub-privacy { display: flex; justify-content: center; align-items: flex-start; max-width: 28em; margin-inline: auto; line-height: var(--lh-ui); text-wrap: balance; }
+.hub .hub-privacy svg { margin-top: 2px; }
+.hub .hub-assure { text-wrap: balance; word-break: keep-all; }
+.hub .hub-assure > span:last-child { min-width: 0; }
+/* 낮은 화면(360x640)에서도 문 명판(주 버튼 글자)까지 한 화면에: 장식인 머리 문양만 접는다 */
+@media (max-height: 680px) {
+  .hub .hub-sigil { display: none; }
+}
+
+/* ── 이어가기 코드 (10-1 b): 글자 링크 → 같은 자리에 펼침 ── */
+.resume-enter { margin-top: var(--space-1); text-align: center; }
+.resume-enter.is-hidden, .resume-make.is-hidden { display: none; }
+.resume-enter__toggle, .resume-make__toggle { font-size: var(--fs-xs); }
+.resume-enter__toggle[aria-expanded="true"] .receipt-toggle__caret,
+.resume-make__toggle[aria-expanded="true"] .receipt-toggle__caret { transform: rotate(180deg); }
+.resume-enter__panel, .resume-make__panel {
+  display: grid; gap: var(--space-3); margin-top: var(--space-1); padding: var(--space-4);
+  border: 1px solid var(--c-line); border-radius: var(--radius-lg); background: var(--c-surface-1); text-align: left;
+}
+.resume-enter__panel.is-hidden, .resume-make__panel.is-hidden { display: none; }
+.resume-enter__panel .receipt-open__row { flex-wrap: wrap; }
+.resume-enter__panel .receipt-open__input, .resume-enter__panel .receipt-open__go { flex: 1 1 100%; min-width: 0; }
+.resume-enter__panel .receipt-open__input { letter-spacing: 0.04em; }
+.resume-make { margin-top: var(--space-1); }
+.resume-code {
+  min-height: calc(1.5em + 2 * var(--space-3)); padding: var(--space-3);
+  border: 1px dashed var(--bronze); border-radius: var(--radius-md); background: oklch(0.14 0.03 285 / 0.7);
+  font-family: var(--font-mono, ui-monospace, "SFMono-Regular", Consolas, monospace); font-size: var(--fs-md); line-height: 1.5;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.06em; color: var(--c-text-strong); text-align: center;
+  overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
+}
+/* 경고: 접히지 않고, 복사 버튼 바로 위에 항상 보인다 */
+.resume-warn {
+  display: grid; grid-template-columns: 18px 1fr; gap: var(--space-2); padding: var(--space-3);
+  border-left: 3px solid oklch(0.84 0.09 var(--hue-candle)); border-radius: var(--radius-md);
+  background: oklch(0.24 0.04 60 / 0.5);
+  font-family: var(--font-sans); font-size: var(--fs-sm); line-height: 1.6; color: var(--c-text-strong); word-break: keep-all;
+}
+.resume-warn svg { width: 18px; height: 18px; margin-top: 2px; color: oklch(0.84 0.09 var(--hue-candle)); }
+.so-far__restored {
+  margin-top: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--accent-soft);
+  font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-strong);
+}
+.so-far__restored.is-hidden { display: none; }
+
+/* ── 3/6 한 줄 (10-1 c) ── */
+.so-far__half {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0 var(--space-2);
+  margin-top: var(--space-2); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); text-align: center;
+}
+.so-far__half.is-hidden { display: none; }
+.so-far__half .text-link { color: var(--accent); }
+
+/* ── 공유 줄 (10-2): 링크 복사 + 카카오톡 자리(키가 비면 빈 채로 숨음) + 완료 한 줄 ── */
+.share-links { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; }
+.share-links::before { content: "·"; margin-right: var(--space-2); color: var(--c-text-faint); }
+.share-links--solo::before, .result-more:has(.btn) .share-links::before { content: none; }
+.share-kakao-slot { display: inline-flex; align-items: center; }
+.share-kakao-slot:empty { display: none; }
+.share-kakao-slot:not(:empty)::before { content: "·"; margin: 0 var(--space-1); color: var(--c-text-faint); }
+.share-status { flex: 0 0 100%; width: 100%; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text); text-align: center; }
+.share-status.is-hidden, .share-url.is-hidden, .share-status__msg.is-hidden { display: none; }
+.share-url {
+  display: block; margin-top: var(--space-1); padding: var(--space-2); border: 1px dashed var(--c-line-strong); border-radius: var(--radius-md);
+  color: var(--c-text-strong); overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
+}
+.result-more--share { margin-top: 0; }
+/* 방 결과의 보조 링크는 세로로 쌓는다: 360px에서 줄이 꺾이며 가운뎃점이 줄 끝·줄 머리에 남던 것 */
+.result-more:has(.share-links) { display: grid; justify-items: center; gap: 0; }
+.result-more:has(.share-links) .result-more__dot { display: none; }
+.result-more:has(.share-links) .share-links::before { content: none; }
+
+/* ── 복원 상태: 입력값이 필요한 부분 대신 한 줄 (10-1 b) ── */
+.restore-note {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0 var(--space-2);
+  margin-top: var(--space-5); padding: var(--space-2) var(--space-4);
+  border: 1px dashed var(--c-line-strong); border-radius: var(--radius-lg);
+  font-family: var(--font-sans); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); text-align: center;
+}
+.restore-note.is-hidden { display: none; }
+.restore-note .text-link { color: var(--accent); }
+
+/* ── 결제 전 화면: 책 모양 두 쪽 (10-3 b). 종이·잉크 값은 .book-reader(결정 53)와 같게 유지 ── */
+.book-peek {
+  --paper: oklch(0.91 0.03 82);
+  --paper-warm: oklch(0.88 0.042 76);
+  --ink: oklch(0.29 0.035 45);
+  --ink-strong: oklch(0.23 0.035 40);
+  --ink-soft: oklch(0.4 0.04 50);
+  --ink-rubric: oklch(0.43 0.13 32);
+  --ink-line: oklch(0.55 0.05 55 / 0.45);
+  margin-top: var(--space-6);
+}
+.book-peek__strip {
+  display: flex; gap: var(--space-3);
+  margin-inline: calc(-1 * var(--gutter)); padding: var(--space-2) var(--gutter) var(--space-4);
+  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter);
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.book-peek__strip::-webkit-scrollbar { display: none; }
+.book-peek__strip:focus { outline: none; }
+.book-peek__strip:focus-visible { outline: 2px solid var(--bronze-hi); outline-offset: -2px; }
+.peek-page {
+  position: relative; flex: 0 0 calc(100% - var(--space-8)); min-width: 0; min-height: 420px;
+  display: grid; grid-template-rows: auto 1fr auto; row-gap: var(--space-2);
+  padding: var(--space-3) var(--space-5) var(--space-3) var(--space-6);
+  border-radius: 2px 7px 7px 2px; scroll-snap-align: start; color: var(--ink);
+  background:
+    linear-gradient(to right, oklch(0.4 0.05 50 / 0.34), oklch(0.55 0.05 55 / 0.12) 4%, transparent 9%),
+    radial-gradient(circle at 86% 9%, oklch(0.72 0.07 62 / 0.28) 0 3px, transparent 9px),
+    radial-gradient(ellipse 22% 14% at 12% 92%, oklch(0.74 0.06 65 / 0.22), transparent 70%),
+    radial-gradient(135% 105% at 55% 48%, transparent 58%, oklch(0.8 0.055 68 / 0.75) 100%),
+    linear-gradient(170deg, var(--paper) 0%, var(--paper-warm) 55%, var(--paper) 100%);
+  box-shadow:
+    inset 0 0 0 1px oklch(0.7 0.05 65 / 0.55),
+    2px 1px 0 -0.5px oklch(0.84 0.035 78),
+    4px 2px 0 -1px oklch(0.76 0.04 72),
+    0 8px 20px oklch(0.05 0.02 285 / 0.6);
+}
+.peek-page__run { display: flex; align-items: center; gap: var(--space-2); min-height: 22px; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--ink-soft); }
+.peek-page__folio { font-family: var(--font-latin); font-size: var(--fs-xs); line-height: 22px; letter-spacing: 0.08em; color: var(--ink-soft); text-align: center; }
+.peek-page__folio::before, .peek-page__folio::after { content: "—"; margin: 0 var(--space-2); color: var(--ink-line); }
+/* 1쪽: 속표지 */
+.peek-page--title::before { content: ""; position: absolute; inset: 12px 12px 12px 22px; border: 1px solid var(--ink-line); border-radius: 2px; pointer-events: none; }
+/* 속표지 관례: 제목 묶음은 위쪽 1/3, 여섯 상징과 읽는 시간은 아래 끝 */
+.peek-page--title .peek-page__body { display: grid; grid-template-rows: auto auto auto auto 1fr auto; justify-items: center; gap: var(--space-2); padding: var(--space-10) var(--space-2) var(--space-5); text-align: center; }
+.peek-page--title .peek-page__marks { align-self: end; }
+.peek-page__fleuron { width: 140px; height: 18px; margin-bottom: var(--space-2); color: var(--ink-rubric); }
+.peek-page__eyebrow { font-family: var(--font-sans); font-size: var(--fs-xs); letter-spacing: 0.06em; color: var(--ink-soft); }
+.peek-page__arch { font-size: var(--fs-xl, 1.5rem); font-weight: 700; line-height: var(--lh-tight); color: var(--ink-strong); text-wrap: balance; word-break: keep-all; }
+.peek-page__book { font-size: var(--fs-md); letter-spacing: 0.18em; color: var(--ink-rubric); }
+.peek-page__marks { display: flex; justify-content: center; gap: var(--space-2); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.peek-page__marks li { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--ink-line); border-radius: 50%; background: none; color: var(--ink-soft); --sig: 14px; }
+.peek-page__time { margin-top: var(--space-2); font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--ink-soft); }
+/* 2쪽: 견본 */
+.peek-page .sample__badge { padding: 0 var(--space-2); border: 1px solid var(--ink-rubric); background: none; color: var(--ink-rubric); }
+.peek-page__title { font-size: var(--fs-md); line-height: var(--lh-tight); color: var(--ink-strong); word-break: keep-all; }
+.peek-page .sample__body { margin-top: var(--space-3); }
+.peek-page .sample__body.prose, .peek-page .sample__body.prose p { font-size: var(--fs-sm); line-height: 1.75; color: var(--ink); }
+.peek-page .sample__body.prose p + p { margin-top: var(--space-3); }
+.peek-page .sample__note { margin-top: var(--space-4); padding-top: var(--space-2); border-top: 1px solid var(--ink-line); font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--ink-soft); }
+.book-peek__hint { font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); text-align: center; }
+.toc__time { font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 400; color: var(--c-text-muted); white-space: nowrap; }
+.toc__time::before { content: "· "; }
+.toc__time:empty { display: none; }
+.deeper .book-peek + .toc { margin-top: var(--space-6); }

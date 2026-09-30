@@ -1650,3 +1650,196 @@ Realistic painterly fantasy character portrait, a finely painted oil and digital
 - **이어서 할 일**: 운영자가 Clipwave 생성 기록에서 두 job을 내려받아 "받을 자리"(`products/strange-oracle/assets/ai/original/`)에 두면 designer가 가운데 3:4 자르기(ffmpeg `crop=iw:iw*4/3,scale=576:768:flags=lanczos`, `libwebp -quality 82`, 200KB 이하)와 판정을 한다. 작업 기록은 서버 메모리에만 있어 재배포되면 사라질 수 있다.
 - 여섯 장 예상: 6 × 60 = **360**(이번 2장을 그대로 쓰면 남은 4장 240) + 다시 만들기 여유 2~3장 120~180. 촐킨(석판)은 사람 문장을 빼고 같은 회화풍·같은 9:16 규칙으로 만든다.
 - 확정 전까지 기존 `guide-*.webp`와 CREDITS.md는 그대로 둔다.
+
+## 10단계: 출시 전 다듬기 (디자인)
+2026-09-30, designer (작업 A1). 기획: specs/strange-oracle.md 10-1 ~ 10-7(결정 55~61). 묶음 B(10-8, 결정 62)는 범위 밖.
+새 화면 없음, 새 이미지 없음(CSS·SVG만), 새 글꼴 없음. JS·data.js는 건드리지 않았다. 새 data-t 키는 data.js에 아직 없어 **지금 화면에서는 글자가 비어 보인다**(마크업의 [초안]은 길이 견본).
+
+### 한눈에
+| 항목 | 어디 | 무엇이 바뀌나 |
+|---|---|---|
+| 10-1 a · 10-5 | 입구 머리 | 영문 윗줄 삭제. 제목 → 요약 → 칩 한 줄 → 개인정보 한 줄 → 문. 문 아래 "완결" 한 줄 |
+| 10-1 b | 입구 | 0/6: 문 아래 글자 링크 → 입력 칸 펼침 / 1/6 이상: "지금까지의 이야기" 끝 글자 링크 → 코드·경고·복사 펼침 |
+| 10-1 c | 입구 "지금까지의 이야기" | 3/6일 때만 한 줄 + 링크 복사 글자 링크 |
+| 10-2 | 방 결과 6곳 · 나의 이야기 | 링크 복사 글자 링크 + 카카오톡 자리(비면 숨음) + 완료 한 줄. 공유 카드 하단 주소, og-image 배치 |
+| 10-3 | #screen-deeper | 제목 아래 책 모양 두 쪽(속표지 · 견본), 읽는 시간 자리. 광고 0 |
+| 10-6 | index.html | 지울 마크업 목록(developer 요청) |
+| 10-7 | 영문 윗줄 | `lang="en"` 16개 키, 27곳 |
+
+### 10-1 a · 10-5. 입구 첫 3초
+- 레이아웃(위→아래): 제목 `hub.logo` → 요약 `intro.summary`(2줄) → **칩 한 줄** `hub.journey.chips.0~2`(점으로 이음, 첫 칩만 강조색 굵게) → **개인정보 한 줄** `intro.note`(자물쇠 아이콘) → 고대의 문(주 버튼, 그대로) → **완결 안내 한 줄** `hub.journey.end`(✦) → (0/6일 때만) 이어가기 코드 링크 → 여섯 문 …
+- 요소 수: 영문 윗줄 `hub.eyebrow` **삭제(−1)**. 칩 줄은 문 아래에서 머리로 **이동**. "여섯 조각이 모여…" 줄(`.journey__end`)은 여섯 문 아래에서 문 바로 아래로 **이동**하고 문구만 교체. 0/6에서만 이어가기 링크 **+1**. 합계는 이전과 같다(1/6 이상에서는 1개 줄어듦).
+- 영문 윗줄 판단: "WORLD ORACLE HALL"은 정보가 없고 요약·칩과 겹쳐 **지웠다**(바꿔 쓰지 않음).
+- 재사용: `.hub-summary`, `.journey__chips/.journey__chip`, `.hub-privacy`, `.journey__end`(모두 기존). 새 class는 배치용 `.hub-chips`, `.hub-assure`뿐.
+- 낮은 화면: `@media (max-height: 680px)`에서 머리 문양(`.hub-sigil`, 장식)만 접는다. 문·명판 크기는 그대로.
+- 상태: 0/6 · 진행 중 · 6/6 모두 같은 머리. 움직임 없음.
+
+**확정 길이(360px, 공백 포함)** — 기획서 상한보다 짧다. 360x640에서 주 버튼이 보이려면 이 값이어야 한다.
+| 키 | 담을 것 | 확정 최대 | 넘으면 |
+|---|---|---|---|
+| intro.summary | 낯섦 + 받는 것 | 40자(2줄) | 3줄이 되어 문이 25px 밀림 |
+| hub.journey.chips.0 | "여섯 방 모두 무료"류 ("무료"는 여섯 방으로 한정) | 9자 | 칩 줄이 2줄 |
+| hub.journey.chips.1 | 전체 읽기 시간 "읽는 데 약 14분"류 ("약" 필수, 읽기 기준) | 9자 | 〃 |
+| hub.journey.chips.2 | 나눠 봐도 된다 | 8자 | 〃 |
+| (칩 셋 합계) | | **26자** | 2줄(+22px) |
+| intro.note | 무엇을 넣는지 + 밖으로 나가지 않음 | **26자(1줄)** | 2줄(+20px) |
+| hub.journey.end | 중간에 멈춰도 방 하나가 한 장으로 완결 | 40자(2줄) | 3줄 |
+- 칩 줄과 개인정보 줄이 **둘 다** 2줄이면 360x640에서 명판 아래 끝이 648px로 8px 넘친다(측정). 하나만 2줄이면 628px로 들어온다.
+
+### 10-1 b. 이어가기 코드
+**만들기(마친 방 1개 이상)** — `.so-far` 맨 아래, "나의 이야기 전체 보기" 다음
+- 글자 링크 `resume-make-toggle`(▾) → 누르면 같은 자리에 패널 `resume-make-panel` 펼침(`aria-expanded`, `.is-hidden` 해제). 새 화면·팝업 없음.
+- 패널 안 순서 **고정**: ① 코드 `resume-code`(점선 청동 테두리, 고정폭 16px, 4자씩 하이픈, 길면 하이픈에서 줄바꿈, 길게 누르면 통째 선택) → ② **경고** `resume-warn`(촛불색 왼쪽 띠 + 세모 아이콘, 14px, 접히지 않음, 닫기 없음) → ③ 복사 버튼 `resume-copy`(보조 버튼, 폭 가득, 48px) → ④ 복사 완료 한 줄 `resume-copied`.
+- 경고는 버튼 **바로 위**에 붙여 두었다. 360x640에서 코드 위 끝~버튼 아래 끝 305px(측정), 경고~버튼 219px로 한 화면에 함께 보인다.
+- 상태: 닫힘(기본) / 펼침 / 복사 완료(`resume-copied` 보임) / 클립보드 막힘(완료 줄 대신 코드가 이미 선택 가능한 글이므로 안내 없이 그대로) / "내 정보 지우기" 뒤: 패널 닫고 `resume-code` 비움.
+
+**넣기(마친 방 0개)** — 문 아래 완결 안내 줄 다음 `resume-enter`
+- 글자 링크 `resume-enter-toggle`(12px, 흐린 색, 밑줄. 주 버튼보다 조용하게) → 패널 `resume-enter-panel`: 입력 칸(폭 가득) → 확인 버튼(보조, 폭 가득, 48px) → 도움말 → 오류 한 줄.
+- 입력 칸 규칙(마크업에 반영): `<form>`이 아닌 `div role="group"`, `name` 없음, `autocomplete="off"`, `autocorrect="off"`, `autocapitalize="characters"`, `spellcheck="false"`, `maxlength="40"`. 확인 버튼은 `type="button"`.
+- 상태: 닫힘 / 펼침 / 오류(`resume-error`에 문구 + `.is-hidden` 해제, 입력 칸 `aria-invalid="true"`) / 복원 성공(패널·링크가 사라지고 `.so-far`가 나타나며 `resume-restored` 한 줄이 보임).
+- 재사용: `.text-link`, `.receipt-toggle__caret`, `.receipt-open__row/__input/__go/__how`, `.input`, `.btn--secondary`, `.field__error`. 새 class: `.resume-enter*`, `.resume-make*`, `.resume-code`, `.resume-warn`, `.so-far__restored`.
+
+**복원 상태 안내**
+- 입구: `resume-restored`(강조색 옅은 바탕 한 줄) — "지금까지의 이야기" 원형 줄 아래. 출처가 드러나는 문장.
+- 방 결과: `.restore-note`(점선 상자 한 줄 + 글자 링크). 별의 방 반전 카드(`result-turn`: 서양 별자리 → 나크샤트라) 자리에 견본 1개를 두었다. 해당 부분을 숨기고 이 줄의 `.is-hidden`을 푼다. 다른 방에도 필요하면 같은 마크업을 복사한다.
+
+### 10-1 c. 3/6 한 줄
+- `.so-far` 안 원형 줄 아래 `hub-half`: 글 한 줄 + 글자 링크(강조색). 링크의 훅은 방 결과와 같은 `share-link-copy`, 완료 줄도 같은 `share-link-status`.
+- 마친 방이 정확히 3개일 때만 `.is-hidden` 해제. 360px에서 글 1줄 + 링크 1줄(66px).
+
+### 10-2. 공유 줄
+- 방 결과 6곳: `.result-more` 안, "결과 이미지 저장·공유" 글자 링크 다음에 `.share-links`(링크 복사 + 카카오톡 자리). 세로로 쌓는다(글자 링크 한 줄씩, 각 44px): 이미지 공유 / 링크 복사 · 카카오톡 / (있으면) 정보 바꿔 보기 / 완료 한 줄.
+- 나의 이야기: 주 공유 버튼(`story-share`) 아래 `.result-more--share`에 같은 묶음.
+- 카카오톡 자리 `share-kakao-slot`: **빈 span**이다. 키가 비어 있으면 아무것도 넣지 않는다(CSS `:empty`로 자리·가운뎃점까지 사라짐). 키가 있으면 share-buttons.js가 이 안에 `<button class="text-link" type="button">`을 넣는다. 카카오 상표색·로고 버튼으로 꾸미지 않는다(글자 링크).
+- 완료 한 줄 `share-link-status`(`role="status"`): 복사 성공 → `share-link-msg` 보임 / 클립보드 막힘 → `share-link-msg` 숨기고 `share-link-url`에 주소를 넣어 보임(점선 상자, 길게 누르면 통째 선택, 줄바꿈 허용).
+- 광고: 방 결과의 광고 자리(`result-end`)는 공유 줄에서 다리·다음 문·끝 장식을 지난 맨 아래 그대로다. 나의 이야기의 `story-end`도 끝 장식 아래 그대로. 버튼 옆 광고 없음.
+
+**공유 카드 하단 주소(1080x1920, 명세만 — 그리기는 developer)**
+- 자리: 기존 하단 제품 이름 줄 **바로 아래** 한 줄. 가운데 정렬, 영문·숫자 글꼴(Cinzel 아님, 본문 sans), 28px, 자간 0.02em, 색은 제품 이름 줄과 같은 흐린 색에 불투명도 0.8.
+- 안전 영역: 핵심 y 260~1640 규칙 그대로. 주소 줄의 아래 끝이 y 1640을 넘지 않게 제품 이름 줄을 40px 올린다(이름 줄 + 간격 12 + 주소 줄).
+- 길이: 표시용 주소(https:// 뗀 것)가 44자를 넘으면 글자 크기를 24px로 줄이고, 그래도 넘으면(가로 900px 초과) 주소 줄을 그리지 않는다. `site.url`이 비어 있으면 주소 줄 없음(지금과 같음, 이름 줄 위치도 그대로).
+
+**og-image.png 배치(1200x630 — developer가 canvas/SVG로 제작, AI·외부 이미지 없음)**
+| 요소 | 위치·크기 | 비고 |
+|---|---|---|
+| 바탕 | 전체. 밤하늘 `#080717` → 위 왼쪽 보랏빛(화면 배경과 같은 방향) 그라데이션 + 별 점 40개 안팎(1~3px, 불투명도 0.3~0.9) | 글자 뒤(가운데 띠)는 별을 성기게 |
+| 제품 이름 "낯선 점술관" | 가운데, 기준선 y 118, Gowun Batang 700, 44px, 청동 밝은색 | 고정 문구 |
+| 여섯 문 상징 | 가운데 한 줄, 중심 y 236. 원 88px(청동 1.5px 테두리, 옅은 안쪽 빛) 6개, 간격 28px → 전체 폭 668px(x 266~934). 순서 **Ⅰ 오검 · Ⅱ 별 · Ⅲ 데칸 · Ⅳ 촐킨 · Ⅴ 룬 · Ⅵ 시빌라**. 원 아래 로마 숫자 Cinzel 18px | index.html의 기존 `<symbol>` 도형 사용 |
+| 제목 `og.title` | 가운데, 기준선 y 410, Gowun Batang 700, 64px, 밝은 글자 | 16자 이내(폭 1024px 이하) |
+| 부제 `og.sub` | 가운데, 기준선 y 478, 34px, 흐린 글자 | 28자 이내(폭 952px 이하) |
+| 아래 장식 | 가운데 y 548, 청동 장식선(`#i-fleuron`) 폭 240px | |
+- 여백: 사방 60px 안에 글자 없음. 가운데 630x630(정사각으로 잘리는 미리보기)에는 제품 이름과 상징 4개, 제목의 가운데가 남는다.
+- 주소는 그리지 않는다(주소가 바뀌면 이미지를 다시 만들어야 한다). 두 방 시절 문구 0건. 대비: 밝은 글자 on `#080717` AA 이상.
+
+### 10-3. 결제 전 화면
+- 레이아웃(위→아래): 결제 띠 → 머리(윗줄 · 제목 · `deeper.lead`) → **책 모양 두 쪽 `.book-peek`** → 책의 목차(봉인, 그대로) → 입력 → 고지 → 결제. 기존 견본 상자 `.sample`은 2쪽으로 옮겨 **없앴다**(훅 `deeper-sample` 그대로).
+- 넘김 방식: **가로 스크롤**(scroll-snap, JS 없음). 쪽 폭 = 화면 안쪽 폭 − 32px → 360에서 288px, 다음 쪽이 오른쪽에 28px쯤 걸쳐 보여 밀 수 있음을 알린다. 아래에 안내 한 줄 `deeper.peek.hint`. 좌우 버튼은 두지 않았다(버튼 2개·JS가 늘고, 두 쪽뿐이라 밀기로 충분).
+- 종이: 결정 53 `.book-page`의 바탕·테두리·그림자와 같은 값(`--paper`, `--ink*`). 두 쪽 높이는 긴 쪽(견본)에 맞춘다. 360에서 288x644, 480에서 408x480(측정).
+- 1쪽 속표지: 괘선 테두리 안에 장식선 → 윗줄 `deeper.peek.coverEyebrow` → **원형 이름** `deeper-peek-arch`(22px 굵게) → "한 권의 책"(붉은 잉크, 자간 넓게) → (아래 끝) 여섯 상징 → **읽는 시간** `deeper-read-time` → 쪽 번호 i.
+- 2쪽 견본: 머리글(견본 알약 + `deeper.peek.sampleMark`) → 제목 `deeper.sample.title` → 본문 `deeper-sample`(14px / 24.5px, 잉크색) → `deeper.sample.note` → 쪽 번호 ii. 유료 문장 0자.
+- 읽는 시간 자리 2곳(같은 훅 `deeper-read-time`): 속표지 아래, 목차 제목 옆 `.toc__time`("약 N자 · 읽는 데 약 N분"). 고지 표 "분량" 칸은 `deeper-volume` 한 칸이라 문장 템플릿에 덧붙인다(developer 요청 5).
+- 접근성: 띠는 `tabindex="0" role="group"` + `aria-label`(키 `deeper.peek.aria`), 키보드 좌우 화살표로 스크롤. 포커스 테두리 청동 2px. 움직임 줄이기: 애니메이션이 원래 없다.
+- 광고 자리: **0개**(`#screen-deeper [data-ad]` 0, 측정).
+- 상태: 원형 없음(있을 수 없지만 방어) → `deeper-peek-arch` 줄만 숨김 / 결제 꺼짐 → 화면 자체가 열리지 않음(그대로).
+
+### 10-7. 영문 윗줄
+- `lang="en"`을 단 키(16개, 27곳): `<room>.intro.eyebrow` 6개(시작·입력 화면 2곳씩), `rune.result.threadEyebrow`, `star.choose.eyebrow`, `star.result.twistEyebrow`, `ogham.result.nameEyebrow`, `decan.choose.eyebrow`, `decan.result.twistEyebrow`, `tzolkin.result.numberEyebrow`, `sibyl.result.askedEyebrow`, `result.factEyebrow`(6곳), `story.eyebrow`.
+- 달지 않은 것: `story.paid.eyebrow`("DEEPER STORY" — 10-3 a에서 한국어로 바뀔 자리), `rune.result.nameLabel`(영문+한글이 한 문장), `rune.norns.*.latin`(고대 노르드어 이름, 결과 카드 쪽은 이미 `aria-hidden` 안). copywriter가 영문 윗줄을 한국어로 바꾸면 그 요소의 `lang="en"`을 뗀다.
+
+### 텍스트 길이 제한 (copywriter용, 360px · 공백 포함)
+| 키(제안) | [초안] | 최대 | 넘으면 |
+|---|---|---|---|
+| resume.make.link | 이어가기 코드 만들기 | 14 | 줄바꿈 |
+| resume.make.warn | (3문장: 글자 그대로는 없음 / 태어난 날을 거의 알아낼 수 있으니 보여 주지 말 것 / 저장·전송 안 되니 직접 보관) | 120 | 7줄 이상이 되어 640 높이에서 코드와 버튼이 한 화면에 안 들어옴 |
+| resume.make.copy | 코드 복사 | 8 | - |
+| resume.make.copied | 코드를 복사했어요 | 14 | - |
+| resume.make.codeAria | 이어가기 코드 | 10 | 화면낭독기용 |
+| resume.enter.link | 이어가기 코드가 있어요 | 16 | 줄바꿈 |
+| resume.enter.help | 복사해 둔 코드를 그대로 붙여 넣어 주세요 | 24 | 2줄 |
+| resume.enter.placeholder | (코드 모양 예, developer가 접두어 확정 뒤) | 20 | 잘림 |
+| resume.enter.go | 불러오기 | 8 | - |
+| resume.errors.shape / order / receipt | 모양 틀림 / 순서 안 맞음 / 영수증 코드를 넣음 | 각 30 | 3줄 |
+| resume.restored | 코드에 담긴 결과를 불러왔어요 … | 30 | 3줄 |
+| resume.needInput | 이 부분은 생일을 다시 넣으면 보여요 | 30 | 3줄 |
+| resume.reinput | 다시 입력 | 8 (기획서에 길이 없음, 제안) | - |
+| hub.half.text / hub.half.link | 벌써 절반이에요 … / 점술관 링크 복사 | 30 / 12 | 3줄 |
+| share.copyLink | 링크 복사 | 8 | - |
+| share.copied | 주소를 복사했어요 | 16 | - |
+| share.kakao | 카카오톡으로 보내기 | 12 | 줄바꿈 |
+| og.title / og.sub | (여섯 방·나의 이야기 기준) | 16 / 28 | 좌우 여백 침범 |
+| deeper.peek.coverEyebrow | 여섯 문이 엮은 | 12 | 2줄 |
+| deeper.peek.bookName | 한 권의 책 (확정) | - | - |
+| deeper.peek.sampleMark | 가상의 두 사람으로 쓴 견본 쪽 | 20 | 머리글 2줄 |
+| deeper.peek.hint | 옆으로 밀면 견본 쪽이 보여요 | 20 (제안) | 2줄 |
+| deeper.peek.aria | 책 미리보기 두 쪽 | 16 | 화면낭독기용 |
+| deeper.readTime | 읽는 데 약 {n}분 | 16 | 목차 제목 2줄 |
+| deeper.lead | (쪽을 넘기는 책에 맞게) | 60 | 4줄 |
+| deeper.sample.note | "리포트" → "책" | 40 | - |
+- 영수증 칸에 이어가기 코드를 넣었을 때의 한 줄(`receipt.open` 쪽 오류, 30자)도 필요하다. 기획서 문구 자리 목록에는 없다 → 운영자·planner 확인.
+
+### developer 전달 사항
+**새 data-js**
+| 이름 | 역할 |
+|---|---|
+| resume-enter | 넣기 묶음. 마친 방 0개일 때만 `.is-hidden` 해제 |
+| resume-enter-toggle / resume-enter-panel | 글자 링크(`aria-expanded`) / 펼침 패널(`.is-hidden`) |
+| resume-input / resume-go / resume-error | 입력 칸 / 확인(`type="button"`) / 오류 한 줄(`.is-hidden`, 문구는 JS) |
+| resume-restored | 복원 직후 한 줄(`.is-hidden`) |
+| resume-make | 만들기 묶음(`.so-far` 안이라 1개 이상일 때만 보임) |
+| resume-make-toggle / resume-make-panel | 글자 링크 / 패널 |
+| resume-code / resume-warn / resume-copy / resume-copied | 코드 글자 / 경고(항상 보임) / 복사 버튼 / 복사 완료 한 줄(`.is-hidden`) |
+| hub-half | 3/6 한 줄(`.is-hidden`) |
+| share-link-copy (8곳) | 링크 복사. 방 결과 6 + 나의 이야기 1 + 입구 3/6 줄 1 |
+| share-link-status / share-link-msg / share-link-url (8곳) | 완료 줄 / 성공 문구 / 막혔을 때 주소 글자. `share-link-copy`와 같은 부모(`.result-more` 또는 `.so-far`) 안에서 찾는다 |
+| share-kakao-slot (7곳) | 카카오톡 버튼이 들어갈 빈 자리 |
+| restore-note / restore-reinput | 복원 상태 안내 한 줄 / 다시 입력 링크(`data-go="star-input"`) |
+| deeper-peek / deeper-peek-arch | 두 쪽 띠 / 속표지의 원형 이름 |
+| deeper-read-time (2곳) | 읽는 시간 글자 |
+
+**상태 class·속성**: 모두 기존 방식 그대로 `.is-hidden`, `aria-expanded`. 새 상태 class 없음. 공통 부품 share-buttons.js가 제품 class에 기대지 않도록 훅은 data-js만 쓴다.
+
+**developer 요청**
+1. 새 data-t 키(위 표)를 data.js에 추가. 없으면 글자가 비어 보인다.
+2. 패널을 펼칠 때 패널 위 끝이 상단 막대 아래에 오도록 스크롤한다(경고와 복사 버튼이 함께 보이게). 포커스는 만들기 → 복사 버튼, 넣기 → 입력 칸.
+3. 입력 칸: Enter는 `keydown`에서 확인과 같은 동작, 그 밖의 규칙은 기획서 10-1(주소·저장소·console 금지, 복원 뒤·"내 정보 지우기" 뒤 비움).
+4. 영수증 칸 `<form class="receipt-open">` 2곳(입구·나의 이야기)은 지금도 `<form>`이다. 제출 기본 동작을 막고 있는지, 이어가기 코드가 들어왔을 때 거부 한 줄을 띄우는지 확인.
+5. 고지 표 "분량" 칸(`deeper-volume`)에 "· 읽는 데 약 N분"을 덧붙인다(같은 템플릿 `deeper.readTime`). 쪽 수는 적지 않는다.
+6. **지워도 되는 마크업(10-6, data-js가 있어 designer는 지우지 않았다)**
+   - `ol.journey__path[hidden]`과 그 안 `journey-step` 6개(index.html 입구), app.js의 `jsAll("journey-step")` 반복. 지운 뒤 알려 주면 style.css의 `.journey__path/.journey__step/.journey__mark/.journey__num/.journey__name/.journey__reads`를 A4에서 지운다.
+   - `story-empty` 묶음(나의 이야기 빈 화면, 방 버튼 6개): 강제 순서에서 닿을 수 있는지 확인 뒤 판단(기획서 10-6).
+   - 입구 `so-far` 목록의 `.is-upcoming` 줄: JS가 매번 만들지만 입구에서는 CSS로 숨겨져 있다(정적 마크업의 "?" 4줄 포함). 만들지 않아도 된다.
+   - `read-progress` 9칸(결정 53에서 은퇴, CSS로 숨김) — 아직 남아 있으면 함께.
+   - 죽은 키에 **`hub.eyebrow`** 추가(이번에 요소를 지웠다). `intro.eyebrow`는 기획서 목록에 이미 있다.
+7. `story.paid.eyebrow`, `rune.result.nameLabel`의 영문: 문구가 정해진 뒤 영문으로 남으면 `lang="en"`(nameLabel은 영문 부분만 `<span lang="en">`로 나눠야 한다).
+8. 공유 카드 하단 주소 줄, og-image는 위 명세대로. share-card.js 기존 옵션은 그대로 두고 주소는 새 옵션으로.
+
+### 색과 대비 [코드 판단: 기존 토큰 값]
+| 글자 / 바탕 | 값 | 판정 |
+|---|---|---|
+| 경고 글 `--c-text-strong`(L .96) / 패널 위 촛불색 옅은 바탕(L≈.2) | 12:1 이상 | AA |
+| 견본 본문 `--ink`(L .29) / 종이(L .80~.91) | 7.6~10.9 (결정 53 표와 같은 값) | AA |
+| 속표지 윗줄·쪽 번호 `--ink-soft`(L .40) / 종이 | 5.0~7.1 | AA |
+| "한 권의 책"·견본 알약 `--ink-rubric`(L .43) / 종이 | 4.6~6.6 | AA |
+| 첫 칩 `--accent`(L .84) / 밤하늘 | 10:1 이상 | AA |
+| 글자 링크 `--c-text-muted` / 밤하늘 | 기존 `.text-link`와 같음 | 기존 점검 값 |
+
+### 캡처·측정 기록 (headless Edge, 움직임 줄이기, tools/serve.js + tools/strange-oracle/cdp.js)
+화면은 class로 직접 전환하고, 새 키 자리에는 [초안] 문장을 넣어 쟀다(app.js는 9단계 그대로).
+| 화면 | 360x640 | 480x800 |
+|---|---|---|
+| 입구 0/6, 확정 길이 문구 | 칩 1줄(20px) · 개인정보 1줄 · 명판(주 버튼 글자) 아래 끝 **606 / 640** → 스크롤 없이 보임 | 662 / 800 |
+| 입구 0/6, 기획서 상한 길이 | 칩 2줄 · 개인정보 2줄 · 명판 아래 끝 **648 / 640 (8px 넘침)** → 확정 길이를 위 표로 줄인 이유 | 682 / 800 |
+| 이어가기 넣기 펼침 + 오류 | 입력 칸 286x51, 확인 286x48, 가로 넘침 없음 | 406 폭 |
+| 코드 만들기 펼침 | 코드 2줄(27자) · 경고 158px · 복사 48px, 코드 위~버튼 아래 305px | 코드 1줄 |
+| 방 결과 공유 줄(별, 카카오 버튼 넣은 모습) | 가로 넘침 없음 | 넘침 없음 |
+| 결제 전 화면 | 두 쪽 288x644, 2쪽까지 밀었을 때 x 52~340, 문서 가로 360/360, 광고 0 | 408x480 |
+- 콘솔 오류 0건(두 크기). data-js 훅 삭제 0건(고치기 전후 개수 비교).
+- 360x800은 고치기 전 CSS로만 쟀다(명판 아래 끝 684 / 800). 문양을 접는 규칙은 높이 680px 이하에서만 걸리므로 800에서는 그대로다.
+- **미확인**: 공유 줄을 세로로 쌓도록 고친 뒤의 캡처(고치기 전 캡처에서 가운뎃점이 줄 끝에 남는 것을 보고 CSS만 고침), 진행 중(1/6~6/6) 입구의 머리 높이(문구가 같아 0/6과 같을 것으로 판단), 실제 기기에서 두 쪽 띠의 밀기 감각과 iOS 사파리 scroll-snap, 화면낭독기 낭독, 실제 data.js 문구가 들어간 뒤의 줄바꿈(A4에서 다시 잰다), e2e 스크립트(돌리지 않음 — 입구 요소 순서가 바뀌었다).
+
+### 판단 기록 (운영자 확인용)
+- 입구 문구 길이를 기획서 상한보다 짧게 확정했다(칩 합계 26자, 개인정보 줄 26자). 이유는 위 측정.
+- 360x640 이하 높이에서 머리 문양(달 고리 장식)을 접는다.
+- "여섯 조각이 모여 나의 이야기 한 편이 돼요" 줄은 완결 안내로 바뀌며 문 아래로 올라갔다(여섯 문 아래에는 더 없다).
+- 두 쪽 넘김은 가로 스크롤로 정했다. 속표지가 견본 쪽만큼 길어(360에서 644px) 목차는 한 화면 아래에서 시작한다.
+- 이어가기 코드 글자는 시스템 고정폭 글꼴(내려받는 글꼴 아님, 제품 글꼴 2개 규칙에 세지 않음)로 보인다.
