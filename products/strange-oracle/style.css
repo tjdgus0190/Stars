@@ -4425,6 +4425,7 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .book-page--part-open .book-opening--half .book-opening__title { font-size: var(--fs-2xl); }
 .book-page--part-open .book-opening--part { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--ink-line); }
 .book-page--part-open.is-solo .book-page__body { display: grid; place-content: center; text-align: center; }
+.book-page.is-solo .book-page__body { display: grid; place-content: center; text-align: center; } /* (QA 필수 5) 장 머리만 남은 장 표제지도 가운데 정렬 */
 
 /* 정적 검토(.is-static-preview)에서는 숨은 새 블록도 보이게 */
 .is-static-preview :is(.story-half, .story-book-note).is-hidden { display: grid !important; }

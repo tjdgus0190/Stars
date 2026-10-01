@@ -3152,7 +3152,9 @@
       w.append(blk.firstElementChild.cloneNode(true), prose);
       deep.push({ kind: "unit", node: stripHooks(w) }, ...rest);
     });
-    p2("deep", B.parts.deep, deep.concat(unitsOf(js("report-evidence", src))));
+    // (11단계 C5 필수 6) 방별 결과 목록은 한 덩어리: 빈 쪽에 들어가면 통째로 다음 쪽, 아니면 줄 단위로 나누고 장 끝 50자 규칙(fixShortEnd)이 마지막 쪽을 채운다
+    const ev = js("report-evidence", src);
+    p2("deep", B.parts.deep, deep.concat(visible(ev) ? [{ kind: "unit", node: stripHooks(ev.cloneNode(true)) }] : []));
     const closeName = bookPartName("close");
     C.push({ key: "close", part: "close", label: closeName, run: [closeName], start: true, blocks: [openBlk(chOpening(R.parts.close)), ...parasOf(js("report-close", src))] });
     C.push({ key: "end", part: "close", label: closeName, run: [closeName], cls: "book-page--end", blocks: srcEnd.map((node) => ({ kind: "unit", node })) });
@@ -3200,7 +3202,26 @@
     // (11단계 F1 ①) 들어가는 범위 안의 마지막 문장 끝에서 자른다. 문장 끝이 없으면(한 문장이 남은 칸보다 김) 어절 경계 — 개수는 F1STAT.wordCut
     let k = lo;
     while (k > 0 && !SENT_END.test(words.slice(0, k).join("").trimEnd())) k--;
+    // 장 머리만 있는 쪽에서 문장 끝으로 잘라 50자 미만만 남으면, 그 조각도 남기지 않고 단락째 다음 쪽(장 표제지)
+    const direct = node.parentElement === bd;
+    const headPage = direct && [...bd.children].every((c) => c === node || isHead(c));
+    if (k > 0 && headPage && [...words.slice(0, k).join("").replace(/s+/g, " ").trim()].length < SHORT_END) k = 0;
     if (k === 0) {
+      // (11단계 C5 필수 5) 문장 끝이 남은 칸 안에 없으면 어절 경계로 자르지 않고 단락째 다음 쪽(장 첫 쪽도 예외 없음).
+      // 이 쪽에 장 머리만 남으면 그 쪽은 장 표제지(.is-solo)가 된다. 빈 쪽에서도 첫 문장이 안 들어가는 극단만 어절 경계(F1STAT.wordCut)
+      const others = [...bd.children].filter((c) => c !== node);
+      if (direct && others.length) {
+        node.textContent = text;
+        node.remove();
+        // 이 쪽에 남는 글이 장 머리 + 50자 미만 단락뿐이면 그 짧은 단락도 함께 다음 쪽으로(F1STAT.carry → place가 새 쪽 맨 앞에 담는다)
+        const rest0 = others.filter((c) => !isHead(c));
+        if (rest0.length && others.some(isHead) && bodyChars(bd) < SHORT_END) {
+          rest0.forEach((c) => c.remove());
+          F1STAT.carry = rest0;
+        }
+        if (onlyHeads(bd)) bd.parentElement.classList.add("is-solo"); // 장 표제지 (머리만, 50자 미만 단락·어절 경계 대신)
+        return [node, false];
+      }
       k = lo;
       F1STAT.wordCut++;
     }
@@ -3521,6 +3542,10 @@
           const [rest, cont] = splitPara(node, bd);
           if (!rest) return;
           start();
+          if (F1STAT.carry) {
+            F1STAT.carry.forEach((c) => bd.append(c));
+            F1STAT.carry = null;
+          }
           if (cont) {
             rest.classList.add("is-cont");
             rest.classList.remove("has-dropcap");

@@ -15,17 +15,18 @@ const BOOK_METRICS = `(() => {
     clone.querySelectorAll('.book-opening').forEach((o) => o.remove());
     const text = clone.textContent.replace(/\\s+/g, ' ').trim();
     const items = bd.querySelectorAll('.timeline__areas > div').length;
+    const contItems = bd.querySelectorAll('.timeline__areas > div.is-cont').length;
     const full = items === 1 && bd.scrollHeight >= bd.clientHeight - 40;
     const first = bd.firstElementChild;
     const lastP = [...bd.querySelectorAll('p, dd')].pop();
-    return { full, n: Number(p.dataset.page), special, chars: [...text].length, headOnly: !special && text.length === 0, items, cont: !!(first && first.matches('p.is-cont')), lastText: lastP ? lastP.textContent.trim() : '' };
+    return { contItems, head: !!bd.querySelector('.book-opening'), full, n: Number(p.dataset.page), special, chars: [...text].length, headOnly: !special && text.length === 0, items, cont: !!(first && first.matches('p.is-cont')), lastText: lastP ? lastP.textContent.trim() : '' };
   });
   const body = info.filter((x) => !x.special);
   let headRun = 0, headPairs = 0;
   info.forEach((x) => { headRun = x.headOnly ? headRun + 1 : 0; if (headRun >= 2) headPairs++; });
-  const midCut = info.filter((x, i) => x.cont && i > 0 && !END.test(info[i - 1].lastText)).map((x) => x.n);
+  const midCut = info.filter((x, i) => x.cont && i > 0 && !END.test(info[i - 1].lastText)).map((x) => x.n + (info[x.n - 2].head ? '(장 첫 쪽 뒤, 앞 쪽 ' + info[x.n - 2].chars + '자)' : ''));
   const tl = info.filter((x) => x.items > 0);
-  return { pages: pages.length, body: body.length, under50: body.filter((x) => x.chars < 50).map((x) => x.n + ':' + x.chars), headPairs, midCut, tlPages: tl.length, tlUnder2: tl.filter((x) => x.items < 2).map((x) => x.n + ':' + x.items + '/' + x.chars + '자') };
+  return { pages: pages.length, solo: pages.filter((p) => p.classList.contains('is-solo') && !p.classList.contains('book-page--part-open')).length, body: body.length, under50: body.filter((x) => x.chars < 50).map((x) => x.n + ':' + x.chars), headPairs, midCut, tlPages: tl.length, tlBad: tl.filter((x) => x.items < 2 && !(x.contItems === x.items && x.chars >= 50)).map((x) => x.n + ':' + x.chars + '자'), tlUnder2: tl.filter((x) => x.items < 2).map((x) => x.n + ':' + x.items + '/' + x.chars + '자') };
 })()`;
 module.exports = { BOOK_METRICS };
 
@@ -56,6 +57,7 @@ if (require.main === module) (async () => {
     await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 640, deviceScaleFactor: 2, mobile: true });
     await sleep(800);
     const m640 = await ev(BOOK_METRICS);
+    if (process.env.PCDEBUG) for (const u of m640.under50) { const n = parseInt(u); console.log(await ev(`[${n - 1}, ${n}].map(k => { const p = document.querySelector('[data-js=book-pages] [data-js=book-page][data-page=' + '"' + k + '"]'); return k + ' ' + p.className + ' | ' + [...p.querySelector('[data-js=book-page-body]').children].map(c => c.tagName + '.' + c.className + '[' + c.textContent.trim().slice(0, 25) + ']').join(' ; '); }).join(' || ')`)); }
     console.log(JSON.stringify({ sample: i + 1, arch: s.arch, "360x800": m800, "360x640": m640 }));
   }
   await b.close();
