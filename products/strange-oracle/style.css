@@ -2826,6 +2826,8 @@ body:not(.is-static-preview) [data-preview-only] { display: none; }
 @keyframes seal-star { from { opacity: 0; transform: scale(0.2); } }
 @keyframes core-breathe { to { opacity: 0.5; scale: 0.9; } }
 .ritual--unseal.is-error .unseal-ring { opacity: 0.35; }
+/* (11단계 C4) 오류 상자가 360x640 첫 화면 아래로 밀려 "여는 중" 글과 건너뛰기만 보이던 것: 오류일 때 인장 고리·진행 글·건너뛰기를 숨김(상자의 role=alert가 알린다) */
+.ritual--unseal.is-error :is(.unseal-ring, [data-js=unseal-status], [data-js=unseal-skip]) { display: none; }
 .unseal-error { display: grid; gap: var(--space-3); width: 100%; margin-top: var(--space-6); padding: var(--space-5); border: 1px solid var(--c-line-strong); border-radius: var(--radius-lg); background: var(--c-surface-1); }
 .unseal-error__title { font-size: var(--fs-md); font-weight: 700; color: var(--c-text-strong); }
 .unseal-error__text { font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); }
@@ -4412,7 +4414,8 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .receipt__note { margin-top: var(--space-2); font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); }
 
 /* F1 쪽 나누기 — 시기별 흐름: 구간마다 새 쪽, 네 항목 한 쪽 또는 2+2. 글자 크기는 그대로, 쪽 안 간격만 줄인다 */
-.book-page .timeline { padding-left: var(--space-5); }
+.book-page .timeline { margin-left: var(--space-2); padding-left: var(--space-3); } /* (C4) 글 시작점은 그대로(8+1+12=21px), 구간 점이 쪽 본문 왼쪽 끝(overflow: hidden)에 반쯤 잘리던 것 */
+.book-page .timeline__stage::before { left: calc(-1 * var(--space-3) - 6px); } /* 점 가운데를 점선 위에 */
 .book-page .timeline__stage { padding-bottom: 0; }
 .book-page .timeline__areas { gap: var(--space-2); }
 .book-page .timeline__age.is-cont { font-weight: 400; color: var(--ink-soft); } /* 2+2로 나뉜 뒷쪽 머리: "서른 무렵 · 이어서" */
