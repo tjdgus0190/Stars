@@ -97,6 +97,7 @@
 
   // ───────── 저장 (sessionStorage, 이 탭 한정) ─────────
   const STORE_KEY = "strange-oracle";
+  const UNLOCK_KEY = "strange-oracle-unlock"; // (12단계 12-2) 광고로 연 방 이름 표시만 {"ogham":1,…}. 입력값·결과 번호·코드는 넣지 않는다
   // (8단계) 인트로가 없어져 started 칸은 쓰지 않는다. 새 세션 = 마친 방이 없음 → 입구부터
   const emptyState = () => ({ profile: {}, visits: {} });
   function validVisit(room, v) {
@@ -135,6 +136,7 @@
   function clearAll() {
     try {
       window.sessionStorage.removeItem(STORE_KEY);
+      window.sessionStorage.removeItem(UNLOCK_KEY); // (12단계) 광고로 연 방 표시도 지운다
     } catch (e) {
       /* 무시 */
     }
@@ -351,6 +353,7 @@
       setTopbar(name);
       window.scrollTo(0, 0);
       enter[name]?.();
+      onScreen(name, next); // (12단계) 배너 채우기·화면 이벤트
     };
     currentName = name; // 전환 중에 다시 불려도 이전 화면 기준으로 기록하지 않게
     if (prev && prev !== next && !reduceMotion && !opts.instant) {
@@ -635,6 +638,7 @@
       }
     }
     resumeEl.code.textContent = code;
+    if (code) track("so_resume", { step: "made" }); // 코드 값은 보내지 않는다
     setPanel(resumeEl.makeToggle, resumeEl.makePanel, open);
     if (open) js("resume-copy").focus({ preventScroll: true });
   });
@@ -663,10 +667,12 @@
     const r = Resume.decode(resumeEl.input.value);
     const visits = r.codes ? visitsFromCodes(r.codes) : null;
     if (!visits) {
+      track("so_resume", { step: "failed" });
       resumeError(T.resume.errors[r.error || "shape"]);
       return resumeEl.input.focus();
     }
     state = { profile: {}, visits, restored: true };
+    track("so_resume", { step: "used" });
     save();
     closeResume(); // 입력 칸을 비운다
     justRestored = true;
@@ -974,10 +980,10 @@
 
     // 운명의 실
     jsAll("thread-word", scr).forEach((el, i) => (el.textContent = [past, now, next][i].keyword));
-    js("turn-text", scr).innerHTML = fill(R.thread, {
+    setTurn("rune", scr, fill(R.thread, {
       who: esc(who), past: past.keyword, now: now.keyword,
       next: `'${next.keyword}'${particle(next.keyword, "이/가")}`,
-    });
+    }));
 
     // 핵심 풀이: 세 돌마다 소제목 + 첫 단락 (둘째 단락부터·II장부터는 책, 서버 full-rune.js). 룬은 identity가 배열이라 맺음 문장 칸은 돌마다 identityClose(선택)
     const norns = T.rune.norns;
@@ -1279,12 +1285,13 @@
     [$('[data-t="star.result.twistEyebrow"]', turn), $('[data-t="star.result.twistTitle"]', turn), js("twist-from", scr).parentElement, js("turn-text", scr)].forEach((el) => show(el, !restored));
     show(js("restore-note", scr), restored);
     if (restored) {
-      js("twist-from", scr).textContent = js("twist-to", scr).textContent = js("turn-text", scr).textContent = note.textContent = "";
+      js("twist-from", scr).textContent = js("twist-to", scr).textContent = note.textContent = "";
+      setTurn("star", scr, "", true); // 복원 상태: 단락이 숨어 있으므로 잠금 UI도 내지 않는다 (12-1)
       show(note, false);
     } else {
       js("twist-from", scr).textContent = west.ko;
       js("twist-to", scr).textContent = sun.ko;
-      js("turn-text", scr).innerHTML = same ? fill(R.twistSame, { sign: west.ko }) : fill(R.twistDiff, { sanskrit: sun.name, sign: sun.ko });
+      setTurn("star", scr, same ? fill(R.twistSame, { sign: west.ko }) : fill(R.twistDiff, { sanskrit: sun.name, sign: sun.ko }));
       show(note, !v.exact);
       note.textContent = v.when ? fill(R.timeNoteChosen, { when: v.when }) : R.timeNoteNoon;
     }
@@ -1507,7 +1514,7 @@
       ? letters.letters.map((i) => `<li class="name-branch__letter"><svg viewBox="0 0 40 80"><use href="#ogham-${OGHAM[i].code}" /></svg><span>${OGHAM[i].sound}</span></li>`).join("")
       : "";
     latinEl.textContent = letters ? letters.latin.toUpperCase() : "";
-    js("turn-text", scr).innerHTML = (letters ? fill(R.turnLead, { count: letters.letters.length, latin: esc(e.latin) }) + " " : "") + e.turn;
+    setTurn("ogham", scr, (letters ? fill(R.turnLead, { count: letters.letters.length, latin: esc(e.latin) }) + " " : "") + e.turn);
     // (10단계) 복원 상태: 이름 글자 줄은 이름이 있어야 그릴 수 있다 → 그 자리에 안내 한 줄 + 다시 입력
     js("restore-note", scr)?.remove();
     if (state.restored && !name) latinEl.after(restoreNote(T.resume.needName, "ogham"));
@@ -1656,7 +1663,7 @@
     js("result-meta", scr).textContent = metaLine(R);
     js("twist-from", scr).textContent = e.sign;
     js("twist-to", scr).textContent = strip(fill(R.twistTo, { part }));
-    js("turn-text", scr).innerHTML = e.turn;
+    setTurn("decan", scr, e.turn);
     const note = js("result-choice-note", scr);
     show(note, Boolean(v.when));
     note.textContent = v.when ? strip(fill(R.choiceNote, { when: v.when })) : "";
@@ -1738,7 +1745,7 @@
     js("tzolkin-number-title", scr).textContent = strip(fill(R.numberTitle, { n: v.number, title: num.title }));
     js("tzolkin-number-glyph", scr).setAttribute("href", `#maya-${v.number}`);
     js("tzolkin-sign-name", scr).textContent = strip(e.name);
-    js("turn-text", scr).innerHTML = num.text;
+    setTurn("tzolkin", scr, num.text);
     const F = R.facts;
     entryReading(scr, e, [
       [F.latin, e.latin], [F.kiche, e.facts.kiche], [F.meaning, e.facts.meaning],
@@ -1882,7 +1889,7 @@
     js("sibyl-result-category", scr).textContent = topic;
     js("sibyl-result-question", scr).textContent = question ? fill(R.question, { q: question }) : "";
     js("sibyl-scroll-quote", scr).textContent = strip(o.line);
-    js("turn-text", scr).innerHTML = o.turn;
+    setTurn("sibyl", scr, o.turn);
     entryReading(scr, o, [], R.interpretNote);
     finishResult(scr, "sibyl", o, R);
   }
@@ -2699,6 +2706,7 @@
   }
   const randomHex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, "0")).join("");
   async function startPay() {
+    track("so_book", { step: "pay_click" });
     const btn = js("deeper-pay");
     if (!Pay.enabled || btn.disabled) return;
     setPayAlert(null);
@@ -2760,6 +2768,7 @@
   let lastConfirm = null;
   const stripQuery = () => {
     if (location.search) history.replaceState(history.state, "", location.pathname + location.hash);
+    startExternal(); // (12단계 12-4) query가 지워진 뒤에만 광고·분석을 시작한다
   };
   function startUnseal(body) {
     const run = ++unsealRun;
@@ -3897,6 +3906,151 @@
     if (!e.target.closest("[data-go]")) endFinale();
   });
 
+  // ═════════ (12단계) 광고로 여는 조각 · 배너 · GA4 (common/ads.js, common/analytics.js) ═════════
+  // 설정은 data.js 맨 위 ads·analytics 한 곳. ID가 모두 비면 아무것도 불러오지 않고 잠금·쿠키 줄·FAQ 광고 안내도 없다(지금과 같음).
+  // 광고·분석은 주소에 query가 없을 때만 시작한다(stripQuery 뒤, 두 부품도 스스로 다시 확인).
+  // 분석 이벤트 값은 아래 허용 목록 안의 낱말뿐이다: 방 이름, 원형 코드, 단계·방법 이름. 입력값·세부 번호·코드는 실릴 자리가 없다(6장).
+  const LOCK_ON = Ads.rewardedConfigured(T.ads);
+  const UNLOCK_OUTCOMES = ["request", "granted", "unavailable", "closed"];
+  const EVENTS = {
+    so_visit: {},
+    so_room_view: { room: CHAPTER_ORDER },
+    so_result: { room: CHAPTER_ORDER, archetype: ARCHETYPES },
+    so_story: { step: ["3of6", "6of6"] },
+    so_unlock: { room: CHAPTER_ORDER, outcome: UNLOCK_OUTCOMES },
+    so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
+    so_resume: { step: ["made", "used", "failed"] },
+    so_book: { step: ["preview", "pay_click"] },
+  };
+  let booted = false;
+  let externalOn = false;
+  function startExternal() {
+    if (!booted || externalOn || location.search) return;
+    externalOn = true;
+    Ads.init(T.ads);
+    if (Analytics.init({ ga4: T.analytics.ga4, title: T.meta.title, events: EVENTS })) track("so_visit");
+    Ads.fill(screens[currentName]);
+  }
+  function track(name, props) {
+    if (externalOn) Analytics.track(name, props);
+  }
+  const storySent = new Set();
+  function onScreen(name, scr) {
+    if (!externalOn) return;
+    Ads.fill(scr);
+    const room = roomOfScreen(name);
+    if (CHAPTER_ORDER.includes(room) && name === `${room}-intro`) track("so_room_view", { room });
+    if (CHAPTER_ORDER.includes(room) && name === `${room}-result` && state.visits[room]) track("so_result", { room, archetype: state.visits[room].archetype });
+    if (name === "story") {
+      const n = filledRooms().length;
+      [["3of6", n >= 3], ["6of6", n === CHAPTER_ORDER.length]].forEach(([step, ok]) => {
+        if (!ok || storySent.has(step)) return;
+        storySent.add(step);
+        track("so_story", { step });
+      });
+    }
+    if (name === "deeper" && Pay.enabled) track("so_book", { step: "preview" });
+  }
+
+  // 입구: 쿠키 한 줄(광고·분석 ID가 하나라도 있을 때), FAQ 광고 안내(보상형 광고단위가 있을 때)
+  js("cookie-line").hidden = !(Ads.anyConfigured(T.ads) || Analytics.configured(T.analytics.ga4));
+  js("hub-faq-adnote").hidden = !LOCK_ON;
+
+  // 공유 이벤트: 방법만 (공유 글·주소·카드 내용은 보내지 않는다)
+  const shareRoom = () => {
+    const room = roomOfScreen(currentName);
+    return CHAPTER_ORDER.includes(room) ? { room } : {};
+  };
+  ["result-share", "result-share-top"].forEach((n) => CHAPTER_ORDER.forEach((room) => js(n, screens[`${room}-result`]).addEventListener("click", () => track("so_share", { room, method: "image" }))));
+  ["story-share", "story-share-top"].forEach((n) => js(n, storyScr).addEventListener("click", () => track("so_share", { method: "image" })));
+  document.addEventListener("click", (e) => {
+    const t = e.target && e.target.closest ? e.target : null;
+    if (!t) return;
+    if (t.closest('[data-js="share-link-copy"]')) track("so_share", Object.assign(shareRoom(), { method: "link" }));
+    else if (t.closest('[data-js="share-kakao-slot"] button')) track("so_share", Object.assign(shareRoom(), { method: "kakao" }));
+  });
+
+  // ── 잠금: 여섯 방 결과의 흐름 풀이 단락(turn-text) 하나 (12-1·12-2). 잠긴 동안 문장은 DOM에 넣지 않는다.
+  //    잠금은 방 완료·다음 문·나의 이야기·원형·이어가기 코드·공유 카드와 무관하다(화면의 이 단락만).
+  const turnHtml = {};
+  function openedRooms() {
+    try {
+      const o = JSON.parse(window.sessionStorage.getItem(UNLOCK_KEY) || "{}");
+      return o && typeof o === "object" ? o : {};
+    } catch (e) {
+      return {};
+    }
+  }
+  function markOpened(room) {
+    const cur = openedRooms();
+    const o = {};
+    CHAPTER_ORDER.forEach((r) => (cur[r] === 1 || r === room) && (o[r] = 1)); // 방 이름 표시만
+    try {
+      window.sessionStorage.setItem(UNLOCK_KEY, JSON.stringify(o));
+    } catch (e) {
+      /* 저장이 막힌 브라우저: 이 화면에서만 열린다 */
+    }
+  }
+  function setTurn(room, scr, html, noLock) {
+    const box = js("result-turn", scr);
+    const text = js("turn-text", box);
+    const lock = js("unlock", box);
+    const btn = js("unlock-btn", box);
+    turnHtml[room] = html;
+    const locked = !noLock && LOCK_ON && openedRooms()[room] !== 1;
+    box.classList.toggle("is-locked", locked);
+    box.classList.remove("is-opening");
+    lock.hidden = !locked;
+    lock.classList.remove("is-waiting", "is-closed");
+    btn.disabled = false;
+    btn.removeAttribute("aria-busy");
+    js("unlock-status", box).textContent = "";
+    text.innerHTML = locked ? "" : html;
+  }
+  function openTurn(room, box, result) {
+    const text = js("turn-text", box);
+    const status = js("unlock-status", box);
+    js("unlock", box).hidden = true;
+    box.classList.remove("is-locked");
+    box.classList.add("is-opening");
+    const done = () => box.classList.remove("is-opening");
+    box.addEventListener("animationend", done, { once: true });
+    setTimeout(done, 700);
+    text.innerHTML = turnHtml[room] || "";
+    text.setAttribute("tabindex", "-1");
+    text.focus({ preventScroll: true });
+    if (result === "unavailable") status.textContent = T.unlock.unavailable;
+    else status.innerHTML = `<span class="visually-hidden">${esc(T.unlock.opened)}</span>`;
+  }
+  CHAPTER_ORDER.forEach((room) => {
+    const box = js("result-turn", screens[`${room}-result`]);
+    const lock = js("unlock", box);
+    const btn = js("unlock-btn", box);
+    const status = js("unlock-status", box);
+    btn.addEventListener("click", async () => {
+      if (lock.classList.contains("is-waiting") || lock.hidden) return;
+      lock.classList.remove("is-closed");
+      lock.classList.add("is-waiting");
+      btn.disabled = true;
+      btn.setAttribute("aria-busy", "true");
+      status.textContent = T.unlock.loading;
+      track("so_unlock", { room, outcome: "request" });
+      const r = await Ads.rewarded({ slot: "room-unlock", room });
+      const result = UNLOCK_OUTCOMES.includes(r) ? r : "unavailable";
+      track("so_unlock", { room, outcome: result });
+      lock.classList.remove("is-waiting");
+      btn.disabled = false;
+      btn.removeAttribute("aria-busy");
+      if (result === "closed") {
+        lock.classList.add("is-closed");
+        status.textContent = T.unlock.closed;
+        return;
+      }
+      markOpened(room);
+      openTurn(room, box, result);
+    });
+  });
+
   // ═════════ 시작 ═════════
   applyText();
   // (8단계) 새 세션(이 탭에 마친 방이 없음)은 주소와 상관없이 입구부터 (spec 8-2, 7-2 딥링크 무시).
@@ -3911,8 +4065,13 @@
   }
   renderHub();
   setTopbar("hub");
+  // (12단계, 검수 메모) 결제 복귀(?pay=success|fail)가 아닌 query(fbclid·utm_* 등)는 시작할 때 지운다 → 광고·분석을 켤 수 있다.
+  // 결제 복귀 query는 그대로 두고, 기존 흐름이 stripQuery()를 부른 뒤에 광고·분석이 시작된다.
+  if (location.search && !["success", "fail"].includes(new URLSearchParams(location.search).get("pay"))) history.replaceState(history.state, "", location.pathname + location.hash);
   go(first, { instant: true, replace: true });
   paidBoot();
+  booted = true;
+  startExternal();
 
   // 테스트·점검용으로 바깥에서 읽을 수 있게 둔다 (입력값은 내보내지 않음)
   // render*는 저장 없이(fresh=false) 결과 틀만 다시 그린다

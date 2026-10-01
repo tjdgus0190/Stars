@@ -429,13 +429,13 @@
         <h2 class="faq__title" id="faq-title" data-t="hub.faq.title">자주 묻는 것</h2>
         <dl class="faq__list" data-js="hub-faq">
           <div class="faq__item"><dt data-t="hub.faq.items.0.q">무엇을 보나요?</dt><dd data-t="hub.faq.items.0.a">켈트 오검, 베다 별자리, 이집트 데칸, 마야 촐킨, 북유럽 룬, 로마 신탁까지 여섯 문화의 점술로 당신의 뿌리·속마음·숨은 재능·다가올 순환·과거와 미래·오늘의 질문을 차례로 비춰 봐요.</dd></div>
-          <div class="faq__item"><dt data-t="hub.faq.items.1.q">결과는 어떻게 읽나요?</dt><dd data-t="hub.faq.items.1.a">방마다 결과 이름과 핵심 풀이가 나오고, 여섯 조각은 여덟 원형 가운데 하나로 모여 나의 이야기 한 편이 돼요.</dd></div>
+          <div class="faq__item"><dt data-t="hub.faq.items.1.q">결과는 어떻게 읽나요?</dt><dd data-t="hub.faq.items.1.a">방마다 결과 이름과 핵심 풀이가 나오고, 여섯 조각은 여덟 원형 가운데 하나로 모여 나의 이야기 한 편이 돼요.</dd>
+            <!-- (12단계 D2) 보상형 ID가 있을 때만 hidden 해제. 300자 소개 글 합계에서 뺀다. 디자인은 5번(결제) 답 끝이었으나 결제 꺼짐이면 그 문답이 통째로 숨어(결정 66) 1번 답 끝으로 옮김 (디자인 메모 안 (b)) -->
+            <dd class="faq__ad-note" data-js="hub-faq-adnote" data-t="hub.faq.adNote" hidden>[초안] 방마다 흐름 풀이 한 단락은 짧은 광고 한 편을 보면 열려요. 광고가 없으면 그냥 열려요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">뿌리에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름과 생년월일은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
           <!-- (11단계 11-5) 결제 꺼짐이면 이 문답 통째로 .is-hidden (결정 66) -->
           <div class="faq__item" data-js="hub-faq-paid"><dt data-t="hub.faq.items.4.q">무료와 유료는 무엇이 다른가요?</dt><dd data-t="hub.faq.items.4.a">여섯 방과 나의 이야기는 모두 무료예요. 한 권의 책은 방마다 네 장 전체와 시기별 흐름을 엮은 선택 상품이에요.</dd>
-            <!-- (12단계) 보상형 ID가 있을 때만 hidden 해제. 300자 소개 글 합계에서 뺀다 -->
-            <dd class="faq__ad-note" data-js="hub-faq-adnote" data-t="hub.faq.adNote" hidden>[초안] 방마다 흐름 풀이 한 단락은 짧은 광고 한 편을 보면 열려요. 광고가 없으면 그냥 열려요.</dd>
           </div>
         </dl>
       </section>
@@ -2866,6 +2866,8 @@
   <script src="../../common/share-card.js"></script>
   <script src="../../common/share-buttons.js"></script>
   <script src="../../common/disclaimer.js"></script>
+  <script src="../../common/ads.js"></script>
+  <script src="../../common/analytics.js"></script>
   <script src="data.js"></script>
   <script src="data-runes.js"></script>
   <script src="data-stars.js"></script>

@@ -1,0 +1,193 @@
+// (12단계 D2) common/ads.js·common/analytics.js 단위 시험. 실제 구글 요청 없음 (가짜 DOM·가짜 googletag·가짜 gtag).
+// 실행: node --test "tools/strange-oracle/*.test.js"
+const test = require("node:test");
+const assert = require("node:assert");
+const fs = require("fs");
+const path = require("path");
+const vm = require("vm");
+
+const SRC_ADS = fs.readFileSync(path.join(__dirname, "..", "..", "common", "ads.js"), "utf8");
+const SRC_GA = fs.readFileSync(path.join(__dirname, "..", "..", "common", "analytics.js"), "utf8");
+const SECRETS = ["김서윤", "1995", "03-25", "14:30", "이준호", "내 일이 잘 풀릴까", "SO7-ABCD-EFGH", "so_20261001_x9", "PAYKEY_TEST_1", "ORDER_TEST_1"];
+
+function el(tag) {
+  const cls = new Set();
+  return {
+    tagName: tag, attrs: {}, children: [], style: {}, text: "",
+    classList: { add: (c) => cls.add(c), remove: (...c) => c.forEach((x) => cls.delete(x)), contains: (c) => cls.has(c) },
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    getAttribute(k) { return k in this.attrs ? this.attrs[k] : null; },
+    appendChild(c) { this.children.push(c); return c; },
+    set textContent(v) { this.children = []; this.text = v; },
+    get textContent() { return this.text; },
+  };
+}
+function env(search = "") {
+  const head = el("head");
+  const slots = [];
+  const root = {
+    querySelectorAll(sel) {
+      if (sel === "[data-ad]") return slots;
+      return slots.filter((s) => s.classList.contains("is-filled"));
+    },
+  };
+  const addSlot = (name) => { const s = el("div"); s.attrs["data-ad"] = name; slots.push(s); return s; };
+  const win = { location: { search, origin: "http://127.0.0.1:8788", pathname: "/products/strange-oracle/index.html" } };
+  const warns = [];
+  const ctx = { window: win, document: { head, createElement: el }, console: { warn: (...a) => warns.push(a.join(" ")), log() {} }, setTimeout, clearTimeout, Date, Promise, Object, Array, String, Number, Boolean, JSON, encodeURIComponent };
+  vm.runInNewContext(SRC_ADS + ";" + SRC_GA, ctx);
+  return { win, head, root, addSlot, warns, ctx, scripts: () => head.children.filter((c) => c.tagName === "script").map((c) => c.src) };
+}
+const GOOD = { adsenseClient: "ca-pub-1234567890123456", rewardedUnit: "/1234567/so_unlock", label: "광고", slots: { hub: { net: "adsense", id: "1234567890" }, "result-end": { net: "adsense", id: "2234567890" }, "story-end": { net: "adfit", id: "DAN-xxxx" } } };
+const EMPTY = { adsenseClient: "", rewardedUnit: "", slots: { hub: { net: "adsense", id: "" } } };
+
+// 가짜 googletag: mode = granted | closed | empty | null | never | throw
+function stubGpt(e, mode) {
+  const calls = [];
+  const handlers = {};
+  const slot = { addService() { return slot; } };
+  e.win.googletag = {
+    cmd: { push: (f) => setTimeout(f, 0) },
+    enums: { OutOfPageFormat: { REWARDED: 4 } },
+    pubads: () => ({ addEventListener: (n, h) => (handlers[n] = handlers[n] || []).push(h) }),
+    defineOutOfPageSlot: (...a) => { calls.push(["define", ...a]); if (mode === "throw") throw new Error("x"); return mode === "null" ? null : slot; },
+    enableServices: () => calls.push(["enable"]),
+    destroySlots: () => calls.push(["destroy"]),
+    display: (s) => {
+      calls.push(["display"]);
+      const fire = (n, ev) => (handlers[n] || []).forEach((h) => h(Object.assign({ slot: s }, ev)));
+      setTimeout(() => {
+        if (mode === "empty") return fire("slotRenderEnded", { isEmpty: true });
+        if (mode === "never") return;
+        fire("rewardedSlotReady", { makeRewardedVisible: () => calls.push(["visible"]) });
+        if (mode === "granted") fire("rewardedSlotGranted", {});
+        fire("rewardedSlotClosed", {});
+      }, 5);
+    },
+  };
+  return calls;
+}
+const loadScripts = (e, ok = true) => e.head.children.filter((c) => c.tagName === "script").forEach((s) => (ok ? s.onload && s.onload() : s.onerror && s.onerror()));
+
+test("ads: ID 모두 빈 값 → init false, script 0개, 채움 0, 보상형 unavailable", async () => {
+  const e = env();
+  assert.strictEqual(e.win.Ads.init(EMPTY), false);
+  e.addSlot("hub");
+  assert.strictEqual(e.win.Ads.fill(e.root), 0);
+  assert.strictEqual(await e.win.Ads.rewarded({ slot: "room-unlock", room: "rune" }), "unavailable");
+  assert.deepStrictEqual(e.scripts(), []);
+  assert.strictEqual(e.win.Ads.anyConfigured(EMPTY), false);
+});
+
+test("ads: 주소에 ?가 있으면 (결제 복귀) 설정이 있어도 아무것도 안 함", async () => {
+  const e = env("?pay=success&paymentKey=PAYKEY_TEST_1&orderId=ORDER_TEST_1&amount=3900");
+  assert.strictEqual(e.win.Ads.init(GOOD), false);
+  e.addSlot("hub");
+  assert.strictEqual(e.win.Ads.fill(e.root), 0);
+  assert.strictEqual(await e.win.Ads.rewarded({ slot: "room-unlock", room: "rune" }), "unavailable");
+  assert.deepStrictEqual(e.scripts(), []);
+});
+
+test("ads: 배너 — 한 화면 최대 2개, adfit은 채우지 않음, 애드센스 스크립트 1번, 라벨·is-filled", () => {
+  const e = env();
+  assert.strictEqual(e.win.Ads.init(GOOD), true);
+  const a = e.addSlot("hub"), b = e.addSlot("result-end"), c = e.addSlot("story-end");
+  assert.strictEqual(e.win.Ads.fill(e.root), 2);
+  assert.ok(a.classList.contains("is-filled") && b.classList.contains("is-filled") && !c.classList.contains("is-filled"));
+  assert.strictEqual(a.children[0].className, "ad-slot__label");
+  assert.strictEqual(a.children[0].text, "광고");
+  assert.strictEqual(e.win.adsbygoogle.length, 2);
+  assert.deepStrictEqual(e.scripts(), ["https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456"]);
+  const e2 = env();
+  e2.win.Ads.init(GOOD);
+  e2.addSlot("story-end");
+  assert.strictEqual(e2.win.Ads.fill(e2.root), 0);
+  assert.ok(e2.warns.some((w) => w.includes("애드핏")));
+  assert.deepStrictEqual(e2.scripts(), []);
+});
+
+test("ads: 배너 스크립트 오류면 접힘(높이 0)", async () => {
+  const e = env();
+  e.win.Ads.init(GOOD);
+  const a = e.addSlot("hub");
+  e.win.Ads.fill(e.root);
+  loadScripts(e, false);
+  await new Promise((r) => setTimeout(r, 5));
+  assert.ok(!a.classList.contains("is-filled"));
+  assert.strictEqual(a.children.length, 0);
+});
+
+test("ads: 모양이 틀린 ID는 쓰지 않음, check가 bad로 알려 줌", () => {
+  const bad = { adsenseClient: "pub-123", rewardedUnit: "so_unlock", slots: { hub: { net: "adsense", id: "abc" }, x: { net: "other", id: "1" } } };
+  const e = env();
+  assert.strictEqual(e.win.Ads.init(bad), false);
+  const c = e.win.Ads.check(bad);
+  assert.deepStrictEqual([...c.bad].sort(), ["ads.adsenseClient", "ads.rewardedUnit", "ads.slots.hub.id", "ads.slots.x.net"].sort());
+  assert.strictEqual(e.win.Ads.check(EMPTY).bad.length, 0);
+});
+
+for (const [mode, want] of [["granted", "granted"], ["closed", "closed"], ["empty", "unavailable"], ["null", "unavailable"], ["throw", "unavailable"], ["never", "unavailable"]]) {
+  test(`ads: 보상형 가짜 googletag ${mode} → ${want}`, async () => {
+    const e = env();
+    e.win.Ads.init(Object.assign({}, GOOD, { timeoutMs: 80 }));
+    const calls = stubGpt(e, mode);
+    const p = e.win.Ads.rewarded({ slot: "room-unlock", room: "rune" });
+    assert.strictEqual(e.win.Ads.rewarded({ slot: "room-unlock", room: "rune" }), p, "진행 중이면 같은 Promise");
+    assert.strictEqual(await p, want);
+    assert.deepStrictEqual(e.scripts(), ["https://securepubads.g.doubleclick.net/tag/js/gpt.js"]);
+    assert.deepStrictEqual(calls[0], ["define", "/1234567/so_unlock", 4]);
+    const all = JSON.stringify(calls);
+    SECRETS.forEach((s) => assert.ok(!all.includes(s)));
+  });
+}
+
+test("ads: gpt.js를 못 받으면 unavailable", async () => {
+  const e = env();
+  e.win.Ads.init(Object.assign({}, GOOD, { timeoutMs: 5000 }));
+  const p = e.win.Ads.rewarded({ slot: "room-unlock", room: "rune" });
+  loadScripts(e, false);
+  assert.strictEqual(await p, "unavailable");
+});
+
+test("analytics: ID 빈 값 → script 0개, track null", () => {
+  const e = env();
+  assert.strictEqual(e.win.Analytics.init({ ga4: "", events: { so_visit: {} } }), false);
+  assert.strictEqual(e.win.Analytics.track("so_visit", {}), null);
+  assert.deepStrictEqual(e.scripts(), []);
+  assert.strictEqual(e.win.dataLayer, undefined);
+});
+
+test("analytics: 주소에 ?가 있으면 init·track 모두 안 함", () => {
+  const e = env("?pay=success&paymentKey=PAYKEY_TEST_1&orderId=ORDER_TEST_1");
+  assert.strictEqual(e.win.Analytics.init({ ga4: "G-TEST12345", events: { so_visit: {} } }), false);
+  assert.strictEqual(e.win.Analytics.track("so_visit", {}), null);
+  assert.deepStrictEqual(e.scripts(), []);
+});
+
+test("analytics: config 값 고정, 허용 목록 밖 이벤트·속성·값은 버림, 입력값·코드 0건", () => {
+  const e = env();
+  const events = { so_visit: {}, so_result: { room: ["rune", "star"], archetype: ["warrior"] }, so_resume: { step: ["made", "used", "failed"] } };
+  assert.strictEqual(e.win.Analytics.init({ ga4: "G-TEST12345", title: "낯선 점술관", events }), true);
+  assert.deepStrictEqual(e.scripts(), ["https://www.googletagmanager.com/gtag/js?id=G-TEST12345"]);
+  const cfg = [...e.win.dataLayer].map((a) => [...a]).find((a) => a[0] === "config");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(cfg[2])), { send_page_view: false, page_location: "http://127.0.0.1:8788/products/strange-oracle/index.html", page_title: "낯선 점술관", allow_google_signals: false, allow_ad_personalization_signals: false });
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(e.win.Analytics.track("so_result", { room: "rune", archetype: "warrior", name: "김서윤", birth: "1995-03-25", nak: 4 }))), { room: "rune", archetype: "warrior" });
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(e.win.Analytics.track("so_result", { room: "김서윤", archetype: "warrior" }))), { archetype: "warrior" });
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(e.win.Analytics.track("so_resume", { step: "made", code: "SO7-ABCD-EFGH" }))), { step: "made" });
+  assert.strictEqual(e.win.Analytics.track("page_view", { page_location: "x" }), null);
+  assert.strictEqual(e.win.Analytics.track("so_unknown", { room: "rune" }), null);
+  assert.strictEqual(e.win.Analytics.track("constructor", {}), null);
+  e.win.location.search = "?orderId=ORDER_TEST_1";
+  assert.strictEqual(e.win.Analytics.track("so_visit", {}), null, "도중에 ?가 생기면 보내지 않음");
+  const all = JSON.stringify([...e.win.dataLayer].map((a) => [...a]));
+  SECRETS.forEach((s) => assert.ok(!all.includes(s), s));
+  assert.ok(![...e.win.dataLayer].some((a) => a[0] === "event" && /^(page_view|scroll|form_|view_search_results)/.test(a[1])));
+  assert.strictEqual(e.win.Analytics.init({ ga4: "G-TEST12345", events }), false, "두 번째 init(=config 다시 부르기) 없음");
+  assert.strictEqual([...e.win.dataLayer].filter((a) => a[0] === "config").length, 1);
+});
+
+test("analytics: 모양이 틀린 측정 ID는 불러오지 않음", () => {
+  const e = env();
+  assert.strictEqual(e.win.Analytics.init({ ga4: "UA-12345-1", events: {} }), false);
+  assert.deepStrictEqual(e.scripts(), []);
+});

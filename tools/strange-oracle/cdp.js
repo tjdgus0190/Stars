@@ -76,6 +76,6 @@ async function launch({ port = 9333, reduced = false, width = 360, height = 800,
     if (full) { await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 2, mobile: true }); await sleep(200); }
   }
   async function close() { try { await send("Browser.close"); } catch (e) {} ws.close(); proc.kill(); }
-  return { send, evaluate, goto, shot, close, log, sleep };
+  return { send, evaluate, goto, shot, close, log, sleep, on: (fn) => listeners.push(fn) };
 }
 module.exports = { launch, sleep };

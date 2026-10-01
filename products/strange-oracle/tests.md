@@ -547,3 +547,32 @@
 | 3 caregiver | 109 (0%) | 168 (+8.4%) | 0/0 | 0/0 | 1 |
 - 360x640 합계는 463쪽에서 508쪽이 됐다(+9.7%). 360x640 1항목 쪽은 표본 1에 5쪽, 표본 3에 1쪽이고 모두 '이어서' 뒷부분, 58~170자다.
 - build-dist 누출 0건, 단위 30/0, e2e-flow 126/0, e2e-paid 133/0.
+
+## 12단계 D2: 광고로 여는 조각·배너·GA4 (2026-10-01, developer)
+
+근거: specs/strange-oracle.md 12-1~12-8(결정 69~73), reports/spec-review-strange-oracle.md 12단계(재검수 메모 포함), design/strange-oracle.md 12단계.
+
+### 만든 것
+- common/ads.js: `Ads.init`·`fill`·`rewarded`·`check`·`rewardedConfigured`/`bannerConfigured`/`anyConfigured`. 배너는 있는 `[data-ad]` 자리만, 한 번에(=한 화면) 최대 2개, `.is-filled` + `span.ad-slot__label`, `unfilled`·스크립트 오류면 접힘. 보상형은 GPT `OutOfPageFormat.REWARDED`, 버튼 뒤에만 gpt.js, ready→보이기, granted/closed/isEmpty·null·오류·8초 → unavailable. 요청 겹침 없음. 빈·틀린 ID, 주소에 `?` → 아무것도 안 함. `adfit`은 결정 41 전 채우지 않음(콘솔 경고).
+- common/analytics.js: GA4 gtag, 측정 ID 있을 때만. config 한 번(`send_page_view:false`, `page_location`=origin+pathname, 고정 제목, 구글 신호·광고 맞춤 신호 끔). 이벤트→속성→허용 값 목록 밖은 버림. `?` 있는 동안 init·track 안 함.
+- data.js: 설정 묶음 `analytics.ga4`, `ads.{adsenseClient, slots, rewardedUnit, label}`(모두 빈 값), 문구 `unlock.*`, `privacy.cookieLine`, `hub.faq.adNote`.
+- app.js: 여섯 방 `turn-text`를 `setTurn()`으로 채움 — 보상형 광고단위가 있고 이 탭에서 연 적 없는 방이면 문장을 DOM에 넣지 않고 잠금 상자. 버튼 → `Ads.rewarded` → granted·unavailable은 펼치며 열고 포커스 `turn-text`, sessionStorage `strange-oracle-unlock`에 방 이름만. closed는 잠긴 채 다시 누르기. "내 정보 지우기"가 이 키도 지움. 별 복원 상태는 잠금 UI 없음. 잠금은 방 완료·다음 문·나의 이야기·원형·이어가기 코드·공유 카드와 무관(화면 단락만).
+- 시작 순서: 결제 복귀(`?pay=success|fail`)가 아닌 query(fbclid·utm_* 등)는 시작할 때 `history.replaceState`로 지운다(검수 메모에 대한 결정: 지우고 광고·분석을 켠다). 결제 복귀 query는 기존 흐름(`stripQuery()` — fail은 바로, success는 책 화면을 떠날 때)이 지운 뒤에만 `Ads.init`·`Analytics.init`.
+- 이벤트(12-5 표): so_visit(시작 1회), so_room_view(방 입구 `*-intro`), so_result(room·archetype), so_story(3of6·6of6, 페이지당 1회), so_unlock(request·granted·unavailable·closed), so_share(image·link·kakao), so_resume(made·used·failed), so_book(preview·pay_click, 결제 켜졌을 때만 생김). 새로고침 직후 첫 화면은 시작 전이라 so_visit만 나간다.
+- 쿠키 줄: 광고·분석 ID가 하나라도 있을 때만. FAQ 광고 안내: 보상형 광고단위가 있을 때만.
+- **디자인과 다른 점**: `hub-faq-adnote`를 5번 문답(결제, 결제 꺼짐이면 통째로 숨음 — 결정 66) 대신 **2번 문답 "결과는 어떻게 읽나요?" 답 끝**으로 옮겼다(디자인 메모의 안 (b), 오케스트레이터 지시). 300자 소개 글 합계는 붙이지 않은 상태 기준 그대로.
+- legal/privacy.html: 제4조의2 "방문 통계와 광고(구글)" [초안] 문단(수집 항목·자동 수집·맞춤형 광고와 끄는 방법·신호 끔·국외 이전·잠금 기록). ◯◯ 빈칸 유지. 문장은 copywriter, 법적 충분성은 운영자(43번).
+- tools/build-dist.js: 빈 ID 경고, 모양이 틀린 ID 실패(규칙은 common/ads.js·analytics.js의 것), `adsenseClient`가 있으면 public/ads.txt.
+- docs/common.md: ads.js·analytics.js 사용법. 이 두 부품을 쓰는 제품은 strange-oracle뿐(grep 확인).
+- 12-1 미확인 확인: 나의 이야기·공유 카드는 `turn-text` 문장을 쓰지 않는다(카드 빌더는 `star.card.twist*` 짧은 문구) → 잠금이 그쪽에 영향 없음.
+
+### 시험 (가짜 googletag·gtag·adsbygoogle, 구글로 나가는 실제 요청 0건)
+- 단위 tools/strange-oracle/ads.test.js 16개(전체 node --test 46/0): 빈 ID → script 0·채움 0·unavailable / `?pay=…&paymentKey=…`면 아무것도 안 함 / 배너 최대 2·adfit 안 채움·라벨 / 스크립트 오류 접힘 / 틀린 ID check·불러오지 않음 / 보상형 granted·closed·isEmpty·null·예외·8초·gpt.js 오류 / GA4 config 값·허용 목록(이름·생일·세부 번호·코드 속성 버림, 목록 밖 값 버림, page_view·모르는 이벤트 null, 도중 `?` 생기면 안 보냄, config 1번).
+- e2e tools/strange-oracle/e2e-ads.js 49/0 (8788 off 서버, 시험 ID는 페이지 시작 때 window.TEXT에 끼움 — 파일에는 없음, 구글 주소는 CDP Fetch로 가로채 가짜 스크립트): 빈 ID 여섯 방 회귀 / 잠김 여섯 방(DOM에 문장 없음, 버튼에 "광고", 배너 ≤2, 360 넘침 없음) / closed → 잠긴 채 → granted 열림·포커스·기록 `{"ogham":1}`·새로고침 뒤 열림 / unavailable: isEmpty·null·8초(8032ms)·gpt.js 차단 각각 열림 / 잠긴 방 있어도 마친 방 6·원형 / 이벤트 이름·속성 키 허용 목록뿐 / 내 정보 지우기 → 키 삭제 / localStorage·쿠키 0 / 결제 복귀 success: query 있는 동안 구글 script·dataLayer·googletag 0, fail: 지운 뒤 시작·paymentKey·orderId 0건 / fbclid·utm 지우고 켬 / 이어가기 코드 복원 탭은 잠긴 채(별 복원은 잠금 없음) / 전수 검색(이름·생일·시각·이어가기 코드·결제 시험값·query 값, 모든 dataLayer 인자·googletag 호출·adsbygoogle 자리·가로챈 요청 URL·본문) 0건 / 세부 번호 키 0 / 콘솔 오류 0(gpt 차단 시험·off 서버 confirm 404 제외).
+- 질문 글(시빌라)은 e2e 전수 검색에 넣지 않았다(시드 방문 기록 사용). 질문은 저장도 이벤트 값도 없고, 이벤트 값은 허용 목록 낱말뿐이라 구조적으로 실릴 수 없다(단위 시험으로 확인).
+- 회귀: build-dist 누출 0건(유료 문장 5629개 대조), e2e-flow reduced 126/0, e2e-paid reduced 133/0.
+- [초안]: data.js 8(unlock 6·cookieLine·adNote), index.html 14(디자이너 마크업 예시, 실행 때 data.js로 덮임), legal/privacy.html 7 → copywriter D3.
+
+### 미확인 (운영자 실환경)
+- 실제 구글 스크립트 동작: 한국 웹 보상형 채움, 데스크톱에서 `defineOutOfPageSlot` null 여부, 실제 배너 높이·CLS, 실제 쿠키, GA4 향상된 측정 꺼짐(운영자가 데이터 스트림에서 끌 것), 애드센스 자동 광고 꺼짐(계정 설정), ads.txt가 호스팅 루트에 놓이는지.
+- `granted`를 `rewardedSlotGranted` 순간에 돌려준다(광고 닫기 전). 실제 GPT에서 이 순서가 맞는지 미확인.

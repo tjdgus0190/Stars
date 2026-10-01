@@ -9,7 +9,9 @@
 | share-card.js | 있음 (2026-09-25 옵션 추가, 2026-09-28 그림 블록·소장판 옵션 추가) | strange-oracle |
 | disclaimer.js | 있음 | strange-oracle |
 | share-buttons.js | 있음 (2026-09-30, 링크 복사 + 카카오톡 자리) | strange-oracle |
-| ads.js, affiliate.js, analytics.js | 아직 없음 | - |
+| ads.js | 있음 (2026-10-01, 배너 채우기 + 보상형) | strange-oracle |
+| analytics.js | 있음 (2026-10-01, GA4 허용 목록) | strange-oracle |
+| affiliate.js | 아직 없음 | - |
 
 ---
 
@@ -112,6 +114,47 @@ ShareButtons.reset();            // 완료 줄 모두 닫기 (화면을 옮길 �
 - 카카오톡: `jsKey`와 `sdkUrl`이 **둘 다** 있을 때만 `share-kakao-slot` 안에 `<button class="text-link">`를 넣는다. 하나라도 비면 버튼도 SDK 요청도 없다. SDK는 버튼을 누른 순간에만 불러온다. 공유 내용은 title·description·imageUrl·주소뿐.
   - SDK 주소는 운영자 결정(strange-oracle 기획서 32번) 전이라 넣지 않았다. **키·주소를 넣은 뒤의 실제 공유 동작은 미확인**(빈 키 분기까지만 시험). 키는 운영자가 넣는다.
 - 개인정보: 주소에 입력값·결과 코드를 넣지 않는다(쿼리·해시를 뺀다). 이 부품은 입력값을 받지 않는다.
+
+## ads.js
+배너 광고 채우기와 보상형 광고(구글 애드센스·애드 매니저). CLAUDE.md 3장 구글 예외에 따라 구글 공식 주소에서만, 이 부품을 통해서만 불러온다.
+
+```js
+// 설정은 제품 data.js 맨 위 한 곳 (ID는 운영자가 넣는다, 에이전트가 지어내지 않는다)
+TEXT.ads = {
+  adsenseClient: "",                                   // "ca-pub-숫자"
+  slots: { hub: { net: "adsense", id: "" }, "result-end": { net: "adsense", id: "" } }, // 자리 이름 = 마크업 data-ad 값
+  rewardedUnit: "",                                    // 애드 매니저 보상형 광고단위 "/네트워크코드/광고단위"
+  label: "광고",                                       // 채워진 배너 위 작은 표시
+};
+Ads.init(TEXT.ads);           // 주소의 query를 지운 뒤에 부른다. 반환 true = 켜짐
+Ads.fill(화면요소);            // 그 안의 [data-ad] 자리를 채운다(화면에 들어갈 때마다). 한 번에 최대 2개
+const r = await Ads.rewarded({ slot: "room-unlock", room }); // "granted" | "unavailable" | "closed", 거절하지 않음
+Ads.rewardedConfigured(TEXT.ads) / Ads.bannerConfigured(...) / Ads.anyConfigured(...) // 잠금 UI·쿠키 줄을 낼지
+Ads.check(TEXT.ads)           // { empty: [...], bad: [...] } (build-dist가 씀)
+```
+- 마크업: `<div class="ad-slot" data-js="ad-slot" data-ad="hub"></div>`. 채우면 `.is-filled` + 맨 앞 `span.ad-slot__label` + `ins.adsbygoogle`. `data-ad-status="unfilled"`나 스크립트 오류면 `.is-filled`를 빼고 비워 높이 0.
+- 자리 규칙(7장): 결과 문구 바로 위아래·버튼 바로 옆에 자리를 두지 않는다. 새 자리는 designer가 마크업에 만든다(부품은 있는 자리만 채움). 자동 광고는 애드센스 계정에서 끈다.
+- 보상형: 버튼을 누른 뒤에만 `securepubads.g.doubleclick.net/tag/js/gpt.js`를 불러와 `defineOutOfPageSlot(광고단위, OutOfPageFormat.REWARDED)`. `rewardedSlotReady` → 보이기, `rewardedSlotGranted` → granted, `rewardedSlotClosed`(받기 전) → closed, `slotRenderEnded`의 `isEmpty`·null 슬롯·스크립트 오류·8초 안에 준비 안 됨 → unavailable. 요청은 겹치지 않는다(진행 중이면 같은 Promise).
+- 빈 ID·모양이 틀린 ID: 아무것도 불러오지 않는다. 주소에 `?`가 있는 동안: init·fill·rewarded 모두 아무것도 안 함(rewarded는 unavailable).
+- `net:"adfit"`: 운영자 결정(strange-oracle 41번) 전에는 채우지 않고 콘솔 경고만.
+- 개인정보: 이 부품은 사용자 입력값을 받지 않는다.
+
+## analytics.js
+GA4(gtag). 허용 목록 밖의 이벤트·속성·값은 버린다(6장을 코드로 강제).
+
+```js
+Analytics.init({
+  ga4: TEXT.analytics.ga4,          // "G-…", 비거나 틀리면 아무것도 안 함
+  title: "고정 제품명",              // page_title
+  events: { so_result: { room: ["rune", ...], archetype: ["warrior", ...] }, so_visit: {} }, // 이벤트 → 속성 → 허용 값 목록
+});
+Analytics.track("so_result", { room: "rune", archetype: "warrior" }); // 보낸 속성 묶음 또는 null
+```
+- config: `send_page_view:false`, `page_location`은 origin+pathname(`?`·`#` 없음), `allow_google_signals:false`, `allow_ad_personalization_signals:false`. config는 init 한 번뿐(화면 이동 때 다시 부르지 않음).
+- 값은 목록 안의 문자열만 지나간다 → 이름·생일·질문·코드 같은 입력값은 실릴 수 없다. 세부 결과 번호도 목록에 넣지 않는다.
+- GA4 '향상된 측정'은 운영자가 데이터 스트림 설정에서 끈다(코드만으로 막히는지 미확인).
+- 빈 ID: gtag.js를 불러오지 않고 track은 null. 주소에 `?`가 있는 동안: init·track 모두 아무것도 안 함.
+- 이 부품을 쓰는 제품은 개인정보처리방침에 구글 애널리틱스·쿠키·국외 이전 안내를 넣고, 입구에 쿠키 한 줄을 둔다(strange-oracle 12-5 참고).
 
 ## disclaimer.js
 운세·사주·타로 결과 하단에 CLAUDE.md 8장의 면책 문구를 넣는다. 문구는 부품 안에 고정돼 있다.

@@ -45,6 +45,36 @@ for (const slug of PRODUCTS) {
     console.log(`  경고: products/${slug}/data.js의 pay.contact(결제 문의처)가 비어 있어 결제 실패 안내에 문의처 줄이 나오지 않습니다 (결제를 켜기 전에 채울 것)`);
 }
 
+// (12단계 12-6) 광고·분석 ID: 빈 값은 경고만(무료판은 ID 없이도 배포 가능), 모양이 틀리면 실패. 점검 규칙은 common/ads.js·analytics.js의 것을 그대로 쓴다
+const ADS_TXT = {};
+{
+  const vm = require("vm");
+  const parts = { window: { location: { search: "" } }, document: {}, console };
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, "common", "ads.js"), "utf8") + ";" + fs.readFileSync(path.join(ROOT, "common", "analytics.js"), "utf8"), parts);
+  const { Ads, Analytics } = parts.window;
+  for (const slug of PRODUCTS) {
+    const w = {};
+    try {
+      vm.runInNewContext(fs.readFileSync(path.join(ROOT, "products", slug, "data.js"), "utf8"), { window: w });
+    } catch (e) {
+      continue;
+    }
+    const T = w.TEXT || {};
+    if (!T.ads && !T.analytics) continue;
+    const c = Ads.check(T.ads || {});
+    const ga4 = String((T.analytics && T.analytics.ga4) || "").trim();
+    if (!ga4) c.empty.push("analytics.ga4");
+    else if (!Analytics.configured(ga4)) c.bad.push("analytics.ga4");
+    if (c.bad.length) {
+      console.error(`오류: products/${slug}/data.js — 광고·분석 ID 모양이 틀림: ${c.bad.join(", ")} (GA4 "G-…", 애드센스 "ca-pub-숫자", 자리 ID 숫자, 보상형 "/네트워크코드/광고단위")`);
+      process.exit(1);
+    }
+    if (c.empty.length) console.log(`  경고: products/${slug}/data.js의 광고·분석 ID가 비어 있음 (${c.empty.join(", ")}) — 빈 것은 불러오지 않고 무료판 그대로 동작합니다`);
+    const client = String((T.ads && T.ads.adsenseClient) || "").trim();
+    if (client) ADS_TXT[slug] = `google.com, ${client.replace(/^ca-/, "")}, DIRECT, f08c47fec0942fa0\n`;
+  }
+}
+
 function copyDir(src, dest, exclude = new Set()) {
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
@@ -83,6 +113,11 @@ for (const slug of PRODUCTS) {
   else console.log(`  경고: products/${slug}/data.js의 site.url이 비어 있어 og:url·canonical을 넣지 않았고 og:image는 상대 경로입니다 (배포 전에 채울 것)`);
 }
 // 루트 이동 페이지: 제품과 같은 title·description(+ site.url이 있으면 og 태그·canonical)
+// (12단계 12-4) 애드센스 게시자 ID가 있으면 사이트 루트(public/)에 ads.txt. 실제 호스팅 루트에 놓이는지는 운영자 확인
+if (ADS_TXT[HOME]) {
+  fs.writeFileSync(path.join(PUBLIC, "ads.txt"), ADS_TXT[HOME]);
+  console.log("  ads.txt 만듦 (public/ads.txt)");
+}
 fs.writeFileSync(path.join(PUBLIC, "index.html"), og.rootPage(HOME, og.readHead(fs.readFileSync(path.join(ROOT, "products", HOME, "index.html"), "utf8")), SITE[HOME]));
 
 let count = 0;
