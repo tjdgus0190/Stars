@@ -2098,3 +2098,70 @@ designer (작업 C4). developer C2·copywriter C3 뒤, 실제 문구로 점검. 
 ### 운영자가 화면으로 직접 확인할 것
 - F1 합격 기준(쪽 수 증가 수용) 결정.
 - 실제 휴대폰에서 봉인 해제 오류 화면(문의처 값을 넣은 뒤)과 책 시기별 흐름 쪽. 화면낭독기 낭독, 키보드 포커스, 움직임 켠 상태는 이번에 보지 않았다(미확인). on + 묶음 2 화면(책 카드·H1)은 범위 밖.
+
+## 12단계: 광고로 여는 조각 (디자인)
+
+2026-10-01 designer, D1. 근거: specs/strange-oracle.md 12-1~12-8, 결정 69~73, reports/spec-review-strange-oracle.md 12단계(546행 메모: 쿠키 줄이 hub 광고 자리에 붙지 않게). 새 화면 0, 결과 문구 변경 0, 기존 data-js 삭제·이름 변경 0.
+
+### 1. 잠금 상자 (여섯 방 `aside.turn` 안, `turn-text` 바로 다음)
+
+마크업(여섯 방 같은 모양): `div.unlock[data-js="unlock"][hidden]` = `p.unlock__note`(unlock.note) + `button.btn.btn--secondary.unlock__btn[data-js="unlock-btn"]`(재생 아이콘 + unlock.button), 그 다음 형제로 `p.unlock-status[data-js="unlock-status"][role=status][aria-live=polite]`(상자를 숨긴 뒤에도 남는 안내 한 줄).
+머리줄·그림(룬 세 낱말, 별·데칸 "A → B", 오검 이름 글자, 촐킨 제목·그림, 별 공감 카드)은 잠김과 상관없이 그대로 보인다 → 무엇이 잠겼는지 보고 고른다.
+
+| 상태 | 붙는 표시 (JS) | 화면 |
+|---|---|---|
+| ID 없음(보상형 광고단위 빈 값) / 별 복원 상태 / 이미 연 방 | 아무것도 안 함. `.unlock`은 `hidden` 그대로 | 잠금 UI 0개. `turn-text`가 처음부터 보인다(지금과 같음) |
+| 잠김 | `.turn.is-locked` + `.unlock`의 `hidden` 해제. `turn-text`는 **비운 채**(문장을 DOM에 넣지 않음, CSS로도 숨김) | 방 색 점선 상자 안 가운데: 안내 한 줄 + 보조 버튼 하나. 흐린 가짜 글 없음 |
+| 기다림(누른 뒤 결과까지, ≤8초) | `.unlock.is-waiting`, 버튼 `disabled` + `aria-busy="true"`, `unlock-status` = unlock.loading | 버튼 반투명, 재생 아이콘만 천천히 숨쉼(움직임 줄이기면 정지). 연속 클릭 불가 |
+| 중간에 닫음(`closed`) | `.is-waiting` 빼고 `.unlock.is-closed`, 버튼 다시 켬, `unlock-status` = unlock.closed | 상자 그대로 + 아래 안내 한 줄. 팝업·횟수 제한·빨간색 없음. 다시 누르면 `.is-closed` 빼고 기다림으로 |
+| 열림(`granted`) | `.unlock` 다시 `hidden`, `.turn`에서 `.is-locked` 빼고 `.is-opening`(animationend에 뺌), `turn-text` 채움, `unlock-status`에 `span.visually-hidden` unlock.opened | 단락이 480ms 동안 펼쳐지며 나타남(max-height 8rem→, 투명→불투명). 움직임 줄이기면 즉시 |
+| 광고 없음(`unavailable`) | 열림과 같게 열고 `unlock-status` = unlock.unavailable(보이는 글) | 열린 단락 아래 작은 회색 한 줄 |
+
+- 포커스: 열림·광고 없음으로 상자가 사라지면 포커스를 `turn-text`(tabindex="-1")로 옮긴다(버튼이 사라져 포커스를 잃지 않게).
+- 잠금 버튼은 화면의 **보조** 버튼이다. 주 버튼(다음 문)은 그대로 하나.
+- 측정(cdp, 헤드리스 Edge, 문구는 아래 예시 길이로 넣어 봄): 360px 상자 278x124, 버튼 203x48(탭 44 이상), 480px 상자 398x124, 여섯 방 모두 넘침 0·가로 스크롤 0.
+
+### 2. 배너와 잠금 버튼은 다르게 보인다
+
+| | 배너 (`.ad-slot`, ads.js) | 잠금 상자 (`.unlock`) |
+|---|---|---|
+| 자리 | 화면 맨 아래(`result-end`·`story-end`) / 입구 FAQ 아래(`hub`) | `aside.turn` 안 — 결과 카드 아래, 핵심 풀이 위 |
+| 모양 | 방 색 없음. 위 1px 회색 선 + 작은 회색 "광고"(`.ad-slot__label`, fs-2xs) + 광고 내용 | 방 색 점선 테두리 상자 + 제품 보조 버튼(테두리, 재생 아이콘) |
+| 비었을 때 | `display:none`(높이 0, base.css). 채워질 때만 선·표시가 생김 | `hidden` = 잠금 UI 0 |
+
+- 배너 자리는 기존 3종만(`hub`, 방마다 `result-end`, `story-end`). 새 자리 0. 한 화면 최대: 입구 1, 방 결과 1, 나의 이야기 1 → 모두 ≤2.
+- 위치 규칙: 셋 다 결과 문구·주 버튼보다 아래에 있고 위아래 여백 48px(base `--space-12`) → 채워져도 위쪽 본문 위치가 변하지 않는다(CLS는 아래 요소만). 방 결과에서 배너와 잠금 상자 사이에는 핵심 풀이·안내자·공유·다음 문이 있어 붙지 않는다.
+- "광고" 표시 글자는 ads.js가 넣는다(공통 부품이라 문구 "광고"를 부품 안에 둔다 — developer 판단, 다른 제품도 같은 표시).
+
+### 3. 입구 쿠키 줄과 FAQ 광고 한 문장
+
+- 입구 맨 아래 순서: FAQ → `hub` 광고 자리 → `div.hub-foot`[ 지우기 안내(`hub.clearNote`, 기존) → **쿠키 줄** `p.hub-cookie[data-js="cookie-line"][hidden]` = privacy.cookieLine + 링크 `개인정보처리방침`(legal/privacy.html, 기존 `legal.links.privacy` 문구 재사용) ].
+  광고 자리와 쿠키 줄 사이에 지우기 안내 한 줄이 끼어 붙지 않는다. 측정: 가짜 배너(100px)를 채웠을 때 배너 아래 끝 → 쿠키 줄 위 360px 100px / 480px 80px.
+- 광고·분석 ID가 하나라도 있을 때만 `hidden` 해제. 입구 첫 화면(제목~문) 요소 수는 그대로, 문 버튼 아래 끝 360x640 610px(스크롤 없이 보임), 480x800 666px.
+- FAQ: `hub-faq-paid` 문답 안, 기존 답 `dd` 다음 형제로 `dd.faq__ad-note[data-js="hub-faq-adnote"][hidden]`(data-t `hub.faq.adNote`). 기존 답 `dd`는 data-t가 글을 통째로 바꾸므로 따로 둔다. 보상형 ID가 있을 때만 `hidden` 해제.
+
+### 4. 문구 자리 (copywriter, D3) — 모두 data.js
+
+| 키 | 자리 | 최대 | 규칙 |
+|---|---|---|---|
+| `unlock.note` | 잠금 상자 안내 | 30자 (360px 한 줄은 약 20자, 두 줄까지 됨) | 무엇이 잠겼는지만. 재촉·흐린 예고 금지 |
+| `unlock.button` | 잠금 버튼 | 30자, **권장 12자 이내**(360px 한 줄) | "광고"가 반드시 들어감. 길이(초) 표기 금지 |
+| `unlock.loading` | 기다림 한 줄 | 30자 | |
+| `unlock.closed` | 닫음 한 줄 | 30자 | 탓하지 않기, 다시 누를 수 있다는 사실 |
+| `unlock.unavailable` | 광고 없음 한 줄 | 30자 | 열어 드렸다는 사실 |
+| `unlock.opened` | 낭독 전용 | 30자 | 화면에 안 보임 |
+| `privacy.cookieLine` | 입구 쿠키 줄 | 70자 | 뒤에 링크 "개인정보처리방침"이 붙음 |
+| `hub.faq.adNote` | FAQ 5번 답 끝 | 60자 | 300자 소개 글 합계에서 제외 |
+
+마크업에 `[초안]` 예시가 있다(unlock.note·button, privacy.cookieLine, hub.faq.adNote). copywriter가 data.js에 넣고 마크업 `[초안]`을 지운다. `unlock.loading/closed/unavailable/opened`는 JS가 넣는 글이라 마크업 자리 없음.
+
+### 5. developer 인계
+
+- 새 data-js: `unlock`(×6), `unlock-btn`(×6), `unlock-status`(×6), `cookie-line`, `hub-faq-adnote`. 각 방에서는 `[data-js="result-turn"]` 안에서 찾는다.
+- 새 상태 클래스: `.turn.is-locked`, `.turn.is-opening`, `.unlock.is-waiting`, `.unlock.is-closed`. 숨김은 `hidden` 속성(`.is-hidden` 아님, 기본이 숨김이라 JS 없이도 ID 없음 상태가 됨).
+- 새 CSS(style.css 끝 "12단계" 블록): `.unlock*`, `.unlock-status`, `.hub-foot`, `.hub-cookie*`, `.faq__ad-note`, `.ad-slot.is-filled` 위 선, 정적 검토용 표시. `prefers-reduced-motion`에서 숨쉬기·펼침 끔.
+- ads.js가 배너를 채우면 `.is-filled` + 맨 앞 `span.ad-slot__label`("광고"). `data-ad-status="unfilled"`면 `.is-filled`를 빼서 높이 0.
+
+### 운영자·planner 확인 필요
+
+- **FAQ adNote가 지금 설정에서 안 보인다**: `hub-faq-paid` 문답은 결제 꺼짐이면 통째로 숨는다(결정 66). 12단계는 결제 꺼짐 그대로라, 보상형 ID를 넣어도 이 문장이 화면에 안 나온다(12-3 FAQ 정직성 미충족). 자리는 기획대로 5번 답 끝에 두었다. 다른 안: (a) 결제 꺼짐이어도 5번 문답만 보이게 하고 답을 무료 기준으로 바꾼다 / (b) 1번 "결과는 어떻게 읽나요?" 답 끝으로 옮긴다. planner 결정 필요.
