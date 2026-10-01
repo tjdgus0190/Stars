@@ -77,8 +77,10 @@ function paidSentences() {
   check("입구에서는 입구 버튼 숨김", await has("[data-js=topbar-home]", "is-hidden"));
   check("주 버튼 = 첫 번째 문 열기(Ⅰ 오검)", (await txt("[data-js=hub-cta-label]")) === (await ev("TEXT.hub.cta.first")) && (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "ogham");
   check("지금까지의 이야기 = 0방이면 숨김", await has("[data-js=hub-sofar]", "is-hidden"));
-  const faq = await ev("[...document.querySelectorAll('[data-js=hub-faq] dd')].reduce((a, d) => a + d.textContent.replace('[초안] ', '').length, 0)");
-  check("자주 묻는 것: 펼친 채 답 합계 300자 이상", faq >= 300 && (await ev("[...document.querySelectorAll('[data-js=hub-faq] dd')].every(d => d.offsetHeight > 0)")), String(faq));
+  // (11단계 11-5) 결제 꺼짐: 유료 문답(hub-faq-paid)은 숨긴다. 보이는 답만으로 300자 이상
+  const faq = await ev("[...document.querySelectorAll('[data-js=hub-faq] dd')].filter(d => d.offsetHeight > 0).reduce((a, d) => a + d.textContent.replace('[초안] ', '').length, 0)");
+  check("자주 묻는 것: 펼친 채 보이는 답 합계 300자 이상", faq >= 300, String(faq));
+  check("11-5 off: FAQ 유료 문답 숨김", await has("[data-js=hub-faq-paid]", "is-hidden"));
   check("입구 광고 1개", (await ev("document.querySelectorAll('#screen-hub [data-js=ad-slot]').length")) === 1);
   check("첫 화면(스크롤 전)에 주 버튼·여정 칩 보임", await ev("(() => { const r = (s) => document.querySelector(s).getBoundingClientRect(); return r('[data-js=hub-cta]').bottom <= innerHeight && document.querySelector('.journey__chip').getBoundingClientRect().bottom <= innerHeight; })()"));
   check("입구 전에는 저장소 비어 있음", (await store()) === "");
@@ -397,6 +399,62 @@ function paidSentences() {
   await ev("StrangeOracle.go('ogham-input')");
   await waitScreen("screen-ogham-input", 3000);
   check("10-7: 오검의 방 입력 — 저장된 이름 보임", (await txt("#screen-ogham-input [data-js=saved-info-value]")) === NAME);
+
+  // ═══ 11단계 묶음 1 (off): H3 흔들리는 원형 · H4 바통 질문 · H5 3/6 중간 결말 · 11-5 막다른 곳 0 ═══
+  const deadScan = (scope) => ev(`(() => { const sc = document.querySelector(${JSON.stringify(scope)}); const t = sc.innerText; return { price: /[0-9],[0-9]{3}\\s*원/.test(t), soon: t.includes('곧 열'), dead: [...sc.querySelectorAll('button[disabled], button[aria-disabled=true]')].filter(b => b.offsetHeight > 0 && !b.closest('[data-js^=hub-door-]')).length, book: /한 권의 책|책을 준비/.test(t) }; })()`);
+  const hookCount = (scope) => ev(`[...document.querySelectorAll(['result-archetype-sway', 'hub-archetype-sway', 'result-bridge', 'story-half'].map(k => ${JSON.stringify(scope)} + ' [data-js=' + k + ']').join(','))].filter(e => e.offsetHeight > 0 && e.textContent.trim()).length`);
+  const swayWant = (n, arch) => ev(`TEXT.result.archetypeSway.replace('{arch}', TEXT.archetypes[${JSON.stringify(arch)}].name).replace('{n}', ${n})`);
+  await seed(["ogham", "star", "decan"]);
+  await b.goto(BASE + "#hub");
+  await waitScreen("screen-hub", 3000);
+  const arch3 = await ev("StrangeOracle.currentArchetype()");
+  check("H3 입구: 3/6 흔들리는 원형 한 줄 = 템플릿({arch}·남은 문 3)", !(await has("[data-js=hub-archetype-sway]", "is-hidden")) && (await txt("[data-js=hub-archetype-sway]")) === (await swayWant(3, arch3)), await txt("[data-js=hub-archetype-sway]"));
+  check("H5 입구: 3/6이면 나의 이야기 링크 글자 = hub.sofar.half (요소 수 그대로)", (await txt("[data-js=hub-story-label]")) === (await ev("TEXT.hub.sofar.half")) && !(await has("[data-js=hub-half]", "is-hidden")));
+  const hubDead = await deadScan("#screen-hub");
+  check("11-5 off 입구: 가격 0 · '곧' 0 · 눌리지 않는 버튼 0 · 떡밥 3개 이하", !hubDead.price && !hubDead.soon && hubDead.dead === 0 && (await hookCount("#screen-hub")) <= 3, JSON.stringify(hubDead));
+  await ev("StrangeOracle.go('story')");
+  await waitScreen("screen-story", 3000);
+  const half = await ev("(() => { const sc = document.querySelector('#screen-story'); const vis = (e) => e && e.offsetHeight > 0; const next = sc.querySelector('[data-js=story-half-next]'); const share = sc.querySelector('[data-js=story-share]'); return { isHalf: sc.classList.contains('is-half'), half: vis(sc.querySelector('[data-js=story-half]')), slots: [...sc.querySelectorAll('[data-js=story-half-slot]')].filter(vis).length, next: vis(next) && next.dataset.go === 'tzolkin-intro', primary: [...sc.querySelectorAll('.btn--primary')].filter(vis).length, shareSecondary: share.classList.contains('btn--secondary'), paid: vis(sc.querySelector('[data-js=story-paid]')), close: sc.querySelector('[data-js=story-half-close]').textContent, spine46: [...sc.querySelectorAll('[data-js=story-chapter]')].slice(3).filter(vis).length }; })()");
+  check("H5 나의 이야기 3/6: is-half · 중간 맺음 · 남은 칸 3 · 다음 문(촐킨) · 주 버튼은 다음 문 하나(공유는 보조) · 책 카드 숨김(off)", half.isHalf && half.half && half.slots === 3 && half.next && half.primary === 0 && half.shareSecondary && !half.paid && half.close.length > 0 && half.spine46 === 0, JSON.stringify(half));
+  const storyDead = await deadScan("#screen-story");
+  check("11-5 off 나의 이야기 3/6: 가격 0 · '곧' 0 · 눌리지 않는 버튼 0 · 책 말 0 · 떡밥 3개 이하", !storyDead.price && !storyDead.soon && storyDead.dead === 0 && !storyDead.book && (await hookCount("#screen-story")) <= 3, JSON.stringify(storyDead));
+  await noHScroll("나의 이야기 3/6");
+  await shot(P + "11-story-half.png");
+  await click("[data-js=story-half-next]");
+  check("H5 다음 문 → Ⅳ 촐킨 시작(강제 순서 그대로)", await waitScreen("screen-tzolkin-intro", 4000), await active());
+  for (const room of ["ogham", "star", "decan"]) {
+    await ev("StrangeOracle.go('story')");
+    await waitScreen("screen-story", 3000);
+    await click("[data-js=story-chapter-reread][data-room=" + room + "]");
+    await waitScreen("screen-" + room + "-result", 4000);
+    const sc = "#screen-" + room + "-result";
+    const sway = await txt(sc + " [data-js=result-archetype-sway]");
+    const br = await ev(`(() => { const e = document.querySelector('${sc} [data-js=result-bridge]'); const t = e.textContent.replace('[초안] ', ''); return { ok: t === TEXT.bridges['${room}'].replace('[초안] ', '') && [...t].length <= 45 && /\\?$/.test(t) && (t.match(/[.?!]/g) || []).length === 1, t }; })()`);
+    const dead = await deadScan(sc);
+    const hooks = await hookCount(sc);
+    check(`H3·H4 ${room} 결과: 원형 한 줄(남은 문 3) · 다리 = 질문 1문장 45자 이내 · 가격·'곧'·죽은 버튼 0 · 떡밥 ${hooks}개(≤3)`, sway === (await swayWant(3, arch3)) && br.ok && !dead.price && !dead.soon && dead.dead === 0 && hooks <= 3, sway + " / " + br.t);
+  }
+  await seed(["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
+  await b.goto(BASE + "#story");
+  await waitScreen("screen-story", 3000);
+  const six = await ev("(() => { const vis = (e) => e && e.offsetHeight > 0; return { paid: vis(document.querySelector('[data-js=story-paid]')), note: vis(document.querySelector('[data-js=story-book-note]')), half: vis(document.querySelector('[data-js=story-half]')), noteBtn: document.querySelector('[data-js=story-book-note]').querySelectorAll('a,button').length }; })()");
+  const sixDead = await deadScan("#screen-story");
+  check("11-5 off 6/6 나의 이야기: 책 카드 숨김 · 글 한 줄(버튼·링크 없음) · 가격·'곧'·죽은 버튼 0 · H5 없음", !six.paid && six.note && six.noteBtn === 0 && !six.half && !sixDead.price && !sixDead.soon && sixDead.dead === 0, JSON.stringify(six) + JSON.stringify(sixDead));
+  const sixRes = [];
+  for (const room of ["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]) {
+    await ev("StrangeOracle.go('story')");
+    await waitScreen("screen-story", 3000);
+    await click("[data-js=story-chapter-reread][data-room=" + room + "]");
+    await waitScreen("screen-" + room + "-result", 4000);
+    const sc = "#screen-" + room + "-result";
+    const d = await deadScan(sc);
+    sixRes.push(Object.assign({ room, sway: await ev(`(() => { const e = document.querySelector('${sc} [data-js=result-archetype-sway]'); return e.offsetHeight > 0 || e.textContent.trim() !== ''; })()`), hooks: await hookCount(sc) }, d));
+  }
+  check("6/6 결과 여섯 곳: H3 없음 · 가격·'곧'·죽은 버튼 0 · 떡밥 3개 이하", sixRes.every((x) => !x.sway && !x.price && !x.soon && x.dead === 0 && x.hooks <= 3), JSON.stringify(sixRes.filter((x) => x.sway || x.price || x.soon || x.dead || x.hooks > 3)));
+  await ev("StrangeOracle.go('hub')");
+  await waitScreen("screen-hub", 3000);
+  check("H3 입구 6/6: 흔들리는 원형 숨김", await has("[data-js=hub-archetype-sway]", "is-hidden"));
+  check("H5 입구 6/6: 링크 글자 = hub.sofar.all", (await txt("[data-js=hub-story-label]")) === (await ev("TEXT.hub.sofar.all")));
 
   // ═══ 8. 개인정보·오류 ═══
   const allReq = b.log.bodies.map((x) => x.url + " " + x.body).join("\n");

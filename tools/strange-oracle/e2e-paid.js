@@ -9,6 +9,7 @@
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-paid.js [reduced|motion]
 // 결과: 콘솔 PASS/FAIL + tools/strange-oracle/out/ (스크린샷·소장 카드·결과 txt)
 const { launch } = require("./cdp.js");
+const { BOOK_METRICS } = require("./page-count.js");
 const fs = require("fs");
 const path = require("path");
 const mode = process.argv[2] || "reduced";
@@ -60,7 +61,7 @@ const SIBYL_Q = "비밀질문XYZ";
   await b.goto(OFF + "#story");
   await sleep(700);
   check("off: 허브 유료 칸 숨김", await hidden("[data-js=hub-paid]"));
-  check("off: 나의 이야기 유료 카드 = 곧 열려요, 버튼 잠김", (await ev("document.querySelector('[data-js=story-paid-go]').disabled")) && !(await ev("document.querySelector('[data-js=story-paid]').classList.contains('is-on')")) && (await txt("[data-js=story-paid-status]")) === (await ev("TEXT.story.paid.status")));
+  check("off(11-5): 나의 이야기 책 카드 통째 숨김 · '곧 열려요'·disabled 버튼 0", (await hidden("[data-js=story-paid]")) && !(await ev("document.querySelector('#screen-story').innerText.includes('곧 열')")) && (await ev("[...document.querySelectorAll('#screen-story button[disabled]')].length")) === 0);
   check("off: 영수증 코드 입력 숨김", await hidden("[data-js=story-paid-reopen]"));
   check("off: 방 결과 책 한 줄 6개 모두 숨김", await ev("[...document.querySelectorAll('[data-js=result-book-line]')].length === 6 && [...document.querySelectorAll('[data-js=result-book-line]')].every(e => e.classList.contains('is-hidden'))"));
   await ev("StrangeOracle.go('deeper')");
@@ -108,18 +109,19 @@ const SIBYL_Q = "비밀질문XYZ";
   check("모의 결제 띠 보임", !(await hidden("#screen-deeper [data-js=pay-band]")) && (await txt("#screen-deeper [data-js=pay-band]")).includes(await ev("TEXT.pay.band.mock")));
   const toc = await ev("[...document.querySelectorAll('[data-js=deeper-toc-item]')].map(li => li.querySelector('[data-js=toc-name]').textContent + ' | ' + li.querySelector('[data-js=toc-vol]').textContent)");
   check("목차 6칸 채움(여는 글·제1부·제2부 셋·닫는 글, 숨은 장 칸 없음)", toc.length === 6 && toc.every((x) => !x.includes("{")) && (await ev("document.querySelectorAll('[data-js=deeper-toc-item][data-part=hidden]').length")) === 0, toc.join(" / "));
-  check("결제 전 고지: 핵심 풀이 포함·분량(새 문장) 표시", (await txt("[data-js=deeper-items]")).includes("핵심 풀이") && /만.*새 문장/.test(await txt("[data-js=deeper-volume]")), await txt("[data-js=deeper-volume]"));
+  check("결제 전 고지: 핵심 풀이 포함 · 분량 칸 = 범위 설명 + 표기 묶음", (await txt("[data-js=deeper-items]")).includes("핵심 풀이") && (await txt("[data-js=deeper-volume]")).endsWith(await txt("[data-js=deeper-read-time]")), await txt("[data-js=deeper-volume]"));
   check("고지: 결제 시점의 여섯 결과로 엮임", (await ev("document.body.innerText.includes(TEXT.deeper.bookFix)")) && !(await ev("document.body.innerText.includes(TEXT.deeper.fixNote)")));
   check("봉인 칸에 글자 없음", await ev("[...document.querySelectorAll('.seal-lines')].every(e => e.textContent.trim() === '')"));
   // (10단계 10-3) 책 모양 두 쪽 + 읽는 시간(글자 수 ÷ 500 올림, "약")
-  const rt = await ev("(() => { const total = Number(document.querySelector('[data-js=deeper-total]').textContent.replace(/[^0-9]/g, '')); const want = TEXT.deeper.readTime.replace('{n}', Math.ceil(total / 500)); const els = [...document.querySelectorAll('[data-js=deeper-read-time]')]; return { total, want, n: els.length, ok: els.every(e => e.textContent.includes(want)) && document.querySelector('[data-js=deeper-volume]').textContent.includes(want) && want.includes('약'), arch: document.querySelector('[data-js=deeper-peek-arch]').textContent, me: TEXT.archetypes[StrangeOracle.currentArchetype()].name, pages: document.querySelectorAll('[data-js=deeper-peek] article').length, peekText: document.querySelector('[data-js=deeper-peek]').innerText }; })()");
-  check("10-3: 읽는 시간 = 올림(글자 수 ÷ 500), '약' 포함, 속표지·목차 옆·분량 칸 세 곳", rt.ok && rt.n === 2 && rt.total > 0, rt.want + " / " + rt.total);
+  const VOL_RE = "^약 ([0-9]+만)?( ?[0-9]천)?자 · 읽는 데 약 [0-9]+분$";
+  const rt = await ev("(() => { const els = [...document.querySelectorAll('[data-js=deeper-read-time]')]; const want = els[0].textContent; return { want, n: els.length, ok: new RegExp(" + JSON.stringify(VOL_RE) + ").test(want) && els.every(e => e.textContent === want) && document.querySelector('[data-js=deeper-total]').textContent === '', arch: document.querySelector('[data-js=deeper-peek-arch]').textContent, me: TEXT.archetypes[StrangeOracle.currentArchetype()].name, pages: document.querySelectorAll('[data-js=deeper-peek] article').length, peekText: document.querySelector('[data-js=deeper-peek]').innerText, five: /[0-9]{1,2},[0-9]{3} *자/.test(document.querySelector('#screen-deeper').innerText) }; })()");
+  check("F3: 분량 표기 한 가지(약 N만 N천자 · 읽는 데 약 N분) — 속표지·목차 옆 같음, deeper-total 비움, 다섯 자리 숫자 0", rt.ok && rt.n === 2 && !rt.five, rt.want);
   check("10-3: 책 두 쪽 — 속표지에 내 원형 이름 + '한 권의 책', 쪽 수 표시 없음", rt.pages === 2 && rt.arch === rt.me && rt.peekText.includes("한 권의 책") && !/[0-9]+ *쪽/.test(rt.peekText));
   check("견본 문단 3개", (await ev("document.querySelectorAll('[data-js=deeper-sample] p').length")) === 3);
   check("저장된 생년월일 확인 카드", !(await hidden("[data-js=deeper-saved]")) && (await hidden("[data-js=deeper-date-field]")));
   check("D-2 고지 블록 바로 뒤 = 결제 알림/버튼", await ev("(() => { const d = document.querySelector('#screen-deeper .disclosure'); const n = d.nextElementSibling; const gate = n.nextElementSibling; return n.dataset.js === 'pay-alert' && gate.dataset.js === 'deeper-gate' && gate.classList.contains('is-hidden') && gate.nextElementSibling.querySelector('[data-js=deeper-pay]') !== null && !d.closest('details'); })()"));
   check("결제 버튼: 동의 전 잠김", await ev("document.querySelector('[data-js=deeper-pay]').disabled"));
-  const volNoPartner = await txt("[data-js=deeper-total]");
+  const volNoPartner = await txt("[data-js=deeper-read-time]");
   // 상대: 이름만 → 오류
   await setVal("[data-js=deeper-partner-name]", PARTNER.name);
   await click("[data-js=deeper-consent]");
@@ -130,14 +132,13 @@ const SIBYL_Q = "비밀질문XYZ";
   await setVal("[data-js=deeper-partner-year]", PARTNER.y);
   await setVal("[data-js=deeper-partner-month]", PARTNER.m);
   await setVal("[data-js=deeper-partner-day]", PARTNER.d);
-  const volPartner = await txt("[data-js=deeper-total]");
+  const volPartner = await txt("[data-js=deeper-read-time]");
   check("상대 입력 → 목차·분량 갱신", volPartner !== volNoPartner && (await txt("[data-js=deeper-items]")).includes(await ev("TEXT.deeper.disclosure.itemsMatch.partner")), `${volNoPartner} → ${volPartner}`);
   const st1 = await storage();
   check("상대 정보가 저장소에 없음 (D-5)", !st1.includes(PARTNER.name) && !st1.includes(String(PARTNER.y)), st1.slice(0, 120));
   await noHScroll("미리보기");
   await shot(P + "01-deeper.png");
   check("D-12 광고 0 (미리보기·봉인 해제·리포트)", (await ev("document.querySelectorAll('#screen-deeper [data-js=ad-slot], #screen-unseal [data-js=ad-slot], #screen-report [data-js=ad-slot], #screen-deeper .ad-slot, #screen-report .ad-slot').length")) === 0);
-  const expectTotal = Number(volPartner.replace(/\D/g, ""));
   await click("[data-js=deeper-pay]");
 
   // ═══ 3. 모의 결제 → successUrl → 봉인 해제 → 리포트 ═══
@@ -170,6 +171,11 @@ const SIBYL_Q = "비밀질문XYZ";
   await ev("document.fonts.ready.then(() => true)");
   await sleep(600); // 글꼴이 늦게 도착하면 한 번 다시 나눈다 (loadingdone → 150ms 디바운스)
   const nPages = await pageCount();
+  const f1 = await ev(BOOK_METRICS);
+  const f1Cut = await ev("[Number(document.querySelector('[data-js=book-reader]').dataset.wordCut), Number(document.querySelector('[data-js=book-reader]').dataset.longStage)]");
+  check("F1: 본문 쪽 50자 미만 0 · 표제만 있는 쪽 연속 0 · 문장 중간 넘김 0(어절 경계 예외는 따로 셈)", f1.under50.length === 0 && f1.headPairs === 0 && f1.midCut.length <= f1Cut[0], `${f1.pages}쪽 · 50자 미만 ${f1.under50.join(",")} · 중간 ${f1.midCut.join(",")} · 어절 경계 ${f1Cut[0]}`);
+  check("F1: 시기별 흐름 쪽마다 항목 2개 이상", f1.tlUnder2.length === 0, `흐름 ${f1.tlPages}쪽 · 1개 쪽 ${f1.tlUnder2.join(",")} · 아주 긴 구간 ${f1Cut[1]}`);
+  check("F1 ④: 제2부 표제 + 시기별 흐름 머리 한 쪽(part-open), 부 표제지 따로 없음", (await ev("document.querySelectorAll('[data-js=book-pages] .book-page--part-open').length")) === 1 && (await ev("[...document.querySelectorAll('[data-js=book-pages] [data-js=book-page][data-part=flow].book-page--half')].length")) === 0);
   check("상단: 입구 버튼·목차 버튼, 9칸 진행률 은퇴(마크업 0)", !(await hidden("[data-js=topbar-home]")) && !(await hidden("[data-js=book-toc-open]")) && (await ev("document.querySelectorAll('[data-js=read-progress-seg], [data-js=read-progress]').length")) === 0);
   check("표지부터(data-view=cover) · 마크업 견본 쪽 없음", (await view()) === "cover" && (await ev("document.querySelectorAll('[data-sample]').length")) === 0);
   const pagedMs = await ev("Number(document.querySelector('[data-js=book-reader]').dataset.pagedMs)");
@@ -272,8 +278,14 @@ const SIBYL_Q = "비밀질문XYZ";
   check("영수증 코드 4자 묶음 ×2곳", (await ev("document.querySelector('[data-js=receipt-code]').children.length")) === 8 && (await txt("[data-js=receipt-code]")) === receipt && (await txt("[data-js=receipt-code-end]")) === receipt);
   check("mock: 토스 영수증 링크 숨김(값 없음)", await hidden("[data-js=receipt-toss]"));
   check("책 견본 자리표시 남지 않음(방 머리·본문)", !(await ev("[...document.querySelectorAll('#screen-report [data-js=book-room-result], #screen-report [data-js=book-room-key], #screen-report [data-js=book-ch1], #screen-report [data-js=book-ch2], #screen-report [data-js=book-hidden]')].some(e => e.textContent.includes('[초안]'))")));
-  const metaN = Number((await txt("[data-js=report-meta]")).replace(/.*약\s*/, "").replace(/\D/g, ""));
-  check("D-11 분량: 미리보기 예상 vs 받은 리포트 ±15%", metaN > 0 && Math.abs(expectTotal - metaN) / metaN <= 0.15, `예상 ${expectTotal} / 실제 ${metaN}`);
+  const labelN = (t) => { const m = t.match(/약 (?:([0-9]+)만)? ?(?:([0-9])천)?자/); return m ? Number(m[1] || 0) * 10000 + Number(m[2] || 0) * 1000 : 0; };
+  const actualN = await ev("(() => { const q = (s) => [...document.querySelectorAll(s)].reduce((a, e) => a + [...e.textContent.replace(/\\s+/g, ' ').trim()].length, 0); return q('[data-js=report-open] > p') + q('[data-js=book-source] [data-js=book-room]:not(.is-hidden) [data-js^=book-ch] > p') + q('[data-js=book-source] [data-js=book-room]:not(.is-hidden) [data-js=book-hidden] > p:not(:first-child)') + q('[data-js=report-timeline] dd') + q('[data-js=report-match] > p') + q('[data-js=match-room-text]') + q('[data-js^=report-deep-] > p') + q('[data-js=report-close] > p'); })()");
+  const bookTotal = await txt("[data-js=book-total]");
+  const metaT = await txt("[data-js=report-meta]");
+  check("F3: 같은 결과로 결제 전(속표지·목차 옆·고지)·책 표지·책 목차 분량 표기가 글자까지 같음", bookTotal === volPartner && metaT.endsWith(volPartner), `${volPartner} | ${bookTotal} | ${metaT}`);
+  check("D-11 분량: 표기 vs 실제 받은 책 글자 수 ±15% (주제 단락 포함 실측)", actualN > 0 && Math.abs(labelN(bookTotal) - actualN) / actualN <= 0.15, `표기 ${labelN(bookTotal)} / 실제 ${actualN}`);
+  check("F3: 책에 다섯 자리 숫자 'NN,NNN자' 0건", !(await ev("/[0-9]{1,2},[0-9]{3} *자/.test(document.querySelector('#screen-report').textContent)")));
+  check("F3: 구매 직후(주제 단락 있음) 1쪽 주제 안내 숨김", await hidden("[data-js=book-topic-note]"));
   const st2 = await storage();
   check("저장소: 영수증 코드·bookmark(쪽 번호)만 추가, 유료 문구·상대 없음, localStorage·쿠키 0", st2.includes(receipt) && Object.keys(JSON.parse(st2).s).sort().join() === "strange-oracle,strange-oracle-bookmark,strange-oracle-receipt" && /^\d+$/.test(JSON.parse(st2).s["strange-oracle-bookmark"] || "") && !st2.includes(PARTNER.name) && JSON.parse(st2).l === 0 && JSON.parse(st2).c === "", Object.keys(JSON.parse(st2).s).join() + " " + JSON.parse(st2).s["strange-oracle-bookmark"]);
   await noHScroll("리포트");
@@ -324,14 +336,44 @@ const SIBYL_Q = "비밀질문XYZ";
   const l1 = r1.split("\n"), l3 = reopened.split("\n");
   const missing = l1.filter((x) => !l3.includes(x));
   check("영수증 코드만으로 같은 리포트 (이름·생일 없음, 주제 단락 2개만 빠짐)", l3.length > 10 && l3.every((x) => l1.includes(x)) && missing.length === 2 && missing[0].startsWith(lens[0]) && missing[1].startsWith(lens[1]), `빠진 줄 ${missing.length}`);
+  check("F3: 새 탭 재열람 분량 표기 = 구매 직후와 같음 · 주제 안내 한 줄 보임", (await txt("[data-js=book-total]")) === volPartner && !(await ev("document.querySelector('[data-js=book-topic-note]').classList.contains('is-hidden')")) && (await txt("[data-js=book-topic-note]")) === (await ev("TEXT.book.topicNote")), await txt("[data-js=book-total]"));
   await shot(P + "04-reopen.png");
 
   // ═══ 7. 실패·취소로 돌아옴 ═══
   await b.goto(BASE + "?pay=fail&code=PAY_PROCESS_CANCELED&message=%EC%B7%A8%EC%86%8C&orderId=" + receipt);
-  check("failUrl → 미리보기 + 실패 알림", (await waitScreen("screen-deeper", 6000)) && !(await hidden("[data-js=pay-alert]")));
+  const kindOf = async () => ({ kind: await ev("document.querySelector('[data-js=pay-alert]').dataset.kind"), title: await txt("[data-js=pay-alert-title]"), text: await txt("[data-js=pay-alert-text]"), shown: !(await hidden("[data-js=pay-alert]")) });
+  const fk = { cancel: await kindOf() };
+  check("failUrl → 미리보기 + 실패 알림", (await waitScreen("screen-deeper", 6000)) && fk.cancel.shown);
+  for (const [k, code] of [["decline", "REJECT_CARD_COMPANY"], ["error", "SOMETHING_UNKNOWN"]]) {
+    await b.goto(BASE + "?pay=fail&code=" + code + "&orderId=" + receipt);
+    await waitScreen("screen-deeper", 6000);
+    fk[k] = await kindOf();
+  }
+  check("F4: 취소·거절·그 밖 세 경우 kind·문구가 서로 다름, 취소에 '연결이 끊겼' 없음, 다시 시도 버튼 있음", fk.cancel.kind === "cancel" && fk.decline.kind === "decline" && fk.error.kind === "error" && new Set([fk.cancel.title, fk.decline.title, fk.error.title]).size === 3 && new Set([fk.cancel.text, fk.decline.text, fk.error.text]).size === 3 && !fk.cancel.text.includes("연결이 끊겼") && Object.values(fk).every((x) => x.shown && x.title && x.text) && (await ev("!!document.querySelector('[data-js=deeper-pay]')")), JSON.stringify(fk));
+  check("F4: 오류 코드 원문 화면에 없음", !(await ev("/REJECT_CARD_COMPANY|SOMETHING_UNKNOWN|PAY_PROCESS/.test(document.body.innerText)")));
   check("오류 코드·메시지를 화면에 보이지 않음", !(await ev("document.body.innerText.includes('PAY_PROCESS_CANCELED')")));
   check("failUrl 값 주소에서 지움", (await ev("location.search")) === "");
   await shot(P + "05-fail.png");
+  // F4 ④ 승인 확인 실패(서버 4xx): 금액이 틀린 successUrl → 다시 시도 숨김, 입구로, 문의처 비면 줄 없음
+  await b.goto(BASE + "?pay=success&paymentKey=mock_bad" + Date.now() + "&orderId=" + receipt + "&amount=1");
+  await waitFor("!document.querySelector('[data-js=unseal-error]').classList.contains('is-hidden')", 8000);
+  const un = await ev("(() => { const vis = (s) => { const e = document.querySelector(s); return !!e && e.offsetHeight > 0; }; return { kind: document.querySelector('[data-js=unseal-error]').dataset.kind, title: document.querySelector('[data-js=unseal-error-title]').textContent, retry: vis('[data-js=unseal-retry]'), back: vis('[data-js=unseal-back]'), contact: vis('[data-js=pay-contact]'), bad: /undefined|example\\.com/.test(document.querySelector('[data-js=unseal-error]').textContent) }; })()");
+  check("F4 ④ 승인 확인 실패: kind unconfirmed · 다시 시도 숨김 · 입구로 버튼 · 문의처 비면 줄 없음(빈 줄·undefined 0)", un.kind === "unconfirmed" && un.title === (await ev("TEXT.pay.fail.unconfirmed.title")) && !un.retry && un.back && !un.contact && !un.bad, JSON.stringify(un));
+  // 연결 끊김(네트워크): confirm 요청을 막는다 → 다시 시도 보임. 문의처를 넣고 다시 시도하면 문의처 줄이 textContent로 보임
+  await b.send("Network.setBlockedURLs", { urls: ["*api/confirm*"] });
+  await b.goto(BASE + "?pay=success&paymentKey=mock_net" + Date.now() + "&orderId=" + receipt + "&amount=3900");
+  await waitFor("!document.querySelector('[data-js=unseal-error]').classList.contains('is-hidden')", 25000);
+  const net1 = await ev("({ kind: document.querySelector('[data-js=unseal-error]').dataset.kind, retry: document.querySelector('[data-js=unseal-retry]').offsetHeight > 0, title: document.querySelector('[data-js=unseal-error-title]').textContent })");
+  await ev("TEXT.pay.contact = '<b>help@shop.test</b>'");
+  await click("[data-js=unseal-retry]");
+  await sleep(300);
+  await waitFor("!document.querySelector('[data-js=unseal-error]').classList.contains('is-hidden')", 25000);
+  const net2 = await ev("({ contact: document.querySelector('[data-js=pay-contact]').offsetHeight > 0, value: document.querySelector('[data-js=pay-contact-value]').textContent, tags: document.querySelector('[data-js=pay-contact-value]').children.length })");
+  await b.send("Network.setBlockedURLs", { urls: [] });
+  check("F4 연결 끊김: kind network · 다시 시도 보임 · 문구 = unseal.error", net1.kind === "network" && net1.retry && net1.title === (await ev("TEXT.unseal.error.title")), JSON.stringify(net1));
+  check("F4 문의처 값: 넣으면 보이고 textContent로만(태그 해석 0)", net2.contact && net2.value === "<b>help@shop.test</b>" && net2.tags === 0, JSON.stringify(net2));
+  const cfg = await ev("fetch('/api/config').then(r => r.json())");
+  check("F2: 결제창 상품 이름(orderName) = '낯선 점술관 · 한 권의 책'", cfg.orderName === "낯선 점술관 · 한 권의 책", cfg.orderName);
 
   // ═══ 8. 생년월일이 프로필에 없을 때: 입력은 계산에만, 저장하지 않음 / 상대 없음 ═══
   await seed(["ogham", "star", "decan", "tzolkin", "sibyl", "rune"], {});
@@ -419,7 +461,9 @@ const SIBYL_Q = "비밀질문XYZ";
   check("mock: 토스 SDK·토스 API 요청 없음", !b.log.requests.some((r) => r.includes("tosspayments")));
   const ext = b.log.requests.filter((r) => !r.includes("127.0.0.1:") && !r.includes("cdn.jsdelivr.net") && !r.startsWith("GET data:") && !r.startsWith("GET blob:") && !r.includes("about:blank"));
   check("외부 요청 = jsdelivr뿐", ext.length === 0, ext.join(" | "));
-  check("콘솔 오류 없음", b.log.errors.length === 0, b.log.errors.join(" | "));
+  // (11단계 F4) 승인 확인 실패·연결 끊김 시험이 일부러 만든 api/confirm 400·차단 기록만 뺀다
+  const errs = b.log.errors.filter((e) => !e.includes("api/confirm"));
+  check("콘솔 오류 없음 (F4 시험이 일부러 만든 api/confirm 400·차단 제외)", errs.length === 0, errs.join(" | "));
 
   fs.writeFileSync(path.join(OUT, P + "result.txt"), out.join("\n") + "\n\n요청 기록(본문):\n" + b.log.bodies.filter((x) => x.body || x.url.includes("/api/")).map((x) => `${x.url} ${x.body}`).join("\n"));
   const fails = out.filter((l) => l.startsWith("FAIL")).length;

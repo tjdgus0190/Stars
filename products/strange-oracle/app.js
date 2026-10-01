@@ -160,6 +160,16 @@
     return ranked.length ? ranked[0][0] : null;
   }
 
+  // (11단계 H3) 흔들리는 원형 한 줄: 마친 방 1~5개일 때만. N = 6 − 지금 마친 방 수. 결제 상태와 무관
+  function renderSway(el) {
+    if (!el) return;
+    const n = filledRooms().length;
+    const a = currentArchetype();
+    const on = Boolean(a) && n > 0 && n < CHAPTER_ORDER.length;
+    el.textContent = on ? fill(T.result.archetypeSway, { arch: T.archetypes[a].name, n: CHAPTER_ORDER.length - n }) : "";
+    show(el, on);
+  }
+
   // ───────── 정적 문구 채우기 ─────────
   function applyText() {
     $$("[data-t]").forEach((el) => (el.textContent = get(el.dataset.t) ?? ""));
@@ -430,7 +440,7 @@
     if (!t) return;
     const name = t.dataset.js || "";
     if (name.startsWith("hub-door-") || name === "sofar-line" || (name === "hub-cta" && CHAPTER_ORDER.includes(t.dataset.room))) openRoom(t.dataset.room, t, name.startsWith("hub-door-"));
-    else if (name === "result-next-door") openNextDoor(t);
+    else if (name === "result-next-door" || name === "story-half-next") openNextDoor(t);
     else if (/-intro-go$/.test(name)) startRoom(t.dataset.go);
     else go(t.dataset.go);
   });
@@ -550,6 +560,11 @@
     js("hub-progress-count").textContent = fill(T.hub.progress.count, { n, total: CHAPTER_ORDER.length });
     const a = currentArchetype();
     js("hub-archetype").textContent = a ? T.archetypes[a].name : "";
+    renderSway(js("hub-archetype-sway"));
+    // (11단계 H5) 3/6이면 "나의 이야기" 링크 글자만 중간 결말용으로 (요소 수 그대로)
+    const storyLabel = js("hub-story-label");
+    storyLabel.dataset.t = n === 3 ? "hub.sofar.half" : "hub.sofar.all";
+    storyLabel.textContent = get(storyLabel.dataset.t) ?? "";
     const codes = myRoomCodes();
     // 마친 방만 줄로 (아직 안 연 방의 "?" 줄은 입구에서 보이지 않아 10단계에서 만들지 않는다)
     js("hub-sofar-list").innerHTML = filled.map((room) => {
@@ -997,6 +1012,7 @@
 
   enter["rune-result"] = () => {
     const scr = screens["rune-result"];
+    renderSway(js("result-archetype-sway", scr));
     replay(js("result-capture", scr));
     watchReveal(scr);
   };
@@ -1308,6 +1324,7 @@
   });
   enter["star-result"] = () => {
     const scr = screens["star-result"];
+    renderSway(js("result-archetype-sway", scr));
     replay(js("result-capture", scr));
     watchReveal(scr);
   };
@@ -1875,6 +1892,7 @@
   ["ogham", "decan", "tzolkin", "sibyl"].forEach((room) => {
     enter[`${room}-result`] = () => {
       const scr = screens[`${room}-result`];
+      renderSway(js("result-archetype-sway", scr));
       replay(js("result-capture", scr));
       watchReveal(scr);
     };
@@ -1986,6 +2004,17 @@
     show(js("story-empty", storyScr), n === 0);
     show(js("story-share-top", storyScr), n > 0);
     show(js("story-share", storyScr), n > 0);
+    // (11단계 H5) 마친 방이 정확히 3개: 중간 맺음 → 남은 세 칸 → 다음 문(주 버튼 하나). 공유 버튼은 보조로 내린다
+    const half = n === 3;
+    storyScr.classList.toggle("is-half", half);
+    show(js("story-half", storyScr), half);
+    js("story-half-next", storyScr).classList.remove("is-opening");
+    const shareBtn = js("story-share", storyScr);
+    shareBtn.classList.toggle("btn--primary", !half);
+    shareBtn.classList.toggle("btn--secondary", half);
+    // (11-5) 결제 꺼짐: 책 카드는 통째 숨기고, 6/6에서만 글 한 줄
+    show(js("story-paid"), Pay.enabled);
+    show(js("story-book-note"), !Pay.enabled && n === CHAPTER_ORDER.length);
 
     // 등뼈: 1~6장 고정 순서
     resetReveal(storyScr);
@@ -2240,15 +2269,6 @@
   const deeperScr = screens.deeper;
   const unsealScr = screens.unseal;
   const reportScr = screens.report;
-  // 예상 분량 (spec 6-2 표. 서버 문구 한도와 같게 유지 — D-11)
-  // 결제 전 고지 분량: 완성된 유료 문구의 실측 평균(2026-09-29, 항목별 평균). 문구를 크게 바꾸면 다시 잰다
-  // (8단계) room = 책 제1부 한 방의 새 문장 평균(Ⅰ장 나머지 ch1Rest + Ⅱ~Ⅳ장 + 숨은 장, 룬·시빌라는 주제 단락 1개 포함),
-  // free = 방에서 이미 본 핵심 풀이 평균(lede + 공개 body, 룬은 세 돌 첫 단락 + 머리 문장). 2026-09-29 core.buildReport 전 항목(룬은 표본 1,300여 조합) 실측
-  const VOL = {
-    room: { ogham: 2873, star: 3013, decan: 3033, tzolkin: 2956, rune: 4044, sibyl: 2257 },
-    free: { ogham: 621, star: 681, decan: 648, tzolkin: 625, rune: 274, sibyl: 411 },
-    open: 280, stage: 490, summary: 130, matchBody: 680, side: 160, matchRoom: 300, deep: 1270, close: 280,
-  };
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   const readReceipt = () => {
@@ -2338,10 +2358,13 @@
     const card = js("story-paid");
     card.classList.toggle("is-on", on);
     card.classList.toggle("is-owned", owned);
-    js("story-paid-status").textContent = on ? T.story.paid.statusOn : T.story.paid.status;
+    // (11단계 11-5) 결제 꺼짐: 카드째 숨김("곧 열려요"·눌리지 않는 버튼 없음), 6/6이면 글 한 줄. 입구 FAQ 유료 문답도 숨김(결정 66)
+    show(card, on);
+    show(js("story-book-note"), !on && filledRooms().length === CHAPTER_ORDER.length);
+    show(js("hub-faq-paid"), on);
+    js("story-paid-status").textContent = T.story.paid.statusOn;
     const goBtn = js("story-paid-go");
-    goBtn.disabled = !on;
-    goBtn.textContent = !on ? T.story.paid.go : owned ? T.story.paid.goOwned : T.story.paid.goOn;
+    goBtn.textContent = owned ? T.story.paid.goOwned : T.story.paid.goOn;
     show(js("story-paid-reopen"), on);
     renderBookCard();
     updateBookLines();
@@ -2456,7 +2479,33 @@
   digitsOnly(pMonth, pDay);
   digitsOnly(pDay);
   let deeperEditing = false;
-  let payFailed = false;
+  let payFailed = null; // (11단계 F4) 결제창 실패 종류: cancel | decline | error (null = 없음)
+  // 토스 오류 코드 → 안내 종류. 표는 tests.md(토스 공식 문서 오류 코드 페이지, 2026-10-01 확인). 표에 없는 코드는 error(③).
+  // 오류 코드 원문은 이 분류에만 쓰고 화면·저장소·분석 어디에도 두지 않는다
+  const FAIL_CANCEL = ["PAY_PROCESS_CANCELED", "USER_CANCEL"];
+  const FAIL_DECLINE = ["REJECT_CARD_COMPANY", "REJECT_CARD_PAYMENT", "REJECT_ACCOUNT_PAYMENT", "INVALID_REJECT_CARD", "INVALID_STOPPED_CARD", "EXCEED_MAX_PAYMENT_AMOUNT", "EXCEED_MAX_DAILY_PAYMENT_COUNT", "EXCEED_MAX_ONE_DAY_AMOUNT"];
+  const failKind = (code) => (FAIL_CANCEL.includes(code) ? "cancel" : FAIL_DECLINE.includes(code) ? "decline" : "error");
+  // 상자 하나에 제목·본문을 종류에 맞는 키로 (data-t도 바꿔 두어 문구 다시 채우기에서 되돌아가지 않게)
+  const setT = (el, key) => {
+    el.dataset.t = key;
+    el.textContent = get(key) ?? "";
+  };
+  function setPayAlert(kind) {
+    const box = js("pay-alert");
+    show(box, Boolean(kind));
+    if (!kind) return;
+    box.dataset.kind = kind;
+    const k = kind === "error" ? "other" : kind;
+    setT(js("pay-alert-title"), `pay.fail.${k}.title`);
+    setT(js("pay-alert-text"), `pay.fail.${k}.text`);
+  }
+  // 문의처 줄: 값(data.js pay.contact)은 textContent로만. 비어 있으면 줄째 숨긴다 (빈 줄·"undefined" 없음)
+  function renderContact() {
+    const v = String((T.pay && T.pay.contact) || "").trim();
+    js("pay-contact-value").textContent = v;
+    show(js("pay-contact"), Boolean(v));
+  }
+  renderContact();
   function readMyBirth(report) {
     const useSaved = Boolean(state.profile.birth) && !deeperEditing;
     if (useSaved) return state.profile.birth;
@@ -2488,7 +2537,7 @@
   }
   const clearPartner = () => [pName, pYear, pMonth, pDay].forEach((el) => (el.value = ""));
 
-  // 예상 분량·목차 (8단계: 여섯 방 한 권. 방마다 VOL 실측 평균, 6/6 전에는 들른 방 + 남은 방을 모두 넣어 "완성된 책" 기준)
+  // 예상 분량·목차 (8단계: 여섯 방 한 권. 11단계 F3부터 bookVolume() 하나 — 6/6 전에는 남은 방을 표 평균으로 넣어 "완성된 책" 기준)
   const bigNum = (n) => {
     const k = Math.round(n / 1000);
     const B = T.report.bigNum;
@@ -2497,25 +2546,43 @@
     if (k % 10 || k < 10) out.push(fill(B.chun, { n: k % 10 || k }));
     return out.join(B.sep);
   };
+  // (11단계 F3) 분량 원본 하나: 영수증 코드 모양의 결과(c)로 책 글자 수를 센다. 표는 data-volume.js(숫자만, 주제 문단 제외 —
+  // 구매 직후와 재열람이 같은 값). estimate=true(결제 전 미리보기)이면 아직 모르는 칸(안 간 방·원형·나이 구간)을 표의 평균으로 채운다.
+  const BV = window.BOOK_VOLUME;
+  function bookVolume(c, estimate) {
+    const A = BV.avg;
+    const a = c.arch && BV.open[c.arch] != null ? c.arch : null;
+    const v = { open: a ? BV.open[a] : A.open, rooms: 0, timeline: a && c.band != null ? BV.timeline[a][c.band] : A.timeline, match: 0, deep: a ? BV.deep[a] : A.deep, close: a ? BV.close[a] : A.close };
+    for (const r of CHAPTER_ORDER) {
+      const x = c[r];
+      if (x == null) {
+        if (estimate) v.rooms += A[r];
+        continue;
+      }
+      v.rooms += r === "rune" ? BV.rune.base + BV.rune.past[x[0]] + BV.rune.now[x[1]] + BV.rune.next[x[2]] : r === "tzolkin" ? BV.room.tzolkin[x.sign] : BV.room[r][x];
+    }
+    if (c.partner && a) {
+      const [i, j] = [PayCode.ARCHETYPES.indexOf(a), PayCode.ARCHETYPES.indexOf(c.partner)]; // 표의 쌍 이름은 paycode.js 순서
+      v.match = BV.pair[i <= j ? `${a}-${c.partner}` : `${c.partner}-${a}`];
+      [["ogham", c.relOgham], ["decan", c.relDecan], ["tzolkin", c.relTzolkin]].forEach(([r, g]) => g != null && (v.match += BV.rel[`${r}-g${g}`] || 0));
+    } else v.match = a ? BV.map[a] : A.map;
+    v.total = Object.values(v).reduce((s, n) => s + n, 0);
+    return v;
+  }
+  // 표기 한 가지: "약 2만 6천자 · 읽는 데 약 53분" (천 자 반올림, 분당 500자 올림). 다섯 자리(결제 전 속표지·목차 옆·고지, 책 표지·목차)가 이 함수만 부른다
+  const volumeLabel = (n) => fill(T.book.volume, { n: bigNum(n), min: Math.ceil(n / READ_PER_MIN) });
   function plan() {
     const rooms = CHAPTER_ORDER;
     const me = currentArchetype();
     const birth = readMyBirth(false);
     const partner = readPartner(false);
     const p = partner.state === "ok" ? partner.p : null;
-    const rel = p ? relations(mineForRelation(birth), p) : null;
-    const relCount = rel ? Object.values(rel).filter((g) => g != null).length : 0;
-    const vol = {
-      open: VOL.open,
-      rooms: rooms.reduce((s, r) => s + VOL.room[r] + VOL.free[r], 0),
-      timeline: VOL.stage * 3,
-      match: p ? VOL.summary + VOL.matchBody + (p.arch === me ? 1 : 2) * VOL.side + relCount * VOL.matchRoom : VOL.summary * 8,
-      deep: VOL.deep,
-      close: VOL.close,
-    };
-    const total = Object.values(vol).reduce((a, b) => a + b, 0);
-    const seen = rooms.reduce((s, r) => s + VOL.free[r], 0); // 방에서 이미 본 핵심 풀이
-    return { rooms, me, birth, p, vol, total, fresh: total - seen };
+    const rel = p ? relations(mineForRelation(birth), p) : {};
+    const c = Object.assign(myRoomCodes(), { arch: me, band: birth ? ageBand(birth) : null, partner: p ? p.arch : null }, rel);
+    const vol = bookVolume(c, true);
+    const total = vol.total;
+    delete vol.total;
+    return { rooms, me, birth, p, vol, total };
   }
   function renderToc() {
     const P = plan();
@@ -2541,19 +2608,19 @@
     jsAll("deeper-toc-item", deeperScr).forEach((li) => {
       const part = li.dataset.part;
       js("toc-name", li).textContent = names[part];
-      js("toc-vol", li).textContent = fill(part === "close" ? Tt.volClose : Tt.vol, { n: comma(P.vol[part]) });
+      js("toc-vol", li).textContent = fill(part === "close" ? Tt.volClose : Tt.vol, { n: bigNum(P.vol[part]) });
       js("toc-teaser", li).textContent = teaser[part];
     });
-    js("deeper-total").textContent = fill(Tt.total, { n: comma(P.total) });
-    // (10단계 10-3 c) 읽는 시간: 글자 수 ÷ 500(분당 500자 가정)을 올림. 속표지·목차 제목 옆·고지 표 분량 칸 세 곳에 같은 값
-    const readTime = fill(T.deeper.readTime, { n: Math.ceil(P.total / READ_PER_MIN) });
-    jsAll("deeper-read-time", deeperScr).forEach((el) => (el.textContent = el.closest('[data-js="deeper-peek"]') ? readTime : T.common.sep.trim() + " " + readTime));
+    js("deeper-total").textContent = ""; // (11단계 F3) 은퇴: 목차 옆은 deeper-read-time 하나만 (CSS :empty 숨김)
+    // (11단계 F3) 속표지·목차 제목 옆·고지 분량 칸 세 곳에 같은 표기 묶음
+    const label = volumeLabel(P.total);
+    jsAll("deeper-read-time", deeperScr).forEach((el) => (el.textContent = label));
     const peekArch = js("deeper-peek-arch");
     peekArch.textContent = meName;
     show(peekArch, Boolean(meName));
     const D = T.deeper.disclosure;
     js("deeper-items").textContent = fill(D.items, { rooms: P.rooms.length, match: P.p ? D.itemsMatch.partner : D.itemsMatch.map });
-    js("deeper-volume").textContent = fill(D.volume, { n: bigNum(P.total), fresh: bigNum(P.fresh) }) + T.common.sep + readTime;
+    js("deeper-volume").textContent = fill(D.volume, { vol: label });
     return P;
   }
   // 결제는 여섯 문을 모두 지난 뒤에만 (8-1). 그전에는 잠금 블록(핍 + N/6 + 다음 문 열기)만, 동의 체크·결제 버튼은 숨긴다
@@ -2594,8 +2661,8 @@
     js("deeper-consent").checked = false;
     clearPartner();
     readPartner(true);
-    show(js("pay-alert"), payFailed);
-    payFailed = false;
+    setPayAlert(payFailed);
+    payFailed = null;
     js("deeper-price").textContent = fill(T.deeper.disclosure.price, { price: comma(Pay.price) });
     show(js("deeper-vat"), Boolean(T.deeper.disclosure.vat));
     show(js("deeper-minor"), Boolean(T.deeper.disclosure.minor));
@@ -2634,7 +2701,7 @@
   async function startPay() {
     const btn = js("deeper-pay");
     if (!Pay.enabled || btn.disabled) return;
-    show(js("pay-alert"), false);
+    setPayAlert(null);
     const birth = readMyBirth(true);
     if (!birth) return dYear.focus();
     const partner = readPartner(true);
@@ -2677,8 +2744,8 @@
         failUrl: `${base}?pay=fail`,
       });
     } catch (e) {
-      // 결제창을 닫았거나 열지 못함: 오류 코드는 보여 주지 않는다
-      show(js("pay-alert"), true);
+      // 결제창을 닫았거나 열지 못함: 오류 코드는 종류 분류에만 쓰고 보여 주지 않는다
+      setPayAlert(failKind(e && e.code));
     } finally {
       btn.classList.remove("is-loading");
       btn.removeAttribute("aria-busy");
@@ -2716,8 +2783,15 @@
         showReport(result.data);
       } else {
         unsealScr.classList.add("is-error");
+        // (11단계 F4) 서버가 4xx로 거절 = 승인 확인 실패(다시 시도 숨김, 입구로) / 그 밖(네트워크·5xx) = 연결 끊김(다시 시도)
+        const kind = result.status >= 400 && result.status < 500 ? "unconfirmed" : "network";
+        const box = js("unseal-error");
+        box.dataset.kind = kind;
+        setT(js("unseal-error-title"), kind === "unconfirmed" ? "pay.fail.unconfirmed.title" : "unseal.error.title");
+        setT(js("unseal-error-text"), kind === "unconfirmed" ? "pay.fail.unconfirmed.text" : "unseal.error.text");
         js("unseal-error-code").textContent = PayCode.pretty(PayCode.normalize(body.orderId) || "");
-        show(js("unseal-error"), true);
+        renderContact();
+        show(box, true);
       }
     };
     setTimeout(() => {
@@ -2851,7 +2925,6 @@
   const bookPartName = (id) =>
     CHAPTER_ORDER.includes(id) ? fill(T.topbar.room, { num: ROMAN[chapterOf(id) - 1], name: T.rooms[id].name })
       : id === "open" ? T.topbar.bookOpen : id === "flow" ? T.topbar.bookFlow : T.topbar.bookClose;
-  const minutes = (n) => Math.max(1, Math.round(n / READ_PER_MIN));
   function renderReport(data) {
     const rep = data.report;
     const c = rep.codes;
@@ -2927,8 +3000,12 @@
     // 목차: 부마다 읽는 시간, 없는 방은 숨김. 전체 분량
     vol.flow = charsOf([ch.timeline, ch.match, ch.deep]);
     vol.close = charsOf(ch.close.paragraphs);
-    const total = Object.values(vol).reduce((a, b) => a + b, 0);
-    js("book-total").textContent = fill(T.book.total, { n: bigNum(total), min: minutes(total) });
+    // (11단계 F3) 전체 분량은 영수증 코드 속 결과로 bookVolume() 하나에서 (주제 문단 제외 → 구매 직후 = 재열람)
+    const volLabel = volumeLabel(bookVolume(c, false).total);
+    js("book-total").textContent = volLabel;
+    // 재열람 등으로 룬·시빌라 주제 문단이 빠진 책이면 1쪽에 한 줄
+    const noTopic = ["rune", "sibyl"].some((r) => byRoom[r] && !topicTail(byRoom[r], c));
+    show(js("book-topic-note"), noTopic);
     jsAll("book-toc-item").forEach((li) => {
       const id = li.dataset.part;
       show(li, vol[id] != null);
@@ -2938,7 +3015,7 @@
       const res = js("book-toc-result", li);
       if (res) res.textContent = headOf(id, c).title;
     });
-    js("report-meta").textContent = fill(R.meta, { rooms: present.length, match: c.partner ? R.metaMatch.partner : R.metaMatch.map, n: comma(total) });
+    js("report-meta").textContent = fill(R.meta, { rooms: present.length, match: c.partner ? R.metaMatch.partner : R.metaMatch.map, vol: volLabel });
     js("report-title").textContent = fill(R.title, { me, n: present.length });
     book = null; // 새 내용: 다음 enter.report에서 쪽을 다시 나눈다 (표지부터)
     js("book-reader").dataset.view = "cover";
@@ -3057,8 +3134,12 @@
     });
     const flowName = bookPartName("flow");
     const p2 = (key, title, blocks) => C.push({ key, part: "flow", label: flowName, run: [B.part2.num, title], start: true, blocks: [openBlk(chOpening(title)), ...blocks] });
-    C.push({ key: "part2", part: "flow", label: flowName, run: [B.part2.num], cls: "book-page--half", start: true, blocks: [openBlk(partOpening(B.part2.num, B.part2.title))] });
-    p2("timeline", B.parts.timeline, unitsOf(js("report-timeline", src)));
+    // (11단계 F1 ④) 제2부 표제 + "시기별 흐름" 머리를 한 쪽(book-page--part-open)에. 첫 구간이 들어가면 이어 담는다(안 들어가면 .is-solo)
+    // (F1 ③) 시기별 흐름은 구간(stage)마다 새 쪽, 네 항목이 안 들어가면 2 + 2
+    const halfHead = opening("half", `<p class="book-opening__kicker">${esc(B.part2.num)}</p><h2 class="book-opening__title">${esc(B.part2.title)}</h2>`);
+    const tlHead = mk("div", "book-opening book-opening--part", `<h3 class="book-opening__title">${esc(B.parts.timeline)}</h3>`);
+    const stages = unitsOf(js("report-timeline", src)).map((u) => Object.assign(u, { kind: "stage" }));
+    C.push({ key: "part2", part: "flow", label: flowName, run: [B.part2.num, B.parts.timeline], firstCls: "book-page--part-open", start: true, stages: true, blocks: [openBlk(halfHead), openBlk(tlHead), ...stages] });
     p2("match", B.parts.match, [{ kind: "unit", node: stripHooks(js("report-match-pair", src).cloneNode(true)) }, ...parasOf(js("report-match", src)), ...unitsOf(js("report-match-rooms", src))]);
     const deep = [];
     ["report-deep-strength", "report-deep-shadow", "report-deep-growth"].forEach((k) => {
@@ -3079,8 +3160,8 @@
   }
 
   const over = (bd) => bd.scrollHeight > bd.clientHeight + 1;
-  function newPage(ch) {
-    const p = mk("article", "book-page" + (ch.cls ? " " + ch.cls : ""));
+  function newPage(ch, first) {
+    const p = mk("article", "book-page" + (ch.cls ? " " + ch.cls : "") + (first && ch.firstCls ? " " + ch.firstCls : ""));
     p.dataset.js = "book-page";
     p.tabIndex = -1;
     if (ch.part) p.dataset.part = ch.part;
@@ -3116,10 +3197,62 @@
       }
       return [null, false]; // 빈 쪽에도 한 어절이 안 들어가는 극단: 그대로 둔다
     }
-    node.textContent = words.slice(0, lo).join("").trimEnd();
+    // (11단계 F1 ①) 들어가는 범위 안의 마지막 문장 끝에서 자른다. 문장 끝이 없으면(한 문장이 남은 칸보다 김) 어절 경계 — 개수는 F1STAT.wordCut
+    let k = lo;
+    while (k > 0 && !SENT_END.test(words.slice(0, k).join("").trimEnd())) k--;
+    if (k === 0) {
+      k = lo;
+      F1STAT.wordCut++;
+    }
+    node.textContent = words.slice(0, k).join("").trimEnd();
     const rest = node.cloneNode(false);
-    rest.textContent = words.slice(lo).join("");
+    rest.textContent = words.slice(k).join("");
     return [rest, true];
+  }
+  const SENT_END = /[.?!…][”’"')\]」』]*$/;
+  const F1STAT = { wordCut: 0, longStage: 0 }; // tests.md 보고용 (쪽 나누기마다 새로 센다)
+  const isHead = (c) => c.classList.contains("book-opening");
+  const onlyHeads = (bd) => [...bd.children].every(isHead);
+  // 본문 글자 수 (공백 포함, 머리 장식 제외, 연속 공백은 하나로)
+  const bodyChars = (bd) => {
+    const c = bd.cloneNode(true);
+    c.querySelectorAll(".book-opening").forEach((o) => o.remove());
+    return [...c.textContent.replace(/\s+/g, " ").trim()].length;
+  };
+  // 빈 쪽 하나에 통째로 들어가는 단락인가 / 이 쪽에 남은 줄 수
+  const lineH = (n) => parseFloat(getComputedStyle(n).lineHeight) || 30;
+  const roomOf = (bd) => {
+    const cs = getComputedStyle(bd);
+    return bd.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  };
+  const fitsEmpty = (node, bd) => node.getBoundingClientRect().height + (parseFloat(getComputedStyle(node).marginTop) || 0) <= roomOf(bd);
+  const linesLeft = (node, bd) => {
+    const r = bd.getBoundingClientRect();
+    const bottom = r.top + bd.clientHeight - parseFloat(getComputedStyle(bd).paddingBottom);
+    return Math.floor((bottom - node.getBoundingClientRect().top) / lineH(node));
+  };
+  // 시기별 흐름 구간 하나 → [나이 + 일 + 관계] / [나이(이어서) + 배움 + 이동]
+  function splitStage(node) {
+    const li = node.firstElementChild;
+    const age = li && li.querySelector(".timeline__age");
+    const dl = li && li.querySelector(".timeline__areas");
+    if (!age || !dl || dl.children.length < 4) return null;
+    const kids = [...dl.children];
+    const half = (list, cont) => {
+      const w = node.cloneNode(false);
+      const l = li.cloneNode(false);
+      const a = age.cloneNode(true);
+      if (cont) {
+        a.classList.add("is-cont");
+        a.textContent = age.textContent + T.common.sep + T.book.timelineCont;
+      }
+      const d = dl.cloneNode(false);
+      list.forEach((k) => d.append(k.cloneNode(true)));
+      l.append(a, d);
+      w.append(l);
+      return w;
+    };
+    return [half(kids.slice(0, 2)), half(kids.slice(2), true)];
   }
   // 빈 쪽보다 큰 unit → 자식마다 같은 껍데기로 감싼 작은 unit들 (자식이 하나면 한 겹 더 들어간다)
   function splitUnit(n) {
@@ -3159,37 +3292,84 @@
     return out;
   }
   const KEEP_WITH_NEXT = ".timeline__age";
-  // (R53-2) 장 끝 쪽이 앞 쪽에서 이어진 단락 한 줄뿐이면, 앞 쪽 단락 끝에서 한 줄 분량 어절을 함께 넘긴다 (앞 쪽은 2줄 이상 남김)
-  function fixWidow(pages, from) {
-    if (pages.length - from < 2) return;
-    const bd = js("book-page-body", pages[pages.length - 1].el);
-    const rest = bd.firstElementChild;
-    if (bd.children.length !== 1 || !rest.matches("p.is-cont") || rest.children.length) return;
-    const prev = js("book-page-body", pages[pages.length - 2].el).lastElementChild;
-    if (!prev || prev.tagName !== "P" || prev.children.length) return;
-    const lh = parseFloat(getComputedStyle(prev).lineHeight);
-    const lines = (e) => Math.round(e.getBoundingClientRect().height / lh);
-    if (!lh || lines(rest) > 1) return;
-    const before = lines(prev);
-    if (before < 3) {
-      // 앞 쪽 조각도 1~2줄뿐: 한 줄을 넘기면 앞 쪽에 외톨이 줄이 남으므로 단락을 통째로 다음 쪽으로
-      if (prev.parentElement.children.length < 2) return;
-      rest.textContent = prev.textContent.trimEnd() + " " + rest.textContent;
-      rest.className = prev.className;
-      prev.remove();
-      return;
+  // (11단계 F1 ②, R53-2 대체) 장의 마지막 쪽 글이 50자 미만이면 앞 쪽의 마지막 블록(단락 또는 나뉜 단락의 조각)을 함께 넘긴다.
+  // 여전히 50자 미만이면 한 블록 더. 앞 쪽이 장 머리만 남게 되거나, 넘긴 뒤 마지막 쪽이 넘치면 멈춘다(되돌림)
+  const SHORT_END = 50;
+  function fixShortEnd(pages, from) {
+    for (let guard = 0; guard < 6; guard++) {
+      if (pages.length - from < 2) return;
+      const lastBd = js("book-page-body", pages[pages.length - 1].el);
+      if (bodyChars(lastBd) >= SHORT_END) return;
+      const prevBd = js("book-page-body", pages[pages.length - 2].el);
+      const blk = prevBd.lastElementChild;
+      if (!blk || isHead(blk)) return;
+      const left = [...prevBd.children].filter((c) => c !== blk);
+      if (!left.length || left.every(isHead)) return;
+      const first = lastBd.firstElementChild;
+      if (first && first.matches("p.is-cont") && blk.tagName === "P" && !blk.children.length && !first.children.length) {
+        // 같은 단락의 앞 조각 + 뒤 조각 → 한 단락으로 합쳐 마지막 쪽에
+        const [oldText, oldCls] = [first.textContent, first.className];
+        first.textContent = blk.textContent.trimEnd() + " " + first.textContent;
+        first.className = blk.className;
+        blk.remove();
+        if (over(lastBd)) {
+          [first.textContent, first.className] = [oldText, oldCls];
+          prevBd.append(blk);
+          return;
+        }
+      } else {
+        lastBd.prepend(blk);
+        if (over(lastBd)) {
+          prevBd.append(blk);
+          if (!moveTail(blk, lastBd)) return; // 통째로는 넘치면 끝 문장부터 하나씩만 함께 넘긴다
+        }
+      }
     }
-    const words = prev.textContent.match(/\S+\s*/g) || [];
-    let k = words.length;
-    while (k > 1 && lines(prev) > before - 1) {
+  }
+  // 앞 쪽 단락의 끝 문장들을 마지막 쪽 맨 앞으로(문장 끝에서만 자른다). 마지막 쪽이 50자 이상이 되거나 넘치기 직전까지
+  function moveTail(blk, lastBd) {
+    if (blk.tagName !== "P" || blk.children.length) return false;
+    const text = blk.textContent;
+    const sents = text.match(/[^]*?[.?!…]+[”’"')]」』]*(?:s+|$)/g);
+    if (!sents || sents.join("") !== text || sents.length < 2) return false;
+    const first = lastBd.firstElementChild;
+    const join = Boolean(first && first.matches("p.is-cont") && !first.children.length); // 마지막 쪽이 blk의 뒷조각으로 시작
+    const orig = join ? first.textContent : "";
+    let frag = join ? first : null;
+    let k = sents.length;
+    const set = (n) => {
+      blk.textContent = sents.slice(0, n).join("").trimEnd();
+      const tail = sents.slice(n).join("").trimEnd();
+      frag.textContent = join ? (tail ? tail + " " + orig : orig) : tail;
+    };
+    let moved = false;
+    while (k > 1 && bodyChars(lastBd) < SHORT_END) {
+      if (!frag) {
+        frag = blk.cloneNode(false);
+        frag.classList.add("is-cont");
+        frag.classList.remove("has-dropcap");
+        lastBd.prepend(frag);
+      }
+      set(k - 1);
+      if (over(lastBd)) {
+        set(k);
+        break;
+      }
       k--;
-      prev.textContent = words.slice(0, k).join("").trimEnd();
+      moved = true;
     }
-    rest.textContent = words.slice(k).join("").trimEnd() + " " + rest.textContent;
+    if (!moved) {
+      blk.textContent = text;
+      if (frag && !join) frag.remove();
+      else if (join) first.textContent = orig;
+    }
+    return moved;
   }
 
   function paginate() {
     const t0 = performance.now();
+    F1STAT.wordCut = 0;
+    F1STAT.longStage = 0;
     tocItems.forEach((li) => tocList.append(li)); // 옮겨 쓴 노드를 원본 자리로
     src.prepend(srcToc);
     src.prepend(srcReceipt);
@@ -3205,15 +3385,103 @@
       chapStart[ch.key] = pages.length;
       let bd = null;
       const start = () => {
-        const page = newPage(ch);
-        if (ch.start && pages.length === chapStart[ch.key]) page.classList.add("is-chapter-start");
+        const first = pages.length === chapStart[ch.key];
+        const page = newPage(ch, first);
+        if (ch.start && first) page.classList.add("is-chapter-start");
         bd = js("book-page-body", page);
         pages.push({ el: page, part: ch.part, chap: ch.key, label: ch.label });
+      };
+      // (F1 ③) 구간 하나를 이 쪽에: 통째 → 아니면 2 + 2(앞 반쪽이 이 쪽, 뒤 반쪽은 새 쪽). 아무것도 못 놓으면 false
+      const fitStage = (node) => {
+        bd.append(node);
+        if (!over(bd)) return true;
+        node.remove();
+        const h = splitStage(node);
+        if (!h) return false;
+        bd.append(h[0]);
+        if (over(bd)) {
+          h[0].remove();
+          return false;
+        }
+        start();
+        bd.append(h[1]);
+        if (!over(bd)) return true;
+        h[1].remove();
+        flowStage(node, 2, true);
+        return true;
+      };
+      // (F1 ③ 아주 긴 항목) 항목을 차례로 담고, 넘치는 항목은 그 안에서 문장 끝으로 나눠 뒷부분을 다음 쪽 첫 항목으로.
+      // 쪽마다 앞 항목의 뒷부분 + 다음 항목이 함께 보이게 한다. from = 시작 항목 번호, cont = 나이 제목에 "이어서"
+      const flowStage = (node, from, cont) => {
+        F1STAT.longStage++;
+        const li = node.firstElementChild;
+        const age = li.querySelector(".timeline__age");
+        const dl = li.querySelector(".timeline__areas");
+        let box = null;
+        const open = (c) => {
+          const w = node.cloneNode(false);
+          const l = li.cloneNode(false);
+          const a = age.cloneNode(true);
+          if (c) {
+            a.classList.add("is-cont");
+            a.textContent = age.textContent + T.common.sep + T.book.timelineCont;
+          }
+          box = dl.cloneNode(false);
+          l.append(a, box);
+          w.append(l);
+          bd.append(w);
+        };
+        open(cont);
+        const q = [...dl.children].slice(from).map((x) => x.cloneNode(true));
+        while (q.length) {
+          const it = q.shift();
+          box.append(it);
+          if (!over(bd)) continue;
+          const dd = it.querySelector("dd");
+          const [rest, cut] = dd && !dd.children.length ? splitPara(dd, bd) : [null, false];
+          if (cut && rest) {
+            const r = it.cloneNode(false);
+            r.classList.add("is-cont");
+            r.append(rest);
+            q.unshift(r);
+            start();
+            open(true);
+            continue;
+          }
+          if (rest && !rest.parentNode) it.append(rest);
+          if (box.children.length > 1) {
+            it.remove();
+            q.unshift(it);
+            start();
+            open(true);
+          }
+        }
+      };
+      const placeStage = (node) => {
+        if (!onlyHeads(bd)) start(); // 구간마다 새 쪽 (부 표제 쪽에서는 이어 담기를 먼저 해 본다)
+        if (fitStage(node)) return;
+        if (bd.children.length) {
+          bd.parentElement.classList.add("is-solo"); // 첫 구간이 안 들어감 → 부 표제 쪽은 가운데 정렬 표제지
+          start();
+          if (fitStage(node)) return;
+        }
+        flowStage(node, 0, false); // 아주 긴 항목: 빈 쪽에도 두 항목이 안 들어감
       };
       const place = (node, kind) => {
         bd.append(node);
         if (!over(bd)) return;
         if (kind === "p" && !node.children.length) {
+          // (F1 ①) 단락 끝에서만 넘긴다: 빈 쪽 하나에 들어가는 단락이면 통째로 다음 쪽. 남은 칸이 3줄 미만이어도 다음 쪽에서 시작.
+          // 장 머리만 있는 쪽에서는 넘기지 않고 이 쪽에서 시작한다(머리만 남는 쪽 금지)
+          const others = [...bd.children].filter((c) => c !== node);
+          // 넘기면 이 쪽 글이 50자 미만으로 남는 경우(장 머리 + 짧은 단락)는 넘기지 않고 이 쪽에서 문장 끝으로 나눈다(F1 ②와 같은 기준)
+          const keep = bodyChars(bd) - [...node.textContent.replace(/s+/g, " ").trim()].length;
+          if (others.length && !others.every(isHead) && keep >= SHORT_END && (fitsEmpty(node, bd) || linesLeft(node, bd) < 3)) {
+            node.remove();
+            start();
+            place(node, "p");
+            return;
+          }
           const [rest, cont] = splitPara(node, bd);
           if (!rest) return;
           start();
@@ -3240,11 +3508,12 @@
       let afterOpen = false;
       ch.blocks.forEach((b) => {
         if (b.kind === "toc") return placeToc(start, () => bd);
+        if (b.kind === "stage") return placeStage(b.node);
         if (b.kind === "p" && afterOpen) b.node.classList.add("has-dropcap");
         afterOpen = b.kind === "open";
         place(b.node, b.kind);
       });
-      fixWidow(pages, chapStart[ch.key]);
+      if (ch.start && !ch.stages) fixShortEnd(pages, chapStart[ch.key]);
       chapLen[ch.key] = pages.length - chapStart[ch.key];
     });
     const total = pages.length;
@@ -3265,6 +3534,8 @@
     seen.clear();
     book = { pages, chapStart, chapLen, partStart, partEnd, key: sizeKey() };
     reader.dataset.pagedMs = Math.round(performance.now() - t0); // 점검용 (e2e: 쪽 나누기 시간)
+    reader.dataset.wordCut = F1STAT.wordCut; // 점검용 (F1: 어절 경계로 넘긴 곳 수 · 아주 긴 시기별 항목 수)
+    reader.dataset.longStage = F1STAT.longStage;
   }
   // 목차 쪽: 넘치면 넘친 항목을 다음 쪽의 새 목록으로 옮긴다 (640 높이에서 2쪽)
   function placeToc(start, getBd) {
@@ -3532,7 +3803,7 @@
     if (ret === "fail") {
       stripQuery();
       if (Pay.enabled) {
-        payFailed = true;
+        payFailed = failKind(String(qs.get("code") || "")); // failUrl의 code(토스 오류 코드)로 종류만 정한다
         go("deeper", { instant: true });
       }
     }

@@ -294,32 +294,12 @@ test("7-4 방별 온전한 이야기: 모든 결과에 도달, 빈 문단 없음
       else assert.equal(r.topics, undefined);
     }
 });
-test("8-1 결제 전 분량: app.js VOL.room(책 제1부 한 방 새 문장) = 방별 실측 평균(±3%)", () => {
-  const src = require("fs").readFileSync(path.join(P, "app.js"), "utf8");
-  const m = /room: \{ ([^}]+) \}/.exec(src);
-  const VOLROOM = Object.fromEntries(m[1].split(",").map((x) => x.trim().split(": ")).map(([k, v]) => [k, Number(v)]));
-  const L = (v) => (typeof v === "string" ? [...v].length : Array.isArray(v) ? v.reduce((a, x) => a + L(x), 0) : 0);
-  const runeAvg = () => { // 룬은 돌 세 개 조합: 표본(겹치지 않는 조합 가운데 9개 중 1개)
-    let s = 0, k = 0;
-    for (let a = 0; a < 24; a++) for (let b = 0; b < 24; b++) for (let d = 0; d < 24; d++) {
-      if (a === b || b === d || a === d || (a * 7 + b * 3 + d) % 9) continue;
-      const c = onlyRoom("rune", 0); c.rune = [a, b, d];
-      const r = core.buildReport(c).chapters.find((x) => x.id === "rooms").rooms[0];
-      s += L([r.ch1Rest, r.ch2, r.ch3, r.ch4, r.hidden.paragraphs]) + L(Object.values(r.topics)) / Object.keys(r.topics).length; k++;
-    }
-    return s / k;
-  };
-  for (const [room, n] of Object.entries(FULL_N)) {
-    let t = 0;
-    for (let i = 0; i < n; i++) {
-      const r = core.buildReport(onlyRoom(room, i)).chapters.find((c) => c.id === "rooms").rooms[0];
-      const topic = r.topics ? L(Object.values(r.topics)) / Object.keys(r.topics).length : 0;
-      t += L([r.ch1Rest, r.ch2, r.ch3, r.ch4, r.hidden.paragraphs]) + topic;
-    }
-    const avg = room === "rune" ? runeAvg() : t / n;
-    assert.ok(Math.abs(avg - VOLROOM[room]) / avg <= 0.03, `${room}: 실측 ${Math.round(avg)} / VOL ${VOLROOM[room]}`);
-    console.log(`  ${room}: 실측 평균 ${Math.round(avg)}자 · VOL ${VOLROOM[room]}`);
-  }
+test("11-6 F3 분량 원본: data-volume.js(숫자만) = 지금 유료·공개 문구로 다시 센 표, 무작위 3000조합 표 합계 = 실제 글자 수", () => {
+  const r = require("child_process").spawnSync(process.execPath, [path.join(__dirname, "make-volume.js"), "--check"], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /최신/);
+  const src = require("fs").readFileSync(path.join(P, "data-volume.js"), "utf8");
+  assert.ok(!/"[^"]*[가-힣][^"]*"/.test(src.split(String.fromCharCode(10)).filter((l) => !l.startsWith("//")).join(String.fromCharCode(10))), "표에 한글 문장 없음(숫자만)");
 });
 test("7-4 무료 파일에 유료 칸 없음 (공개 data-*.js)", () => {
   const vm = require("vm");

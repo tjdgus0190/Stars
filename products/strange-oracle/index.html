@@ -2199,15 +2199,15 @@
       <!-- (11단계 11-5·F6) 결제 꺼짐 + 6/6: 책 카드(story-paid) 대신 이 한 줄만. 가격·날짜·버튼·링크·"곧" 없음. 그 밖에는 .is-hidden -->
       <p class="story-book-note is-hidden" data-js="story-book-note" data-t="story.bookNote">[초안] 이 이야기를 더 길게 엮은 한 권의 책을 준비하고 있어요.</p>
 
-      <!-- 상태: 기본 = "곧 열려요"(결제 꺼짐) / .is-on = 결제 켜짐(버튼 "무엇이 들어 있는지 보기") / .is-owned = 이 탭에 영수증 코드 있음("내 리포트 다시 보기") -->
-      <aside class="paid-card" data-js="story-paid">
+      <!-- 상태: 결제 꺼짐 = 카드째 .is-hidden(11-5) / .is-on = 결제 켜짐(버튼 "무엇이 들어 있는지 보기") / .is-owned = 이 탭에 영수증 코드 있음("내 책 다시 펴기") -->
+      <aside class="paid-card is-hidden" data-js="story-paid">
         <svg class="paid-card__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
         <p class="eyebrow" data-t="story.paid.eyebrow"></p>
         <h2 class="paid-card__title" data-t="story.paid.title"></h2>
         <p class="paid-card__lead" data-t="story.paid.lead"></p>
         <ul class="paid-card__list" data-js="story-paid-list"></ul>
-        <p class="paid-card__price"><span data-js="story-paid-price" data-t="story.paid.price"></span> · <span data-js="story-paid-status" data-t="story.paid.status"></span></p>
-        <button class="btn btn--secondary btn--block" type="button" disabled data-js="story-paid-go" data-t="story.paid.go"></button>
+        <p class="paid-card__price"><span data-js="story-paid-price" data-t="story.paid.price"></span> · <span data-js="story-paid-status" data-t="story.paid.statusOn"></span></p>
+        <button class="btn btn--secondary btn--block" type="button" data-js="story-paid-go" data-t="story.paid.goOn"></button>
         <div class="paid-card__reopen is-hidden" data-js="story-paid-reopen">
         <form class="receipt-open" data-js="receipt-open" novalidate>
           <label class="receipt-open__label" for="receipt-open-story" data-t="receipt.open.label">영수증 코드로 열기</label>
@@ -2423,8 +2423,8 @@
       <!-- (11단계 F4) data-kind = cancel(내가 닫음) | decline(카드사·한도 거절) | error(그 밖의 결제창 오류). JS가 kind에 맞는 제목·본문을 넣는다.
            다시 시도 = 바로 아래 결제 버튼(그대로). 문의처 줄은 이 경우들에는 그리지 않는다(승인 실패·연결 끊김은 봉인 해제 화면 unseal-error) -->
       <div class="pay-alert is-hidden" data-js="pay-alert" data-kind="decline" role="alert">
-        <p class="pay-alert__title" data-js="pay-alert-title" data-t="pay.fail.title">결제가 완료되지 않았어요. 돈은 나가지 않았어요.</p>
-        <p class="pay-alert__text" data-js="pay-alert-text" data-t="pay.fail.text">결제창을 닫았거나 연결이 잠시 끊겼을 수 있어요. 아래 버튼으로 다시 시도해 주세요.</p>
+        <p class="pay-alert__title" data-js="pay-alert-title" data-t="pay.fail.other.title">결제가 완료되지 않았어요. 돈은 나가지 않았어요.</p>
+        <p class="pay-alert__text" data-js="pay-alert-text" data-t="pay.fail.other.text">결제창을 닫았거나 연결이 잠시 끊겼을 수 있어요. 아래 버튼으로 다시 시도해 주세요.</p>
       </div>
 
       <!-- (8단계) 6/6 전: 이 블록만 보이고(.is-hidden 해제) 동의 체크(deeper-consent-row)·결제 버튼(pay-cta)은 .is-hidden -->
@@ -2824,6 +2824,7 @@
   <script src="data-decans.js"></script>
   <script src="data-tzolkin.js"></script>
   <script src="data-oracles.js"></script>
+  <script src="data-volume.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js" integrity="sha384-LTVHvxfbG3XHla4Lu0C0s9U18B2sBOuzJIeOoVHm2t05SOOORvMbBMEVjXrGau9g" crossorigin="anonymous"></script>
   <script src="astro.js"></script>
   <script src="calc.js"></script>

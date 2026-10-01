@@ -32,6 +32,18 @@ for (const slug of PRODUCTS) {
   }
   SITE[slug] = url;
 }
+// (strange-oracle 11단계 F4) 결제 문의처 pay.contact가 비어 있으면 경고 한 줄 (결제 실패 안내에 문의처 줄이 그려지지 않는다)
+for (const slug of PRODUCTS) {
+  const w = {};
+  try {
+    require("vm").runInNewContext(fs.readFileSync(path.join(ROOT, "products", slug, "data.js"), "utf8"), { window: w });
+  } catch (e) {
+    continue;
+  }
+  const pay = w.TEXT && w.TEXT.pay;
+  if (pay && "contact" in pay && !String(pay.contact || "").trim())
+    console.log(`  경고: products/${slug}/data.js의 pay.contact(결제 문의처)가 비어 있어 결제 실패 안내에 문의처 줄이 나오지 않습니다 (결제를 켜기 전에 채울 것)`);
+}
 
 function copyDir(src, dest, exclude = new Set()) {
   fs.mkdirSync(dest, { recursive: true });

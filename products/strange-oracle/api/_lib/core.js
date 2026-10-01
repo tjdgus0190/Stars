@@ -40,7 +40,7 @@ const C = {
 };
 
 const PRICE = 3900;
-const ORDER_NAME = "낯선 점술관 · 더 깊은 이야기";
+const ORDER_NAME = "낯선 점술관 · 한 권의 책";
 const TOSS_API = "https://api.tosspayments.com";
 const ARCH = PayCode.ARCHETYPES;
 const byCode = (list) => Object.fromEntries(list.map((e) => [e.code, e]));

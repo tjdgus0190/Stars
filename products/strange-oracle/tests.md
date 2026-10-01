@@ -457,3 +457,68 @@
 - `e2e-paid.js reduced`: 119 PASS / 0 FAIL (새 검사: 읽는 시간, 책 두 쪽, 영수증 칸의 이어가기 코드 거부, 이어가기 칸의 영수증 코드 거부, 복원 → 6/6 → 생일 다시 입력 → 모의 결제 → 책, 코드가 저장소·요청·console에 없음).
 - `e2e-flow.js reduced`: 111 PASS / 0 FAIL (새 검사: 넣기·만들기·오류 3종·Enter, 360x640 경고 위치, 3/6 한 줄, 링크 복사 성공·막힘, 1~6방 왕복, 복원 상태 방 화면, 내 정보 지우기, 이름 미리 채움, lang, 죽은 마크업 0).
 - 미확인·미실행: motion 모드 e2e, site.url에 실제 값을 넣은 전체 빌드(og 함수 단위 시험으로만 확인), 공유 카드에 주소 줄이 그려진 모습, 실제 기기의 클립보드·공유 시트(files+url), 카카오 공유, 480px 화면, 화면낭독기.
+
+## 11단계 묶음 1: 결제까지의 길 — off에서 보이는 것 (2026-10-01, developer, 작업 C2)
+범위: H3·H4·H5(책 카드 제외)·11-5·F1~F6. 묶음 2(11-2·11-3·H1·H2·11-4)는 하지 않았다. `pay.earlyPurchase`는 기획서 11-3(묶음 2) 소속이라 넣지 않았다.
+
+### F2 유료 문구 옛 이름 (api/_paid, 주석 제외 23곳) · ORDER_NAME
+- close.js 8곳 "이 리포트를 다시 펼쳐" → "이 책을 다시 펼쳐"(원형 8개 닫는 글 전부)
+- open.js 10곳 "이 리포트가/에/에서/ 끝까지" → "이 책이/에/에서/ 끝까지"(조사 받침에 맞춤)
+- deep.js 1곳 "이번 리포트는" → "이번 책은"
+- hidden-tzolkin.js 4곳 "무료 리포트에서/의" → "무료 결과에서/의"
+- "늘먼저": 6방 전체 0건(이미 "늘 먼저"). "소장판" 0건. 남은 "더 깊은 이야기" 1곳 = full-decan.js 463행 "더 깊은 이야기를 꺼내놓게"(일반 표현, 상품 이름 아님 — 그대로, copywriter 판단). 주석의 "유료 리포트 문구"는 그대로.
+- api/_lib/core.js `ORDER_NAME` "낯선 점술관 · 더 깊은 이야기" → "낯선 점술관 · 한 권의 책". e2e-paid가 /api/config의 orderName을 확인.
+
+### F3 분량 원본 하나
+- `data-volume.js`(새, 숫자만): `tools/strange-oracle/make-volume.js`가 core.buildReport + 공개 data로 방 결과별·원형별·나이 구간별·궁합 쌍별 글자 수를 세어 만든다. 룬은 돌 자리(지나온·지금·다가올)별 몫 + 기준값. 주제 단락 제외.
+- 대조: 무작위 3,000조합(옛 영수증 = 방 6개 미만 300건 포함) 표 합계 = 실제 책 글자 수, 불일치 0. 단위 시험 `api.test.js` "11-6 F3"(`make-volume.js --check`)가 표가 최신인지 본다 → **유료 문구를 고치면 make-volume.js를 다시 실행**.
+- app.js `bookVolume(c, estimate)` 하나 + `volumeLabel()` 표기 "약 2만 6천자 · 읽는 데 약 53분"(천 자 반올림, 500자/분 올림). 다섯 자리(결제 전 속표지·목차 옆·고지 분량 칸, 책 표지 report-meta, 책 목차 book-total)가 모두 이 함수. `deeper-total`은 비움. 옛 VOL 평균표·`deeper.readTime`·`deeper.toc.total` 삭제, "새 문장 약 N자" 표기 삭제.
+- 재열람에 주제 단락이 없으면 1쪽 `book-topic-note` 보임. e2e: 결제 전 = 책 표지 = 목차 = 새 탭 재열람 표기 글자까지 같음, 실제 글자 수와 ±15% 안.
+
+### F4 토스 오류 코드 → 안내 종류 (토스페이먼츠 공식 문서 오류 코드 페이지 docs.tosspayments.com/reference/error-codes, 2026-10-01 웹으로 확인. 페이지 요약을 읽은 것이라 전체 목록 대조는 미확인)
+| 종류 | 코드 |
+|---|---|
+| ① cancel(내가 닫음) | PAY_PROCESS_CANCELED, USER_CANCEL(옛 SDK 이름, 보험) |
+| ② decline(카드사·한도 거절) | REJECT_CARD_COMPANY, REJECT_CARD_PAYMENT, REJECT_ACCOUNT_PAYMENT, INVALID_REJECT_CARD, INVALID_STOPPED_CARD, EXCEED_MAX_PAYMENT_AMOUNT, EXCEED_MAX_DAILY_PAYMENT_COUNT, EXCEED_MAX_ONE_DAY_AMOUNT |
+| ③ error(그 밖) | 표에 없는 모든 코드(PAY_PROCESS_ABORTED, INVALID_CARD_NUMBER, NOT_FOUND_PAYMENT_SESSION 등) |
+| ④ unconfirmed | 봉인 해제 confirm이 4xx (다시 시도 숨김, 입구로) |
+| 연결 끊김 network | confirm이 네트워크 실패·5xx (다시 시도) |
+- 코드는 failUrl `code` 또는 SDK 예외 `e.code`에서 분류에만 쓰고 화면·저장소·분석에 두지 않는다. 문의처 `pay.contact`(data.js 맨 위 `pay` 묶음, 기본 "")는 textContent로만, 비면 줄째 숨김. build-dist가 빈 값 경고. 결제 띠·실패 문구(`pay`)를 data.js 맨 위 설정 묶음으로 옮겼다(키 경로 그대로).
+
+### F5 sessionStorage에 실제로 들어가는 값 (app.js 확인)
+| 키 | 값 |
+|---|---|
+| `strange-oracle` | profile = 이름, 생년월일, 태어난 시각(별의 방에서 넣었을 때) / visits = 방마다 결과 유형 코드·원형 태그, 룬·시빌라는 고른 주제 키 / restored(참·거짓) |
+| `strange-oracle-receipt` | 영수증 코드 |
+| `strange-oracle-bookmark` | 책에서 읽던 쪽 번호(숫자) |
+- 저장하지 않음: 궁합 상대 이름·생년월일(코드로 바꾼 뒤 입력칸 비움), 시빌라 질문 글, 결제 전 화면에서 새로 넣은 내 생년월일(이번 계산에만), 이어가기 코드 글자. (묶음 2의 `pendingSeal`·`sealedRooms`는 아직 없음)
+- legal/privacy.html 제2조: 앞 문장 "생년월일, 궁합 상대의 이름·생년월일 같은 입력값은 … 잠시 저장되어" → "이름, 생년월일, 태어난 시각 같은 입력값은 … 잠시 저장되어", 목록에 "잠시 저장하는 것"·"저장하지 않는 것(궁합 상대·시빌라 질문)" 두 줄 추가. ◯◯ 빈칸·템플릿 표시는 그대로. (copywriter가 C3에서 문장을 다듬을 수 있음)
+
+### 11-5 결제 꺼짐
+- 나의 이야기 책 카드 통째 숨김, 6/6에서만 `story-book-note` 한 줄. `story.paid.status/go`("곧 열려요") 키와 마크업 `disabled` 삭제, 카드 기본 `.is-hidden`. 입구 FAQ 유료 문답 숨김(FAQ JSON-LD는 index.html에 없음).
+- off에서 유료·"책" 말이 남는 곳(목록): 입구 칩 "여섯 방 무료"(가격·결제 없음), title·description "무료 운세"(가격·결제 없음), 6/6 책 한 줄(운영자 결정 38번 전제). 가격·"결제"가 보이는 곳 0(e2e-flow 입구·나의 이야기 3/6·6/6·결과 6곳 innerText 검사).
+- **주의**: 유료 문답을 숨기면 보이는 FAQ 답 합계가 278자(<300, CLAUDE.md 7장). FAQ "결과는 어떻게 읽나요?" 답을 [초안] 견본으로 26자 늘려 304자 → copywriter 확정 필요.
+
+### H3·H4·H5
+- H3 `renderSway`: 결과 6곳(화면 들어올 때)·입구. 마친 방 1~5개만, N = 6 − 지금 마친 방 수.
+- H4 `bridges` 오검~룬 5개를 디자인 견본 질문 1문장([초안])으로 교체(옛 2문장 문구는 지움). 시빌라 다리는 그대로.
+- H5 3/6: `#screen-story.is-half`, `story-half` 보임, `story-share` → btn--secondary(주 버튼은 다음 문 하나), `story-half-next`는 결과 화면 다음 문과 같은 openNextDoor(상징 떠오름 → 촐킨, 강제 순서 그대로). 입구 `hub-story-label` 3/6이면 `hub.sofar.half`.
+
+### F1 쪽 나누기 (결정 53 리더) — 측정 `tools/strange-oracle/page-count.js`(표본 영수증 3개, 원형 warrior·sage·caregiver)
+| 표본 | 360x800 전 → 후 | 360x640 전 → 후 | 50자 미만 본문 쪽(800) 전 → 후 |
+|---|---|---|---|
+| 1 warrior(상대 없음) | 111 → 113 | 156 → 172 | 6 → 0 |
+| 2 sage(상대 있음) | 108 → 115 | 152 → 165 | 8 → 0 |
+| 3 caregiver | 109 → 109 | 155 → 169 | 5 → 0 |
+- 후: 360x800 세 표본 모두 50자 미만 0·표제만 있는 쪽 연속 0·문장 중간 넘김 0. 360x640은 50자 미만 표본3에 1쪽(41자), 어절 경계 넘김 1~2곳(한 문장이 남은 칸보다 긴 경우).
+- **합격 기준 "쪽 수가 줄었다"는 못 맞춤**: 규칙 ①(단락 통째 넘김)이 쪽 아래 빈칸을 늘려 800에서 +0~7쪽, 640에서 +13~16쪽. 규칙을 임의로 풀지 않았다(designer·planner 판단, design 주의 문단 그대로).
+- 시기별 흐름: 표본 2·3은 쪽마다 항목 2개 이상. 표본 1(warrior, 항목이 김)은 800에서 항목 1개 쪽 3개(640에서 7개) — 두 항목도 한 쪽에 안 들어가 문장 끝으로 나눈 뒤에도 다음 항목 첫 문장이 들어가지 않는 경우. e2e-paid 표본(시험 seed)은 0.
+- 구현: 단락이 빈 쪽 하나에 들어가면 통째 다음 쪽(남은 칸 3줄 미만도), 장 머리만 있는 쪽·넘기면 50자 미만이 남는 쪽에서는 이 쪽에서 문장 끝으로 나눔 / 장 끝 50자 미만이면 앞 쪽 마지막 블록(넘치면 끝 문장부터) 함께 넘김(R53-2 fixWidow 대체) / 구간마다 새 쪽, 2+2, 아주 긴 구간은 항목 안 문장 끝 / 제2부 표제 + 시기별 흐름 머리 한 쪽(`book-page--part-open`, 안 들어가면 `.is-solo`). 어절 경계 수는 `book-reader[data-word-cut]`.
+
+### 실행
+- mock 서버 8787(mock)·8788(off) 재시작 뒤 시험(_paid·core.js 수정 반영).
+- `node tools/build-dist.js`: public/에 유료 문구 0건(5,629문장 대조), 유료 문구 [초안] 없음, 공개 [초안] data.js 24 · index.html 22(C3 copywriter 몫), 경고 2줄(pay.contact 비어 있음, site.url 비어 있음).
+- `node --test "tools/strange-oracle/*.test.js"`: 30 pass / 0 fail ("8-1 VOL.room" 시험 → "11-6 F3 분량 표" 시험으로 교체).
+- `e2e-flow.js reduced`: 126 PASS / 0 FAIL (새: H3 입구·결과, H4 질문 1문장 45자, H5 3/6, off 가격·"곧"·죽은 버튼 0(입구·나의 이야기 3/6·6/6·결과 6곳), 떡밥 화면당 3개 이하, FAQ 유료 문답 숨김).
+- `e2e-paid.js reduced`: 132 PASS / 0 FAIL (새: off 책 카드 숨김, F3 다섯 자리 같음·±15%·재열람 같음·주제 안내, F1 지표, F4 취소·거절·그 밖·승인 실패·연결 끊김·문의처 textContent, orderName).
+- 미확인·미실행: motion 모드 e2e, 실제 토스 test 키로 실패 코드 재현, on 상태 360px 줄바꿈(C4), 화면낭독기.
