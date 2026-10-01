@@ -15,16 +15,17 @@ const BOOK_METRICS = `(() => {
     clone.querySelectorAll('.book-opening').forEach((o) => o.remove());
     const text = clone.textContent.replace(/\\s+/g, ' ').trim();
     const items = bd.querySelectorAll('.timeline__areas > div').length;
+    const full = items === 1 && bd.scrollHeight >= bd.clientHeight - 40;
     const first = bd.firstElementChild;
     const lastP = [...bd.querySelectorAll('p, dd')].pop();
-    return { n: Number(p.dataset.page), special, chars: [...text].length, headOnly: !special && text.length === 0, items, cont: !!(first && first.matches('p.is-cont')), lastText: lastP ? lastP.textContent.trim() : '' };
+    return { full, n: Number(p.dataset.page), special, chars: [...text].length, headOnly: !special && text.length === 0, items, cont: !!(first && first.matches('p.is-cont')), lastText: lastP ? lastP.textContent.trim() : '' };
   });
   const body = info.filter((x) => !x.special);
   let headRun = 0, headPairs = 0;
   info.forEach((x) => { headRun = x.headOnly ? headRun + 1 : 0; if (headRun >= 2) headPairs++; });
   const midCut = info.filter((x, i) => x.cont && i > 0 && !END.test(info[i - 1].lastText)).map((x) => x.n);
   const tl = info.filter((x) => x.items > 0);
-  return { pages: pages.length, body: body.length, under50: body.filter((x) => x.chars < 50).map((x) => x.n + ':' + x.chars), headPairs, midCut, tlPages: tl.length, tlUnder2: tl.filter((x) => x.items < 2).map((x) => x.n + ':' + x.items) };
+  return { pages: pages.length, body: body.length, under50: body.filter((x) => x.chars < 50).map((x) => x.n + ':' + x.chars), headPairs, midCut, tlPages: tl.length, tlUnder2: tl.filter((x) => x.items < 2).map((x) => x.n + ':' + x.items + '/' + x.chars + '자') };
 })()`;
 module.exports = { BOOK_METRICS };
 

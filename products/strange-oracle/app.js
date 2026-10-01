@@ -3431,12 +3431,48 @@
           w.append(l);
           bd.append(w);
         };
+        // 이 쪽 마지막 항목의 끝 문장 하나를 떼어 다음 쪽 첫 항목(is-cont)으로. 한 문장뿐이면 allowWhole일 때 통째로
+        const pairTail = (allowWhole) => {
+          const prev = box.lastElementChild;
+          const pdd = prev && prev.querySelector("dd");
+          const ptext = pdd && !pdd.children.length ? pdd.textContent : "";
+          const sents = ptext.match(/[^]*?[.?!…]+[”’"')\]」』]*(?:\s+|$)/g);
+          if (sents && sents.join("") === ptext && sents.length >= 2) {
+            pdd.textContent = sents.slice(0, -1).join("").trimEnd();
+            const tail = prev.cloneNode(false);
+            tail.classList.add("is-cont");
+            const d = pdd.cloneNode(false);
+            d.textContent = sents[sents.length - 1].trimEnd();
+            tail.append(d);
+            return tail;
+          }
+          if (allowWhole && box.children.length >= 3) {
+            prev.remove();
+            return prev;
+          }
+          return null;
+        };
         open(cont);
         const q = [...dl.children].slice(from).map((x) => x.cloneNode(true));
         while (q.length) {
           const it = q.shift();
           box.append(it);
           if (!over(bd)) continue;
+          // (C4 요청) 구간의 마지막 항목이 넘치면 그 뒷부분이 홀로 한 쪽이 된다 → 앞 항목의 끝 문장 하나를 함께 다음 쪽으로 보내
+          // 다음 쪽에 항목이 둘 보이게 한다(앞 쪽 항목 수는 그대로). 앞 항목이 한 문장뿐이면 이 쪽에 셋 이상일 때만 통째로 보낸다
+          if (!q.length && box.children.length >= 2 && !it.paired) {
+            it.remove();
+            it.paired = true; // 한 번만 (다음 쪽에서 또 넘치면 아래 보통 나누기)
+            const tail = pairTail(box.children.length >= 2);
+            if (tail) {
+              start();
+              open(true);
+              box.append(tail);
+              q.unshift(it);
+              continue;
+            }
+            box.append(it);
+          }
           const dd = it.querySelector("dd");
           const [rest, cut] = dd && !dd.children.length ? splitPara(dd, bd) : [null, false];
           if (cut && rest) {

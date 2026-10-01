@@ -244,6 +244,8 @@ const SIBYL_Q = "비밀질문XYZ";
   await sleep(600);
   const n640 = await pageCount();
   const ov640 = await overflowPages();
+  const f640 = await ev(BOOK_METRICS);
+  check("F1 (360x640): 본문 쪽 50자 미만 0 · 표제만 연속 0 · 시기별 흐름 쪽마다 항목 2개 이상", f640.under50.length === 0 && f640.headPairs === 0 && f640.tlUnder2.length === 0, `${f640.pages}쪽 · 50자 미만 ${f640.under50.join(",")} · 1항목 쪽 ${f640.tlUnder2.join(",")}`);
   const room640 = await ev("document.querySelector('[data-js=book-page].is-current').dataset.room");
   await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 800, deviceScaleFactor: 2, mobile: true });
   await sleep(600);
