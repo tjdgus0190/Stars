@@ -4359,3 +4359,69 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .toc__time:empty { display: none; }
 .toc__title:has(.toc__time) .toc__total { margin-left: auto; }
 .deeper .book-peek + .toc { margin-top: var(--space-6); }
+
+/* ═════════ 11단계 묶음 1 — 결제까지의 길 (off에서도 보이는 것). 명세: design/strange-oracle.md "11단계 묶음 1" ═════════ */
+/* H3 흔들리는 원형: 방 결과 원형 줄(flex: 배지 | 글) 아래 둘째 줄. 배지 폭만큼 들여 글 칸에 맞춘다 */
+.archetype-line { flex-wrap: wrap; }
+.archetype-line__text { flex: 1 1 0; min-width: 0; }
+.archetype-line__sway {
+  flex: 0 0 100%; margin: var(--space-2) 0 0; padding-top: var(--space-2);
+  border-top: 1px dashed var(--c-line); font-family: var(--font-sans); font-size: var(--fs-sm); line-height: var(--lh-ui);
+  color: var(--c-text-muted); word-break: keep-all; text-wrap: pretty;
+}
+/* 입구 "지금의 원형" 줄 안 둘째 줄 (요소 수 그대로) */
+.so-far__sway { display: block; margin-top: var(--space-1); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); word-break: keep-all; text-wrap: pretty; }
+
+/* H4 바통 질문: 한 문장 질문(45자) — 2줄이 고르게 */
+.say--bridge .passage__bridge { word-break: keep-all; text-wrap: balance; }
+
+/* H5 3/6 중간 결말: 중간 맺음 → 남은 세 장 칸 → 다음 문(주). 4~6장 줄은 숨긴다(칸이 대신) */
+#screen-story.is-half .spine-item:is(.is-available, .is-upcoming) { display: none; }
+.story-half { display: grid; gap: var(--space-5); margin-top: var(--space-8); }
+.story-half__close { font-size: var(--fs-md); line-height: var(--lh-read); color: var(--c-text); text-align: center; word-break: keep-all; text-wrap: pretty; }
+.story-half__slots { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.story-half__slot {
+  display: grid; grid-template-columns: 2em 28px 1fr; align-items: center; column-gap: var(--space-3);
+  min-height: 56px; padding: var(--space-2) var(--space-4);
+  border: 1px dashed var(--c-line-strong); border-radius: var(--radius-md); background: var(--c-surface-1);
+}
+.story-half__num, .story-half__slot > .sig { grid-row: span 2; }
+.story-half__num { font-family: var(--font-latin); font-size: var(--fs-sm); color: var(--c-text-muted); text-align: center; }
+.story-half__slot > .sig { width: 28px; height: 28px; color: var(--accent); opacity: 0.75; }
+.story-half__slot > .sig--rune { width: 24px; height: 36px; justify-self: center; }
+.story-half__name { font-weight: 700; color: var(--c-text-strong); }
+.story-half__wait { font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
+.story-half__door { margin-top: var(--space-2); }
+.story-half__door .next-door__glyph .sig { width: 28px; height: 28px; }
+
+/* 11-5·F6 결제 꺼짐 6/6: 책은 글 한 줄뿐(카드·가격·버튼 없음). 본문보다 조용하게 */
+.story-book-note { max-width: 22em; margin: var(--space-8) auto 0; font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-muted); text-align: center; word-break: keep-all; text-wrap: balance; }
+
+/* F4 결제 실패 안내: 내가 닫음 = 차분한 회색 / 거절 = 촛불색 / 그 밖 = 기존 붉은 상자 */
+.pay-alert[data-kind="cancel"] { border-color: var(--c-line-strong); background: var(--c-surface-1); }
+.pay-alert[data-kind="decline"] { border-color: oklch(0.78 0.12 75 / 0.6); background: oklch(0.24 0.045 75); }
+.unseal-error__code:empty { display: none; }
+.unseal-error[data-kind="unconfirmed"] [data-js="unseal-retry"] { display: none; }
+/* 문의처 줄: pay.contact가 비면 JS가 .is-hidden, 값 칸이 비어도 CSS가 한 번 더 숨긴다(빈 줄·"undefined" 방지) */
+.pay-contact { padding-top: var(--space-3); border-top: 1px solid var(--c-line); font-family: var(--font-sans); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-muted); overflow-wrap: anywhere; }
+.pay-contact__value { color: var(--c-text-strong); user-select: all; }
+.pay-contact:has(.pay-contact__value:empty) { display: none; }
+
+/* F3 분량 표기 하나: 목차 제목은 deeper-read-time 한 칸만 쓰고 deeper-total은 비운다 */
+.toc__total:empty { display: none; }
+.receipt__note { margin-top: var(--space-2); font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); }
+
+/* F1 쪽 나누기 — 시기별 흐름: 구간마다 새 쪽, 네 항목 한 쪽 또는 2+2. 글자 크기는 그대로, 쪽 안 간격만 줄인다 */
+.book-page .timeline { padding-left: var(--space-5); }
+.book-page .timeline__stage { padding-bottom: 0; }
+.book-page .timeline__areas { gap: var(--space-2); }
+.book-page .timeline__age.is-cont { font-weight: 400; color: var(--ink-soft); } /* 2+2로 나뉜 뒷쪽 머리: "서른 무렵 · 이어서" */
+/* F1 ④ 제2부 표제 + 시기별 흐름 머리를 한 쪽에. 첫 구간(또는 그 앞 두 항목)이 들어가면 이어 담고, 안 들어가면 .is-solo(가운데 정렬 표제지) */
+.book-page--part-open .book-page__body { display: block; text-align: start; }
+.book-page--part-open .book-opening--half { padding-top: var(--space-6); text-align: center; }
+.book-page--part-open .book-opening--half .book-opening__title { font-size: var(--fs-2xl); }
+.book-page--part-open .book-opening--part { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--ink-line); }
+.book-page--part-open.is-solo .book-page__body { display: grid; place-content: center; text-align: center; }
+
+/* 정적 검토(.is-static-preview)에서는 숨은 새 블록도 보이게 */
+.is-static-preview :is(.story-half, .story-book-note).is-hidden { display: grid !important; }

@@ -354,7 +354,8 @@
             <span class="hub-progress__bar" aria-hidden="true"><span class="hub-progress__fill"></span><span class="hub-progress__ticks"><i></i><i></i><i></i><i></i><i></i></span></span>
           </div>
         </header>
-        <p class="so-far__arch"><span class="so-far__arch-label" data-t="hub.sofar.archLabel">지금의 원형</span> <b data-js="hub-archetype"></b></p>
+        <p class="so-far__arch"><span class="so-far__arch-label" data-t="hub.sofar.archLabel">지금의 원형</span> <b data-js="hub-archetype"></b><!-- (11단계 H3) 같은 줄 안 둘째 줄(요소 수 그대로). 6/6이면 .is-hidden -->
+          <span class="so-far__sway" data-js="hub-archetype-sway">[초안] 지금 앞선 원형은 현자, 남은 문 4개. 다음 방이 굳힐 수도, 뒤집을 수도 있어요.</span></p>
         <!-- (10단계 10-1 b) 코드로 복원한 직후에만 .is-hidden 해제 (출처가 드러나는 한 줄) -->
         <p class="so-far__restored is-hidden" data-js="resume-restored" role="status" data-t="resume.restored">코드에 담긴 결과를 불러왔어요. 호칭은 ‘당신’이에요</p>
         <!-- (10단계 10-1 c) 마친 방이 정확히 3개일 때만 .is-hidden 해제. 글자 링크 = 10-2의 링크 복사(서비스 주소). 완료 한 줄은 아래 share-link-status -->
@@ -372,7 +373,7 @@
             <span class="so-far__go" aria-hidden="true">›</span>
           </button></li>
         </ol>
-        <button class="so-far__all" type="button" data-go="story" data-js="hub-story"><span data-t="hub.sofar.all">나의 이야기 전체 보기</span> <span aria-hidden="true">→</span></button>
+        <button class="so-far__all" type="button" data-go="story" data-js="hub-story"><span data-js="hub-story-label" data-t="hub.sofar.all">나의 이야기 전체 보기</span> <span aria-hidden="true">→</span></button>
         <!-- (10단계 10-1 b) 이어가기 코드 만들기: 마친 방 1개 이상(=이 영역이 보일 때). 누를 때만 그 자리에서 계산해 resume-code에 넣는다.
              순서 고정: 코드 → 경고(접지 않음) → 복사 버튼. 경고는 복사 버튼보다 위에 항상 보여야 한다.
              코드는 화면 표시와 복사 버튼의 클립보드 쓰기만. "내 정보 지우기"를 누르면 패널을 닫고 resume-code를 비운다 -->
@@ -431,7 +432,8 @@
           <div class="faq__item"><dt data-t="hub.faq.items.1.q">결과는 어떻게 읽나요?</dt><dd data-t="hub.faq.items.1.a">방마다 결과 이름과 핵심 풀이가 나오고, 여섯 조각은 여덟 원형 가운데 하나로 모여 나의 이야기 한 편이 돼요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">뿌리에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름과 생년월일은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
-          <div class="faq__item"><dt data-t="hub.faq.items.4.q">무료와 유료는 무엇이 다른가요?</dt><dd data-t="hub.faq.items.4.a">여섯 방과 나의 이야기는 모두 무료예요. 한 권의 책은 방마다 네 장 전체와 시기별 흐름을 엮은 선택 상품이에요.</dd></div>
+          <!-- (11단계 11-5) 결제 꺼짐이면 이 문답 통째로 .is-hidden (결정 66) -->
+          <div class="faq__item" data-js="hub-faq-paid"><dt data-t="hub.faq.items.4.q">무료와 유료는 무엇이 다른가요?</dt><dd data-t="hub.faq.items.4.a">여섯 방과 나의 이야기는 모두 무료예요. 한 권의 책은 방마다 네 장 전체와 시기별 흐름을 엮은 선택 상품이에요.</dd></div>
         </dl>
       </section>
 
@@ -609,6 +611,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
         </span>
         <p class="archetype-line__text"><span class="archetype-line__label" data-t="result.archetypeLabel"></span> <b data-js="result-archetype-name"></b> — <span data-js="result-archetype-why"></span></p>
+        <!-- (11단계 H3) 흔들리는 원형: 결제 상태와 무관하게 보임. 6/6이면 .is-hidden. 템플릿 result.archetypeSway({arch},{n}) -->
+        <p class="archetype-line__sway" data-js="result-archetype-sway">[초안] 지금 앞선 원형은 현자, 남은 문 4개. 다음 방이 굳힐 수도, 뒤집을 수도 있어요.</p>
       </aside>
 
       <aside class="turn" data-js="result-turn">
@@ -669,7 +673,7 @@
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.rune)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
           <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-rune" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.rune.name">룬</b></span></p>
-          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.rune">과거와 현재, 다가올 모습까지 세 개의 룬이 한 줄로 이어 주었어요. 이제 남은 것은 지금 이 순간, 당신 마음속의 질문 하나뿐이에요. 마지막 문 너머 촛불 앞에 그 질문을 내려놓으면, 시빌라의 신탁이 조용히 답을 건넬 거예요.</p>
+          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.rune">[초안] 세 돌이 이은 실 끝에서, 오늘 마음에 품은 질문은 어떤 답을 만날까요?</p>
         </div>
         <button class="next-door" type="button" data-room="sibyl" data-go="sibyl-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
@@ -946,6 +950,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
         </span>
         <p class="archetype-line__text"><span class="archetype-line__label" data-t="result.archetypeLabel"></span> <b data-js="result-archetype-name"></b> — <span data-js="result-archetype-why"></span></p>
+        <!-- (11단계 H3) 흔들리는 원형: 결제 상태와 무관하게 보임. 6/6이면 .is-hidden. 템플릿 result.archetypeSway({arch},{n}) -->
+        <p class="archetype-line__sway" data-js="result-archetype-sway">[초안] 지금 앞선 원형은 현자, 남은 문 4개. 다음 방이 굳힐 수도, 뒤집을 수도 있어요.</p>
       </aside>
 
       <aside class="turn" data-js="result-turn">
@@ -1013,7 +1019,7 @@
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.star)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
           <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-star" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.star.name">별</b></span></p>
-          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.star">마음결을 가만히 읽었어요. 그 마음 안쪽에는 아직 꺼내 쓰지 않은 재능 하나가 잠들어 있을지도 몰라요. 태어난 날 하늘에 드리운 해시계 그림자가 그 재능이 어디 숨어 있는지 알고 있어요. 그림자를 따라 데칸의 방으로 걸어가 볼까요.</p>
+          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.star">[초안] 이 마음결 안쪽에 아직 꺼내 쓰지 않은 재능은 무엇일까요?</p>
         </div>
         <button class="next-door" type="button" data-room="decan" data-go="decan-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
@@ -1175,6 +1181,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
         </span>
         <p class="archetype-line__text"><span class="archetype-line__label" data-t="result.archetypeLabel"></span> <b data-js="result-archetype-name"></b> — <span data-js="result-archetype-why"></span></p>
+        <!-- (11단계 H3) 흔들리는 원형: 결제 상태와 무관하게 보임. 6/6이면 .is-hidden. 템플릿 result.archetypeSway({arch},{n}) -->
+        <p class="archetype-line__sway" data-js="result-archetype-sway">[초안] 지금 앞선 원형은 현자, 남은 문 4개. 다음 방이 굳힐 수도, 뒤집을 수도 있어요.</p>
       </aside>
 
       <aside class="turn" data-js="result-turn">
@@ -1248,7 +1256,7 @@
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.ogham)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
           <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></span></p>
-          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.ogham">이름 석 자가 새긴 뿌리를 확인했어요. 그 뿌리 위에 서서 보면, 당신이 어디서 왔는지 어렴풋이 보이죠. 이제 그 뿌리가 떠받치는 지금의 속마음은 어떤 모양일까요. 태어난 순간의 달이 기억하는 이야기를 들으러, 별의 방으로 건너가요.</p>
+          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.ogham">[초안] 이 뿌리가 떠받치는 지금의 속마음은, 태어난 밤의 달이 어떻게 기억할까요?</p>
         </div>
         <button class="next-door" type="button" data-room="star" data-go="star-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
@@ -1497,6 +1505,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
         </span>
         <p class="archetype-line__text"><span class="archetype-line__label" data-t="result.archetypeLabel"></span> <b data-js="result-archetype-name"></b> — <span data-js="result-archetype-why"></span></p>
+        <!-- (11단계 H3) 흔들리는 원형: 결제 상태와 무관하게 보임. 6/6이면 .is-hidden. 템플릿 result.archetypeSway({arch},{n}) -->
+        <p class="archetype-line__sway" data-js="result-archetype-sway">[초안] 지금 앞선 원형은 현자, 남은 문 4개. 다음 방이 굳힐 수도, 뒤집을 수도 있어요.</p>
       </aside>
 
       <aside class="turn" data-js="result-turn">
@@ -1564,7 +1574,7 @@
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.decan)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
           <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-decan" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.decan.name">데칸</b></span></p>
-          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.decan">잠들어 있던 재능을 마침내 깨웠어요. 이 재능은 한자리에 머물지 않고, 시간이 흐르며 계속 모양을 바꿔 가요. 그 흐름이 어떤 순환을 그리는지, 마야인들이 260일을 세어 온 촐킨의 달력이 다음 방에서 짚어 줄 거예요.</p>
+          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.decan">[초안] 깨어난 이 재능은 앞으로 어떤 순환을 따라 모양을 바꿔 갈까요?</p>
         </div>
         <button class="next-door" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
@@ -1758,6 +1768,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
         </span>
         <p class="archetype-line__text"><span class="archetype-line__label" data-t="result.archetypeLabel"></span> <b data-js="result-archetype-name"></b> — <span data-js="result-archetype-why"></span></p>
+        <!-- (11단계 H3) 흔들리는 원형: 결제 상태와 무관하게 보임. 6/6이면 .is-hidden. 템플릿 result.archetypeSway({arch},{n}) -->
+        <p class="archetype-line__sway" data-js="result-archetype-sway">[초안] 지금 앞선 원형은 현자, 남은 문 4개. 다음 방이 굳힐 수도, 뒤집을 수도 있어요.</p>
       </aside>
 
       <aside class="turn" data-js="result-turn">
@@ -1824,7 +1836,7 @@
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.tzolkin)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
           <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-tzolkin" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.tzolkin.name">촐킨</b></span></p>
-          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.tzolkin">다가올 순환의 흐름을 짚어 보았어요. 뿌리도 마음도 재능도, 결국 하나의 길 위에 놓여 있었죠. 이제 그 길을 지나온 과거와 지금 선 자리, 그리고 다가올 모습을 한 줄로 이어 볼 시간이에요. 세 개의 룬이 그 실을 쥐고 있어요.</p>
+          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.tzolkin">[초안] 지나온 길과 지금 선 자리, 그 다음 모습은 한 줄로 어떻게 이어질까요?</p>
         </div>
         <button class="next-door" type="button" data-room="rune" data-go="rune-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
@@ -1980,6 +1992,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
         </span>
         <p class="archetype-line__text"><span class="archetype-line__label" data-t="result.archetypeLabel"></span> <b data-js="result-archetype-name"></b> — <span data-js="result-archetype-why"></span></p>
+        <!-- (11단계 H3) 흔들리는 원형: 결제 상태와 무관하게 보임. 6/6이면 .is-hidden. 템플릿 result.archetypeSway({arch},{n}) -->
+        <p class="archetype-line__sway" data-js="result-archetype-sway">[초안] 지금 앞선 원형은 현자, 남은 문 4개. 다음 방이 굳힐 수도, 뒤집을 수도 있어요.</p>
       </aside>
 
       <aside class="turn" data-js="result-turn">
@@ -2160,6 +2174,30 @@
         <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="5"><span class="spine-item__node" aria-hidden="true">5</span><div class="spine-item__body" data-js="story-chapter-body"></div></li>
         <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="6"><span class="spine-item__node" aria-hidden="true">6</span><div class="spine-item__body" data-js="story-chapter-body"></div></li>
       </ol>
+
+      <!-- (11단계 H5) 3/6 중간 결말: 마친 방이 정확히 3개일 때만 화면에 .is-half → 이 블록 .is-hidden 해제,
+           spine의 4~6장 줄(.is-available/.is-upcoming)은 CSS가 숨긴다. 결제 상태와 무관하게 보임(책 카드는 묶음 2).
+           강제 순서상 3/6의 다음 방은 늘 Ⅳ 촐킨이라 칸·문은 정적이다 -->
+      <section class="story-half is-hidden" data-js="story-half" aria-labelledby="story-half-title">
+        <h2 class="visually-hidden" id="story-half-title" data-t="story.half.title">[초안] 이야기의 절반</h2>
+        <p class="story-half__close" data-js="story-half-close" data-t="story.half.close">[초안] 뿌리와 마음과 재능, 세 장이 한 사람의 앞모습을 그렸어요. 이제 남은 세 장이 그 사람이 걸어갈 쪽을 비춰 줄 차례예요.</p>
+        <ol class="story-half__slots">
+          <li class="story-half__slot" data-js="story-half-slot" data-room="tzolkin"><span class="story-half__num" aria-hidden="true">IV</span><svg class="sig" viewBox="0 0 40 40" aria-hidden="true"><use href="#icon-tzolkin" /></svg><span class="story-half__name" data-t="rooms.tzolkin.name"></span><span class="story-half__wait" data-t="story.half.slot">[초안] 다음 문에서 열려요</span></li>
+          <li class="story-half__slot" data-js="story-half-slot" data-room="rune"><span class="story-half__num" aria-hidden="true">V</span><svg class="sig sig--rune" viewBox="0 0 40 60" aria-hidden="true"><use href="#rune-raidho" /></svg><span class="story-half__name" data-t="rooms.rune.name"></span><span class="story-half__wait" data-t="story.half.slot">[초안] 다음 문에서 열려요</span></li>
+          <li class="story-half__slot" data-js="story-half-slot" data-room="sibyl"><span class="story-half__num" aria-hidden="true">VI</span><svg class="sig" viewBox="0 0 40 40" aria-hidden="true"><use href="#icon-sibyl" /></svg><span class="story-half__name" data-t="rooms.sibyl.name"></span><span class="story-half__wait" data-t="story.half.slot">[초안] 다음 문에서 열려요</span></li>
+        </ol>
+        <!-- 주 버튼: 방 결과의 다음 문과 같은 컴포넌트 -->
+        <button class="next-door story-half__door" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="story-half-next">
+          <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
+          <span class="next-door__glyph" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span>
+          <span class="next-door__num" aria-hidden="true">IV</span>
+          <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
+          <span class="next-door__name" data-t="rooms.tzolkin.name"></span>
+        </button>
+      </section>
+
+      <!-- (11단계 11-5·F6) 결제 꺼짐 + 6/6: 책 카드(story-paid) 대신 이 한 줄만. 가격·날짜·버튼·링크·"곧" 없음. 그 밖에는 .is-hidden -->
+      <p class="story-book-note is-hidden" data-js="story-book-note" data-t="story.bookNote">[초안] 이 이야기를 더 길게 엮은 한 권의 책을 준비하고 있어요.</p>
 
       <!-- 상태: 기본 = "곧 열려요"(결제 꺼짐) / .is-on = 결제 켜짐(버튼 "무엇이 들어 있는지 보기") / .is-owned = 이 탭에 영수증 코드 있음("내 리포트 다시 보기") -->
       <aside class="paid-card" data-js="story-paid">
@@ -2382,7 +2420,9 @@
       </section>
 
       <!-- 결제 실패·취소로 돌아왔을 때 (.is-hidden 해제). 오류 코드는 보여 주지 않는다 -->
-      <div class="pay-alert is-hidden" data-js="pay-alert" role="alert">
+      <!-- (11단계 F4) data-kind = cancel(내가 닫음) | decline(카드사·한도 거절) | error(그 밖의 결제창 오류). JS가 kind에 맞는 제목·본문을 넣는다.
+           다시 시도 = 바로 아래 결제 버튼(그대로). 문의처 줄은 이 경우들에는 그리지 않는다(승인 실패·연결 끊김은 봉인 해제 화면 unseal-error) -->
+      <div class="pay-alert is-hidden" data-js="pay-alert" data-kind="decline" role="alert">
         <p class="pay-alert__title" data-js="pay-alert-title" data-t="pay.fail.title">결제가 완료되지 않았어요. 돈은 나가지 않았어요.</p>
         <p class="pay-alert__text" data-js="pay-alert-text" data-t="pay.fail.text">결제창을 닫았거나 연결이 잠시 끊겼을 수 있어요. 아래 버튼으로 다시 시도해 주세요.</p>
       </div>
@@ -2438,11 +2478,15 @@
       <button class="btn btn--ghost btn--small" type="button" data-js="unseal-skip" data-t="unseal.skip">건너뛰기</button>
 
       <!-- 승인 확인 실패 (.is-hidden 해제 + 화면에 .is-error). 결제는 됐을 수 있으므로 영수증 코드로 열기를 함께 안내 -->
-      <div class="unseal-error is-hidden" data-js="unseal-error" role="alert">
-        <p class="unseal-error__title" data-t="unseal.error.title">봉인을 여는 중에 연결이 끊겼어요</p>
-        <p class="unseal-error__text" data-t="unseal.error.text">결제가 됐다면 책은 안전하게 남아 있어요. 다시 시도하거나, 아래 코드로 열어 주세요.</p>
+      <!-- (11단계 F4) data-kind = network(연결 끊김·5xx: 다시 시도가 주 버튼) | unconfirmed(승인 확인 실패 4xx: 다시 시도 숨김, 돌아가기가 주 동작).
+           제목·본문은 JS가 kind에 맞게 넣는다(훅 unseal-error-title/-text). 문의처 줄(pay-contact)은 두 경우 모두, pay.contact가 비어 있으면 .is-hidden -->
+      <div class="unseal-error is-hidden" data-js="unseal-error" data-kind="unconfirmed" role="alert">
+        <p class="unseal-error__title" data-js="unseal-error-title" data-t="unseal.error.title">봉인을 여는 중에 연결이 끊겼어요</p>
+        <p class="unseal-error__text" data-js="unseal-error-text" data-t="unseal.error.text">결제가 됐다면 책은 안전하게 남아 있어요. 다시 시도하거나, 아래 코드로 열어 주세요.</p>
         <p class="unseal-error__code" data-js="unseal-error-code"></p>
+        <p class="pay-contact" data-js="pay-contact"><span class="pay-contact__label" data-t="pay.fail.contactLabel">[초안] 결제 문의는 여기로</span> <span class="pay-contact__value" data-js="pay-contact-value">[초안] help@example.com</span></p>
         <button class="btn btn--primary btn--block" type="button" data-js="unseal-retry" data-t="unseal.error.retry">다시 시도하기</button>
+        <button class="btn btn--secondary btn--block unseal-error__back" type="button" data-js="unseal-back" data-go="hub" data-t="unseal.error.back">[초안] 입구로 돌아가기</button>
       </div>
     </section>
 
@@ -2516,6 +2560,8 @@
             <a class="receipt__toss is-hidden" data-js="receipt-toss" href="#" target="_blank" rel="noopener" data-t="receipt.toss">결제 영수증 보기</a>
           </div>
           <p class="receipt__text" data-t="receipt.text">이 코드가 있으면 다른 기기에서도 다시 열 수 있어요. 코드를 아는 사람은 누구나 이 책을 볼 수 있으니 공유하지 마세요.</p>
+          <!-- (11단계 F3) 재열람(영수증 코드로 연 책)에서 룬·시빌라 주제 문단이 빠졌을 때만 .is-hidden 해제. 1쪽(면지)에 함께 옮겨진다 -->
+          <p class="receipt__note is-hidden" data-js="book-topic-note" data-t="book.topicNote">[초안] 다시 연 책에는 룬·시빌라에서 고른 주제 문단이 빠져 있어요.</p>
           <button class="btn btn--text receipt__forget" type="button" data-js="receipt-forget" data-t="receipt.forget">이 탭에서 코드 지우기</button>
         </aside>
 
