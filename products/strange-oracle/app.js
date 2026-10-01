@@ -3910,7 +3910,8 @@
   // 설정은 data.js 맨 위 ads·analytics 한 곳. ID가 모두 비면 아무것도 불러오지 않고 잠금·쿠키 줄·FAQ 광고 안내도 없다(지금과 같음).
   // 광고·분석은 주소에 query가 없을 때만 시작한다(stripQuery 뒤, 두 부품도 스스로 다시 확인).
   // 분석 이벤트 값은 아래 허용 목록 안의 낱말뿐이다: 방 이름, 원형 코드, 단계·방법 이름. 입력값·세부 번호·코드는 실릴 자리가 없다(6장).
-  const LOCK_ON = Ads.rewardedConfigured(T.ads);
+  // (운영자 결정 2026-10-01) ads.lockAlways면 광고단위가 없어도 잠금을 보인다 — 광고가 없으면 누르는 즉시 "광고 없음" 안내와 함께 열린다
+  const LOCK_ON = Ads.rewardedConfigured(T.ads) || (T.ads && T.ads.lockAlways === true);
   const UNLOCK_OUTCOMES = ["request", "granted", "unavailable", "closed"];
   const EVENTS = {
     so_visit: {},

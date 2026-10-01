@@ -95,17 +95,23 @@ const STUB_ADS = `(function () {
 
   // ═══ 1. ID 모두 빈 값 (파일 그대로) ═══
   await b.goto(BASE);
+  const TEXT_UNAVAILABLE = await ev("TEXT.unlock.unavailable");
   await ev("sessionStorage.clear()");
   await seed(ORDER);
   for (const r of ORDER) {
     await openRoom(r);
     const st = await room(r, `({ locked: box.classList.contains('is-locked'), lockShown: !lock.hidden, text: text.textContent.trim().length, ads: s.querySelectorAll('.ad-slot.is-filled').length, h: [...s.querySelectorAll('[data-ad]')].map(a => a.getBoundingClientRect().height).join(',') })`);
-    check(`빈 ID: ${r} 잠금 UI 0·turn-text 바로 보임·광고 자리 높이 0`, !st.locked && !st.lockShown && st.text > 0 && st.ads === 0 && /^0(,0)*$/.test(st.h), JSON.stringify(st));
+    // (운영자 결정 2026-10-01 ads.lockAlways) 광고 ID가 없어도 잠금은 보이고, 누르면 '광고 없음' 안내와 함께 바로 열린다
+    check(`빈 ID + lockAlways: ${r} 잠금 보임·단락 비어 있음·광고 자리 높이 0`, st.locked && st.lockShown && st.text === 0 && st.ads === 0 && /^0(,0)*$/.test(st.h), JSON.stringify(st));
+    await room(r, "btn.click()");
+    await sleep(150);
+    const op = await room(r, `({ locked: box.classList.contains('is-locked'), lockShown: !lock.hidden, text: text.textContent.trim().length, msg: status.textContent.trim() })`);
+    check(`빈 ID + lockAlways: ${r} 누르면 바로 열림·광고 없음 안내`, !op.locked && !op.lockShown && op.text > 0 && op.msg === TEXT_UNAVAILABLE, JSON.stringify(op));
   }
   await b.goto(BASE + "#hub");
   await waitScreen("screen-hub");
   check("빈 ID: 구글 script 태그 0개", (await googleTags()).length === 0);
-  check("빈 ID: 쿠키 줄·FAQ 광고 안내 숨김, dataLayer·googletag 없음", await ev("document.querySelector('[data-js=cookie-line]').hidden && document.querySelector('[data-js=hub-faq-adnote]').hidden && !window.dataLayer && !window.googletag && !window.adsbygoogle"));
+  check("빈 ID: 쿠키 줄 숨김·FAQ 광고 안내 보임(lockAlways), dataLayer·googletag 없음", await ev("document.querySelector('[data-js=cookie-line]').hidden && !document.querySelector('[data-js=hub-faq-adnote]').hidden && !window.dataLayer && !window.googletag && !window.adsbygoogle"));
   check("빈 ID: 가로챈 구글 요청 0건", ext.length === 0, ext.length);
 
   // ═══ 2. 시험 ID 끼워 넣기 ═══
