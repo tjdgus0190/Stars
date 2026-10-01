@@ -670,3 +670,72 @@
 
 #### meta.json
 - status는 "검수통과" 그대로(변경 없음)
+
+## 12단계 검수 (2026-10-01)
+
+범위: 12단계 "광고로 여는 조각"(결정 69~73), 커밋 449efcb~ac91c0e. 검수자: qa-reviewer (D5)
+
+### 판정: 수정 필요 (필수 1건, 문서 한 줄)
+
+코드 동작(광고·분석 부품, 잠금, query 정리, 결제 복귀, 지우기)은 모두 통과. 개인정보처리방침의 전송 항목 목록이 실제 보내는 이벤트보다 하나 적다.
+
+### 필수 수정
+1. `products/strange-oracle/legal/privacy.html:90` — "방문 통계로 보내는 항목" 목록에 `so_book`(한 권의 책 미리보기 화면 도달·결제 버튼 누름, 결제가 켜졌을 때만)이 빠져 있다. app.js는 `so_book`을 보내고(EVENTS 허용 목록, `startPay`·`onScreen`), 기획서 12-5는 privacy.html에 "위 이벤트"를 적으라고 한다. 한 항목만 추가하면 된다 (developer 문단 → copywriter 문장).
+
+### 실행한 시험
+| 시험 | 결과 |
+|---|---|
+| `node tools/build-dist.js` | "[초안] 없음", "public/에 유료 문구 0건 (5629개 대조)", 빈 ID 경고 1줄(6개 항목), pay.contact·site.url 경고(기존) |
+| `node --test "tools/strange-oracle/*.test.js"` | 46 pass / 0 fail |
+| `e2e-ads.js` | 49 PASS / 0 FAIL (구글 요청 49건 모두 가로챔, 실제 전송 0) |
+| `e2e-flow.js reduced` | 126 PASS / 0 FAIL |
+| `e2e-paid.js reduced` | 133 PASS / 0 FAIL (6/6 결제 mock 포함) |
+| 검수자 별도 스크립트(스크래치, 저장소에 안 남김) | 아래 "독립 확인" |
+
+### 독립 확인 (cdp.js, 시험 ID는 실행 때만 window.TEXT에 끼움, 구글 6개 도메인 전부 Fetch로 가로채 가짜 응답)
+- **시빌라 질문 전수 검색**: 실제 화면에서 질문(표식 문자열 포함)을 입력 → 의식 → 결과(질문이 화면 DOM에 보이는 상태, 결과 끝 배너 채움) → 잠금 버튼 → granted. 그 뒤 8787(결제 켜짐)에서 책 화면 상대 이름·생일 입력. dataLayer 전체, GPT 호출 인자, 애드센스 `<ins>` 속성, 가로챈 요청 주소·본문을 모아 검색 → 질문·이름·상대 이름·생년(1995·1993)·시각 0건
+- GPT 호출 = `define("/1234567/so_unlock", REWARDED)`·addService·enable·display·visible·destroy뿐(대상 지정·setTargeting 없음). 애드센스 `<ins>` 속성 = client·slot·format·responsive뿐
+- 이벤트 = `so_result{room,archetype}`, `so_unlock{room,outcome}` 등 허용 목록 낱말만. 잠금 기록 `{"sibyl":1}`(방 이름만)
+- 외부 요청 = 구글(가로챔) + jsdelivr 글꼴뿐
+- 단위 확인: `Ads.check`가 틀린 게시자·광고단위·자리 ID·net을 bad로 잡음(build-dist가 이것으로 exit 1). `?pay=success`가 있으면 `Ads.init`·`Analytics.init` 모두 false
+- 360x640(ID 있음): 입구 주 버튼 top 247 / bottom 577 < 640, 쿠키 줄 보임, 입구 배너 1, 가로 넘침 없음(360). 룬 결과: 다음 문 버튼과 결과 끝 배너 사이 153px, 배너 위 "광고" 표시, 배너 1개
+
+### 항목별 판정
+| 항목 | 판정 | 근거 |
+|---|---|---|
+| 6장: 입력값·코드·결제값이 구글로 안 감 | 통과 | analytics.js `clean`(허용 값 목록 안의 문자열만), ads.js는 입력값을 받지 않음. 위 전수 검색 + e2e-ads 전수 검색 |
+| page_location에서 ?·# 제거, 자동 page_view·신호 끔 | 통과 | analytics.js:37-43, e2e-ads config 확인 |
+| 빈 ID·query 있는 동안 아무것도 안 불러옴 | 통과 | ads.js:56·77·154, analytics.js:29·53, e2e-ads 빈 ID 9건·결제 복귀 2건 |
+| 시작 때 query 정리가 결제 복귀를 깨지 않음 | 통과 | app.js 시작부: `pay=success|fail`이면 남겨 두고 `stripQuery()` → `startExternal()`. e2e-ads success·fail, e2e-paid 133 PASS |
+| 잠금 기록 = 방 이름만, 지우기로 삭제 | 통과 | app.js `markOpened`(CHAPTER_ORDER만), `clearAll`에 UNLOCK_KEY 삭제, e2e-ads |
+| 3장: 구글 스크립트는 두 common 파일에서만, 구글 주소만 | 통과 | adsbygoogle.js·gpt.js(ads.js:8-9), gtag/js(analytics.js:9). 다른 파일에 구글 주소 없음(빌드 검사·요청 기록) |
+| 애드핏 안 불러옴(결정 41 대기) | 통과 | ads.js:85-89 경고만 |
+| 보상형 = GPT 공식 웹 보상형 | 통과 | `defineOutOfPageSlot(unit, OutOfPageFormat.REWARDED)`, rewardedSlotReady→makeRewardedVisible, Granted/Closed |
+| 클릭 유도 없음, 버튼에 광고 명시 | 통과 | "광고 한 편 보고 열기", 배너 위 "광고" 표시 |
+| 배너 ≤2/화면, 버튼·결과 문구와 떨어짐, 비면 접힘 | 통과 | MAX_PER_SCREEN 2, unfilled→collapse, 결과 끝 배너는 장식 줄(page-end) 뒤 153px. D4 UI 점검과 일치 |
+| 대체 열림(unavailable·8초·차단·오류), 닫음→다시 | 통과 | e2e-ads 4종 + closed |
+| 잠금이 완료·다음 문·이야기·이어가기·공유에 영향 없음 | 통과 | 잠긴 채 6/6·원형 유지(e2e-ads), 복원 탭 잠금 UI 없음 |
+| "여섯 방 무료" 유지 | 통과 | 결제 없이 모두 열림(광고가 없으면 그냥 열림). FAQ 광고 안내가 이를 정직하게 알림 |
+| FAQ 광고 안내 위치·조건 | 통과 | 2번째 문답("결과는 어떻게 읽나요?") 답 끝, `rewardedConfigured`일 때만 |
+| 쿠키 줄 조건 | 통과 | ID가 하나라도 있을 때만(app.js `cookie-line`) |
+| privacy.html 문단 | **수정 필요** | 필수 1. 나머지(맞춤형 광고 가능·끄는 방법 링크, 구글 신호·광고 맞춤 신호는 GA4 설정에서 끔, sessionStorage 방 이름만)는 실제 동작과 맞음 |
+| build-dist: 빈 ID 경고·틀린 모양 실패·ads.txt | 통과 | 경고 확인, 실패는 `Ads.check` 단위 확인, ads.txt는 adsenseClient 있을 때만(코드 검토, 실제 생성은 파일에 ID를 넣어야 해서 미실행) |
+| 회귀(10·11단계, 책, 결제 6/6, 360x640) | 통과 | e2e-flow 126, e2e-paid 133, 위 360x640 |
+
+### 권장 (출시 막지 않음)
+- `common/ads.js:155` — 보상형 요청이 진행 중일 때(최대 8초 로딩) 다른 방 결과로 옮겨 그 방 버튼을 누르면 같은 promise를 받아, granted면 두 방이 함께 열린다. 광고 한 편으로 두 단락이 열리는 정도라 해는 없지만, 진행 중이면 두 번째 요청은 "unavailable"이 아니라 기다리게 하거나 버튼을 막는 편이 의도에 맞다.
+- privacy.html:93 "광고 맞춤 신호는 서비스 설정에서 끕니다"는 GA4 설정 이야기다. 애드센스·애드 매니저 광고 자체는 맞춤형일 수 있다(같은 문단 앞 항목에 적혀 있어 사실과 어긋나지는 않음). 읽는 사람이 헷갈리지 않게 "방문 통계(GA4)의 …"로 주어를 분명히 하면 좋다.
+
+### 운영자 확인
+- GA4 '향상된 측정'은 데이터 스트림 설정에서 꺼야 한다(코드로는 막히는지 미확인, 기획 12-5)
+- 국내 행태정보 안내·해외(EEA 등) 동의 메시지의 법적 충분성(결정 43), privacy.html의 빈칸(◯◯ 보관 기간·국외 이전 세부)
+- 애드센스 자동 광고는 계정에서 꺼 둘 것(data.js 주석). ads.txt가 실제 호스팅 루트에 놓이는지
+
+### 미확인
+- 실제 구글 스크립트(adsbygoogle.js·gpt.js·gtag.js)의 동작: 모두 가짜 응답으로만 시험했다. 특히 구글 스크립트가 화면 DOM 글자(결과 화면에 보이는 시빌라 질문 등)를 스스로 읽어 보내는지는 확인할 수 없다
+- 실제 보상형 광고 표시·granted 시점, 실제 기기·광고 차단기
+- e2e-flow·e2e-paid motion은 돌리지 않음
+- ads.txt 실제 생성(데이터 파일에 ID를 넣어야 해서 실행하지 않음, 코드 검토만)
+
+### meta.json
+- status는 "검수통과" 그대로 둠. 필수 1은 정적 문서 한 줄이라 코드 동작에는 영향 없음. 다만 이 판정이 "수정 필요"이므로 11장 기준상 고친 뒤 재검수(1차)가 필요하다 — 운영자 판단 요청

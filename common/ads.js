@@ -152,7 +152,8 @@
   }
   function rewarded(opts) {
     if (!cfg || !cfg.rewardedUnit || !queryFree()) return Promise.resolve("unavailable");
-    if (current) return current.promise;
+    // 이미 다른 방의 광고를 기다리는 중이면 이 요청은 열지 않는다(광고 한 편으로 두 방이 열리지 않게). 잠긴 채 다시 누를 수 있다
+    if (current) return Promise.resolve("closed");
     let resolveFn;
     const req = { slot: null };
     req.promise = new Promise((r) => (resolveFn = r));

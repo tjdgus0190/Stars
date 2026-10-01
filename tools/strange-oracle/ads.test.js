@@ -132,7 +132,8 @@ for (const [mode, want] of [["granted", "granted"], ["closed", "closed"], ["empt
     e.win.Ads.init(Object.assign({}, GOOD, { timeoutMs: 80 }));
     const calls = stubGpt(e, mode);
     const p = e.win.Ads.rewarded({ slot: "room-unlock", room: "rune" });
-    assert.strictEqual(e.win.Ads.rewarded({ slot: "room-unlock", room: "rune" }), p, "진행 중이면 같은 Promise");
+    // (12단계 QA 권장) 진행 중에 다른 요청이 오면 그 요청은 열지 않는다 — 광고 한 편으로 두 방이 열리지 않게
+    assert.strictEqual(await e.win.Ads.rewarded({ slot: "room-unlock", room: "star" }), "closed", "진행 중 두 번째 요청은 closed");
     assert.strictEqual(await p, want);
     assert.deepStrictEqual(e.scripts(), ["https://securepubads.g.doubleclick.net/tag/js/gpt.js"]);
     assert.deepStrictEqual(calls[0], ["define", "/1234567/so_unlock", 4]);
