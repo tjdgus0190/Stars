@@ -459,3 +459,8 @@ QA(reports/qa-strange-oracle.md "11단계 묶음 1 검수") 필수 지적: 유�
 ### 운영자·planner 확인할 것 (원문 쪽, 이번 범위 밖)
 - **summary·sides에는 쓰임 표시 칸이 없다.** 그래서 summary의 "사랑"(lover-rebel, lover-caregiver)·"애정"(warrior-lover), sides의 "애정"·"기념일"(warrior-lover, lover-rebel, lover-explorer)이 가족·동료 유형에도 그대로 나온다. 고치려면 `summaryOverride`·`sidesOverride` 같은 칸이 spec에 필요함.
 - **원형 이름이 섞여 있다**: data.js 원형 이름은 "반항아"인데 match.js의 rebel-* 쌍 일부는 "반역자"로 씀(match.js 39줄, 그중 summary 5쌍·sides 9칸). 원문 동결 규칙 때문에 고치지 않았다(덮어쓰기는 반역자 그대로). 통일하려면 운영자 결정 필요.
+
+### 13단계 E2 후속 (2026-10-03, 코디네이터 요청)
+- **유형별 summary·sides 덮어쓰기 추가**: `summaryOverride[유형][쌍]`(3쌍: warrior-lover·lover-rebel·lover-caregiver)과 `sidesOverride[유형][쌍][원형]`(3칸: warrior-lover.lover·lover-rebel.lover·lover-explorer.explorer)을 friend·work·family에 같은 문장으로 넣음(합계 18칸). 칸이 없으면 원문을 쓰고, lover 유형은 늘 원문. 바꾼 것은 낱말뿐: 애정→마음/관심, 사랑(이라 여겨요/의 언어)→아끼는 마음/마음의 언어, 사랑이 식은→마음이 멀어진, 정해진 기념일·어디론가 데려가→특별한 날·새로운 곳으로 이끌어, 짜릿한→신선한. 길이는 원문 ±5자(원문 자체가 150·200자 기준을 넘는 칸 그대로).
+- **원형 이름 통일**: `api/_paid/match.js`의 "반역자" 60곳 → "반항아"(받침 없는 말끼리라 조사는 그대로). data-book-bond.js 덮어쓰기 1곳도 같이 고침. 다른 _paid 파일·data*.js·app.js에는 없음.
+- 검사: bond 금지어 0건, 덮어쓰기 칸에 연인 전용 낱말·반역자 0건, `make-volume.js` 대조 3000건 중 불일치 0, `node --test tools/strange-oracle/*.test.js` 46/46 통과.
