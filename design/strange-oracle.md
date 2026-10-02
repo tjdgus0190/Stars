@@ -2187,3 +2187,138 @@ designer (작업 D4). developer D2·copywriter D3 뒤, 실제 문구([초안] 0)
 
 ### designer가 직접 고친 것
 - 없음(CSS·마크업 변경 0). 따라서 build-dist·e2e 재실행은 하지 않음.
+
+
+## 13단계: 광고로 여는 책 (디자인)
+
+2026-10-03 designer, E1. 근거: specs/strange-oracle.md 13-1~13-9, 결정 75~82, reports/spec-review-strange-oracle.md 13단계 절(614행 메모: 새로고침·옛 `#deeper`·영수증 칸으로 오면 목차/궁합 표지로). 12단계 방 잠금(`turn-text`·`.unlock`)은 손대지 않았다. 새 화면 0 — 기존 `#screen-report` 하나에 세 보기를 둔다.
+
+### 0. 흐름 (입구 → 궁합 첫 쪽 탭 4번)
+입구 책 카드 "목차 보기"(1) → 목차 궁합 카드(2) → 궁합 표지에서 상대 입력 후 "광고 한 편 보고 이 장 열기"(3) → 펼치기(4, 광고가 끝나면 이 버튼만 남음) → 장 첫 쪽.
+- 광고 결과가 `granted`/`unavailable`이고 장 파일까지 받아졌으면 developer가 펼치기 없이 바로 첫 쪽으로 넘겨도 된다(그러면 3번). 디자인은 두 경우 모두 막다른 곳 없음.
+
+### 1. 보기 전환 (`#screen-report` 안 `div.book-reader[data-view]`)
+| data-view | 보이는 것 | 스크롤 | 배너 |
+|---|---|---|---|
+| `toc` (책의 집) | `.book-home` | 화면 전체 위아래 스크롤 | `book-toc` 1개 (맨 아래) |
+| `cover` (장 표지) | `.chapter-cover` | 위아래 스크롤 | 0 |
+| `pages` (장 안) | `.book-stage` + `.book-bar` (결정 53 그대로) | 한 화면 고정 | 0 |
+- CSS: `.screen.book.is-active:has(> .book-reader:not([data-view="pages"]))`만 높이 고정을 푼다. `:has` 미지원 브라우저도 내용이 아래로 넘쳐 문서가 스크롤되므로 막히지 않는다.
+- 상단 막대: `book-toc-open`("목차")은 `cover`·`pages`에서만 보임(누르면 `toc`). `read-label`은 장 안에서 "궁합 · 3 / 9", 목차·표지에서는 비움. 9칸 부 진행률은 은퇴(마크업 주석까지 삭제).
+
+### 2. 목차 (`.book-home`)
+위에서 아래: 장식선 → 제목 `book.toc.title` → 원형 이름(`book-home-arch`, 0/6이면 비어 숨음) → 안내 `book.toc.lede`/`ledeAll`(`book-home-lede`) → 이어 읽기(`book-resume`, 같은 탭 기록이 있을 때만) → 장 목록 → 책 카드 공유(보조) → 이용약관·개인정보처리방침 → 면책(`disclaimer-slot`) → 배너 `book-toc`.
+- 이어 읽기는 기획 "아래"에서 **목록 위**로 올렸다: 360x640 첫 화면에서 보이고, 배너와도 멀어진다(판단 기록 1).
+- 장 목록 = 여는 글 / 제1부 Ⅰ~Ⅵ / 제2부 흐름·궁합·심층 / 닫는 글. 부 이름은 `book.part1.*`·`book.part2.*` 재사용.
+- 장 카드 한 장 = `li.chapter-row[data-chapter][data-state] > button.chapter-row__btn` 하나(행 전체가 탭 영역, 높이 68~108px). 칸: 번호(Ⅰ~Ⅵ, 여는/닫는 글 ✦, 제2부 빈칸) · 문양(방별 장만) · 이름 + 둘째 줄(`book-chapter-sub`: 방별 장 = 결과 이름, 그 밖 = `book.chapter.blurbs.<id>`, 두 줄까지) + 상태 줄(`book-chapter-state`) · 읽는 시간(`book-chapter-time`, data-volume.js).
+
+| data-state | 상태 줄 문구 | 모양 | 누르면 |
+|---|---|---|---|
+| `need-room` | `book.toc.needRoom`({room}) / 닫는 글은 `book.toc.needAll` | 점선 테두리·배경 없음, 자물쇠 아이콘, 이름 굵기만 낮춤(글자색 AA 유지, opacity 안 씀) | 안내만(그 방 입구로 가는 안내, 강제 순서 그대로) |
+| `can-open` | `book.toc.canOpen` ("광고 한 편") | 재생 아이콘 + 테두리 알약 = 12단계 잠금 버튼과 같은 계열(제품 보조 버튼 테두리·방 accent) | 장 표지 |
+| `opened` | `book.toc.opened` ("읽기") | 체크 아이콘, accent 테두리 | 장 표지(펼치기) 또는 바로 첫 쪽(developer) |
+| `read` | `book.toc.reread` ("다시 읽기") | 체크 아이콘, 회색 | 같음 |
+- 광고가 필요 없는 장(여는 글·닫는 글)과 `lockAlways:false` + 광고단위 없음이면 열 수 있게 되는 즉시 `opened`(잠금 UI 0개).
+- 0/6이면 모든 행이 `need-room`, 광고 표시 0개(13-7의 2).
+- 잠긴 장의 문장은 목차에 없다(결과 이름·한 줄 소개·시간만).
+- 배너 간격(측정): 마지막 장 카드 → 공유 버튼 48px 이상, 공유 버튼 아래 끝 → 배너 위 끝 360px 108px / 480px 108px(사이에 법적 고지 줄과 면책). 한 화면 배너 1.
+- 주 버튼 0개(장 카드가 주 행동). 공유는 `btn--secondary`.
+
+### 3. 장 표지 (`.chapter-cover[data-chapter][data-state]`)
+위에서 아래: 가죽 장정(결정 53 `.leather` 재사용) 안에 부(`chapter-cover-part`) · 문양(`chapter-cover-mark`, 방별 장만 — 목차 행 svg 복제) · 장 이름(`chapter-cover-title`) · 결과 이름(`chapter-cover-result`) · key(`chapter-cover-key`) · 숨은 장 제목 줄(`chapter-cover-hidden-row` 안 `chapter-cover-hidden`, 결정 65) · 분량(`chapter-cover-volume`, `book.chapter.volume`) → (궁합) 입력 묶음 / (흐름) 생년월일 → 버튼 묶음.
+- 방별 장이 아니면 결과·key·숨은 장 줄은 `hidden`. 가죽 높이: 기본 min(52dvh, 400px) / 입력이 있는 표지(`data-chapter="match"`, 흐름 입력이 보일 때 `.has-form`)는 내용 높이.
+
+| data-state | 보이는 버튼 | 그 밖 |
+|---|---|---|
+| `locked` | `book-unlock` (보조 + 재생 아이콘, `book.unlock.button`) | 광고 중간에 닫음 = locked 그대로 + `book-unlock-status`에 `book.unlock.closed`. 다시 누를 수 있음 |
+| `waiting` | `book-unlock` disabled + `aria-busy="true"`, 반투명, 아이콘만 숨쉼(움직임 줄이기면 정지) | `book-unlock-status` = `book.unlock.loading` |
+| `open` | `book-chapter-open` (주 버튼, `book.chapter.open`). 파일 받는 중이면 disabled + `aria-busy` + `.is-fetching` | 광고 없음이면 `book.unlock.unavailable` 한 줄(보이게), granted면 `book.unlock.opened`(.visually-hidden 낭독만) |
+| `fail` | `book-load-fail` 상자: `book.chapter.loadFail` + `book-load-retry` | 열림 표시는 이미 남김 → 다시 시도는 광고 없이 파일만 |
+- 늘 보임: `book-cover-toc` "‹ 목차로"(글자 링크). 궁합만: `book-match-nopartner` "상대 없이 궁합 지도 보기"(잠겼으면 같은 광고 흐름 뒤 지도).
+- 한 화면 주 버튼 ≤1(잠김 상태는 0). 배너 0.
+- 포커스: 광고 결과로 버튼이 바뀌면 포커스를 `book-chapter-open`(열림) 또는 장 이름으로 옮긴다.
+- 360x640 측정: 방별 장(데칸) 표지 = 가죽 77~410, 잠금 버튼 아래 끝 478(스크롤 없음). 480x800 545.
+
+### 4. 궁합 입력 (`form.chapter-form--match[data-js="book-match-form"]`)
+순서: 상대 정보 고지(`book.match.consent`, 결정 17 문구를 입력 **위**에) → 상대 이름(`book-match-name`) → 상대 생년월일(`book-match-year/month/day`) → 관계 유형(`fieldset.rel-type[data-js="book-match-type"]`, 라디오 4개 `book-match-type-input` name="book-match-type" value = lover / friend / work / family, 2×2, 기본 선택 없음) → 오류 한 줄(`book-match-error`, role=alert).
+- 고른 칸: accent 테두리 + 옅은 배경 + "✓" + 굵게(색만으로 알리지 않음). 키보드 포커스 고리. 유형 미선택으로 누르면 fieldset에 `aria-invalid="true"`(점선 빨강 테두리) + `book.match.errors.type`.
+- 값은 메모리에만. 새로고침·이어 읽기·다른 장에 갔다 오면 빈 칸으로 다시 이 표지(열림 표시는 남아 버튼은 `open` 상태의 펼치기).
+- 360x640 측정: 입력 묶음 471px, 유형 칸 156x56(두 줄 "연인·마음에 둔 사람"), 잠금 버튼 위 끝 756 → 한 번 스크롤. 가로 넘침 0.
+
+### 5. 시기별 흐름 생년월일 (`fieldset.chapter-form--flow[data-js="book-flow-date"][hidden]`)
+이 탭에 생년월일이 없을 때만 `hidden` 해제(+ 표지에 `.has-form`). `book-flow-year/month/day`, `book-flow-error`, 처음 저장 고지 `book-flow-notice`(6장 예외: "이 탭에만 잠시 보관…", 기존 고지 키가 있으면 developer가 그 키로 바꿔도 됨). profile에 넣고 "내 정보 지우기"를 따른다.
+
+### 6. 장 안 (결정 53 리더)
+- 쪽 번호 장 안 기준 "3 / 9", 머리줄(달리는 제목) = 장 이름. 스와이프·가장자리 탭·이전/다음·←/→·움직임 줄이기 즉시 전환 그대로.
+- 장 첫 쪽에서 "이전" = 장 표지(`cover`). 마지막 쪽 = **장 끝 쪽**: `book-source` 안 `div.chapter-end`를 JS가 그 장 마지막 쪽으로 옮겨 쓴다.
+  - 장 끝 쪽(종이 위): 장식선 → 장 이름(`chapter-end-name`) → "다음 장 {이름} →"(`chapter-end-next`, 주 버튼, 짙은 잉크 바탕 + 종이색 글자) → 다음 장이 잠겼으면 한 줄(`chapter-end-next-state`: canOpen/needRoom 문구, 아니면 비움) → "목차로"(`chapter-end-toc`, 잉크 테두리 보조).
+  - 다음 장이 잠겼으면 그 장 표지로. 닫는 글에서는 `chapter-end-next`에 `.is-hidden`.
+- 장 안 배너 0. `book-source`에는 지금 연 장 하나만 채우고 잠긴 장 문장은 넣지 않는다.
+
+### 7. 입구 · 방 결과 · 나의 이야기의 길 (가격 0)
+- 입구 책 카드(`hub-book`, 자리·요소 수 그대로): `data-state` = none / some / all. 설명 줄 `hub-book-desc`(`hub.book.desc`) = 입구에서 "장마다 짧은 광고 한 편으로 열려요"를 밝히는 유일한 줄. 상태 줄 `hub-book-hint` = `hub.book.state0`/`stateSome`({n})/`stateAll`. 버튼 `hub-book-go` = `hub.book.goToc`(보조). 영수증 토글·폼은 삭제. 측정: 입구 문 버튼 아래 끝 360x640 548px(스크롤 없이 보임), 480x800 600px. 카드 360 폭 320x255.
+- 방 결과 책 한 줄(`result-book-line`, 여섯 방, 마크업 그대로): 결제 상태와 무관하게 `hook` + `result-book-link`(`room.bookLink`, "책에서 이 방의 장 열기") 늘 보임, `book-line-note`(옛 "여섯 문 끝…")는 숨김 → 그 방 장 표지로. `result-end` 배너와는 지금처럼 핵심 풀이·다음 문으로 떨어져 있다.
+- 나의 이야기: 옛 결제 카드·결제 꺼짐 한 줄 자리에 `div.story-book > button.story-book__go[data-js="story-book-link"]`(보조, 책 아이콘, `story.bookLink`). 마친 방 0개면 `.is-hidden`. 주 버튼은 아래 공유 하나 그대로.
+- FAQ 5번 문답(`hub.faq.items.4.*`)은 같은 키로 책 문답으로 바뀜(결제 문답 은퇴, `hub-faq-paid` 훅 삭제).
+
+### 8. 삭제한 마크업 (developer가 짝 JS 삭제)
+- 화면: `#screen-deeper` 전체(가격·받는 것·견본 두 쪽·6/6 전 봉인·동의·결제 버튼·테스트 띠·결제 실패 안내·사업자 정보·환불 링크), `#screen-unseal` 전체.
+- 입구: `hub-paid` 감싸개, 영수증 토글·폼(`receipt-toggle`, `receipt-open*`), `hub-faq-paid`.
+- 나의 이야기: `story-paid` 카드 전체, `story-book-note`.
+- 책: 테스트 띠, 책 표지(`book-cover`, `book-open-btn`, `report-title`, `report-meta`, "영수증 코드로 언제든 다시 열려요"), 영수증 카드 두 개, `book-topic-note`, 원본의 옛 목차 nav, 끝 버튼 묶음(`book-end-actions`, `report-go-story`), 목차 시트 dialog.
+- 삭제한 data-js 전체: biz-info, biz-info-list, book-cover, book-end-actions, book-open-btn, book-resume-name, book-resume-page, book-toc, book-toc-close, book-toc-item, book-toc-list, book-toc-result, book-toc-sheet, book-toc-sheet-list, book-toc-time, book-topic-note, book-total, deeper-consent, deeper-consent-row, deeper-date-error, deeper-date-field, deeper-day, deeper-gate, deeper-gate-count, deeper-gate-next, deeper-items, deeper-minor, deeper-month, deeper-partner, deeper-partner-day, deeper-partner-error, deeper-partner-month, deeper-partner-name, deeper-partner-year, deeper-pay, deeper-pay-cta, deeper-pay-status, deeper-peek, deeper-peek-arch, deeper-price, deeper-read-time, deeper-sample, deeper-saved, deeper-saved-edit, deeper-saved-value, deeper-toc, deeper-toc-item, deeper-total, deeper-vat, deeper-volume, deeper-year, hub-faq-paid, hub-paid, pay-alert, pay-alert-text, pay-alert-title, pay-band, pay-contact, pay-contact-value, receipt, receipt-code, receipt-code-end, receipt-copy, receipt-copy-end, receipt-end, receipt-forget, receipt-open, receipt-open-error, receipt-open-go, receipt-open-input, receipt-toggle, receipt-toss, report-go-story, report-meta, report-title, screen-deeper, screen-unseal, story-book-note, story-paid, story-paid-go, story-paid-list, story-paid-price, story-paid-reopen, story-paid-status, toc-name, toc-teaser, toc-vol, unseal-back, unseal-error, unseal-error-code, unseal-error-text, unseal-error-title, unseal-retry, unseal-skip, unseal-status.
+- 남긴 공용 훅: `screen-report`, `book-reader`, `book-stage`, `book-pages`, `book-edge-prev/next`, `book-bar`, `book-prev/next`, `book-track-fill`, `book-live`, `book-source` 안 모든 장 원본(`report-part`, `book-room*`, `report-timeline`, `report-match*`, `match-room-text`, `report-deep-*`, `report-evidence`, `report-open`, `report-close`), `book-resume`, `book-toc-open`(동작만 바뀜), `report-share`(목차로 옮김), `disclaimer-slot`(목차로 옮김), `legal-links`(목차로 옮김, 환불 링크 뺌), `page-end`, `hub-book*`, 이어가기 코드(`resume-*`, 클래스 `receipt-open__*`·`receipt-toggle__caret`은 이어가기 칸이 같이 써서 CSS 유지).
+- style.css에서 은퇴 클래스 전용 규칙 166개 삭제(pay-band, deeper-*, peek-page, book-peek, unseal-*, pay-cta/alert/contact, disclosure, biz-info, paid-card, book-gate, receipt(코드 카드), sheet, book-cover*, book-toc*, story-book-note, hub-paid). `.legal-links`, `.notice--partner`, `.leather`, `.book-resume`, `.receipt-open__*`는 남김.
+
+### 9. 문구 자리 (copywriter, data.js — 마크업의 `[초안]`은 data.js에 넣은 뒤 지운다)
+| 키 | 자리 | 최대 | 비고 |
+|---|---|---|---|
+| `hub.book.desc` | 입구 카드 설명 | 40 | 장마다 광고 한 편으로 열린다는 사실 한 번 |
+| `hub.book.state0` / `stateSome` / `stateAll` | 입구 카드 상태 줄 | 각 30 (권장 18, 360px 한 줄) | `{n}`. 버튼이 "목차 보기"라 상태 줄에서는 "· 목차 보기"를 빼도 됨 |
+| `hub.book.goToc` | 입구 카드 버튼 | 10 | 새 키 |
+| `story.bookLink` | 나의 이야기 버튼 | 14 | |
+| `room.bookLink` | 방 결과 링크 | 16 | 화살표는 마크업이 붙임 |
+| `book.toc.title` / `lede` / `ledeAll` | 목차 머리 | 16 / 50 / 40 | `{n}` |
+| `book.toc.needRoom` / `needAll` / `canOpen` / `opened` / `reread` | 장 카드 상태 줄 | 각 20 (canOpen·opened·reread 권장 8) | `needAll` 새 키(닫는 글). 360px에서 needRoom은 두 줄까지 됨 |
+| `book.toc.resume` | 이어 읽기 | 30 | `{chapter}` `{page}` |
+| `book.chapter.blurbs.{open,flow,match,deep,close}` | 장 카드 둘째 줄 | 각 30 | 360px 두 줄 |
+| `book.chapter.volume` | 표지 분량 | 24 | |
+| `book.chapter.open` / `next` / `toToc` / `retry` | 표지·장 끝 버튼 | 8 / 10 / 10 / 8 | next 뒤에 장 이름이 붙음 |
+| `book.chapter.loadFail` | 불러오기 실패 | 40 | |
+| `book.unlock.button` | 표지 잠금 버튼 | 30 (권장 16, 360px 한 줄) | "광고" 필수, 초·횟수 표기 금지 |
+| `book.unlock.loading` / `unavailable` / `closed` / `opened` | 결과 한 줄 | 각 30 | opened는 낭독만 |
+| `book.match.consent` | 상대 정보 고지 | 기존 `deeper.partner.notice` 길이(약 80) | 옮겨 쓰기 |
+| `book.match.nameLabel` / `dateLabel` / `namePlaceholder` / `yearAria` / `monthAria` / `dayAria` | 상대 입력 | 각 12 | 새 키(옛 `deeper.partner.*`에서 옮김) |
+| `book.match.typeLabel` | 유형 질문 | 20 | |
+| `book.match.types.{lover,friend,work,family}` | 유형 칸 | 각 12 (lover는 두 줄 됨) | 성별 중립 |
+| `book.match.noPartner` | 글자 링크 | 20 | |
+| `book.match.errors.{name,date,type}` | 오류 한 줄 | 각 40 | |
+| `book.match.peekLine` | M5 틀 문장 | 60 | 장 안 |
+| `book.flow.dateLabel` / `dateHint` / `notice` / `yearAria` / `monthAria` / `dayAria` | 흐름 생년월일 | 12 / 16 / 60 / 12 | notice는 기존 6장 고지 키가 있으면 그것 |
+| `report.share` | 목차 공유 버튼 | 14 | "책 카드 저장·공유"로 바꿀지 copywriter 판단 |
+| `hub.faq.items.4.q` / `.a` | 책 문답 | 20 / 150 | |
+
+### 10. developer 인계
+- 새 data-js: `book-home`, `book-home-arch`, `book-home-lede`, `book-resume-text`, `book-chapters`, `book-chapter`(×11, `data-chapter` = open·ogham·star·decan·tzolkin·rune·sibyl·flow·match·deep·close), `book-chapter-btn`, `book-chapter-sub`, `book-chapter-state`, `book-chapter-time`, `chapter-cover`, `chapter-cover-part`, `chapter-cover-mark`, `chapter-cover-title`, `chapter-cover-result`, `chapter-cover-key`, `chapter-cover-hidden-row`, `chapter-cover-hidden`, `chapter-cover-volume`, `book-match-form`, `book-match-name`, `book-match-year/month/day`, `book-match-type`, `book-match-type-input`(×4), `book-match-error`, `book-flow-date`, `book-flow-year/month/day`, `book-flow-error`, `book-flow-notice`, `book-unlock`, `book-chapter-open`, `book-unlock-status`, `book-load-fail`, `book-load-retry`, `book-match-nopartner`, `book-cover-toc`, `chapter-end`, `chapter-end-name`, `chapter-end-next`, `chapter-end-next-name`, `chapter-end-next-state`, `chapter-end-toc`, `story-book`, `story-book-link`. 배너 자리 `data-ad="book-toc"`.
+- 상태: `book-reader[data-view]` toc|cover|pages / `chapter-row[data-state]` need-room|can-open|opened|read / `chapter-cover[data-state]` locked|waiting|open|fail, `[data-chapter]`, `.has-form`(흐름 입력이 보일 때) / `chapter-open.is-fetching` / `rel-type[aria-invalid]` / `hub-book[data-state]` none|some|all / `story-book.is-hidden` / `chapter-end-next.is-hidden`(마지막 장). 숨김은 표지 안에서는 `hidden` 속성(CSS가 `!important`로 보장).
+- 지금 app.js는 삭제된 훅에서 멈춘다(측정 때 2407행 `js("receipt-toggle")` null). E3에서 위 삭제 목록의 JS를 걷어 내야 화면이 다시 돈다.
+- `book-toc-open`: 시트 대신 `data-view="toc"`로. `book-resume`: 문구는 `book-resume-text` 한 칸에 `book.toc.resume` 채움.
+- `disclaimer-slot`은 이제 목차에 있다(장 끝 쪽으로 옮기지 않음).
+- `legal-links`는 목차 아래로 옮겼고 환불 링크를 뺐다. legal/refund.html 파일 처리는 13-8대로 developer.
+- `.book-reader` 종이 토큰은 그대로라 장 끝 쪽(`chapter-end`)은 쪽 안에서 색이 맞는다.
+
+### 11. 판단 기록 (운영자 확인용)
+1. 이어 읽기를 목록 **위**에 둠(기획은 "아래"): 첫 화면에서 보이고 배너와 멀어짐.
+2. 목차의 "열 수 있음" 표시는 버튼이 아니라 행 안의 알약(재생 아이콘 + "광고 한 편"). 실제 광고는 장 표지의 잠금 버튼에서만 시작한다 → 실수로 광고가 뜨지 않고, 표지에서 분량·숨은 장 제목을 보고 고른다.
+3. 법적 고지 링크(이용약관·개인정보처리방침)는 결제 화면과 함께 사라지므로 목차 아래로 옮김. 사업자 정보 칸(◯◯)은 판매가 없어 화면에서 뺐다(13-8 45번, 운영자 확인).
+
+### 12. 측정 (headless Edge, tools/strange-oracle/cdp.js, mock `--src` 8790, 움직임 줄이기, JS가 멈춘 상태라 DOM으로 보기를 강제하고 가짜 배너 100px)
+| | 360x640 | 480x800 |
+|---|---|---|
+| 가로 넘침(목차·궁합 표지·데칸 표지) | 0 | 0 |
+| 장 카드 높이 | 68~108 | 68~77 |
+| 공유 버튼 아래 → 배너 위 | 108px | 108px |
+| 목차 전체 높이 | 약 1,770 | 1,656 |
+| 궁합 표지 주 버튼 수(잠김) | 0 | 0 |
+| 입구 문 버튼 아래 끝 | 548 | 600 |
+- 미확인: 장 끝 쪽(종이 위) 실제 모습·대비(JS가 쪽을 만들어야 보임), 목차 0/6·6/6 실제 문구 길이, 광고 결과별 전환, 상단 막대 표시 — E5 UI 점검에서 확인.

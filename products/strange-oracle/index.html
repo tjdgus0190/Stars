@@ -153,10 +153,10 @@
         <svg class="topbar__home-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 18V9a6 6 0 0 1 12 0v9M4 18h12M10 18v-6M8 12h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span data-t="topbar.home">입구</span>
       </button>
-      <!-- 방 화면: "Ⅲ 데칸의 방" + <span class="topbar__count">3/6</span> · 책: "Ⅳ 촐킨의 방 · 4/9". 입구에서는 비움 -->
+      <!-- 방 화면: "Ⅲ 데칸의 방" + <span class="topbar__count">3/6</span> · 책 장 안: "궁합 · 3 / 9"(장 안 쪽 번호). 목차·장 표지·입구에서는 비움 -->
       <p class="topbar__chapter" data-js="read-label" aria-live="polite"></p>
       <div class="topbar__end">
-      <!-- 책(#report)에서만 보임: 목차 시트 열기 -->
+      <!-- (13단계) 책의 장 표지·장 안에서만 보임: 누르면 어디서든 목차(data-view="toc")로. 목차 시트(dialog)는 은퇴 -->
       <button class="topbar__toc is-hidden" type="button" data-js="book-toc-open" aria-haspopup="dialog">
         <svg class="topbar__clear-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <span data-t="book.tocButton">목차</span>
@@ -167,7 +167,6 @@
       </button>
       </div>
     </div>
-    <!-- (8단계) 책(#report)에서만 보이는 부 단위 진행률 9칸: 여는 글 · 여섯 방 · 제2부 · 닫는 글 (topbar에 .is-reading) -->
   </header>
 
   <main id="app" class="page">
@@ -391,38 +390,25 @@
         </div>
       </section>
 
-      <!-- (8단계) 한 권의 책: 결제 켜짐일 때만 (hub-paid .is-hidden 해제). data-state (JS):
-           locked(6/6 전: 여섯 칸 중 N칸 켜짐 + "N/6", 버튼 = 미리보기) / ready(6/6: 3,900원 버튼) / owned(결제 후: 내 책 다시 펴기) -->
-      <div class="hub-paid" data-js="hub-paid">
-        <aside class="book-card" data-js="hub-book" data-state="locked" aria-labelledby="book-card-title">
-          <span class="book-card__cover" aria-hidden="true">
-            <svg viewBox="0 0 48 60"><path d="M6 4h32a4 4 0 0 1 4 4v48H10a4 4 0 0 1-4-4Z" /><path d="M10 48h32M14 4v44" /></svg>
-            <svg class="wax-seal book-card__seal"><use href="#i-seal"/></svg>
-          </span>
-          <div class="book-card__text">
-            <p class="book-card__eyebrow" data-t="hub.book.eyebrow">여섯 문 끝에서</p>
-            <h2 class="book-card__title" id="book-card-title" data-t="hub.book.title">한 권의 책</h2>
-            <p class="book-card__desc" data-js="hub-book-desc" data-t="hub.book.desc">여섯 방의 네 장 전체와 숨은 장, 시기별 흐름까지 한 번에 엮어요</p>
-          </div>
-          <div class="book-card__lock" data-js="hub-book-lock">
-            <span class="book-card__pips" aria-hidden="true"><i class="is-on"></i><i class="is-on"></i><i></i><i></i><i></i><i></i></span>
-            <span class="book-card__hint" data-js="hub-book-hint"></span>
-          </div>
-          <!-- 문구: locked hub.book.go.locked / ready hub.book.go.ready / owned hub.book.go.owned -->
-          <button class="btn btn--secondary btn--block book-card__go" type="button" data-js="hub-book-go"></button>
-        </aside>
-        <!-- (8단계, U9) 영수증 코드 입력은 접힌 글자 링크. 누르면 aria-expanded="true" + 폼 .is-hidden 해제 -->
-        <button class="receipt-toggle" type="button" data-js="receipt-toggle" aria-expanded="false" aria-controls="receipt-open-hub-form"><span data-t="intro.receipt">영수증 코드가 있어요</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
-        <form class="receipt-open receipt-open--hub is-hidden" id="receipt-open-hub-form" data-js="receipt-open" novalidate>
-          <label class="receipt-open__label" for="receipt-open-hub" data-t="receipt.open.label">영수증 코드로 열기</label>
-          <div class="receipt-open__row">
-            <input class="input receipt-open__input" id="receipt-open-hub" data-js="receipt-open-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="SO1A-B2C3-D4E5-…" data-ph="receipt.open.placeholder" />
-            <button class="btn btn--secondary receipt-open__go" type="submit" data-js="receipt-open-go" data-t="receipt.open.go">다시 열기</button>
-          </div>
-          <p class="receipt-open__how" data-t="receipt.open.how">결제 직후 받은 코드를 넣으면 이름·생년월일 없이 책 전체가 다시 열려요.</p>
-          <p class="field__error is-hidden" data-js="receipt-open-error" role="alert"></p>
-        </form>
-      </div>
+      <!-- (13단계) 한 권의 책 카드: 결제 없이 늘 보인다. data-state (JS) = none(0/6) | some(1~5/6) | all(6/6).
+           desc = "장마다 짧은 광고 한 편으로 열려요"(hub.book.desc, 입구에서 광고를 밝히는 유일한 줄) · hint = hub.book.state0 / stateSome({n}) / stateAll.
+           가격·결제 문구 없음. 버튼 = 목차로 (hub.book.goToc) -->
+      <aside class="book-card" data-js="hub-book" data-state="some" aria-labelledby="book-card-title">
+        <span class="book-card__cover" aria-hidden="true">
+          <svg viewBox="0 0 48 60"><path d="M6 4h32a4 4 0 0 1 4 4v48H10a4 4 0 0 1-4-4Z" /><path d="M10 48h32M14 4v44" /></svg>
+          <svg class="wax-seal book-card__seal"><use href="#i-seal"/></svg>
+        </span>
+        <div class="book-card__text">
+          <p class="book-card__eyebrow" data-t="hub.book.eyebrow">여섯 문 끝에서</p>
+          <h2 class="book-card__title" id="book-card-title" data-t="hub.book.title">한 권의 책</h2>
+          <p class="book-card__desc" data-js="hub-book-desc" data-t="hub.book.desc">[초안] 방마다 네 장과 숨은 장, 흐름·궁합까지. 장마다 짧은 광고 한 편으로 열려요</p>
+        </div>
+        <div class="book-card__lock" data-js="hub-book-lock">
+          <span class="book-card__pips" aria-hidden="true"><i class="is-on"></i><i class="is-on"></i><i></i><i></i><i></i><i></i></span>
+          <span class="book-card__hint" data-js="hub-book-hint">[초안] 열 수 있는 장 4개</span>
+        </div>
+        <button class="btn btn--secondary btn--block book-card__go" type="button" data-js="hub-book-go" data-t="hub.book.goToc">[초안] 목차 보기</button>
+      </aside>
 
       <!-- (8단계) 자주 묻는 것: 광고 심사용 소개 글(300자 이상)을 대체. 접지 않고 펼친 채 (글자 수가 접힌 칸에 숨지 않게) -->
       <section class="faq" aria-labelledby="faq-title">
@@ -434,8 +420,8 @@
             <dd class="faq__ad-note" data-js="hub-faq-adnote" data-t="hub.faq.adNote" hidden>방마다 흐름 풀이 한 단락은 짧은 광고 한 편을 보면 열려요. 광고가 없으면 그냥 열려요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">뿌리에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름과 생년월일은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
-          <!-- (11단계 11-5) 결제 꺼짐이면 이 문답 통째로 .is-hidden (결정 66) -->
-          <div class="faq__item" data-js="hub-faq-paid"><dt data-t="hub.faq.items.4.q">무료와 유료는 무엇이 다른가요?</dt><dd data-t="hub.faq.items.4.a">여섯 방과 나의 이야기는 모두 무료예요. 한 권의 책은 방마다 네 장 전체와 시기별 흐름을 엮은 선택 상품이에요.</dd>
+          <!-- (13단계) 책 문답: 장마다 광고 한 편, 광고가 없으면 그냥 열림, 무엇이 담기는지 (답 150자). 결제 문답은 은퇴 -->
+          <div class="faq__item"><dt data-t="hub.faq.items.4.q">[초안] 한 권의 책은 무엇인가요?</dt><dd data-t="hub.faq.items.4.a">[초안] 방마다 네 장 전체와 숨은 장, 시기별 흐름·궁합·원형 심층을 장마다 나눠 담은 책이에요. 장마다 짧은 광고 한 편을 보면 열리고, 광고가 없으면 그냥 열려요.</dd>
           </div>
         </dl>
       </section>
@@ -2245,30 +2231,11 @@
         </button>
       </section>
 
-      <!-- (11단계 11-5·F6) 결제 꺼짐 + 6/6: 책 카드(story-paid) 대신 이 한 줄만. 가격·날짜·버튼·링크·"곧" 없음. 그 밖에는 .is-hidden -->
-      <p class="story-book-note is-hidden" data-js="story-book-note" data-t="story.bookNote">이 이야기를 더 길게 엮은 한 권의 책을 준비하고 있어요.</p>
-
-      <!-- 상태: 결제 꺼짐 = 카드째 .is-hidden(11-5) / .is-on = 결제 켜짐(버튼 "무엇이 들어 있는지 보기") / .is-owned = 이 탭에 영수증 코드 있음("내 책 다시 펴기") -->
-      <aside class="paid-card is-hidden" data-js="story-paid">
-        <svg class="paid-card__seal wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-        <p class="eyebrow" data-t="story.paid.eyebrow"></p>
-        <h2 class="paid-card__title" data-t="story.paid.title"></h2>
-        <p class="paid-card__lead" data-t="story.paid.lead"></p>
-        <ul class="paid-card__list" data-js="story-paid-list"></ul>
-        <p class="paid-card__price"><span data-js="story-paid-price" data-t="story.paid.price"></span> · <span data-js="story-paid-status" data-t="story.paid.statusOn"></span></p>
-        <button class="btn btn--secondary btn--block" type="button" data-js="story-paid-go" data-t="story.paid.goOn"></button>
-        <div class="paid-card__reopen is-hidden" data-js="story-paid-reopen">
-        <form class="receipt-open" data-js="receipt-open" novalidate>
-          <label class="receipt-open__label" for="receipt-open-story" data-t="receipt.open.label">영수증 코드로 열기</label>
-          <div class="receipt-open__row">
-            <input class="input receipt-open__input" id="receipt-open-story" data-js="receipt-open-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="SO1A-B2C3-D4E5-…" data-ph="receipt.open.placeholder" />
-            <button class="btn btn--secondary receipt-open__go" type="submit" data-js="receipt-open-go" data-t="receipt.open.go">다시 열기</button>
-          </div>
-          <p class="receipt-open__how" data-t="receipt.open.how">결제 직후 받은 코드를 넣으면 이름·생년월일 없이 책 전체가 다시 열려요.</p>
-          <p class="field__error is-hidden" data-js="receipt-open-error" role="alert"></p>
-        </form>
-        </div>
-      </aside>
+      <!-- (13단계) 책으로 가는 한 줄 버튼: 마친 방이 1개 이상이면 보임(0/6은 story-empty가 대신하므로 .is-hidden). 가격 없음.
+           보조 버튼 — 이 화면의 주 버튼은 아래 공유 하나 -->
+      <div class="story-book" data-js="story-book">
+        <button class="btn btn--secondary btn--block story-book__go" type="button" data-js="story-book-link"><svg class="story-book__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3 4.5h5.5A2.5 2.5 0 0 1 11 7v9a2 2 0 0 0-2-2H3ZM17 4.5h-5.5A2.5 2.5 0 0 0 9 7v9a2 2 0 0 1 2-2h6Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg><span data-t="story.bookLink">[초안] 책 목차 열기</span></button>
+      </div>
 
       <div class="result-actions">
         <button class="btn btn--primary btn--block" type="button" data-js="story-share" data-t="story.share"></button>
@@ -2284,9 +2251,7 @@
       <div class="ad-slot" data-js="ad-slot" data-ad="story-end"></div>
     </section>
 
-    <!-- ═════════ 6단계: 유료 리포트 (결제가 꺼져 있으면 JS가 이 세 화면으로 가는 길을 만들지 않는다) ═════════
-         문구는 전부 data-t 키. data-js 칸은 JS가 채우므로 비워 둔다.
-         유료 문장은 이 파일에 한 글자도 넣지 않는다 (spec 6-3·D-4). 봉인 칸의 흐린 줄은 글자가 아닌 도형이다. -->
+    <!-- 공용 장식 symbol (책 장식선·밀랍 인장) -->
     <svg class="rune-sprite" aria-hidden="true" focusable="false">
       <!-- (결정 53) 책 장식선: 가운데 마름모 + 양쪽 덩굴. designer 직접 제작 -->
       <symbol id="i-fleuron" viewBox="0 0 160 20"><g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M8 10h46M106 10h46"/><path d="M54 10c5-7 14-8 17-1-1 5-7 6-9 2M106 10c-5-7-14-8-17-1 1 5 7 6 9 2"/></g><path d="M80 3.5l5.5 6.5-5.5 6.5-5.5-6.5z" fill="currentColor"/><circle cx="4" cy="10" r="1.6" fill="currentColor"/><circle cx="156" cy="10" r="1.6" fill="currentColor"/></symbol>
@@ -2297,288 +2262,279 @@
       </symbol>
     </svg>
 
-    <!-- ═════════ 6-P. 더 깊은 이야기: 미리보기·고지·결제 (#deeper) ═════════ -->
-    <section class="screen deeper" id="screen-deeper" data-js="screen-deeper" data-room="hall" data-preview="6-P. 한 권의 책 — 결제 전 미리보기 (광고 없음. 정적 검토: 6/6 전 잠금 블록과 결제 블록을 함께 보여 줌)">
-      <p class="pay-band" data-js="pay-band" data-mode="mock"><span class="pay-band__mark" aria-hidden="true">◇</span><span data-t="pay.band.mock">모의 결제 — 실제 결제창 없이 시험해요</span></p>
+    <!-- ═════════ 6-R. 한 권의 책 (13단계: 광고로 여는 책, 결정 75~82) ═════════
+         한 화면 안의 세 보기 — book-reader[data-view] = "toc"(목차 = 책의 집) | "cover"(장 표지 = 잠긴 장의 문) | "pages"(장 안 리더, 결정 53).
+         toc·cover는 화면이 위아래로 스크롤되고, pages만 한 화면에 고정된다. 가격·결제 문구 없음.
+         설계: design/strange-oracle.md 「13단계: 광고로 여는 책 (디자인)」 -->
+    <section class="screen report book" id="screen-report" data-js="screen-report" data-room="hall" data-preview="6-R. 한 권의 책 — 목차 (정적 검토: 3/6, 장 카드 네 상태)">
+      <div class="book-reader" data-js="book-reader" data-view="toc">
 
-      <header class="deeper-head">
-        <p class="eyebrow" data-t="deeper.eyebrow">여섯 문 끝의 한 권</p>
-        <h1 class="deeper-head__title" data-t="deeper.title">당신만을 위한 한 권의 책</h1>
-        <p class="deeper-head__lead" data-t="deeper.lead">여섯 방의 네 장 전체와 숨은 장, 시기별 흐름과 궁합까지 쪽을 넘기며 읽는 한 권의 책으로 엮어요.</p>
-      </header>
+        <!-- ── 목차 (data-view="toc") ── 배너는 맨 아래 book-toc 하나뿐 -->
+        <div class="book-home" data-js="book-home">
+          <header class="book-home__head">
+            <svg class="book-home__fleuron" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#i-fleuron" /></svg>
+            <h1 class="book-home__title" id="book-home-title" data-t="book.toc.title">[초안] 한 권의 책</h1>
+            <!-- JS: 지금의 원형 이름 (공개 data). 0/6이면 빈 채로 숨는다 -->
+            <p class="book-home__arch" data-js="book-home-arch"></p>
+            <!-- JS: 6/6 전 book.toc.lede({n}) / 6/6 book.toc.ledeAll -->
+            <p class="book-home__lede" data-js="book-home-lede">[초안] 지금까지 3개 방으로 엮은 책이에요. 방을 더 지나면 원형이 바뀔 수 있어요</p>
+          </header>
 
-      <!-- (10단계 10-3 b) 책 모양 두 쪽: 결정 53 리더의 종이 모양을 그대로 쓴 정적 미리보기. 가로로 밀어 넘긴다(scroll-snap, JS 없음).
-           1쪽 = 속표지(내 원형 이름 + "한 권의 책" + 읽는 시간), 2쪽 = 무료 견본(data.js deeper.sample.body, 가상의 두 사람).
-           유료 문장은 한 글자도 넣지 않는다. 광고 자리 0 -->
-      <section class="book-peek" aria-labelledby="deeper-sample-title">
-        <div class="book-peek__strip" data-js="deeper-peek" tabindex="0" role="group" data-aria="deeper.peek.aria" aria-label="책 미리보기 두 쪽">
-          <article class="peek-page peek-page--title">
-            <p class="peek-page__run" aria-hidden="true"></p>
-            <div class="peek-page__body">
-              <svg class="peek-page__fleuron" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#i-fleuron" /></svg>
-              <p class="peek-page__eyebrow" data-t="deeper.peek.coverEyebrow">여섯 문이 엮은</p>
-              <!-- JS: 지금의 원형 이름(무료 data). 비어 있으면 이 줄만 숨긴다 -->
-              <p class="peek-page__arch" data-js="deeper-peek-arch"></p>
-              <p class="peek-page__book" data-t="deeper.peek.bookName">한 권의 책</p>
-              <ul class="peek-page__marks" aria-hidden="true">
-                <li data-room="ogham"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></li>
-                <li data-room="star"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></li>
-                <li data-room="decan"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></li>
-                <li data-room="tzolkin"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></li>
-                <li data-room="rune"><svg class="sig sig--rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></li>
-                <li data-room="sibyl"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></li>
-              </ul>
-              <!-- JS: deeper.readTime("읽는 데 약 {n}분"), n = 올림(글자 수 ÷ 500). 손으로 쓴 숫자 금지 -->
-              <p class="peek-page__time" data-js="deeper-read-time"></p>
-            </div>
-            <p class="peek-page__folio" aria-hidden="true">i</p>
-          </article>
-          <article class="peek-page peek-page--sample">
-            <p class="peek-page__run"><span class="sample__badge" data-t="deeper.sample.badge">견본</span><span data-t="deeper.peek.sampleMark">가상의 두 사람으로 쓴 견본 쪽</span></p>
-            <div class="peek-page__body">
-              <h2 class="peek-page__title" id="deeper-sample-title" data-t="deeper.sample.title">3장 · 탐험가와 현자의 궁합 (가상의 두 사람)</h2>
-              <div class="sample__body prose" data-js="deeper-sample" data-list="deeper.sample.body">
-              </div>
-              <p class="sample__note" data-t="deeper.sample.note">실제 책에서는 이 자리에 당신과 상대의 원형이 들어가요.</p>
-            </div>
-            <p class="peek-page__folio" aria-hidden="true">ii</p>
-          </article>
+          <!-- 이어 읽기: 이 탭에 마지막 장 id + 쪽 번호가 있을 때만 .is-hidden 해제 (book.toc.resume, {chapter} {page}) -->
+          <button class="book-resume is-hidden" type="button" data-js="book-resume">
+            <svg class="book-resume__icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3h8v14l-4-3-4 3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <span class="book-resume__text" data-js="book-resume-text">[초안] 지난번 읽던 궁합 7쪽부터</span>
+            <span aria-hidden="true">→</span>
+          </button>
+
+          <!-- 장 목록 (순서 고정). li[data-state] = need-room(아직 못 엶) | can-open(광고 한 편으로 열 수 있음) | opened(열림, 읽기) | read(다 읽음, 다시 읽기).
+               상태 글은 JS가 book.toc.needRoom({room}) / needAll / canOpen / opened / reread 로 넣는다. 아이콘은 CSS가 상태에 맞게 그린다.
+               잠긴 장의 문장은 이 목록에 없다 (결과 이름·한 줄 소개·읽는 시간만) -->
+          <nav class="chapters" data-js="book-chapters" aria-labelledby="book-home-title">
+            <ol class="chapters__list">
+              <li class="chapter-row" data-js="book-chapter" data-chapter="open" data-state="read">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true">✦</span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="book.toc.open"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub" data-t="book.chapter.blurbs.open">[초안] 여섯 문이 당신을 부른 이유</span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] 다시 읽기</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 2분</span>
+                </button>
+              </li>
+            </ol>
+            <p class="chapters__part"><span data-t="book.part1.num">제1부</span> <span data-t="book.part1.title">여섯 방의 온전한 이야기</span></p>
+            <ol class="chapters__list">
+              <li class="chapter-row" data-js="book-chapter" data-chapter="ogham" data-room="ogham" data-state="read">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true">I</span>
+                  <span class="chapter-row__mark" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="rooms.ogham.name"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub"></span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] 다시 읽기</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 7분</span>
+                </button>
+              </li>
+              <li class="chapter-row" data-js="book-chapter" data-chapter="star" data-room="star" data-state="opened">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true">II</span>
+                  <span class="chapter-row__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="rooms.star.name"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub"></span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] 읽기</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 8분</span>
+                </button>
+              </li>
+              <li class="chapter-row" data-js="book-chapter" data-chapter="decan" data-room="decan" data-state="can-open">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true">III</span>
+                  <span class="chapter-row__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="rooms.decan.name"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub"></span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] 광고 한 편</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 7분</span>
+                </button>
+              </li>
+              <li class="chapter-row" data-js="book-chapter" data-chapter="tzolkin" data-room="tzolkin" data-state="need-room">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true">IV</span>
+                  <span class="chapter-row__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="rooms.tzolkin.name"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub"></span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] Ⅳ 촐킨의 방을 지나면 열려요</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 7분</span>
+                </button>
+              </li>
+              <li class="chapter-row" data-js="book-chapter" data-chapter="rune" data-room="rune" data-state="need-room">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true">V</span>
+                  <span class="chapter-row__mark" aria-hidden="true"><svg class="sig sig--rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="rooms.rune.name"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub"></span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] Ⅴ 룬의 방을 지나면 열려요</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 6분</span>
+                </button>
+              </li>
+              <li class="chapter-row" data-js="book-chapter" data-chapter="sibyl" data-room="sibyl" data-state="need-room">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true">VI</span>
+                  <span class="chapter-row__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="rooms.sibyl.name"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub"></span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] Ⅵ 시빌라의 방을 지나면 열려요</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 6분</span>
+                </button>
+              </li>
+            </ol>
+            <p class="chapters__part"><span data-t="book.part2.num">제2부</span> <span data-t="book.part2.title">나의 흐름</span></p>
+            <ol class="chapters__list">
+              <li class="chapter-row" data-js="book-chapter" data-chapter="flow" data-state="can-open">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true"></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="book.parts.timeline"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub" data-t="book.chapter.blurbs.flow">[초안] 지금부터 세 구간, 네 영역의 흐름</span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] 광고 한 편</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 6분</span>
+                </button>
+              </li>
+              <li class="chapter-row" data-js="book-chapter" data-chapter="match" data-state="opened">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true"></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="book.parts.match"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub" data-t="book.chapter.blurbs.match">[초안] 한 사람을 골라 두 원형을 겹쳐 봐요</span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] 읽기</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 6분</span>
+                </button>
+              </li>
+              <li class="chapter-row" data-js="book-chapter" data-chapter="deep" data-state="can-open">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true"></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="book.parts.deep"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub" data-t="book.chapter.blurbs.deep">[초안] 강점과 그림자, 자라는 방향</span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] 광고 한 편</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 5분</span>
+                </button>
+              </li>
+            </ol>
+            <ol class="chapters__list chapters__list--close">
+              <li class="chapter-row" data-js="book-chapter" data-chapter="close" data-state="need-room">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true">✦</span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="book.toc.close"></span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub" data-t="book.chapter.blurbs.close">[초안] 여섯 문을 닫으며 남기는 말</span>
+                    <span class="chapter-row__state" data-js="book-chapter-state">[초안] 여섯 방을 모두 지나면 열려요</span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 2분</span>
+                </button>
+              </li>
+            </ol>
+          </nav>
+
+          <!-- 책 카드 공유 (기존 소장 카드: 원형·여섯 문양, 상대 이름 없음). 보조 버튼 — 이 화면에 주 버튼 없음(장 카드가 주 행동) -->
+          <div class="book-home__share">
+            <button class="btn btn--secondary btn--block" type="button" data-js="report-share" data-t="report.share">소장 카드 저장·공유</button>
+          </div>
+          <nav class="legal-links book-home__legal" data-js="legal-links" data-aria="legal.links.aria" aria-label="법적 고지">
+            <a href="legal/terms.html" data-t="legal.links.terms">이용약관</a>
+            <a href="legal/privacy.html" data-t="legal.links.privacy">개인정보처리방침</a>
+          </nav>
+          <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
+          <!-- 배너 book-toc (13-3): 목차 맨 아래, 면책 아래. 장 카드·이어 읽기·공유 버튼과는 법적 고지 줄·면책·여백 48px로 떨어진다 -->
+          <div class="ad-slot" data-js="ad-slot" data-ad="book-toc"></div>
         </div>
-        <p class="book-peek__hint" data-t="deeper.peek.hint">옆으로 밀면 견본 쪽이 보여요</p>
-      </section>
 
-      <!-- 나에게 맞춘 목차. 장 제목·분량은 JS가 방문 기록으로 채운다. 상태: .is-sealed(유료) / .is-open(견본·무료) -->
-      <section class="toc" aria-labelledby="deeper-toc-title">
-        <h2 class="toc__title" id="deeper-toc-title"><span data-t="deeper.toc.title">책의 목차</span> <span class="toc__total" data-js="deeper-total"></span> <span class="toc__time" data-js="deeper-read-time"></span></h2>
-        <ol class="toc__list" data-js="deeper-toc">
-          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="open">
-            <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">✦</span><span class="toc-item__name" data-js="toc-name"></span><span class="toc-item__vol" data-js="toc-vol"></span></div>
-            <p class="toc-item__teaser" data-js="toc-teaser"></p>
-            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
-            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-            <span class="visually-hidden" data-t="deeper.sealedSr">결제하면 열려요</span>
-          </li>
-          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="rooms">
-            <div class="toc-item__head"><span class="toc-item__num toc-item__num--part" aria-hidden="true">1부</span><span class="toc-item__name" data-js="toc-name"></span><span class="toc-item__vol" data-js="toc-vol"></span></div>
-            <p class="toc-item__teaser" data-js="toc-teaser"></p>
-            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
-            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-            <span class="visually-hidden" data-t="deeper.sealedSr">결제하면 열려요</span>
-          </li>
-          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="timeline">
-            <div class="toc-item__head"><span class="toc-item__num toc-item__num--part" aria-hidden="true">2부</span><span class="toc-item__name" data-js="toc-name"></span><span class="toc-item__vol" data-js="toc-vol"></span></div>
-            <p class="toc-item__teaser" data-js="toc-teaser"></p>
-            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
-            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-            <span class="visually-hidden" data-t="deeper.sealedSr">결제하면 열려요</span>
-          </li>
-          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="match">
-            <div class="toc-item__head"><span class="toc-item__num toc-item__num--part" aria-hidden="true">2부</span><span class="toc-item__name" data-js="toc-name"></span><span class="toc-item__vol" data-js="toc-vol"></span></div>
-            <p class="toc-item__teaser" data-js="toc-teaser"></p>
-            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
-            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-            <span class="visually-hidden" data-t="deeper.sealedSr">결제하면 열려요</span>
-          </li>
-          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="deep">
-            <div class="toc-item__head"><span class="toc-item__num toc-item__num--part" aria-hidden="true">2부</span><span class="toc-item__name" data-js="toc-name"></span><span class="toc-item__vol" data-js="toc-vol"></span></div>
-            <p class="toc-item__teaser" data-js="toc-teaser"></p>
-            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
-            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-            <span class="visually-hidden" data-t="deeper.sealedSr">결제하면 열려요</span>
-          </li>
-          <li class="toc-item is-sealed" data-js="deeper-toc-item" data-part="close">
-            <div class="toc-item__head"><span class="toc-item__num" aria-hidden="true">✦</span><span class="toc-item__name" data-js="toc-name"></span><span class="toc-item__vol" data-js="toc-vol"></span></div>
-            <p class="toc-item__teaser" data-js="toc-teaser"></p>
-            <div class="seal-lines" aria-hidden="true"><span></span><span></span><span></span></div>
-            <svg class="wax-seal" aria-hidden="true"><use href="#i-seal"/></svg>
-            <span class="visually-hidden" data-t="deeper.sealedSr">결제하면 열려요</span>
-          </li>
-        </ol>
-      </section>
-
-      <!-- (10단계) 견본 한 장은 위 책 모양 2쪽으로 옮겼다 (훅 deeper-sample 그대로) -->
-
-      <!-- 내 리포트에 필요한 입력 -->
-      <section class="deeper-input" aria-labelledby="deeper-input-title">
-        <h2 class="deeper-input__title" id="deeper-input-title" data-t="deeper.input.title">책에 쓸 정보</h2>
-
-        <!-- 프로필에 생년월일이 있으면: 확인 카드만 (입력칸은 .is-hidden) -->
-        <div class="saved-info" data-js="deeper-saved">
-          <p class="saved-info__label" data-t="deeper.input.savedLabel">나의 생년월일</p>
-          <p class="saved-info__value" data-js="deeper-saved-value"></p>
-          <p class="saved-info__ask" data-t="deeper.input.savedAsk">이 정보로 2장 시기별 흐름을 계산할까요?</p>
-          <button class="btn btn--text saved-info__edit" type="button" data-js="deeper-saved-edit" data-t="deeper.input.savedEdit">다시 입력하기</button>
-        </div>
-
-        <fieldset class="field" data-js="deeper-date-field">
-          <legend class="field__label"><span data-t="deeper.input.dateLabel">나의 생년월일</span> <span class="field__hint" data-t="deeper.input.dateHint">(필수 · 2장 계산용)</span></legend>
-          <div class="field__row">
-            <input class="input input--num date-y" data-js="deeper-year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="1995" data-aria="deeper.input.yearAria" />
-            <span class="field__unit" data-t="common.units.y"></span>
-            <input class="input input--num date-md" data-js="deeper-month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="3" data-aria="deeper.input.monthAria" />
-            <span class="field__unit" data-t="common.units.m"></span>
-            <input class="input input--num date-md" data-js="deeper-day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="21" data-aria="deeper.input.dayAria" />
-            <span class="field__unit" data-t="common.units.d"></span>
-          </div>
-          <p class="field__error is-hidden" data-js="deeper-date-error" role="alert"></p>
-        </fieldset>
-
-        <!-- 궁합 상대 (선택). 본인 정보와 다른 테두리·아이콘으로 구분한다 -->
-        <fieldset class="partner" data-js="deeper-partner">
-          <legend class="partner__legend"><span data-t="deeper.partner.legend">궁합을 볼 상대</span> <span class="field__hint" data-t="deeper.partner.optional">(선택)</span></legend>
-          <div class="field">
-            <label class="field__label" for="deeper-partner-name" data-t="deeper.partner.nameLabel">상대의 이름</label>
-            <input class="input" id="deeper-partner-name" data-js="deeper-partner-name" type="text" maxlength="10" autocomplete="off" spellcheck="false" data-ph="deeper.partner.namePlaceholder" />
-          </div>
-          <div class="field">
-            <p class="field__label" id="deeper-partner-date-label" data-t="deeper.partner.dateLabel">상대의 생년월일</p>
-            <div class="field__row" role="group" aria-labelledby="deeper-partner-date-label">
-              <input class="input input--num date-y" data-js="deeper-partner-year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="1994" data-aria="deeper.partner.yearAria" />
-              <span class="field__unit" data-t="common.units.y"></span>
-              <input class="input input--num date-md" data-js="deeper-partner-month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="11" data-aria="deeper.partner.monthAria" />
-              <span class="field__unit" data-t="common.units.m"></span>
-              <input class="input input--num date-md" data-js="deeper-partner-day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="2" data-aria="deeper.partner.dayAria" />
-              <span class="field__unit" data-t="common.units.d"></span>
-            </div>
-            <p class="field__error is-hidden" data-js="deeper-partner-error" role="alert"></p>
-          </div>
-          <p class="notice notice--partner">
-            <svg class="notice__icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="13.5" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c.6-3 2.6-4.5 5-4.5s4.4 1.5 5 4.5M12 12.6c2.3-.4 4.9.6 5.6 3.9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-            <span data-t="deeper.partner.notice">상대방 정보는 코드 계산에만 쓰고 저장하지 않으며, 어디에도 전송되지 않아요. 상대방이 알고 있는지 한 번 확인해 주세요.</span>
-          </p>
-        </fieldset>
-
-        <p class="deeper-fact" data-t="deeper.bookFix">결제 시점의 여섯 결과로 책이 엮여요. 결제 뒤 방을 다시 해도 책은 바뀌지 않아요.</p>
-      </section>
-
-      <!-- 결제 전 고지: 결제 버튼 바로 위, 접지 않고 펼친 채 (D-2) -->
-      <section class="disclosure" aria-labelledby="deeper-disclosure-title">
-        <h2 class="disclosure__title" id="deeper-disclosure-title" data-t="deeper.disclosure.title">결제 전에 꼭 확인해 주세요</h2>
-        <dl class="disclosure__list">
-          <div class="disclosure__row"><dt data-t="deeper.disclosure.itemsLabel">받는 것</dt><dd data-js="deeper-items"></dd></div>
-          <div class="disclosure__row"><dt data-t="deeper.disclosure.volumeLabel">분량</dt><dd data-js="deeper-volume"></dd></div>
-          <div class="disclosure__row disclosure__row--price"><dt data-t="deeper.disclosure.priceLabel">가격</dt><dd><b data-js="deeper-price"></b> <span data-js="deeper-vat" data-t="deeper.disclosure.vat">(부가세 ◯◯)</span></dd></div>
-          <div class="disclosure__row"><dt data-t="deeper.disclosure.howLabel">이용 방법</dt><dd data-t="deeper.disclosure.how">로그인은 없어요. 결제 직후 보여 드리는 영수증 코드로 언제든 다시 열 수 있어요. 코드를 잃어버리면 다시 열 수 없을 수 있으니 꼭 적어 두세요(문의 시 결제 시각·금액으로 찾아 드려요).</dd></div>
-          <div class="disclosure__row"><dt data-t="deeper.disclosure.refundLabel">청약철회·환불</dt><dd data-t="deeper.disclosure.refund">디지털 콘텐츠는 결제 완료와 동시에 열람이 시작되어 청약철회가 제한됩니다. 다만 책이 열리지 않거나 내용이 표시·안내와 다르면 환불해 드립니다. 문의: ◯◯ · 처리 기간: ◯◯</dd></div>
-          <div class="disclosure__row" data-js="deeper-minor"><dt data-t="deeper.disclosure.minorLabel">미성년자</dt><dd data-t="deeper.disclosure.minor">◯◯ (운영자 확인 전)</dd></div>
-        </dl>
-        <label class="check consent" data-js="deeper-consent-row">
-          <input type="checkbox" data-js="deeper-consent" />
-          <span data-t="deeper.consent">결제 즉시 책이 열리며, 열린 뒤에는 청약철회가 제한된다는 것을 확인했어요.</span>
-        </label>
-      </section>
-
-      <!-- 결제 실패·취소로 돌아왔을 때 (.is-hidden 해제). 오류 코드는 보여 주지 않는다 -->
-      <!-- (11단계 F4) data-kind = cancel(내가 닫음) | decline(카드사·한도 거절) | error(그 밖의 결제창 오류). JS가 kind에 맞는 제목·본문을 넣는다.
-           다시 시도 = 바로 아래 결제 버튼(그대로). 문의처 줄은 이 경우들에는 그리지 않는다(승인 실패·연결 끊김은 봉인 해제 화면 unseal-error) -->
-      <div class="pay-alert is-hidden" data-js="pay-alert" data-kind="decline" role="alert">
-        <p class="pay-alert__title" data-js="pay-alert-title" data-t="pay.fail.other.title">결제가 완료되지 않았어요. 돈은 나가지 않았어요.</p>
-        <p class="pay-alert__text" data-js="pay-alert-text" data-t="pay.fail.other.text">결제창을 닫았거나 연결이 잠시 끊겼을 수 있어요. 아래 버튼으로 다시 시도해 주세요.</p>
-      </div>
-
-      <!-- (8단계) 6/6 전: 이 블록만 보이고(.is-hidden 해제) 동의 체크(deeper-consent-row)·결제 버튼(pay-cta)은 .is-hidden -->
-      <div class="book-gate" data-js="deeper-gate">
-        <span class="book-card__pips" aria-hidden="true"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i></i><i></i><i></i></span>
-        <p class="book-gate__text"><span data-t="deeper.gate.text">여섯 문을 모두 지나면 엮을 수 있어요</span> <b data-js="deeper-gate-count">(3/6)</b></p>
-        <button class="btn btn--primary btn--block" type="button" data-js="deeper-gate-next" data-t="deeper.gate.next">다음 문 열기</button>
-      </div>
-
-      <div class="pay-cta" data-js="deeper-pay-cta">
-        <!-- 동의 전: disabled. 결제창 여는 중: .is-loading + aria-busy -->
-        <button class="btn btn--primary btn--block pay-cta__btn" type="button" disabled data-js="deeper-pay" data-t="deeper.pay">3,900원 결제하기</button>
-        <p class="pay-cta__status" data-js="deeper-pay-status" aria-live="polite" data-t="deeper.payHint">위 확인란에 체크하면 결제 버튼이 켜져요.</p>
-      </div>
-
-      <!-- 사업자 정보·정책 링크 (◯◯ 빈칸은 운영자 입력. live에서 빈칸이 남으면 결제 버튼을 숨김 — developer) -->
-      <footer class="biz-info" data-js="biz-info">
-        <dl class="biz-info__list" data-js="biz-info-list">
-          <div><dt data-t="biz.nameLabel">상호</dt><dd data-t="biz.name">◯◯</dd></div>
-          <div><dt data-t="biz.ceoLabel">대표자</dt><dd data-t="biz.ceo">◯◯</dd></div>
-          <div><dt data-t="biz.regLabel">사업자등록번호</dt><dd data-t="biz.reg">◯◯◯-◯◯-◯◯◯◯◯</dd></div>
-          <div><dt data-t="biz.salesLabel">통신판매업 신고번호</dt><dd data-t="biz.sales">◯◯</dd></div>
-          <div><dt data-t="biz.addrLabel">주소</dt><dd data-t="biz.addr">◯◯</dd></div>
-          <div><dt data-t="biz.contactLabel">연락처</dt><dd data-t="biz.contact">◯◯</dd></div>
-          <div><dt data-t="biz.hostLabel">호스팅 제공자</dt><dd data-t="biz.host">◯◯</dd></div>
-        </dl>
-        <nav class="legal-links" data-js="legal-links" data-aria="legal.links.aria">
-          <a href="legal/refund.html" data-t="legal.links.refund">환불 정책</a>
-          <a href="legal/terms.html" data-t="legal.links.terms">이용약관</a>
-          <a href="legal/privacy.html" data-t="legal.links.privacy">개인정보처리방침</a>
-        </nav>
-      </footer>
-    </section>
-
-    <!-- ═════════ 6-U. 봉인 해제 의식 (successUrl 복귀, 약 3초, 누르면 건너뛰기) ═════════
-         여섯 방 의식과 다른 연출: 별자리 고리에 놓인 밀랍 인장 여섯 개가 차례로 갈라지고, 그 자리에 별이 켜진다.
-         .is-running 동안만 움직임. 애니메이션이 없을 때(움직임 줄이기·정적 검토)의 기본 모습 = 모두 갈라진 최종 모습 -->
-    <section class="screen ritual ritual--unseal" id="screen-unseal" data-js="screen-unseal" data-room="hall" data-preview="6-U. 봉인 해제 의식 (정적 검토: 여섯 인장이 모두 갈라진 최종 모습)">
-      <p class="pay-band" data-js="pay-band" data-mode="test"><span class="pay-band__mark" aria-hidden="true">◇</span><span data-t="pay.band.test">테스트 결제 — 실제로 돈이 나가지 않아요</span></p>
-      <p class="ritual-hint" data-js="unseal-status" aria-live="polite" data-t="unseal.status">봉인을 여는 중이에요</p>
-      <div class="unseal-ring" aria-hidden="true">
-        <svg class="unseal-ring__lines" viewBox="0 0 200 200"><polygon points="100,20 169,60 169,140 100,180 31,140 31,60" /></svg>
-        <span class="unseal-seal" style="--i:0"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
-        <span class="unseal-seal" style="--i:1"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
-        <span class="unseal-seal" style="--i:2"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
-        <span class="unseal-seal" style="--i:3"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
-        <span class="unseal-seal" style="--i:4"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
-        <span class="unseal-seal" style="--i:5"><svg class="wax-seal wax-seal--l"><use href="#i-seal"/></svg><svg class="wax-seal wax-seal--r"><use href="#i-seal"/></svg><i class="unseal-seal__star"></i></span>
-        <span class="unseal-ring__core"></span>
-      </div>
-      <button class="btn btn--ghost btn--small" type="button" data-js="unseal-skip" data-t="unseal.skip">건너뛰기</button>
-
-      <!-- 승인 확인 실패 (.is-hidden 해제 + 화면에 .is-error). 결제는 됐을 수 있으므로 영수증 코드로 열기를 함께 안내 -->
-      <!-- (11단계 F4) data-kind = network(연결 끊김·5xx: 다시 시도가 주 버튼) | unconfirmed(승인 확인 실패 4xx: 다시 시도 숨김, 돌아가기가 주 동작).
-           제목·본문은 JS가 kind에 맞게 넣는다(훅 unseal-error-title/-text). 문의처 줄(pay-contact)은 두 경우 모두, pay.contact가 비어 있으면 .is-hidden -->
-      <div class="unseal-error is-hidden" data-js="unseal-error" data-kind="unconfirmed" role="alert">
-        <p class="unseal-error__title" data-js="unseal-error-title" data-t="unseal.error.title">책을 여는 중 연결이 끊겼어요</p>
-        <p class="unseal-error__text" data-js="unseal-error-text" data-t="unseal.error.text">결제가 됐다면 책은 안전하게 남아 있어요. 다시 시도하거나, 아래 코드로 열어 주세요.</p>
-        <p class="unseal-error__code" data-js="unseal-error-code"></p>
-        <p class="pay-contact" data-js="pay-contact"><span class="pay-contact__label" data-t="pay.fail.contactLabel">결제 문의</span> <span class="pay-contact__value" data-js="pay-contact-value"></span></p>
-        <button class="btn btn--primary btn--block" type="button" data-js="unseal-retry" data-t="unseal.error.retry">다시 시도하기</button>
-        <button class="btn btn--secondary btn--block unseal-error__back" type="button" data-js="unseal-back" data-go="hub" data-t="unseal.error.back">입구로 돌아가기</button>
-      </div>
-    </section>
-
-    <!-- ═════════ 6-R. 유료 리포트 읽기 (광고 없음) ═════════
-         부분(.report-part) 상태: .is-sealed(해제 전) → .is-unsealing(JS가 차례로, --i 지연) → 기본(열림).
-         기본 스타일이 열린 모습이라 움직임 줄이기·정적 검토에서는 처음부터 모두 열려 있다 -->
-    <section class="screen report book" id="screen-report" data-js="screen-report" data-room="hall" data-preview="6-R. 한 권의 책 — 표지 · 목차 · 제1부 여섯 방 · 제2부 (광고 없음)">
-      <p class="pay-band" data-js="pay-band" data-mode="test"><span class="pay-band__mark" aria-hidden="true">◇</span><span data-t="pay.band.test">테스트 결제 — 실제로 돈이 나가지 않아요</span></p>
-
-      <!-- ═══ (결정 53) 책을 넘기는 리더. data-view="cover"(표지) | "pages"(책장). 설계: design/strange-oracle.md "책을 넘기는 리더 (결정 53)" ═══ -->
-      <div class="book-reader" data-js="book-reader" data-view="cover">
-        <!-- 표지: 낡은 가죽 장정. 쪽 번호 없음 -->
-        <div class="book-cover-page" data-js="book-cover">
-          <div class="leather">
+        <!-- ── 장 표지 (data-view="cover") ── 배너 없음.
+             data-chapter = 장 id (open·ogham·star·decan·tzolkin·rune·sibyl·flow·match·deep·close)
+             data-state = locked(잠김: 광고 버튼) | waiting(광고 결과 기다림: 버튼 disabled + aria-busy) | open(열림: 펼치기) | fail(장 파일 불러오기 실패: 다시 시도)
+             광고 중간에 닫음(closed)은 locked + book-unlock-status 한 줄. 광고 없음(unavailable)은 open + 한 줄 -->
+        <div class="chapter-cover" data-js="chapter-cover" data-chapter="match" data-state="locked" aria-labelledby="chapter-cover-title">
+          <div class="leather chapter-cover__leather">
             <span class="leather__spine" aria-hidden="true"></span>
             <span class="leather__corner leather__corner--tl" aria-hidden="true"></span><span class="leather__corner leather__corner--tr" aria-hidden="true"></span><span class="leather__corner leather__corner--bl" aria-hidden="true"></span><span class="leather__corner leather__corner--br" aria-hidden="true"></span>
-            <!-- (8단계) 표지: 소장판 · 원형 이름 · 여섯 방 문양 -->
-            <header class="report-head book-cover" id="book-top">
-              <p class="report-head__badge" data-t="report.badge">한 권의 책</p>
-              <h1 class="report-head__title" data-js="report-title"></h1>
-              <p class="report-head__meta" data-js="report-meta"></p>
-              <ul class="book-cover__marks" aria-hidden="true">
-                <li data-room="ogham"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></li>
-                <li data-room="star"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></li>
-                <li data-room="decan"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></li>
-                <li data-room="tzolkin"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></li>
-                <li data-room="rune"><svg class="sig sig--rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></li>
-                <li data-room="sibyl"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></li>
-              </ul>
-              <p class="book-cover__pace" data-t="book.pace">천천히 나눠 읽어도 돼요. 영수증 코드로 언제든 다시 열려요.</p>
+            <header class="chapter-cover__head">
+              <!-- JS: "제1부" / "제2부" (book.part*.num). 여는 글·닫는 글은 비움 -->
+              <p class="chapter-cover__part" data-js="chapter-cover-part">제2부</p>
+              <!-- JS: 방별 장이면 목차 행의 문양 svg를 복제해 넣는다. 그 밖에는 비어 숨음 -->
+              <span class="chapter-cover__mark" data-js="chapter-cover-mark" aria-hidden="true"></span>
+              <h1 class="chapter-cover__title" id="chapter-cover-title" data-js="chapter-cover-title">궁합</h1>
+              <!-- 방별 장만: 결과 이름 · key · 숨은 장 제목(결정 65). 아니면 세 줄 모두 hidden -->
+              <p class="chapter-cover__result" data-js="chapter-cover-result" hidden></p>
+              <p class="chapter-cover__key" data-js="chapter-cover-key" hidden></p>
+              <p class="chapter-cover__hidden" data-js="chapter-cover-hidden-row" hidden><svg class="wax-seal chapter-cover__seal" aria-hidden="true"><use href="#i-seal"/></svg><span data-t="book.hiddenChapter">숨은 장</span> <b data-js="chapter-cover-hidden"></b></p>
+              <!-- book.chapter.volume ({n}자 · {m}분, data-volume.js 숫자) -->
+              <p class="chapter-cover__volume" data-js="chapter-cover-volume">[초안] 약 3,600자 · 읽는 데 약 7분</p>
             </header>
           </div>
-          <div class="book-cover-page__actions">
-            <button class="btn btn--primary btn--block" type="button" data-js="book-open-btn" data-t="book.openBook">책 펼치기</button>
-            <!-- 이어 읽기: 이 탭에 저장된 쪽 번호가 있을 때만 .is-hidden 해제. 누르면 그 쪽을 펼친다 -->
-            <button class="book-resume is-hidden" type="button" data-js="book-resume">
-              <svg class="book-resume__icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3h8v14l-4-3-4 3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-              <span class="book-resume__text"><span data-t="book.resume.before">지난번 읽던</span> <b data-js="book-resume-name"></b> · <b data-js="book-resume-page"></b><span data-t="book.resume.pageAfter">쪽부터 이어 읽기</span></span>
-              <span aria-hidden="true">→</span>
-            </button>
+
+          <!-- 궁합만 (data-chapter="match"): 상대 정보 + 관계 유형. 값은 메모리에만 (sessionStorage에도 넣지 않음, 13-4).
+               새로고침·이어 읽기로 오면 빈 칸으로 다시 보인다. 광고 버튼·펼치기를 누르면 먼저 이 칸을 확인한다 -->
+          <form class="chapter-form chapter-form--match" data-js="book-match-form" novalidate>
+            <p class="notice notice--partner">
+              <svg class="notice__icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="13.5" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c.6-3 2.6-4.5 5-4.5s4.4 1.5 5 4.5M12 12.6c2.3-.4 4.9.6 5.6 3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span data-t="book.match.consent">[초안] 상대방 정보는 이 화면의 계산에만 쓰고 저장하지 않으며, 어디에도 전송되지 않아요. 상대방이 알고 있는지 한 번 확인해 주세요.</span>
+            </p>
+            <div class="field">
+              <label class="field__label" for="book-match-name" data-t="book.match.nameLabel">[초안] 상대의 이름</label>
+              <input class="input" id="book-match-name" data-js="book-match-name" type="text" maxlength="10" autocomplete="off" spellcheck="false" data-ph="book.match.namePlaceholder" />
+            </div>
+            <div class="field">
+              <p class="field__label" id="book-match-date-label" data-t="book.match.dateLabel">[초안] 상대의 생년월일</p>
+              <div class="field__row" role="group" aria-labelledby="book-match-date-label">
+                <input class="input input--num date-y" data-js="book-match-year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="1994" data-aria="book.match.yearAria" />
+                <span class="field__unit" data-t="common.units.y"></span>
+                <input class="input input--num date-md" data-js="book-match-month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="11" data-aria="book.match.monthAria" />
+                <span class="field__unit" data-t="common.units.m"></span>
+                <input class="input input--num date-md" data-js="book-match-day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="2" data-aria="book.match.dayAria" />
+                <span class="field__unit" data-t="common.units.d"></span>
+              </div>
+            </div>
+            <!-- 관계 유형 4칸: 기본 선택 없음, 필수. 고르지 않고 누르면 book-match-error에 book.match.errors.type -->
+            <fieldset class="rel-type" data-js="book-match-type">
+              <legend class="field__label rel-type__legend" data-t="book.match.typeLabel">[초안] 두 사람은 어떤 사이인가요</legend>
+              <div class="rel-type__grid">
+                <label class="rel-type__opt"><input class="rel-type__input" type="radio" name="book-match-type" value="lover" data-js="book-match-type-input" /><span class="rel-type__label" data-t="book.match.types.lover">[초안] 연인·마음에 둔 사람</span></label>
+                <label class="rel-type__opt"><input class="rel-type__input" type="radio" name="book-match-type" value="friend" data-js="book-match-type-input" /><span class="rel-type__label" data-t="book.match.types.friend">[초안] 친구</span></label>
+                <label class="rel-type__opt"><input class="rel-type__input" type="radio" name="book-match-type" value="work" data-js="book-match-type-input" /><span class="rel-type__label" data-t="book.match.types.work">[초안] 동료</span></label>
+                <label class="rel-type__opt"><input class="rel-type__input" type="radio" name="book-match-type" value="family" data-js="book-match-type-input" /><span class="rel-type__label" data-t="book.match.types.family">[초안] 가족</span></label>
+              </div>
+            </fieldset>
+            <!-- 오류 한 줄 (JS 문구: book.match.errors.name / date / type) -->
+            <p class="field__error is-hidden" data-js="book-match-error" role="alert"></p>
+          </form>
+
+          <!-- 시기별 흐름만 (data-chapter="flow"), 이 탭에 생년월일이 없을 때만 hidden 해제. profile에 넣고 처음 저장할 때 notice를 보인다(6장 예외) -->
+          <fieldset class="field chapter-form chapter-form--flow" data-js="book-flow-date" hidden>
+            <legend class="field__label"><span data-t="book.flow.dateLabel">[초안] 나의 생년월일</span> <span class="field__hint" data-t="book.flow.dateHint">[초안] (시기별 흐름 계산용)</span></legend>
+            <div class="field__row">
+              <input class="input input--num date-y" data-js="book-flow-year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="1995" data-aria="book.flow.yearAria" />
+              <span class="field__unit" data-t="common.units.y"></span>
+              <input class="input input--num date-md" data-js="book-flow-month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="3" data-aria="book.flow.monthAria" />
+              <span class="field__unit" data-t="common.units.m"></span>
+              <input class="input input--num date-md" data-js="book-flow-day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="21" data-aria="book.flow.dayAria" />
+              <span class="field__unit" data-t="common.units.d"></span>
+            </div>
+            <p class="field__error is-hidden" data-js="book-flow-error" role="alert"></p>
+            <p class="notice" data-js="book-flow-notice" data-t="book.flow.notice">[초안] 이 기기의 이 탭에만 잠시 보관되며 어디에도 전송되지 않아요. 내 정보 지우기로 언제든 지울 수 있어요.</p>
+          </fieldset>
+
+          <div class="chapter-cover__actions">
+            <!-- 잠금 버튼: 12단계 잠금 버튼과 같은 모양(보조 버튼 + 재생 아이콘). 문구에 "광고" 필수 -->
+            <button class="btn btn--secondary btn--block unlock__btn chapter-unlock" type="button" data-js="book-unlock"><svg class="unlock__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5v6l4.8-3z" fill="currentColor"/></svg><span data-t="book.unlock.button">[초안] 광고 한 편 보고 이 장 열기</span></button>
+            <!-- 열림: 펼치기(이 화면의 주 버튼). 장 파일을 아직 받는 중이면 disabled + aria-busy + .is-fetching -->
+            <button class="btn btn--primary btn--block chapter-open" type="button" data-js="book-chapter-open" data-t="book.chapter.open">[초안] 펼치기</button>
+            <!-- 결과 한 줄 (JS 문구: book.unlock.loading / closed / unavailable / opened — opened는 .visually-hidden으로 낭독만) -->
+            <p class="unlock-status" data-js="book-unlock-status" role="status" aria-live="polite"></p>
+            <div class="chapter-fail" data-js="book-load-fail" role="alert">
+              <p class="chapter-fail__text" data-t="book.chapter.loadFail">[초안] 이 장을 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요</p>
+              <button class="btn btn--secondary btn--small" type="button" data-js="book-load-retry" data-t="book.chapter.retry">[초안] 다시 시도</button>
+            </div>
+            <!-- 궁합만: 상대 없이 여덟 원형 지도. 잠겨 있으면 같은 광고 한 편 뒤에 열린다 -->
+            <button class="text-link chapter-cover__alt" type="button" data-js="book-match-nopartner" data-t="book.match.noPartner">[초안] 상대 없이 궁합 지도 보기</button>
+            <button class="text-link chapter-cover__toc" type="button" data-js="book-cover-toc"><span aria-hidden="true">‹</span> <span data-t="book.chapter.toToc">[초안] 목차로</span></button>
           </div>
         </div>
 
+        <!-- ── 장 안 (data-view="pages") ── 결정 53 리더 그대로. 쪽 번호는 장 안 기준 "3 / 9", 머리줄 = 장 이름. 배너 없음 -->
         <!-- 책장: 한 쪽 = 한 화면. 쪽은 JS가 book-source의 블록을 재어 book-pages에 만든다 -->
         <div class="book-stage" data-js="book-stage" role="region" aria-roledescription="책" data-aria="book.stageAria" aria-label="한 권의 책">
           <div class="book-stage__pages" data-js="book-pages"></div>
@@ -2597,57 +2553,9 @@
         <p class="visually-hidden" data-js="book-live" aria-live="polite"></p>
       </div>
 
-      <!-- (결정 53) 원본: JS가 지금처럼 여기를 채운 뒤, 블록을 재어 위 book-pages로 쪽을 만든다. 화면에는 보이지 않는다.
-           receipt → 1쪽(면지), book-toc → 목차 쪽, disclaimer-slot·result-actions·receipt--end → 마지막 쪽(뒷면지)으로 옮겨 쓴다 -->
+      <!-- (결정 53) 원본: JS가 지금 연 장 하나만 채운 뒤 블록을 재어 위 book-pages로 쪽을 만든다. 화면에는 보이지 않는다.
+           잠긴 장의 문장은 여기에도 넣지 않는다. chapter-end → 그 장의 마지막 쪽으로 옮겨 쓴다 -->
       <div class="book-source" data-js="book-source" hidden>
-        <!-- 영수증 코드 카드 (맨 위). 아래쪽에 한 번 더 (.receipt--end) -->
-        <aside class="receipt" data-js="receipt" aria-labelledby="receipt-title">
-          <p class="receipt__label" id="receipt-title" data-t="receipt.label">영수증 코드</p>
-          <p class="receipt__code" data-js="receipt-code"><span>SO1A</span><span>B2C3</span><span>D4E5</span><span>F6G7</span><span>H8J9</span><span>K2M4</span></p>
-          <div class="receipt__actions">
-            <button class="btn btn--secondary btn--small" type="button" data-js="receipt-copy" data-t="receipt.copy">코드 복사</button>
-            <a class="receipt__toss is-hidden" data-js="receipt-toss" href="#" target="_blank" rel="noopener" data-t="receipt.toss">결제 영수증 보기</a>
-          </div>
-          <p class="receipt__text" data-t="receipt.text">이 코드가 있으면 다른 기기에서도 다시 열 수 있어요. 코드를 아는 사람은 누구나 이 책을 볼 수 있으니 공유하지 마세요.</p>
-          <!-- (11단계 F3) 재열람(영수증 코드로 연 책)에서 룬·시빌라 주제 문단이 빠졌을 때만 .is-hidden 해제. 1쪽(면지)에 함께 옮겨진다 -->
-          <p class="receipt__note is-hidden" data-js="book-topic-note" data-t="book.topicNote">다시 연 책에는 룬·시빌라에서 고른 주제 문단이 담기지 않아요.</p>
-          <button class="btn btn--text receipt__forget" type="button" data-js="receipt-forget" data-t="receipt.forget">이 탭에서 코드 지우기</button>
-        </aside>
-
-        <!-- (8단계) 목차: 부·방마다 읽는 시간, 읽은 부분 .is-read(체크). 상단 막대 "목차" 버튼의 시트(book-toc-sheet)는 JS가 이 목록을 복제해 쓴다 -->
-        <nav class="book-toc" id="book-toc" data-js="book-toc" aria-labelledby="book-toc-title">
-          <h2 class="book-toc__title" id="book-toc-title"><span data-t="book.toc.title">목차</span> <span class="book-toc__total" data-js="book-total"></span></h2>
-          <ol class="book-toc__list" data-js="book-toc-list">
-              <li class="book-toc__item is-read" data-js="book-toc-item" data-part="open">
-                <a class="book-toc__link" href="#book-open"><span class="book-toc__num" aria-hidden="true">✦</span><span data-t="book.toc.open">여는 글</span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-              <li class="book-toc__item is-read" data-js="book-toc-item" data-part="ogham" data-room="ogham">
-                <a class="book-toc__link" href="#book-ogham"><span class="book-toc__num" aria-hidden="true">I</span><span class="book-toc__mark" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span><span class="book-toc__name"><span data-t="rooms.ogham.name"></span><span class="book-toc__result" data-js="book-toc-result"></span></span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-              <li class="book-toc__item" data-js="book-toc-item" data-part="star" data-room="star">
-                <a class="book-toc__link" href="#book-star"><span class="book-toc__num" aria-hidden="true">II</span><span class="book-toc__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span><span class="book-toc__name"><span data-t="rooms.star.name"></span><span class="book-toc__result" data-js="book-toc-result"></span></span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-              <li class="book-toc__item" data-js="book-toc-item" data-part="decan" data-room="decan">
-                <a class="book-toc__link" href="#book-decan"><span class="book-toc__num" aria-hidden="true">III</span><span class="book-toc__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></span><span class="book-toc__name"><span data-t="rooms.decan.name"></span><span class="book-toc__result" data-js="book-toc-result"></span></span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-              <li class="book-toc__item" data-js="book-toc-item" data-part="tzolkin" data-room="tzolkin">
-                <a class="book-toc__link" href="#book-tzolkin"><span class="book-toc__num" aria-hidden="true">IV</span><span class="book-toc__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span><span class="book-toc__name"><span data-t="rooms.tzolkin.name"></span><span class="book-toc__result" data-js="book-toc-result"></span></span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-              <li class="book-toc__item" data-js="book-toc-item" data-part="rune" data-room="rune">
-                <a class="book-toc__link" href="#book-rune"><span class="book-toc__num" aria-hidden="true">V</span><span class="book-toc__mark" aria-hidden="true"><svg class="sig sig--rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></span><span class="book-toc__name"><span data-t="rooms.rune.name"></span><span class="book-toc__result" data-js="book-toc-result"></span></span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-              <li class="book-toc__item" data-js="book-toc-item" data-part="sibyl" data-room="sibyl">
-                <a class="book-toc__link" href="#book-sibyl"><span class="book-toc__num" aria-hidden="true">VI</span><span class="book-toc__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></span><span class="book-toc__name"><span data-t="rooms.sibyl.name"></span><span class="book-toc__result" data-js="book-toc-result"></span></span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-              <li class="book-toc__item" data-js="book-toc-item" data-part="flow">
-                <a class="book-toc__link" href="#book-flow"><span class="book-toc__num" aria-hidden="true">2부</span><span data-t="book.toc.flow">나의 흐름 — 흐름·궁합·원형</span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-              <li class="book-toc__item" data-js="book-toc-item" data-part="close">
-                <a class="book-toc__link" href="#book-close"><span class="book-toc__num" aria-hidden="true">✦</span><span data-t="book.toc.close">닫는 글</span><span class="book-toc__time" data-js="book-toc-time"></span><span class="book-toc__check" aria-hidden="true"></span></a>
-              </li>
-          </ol>
-        </nav>
-
         <!-- 여는 글 -->
         <article class="report-part book-part" data-js="report-part" data-part="open" id="book-open" style="--i:0">
           <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="report.parts.open">여는 글</p></header>
@@ -2820,21 +2728,17 @@
           <div class="report-part__body prose" data-js="report-close"><p></p></div>
         </article>
 
-        <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
-
-        <div class="result-actions" data-js="book-end-actions">
-          <button class="btn btn--primary btn--block" type="button" data-js="report-share" data-t="report.share">소장 카드 저장·공유</button>
-          <button class="text-link" type="button" data-go="story" data-js="report-go-story" data-t="report.toStory">나의 이야기로 돌아가기</button>
+        <!-- (13단계) 장 끝 쪽: 다음 장(주) + 목차로(보조). 다음 장이 잠겼으면 그 장 표지로 가고, 아래 한 줄에 book.toc.canOpen / needRoom.
+             닫는 글(마지막 장)에서는 chapter-end-next를 .is-hidden -->
+        <div class="chapter-end" data-js="chapter-end">
+          <svg class="chapter-end__fleuron" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#i-fleuron" /></svg>
+          <p class="chapter-end__name" data-js="chapter-end-name">궁합</p>
+          <button class="btn btn--primary btn--block chapter-end__next" type="button" data-js="chapter-end-next"><span data-t="book.chapter.next">[초안] 다음 장</span> <span class="chapter-end__next-name" data-js="chapter-end-next-name">원형, 더 깊이</span> <span aria-hidden="true">→</span></button>
+          <p class="chapter-end__state" data-js="chapter-end-next-state">[초안] 광고 한 편</p>
+          <button class="btn btn--secondary btn--block chapter-end__toc" type="button" data-js="chapter-end-toc" data-t="book.chapter.toToc">[초안] 목차로</button>
         </div>
 
-        <aside class="receipt receipt--end" data-js="receipt-end" aria-labelledby="receipt-end-title">
-          <p class="receipt__label" id="receipt-end-title" data-t="receipt.labelEnd">다시 열 때 필요한 영수증 코드</p>
-          <p class="receipt__code" data-js="receipt-code-end"><span>SO1A</span><span>B2C3</span><span>D4E5</span><span>F6G7</span><span>H8J9</span><span>K2M4</span></p>
-          <button class="btn btn--secondary btn--small" type="button" data-js="receipt-copy-end" data-t="receipt.copy">코드 복사</button>
-        </aside>
-
         <div class="page-end" data-js="page-end" aria-hidden="true"><span>✦</span></div>
-        <!-- 광고 자리 없음 (spec 6-1, D-12) -->
       </div>
     </section>
   </main>
@@ -2850,16 +2754,6 @@
     </div>
   </dialog>
 
-  <!-- (8단계) 책 목차 시트: 상단 막대 "목차"로 연다. 목록은 JS가 #book-toc의 ol을 복제해 넣는다. 항목을 누르면 닫히고 이동 -->
-  <dialog class="dialog sheet" data-js="book-toc-sheet" aria-labelledby="book-sheet-title">
-    <div class="dialog__body sheet__body">
-      <div class="sheet__head">
-        <h2 class="sheet__title" id="book-sheet-title" data-t="book.toc.title">목차</h2>
-        <button class="sheet__close" type="button" data-js="book-toc-close" data-aria="book.tocClose" aria-label="닫기">✕</button>
-      </div>
-      <div class="sheet__list" data-js="book-toc-sheet-list"></div>
-    </div>
-  </dialog>
 
   <p class="toast" data-js="toast" role="status" aria-live="polite"></p>
 
