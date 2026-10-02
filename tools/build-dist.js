@@ -1,6 +1,6 @@
 // 배포용 폴더(dist/) 만들기. 공개해도 되는 파일만 public/에 복사한다.
 // 사용: node tools/build-dist.js
-// 결과 (dist/ = Vercel 프로젝트 루트, 6단계 유료 리포트 이후):
+// 결과 (13단계부터 정적 전용):
 //   dist/vercel.json               outputDirectory = "public" → 공개 정적 파일은 public/ 아래만
 //   dist/public/                   정적 사이트 전체 (index.html → 제품으로 이동, common/, products/<slug>/)
 //                                  결제 없이 순수 정적 호스팅에 올릴 때는 이 public/ 폴더만 올린다
@@ -15,9 +15,8 @@ const ROOT = path.resolve(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
 const PRODUCTS = ["strange-oracle"]; // 배포할 제품
 const HOME = "strange-oracle"; // dist 첫 화면이 이동할 제품
-const PRODUCT_EXCLUDE = new Set(["meta.json", "tests.md", "api"]);
+const PRODUCT_EXCLUDE = new Set(["meta.json", "tests.md", "api", "pay.json", "refund.html"]); // refund.html: legal/ 안 환불 정책(13단계 은퇴)
 const PUBLIC = path.join(DIST, "public");
-const API_PRODUCT = "strange-oracle"; // dist/api/에 함수를 올릴 제품 (한 프로젝트에 하나)
 const og = require("./og-tags.js");
 
 // (10단계 10-2) 서비스 주소: 제품 data.js 맨 위 site.url 한 줄. 모양이 틀리면 아무것도 만들지 않고 멈춘다.
@@ -32,19 +31,6 @@ for (const slug of PRODUCTS) {
   }
   SITE[slug] = url;
 }
-// (strange-oracle 11단계 F4) 결제 문의처 pay.contact가 비어 있으면 경고 한 줄 (결제 실패 안내에 문의처 줄이 그려지지 않는다)
-for (const slug of PRODUCTS) {
-  const w = {};
-  try {
-    require("vm").runInNewContext(fs.readFileSync(path.join(ROOT, "products", slug, "data.js"), "utf8"), { window: w });
-  } catch (e) {
-    continue;
-  }
-  const pay = w.TEXT && w.TEXT.pay;
-  if (pay && "contact" in pay && !String(pay.contact || "").trim())
-    console.log(`  경고: products/${slug}/data.js의 pay.contact(결제 문의처)가 비어 있어 결제 실패 안내에 문의처 줄이 나오지 않습니다 (결제를 켜기 전에 채울 것)`);
-}
-
 // (12단계 12-6) 광고·분석 ID: 빈 값은 경고만(무료판은 ID 없이도 배포 가능), 모양이 틀리면 실패. 점검 규칙은 common/ads.js·analytics.js의 것을 그대로 쓴다
 const ADS_TXT = {};
 {
@@ -91,21 +77,8 @@ copyDir(path.join(ROOT, "common"), path.join(PUBLIC, "common"));
 for (const slug of PRODUCTS) {
   copyDir(path.join(ROOT, "products", slug), path.join(PUBLIC, "products", slug), PRODUCT_EXCLUDE);
 }
-// 결제 함수가 있다는 표시(pay.json). 브라우저는 이것이 true일 때만 /api/config를 묻는다(순수 정적 서버에서 404 콘솔 오류가 나지 않게).
-// 결제 없이 순수 정적 호스팅에 올릴 때: node tools/build-dist.js --static → pay.json이 false로 남고 dist/api·vercel.json을 만들지 않는다
-const STATIC_ONLY = process.argv.includes("--static");
-if (!STATIC_ONLY) fs.writeFileSync(path.join(PUBLIC, "products", API_PRODUCT, "pay.json"), JSON.stringify({ api: true }) + "\n");
-// 서버리스 함수: 제품 폴더 api/ → dist/api/, 공유 부호화 파일 paycode.js는 _lib/ 안에 한 벌 더
-const apiSrc = path.join(ROOT, "products", API_PRODUCT, "api");
-if (!STATIC_ONLY) {
-  copyDir(apiSrc, path.join(DIST, "api"));
-  fs.copyFileSync(path.join(ROOT, "products", API_PRODUCT, "paycode.js"), path.join(DIST, "api", "_lib", "paycode.js"));
-  fs.writeFileSync(
-    path.join(DIST, "vercel.json"),
-    JSON.stringify({ $schema: "https://openapi.vercel.sh/vercel.json", outputDirectory: "public", headers: [{ source: "/api/(.*)", headers: [{ key: "Cache-Control", value: "no-store" }] }] }, null, 2) + "\n"
-  );
-}
-
+// (13단계 13-5) 정적 전용이 기본이다: dist/api·vercel.json을 만들지 않는다. 정적 호스트에 올릴 폴더 = dist/public.
+// 휴면 서버(제품 폴더 api/)·pay.json·legal/refund.html은 배포에 넣지 않는다. --static 인자는 예전 습관용으로 받아 두기만 한다(같은 동작).
 // 제품 index.html 복사본: og:image 절대 경로, og:url·canonical 추가 (site.url이 있을 때만)
 for (const slug of PRODUCTS) {
   const file = path.join(PUBLIC, "products", slug, "index.html");
@@ -135,38 +108,78 @@ for (const slug of PRODUCTS) {
   console.log(left.length ? `  [초안] 남음 (중간 공유본): ${left.map(([f, n]) => `${f} ${n}`).join(", ")}` : "  [초안] 없음");
 }
 
-// 유료 문구 누출 점검(D-4): public/ 아래에 api 폴더가 없고, _paid의 문장이 공개 파일 어디에도 없어야 한다
+// (13단계 13-5) 책 문구 배포 점검 — 하나라도 실패하면 빌드 실패(exit 1)
+//  ① 배포 폴더(dist/) 어디에도 api/·_paid·legal/refund.html 없음
+//  ② index.html과 첫 화면이 정적으로 부르는 파일(index.html의 script·link 목록)에 data-book-*.js 문장 0건 (첫 화면 무게 보호)
+//  ③ data-book-*.js 전부 존재, 각 파일 [초안] 0개
+//  ④ 이름이 _로 시작하는 폴더 없음 (기존 D-4)
+// 원본 api/_paid 문장 수 = data-book-*.js 문장 수 대조는 여기서 하지 않는다 → tools/strange-oracle/move-book.js(옮긴 직후 한 번)
 {
-  const paidStrings = new Set();
-  // 문구 칸만 모은다(code 같은 열쇠 칸은 공개 데이터와 겹칠 수 있어 뺀다)
-  const collect = (v) => (typeof v === "string" ? v.length >= 12 && paidStrings.add(v) : Array.isArray(v) ? v.forEach(collect) : v && typeof v === "object" && Object.entries(v).forEach(([k, x]) => k !== "code" && collect(x)));
-  for (const f of fs.readdirSync(path.join(apiSrc, "_paid"))) collect(require(path.join(apiSrc, "_paid", f)));
-  // (7단계) 방별 온전한 이야기(full-*.js)는 원래 무료였던 결과 문구를 옮긴 것이라, 처음부터 무료 칸(key 핵심 문장·summary 요약)과
-  // 같은 문장으로 쓰인 것이 있다(예: 룬 now.body 첫 단락 = key). 그 문장은 무료 화면에 원래 보이는 문장이므로 누출로 치지 않고 따로 센다.
-  const freeText = [];
   const vm = require("vm");
-  const pubDir = path.join(apiSrc, "..");
-  for (const f of fs.readdirSync(pubDir).filter((n) => /^data-.*\.js$/.test(n))) {
-    const w = {};
-    vm.runInNewContext(fs.readFileSync(path.join(pubDir, f), "utf8"), { window: w });
-    const grab = (v, k) => (typeof v === "string" ? (k === "key" || k === "summary") && freeText.push(v) : Array.isArray(v) ? v.forEach((x) => grab(x, k)) : v && typeof v === "object" && Object.entries(v).forEach(([kk, x]) => grab(x, k === "summary" ? k : kk)));
-    Object.values(w).forEach((v) => grab(v, ""));
-  }
-  const dup = [...paidStrings].filter((s) => freeText.some((t) => t.includes(s)));
-  dup.forEach((s) => paidStrings.delete(s));
-  console.log(`  유료 문장 가운데 무료 칸(key·summary)과 원래 같은 문장 ${dup.length}개 — 누출 대조에서 뺌 (copywriter 판단용 목록: tests.md 7단계)`);
-  const leaks = [];
+  const fails = [];
+  const BOOK_FILES = ["arch", "flow", "match", "bond", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"].map((n) => `data-book-${n}.js`);
   (function walk(d) {
     for (const e of fs.readdirSync(d, { withFileTypes: true })) {
       const p = path.join(d, e.name);
-      if (e.isDirectory()) { if (e.name === "api" || e.name.startsWith("_")) leaks.push(p); walk(p); continue; }
-      if (!/.(html|js|css|json|md|txt)$/.test(e.name)) continue;
-      const text = fs.readFileSync(p, "utf8");
-      for (const s of paidStrings) if (text.includes(s)) { leaks.push(p + " ← " + s.slice(0, 20)); break; }
+      const rel = path.relative(DIST, p).split(path.sep).join("/");
+      if (e.isDirectory()) {
+        if (e.name === "api" || e.name === "_paid") fails.push(`① ${rel}/ 있음`);
+        else if (e.name.startsWith("_")) fails.push(`④ _로 시작하는 폴더 ${rel}/`);
+        walk(p);
+      } else if (/(^|\/)legal\/refund\.html$/.test(rel)) fails.push(`① ${rel} 있음`);
     }
-  })(PUBLIC);
-  console.log(leaks.length ? "  경고: 공개 폴더에 서버 전용 내용이 있음 — " + leaks.join(", ") : `  public/에 유료 문구 0건 (유료 문장 ${paidStrings.size}개 대조, api/·_paid는 dist/api/에만)`);
-  const paidLeft = fs.readdirSync(path.join(apiSrc, "_paid")).map((f) => [f, (fs.readFileSync(path.join(apiSrc, "_paid", f), "utf8").split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n").match(/\[초안\]/g) || []).length]).filter(([, n]) => n);
-  console.log(paidLeft.length ? "  유료 문구 [초안] 남음: " + paidLeft.map(([f, n]) => f + " " + n).join(", ") : "  유료 문구 [초안] 없음");
-  if (leaks.length) process.exitCode = 1;
+  })(DIST);
+  for (const slug of PRODUCTS) {
+    const dir = path.join(PUBLIC, "products", slug);
+    const book = fs.readdirSync(dir).filter((f) => /^data-book-.*\.js$/.test(f));
+    if (!book.length) continue; // 책이 없는 제품
+    BOOK_FILES.filter((f) => !book.includes(f)).forEach((f) => fails.push(`③ ${slug}/${f} 없음`));
+    // 책 문장(12자 이상). 무료 칸(key·summary)과 원래 같은 문장은 첫 화면 공개 data에 처음부터 있으므로 뺀다(7단계부터 같은 규칙)
+    const sentences = new Set();
+    const collect = (v, k) => (typeof v === "string" ? k !== "code" && v.length >= 12 && sentences.add(v) : Array.isArray(v) ? v.forEach((x) => collect(x, k)) : v && typeof v === "object" && Object.entries(v).forEach(([kk, x]) => collect(x, kk)));
+    for (const f of book) {
+      const text = fs.readFileSync(path.join(dir, f), "utf8");
+      const n = (text.split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n").match(/\[초안\]/g) || []).length;
+      if (n) fails.push(`③ ${slug}/${f} [초안] ${n}개`);
+      const w = {};
+      vm.runInNewContext(text, { window: w });
+      Object.values(w).forEach((v) => collect(v, ""));
+    }
+    const html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
+    const refs = [...html.matchAll(/<(?:script|link)\b[^>]*?(?:src|href)="([^"]+)"/g)].map((m) => m[1]).filter((u) => !/^(https?:|data:|\/\/)/.test(u));
+    refs.filter((u) => /data-book-/.test(u)).forEach((u) => fails.push(`② index.html이 ${u}를 부름`));
+    const free = [];
+    const grab = (v, k) => (typeof v === "string" ? (k === "key" || k === "summary") && free.push(v) : Array.isArray(v) ? v.forEach((x) => grab(x, k)) : v && typeof v === "object" && Object.entries(v).forEach(([kk, x]) => grab(x, k === "summary" ? k : kk)));
+    const firstFiles = ["index.html", ...refs.map((u) => u.split("?")[0])];
+    const firstText = {};
+    for (const u of firstFiles) {
+      const p = path.resolve(dir, u);
+      if (!fs.existsSync(p)) continue;
+      firstText[u] = fs.readFileSync(p, "utf8");
+      if (/\/data[^/]*\.js$|^data[^/]*\.js$/.test(u)) {
+        const w = {};
+        try {
+          vm.runInNewContext(firstText[u], { window: w });
+          Object.values(w).forEach((v) => grab(v, ""));
+        } catch (e) {
+          /* 데이터 파일이 아니면 무시 */
+        }
+      }
+    }
+    const same = [...sentences].filter((s) => free.some((t) => t.includes(s)));
+    same.forEach((s) => sentences.delete(s));
+    let hits = 0;
+    for (const [u, text] of Object.entries(firstText))
+      for (const s of sentences)
+        if (text.includes(s)) {
+          hits++;
+          fails.push(`② ${slug}/${u} ← "${s.slice(0, 20)}…"`);
+          break;
+        }
+    console.log(`  첫 화면 파일 ${Object.keys(firstText).length}개에 책 문장 ${hits}건 (책 문장 ${sentences.size}개 대조, 무료 칸과 원래 같은 문장 ${same.length}개 뺌) · data-book-*.js ${book.length}개는 장을 열 때만`);
+  }
+  if (fails.length) {
+    console.error("  실패: 책 문구 배포 점검 — " + fails.slice(0, 12).join(" | "));
+    process.exitCode = 1;
+  } else console.log("  책 문구 배포 점검 통과 (api/·_paid·refund.html 없음, 첫 화면 책 문장 0, data-book [초안] 0, _ 폴더 없음) — 정적 호스트에 올릴 폴더: dist/public");
 }

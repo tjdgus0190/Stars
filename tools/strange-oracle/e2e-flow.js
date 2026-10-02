@@ -1,6 +1,6 @@
 // 8단계 무료 흐름 점검 (입구 첫 화면·입구 버튼·뒤로 가기 기록·상징 떠오름·짧은 무료 결과·입력 건너뜀·의식 건너뛰기·결말). 헤드리스 Edge, 결제 꺼짐 서버.
 // 준비: node tools/build-dist.js
-//       node tools/strange-oracle/mock-server.js --port 8788 --mode off   (mock-server는 시작할 때 api/_paid를 읽어 두므로 바꿨으면 다시 켤 것)
+//       node tools/strange-oracle/mock-server.js --port 8788 --mode off   (13단계: 정적 배포 폴더 dist/public)
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-flow.js [reduced|motion]
 // 결과: 콘솔 PASS/FAIL + tools/strange-oracle/out/p8<r|m>-*.png, result.txt
 const { launch } = require("./cdp.js");
@@ -17,13 +17,18 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
 const ORDER = ["ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
 const NAME = "김서윤";
 
-// 유료 문장 목록 (D-4 확장판): api/_paid 전부(8단계 identity.rest·event.lede 포함), 12자 이상. 무료 칸(key·summary)과 원래 같은 문장은 build-dist.js와 같은 규칙으로 뺀다
+// 책 문장 목록 (13단계: data-book-*.js 전부, 옛 api/_paid에서 옮긴 문장 + 궁합 새 모듈), 12자 이상. 무료 칸(key·summary)과 원래 같은 문장은 build-dist.js와 같은 규칙으로 뺀다.
+// 방 결과 등 무료 화면에는 책 문장이 0건이어야 한다(책 문장은 장을 열 때만).
 function paidSentences() {
   const set = new Set();
   const collect = (v) => (typeof v === "string" ? v.length >= 12 && set.add(v) : Array.isArray(v) ? v.forEach(collect) : v && typeof v === "object" && Object.entries(v).forEach(([k, x]) => k !== "code" && collect(x)));
-  for (const f of fs.readdirSync(path.join(PROD, "api", "_paid"))) collect(require(path.join(PROD, "api", "_paid", f)));
+  for (const f of fs.readdirSync(PROD).filter((n) => /^data-book-.*\.js$/.test(n))) {
+    const w = {};
+    vm.runInNewContext(fs.readFileSync(path.join(PROD, f), "utf8"), { window: w });
+    Object.values(w).forEach(collect);
+  }
   const free = [];
-  for (const f of fs.readdirSync(PROD).filter((n) => /^data-.*\.js$/.test(n))) {
+  for (const f of fs.readdirSync(PROD).filter((n) => /^data-.*\.js$/.test(n) && !/^data-book-/.test(n))) {
     const w = {};
     vm.runInNewContext(fs.readFileSync(path.join(PROD, f), "utf8"), { window: w });
     const grab = (v, k) => (typeof v === "string" ? (k === "key" || k === "summary") && free.push(v) : Array.isArray(v) ? v.forEach((x) => grab(x, k)) : v && typeof v === "object" && Object.entries(v).forEach(([kk, x]) => grab(x, k === "summary" ? k : kk)));
@@ -77,10 +82,10 @@ function paidSentences() {
   check("입구에서는 입구 버튼 숨김", await has("[data-js=topbar-home]", "is-hidden"));
   check("주 버튼 = 첫 번째 문 열기(Ⅰ 오검)", (await txt("[data-js=hub-cta-label]")) === (await ev("TEXT.hub.cta.first")) && (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "ogham");
   check("지금까지의 이야기 = 0방이면 숨김", await has("[data-js=hub-sofar]", "is-hidden"));
-  // (11단계 11-5) 결제 꺼짐: 유료 문답(hub-faq-paid)은 숨긴다. 보이는 답만으로 300자 이상
+  // 보이는 답 합계 300자 이상 (13단계: 5번 문답은 책 문답, 결제 문답 은퇴)
   const faq = await ev("[...document.querySelectorAll('[data-js=hub-faq] dd')].filter(d => d.offsetHeight > 0).reduce((a, d) => a + d.textContent.replace('[초안] ', '').length, 0)");
   check("자주 묻는 것: 펼친 채 보이는 답 합계 300자 이상", faq >= 300, String(faq));
-  check("11-5 off: FAQ 유료 문답 숨김", await has("[data-js=hub-faq-paid]", "is-hidden"));
+  check("13단계: FAQ 결제 문답 훅 없음·가격 말 없음", await ev("!document.querySelector('[data-js=hub-faq-paid]') && !/[0-9],[0-9]{3}\\s*원|결제/.test(document.querySelector('[data-js=hub-faq]').innerText)"));
   check("입구 광고 1개", (await ev("document.querySelectorAll('#screen-hub [data-js=ad-slot]').length")) === 1);
   check("첫 화면(스크롤 전)에 주 버튼·여정 칩 보임", await ev("(() => { const r = (s) => document.querySelector(s).getBoundingClientRect(); return r('[data-js=hub-cta]').bottom <= innerHeight && document.querySelector('.journey__chip').getBoundingClientRect().bottom <= innerHeight; })()"));
   check("입구 전에는 저장소 비어 있음", (await store()) === "");
@@ -123,7 +128,7 @@ function paidSentences() {
   const sh = await roomShape("ogham");
   check("방 결과: 장 목차·장 섹션·봉인·장 사이 광고 0개", sh.chapters === 0, JSON.stringify(sh));
   check("핵심 풀이 채움 + 광고 1개 + '나의 이야기 보기' 링크 없음(U7)", sh.reading >= 3 && sh.ads === 1 && sh.goStory === 0, JSON.stringify(sh));
-  check("결제 꺼짐: 책 한 줄 숨김", sh.bookLine === true);
+  check("13단계: 방 결과 책 한 줄 보임(결제 상태와 무관)", sh.bookLine === false);
   const leak1 = await freeLeak("ogham");
   check("D-4 확장: 무료 화면에 유료 문장(identity.rest·event.lede 포함) 0", leak1.length === 0, leak1.slice(0, 2).join(" | "));
   check("공유 = 카드 아래 주 1개 + 글자 링크, 다시 보기 = 글자 링크(U6)", (await ev("document.querySelector('#screen-ogham-result [data-js=result-retry]').classList.contains('text-link') && document.querySelector('#screen-ogham-result [data-js=result-share]').classList.contains('text-link')")));
@@ -214,7 +219,7 @@ function paidSentences() {
   await click("[data-js=topbar-home]");
   await waitScreen("screen-hub", 3000);
   check("6/6 입구: 주 버튼 = 나의 이야기 보기, 번호판 숨김", (await ev("document.querySelector('[data-js=hub-cta]').dataset.go")) === "story" && (await has("[data-js=hub-cta-num]", "is-hidden")));
-  check("6/6: '?' 줄 없음, 결제 꺼짐이면 책 카드 숨김", (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await has("[data-js=hub-paid]", "is-hidden")));
+  check("6/6: '?' 줄 없음, 입구 책 카드 6/6 상태(all)", (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await ev("document.querySelector('[data-js=hub-book]').dataset.state")) === "all");
   await shot(P + "03-hub-done.png");
 
   // ═══ 10단계: 이어가기 코드·링크 복사·찌꺼기 정리·이름 미리 채움 (spec 10-1·10-2·10-6·10-7) ═══
@@ -282,7 +287,7 @@ function paidSentences() {
   await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 640, deviceScaleFactor: 2, mobile: true });
   const reqMake = b.log.requests.length;
   const code3 = await makeCode();
-  await sleep(200);
+  await sleep(reduced ? 200 : 1000); // 움직임 모드는 html scroll-behavior: smooth라 패널까지 스크롤이 끝나길 기다린다
   check("10-1: 코드 만들기 → SOG1 + 4자 묶음(15자, 20자 이내)", /^SOG1-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{3}$/.test(code3), code3.replace(/[0-9A-Z]/g, "#"));
   const lay = await ev("(() => { const r = (n) => document.querySelector('[data-js=' + n + ']').getBoundingClientRect(); const c = r('resume-code'), w = r('resume-warn'), b = r('resume-copy'); return { codeTop: Math.round(c.top), warnTop: Math.round(w.top), warnBottom: Math.round(w.bottom), copyTop: Math.round(b.top), copyBottom: Math.round(b.bottom), h: innerHeight, warnLen: document.querySelector('[data-js=resume-warn]').textContent.trim().length }; })()");
   check("10-1: 360x640 — 코드 → 경고 → 복사 버튼 순서로 한 화면 안(접힘·스크롤 밖 아님)", lay.codeTop >= 0 && lay.warnTop >= lay.codeTop && lay.warnBottom <= lay.copyTop && lay.copyBottom <= lay.h && lay.warnLen > 20, JSON.stringify(lay));
@@ -437,9 +442,9 @@ function paidSentences() {
   await seed(["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
   await b.goto(BASE + "#story");
   await waitScreen("screen-story", 3000);
-  const six = await ev("(() => { const vis = (e) => e && e.offsetHeight > 0; return { paid: vis(document.querySelector('[data-js=story-paid]')), note: vis(document.querySelector('[data-js=story-book-note]')), half: vis(document.querySelector('[data-js=story-half]')), noteBtn: document.querySelector('[data-js=story-book-note]').querySelectorAll('a,button').length }; })()");
+  const six = await ev("(() => { const vis = (e) => e && e.offsetHeight > 0; return { paid: vis(document.querySelector('[data-js=story-paid]')), note: vis(document.querySelector('[data-js=story-book]')), half: vis(document.querySelector('[data-js=story-half]')), noteBtn: document.querySelector('[data-js=story-book]').querySelectorAll('button:not([disabled])').length === 1 }; })()");
   const sixDead = await deadScan("#screen-story");
-  check("11-5 off 6/6 나의 이야기: 책 카드 숨김 · 글 한 줄(버튼·링크 없음) · 가격·'곧'·죽은 버튼 0 · H5 없음", !six.paid && six.note && six.noteBtn === 0 && !six.half && !sixDead.price && !sixDead.soon && sixDead.dead === 0, JSON.stringify(six) + JSON.stringify(sixDead));
+  check("13단계 6/6 나의 이야기: 결제 카드 없음 · 책 목차 열기 버튼 1개 · 가격·'곧'·죽은 버튼 0 · H5 없음", !six.paid && six.note && six.noteBtn && !six.half && !sixDead.price && !sixDead.soon && sixDead.dead === 0, JSON.stringify(six) + JSON.stringify(sixDead));
   const sixRes = [];
   for (const room of ["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]) {
     await ev("StrangeOracle.go('story')");
@@ -470,7 +475,7 @@ function paidSentences() {
   fs.mkdirSync(OUT, { recursive: true });
   fs.writeFileSync(path.join(OUT, P + "result.txt"), out.join("\n") + "\n");
   const fails = out.filter((l) => l.startsWith("FAIL")).length;
-  console.log(`\n${out.length - fails} PASS / ${fails} FAIL (유료 문장 ${PAID.length}개 대조)`);
+  console.log(`\n${out.length - fails} PASS / ${fails} FAIL (책 문장 ${PAID.length}개 대조)`);
   await b.close();
   process.exit(fails ? 1 : 0);
 })().catch((e) => { console.log(out.join("\n")); console.error("CRASH", e); process.exit(1); });

@@ -576,3 +576,51 @@
 ### 미확인 (운영자 실환경)
 - 실제 구글 스크립트 동작: 한국 웹 보상형 채움, 데스크톱에서 `defineOutOfPageSlot` null 여부, 실제 배너 높이·CLS, 실제 쿠키, GA4 향상된 측정 꺼짐(운영자가 데이터 스트림에서 끌 것), 애드센스 자동 광고 꺼짐(계정 설정), ads.txt가 호스팅 루트에 놓이는지.
 - `granted`를 `rewardedSlotGranted` 순간에 돌려준다(광고 닫기 전). 실제 GPT에서 이 순서가 맞는지 미확인.
+
+## 13단계 E3: 광고로 여는 책 (2026-10-03, developer)
+
+### 만든 것
+- **옮기기** `tools/strange-oracle/move-book.js`: `api/_paid/*.js` 18개 → `data-book-{ogham,star,decan,tzolkin,rune,sibyl,flow,match,arch}.js` (방 단위·주제 단위, 결과 번호를 파일 이름에 넣지 않음). 다시 돌릴 수 있다(`--check`는 쓰지 않고 대조만). `data-book-bond.js`(copywriter)는 건드리지 않는다.
+  - 무손실 대조 (원본/공개, 2026-10-03 마지막 실행 — 반역자→반항아 통일 반영 뒤): 문자열 6,279/6,279 · **문장 14,124/14,124** · 글자 585,202/585,202, 파일 9개 모두 deepEqual 같음, 원본 18개 전부 옮김.
+- **브라우저 조립** `book.js`(window.BookCore, 로직만): core.js의 `hiddenEntry·fullRoom·pairCode·timelineStages·buildReport`를 그대로 옮김 + 장 하나씩(`openChapter`…`matchChapter`). 궁합은 `pairUse`(skip·lover)·`pairOverride`(덮어쓴 문단도 쓰임 표시 따름)·`summaryOverride`/`sidesOverride`(lover가 아닐 때만, 없으면 원문)·`roomVariants`(v=(내 코드+상대 코드) mod 3, 0이면 원문)·M1·M3·M5(peekLine) 조립. 순서: summary → M1 장면 → M2 → sides → M3 → M5 → M4 목록 → M1 함께 해 볼 한 가지.
+- **화면** app.js: 결제·영수증·토스·미리보기·봉인 해제 JS 전부 삭제, `#screen-report` 안 목차/표지/장 안 세 보기, 장별 열림(13-2), 장 파일 지연 불러오기(실패 → 다시 시도, 광고 다시 안 봄), 궁합 표지(상대·관계 유형 메모리만), 흐름 표지 생년월일(profile), 장 끝 쪽(다음 열 수 있는 장 → 그 장 표지 / 열린 장은 바로 첫 쪽), 이어 읽기 `"<장 id>:<쪽>"`, 옛 `#deeper`·`#unseal`·`#report`·영수증 칸 → 목차, 옛 `?pay=` 포함 모든 query는 시작할 때 지움.
+  - 광고가 `granted`면 바로 첫 쪽(탭 3번), `unavailable`이면 안내 한 줄을 보이고 "펼치기"(탭 4번) — 안내가 보이도록.
+- **build-dist** 정적 전용 기본(dist/api·vercel.json 안 만듦, `--static`은 같은 동작). **정적 호스트에 올릴 폴더 = `dist/public`**. 배포에서 뺌: 제품 `api/`, `pay.json`, `legal/refund.html`. `paycode.js`는 이어가기 코드가 써서 남김. 새 점검 ①~④(13-5) 실패 시 exit 1.
+- 분석 허용 목록(app.js EVENTS — common/analytics.js는 받은 목록을 강제만 하므로 바꾸지 않음): `so_book` step toc·cover·read·done + chapter(11개), `so_unlock`에 chapter 추가(slot 안 보냄), preview·pay_click 삭제.
+- 지운 파일: `tools/strange-oracle/e2e-paid.js`(결제 흐름 은퇴 → `e2e-book.js`로 대체). `legal/refund.html`은 저장소에 남기고 배포에서만 뺌.
+
+### 동일성 시험 (13-7의 6, `tools/strange-oracle/book.test.js`)
+`BookCore.buildReport(원본 문구, 코드)` = 휴면 `core.buildReport(코드)` deepStrictEqual, 새 모듈 끔. 표본 403개, 차이 0:
+- 오검 20 · 별 27 · 데칸 36 · 촐킨 문양 20(숫자 1~13 돌림) · 시빌라 신탁 32(주제는 책 조립 입력이 아님 — 주제 단락은 화면이 이 탭 기록으로 붙임)
+- **룬**: 24개가 지나온·지금·다가올 세 자리에 각각 한 번씩 들어가는 묶음 = `[i, i+1, i+2] mod 24`, i = 0~23 (24개)
+- 흐름 8 원형 × 7 구간 = 56
+- 궁합 36쌍 × 등급 5묶음(오검 k%3·데칸 k·촐킨 k%3, k=0~3 + 등급 없음) = 180, 상대 없음(지도)·여섯 방 모두 원형 8
+- 공개 파일(data-book-*.js)로 묶은 문구로도 같음(옮긴 직후. 이후 copywriter가 고치면 이 칸은 건너뜀 — 정상).
+
+### 궁합 (13-7의 8)
+- 8 × 8 × 4 = 256 조합: 빈 칸·undefined·`{room}` 남음 0, 같은 입력 두 번 = 같은 글, 마지막 문단 = `first[유형][상대].together`, 문단 6개 이상·방별 관계 3개.
+- 쓰임 표시·덮어쓰기 표본 확인: lover-ruler 4번 문단은 어느 유형에도 없음, warrior-lover 3번은 연인 유형에만, warrior-sage 3번은 덮어쓴 글, friend 유형 summary/sides 덮어쓰기, ogham 변형 v=0 원문 / v=1 변형.
+
+### 다양성 실측 (13-7의 9, seed 20261003, 무작위 두 사람 200쌍, 문장 단위 — `out/book-variety.txt`)
+- **① 같은 원형 쌍·같은 유형·다른 사람: 다른 문장 비율 평균 33.3%** (비교 1,476쌍) — 목표 30% 이상 충족.
+- **② 같은 두 사람·관계 유형만 다름: 평균 23.6%** (비교 1,200쌍) — 기획 추정 "60% 이상"에 **미달** → planner 보고(실패 아님). 원인: 유형이 바꾸는 것은 M1(장면·마지막)·M3·M2 연인 문단·친구/동료/가족용 summary·sides 덮어쓰기뿐이고, 쌍 본문(M2)·방별 관계(M4)·엿보기(M5)는 유형과 무관하다. 화면 e2e(같은 두 사람)도 유형 쌍마다 24%.
+- 데칸 번호는 천체 계산 라이브러리(브라우저 CDN)가 Node에 없어 무작위 0~35로 대신했다(오검=무작위 한글 이름 계산, 촐킨=무작위 생일 계산).
+
+### 첫 화면 전송량 (index.html + 정적으로 부르는 로컬 파일, CDN 글꼴·천체 라이브러리 제외)
+| | 파일 | 크기 | gzip |
+|---|---|---|---|
+| 12단계 끝 (d3e9c03) | 20 | 1,510.5KB | 402.7KB |
+| 13단계 E1 (69ff869) | 20 | 1,490.2KB | 399.2KB |
+| 지금 (E3, book.js 1개 추가) | 21 | 1,475.8KB | 393.2KB |
+- 첫 화면 data-book-*.js·`/api/`·pay.json 요청 0(e2e-book). 장 파일 크기(압축 전): arch 40KB · flow 75KB · match 113KB + bond 77KB · 오검 156KB · 별 221KB · 데칸 295KB · 촐킨 160KB · 룬 251KB · 시빌라 259KB.
+
+### 시험 결과 (2026-10-03)
+- `node tools/build-dist.js`: 첫 화면 파일 21개에 책 문장 0건(책 문장 5,765개 대조, 무료 칸과 원래 같은 문장 11개 뺌), 점검 ①~④ 통과.
+- `node --test "tools/strange-oracle/*.test.js"`: 51 PASS / 0 FAIL (book.test.js 5 포함, api.test.js는 휴면 서버 그대로 통과).
+- `e2e-book.js` 60 PASS / 0 FAIL · `e2e-flow.js reduced` 126 / 0 · `e2e-flow.js motion` 127 / 0 (10-1 코드 패널 배치 점검이 smooth 스크롤을 200ms만 기다려 실패하던 것을 1초로 — 시험 쪽 수정) · `e2e-ads.js` 55 / 0 (옛 결제 복귀 점검을 "query 지운 뒤 시작"으로, 이벤트 키에 chapter 추가).
+- 개인정보 전수 검색(e2e-book): 상대 이름·생일·내 이름·생일·관계 유형(friend·family·work)·옛 결제 시험값 → 요청 URL·본문·gtag 인자·sessionStorage·localStorage·쿠키 0건.
+
+### 미확인
+- 실제 보상형 광고(한국 웹 광고단위)·실제 GA4 수신 — 가짜 googletag로만 시험.
+- 데칸·시빌라 장(약 260~295KB) 느린 모바일 회선 불러오기 시간.
+- legal/terms.html 본문에 "환불 정책(refund.html)" 문장이 남아 있음(링크는 아님) — 약관 개정은 E4 copywriter.

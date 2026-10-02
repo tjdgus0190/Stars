@@ -136,13 +136,16 @@
   function clearAll() {
     try {
       window.sessionStorage.removeItem(STORE_KEY);
-      window.sessionStorage.removeItem(UNLOCK_KEY); // (12단계) 광고로 연 방 표시도 지운다
+      window.sessionStorage.removeItem(UNLOCK_KEY); // (12단계) 광고로 연 방 표시도 지운다 (13단계: 연 장 표시 book-* 포함)
+      window.sessionStorage.removeItem("strange-oracle-bookmark"); // (13단계) 이어 읽기 장 id·쪽 번호
+      window.sessionStorage.removeItem("strange-oracle-receipt"); // 12단계까지의 영수증 코드 칸
     } catch (e) {
       /* 무시 */
     }
     state = emptyState();
     Object.keys(editing).forEach((k) => (editing[k] = false));
-    $$("input[data-js], textarea[data-js]").forEach((el) => (el.type === "checkbox" ? (el.checked = false) : (el.value = "")));
+    $$("input[data-js], textarea[data-js]").forEach((el) => (el.type === "checkbox" || el.type === "radio" ? (el.checked = false) : (el.value = "")));
+    if (typeof readSet !== "undefined") readSet.clear();
     resetSibyl();
     [js("star-hour"), js("star-minute")].forEach((el) => (el.disabled = false));
     closeResume(); // 펼쳐 둔 이어가기 코드 표시·입력 칸을 닫고 비운다 (입력 칸 값은 위에서 이미 비움)
@@ -187,7 +190,6 @@
     jsAll("rashi-label").forEach((el, i) => (el.textContent = RASHIS[i].ko.replace("자리", "")));
     // 촐킨 톱니 카르투슈 20개: 유카텍 이름 대문자 (SVG text)
     jsAll("tzolkin-sign-label").forEach((el, i) => (el.textContent = TZ_SIGNS[i].latin.toUpperCase()));
-    js("story-paid-list").innerHTML = T.story.paid.list.map((li) => `<li>${li}</li>`).join("");
     document.title = T.meta.title;
     const desc = $('meta[name="description"]');
     if (desc) desc.content = T.meta.description;
@@ -262,7 +264,7 @@
     const inRoom = CHAPTER_ORDER.includes(room);
     const reading = name === "report";
     show(js("topbar-home"), name !== "hub");
-    show(js("book-toc-open"), reading);
+    show(js("book-toc-open"), reading && js("book-reader").dataset.view !== "toc"); // (13단계) 목차 버튼은 장 표지·장 안에서만
     const bar = js("topbar");
     bar.classList.toggle("is-room", inRoom);
     bar.classList.toggle("is-reading", reading);
@@ -302,7 +304,7 @@
   // ───────── (8단계 U1) 브라우저 기록: 화면 전환마다 pushState(해시 = 화면 이름), popstate에서 go() ─────────
   // 의식·후보·봉인 해제로 갈 때와 그 화면을 떠날 때는 replaceState → 뒤로 가기가 의식을 다시 틀지 않는다 (결과 → 뒤로 = 방 시작 또는 입구).
   // 입구에서 뒤로 가기는 브라우저 기본 동작. 해시에는 화면 이름만 들어간다 (입력값 없음)
-  const TRANSIENT_TO = (name) => /-(ritual|choose)$/.test(name) || name === "unseal";
+  const TRANSIENT_TO = (name) => /-(ritual|choose)$/.test(name);
   const TRANSIENT_FROM = (name) => TRANSIENT_TO(name) || name === "finale";
   const urlOf = (name) => (name === "hub" ? location.pathname + location.search : `#${name}`);
   function record(name, prevName, opts) {
@@ -319,12 +321,12 @@
   }
   addEventListener("popstate", (e) => {
     let name = (e.state && e.state.so) || location.hash.replace("#", "") || "hub";
+    if (name === "deeper" || name === "unseal") name = "report"; // (13단계) 은퇴한 결제 화면 → 책 목차
     if (!screens[name]) return; // 책 안 목차 이동 등 화면이 아닌 해시
     if (sig) sig.end();
     if (TRANSIENT_TO(name)) name = "hub";
     const room = roomOfScreen(name);
-    if (name === "report" && !reportView) name = "hub";
-    else if (CHAPTER_ORDER.includes(room) && name === `${room}-result` && isDone(room)) RENDER[room](state.visits[room], false);
+    if (CHAPTER_ORDER.includes(room) && name === `${room}-result` && isDone(room)) RENDER[room](state.visits[room], false);
     go(name, { instant: true, fromPop: true });
   });
 
@@ -879,30 +881,20 @@
     c.innerHTML = close || "";
     show(c, Boolean(close));
   }
-  // 책 한 줄 (방 안의 유일한 유료 신호, 결제 꺼짐이면 숨김): locked(6/6 전, 글자만) / ready(미리보기로) / owned(내 책의 이 방으로)
-  const bookState = () => (Pay.enabled && readReceipt() ? "owned" : filledRooms().length === CHAPTER_ORDER.length ? "ready" : "locked");
+  // (13단계) 방 결과의 책 한 줄: 결제 상태와 무관하게 떡밥(hook) + "책에서 이 방의 장 열기 →"(그 장 표지로). 옛 "여섯 문 끝…" 줄은 숨김
   function updateBookLines() {
-    const st = bookState();
     jsAll("result-book-line").forEach((el) => {
-      show(el, Pay.enabled);
-      el.dataset.state = st;
-      show(js("result-book-link", el), st !== "locked");
-      js("book-line-link-label", el).textContent = st === "owned" ? T.result.bookLine.owned : T.result.bookLine.ready;
+      show(el, true);
+      el.dataset.state = "open";
+      show(js("book-line-note", el), false);
+      show(js("result-book-link", el), true);
+      js("book-line-link-label", el).textContent = T.room.bookLink;
     });
   }
   function renderBookLine(scr, hook) {
     js("book-line-hook", scr).innerHTML = hook || "";
     updateBookLines();
   }
-  // 책 한 줄 링크: 결제 뒤에는 책을 열고 그 방 자리로, 아니면 미리보기
-  let jumpTo = null;
-  CHAPTER_ORDER.forEach((room) => js("result-book-link", screens[`${room}-result`]).addEventListener("click", (e) => {
-    const code = readReceipt();
-    if (bookState() === "owned" && code) {
-      jumpTo = room;
-      reopen(code, e.currentTarget, null);
-    } else go("deeper");
-  }));
 
   // (8단계 U4) 기다리는 의식: 시작 1초 뒤부터 아무 데나 누르면 바로 결과로 (힌트 ritual-skip). 같은 방을 다시 하면 기다림 절반
   const waitMs = (room, ms) => (isDone(room) ? Math.round(ms / 2) : ms);
@@ -2019,9 +2011,8 @@
     const shareBtn = js("story-share", storyScr);
     shareBtn.classList.toggle("btn--primary", !half);
     shareBtn.classList.toggle("btn--secondary", half);
-    // (11-5) 결제 꺼짐: 책 카드는 통째 숨기고, 6/6에서만 글 한 줄
-    show(js("story-paid"), Pay.enabled);
-    show(js("story-book-note"), !Pay.enabled && n === CHAPTER_ORDER.length);
+    // (13단계) 결말 뒤 "책 목차 열기" 한 줄 버튼. 마친 방이 없으면 숨김
+    show(js("story-book", storyScr), n > 0);
 
     // 등뼈: 1~6장 고정 순서
     resetReveal(storyScr);
@@ -2259,40 +2250,27 @@
     if (filledRooms().length) shareCard(e.currentTarget, buildStoryCard);
   }));
 
-  // ═════════ 6단계: 유료 리포트 "더 깊은 이야기" (spec 6-3·6-4, design 「6단계」) ═════════
-  // 켜지는 조건: pay.json의 api가 true(Vercel 배포본) → /api/config가 enabled:true. 그 밖(순수 정적 서버·파일·off)은 전부 꺼짐이고,
-  // 꺼져 있으면 새 요소는 .is-hidden 그대로, 세 화면(deeper·unseal·report)으로 가는 길이 없다 (D-9).
-  // 개인정보 (CLAUDE.md 6장, spec 6-4):
-  //  - 서버로 보내는 것: 결제 정보(paymentKey·orderId·amount)와 영수증 코드뿐. orderId 안에는 결과 코드 번호만 있다 (paycode.js).
-  //  - 이름·생년월일·태어난 시각·시빌라 질문·상대 정보는 보내지 않는다. 나이는 구간 코드(b1~b7)로만, 상대는 원형·관계 등급 코드로만 바뀐다.
-  //  - 상대의 이름·생년월일은 입력칸에만 있고 어디에도 저장하지 않는다(sessionStorage 포함). 코드를 만든 직후 입력칸을 비운다.
-  //  - 이 화면에서 새로 넣은 내 생년월일도 저장하지 않고 이번 계산에만 쓴다 (프로필에 이미 있으면 그 값을 쓴다).
-  //  - sessionStorage에는 영수증 코드만 따로 둔다(키 strange-oracle-receipt, 개인정보 아님). "내 정보 지우기"는 이것을 지우지 않는다.
-  //  - 유료 문구는 메모리(reportView)에만 두고 어떤 저장소에도 넣지 않는다.
-  const PAY_OFF = { enabled: false, mode: "off", clientKey: "", price: 3900, orderName: "" };
-  let Pay = PAY_OFF;
-  const RECEIPT_KEY = "strange-oracle-receipt";
-  const TOSS_SDK = "https://js.tosspayments.com/v2/standard"; // 토스 공식 주소(CLAUDE.md 3장 예외). 결제 버튼을 누른 뒤에만 불러온다
-  const deeperScr = screens.deeper;
-  const unsealScr = screens.unseal;
+  // ═════════ (13단계) 광고로 여는 책: 목차 · 장 표지 · 장 안 (spec 13-1~13-8, design 「13단계」) ═════════
+  // 결정 75: 책은 팔지 않는다. 가격·결제창·영수증 코드·토스 로더는 화면에서 은퇴했다. 휴면 서버(api/)는 부르지 않는다.
+  // paycode.js는 이어가기 코드(PayCode.Resume)와 원형·방 순서 표 때문에 그대로 쓴다.
+  // 개인정보 (CLAUDE.md 6장, spec 13-4·13-8):
+  //  - 책은 이 브라우저에서 결과 코드·원형·나이 구간만으로 조립한다(book.js). 장 문구 파일(data-book-*.js)은 방·주제 단위 이름으로만,
+  //    같은 출처 정적 <script>로 받는다(결과 번호·query 없음). 잠긴 장의 문장은 DOM에 넣지 않는다.
+  //  - 궁합 상대의 이름·생년월일·관계 유형은 궁합 표지 입력칸과 이 함수들의 지역 값에만 둔다(sessionStorage에도 넣지 않음).
+  //    다른 장·목차로 가면 입력칸을 비운다. 분석 이벤트에는 장 id·단계만.
+  //  - sessionStorage: 광고로 연 장 표시 "book-<장 id>":1 (strange-oracle-unlock 칸), 이어 읽기 "<장 id>:<쪽>" (strange-oracle-bookmark). 문장·입력값 없음.
+  //  - 시기별 흐름 표지의 생년월일은 6장 예외대로 profile에 넣는다(기존 고지·내 정보 지우기를 따름).
   const reportScr = screens.report;
+  const BookCore = window.BookCore;
+  const BV = window.BOOK_VOLUME;
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
   const comma = (n) => Number(n).toLocaleString("ko-KR");
-  const readReceipt = () => {
-    try {
-      return PayCode.normalize(window.sessionStorage.getItem(RECEIPT_KEY) || "");
-    } catch (e) {
-      return "";
-    }
-  };
-  const writeReceipt = (code) => {
-    try {
-      if (code) window.sessionStorage.setItem(RECEIPT_KEY, code);
-      else window.sessionStorage.removeItem(RECEIPT_KEY);
-    } catch (e) {
-      /* 저장이 막힌 브라우저: 코드 카드로만 안내 */
-    }
-  };
+  const OLD_RECEIPT_KEY = "strange-oracle-receipt"; // 12단계까지 영수증 코드 칸. 남아 있으면 지우고 목차로 보낸다(13-4)
+  const BOOK_IDS = ["open", ...CHAPTER_ORDER, "flow", "match", "deep", "close"];
+  const AD_FREE = new Set(["open", "close"]); // 여는 글·닫는 글은 광고 없이 열린다 (13-2)
+  const FILES = { open: ["data-book-arch.js"], deep: ["data-book-arch.js"], close: ["data-book-arch.js"], flow: ["data-book-flow.js"], match: ["data-book-match.js", "data-book-bond.js"] };
+  CHAPTER_ORDER.forEach((r) => (FILES[r] = [`data-book-${r}.js`]));
+
   // data-t가 붙은 요소를 한 덩어리 안에서만 다시 채운다 (복제한 틀에 쓴다)
   const textIn = (el) => $$("[data-t]", el).forEach((x) => (x.textContent = get(x.dataset.t) ?? ""));
   const paras = (el, list) => {
@@ -2303,123 +2281,26 @@
       el.append(p);
     }
   };
-
-  // ── 마크업의 모양 견본을 틀로 떼어 두고, data-t 없는 초안 표시 견본 글자는 지운다 (design developer 요청 2·3)
+  // 마크업의 모양 견본을 틀로 떼어 두고 견본 글자는 지운다
   const tpl = {
     stage: js("report-timeline").firstElementChild.cloneNode(true),
     matchRoom: js("report-match-rooms").firstElementChild.cloneNode(true),
   };
-  function clearPaidSamples() {
-    ["report-timeline", "report-match-rooms", "report-open", "report-close", "report-match", "report-deep-strength", "report-deep-shadow", "report-deep-growth",
-      "report-title", "report-meta", "receipt-code", "receipt-code-end", "unseal-error-code", "deeper-total", "deeper-items", "deeper-volume", "deeper-price", "deeper-saved-value", "deeper-peek-arch"]
+  const matchEnd = document.createElement("div"); // 궁합 마지막 문단(M1 함께 해 볼 한 가지): 방별 관계 목록 뒤
+  matchEnd.className = "report-part__body prose";
+  matchEnd.dataset.js = "report-match-end";
+  js("report-match-rooms").after(matchEnd);
+  function clearSource() {
+    ["report-timeline", "report-match-rooms", "report-open", "report-close", "report-match", "report-match-end", "report-deep-strength", "report-deep-shadow", "report-deep-growth", "report-evidence"]
       .forEach((n) => (js(n).textContent = ""));
-    jsAll("deeper-read-time").forEach((el) => (el.textContent = ""));
     [...js("report-match-pair").children].forEach((s, i) => i !== 1 && (s.textContent = ""));
-    jsAll("deeper-toc-item").forEach((li) => ["toc-name", "toc-vol", "toc-teaser"].forEach((n) => (js(n, li).textContent = "")));
-  }
-
-  // ── 서버 호출 (같은 출처 /api/*). 본문에는 정해진 키만 담는다
-  async function apiCall(name, body) {
-    const ctl = "AbortController" in window ? new AbortController() : null;
-    const timer = setTimeout(() => ctl && ctl.abort(), 20000);
-    try {
-      const res = await fetch(`/api/${name}`, {
-        method: body ? "POST" : "GET",
-        headers: body ? { "Content-Type": "application/json" } : {},
-        body: body ? JSON.stringify(body) : undefined,
-        cache: "no-store",
-        credentials: "omit",
-        signal: ctl ? ctl.signal : undefined,
-      });
-      let data = null;
-      try {
-        data = await res.json();
-      } catch (e) {
-        /* 빈 응답 */
-      }
-      return { ok: res.ok, status: res.status, data };
-    } catch (e) {
-      return { ok: false, status: 0, data: null };
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-  async function loadPayConfig() {
-    try {
-      const flag = await (await fetch("pay.json", { cache: "no-store" })).json();
-      if (!flag || flag.api !== true) return;
-      const r = await apiCall("config");
-      const c = r.ok && r.data;
-      if (c && c.enabled === true && ["mock", "test", "live"].includes(c.mode) && Number(c.price) > 0)
-        Pay = { enabled: true, mode: c.mode, clientKey: String(c.clientKey || ""), price: Number(c.price), orderName: String(c.orderName || "") };
-    } catch (e) {
-      Pay = PAY_OFF; // 설정을 못 받으면 결제만 조용히 꺼진다
-    }
-  }
-  const hasBlank = () => JSON.stringify([T.biz, T.deeper.disclosure]).includes("◯◯");
-
-  // ── 진입점 상태 (입구 책 카드·나의 이야기·방 결과 책 한 줄)
-  function applyPayUi() {
-    const on = Pay.enabled;
-    const owned = on && Boolean(readReceipt());
-    const card = js("story-paid");
-    card.classList.toggle("is-on", on);
-    card.classList.toggle("is-owned", owned);
-    // (11단계 11-5) 결제 꺼짐: 카드째 숨김("곧 열려요"·눌리지 않는 버튼 없음), 6/6이면 글 한 줄. 입구 FAQ 유료 문답도 숨김(결정 66)
-    show(card, on);
-    show(js("story-book-note"), !on && filledRooms().length === CHAPTER_ORDER.length);
-    show(js("hub-faq-paid"), on);
-    js("story-paid-status").textContent = T.story.paid.statusOn;
-    const goBtn = js("story-paid-go");
-    goBtn.textContent = owned ? T.story.paid.goOwned : T.story.paid.goOn;
-    show(js("story-paid-reopen"), on);
-    renderBookCard();
-    updateBookLines();
-    jsAll("pay-band").forEach((band) => {
-      const mode = Pay.mode === "mock" || Pay.mode === "test" ? Pay.mode : null;
-      show(band, Boolean(mode));
-      if (!mode) return;
-      band.dataset.mode = mode;
-      const label = $("[data-t]", band);
-      label.dataset.t = `pay.band.${mode}`;
-      label.textContent = T.pay.band[mode];
+    jsAll("book-room").forEach((el) => {
+      show(el, false);
+      ["book-ch1", "book-ch2", "book-ch3", "book-ch4", "book-hidden"].forEach((k) => (js(k, el).textContent = ""));
     });
   }
-  // (8단계, 8-2 5번) 입구 "한 권의 책" 카드: locked(6/6 전, 핍 N칸 + 미리보기) / ready(6/6, 3,900원) / owned(내 책 다시 펴기)
-  function renderBookCard() {
-    const box = js("hub-paid");
-    show(box, Pay.enabled);
-    if (!Pay.enabled) return;
-    const n = filledRooms().length;
-    const st = bookState();
-    const card = js("hub-book");
-    card.dataset.state = st;
-    $$("i", js("hub-book-lock")).forEach((pip, i) => pip.classList.toggle("is-on", i < n));
-    js("hub-book-hint").textContent = fill(T.hub.book.hint, { n });
-    js("hub-book-go").textContent = fill(T.hub.book.go[st], { price: comma(Pay.price) });
-  }
-  js("hub-book-go").addEventListener("click", (e) => {
-    const code = readReceipt();
-    if (Pay.enabled && code) reopen(code, e.currentTarget, null);
-    else if (Pay.enabled) go("deeper");
-  });
-  // 영수증 코드 입력은 접힌 글자 링크 (U9)
-  js("receipt-toggle").addEventListener("click", (e) => {
-    const btn = e.currentTarget;
-    const open = btn.getAttribute("aria-expanded") !== "true";
-    btn.setAttribute("aria-expanded", String(open));
-    const form = js("receipt-open", js("hub-paid"));
-    show(form, open);
-    if (open) js("receipt-open-input", form).focus();
-  });
-  js("story-paid-go").addEventListener("click", () => {
-    if (!Pay.enabled) return;
-    const code = readReceipt();
-    if (code) reopen(code, js("story-paid-go"), null);
-    else go("deeper");
-  });
 
-  // ── 브라우저 쪽 계산: 나이 구간·상대 원형·관계 등급 (spec 6-2)
+  // ── 브라우저 쪽 계산: 나이 구간·상대 원형·관계 등급 (spec 6-2, 13-4)
   // 오늘 기준 만 나이 → b1(24세 이하) b2(25~29) … b7(50세 이상) = 0~6
   function ageBand(b) {
     const now = new Date();
@@ -2476,403 +2357,346 @@
     };
   }
 
-  // ── 6-P 미리보기 입력 읽기
-  const dYear = js("deeper-year"), dMonth = js("deeper-month"), dDay = js("deeper-day");
-  const pName = js("deeper-partner-name"), pYear = js("deeper-partner-year"), pMonth = js("deeper-partner-month"), pDay = js("deeper-partner-day");
-  digitsOnly(dYear, dMonth);
-  digitsOnly(dMonth, dDay);
-  digitsOnly(dDay);
-  digitsOnly(pYear, pMonth);
-  digitsOnly(pMonth, pDay);
-  digitsOnly(pDay);
-  let deeperEditing = false;
-  let payFailed = null; // (11단계 F4) 결제창 실패 종류: cancel | decline | error (null = 없음)
-  // 토스 오류 코드 → 안내 종류. 표는 tests.md(토스 공식 문서 오류 코드 페이지, 2026-10-01 확인). 표에 없는 코드는 error(③).
-  // 오류 코드 원문은 이 분류에만 쓰고 화면·저장소·분석 어디에도 두지 않는다
-  const FAIL_CANCEL = ["PAY_PROCESS_CANCELED", "USER_CANCEL"];
-  const FAIL_DECLINE = ["REJECT_CARD_COMPANY", "REJECT_CARD_PAYMENT", "REJECT_ACCOUNT_PAYMENT", "INVALID_REJECT_CARD", "INVALID_STOPPED_CARD", "EXCEED_MAX_PAYMENT_AMOUNT", "EXCEED_MAX_DAILY_PAYMENT_COUNT", "EXCEED_MAX_ONE_DAY_AMOUNT"];
-  const failKind = (code) => (FAIL_CANCEL.includes(code) ? "cancel" : FAIL_DECLINE.includes(code) ? "decline" : "error");
-  // 상자 하나에 제목·본문을 종류에 맞는 키로 (data-t도 바꿔 두어 문구 다시 채우기에서 되돌아가지 않게)
-  const setT = (el, key) => {
-    el.dataset.t = key;
-    el.textContent = get(key) ?? "";
-  };
-  function setPayAlert(kind) {
-    const box = js("pay-alert");
-    show(box, Boolean(kind));
-    if (!kind) return;
-    box.dataset.kind = kind;
-    const k = kind === "error" ? "other" : kind;
-    setT(js("pay-alert-title"), `pay.fail.${k}.title`);
-    setT(js("pay-alert-text"), `pay.fail.${k}.text`);
-  }
-  // 문의처 줄: 값(data.js pay.contact)은 textContent로만. 비어 있으면 줄째 숨긴다 (빈 줄·"undefined" 없음)
-  function renderContact() {
-    const v = String((T.pay && T.pay.contact) || "").trim();
-    js("pay-contact-value").textContent = v;
-    show(js("pay-contact"), Boolean(v));
-  }
-  renderContact();
-  function readMyBirth(report) {
-    const useSaved = Boolean(state.profile.birth) && !deeperEditing;
-    if (useSaved) return state.profile.birth;
-    const y = Number(dYear.value), m = Number(dMonth.value), d = Number(dDay.value);
-    const ok = dYear.value.length === 4 && Calc.validDate(y, m, d);
-    if (report) setFieldError("deeper-date-field", "deeper-date-error", ok ? "" : T.deeper.errors.date);
-    return ok ? { y, m, d } : null;
-  }
-  // 상대: 넷 다 비었으면 none, 모두 맞으면 ok(+계산 결과), 아니면 오류 종류
-  function readPartner(report) {
-    const vals = [pName.value.trim(), pYear.value, pMonth.value, pDay.value];
-    let out;
-    if (vals.every((x) => !x)) out = { state: "none" };
-    else {
-      const y = Number(pYear.value), m = Number(pMonth.value), d = Number(pDay.value);
-      const dateOk = pYear.value.length === 4 && Calc.validDate(y, m, d);
-      if (!vals[0] || !dateOk) out = { state: "error", msg: T.deeper.errors.partnerBoth };
-      else {
-        const p = partnerOf(vals[0], { y, m, d });
-        out = p ? { state: "ok", p } : { state: "error", msg: T.deeper.errors.partnerName };
-      }
-    }
-    if (report) {
-      const err = js("deeper-partner-error");
-      err.textContent = out.state === "error" ? out.msg : "";
-      show(err, out.state === "error");
-    }
-    return out;
-  }
-  const clearPartner = () => [pName, pYear, pMonth, pDay].forEach((el) => (el.value = ""));
 
-  // 예상 분량·목차 (8단계: 여섯 방 한 권. 11단계 F3부터 bookVolume() 하나 — 6/6 전에는 남은 방을 표 평균으로 넣어 "완성된 책" 기준)
-  const bigNum = (n) => {
-    const k = Math.round(n / 1000);
-    const B = T.report.bigNum;
-    const out = [];
-    if (k >= 10) out.push(fill(B.man, { n: Math.floor(k / 10) }));
-    if (k % 10 || k < 10) out.push(fill(B.chun, { n: k % 10 || k }));
-    return out.join(B.sep);
-  };
-  // (11단계 F3) 분량 원본 하나: 영수증 코드 모양의 결과(c)로 책 글자 수를 센다. 표는 data-volume.js(숫자만, 주제 문단 제외 —
-  // 구매 직후와 재열람이 같은 값). estimate=true(결제 전 미리보기)이면 아직 모르는 칸(안 간 방·원형·나이 구간)을 표의 평균으로 채운다.
-  const BV = window.BOOK_VOLUME;
-  function bookVolume(c, estimate) {
-    const A = BV.avg;
-    const a = c.arch && BV.open[c.arch] != null ? c.arch : null;
-    const v = { open: a ? BV.open[a] : A.open, rooms: 0, timeline: a && c.band != null ? BV.timeline[a][c.band] : A.timeline, match: 0, deep: a ? BV.deep[a] : A.deep, close: a ? BV.close[a] : A.close };
-    for (const r of CHAPTER_ORDER) {
-      const x = c[r];
-      if (x == null) {
-        if (estimate) v.rooms += A[r];
-        continue;
-      }
-      v.rooms += r === "rune" ? BV.rune.base + BV.rune.past[x[0]] + BV.rune.now[x[1]] + BV.rune.next[x[2]] : r === "tzolkin" ? BV.room.tzolkin[x.sign] : BV.room[r][x];
-    }
-    if (c.partner && a) {
-      const [i, j] = [PayCode.ARCHETYPES.indexOf(a), PayCode.ARCHETYPES.indexOf(c.partner)]; // 표의 쌍 이름은 paycode.js 순서
-      v.match = BV.pair[i <= j ? `${a}-${c.partner}` : `${c.partner}-${a}`];
-      [["ogham", c.relOgham], ["decan", c.relDecan], ["tzolkin", c.relTzolkin]].forEach(([r, g]) => g != null && (v.match += BV.rel[`${r}-g${g}`] || 0));
-    } else v.match = a ? BV.map[a] : A.map;
-    v.total = Object.values(v).reduce((s, n) => s + n, 0);
-    return v;
-  }
-  // 표기 한 가지: "약 2만 6천자 · 읽는 데 약 53분" (천 자 반올림, 분당 500자 올림). 다섯 자리(결제 전 속표지·목차 옆·고지, 책 표지·목차)가 이 함수만 부른다
-  const volumeLabel = (n) => fill(T.book.volume, { n: bigNum(n), min: Math.ceil(n / READ_PER_MIN) });
-  function plan() {
-    const rooms = CHAPTER_ORDER;
-    const me = currentArchetype();
-    const birth = readMyBirth(false);
-    const partner = readPartner(false);
-    const p = partner.state === "ok" ? partner.p : null;
-    const rel = p ? relations(mineForRelation(birth), p) : {};
-    const c = Object.assign(myRoomCodes(), { arch: me, band: birth ? ageBand(birth) : null, partner: p ? p.arch : null }, rel);
-    const vol = bookVolume(c, true);
-    const total = vol.total;
-    delete vol.total;
-    return { rooms, me, birth, p, vol, total };
-  }
-  function renderToc() {
-    const P = plan();
-    const Tt = T.deeper.toc;
-    const meName = P.me ? T.archetypes[P.me].name : "";
-    const band = P.birth ? Math.min(ageBand(P.birth), 4) : null;
-    const names = {
-      open: Tt.open,
-      rooms: Tt.rooms,
-      timeline: band == null ? T.report.parts.timeline : fill(Tt.timeline, { from: T.deeper.bands[band], to: T.deeper.bands[band + 2] }),
-      match: P.p ? fill(Tt.match, { me: meName, with: particle(meName || "나", "과/와"), you: T.archetypes[P.p.arch].name }) : fill(Tt.matchMap, { me: meName, with: particle(meName || "나", "과/와") }),
-      deep: fill(Tt.deep, { me: meName }),
-      close: Tt.close,
-    };
-    const teaser = {
-      open: T.deeper.teaser.open,
-      rooms: T.deeper.teaser.rooms,
-      timeline: T.deeper.teaser.timeline,
-      match: P.p ? T.deeper.teaser.match : T.deeper.teaser.matchMap,
-      deep: P.me ? T.deeper.teaser.archetype[P.me] : "",
-      close: T.deeper.teaser.close,
-    };
-    jsAll("deeper-toc-item", deeperScr).forEach((li) => {
-      const part = li.dataset.part;
-      js("toc-name", li).textContent = names[part];
-      js("toc-vol", li).textContent = fill(part === "close" ? Tt.volClose : Tt.vol, { n: bigNum(P.vol[part]) });
-      js("toc-teaser", li).textContent = teaser[part];
-    });
-    js("deeper-total").textContent = ""; // (11단계 F3) 은퇴: 목차 옆은 deeper-read-time 하나만 (CSS :empty 숨김)
-    // (11단계 F3) 속표지·목차 제목 옆·고지 분량 칸 세 곳에 같은 표기 묶음
-    const label = volumeLabel(P.total);
-    jsAll("deeper-read-time", deeperScr).forEach((el) => (el.textContent = label));
-    const peekArch = js("deeper-peek-arch");
-    peekArch.textContent = meName;
-    show(peekArch, Boolean(meName));
-    const D = T.deeper.disclosure;
-    js("deeper-items").textContent = fill(D.items, { rooms: P.rooms.length, match: P.p ? D.itemsMatch.partner : D.itemsMatch.map });
-    js("deeper-volume").textContent = fill(D.volume, { vol: label });
-    return P;
-  }
-  // 결제는 여섯 문을 모두 지난 뒤에만 (8-1). 그전에는 잠금 블록(핍 + N/6 + 다음 문 열기)만, 동의 체크·결제 버튼은 숨긴다
-  const allDone = () => filledRooms().length === CHAPTER_ORDER.length;
-  function updatePayButton() {
-    const btn = js("deeper-pay");
-    const status = js("deeper-pay-status");
-    const blocked = Pay.mode === "live" && hasBlank();
-    const ready = allDone();
-    const n = filledRooms().length;
-    show(js("deeper-gate"), !ready);
-    show(js("deeper-consent-row"), ready);
-    show(js("deeper-pay-cta"), ready);
-    $$("i", js("deeper-gate")).forEach((pip, i) => pip.classList.toggle("is-on", i < n));
-    js("deeper-gate-count").textContent = fill(T.deeper.gate.count, { n });
-    show(btn, !blocked);
-    const consent = js("deeper-consent").checked;
-    btn.disabled = !consent || !ready || btn.classList.contains("is-loading");
-    status.textContent = blocked ? T.deeper.blankLive : !ready ? T.deeper.needRoom : consent ? T.deeper.payReady : T.deeper.payHint;
-  }
-  js("deeper-gate-next").addEventListener("click", (e) => {
-    const next = nextRoom();
-    if (next) openRoom(next, e.currentTarget, false);
-  });
-  function renderDeeperInput() {
-    const saved = Boolean(state.profile.birth) && !deeperEditing;
-    show(js("deeper-saved"), saved);
-    show(js("deeper-date-field"), !saved);
-    if (state.profile.birth) {
-      js("deeper-saved-value").textContent = fill(T.common.date, state.profile.birth);
-      if (!dYear.value) [dYear.value, dMonth.value, dDay.value] = [state.profile.birth.y, state.profile.birth.m, state.profile.birth.d];
-    }
-    setFieldError("deeper-date-field", "deeper-date-error", "");
-  }
-  enter.deeper = () => {
-    if (!Pay.enabled) return go("hub", { instant: true });
-    deeperEditing = false;
-    js("deeper-consent").checked = false;
-    clearPartner();
-    readPartner(true);
-    setPayAlert(payFailed);
-    payFailed = null;
-    js("deeper-price").textContent = fill(T.deeper.disclosure.price, { price: comma(Pay.price) });
-    show(js("deeper-vat"), Boolean(T.deeper.disclosure.vat));
-    show(js("deeper-minor"), Boolean(T.deeper.disclosure.minor));
-    renderDeeperInput();
-    renderToc();
-    updatePayButton();
-  };
-  js("deeper-saved-edit").addEventListener("click", () => {
-    deeperEditing = true;
-    renderDeeperInput();
-    renderToc();
-    dYear.focus();
-  });
-  [dYear, dMonth, dDay, pName, pYear, pMonth, pDay].forEach((el) => el.addEventListener("input", () => renderToc()));
-  js("deeper-consent").addEventListener("change", updatePayButton);
-
-  // ── 결제 (결제 버튼을 누른 뒤에만 토스 SDK를 불러온다)
-  let sdkPromise = null;
-  function loadTossSdk() {
-    if (window.TossPayments) return Promise.resolve();
-    if (!sdkPromise)
-      sdkPromise = new Promise((res, rej) => {
+  // ── 장 문구 파일 지연 불러오기 (같은 파일은 한 번만. 실패하면 다음 시도에서 다시)
+  const loading = {};
+  function loadFile(f) {
+    if (!loading[f])
+      loading[f] = new Promise((res, rej) => {
         const s = document.createElement("script");
-        s.src = TOSS_SDK;
-        s.onload = () => (window.TossPayments ? res() : rej(new Error("sdk")));
+        s.src = f;
+        s.onload = res;
         s.onerror = () => {
-          sdkPromise = null;
+          delete loading[f];
           s.remove();
-          rej(new Error("sdk"));
+          rej(new Error("load"));
         };
         document.head.append(s);
       });
-    return sdkPromise;
+    return loading[f];
   }
-  const randomHex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, "0")).join("");
-  async function startPay() {
-    track("so_book", { step: "pay_click" });
-    const btn = js("deeper-pay");
-    if (!Pay.enabled || btn.disabled) return;
-    setPayAlert(null);
-    const birth = readMyBirth(true);
-    if (!birth) return dYear.focus();
-    const partner = readPartner(true);
-    if (partner.state === "error") return pName.focus();
-    const arch = currentArchetype();
-    const rooms = myRoomCodes();
-    if (!arch || !allDone()) return updatePayButton(); // 6/6 전에는 결제하지 않는다 (서버 confirm도 400)
-    const p = partner.state === "ok" ? partner.p : null;
-    const rel = p ? relations(mineForRelation(birth), p) : { relOgham: null, relDecan: null, relTzolkin: null };
-    const orderId = PayCode.encode(Object.assign(rooms, { arch, band: ageBand(birth), partner: p ? p.arch : null }, rel));
-    clearPartner(); // 상대 정보는 코드로 바뀐 뒤 바로 지운다
-    const base = location.origin + location.pathname;
-    if (Pay.mode === "mock") {
-      // 모의 결제: 토스를 부르지 않고 successUrl 모양 그대로 돌아온다
-      location.assign(`${base}?pay=success&paymentKey=mock_${randomHex(12)}&orderId=${orderId}&amount=${Pay.price}`);
-      return;
-    }
-    btn.classList.add("is-loading");
-    btn.setAttribute("aria-busy", "true");
-    js("deeper-pay-status").textContent = T.deeper.payOpening;
-    try {
-      await loadTossSdk();
-    } catch (e) {
-      btn.classList.remove("is-loading");
-      btn.removeAttribute("aria-busy");
-      updatePayButton();
-      js("deeper-pay-status").textContent = T.pay.sdkFail;
-      return;
-    }
-    try {
-      const tp = window.TossPayments(Pay.clientKey);
-      const payment = tp.payment({ customerKey: window.TossPayments.ANONYMOUS });
-      // customerName·customerEmail·전화번호는 보내지 않는다 (spec 6-4)
-      await payment.requestPayment({
-        method: "CARD",
-        amount: { currency: "KRW", value: Pay.price },
-        orderId,
-        orderName: Pay.orderName,
-        successUrl: `${base}?pay=success`,
-        failUrl: `${base}?pay=fail`,
-      });
-    } catch (e) {
-      // 결제창을 닫았거나 열지 못함: 오류 코드는 종류 분류에만 쓰고 보여 주지 않는다
-      setPayAlert(failKind(e && e.code));
-    } finally {
-      btn.classList.remove("is-loading");
-      btn.removeAttribute("aria-busy");
-      updatePayButton();
-    }
+  const loadState = {}; // 장 id → loading | ok | fail
+  function fetchChapter(id) {
+    if (loadState[id] === "ok") return Promise.resolve(true);
+    loadState[id] = "loading";
+    syncOpenBtn();
+    return Promise.all(FILES[id].map(loadFile)).then(() => true, () => false).then((ok) => {
+      loadState[id] = ok ? "ok" : "fail";
+      if (coverId === id) syncOpenBtn();
+      return ok;
+    });
   }
-  js("deeper-pay").addEventListener("click", startPay);
 
-  // ── 6-U 봉인 해제: 의식(약 3초)과 api/confirm을 함께. 둘 다 끝나야 리포트로 (건너뛰기 = 의식만 끝냄)
-  let unsealRun = 0;
-  let unsealSkip = () => {};
-  let lastConfirm = null;
-  const stripQuery = () => {
-    if (location.search) history.replaceState(history.state, "", location.pathname + location.hash);
-    startExternal(); // (12단계 12-4) query가 지워진 뒤에만 광고·분석을 시작한다
+  // ── 장 상태 (13-2)
+  const roomsDone = () => filledRooms().length;
+  const available = (id) => (CHAPTER_ORDER.includes(id) ? isDone(id) : id === "close" ? roomsDone() === CHAPTER_ORDER.length : roomsDone() > 0);
+  const needsAd = (id) => LOCK_ON && !AD_FREE.has(id);
+  const isOpen = (id) => !needsAd(id) || openedRooms()["book-" + id] === 1;
+  const readSet = new Set(); // 이 화면에서 끝까지 읽은 장 (메모리만)
+  const chapterState = (id) => (!available(id) ? "need-room" : !isOpen(id) ? "can-open" : readSet.has(id) ? "read" : "opened");
+  const chapterName = (id) =>
+    CHAPTER_ORDER.includes(id) ? fill(T.topbar.room, { num: ROMAN[chapterOf(id) - 1], name: T.rooms[id].name })
+      : id === "open" ? T.book.toc.open : id === "close" ? T.book.toc.close : T.book.parts[id === "flow" ? "timeline" : id];
+  const needLine = (id) => (id === "close" ? T.book.toc.needAll : fill(T.book.toc.needRoom, { room: chapterName(CHAPTER_ORDER.includes(id) ? id : CHAPTER_ORDER[0]) }));
+  function myCodes() {
+    const b = state.profile.birth;
+    return Object.assign(myRoomCodes(), { arch: currentArchetype(), band: b ? ageBand(b) : null });
+  }
+  // 분량: data-volume.js 숫자(글자 수). 아직 모르는 칸(상대·나이 구간)은 표의 값으로
+  function chapterChars(id) {
+    const c = myCodes();
+    const a = c.arch;
+    if (CHAPTER_ORDER.includes(id)) {
+      const x = c[id];
+      if (x == null) return BV.avg[id];
+      return id === "rune" ? BV.rune.base + BV.rune.past[x[0]] + BV.rune.now[x[1]] + BV.rune.next[x[2]] : id === "tzolkin" ? BV.room.tzolkin[x.sign] : BV.room[id][x];
+    }
+    if (id === "flow") return a && c.band != null ? BV.timeline[a][c.band] : BV.avg.timeline;
+    if (id === "match") return a ? BV.map[a] : BV.avg.map;
+    return a ? BV[id][a] : BV.avg[id];
+  }
+  const minutes = (n) => Math.max(1, Math.ceil(n / READ_PER_MIN));
+  const volumeLabel = (n) => fill(T.book.chapter.volume, { n: comma(Math.round(n / 100) * 100), m: minutes(n) });
+
+  // ── 이어 읽기 (sessionStorage "strange-oracle-bookmark" = "<장 id>:<쪽>", 결정 53 칸을 13-1 형식으로)
+  const BOOKMARK_KEY = "strange-oracle-bookmark";
+  const readBookmark = () => {
+    try {
+      const m = /^([a-z]+):(\d{1,4})$/.exec(window.sessionStorage.getItem(BOOKMARK_KEY) || "");
+      return m && BOOK_IDS.includes(m[1]) && Number(m[2]) > 0 ? { id: m[1], page: Number(m[2]) } : null;
+    } catch (e) {
+      return null;
+    }
   };
-  function startUnseal(body) {
-    const run = ++unsealRun;
-    lastConfirm = body;
-    go("unseal", { instant: true });
-    unsealScr.classList.remove("is-error", "is-running");
-    show(js("unseal-error"), false);
-    const ms = reduceMotion ? 0 : parseFloat(getComputedStyle(unsealScr).getPropertyValue("--unseal-ms")) || 3000;
-    if (!reduceMotion) {
-      void unsealScr.offsetWidth;
-      unsealScr.classList.add("is-running");
+  const writeBookmark = (id, n) => {
+    try {
+      if (id && n) window.sessionStorage.setItem(BOOKMARK_KEY, `${id}:${n}`);
+      else window.sessionStorage.removeItem(BOOKMARK_KEY);
+    } catch (e) {
+      /* 저장이 막힌 브라우저: 이어 읽기 없이 */
     }
-    let waited = ms === 0;
-    let result = null;
-    const finish = () => {
-      if (run !== unsealRun || !waited || !result) return;
-      unsealScr.classList.remove("is-running");
-      if (result.ok && result.data && result.data.report) {
-        writeReceipt(result.data.receipt);
-        applyPayUi();
-        showReport(result.data);
-      } else {
-        unsealScr.classList.add("is-error");
-        // (11단계 F4) 서버가 4xx로 거절 = 승인 확인 실패(다시 시도 숨김, 입구로) / 그 밖(네트워크·5xx) = 연결 끊김(다시 시도)
-        const kind = result.status >= 400 && result.status < 500 ? "unconfirmed" : "network";
-        const box = js("unseal-error");
-        box.dataset.kind = kind;
-        setT(js("unseal-error-title"), kind === "unconfirmed" ? "pay.fail.unconfirmed.title" : "unseal.error.title");
-        setT(js("unseal-error-text"), kind === "unconfirmed" ? "pay.fail.unconfirmed.text" : "unseal.error.text");
-        js("unseal-error-code").textContent = PayCode.pretty(PayCode.normalize(body.orderId) || "");
-        renderContact();
-        show(box, true);
-      }
-    };
-    setTimeout(() => {
-      waited = true;
-      finish();
-    }, ms);
-    unsealSkip = () => {
-      waited = true;
-      finish();
-    };
-    apiCall("confirm", body).then((r) => {
-      result = r;
-      finish();
-    });
-  }
-  js("unseal-skip").addEventListener("click", () => unsealSkip());
-  js("unseal-retry").addEventListener("click", () => lastConfirm && startUnseal(lastConfirm));
+  };
 
-  // ── 영수증 코드로 다시 열기
-  function reopenError(status) {
-    const E = T.receipt.errors;
-    return status === 400 ? E.format : status === 404 ? E.notFound : status === 410 ? E.canceled : E.network;
+  // ── 입구 책 카드 · 방 결과 책 한 줄 · 나의 이야기 버튼 (가격 0, 13-1)
+  function renderBookCard() {
+    const n = roomsDone();
+    const card = js("hub-book");
+    card.dataset.state = n === 0 ? "none" : n === CHAPTER_ORDER.length ? "all" : "some";
+    $$("i", js("hub-book-lock")).forEach((pip, i) => pip.classList.toggle("is-on", i < n));
+    js("hub-book-hint").textContent = n === 0 ? T.hub.book.state0 : n === CHAPTER_ORDER.length ? T.hub.book.stateAll : fill(T.hub.book.stateSome, { n: BOOK_IDS.filter(available).length });
   }
-  async function reopen(code, btn, errEl) {
-    if (btn) btn.classList.add("is-loading");
-    const r = await apiCall("report", { receipt: code });
-    if (btn) btn.classList.remove("is-loading");
-    if (r.ok && r.data && r.data.report) {
-      writeReceipt(r.data.receipt);
-      applyPayUi();
-      showReport(r.data);
-    } else if (errEl) {
-      errEl.textContent = reopenError(r.status);
-      show(errEl, true);
-    } else toast(reopenError(r.status));
+  let coverNext = null; // 책 화면에 들어가자마자 열 장 표지 (방 결과 링크)
+  const goBook = (id) => {
+    coverNext = id || null;
+    go("report");
+  };
+  js("hub-book-go").addEventListener("click", () => goBook(null));
+  js("story-book-link").addEventListener("click", () => goBook(null));
+  CHAPTER_ORDER.forEach((room) => js("result-book-link", screens[`${room}-result`]).addEventListener("click", () => goBook(isDone(room) ? room : null)));
+
+  // ═════════ 목차 (data-view="toc") ═════════
+  const reader = js("book-reader");
+  const cover = js("chapter-cover");
+  let coverId = null; // 지금 표지(또는 장 안)의 장 id
+  let curChapter = null; // 지금 쪽으로 펼친 장 id
+  let matchInput = null; // 궁합 상대(메모리만): { type, p } 또는 { map: true }
+  function setView(v) {
+    finishTurn();
+    reader.dataset.view = v;
+    show(js("book-toc-open"), currentName === "report" && v !== "toc");
+    if (v !== "pages") js("read-label").textContent = "";
+    body.classList.toggle("is-reading", currentName === "report" && v === "pages");
   }
-  jsAll("receipt-open").forEach((form) => {
-    const input = js("receipt-open-input", form);
-    const err = js("receipt-open-error", form);
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const code = PayCode.normalize(input.value);
-      show(err, false);
-      if (!code || !PayCode.decode(code)) {
-        // (10단계) 이어가기 코드(SOG1…)는 이 칸이 아니다: 서버에 묻지 않고 안내 한 줄만. 유료 내용을 열지 않는다
-        err.textContent = Resume.looksResume(input.value) ? T.receipt.errors.wrongBox : T.receipt.errors.format;
-        if (Resume.looksResume(input.value)) input.value = ""; // 이어가기 코드는 이 칸에 남기지 않는다
-        show(err, true);
-        return input.focus();
-      }
-      reopen(code, js("receipt-open-go", form), err);
+  function renderToc() {
+    const n = roomsDone();
+    const a = currentArchetype();
+    const c = myCodes();
+    const arch = js("book-home-arch");
+    arch.textContent = a ? T.archetypes[a].name : "";
+    arch.hidden = !a;
+    js("book-home-lede").textContent = n === CHAPTER_ORDER.length ? T.book.toc.ledeAll : n ? fill(T.book.toc.lede, { n }) : T.hub.book.state0;
+    jsAll("book-chapter").forEach((li) => {
+      const id = li.dataset.chapter;
+      const st = chapterState(id);
+      li.dataset.state = st;
+      if (CHAPTER_ORDER.includes(id)) js("book-chapter-sub", li).textContent = isDone(id) ? headOf(id, c).title : "";
+      js("book-chapter-state", li).textContent = st === "need-room" ? needLine(id) : st === "can-open" ? T.book.toc.canOpen : st === "read" ? T.book.toc.reread : T.book.toc.opened;
+      js("book-chapter-time", li).textContent = fill(T.book.time, { n: minutes(chapterChars(id)) });
     });
+    const bm = readBookmark();
+    const ok = Boolean(bm && available(bm.id));
+    show(js("book-resume"), ok);
+    if (ok) js("book-resume-text").textContent = fill(T.book.toc.resume, { chapter: chapterName(bm.id), page: bm.page });
+    Disclaimer.mount(js("disclaimer-slot", reportScr));
+  }
+  function showToc() {
+    clearForms();
+    coverId = null;
+    setView("toc");
+    renderToc();
+    loadFile("data-book-arch.js").catch(() => {}); // 목차를 처음 열 때 여는 글·심층·닫는 글 파일 (13-5)
+    window.scrollTo(0, 0);
+    track("so_book", { step: "toc" });
+  }
+  enter.report = () => {
+    const id = coverNext;
+    coverNext = null;
+    if (id && available(id)) openCover(id);
+    else showToc();
+  };
+  leave.report = () => {
+    finishTurn();
+    clearForms();
+    matchInput = null;
+  };
+  jsAll("book-chapter-btn").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const li = btn.closest("[data-js=book-chapter]");
+      if (li.dataset.state === "need-room") return toast(js("book-chapter-state", li).textContent); // 안내만 (강제 순서 그대로)
+      openCover(li.dataset.chapter);
+    })
+  );
+  js("book-resume").addEventListener("click", () => resume());
+  js("book-toc-open").addEventListener("click", () => showToc());
+  js("book-cover-toc").addEventListener("click", () => showToc());
+  js("chapter-end-toc").addEventListener("click", () => showToc());
+
+  // ═════════ 장 표지 (data-view="cover") ═════════
+  const mY = js("book-match-year"), mM = js("book-match-month"), mD = js("book-match-day"), mName = js("book-match-name");
+  const fY = js("book-flow-year"), fM = js("book-flow-month"), fD = js("book-flow-day");
+  digitsOnly(mY, mM);
+  digitsOnly(mM, mD);
+  digitsOnly(mD);
+  digitsOnly(fY, fM);
+  digitsOnly(fM, fD);
+  digitsOnly(fD);
+  const typeInputs = jsAll("book-match-type-input");
+  function setErr(el, msg) {
+    el.textContent = msg || "";
+    show(el, Boolean(msg));
+  }
+  function clearForms() {
+    [mName, mY, mM, mD, fY, fM, fD].forEach((el) => (el.value = ""));
+    typeInputs.forEach((r) => (r.checked = false));
+    js("book-match-type").removeAttribute("aria-invalid");
+    setErr(js("book-match-error"), "");
+    setErr(js("book-flow-error"), "");
+  }
+  typeInputs.forEach((r) => r.addEventListener("change", () => js("book-match-type").removeAttribute("aria-invalid")));
+  function setCoverState(st) {
+    cover.dataset.state = st;
+    const u = js("book-unlock");
+    u.disabled = st === "waiting";
+    if (st === "waiting") u.setAttribute("aria-busy", "true");
+    else u.removeAttribute("aria-busy");
+    syncOpenBtn();
+  }
+  function syncOpenBtn() {
+    const b = js("book-chapter-open");
+    const f = loadState[coverId] === "loading";
+    b.classList.toggle("is-fetching", f);
+    b.disabled = f;
+    if (f) b.setAttribute("aria-busy", "true");
+    else b.removeAttribute("aria-busy");
+  }
+  const setStatus = (html) => (js("book-unlock-status").innerHTML = html);
+  const needsFlowDate = (id) => id === "flow" && !state.profile.birth;
+  function openCover(id, keep) {
+    if (!available(id)) return showToc();
+    if (!keep || coverId !== id) {
+      clearForms();
+      matchInput = null;
+    }
+    coverId = id;
+    setView("cover");
+    cover.dataset.chapter = id;
+    const room = CHAPTER_ORDER.includes(id);
+    const c = myCodes();
+    js("chapter-cover-part").textContent = room ? T.book.part1.num : AD_FREE.has(id) ? "" : T.book.part2.num;
+    const mark = $(`[data-js=book-chapter][data-chapter="${id}"] .chapter-row__mark`, reportScr);
+    js("chapter-cover-mark").innerHTML = room && mark ? mark.innerHTML : "";
+    js("chapter-cover-title").textContent = chapterName(id);
+    const h = room ? headOf(id, c) : null;
+    const res = js("chapter-cover-result"), key = js("chapter-cover-key"), hid = js("chapter-cover-hidden-row");
+    res.textContent = h ? h.title : "";
+    key.textContent = h ? h.key : "";
+    res.hidden = key.hidden = !h;
+    hid.hidden = true; // 숨은 장 제목(결정 65 공개 떡밥)은 그 방 파일이 오면 채운다
+    js("chapter-cover-volume").textContent = volumeLabel(chapterChars(id));
+    const flowForm = js("book-flow-date");
+    flowForm.hidden = !needsFlowDate(id);
+    cover.classList.toggle("has-form", needsFlowDate(id));
+    setStatus("");
+    setCoverState(isOpen(id) ? "open" : "locked");
+    window.scrollTo(0, 0);
+    track("so_book", { step: "cover", chapter: id });
+    // 표지를 여는 순간 받기 시작한다(광고를 보는 동안 받음, 13-5)
+    fetchChapter(id).then((ok) => {
+      if (coverId !== id) return;
+      if (ok && room) {
+        const C = BookCore.contentFrom(window);
+        const e = BookCore.hiddenEntry(C, id, c);
+        js("chapter-cover-hidden").textContent = e ? e.title : "";
+        hid.hidden = !e;
+      }
+      if (!ok && cover.dataset.state === "open" && reader.dataset.view === "cover") setCoverState("fail");
+    });
+  }
+  // 입력 확인 (광고 전에, 13-1). 궁합: 상대 이름·생년월일·관계 유형 / 시기별 흐름: 이 탭에 생년월일이 없을 때만
+  function prepare(id, noPartner) {
+    if (id === "match") {
+      if (noPartner) return (matchInput = { map: true });
+      const E = T.book.match.errors;
+      const name = mName.value.trim();
+      const y = Number(mY.value), m = Number(mM.value), d = Number(mD.value);
+      const type = (typeInputs.find((r) => r.checked) || {}).value || null;
+      const typeBox = js("book-match-type");
+      if (type) typeBox.removeAttribute("aria-invalid");
+      let msg = "";
+      let p = null;
+      if (!name) msg = E.name;
+      else if (!(mY.value.length === 4 && Calc.validDate(y, m, d))) msg = E.date;
+      else if (!(p = partnerOf(name, { y, m, d }))) msg = E.name;
+      else if (!type) {
+        msg = E.type;
+        typeBox.setAttribute("aria-invalid", "true");
+      }
+      setErr(js("book-match-error"), msg);
+      if (msg) {
+        (!name || !p ? mName : !type ? typeInputs[0] : mY).focus();
+        return null;
+      }
+      return (matchInput = { type, p });
+    }
+    if (needsFlowDate(id)) {
+      const y = Number(fY.value), m = Number(fM.value), d = Number(fD.value);
+      const ok = fY.value.length === 4 && Calc.validDate(y, m, d);
+      setErr(js("book-flow-error"), ok ? "" : T.book.flow.error);
+      if (!ok) {
+        fY.focus();
+        return null;
+      }
+      state.profile.birth = { y, m, d }; // 6장 예외: 이 탭의 profile에만 (고지는 입력칸 아래 book-flow-notice)
+      save();
+    }
+    return {};
+  }
+  async function unlock(noPartner) {
+    const id = coverId;
+    if (!id || cover.dataset.state !== "locked") return;
+    if (!prepare(id, noPartner)) return;
+    setCoverState("waiting");
+    setStatus(esc(T.book.unlock.loading));
+    track("so_unlock", { chapter: id, outcome: "request" });
+    const r = await Ads.rewarded({ slot: "book-unlock", room: id });
+    const result = UNLOCK_OUTCOMES.includes(r) ? r : "unavailable";
+    track("so_unlock", { chapter: id, outcome: result });
+    if (coverId !== id || reader.dataset.view !== "cover") return;
+    if (result === "closed") {
+      setCoverState("locked");
+      setStatus(esc(T.book.unlock.closed));
+      return;
+    }
+    markOpened("book-" + id); // 장 id 표시만 (13-2)
+    setCoverState("open");
+    if (result === "unavailable") {
+      setStatus(esc(T.book.unlock.unavailable)); // 광고가 없어 그냥 열림 → 안내를 보이고 펼치기는 사용자가
+      js("book-chapter-open").focus();
+    } else setStatus(`<span class="visually-hidden">${esc(T.book.unlock.opened)}</span>`);
+    const ok = await fetchChapter(id);
+    if (coverId !== id || reader.dataset.view !== "cover") return;
+    if (!ok) return setCoverState("fail");
+    if (result === "granted") readChapter(id, matchInput || {}, 0); // 광고를 끝까지 봤으면 바로 첫 쪽 (design 0)
+  }
+  js("book-unlock").addEventListener("click", () => unlock(false));
+  async function openNow(noPartner) {
+    const id = coverId;
+    if (!id || !isOpen(id) || cover.dataset.state === "waiting") return;
+    const pre = prepare(id, noPartner);
+    if (!pre) return;
+    const ok = await fetchChapter(id);
+    if (coverId !== id) return;
+    if (!ok) return setCoverState("fail");
+    readChapter(id, pre, 0);
+  }
+  js("book-chapter-open").addEventListener("click", () => openNow(false));
+  js("book-match-nopartner").addEventListener("click", () => (cover.dataset.state === "locked" ? unlock(true) : openNow(true)));
+  js("book-load-retry").addEventListener("click", () => {
+    const id = coverId;
+    fetchChapter(id).then((ok) => coverId === id && ok && setCoverState(isOpen(id) ? "open" : "locked")); // 광고는 다시 보지 않는다(열림 표시는 이미 남김)
   });
-
-  // ── 6-R 한 권의 책 그리기 (문단은 모두 textContent. 서버 문구에 HTML 없음)
-  let reportView = null;
-  const fillCode = (el, code) => {
-    el.textContent = "";
-    PayCode.groups(code).forEach((g) => {
-      const s = document.createElement("span");
-      s.textContent = g;
-      el.append(s);
-    });
-  };
-  const SKIP_KEYS = new Set(["id", "room", "me", "you", "other", "band", "grade", "now", "past", "label", "title", "topics"]);
-  function charsOf(v) {
-    if (typeof v === "string") return [...v].length;
-    if (Array.isArray(v)) return v.reduce((a, x) => a + charsOf(x), 0);
-    if (v && typeof v === "object") return Object.entries(v).reduce((a, [k, x]) => a + (SKIP_KEYS.has(k) ? 0 : charsOf(x)), 0);
-    return 0;
+  // 이어 읽기: 같은 탭에서만. 궁합은 상대 정보가 메모리에서 사라졌으므로 표지(입력)로, 복원한 탭 등 열림 표시가 없으면 표지로
+  async function resume() {
+    const bm = readBookmark();
+    if (!bm || !available(bm.id)) return;
+    if (bm.id === "match" || needsFlowDate(bm.id) || !isOpen(bm.id)) return openCover(bm.id);
+    openCover(bm.id);
+    const ok = await fetchChapter(bm.id);
+    if (ok && coverId === bm.id && reader.dataset.view === "cover") readChapter(bm.id, {}, bm.page - 1);
   }
-  // 4장 근거: 영수증 코드 속 결과 번호 + 무료 데이터 (새 탭에서도 이름·생일 없이 조립된다)
+
+  // ═════════ 장 원본 채우기 (book-source에는 지금 연 장 하나만) ═════════
+  // 4장 근거: 결과 코드 + 무료 데이터
   function evidenceFromCodes(c) {
     const E = T.story.evidenceType;
     const rows = [];
@@ -2892,7 +2716,7 @@
     }
     return rows.join("");
   }
-  // 룬·시빌라 넷째 장 끝 "고른 주제" 단락: 주제는 영수증 코드에 없어서, 이 탭에 같은 결과가 남아 있을 때만 붙인다 (없으면 생략)
+  // 룬·시빌라 넷째 장 끝 "고른 주제" 단락: 이 탭에 같은 결과가 남아 있을 때만
   function topicTail(fr, c) {
     if (!fr.topics) return null;
     const v = state.visits[fr.room];
@@ -2903,8 +2727,7 @@
     }
     return v.sors === c.sibyl && fr.topics[v.topic] ? `${ORACLE_TOPICS[v.topic].lens} ${fr.topics[v.topic]}` : null;
   }
-  // 책 제1부 Ⅰ장 앞부분: 방에서 본 핵심 풀이를 영수증 코드 속 결과 코드로 공개 data에서 다시 조립한다 (개인 입력 없음 → 다른 기기에서도 같은 책).
-  // identity.lede + 공개 body(+ 서버 ch1Rest). 사실 목록·해석 안내·맺음 문장(identity.close)은 방 화면 전용이라 넣지 않는다 (spec 8-1, R-1)
+  // 방별 장 Ⅰ장 앞부분: 방에서 본 핵심 풀이를 결과 코드로 공개 data에서 다시 조립 (identity.lede + body + ch1Rest)
   function bookCh1(room, c, rest) {
     if (room === "rune") {
       const rs = c.rune.map((i) => RUNES[i]);
@@ -2931,157 +2754,114 @@
       el.append(p);
     });
   };
-  const bookPartName = (id) =>
-    CHAPTER_ORDER.includes(id) ? fill(T.topbar.room, { num: ROMAN[chapterOf(id) - 1], name: T.rooms[id].name })
-      : id === "open" ? T.topbar.bookOpen : id === "flow" ? T.topbar.bookFlow : T.topbar.bookClose;
-  function renderReport(data) {
-    const rep = data.report;
-    const c = rep.codes;
-    const ch = Object.fromEntries(rep.chapters.map((x) => [x.id, x]));
-    reportView = { receipt: data.receipt, rep };
+  // 궁합 M5: 상대의 오검·데칸·촐킨 공개 결과 이름 + key
+  const peeksOf = (p) => [
+    { room: T.rooms.ogham.name, name: strip(OGHAM[p.ogham].title), key: strip(OGHAM[p.ogham].key) },
+    { room: T.rooms.decan.name, name: strip(DECANS[p.decan].title), key: strip(DECANS[p.decan].key) },
+    { room: T.rooms.tzolkin.name, name: strip(TZ_SIGNS[p.tzSign].name), key: strip(TZ_SIGNS[p.tzSign].key) },
+  ];
+  function renderChapter(id, pre) {
+    clearSource();
+    const C = BookCore.contentFrom(window);
+    const c = myCodes();
+    const me = c.arch;
     const R = T.report;
-    fillCode(js("receipt-code"), data.receipt);
-    fillCode(js("receipt-code-end"), data.receipt);
-    const toss = js("receipt-toss");
-    show(toss, Boolean(data.receiptUrl));
-    toss.href = data.receiptUrl || "#";
-    const me = T.archetypes[c.arch].name;
-    paras(js("report-open"), ch.open.paragraphs);
-    // 제1부: 방마다 머리(공개 data) → Ⅰ(공개 핵심 풀이 + ch1Rest) → Ⅱ → Ⅲ → Ⅳ(+주제 단락) → 숨은 장. 서버가 Ⅰ~Ⅵ 순서로 보낸다
-    const byRoom = Object.fromEntries((ch.rooms ? ch.rooms.rooms : []).map((fr) => [fr.room, fr]));
-    const vol = { open: charsOf(ch.open.paragraphs) };
-    const present = CHAPTER_ORDER.filter((r) => byRoom[r]);
-    jsAll("book-room").forEach((el) => {
-      const room = el.dataset.room;
-      const fr = byRoom[room];
-      show(el, Boolean(fr));
-      if (!fr) return;
-      const h = headOf(room, c);
+    if (id === "open" || id === "close") paras(js(id === "open" ? "report-open" : "report-close"), (id === "open" ? BookCore.openChapter : BookCore.closeChapter)(C, me).paragraphs);
+    else if (id === "deep") {
+      const d = BookCore.deepChapter(C, me);
+      paras(js("report-deep-strength"), d.strength);
+      paras(js("report-deep-shadow"), d.shadow);
+      paras(js("report-deep-growth"), d.growth);
+      js("report-evidence").innerHTML = evidenceFromCodes(c);
+    } else if (id === "flow") {
+      const tl = js("report-timeline");
+      BookCore.timelineChapter(C, me, c.band).stages.forEach((s) => {
+        const el = tpl.stage.cloneNode(true);
+        textIn(el);
+        el.classList.toggle("is-now", s.now);
+        js("timeline-age", el).textContent = fill(s.now ? R.stageNow : s.past ? R.stagePast : R.stageNext, { label: s.label });
+        ["work", "relation", "learn", "move"].forEach((k) => (js(`timeline-${k}`, el).textContent = s[k]));
+        tl.append(el);
+      });
+    } else if (id === "match") {
+      const pair = js("report-match-pair").children;
+      pair[0].textContent = T.archetypes[me].name;
+      let m;
+      if (pre.p) {
+        const mine = mineForRelation(state.profile.birth || null);
+        const codes = Object.assign({ arch: me, partner: pre.p.arch }, relations(mine, pre.p));
+        m = BookCore.matchChapter(C, codes, window.BOOK_BOND, { type: pre.type, mine, partner: pre.p, peeks: peeksOf(pre.p) });
+      } else m = BookCore.mapChapter(C, me);
+      pair[2].textContent = m.you ? T.archetypes[m.you].name : R.mapYou;
+      const bodyEl = js("report-match");
+      paras(bodyEl, m.you ? [m.summary].concat(m.paragraphs) : []);
+      show(bodyEl, Boolean(m.you));
+      const list = js("report-match-rooms");
+      const rows = m.you ? m.rooms.map((r) => [`${T.rooms[r.room].name} · ${r.label}`, r.text]) : m.map.map((x) => [T.archetypes[x.other].name, x.summary]);
+      rows.forEach(([label, text]) => {
+        const li = tpl.matchRoom.cloneNode(true);
+        const head = li.firstElementChild;
+        head.removeAttribute("data-t");
+        head.textContent = label;
+        js("match-room-text", li).textContent = text;
+        list.append(li);
+      });
+      show(list, rows.length > 0);
+      paras(matchEnd, m.end ? [m.end] : []);
+    } else {
+      const el = $(`[data-js=book-room][data-room="${id}"]`, src);
+      const fr = BookCore.fullRoom(C, id, c);
+      show(el, true);
+      const h = headOf(id, c);
       js("book-room-result", el).textContent = h.title;
       js("book-room-key", el).textContent = h.key;
-      const ch1 = bookCh1(room, c, fr.ch1Rest);
-      rich(js("book-ch1", el), ch1);
+      rich(js("book-ch1", el), bookCh1(id, c, fr.ch1Rest));
       paras(js("book-ch2", el), fr.ch2);
       paras(js("book-ch3", el), fr.ch3);
       const tail = topicTail(fr, c);
       paras(js("book-ch4", el), tail ? fr.ch4.concat(tail) : fr.ch4);
       paras(js("book-hidden", el), [fr.hidden.title].concat(fr.hidden.paragraphs));
-      vol[room] = ch1.reduce((a, x) => a + [...x.text].length, 0) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs]) + (tail ? [...tail].length : 0);
-    });
-    // 2장
-    const tl = js("report-timeline");
-    tl.textContent = "";
-    ch.timeline.stages.forEach((s) => {
-      const el = tpl.stage.cloneNode(true);
-      textIn(el);
-      el.classList.toggle("is-now", s.now);
-      js("timeline-age", el).textContent = fill(s.now ? R.stageNow : s.past ? R.stagePast : R.stageNext, { label: s.label });
-      ["work", "relation", "learn", "move"].forEach((k) => (js(`timeline-${k}`, el).textContent = s[k]));
-      tl.append(el);
-    });
-    // 3장
-    const m = ch.match;
-    const pair = js("report-match-pair").children;
-    pair[0].textContent = me;
-    pair[2].textContent = m.you ? T.archetypes[m.you].name : R.mapYou;
-    const body = js("report-match");
-    paras(body, m.you ? [m.summary].concat(m.paragraphs) : []);
-    show(body, Boolean(m.you));
-    const list = js("report-match-rooms");
-    list.textContent = "";
-    const rows = m.you ? m.rooms.map((r) => [`${T.rooms[r.room].name} · ${r.label}`, r.text]) : m.map.map((x) => [T.archetypes[x.other].name, x.summary]);
-    rows.forEach(([label, text]) => {
-      const li = tpl.matchRoom.cloneNode(true);
-      const head = li.firstElementChild;
-      head.removeAttribute("data-t");
-      head.textContent = label;
-      js("match-room-text", li).textContent = text;
-      list.append(li);
-    });
-    show(list, rows.length > 0);
-    // 4장
-    paras(js("report-deep-strength"), ch.deep.strength);
-    paras(js("report-deep-shadow"), ch.deep.shadow);
-    paras(js("report-deep-growth"), ch.deep.growth);
-    js("report-evidence").innerHTML = evidenceFromCodes(c);
-    paras(js("report-close"), ch.close.paragraphs);
-    Disclaimer.mount(js("disclaimer-slot", reportScr));
-    // 목차: 부마다 읽는 시간, 없는 방은 숨김. 전체 분량
-    vol.flow = charsOf([ch.timeline, ch.match, ch.deep]);
-    vol.close = charsOf(ch.close.paragraphs);
-    // (11단계 F3) 전체 분량은 영수증 코드 속 결과로 bookVolume() 하나에서 (주제 문단 제외 → 구매 직후 = 재열람)
-    const volLabel = volumeLabel(bookVolume(c, false).total);
-    js("book-total").textContent = volLabel;
-    // 재열람 등으로 룬·시빌라 주제 문단이 빠진 책이면 1쪽에 한 줄
-    const noTopic = ["rune", "sibyl"].some((r) => byRoom[r] && !topicTail(byRoom[r], c));
-    show(js("book-topic-note"), noTopic);
-    jsAll("book-toc-item").forEach((li) => {
-      const id = li.dataset.part;
-      show(li, vol[id] != null);
-      li.classList.remove("is-read", "is-current");
-      if (vol[id] == null) return;
-      js("book-toc-time", li).textContent = ""; // (결정 53) 시작 쪽 번호는 쪽 나누기(paginate) 뒤에
-      const res = js("book-toc-result", li);
-      if (res) res.textContent = headOf(id, c).title;
-    });
-    js("report-meta").textContent = fill(R.meta, { rooms: present.length, match: c.partner ? R.metaMatch.partner : R.metaMatch.map, vol: volLabel });
-    js("report-title").textContent = fill(R.title, { me, n: present.length });
-    book = null; // 새 내용: 다음 enter.report에서 쪽을 다시 나눈다 (표지부터)
-    js("book-reader").dataset.view = "cover";
+    }
+    // 장 끝 쪽: 다음 장(열 수 있는 다음 장, 잠겼으면 그 장 표지) + 목차로
+    const next = BOOK_IDS.slice(BOOK_IDS.indexOf(id) + 1).find(available) || null;
+    js("chapter-end-name").textContent = chapterName(id);
+    const nb = js("chapter-end-next");
+    nb.dataset.next = next || "";
+    nb.classList.toggle("is-hidden", !next);
+    js("chapter-end-next-name").textContent = next ? chapterName(next) : "";
+    const ns = js("chapter-end-next-state");
+    ns.textContent = next && !isOpen(next) ? T.book.toc.canOpen : "";
   }
-  function showReport(data) {
-    renderReport(data);
-    go("report", { instant: true }); // enter.report → 쪽 나누기
-    if (jumpTo) {
-      const room = jumpTo; // 방의 책 한 줄 → 그 방의 첫 쪽으로 바로 (연출 없이)
-      jumpTo = null;
-      jumpToPart(room);
-    } else showCover();
+  js("chapter-end-next").addEventListener("click", (e) => {
+    const next = e.currentTarget.dataset.next;
+    if (!next || !available(next)) return showToc();
+    if (next === "match" || needsFlowDate(next) || !isOpen(next)) return openCover(next);
+    openCover(next);
+    fetchChapter(next).then((ok) => ok && coverId === next && reader.dataset.view === "cover" && readChapter(next, {}, 0));
+  });
+  function readChapter(id, pre, page) {
+    renderChapter(id, pre);
+    curChapter = id;
+    coverId = id;
+    book = null;
+    paginate();
+    setView("pages");
+    setPage(Math.min(Math.max(0, page || 0), book.pages.length - 1), { focus: true });
+    track("so_book", { step: "read", chapter: id });
   }
-  leave.report = () => {
-    stripQuery();
-    finishTurn();
-    const sheet = js("book-toc-sheet");
-    if (sheet.open) sheet.close();
-  };
 
-  // ═════════ (결정 53) 책을 넘기는 리더: book-source → 쪽 나누기 → 넘기기 ═════════
-  // 설계: design/strange-oracle.md "책을 넘기는 리더 (결정 53)". source 채우기(renderReport)는 그대로 두고,
-  // 여기서 source를 장(chapter) → 블록(open 머리 / p 단락 / unit 통째)으로 훑어 실제 쪽(book-page)에 넣으며 잰다.
-  //  - 장은 늘 새 쪽에서 시작. 단락은 넘치면 어절 경계에서 이분 탐색으로 쪼개 뒷부분을 다음 쪽 .is-cont로.
-  //  - unit은 통째로 다음 쪽. 빈 쪽보다 크면 자식 단위로 한 번 더 나눈다.
-  //  - 면지 영수증·목차·뒷면지(면책·공유·영수증 끝)는 복제하지 않고 옮겨 쓴다(훅·이벤트 그대로). 다시 나누기 전 source로 되돌린다.
-  // bookmark: sessionStorage "strange-oracle-bookmark"에 쪽 번호(숫자)만. 문장·개인정보는 넣지 않는다
-  const BOOKMARK_KEY = "strange-oracle-bookmark";
-  const readBookmark = () => {
-    try {
-      const v = window.sessionStorage.getItem(BOOKMARK_KEY) || "";
-      return /^\d{1,4}$/.test(v) ? Number(v) : 0;
-    } catch (e) {
-      return 0;
-    }
-  };
-  const writeBookmark = (n) => {
-    try {
-      if (n) window.sessionStorage.setItem(BOOKMARK_KEY, String(n));
-      else window.sessionStorage.removeItem(BOOKMARK_KEY);
-    } catch (e) {
-      /* 저장이 막힌 브라우저: 이어 읽기 없이 */
-    }
-  };
-  const reader = js("book-reader");
+  // ═════════ (결정 53) 책을 넘기는 리더: book-source → 쪽 나누기 → 넘기기. 13단계부터 장 하나가 작은 책 ═════════
+  // 장은 늘 새 쪽에서 시작. 단락은 넘치면 문장 끝(없으면 어절 경계)에서 나눠 다음 쪽 .is-cont로. unit은 통째로 다음 쪽.
+  // 장 끝 쪽(chapter-end)은 복제하지 않고 옮겨 쓴다(훅·이벤트 그대로). 다시 나누기 전 source로 되돌린다.
   const bookStage = js("book-stage");
   const pagesBox = js("book-pages");
   const src = js("book-source");
-  const [srcReceipt, srcToc, ...srcEnd] = ["receipt", "book-toc", "disclaimer-slot", "book-end-actions", "receipt-end", "page-end"].map((k) => js(k, src));
-  const tocList = js("book-toc-list", srcToc);
-  const tocItems = jsAll("book-toc-item", tocList);
+  const srcEnd = [js("chapter-end", src)];
   const TURN_SAFETY = 700; // animationend가 오지 않을 때의 안전장치 (--turn-dur 520ms)
-  let book = null; // { pages: [{ el, part, chap, label }], chapStart, chapLen, partStart, partEnd, key }
+  let book = null; // { pages: [{ el, part, chap, label }], chapStart, chapLen, key }
   let cur = 0;
   let turning = false;
   let turnDone = null;
-  const seen = new Set();
   bookStage.setAttribute("aria-roledescription", T.book.stageRole);
   const sizeKey = () => `${innerWidth}x${innerHeight}`;
 
@@ -3102,7 +2882,6 @@
   const opening = (mod, inner) => mk("div", `book-opening book-opening--${mod}`, ORN + inner);
   const chOpening = (title, numeral) =>
     opening("ch", (numeral ? `<p class="book-opening__numeral" aria-hidden="true">${esc(numeral)}</p>` : "") + `<h3 class="book-opening__title">${esc(title)}</h3>`);
-  const partOpening = (num, title) => opening("part", `<p class="book-opening__kicker">${esc(num)}</p><h2 class="book-opening__title">${esc(title)}</h2>`);
   const visible = (n) => n && !n.classList.contains("is-hidden");
   const parasOf = (box) => (visible(box) ? [...box.children].filter((p) => p.textContent.trim()).map((p) => ({ kind: "p", node: stripHooks(p.cloneNode(true)) })) : []);
   const wrapUnit = (parent, child) => {
@@ -3112,22 +2891,39 @@
   };
   const unitsOf = (list) => (visible(list) ? [...list.children].map((li) => ({ kind: "unit", node: wrapUnit(list, li) })) : []);
 
-  // 원본 → 장 목록 (순서: 면지 · 목차 · 여는 글 · 제1부 표제지 · 방마다 Ⅰ~Ⅳ장·숨은 장 · 제2부 표제지 · 흐름 · 궁합 · 심층 · 닫는 글 · 뒷면지)
+  // 지금 연 장 하나 → 쪽 묶음 목록 (방별 장은 Ⅰ~Ⅳ장·숨은 장마다 새 쪽) + 장 끝 쪽
   function bookChapters() {
     const B = T.book;
     const R = T.report;
     const CN = T.result.chapterNames;
+    const id = curChapter;
+    const name = chapterName(id);
     const C = [];
     const openBlk = (node) => ({ kind: "open", node });
-    C.push({ key: "front", part: "", label: B.front.title, run: [B.front.title], cls: "book-page--front", blocks: [{ kind: "unit", node: srcReceipt }] });
-    C.push({ key: "toc", part: "", label: B.toc.title, run: [B.toc.title], cls: "book-page--toc", blocks: [{ kind: "toc" }] });
-    const openName = bookPartName("open");
-    C.push({ key: "open", part: "open", label: openName, run: [openName], start: true, blocks: [openBlk(chOpening(R.parts.open)), ...parasOf(js("report-open", src))] });
-    const rooms = jsAll("book-room", src).filter(visible);
-    C.push({ key: "part1", part: "part1", label: B.part1.num, run: [B.part1.num], cls: "book-page--half", start: true, blocks: [openBlk(partOpening(B.part1.num, B.part1.title))] });
-    rooms.forEach((r) => {
-      const id = r.dataset.room;
-      const name = bookPartName(id);
+    const one = (key, title, blocks, extra) => C.push(Object.assign({ key, part: id, label: name, run: [name], start: true, blocks: [openBlk(chOpening(title)), ...blocks] }, extra || {}));
+    if (id === "open") one("open", R.parts.open, parasOf(js("report-open", src)));
+    else if (id === "close") one("close", R.parts.close, parasOf(js("report-close", src)));
+    else if (id === "flow") {
+      const stages = unitsOf(js("report-timeline", src)).map((u) => Object.assign(u, { kind: "stage" }));
+      one("flow", B.parts.timeline, stages, { stages: true, run: [B.part2.num, B.parts.timeline] });
+    } else if (id === "match") {
+      one("match", B.parts.match, [{ kind: "unit", node: stripHooks(js("report-match-pair", src).cloneNode(true)) }, ...parasOf(js("report-match", src)), ...unitsOf(js("report-match-rooms", src)), ...parasOf(matchEnd)], { run: [B.part2.num, B.parts.match] });
+    } else if (id === "deep") {
+      const deep = [];
+      ["report-deep-strength", "report-deep-shadow", "report-deep-growth"].forEach((k) => {
+        const box = js(k, src);
+        const blk = box.parentElement; // .deep-block: 제목 + 첫 단락은 한 덩어리, 나머지 단락은 쪼갤 수 있게
+        const [first, ...rest] = parasOf(box);
+        const w = blk.cloneNode(false);
+        const prose = box.cloneNode(false);
+        if (first) prose.append(first.node);
+        w.append(blk.firstElementChild.cloneNode(true), prose);
+        deep.push({ kind: "unit", node: stripHooks(w) }, ...rest);
+      });
+      const ev = js("report-evidence", src);
+      one("deep", B.parts.deep, deep.concat(ev.children.length ? [{ kind: "unit", node: stripHooks(ev.cloneNode(true)) }] : []), { run: [B.part2.num, B.parts.deep] });
+    } else {
+      const r = $(`[data-js=book-room][data-room="${id}"]`, src);
       const head = opening(
         "room",
         `<p class="book-opening__kicker"><span aria-hidden="true">${ROMAN[chapterOf(id) - 1]}</span> ${esc(T.rooms[id].name)}</p>` +
@@ -3140,33 +2936,8 @@
         const top = i === 0 ? head : chOpening(title, i < 4 ? ROMAN[i] : "");
         C.push({ key: `${id}-${i}`, part: id, room: id, label: name, run: [name, title], start: true, blocks: [openBlk(top), ...parasOf(js(k, r))] });
       });
-    });
-    const flowName = bookPartName("flow");
-    const p2 = (key, title, blocks) => C.push({ key, part: "flow", label: flowName, run: [B.part2.num, title], start: true, blocks: [openBlk(chOpening(title)), ...blocks] });
-    // (11단계 F1 ④) 제2부 표제 + "시기별 흐름" 머리를 한 쪽(book-page--part-open)에. 첫 구간이 들어가면 이어 담는다(안 들어가면 .is-solo)
-    // (F1 ③) 시기별 흐름은 구간(stage)마다 새 쪽, 네 항목이 안 들어가면 2 + 2
-    const halfHead = opening("half", `<p class="book-opening__kicker">${esc(B.part2.num)}</p><h2 class="book-opening__title">${esc(B.part2.title)}</h2>`);
-    const tlHead = mk("div", "book-opening book-opening--part", `<h3 class="book-opening__title">${esc(B.parts.timeline)}</h3>`);
-    const stages = unitsOf(js("report-timeline", src)).map((u) => Object.assign(u, { kind: "stage" }));
-    C.push({ key: "part2", part: "flow", label: flowName, run: [B.part2.num, B.parts.timeline], firstCls: "book-page--part-open", start: true, stages: true, blocks: [openBlk(halfHead), openBlk(tlHead), ...stages] });
-    p2("match", B.parts.match, [{ kind: "unit", node: stripHooks(js("report-match-pair", src).cloneNode(true)) }, ...parasOf(js("report-match", src)), ...unitsOf(js("report-match-rooms", src))]);
-    const deep = [];
-    ["report-deep-strength", "report-deep-shadow", "report-deep-growth"].forEach((k) => {
-      const box = js(k, src);
-      const blk = box.parentElement; // .deep-block: 제목 + 첫 단락은 한 덩어리, 나머지 단락은 쪼갤 수 있게
-      const [first, ...rest] = parasOf(box);
-      const w = blk.cloneNode(false);
-      const prose = box.cloneNode(false);
-      if (first) prose.append(first.node);
-      w.append(blk.firstElementChild.cloneNode(true), prose);
-      deep.push({ kind: "unit", node: stripHooks(w) }, ...rest);
-    });
-    // (11단계 C5 필수 6) 방별 결과 목록은 한 덩어리: 빈 쪽에 들어가면 통째로 다음 쪽, 아니면 줄 단위로 나누고 장 끝 50자 규칙(fixShortEnd)이 마지막 쪽을 채운다
-    const ev = js("report-evidence", src);
-    p2("deep", B.parts.deep, deep.concat(visible(ev) ? [{ kind: "unit", node: stripHooks(ev.cloneNode(true)) }] : []));
-    const closeName = bookPartName("close");
-    C.push({ key: "close", part: "close", label: closeName, run: [closeName], start: true, blocks: [openBlk(chOpening(R.parts.close)), ...parasOf(js("report-close", src))] });
-    C.push({ key: "end", part: "close", label: closeName, run: [closeName], cls: "book-page--end", blocks: srcEnd.map((node) => ({ kind: "unit", node })) });
+    }
+    C.push({ key: "end", part: id, label: name, run: [name], cls: "book-page--end", blocks: srcEnd.map((node) => ({ kind: "unit", node })) });
     return C;
   }
 
@@ -3400,12 +3171,8 @@
     const t0 = performance.now();
     F1STAT.wordCut = 0;
     F1STAT.longStage = 0;
-    tocItems.forEach((li) => tocList.append(li)); // 옮겨 쓴 노드를 원본 자리로
-    src.prepend(srcToc);
-    src.prepend(srcReceipt);
-    srcEnd.forEach((n) => src.append(n));
+    srcEnd.forEach((n) => src.append(n)); // 옮겨 쓴 장 끝 쪽을 원본 자리로
     pagesBox.textContent = "";
-    tocItems.forEach((li) => (js("book-toc-time", li).textContent = fill(T.book.tocPage, { n: "000" }))); // 폭 자리 잡기
     const view = reader.dataset.view;
     reader.dataset.view = "pages"; // 재려면 무대가 보여야 한다 (같은 작업 안에서 되돌리므로 화면에 그려지지 않음)
     const pages = [];
@@ -3577,7 +3344,6 @@
       start();
       let afterOpen = false;
       ch.blocks.forEach((b) => {
-        if (b.kind === "toc") return placeToc(start, () => bd);
         if (b.kind === "stage") return placeStage(b.node);
         if (b.kind === "p" && afterOpen) b.node.classList.add("has-dropcap");
         afterOpen = b.kind === "open";
@@ -3599,43 +3365,16 @@
       if (pg.part && !(pg.part in partStart)) partStart[pg.part] = i;
       if (pg.part) partEnd[pg.part] = i;
     });
-    tocItems.forEach((li) => (js("book-toc-time", li).textContent = li.dataset.part in partStart ? fill(T.book.tocPage, { n: partStart[li.dataset.part] + 1 }) : ""));
     reader.dataset.view = view;
-    seen.clear();
     book = { pages, chapStart, chapLen, partStart, partEnd, key: sizeKey() };
     reader.dataset.pagedMs = Math.round(performance.now() - t0); // 점검용 (e2e: 쪽 나누기 시간)
     reader.dataset.wordCut = F1STAT.wordCut; // 점검용 (F1: 어절 경계로 넘긴 곳 수 · 아주 긴 시기별 항목 수)
     reader.dataset.longStage = F1STAT.longStage;
   }
-  // 목차 쪽: 넘치면 넘친 항목을 다음 쪽의 새 목록으로 옮긴다 (640 높이에서 2쪽)
-  function placeToc(start, getBd) {
-    getBd().append(srcToc);
-    let list = tocList;
-    while (over(getBd())) {
-      const vis = [...list.children].filter(visible);
-      if (vis.length < 2) break;
-      const moved = [];
-      while (over(getBd()) && vis.length > 1) {
-        const li = vis.pop();
-        li.remove();
-        moved.unshift(li);
-      }
-      start();
-      const nav = srcToc.cloneNode(false);
-      nav.removeAttribute("id");
-      nav.removeAttribute("data-js");
-      nav.removeAttribute("aria-labelledby");
-      list = tocList.cloneNode(false);
-      list.removeAttribute("data-js");
-      list.append(...moved);
-      nav.append(list);
-      getBd().append(nav);
-    }
-  }
 
   function relayout() {
-    if (!reportView || currentName !== "report") {
-      if (book) book.key = ""; // 책 화면으로 돌아올 때 다시 나눈다
+    if (currentName !== "report" || reader.dataset.view !== "pages" || !curChapter) {
+      if (book) book.key = ""; // 장 안으로 돌아올 때 다시 나눈다
       return;
     }
     finishTurn();
@@ -3645,12 +3384,8 @@
     let i = 0;
     if (anchor && anchor.chap in book.chapStart) i = book.chapStart[anchor.chap] + Math.min(anchor.off, book.chapLen[anchor.chap] - 1);
     setPage(i, { quiet: true });
-    if (reader.dataset.view === "cover") updateResume();
   }
-  enter.report = () => {
-    if (reportView && (!book || book.key !== sizeKey())) relayout();
-  };
-  // 다시 나누기: 크기(가로·세로) 변화, 글꼴 도착(본문 글꼴은 쓰일 때 내려받으므로 첫 나누기 뒤에 올 수 있다). 150ms 디바운스
+  // 다시 나누기: 크기(가로·세로) 변화, 글꼴 도착. 150ms 디바운스
   let resizeTimer = 0;
   const scheduleRelayout = (force) => {
     clearTimeout(resizeTimer);
@@ -3671,52 +3406,25 @@
     cur = i;
     const pg = P[i];
     const reading = reader.dataset.view === "pages";
-    bookStage.classList.toggle("is-first", i === 0);
+    bookStage.classList.toggle("is-first", false); // 첫 쪽의 "이전" = 장 표지 (13-1)
     bookStage.classList.toggle("is-last", i === total - 1);
-    js("book-prev").disabled = i === 0;
+    js("book-prev").disabled = false;
     js("book-next").disabled = i === total - 1;
     js("book-track-fill").style.setProperty("--p", ((i + 1) / total).toFixed(4));
-    js("read-label").textContent = reading ? pg.label : "";
-    if (reading) {
-      seen.add(i);
-      writeBookmark(i + 1);
-      if (!quiet) js("book-live").textContent = fill(T.book.live, { n: i + 1, total, chapter: pg.label });
-      if (focus) pg.el.focus({ preventScroll: true });
+    if (!reading) return;
+    js("read-label").textContent = fill(T.book.chapter.readLabel, { chapter: pg.label, n: i + 1, total });
+    writeBookmark(curChapter, i + 1);
+    if (!quiet) js("book-live").textContent = fill(T.book.live, { n: i + 1, total, chapter: pg.label });
+    if (focus) pg.el.focus({ preventScroll: true });
+    if (i === total - 1 && !readSet.has(curChapter)) {
+      readSet.add(curChapter);
+      track("so_book", { step: "done", chapter: curChapter });
     }
-    tocItems.forEach((li) => {
-      const p = li.dataset.part;
-      li.classList.toggle("is-current", reading && p === pg.part);
-      li.classList.toggle("is-read", p in book.partEnd && seen.has(book.partEnd[p]));
-    });
   }
-  function openBook(i) {
-    if (!book) return;
+  const backToCover = () => {
     finishTurn();
-    reader.dataset.view = "pages";
-    setPage(i, { focus: true });
-  }
-  function showCover() {
-    finishTurn();
-    reader.dataset.view = "cover";
-    js("read-label").textContent = "";
-    updateResume();
-  }
-  function updateResume() {
-    const mark = readBookmark();
-    const resume = js("book-resume");
-    const ok = Boolean(book) && mark > 1;
-    show(resume, ok);
-    if (!ok) return;
-    const i = Math.min(mark, book.pages.length) - 1;
-    js("book-resume-name", resume).textContent = book.pages[i].label;
-    js("book-resume-page", resume).textContent = i + 1;
-  }
-  js("book-open-btn").addEventListener("click", () => openBook(0));
-  js("book-resume").addEventListener("click", () => book && openBook(Math.min(readBookmark(), book.pages.length) - 1));
-  function jumpToPart(part) {
-    if (!book || !(part in book.partStart)) return;
-    openBook(book.partStart[part]); // 멀리 뛰는 이동은 연출 없이 즉시
-  }
+    openCover(curChapter, true);
+  };
 
   // 한 쪽 넘기기: 넘기는 동안 들어온 입력은 버린다. 움직임 줄이기는 turn class 없이 is-current만
   function finishTurn() {
@@ -3725,7 +3433,8 @@
   function turn(dir) {
     if (!book || turning || reader.dataset.view !== "pages") return;
     const to = cur + dir;
-    if (to < 0 || to >= book.pages.length) return;
+    if (to < 0) return backToCover();
+    if (to >= book.pages.length) return;
     if (reduceMotion) return setPage(to);
     const a = book.pages[cur].el;
     const b = book.pages[to].el;
@@ -3789,48 +3498,7 @@
     act();
   });
 
-  // 목차(목차 쪽·상단 막대 시트): 링크 기본 이동을 막고 그 장의 시작 쪽으로 즉시
-  const tocSheet = js("book-toc-sheet");
-  const tocClick = (e) => {
-    const a = e.target.closest("a");
-    const li = a && a.closest("li[data-part]");
-    if (!li) return;
-    e.preventDefault();
-    if (tocSheet.open) tocSheet.close();
-    jumpToPart(li.dataset.part);
-  };
-  pagesBox.addEventListener("click", tocClick);
-  tocSheet.addEventListener("click", tocClick);
-  js("book-toc-open").addEventListener("click", () => {
-    const list = js("book-toc-sheet-list");
-    list.textContent = "";
-    const ol = tocList.cloneNode(false);
-    tocItems.forEach((li) => ol.append(li.cloneNode(true)));
-    list.append(stripHooks(ol));
-    if (tocSheet.showModal) tocSheet.showModal();
-    else tocSheet.setAttribute("open", "");
-  });
-  js("book-toc-close").addEventListener("click", () => tocSheet.close());
-
-  // 영수증 코드 복사·지우기
-  function copyReceipt() {
-    if (!reportView) return;
-    const text = PayCode.pretty(reportView.receipt);
-    const done = () => toast(T.receipt.copied);
-    const fail = () => toast(T.receipt.copyFail);
-    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fail);
-    else fail();
-  }
-  js("receipt-copy").addEventListener("click", copyReceipt);
-  js("receipt-copy-end").addEventListener("click", copyReceipt);
-  js("receipt-forget").addEventListener("click", () => {
-    writeReceipt("");
-    writeBookmark("");
-    applyPayUi();
-    toast(T.receipt.forgot);
-  });
-
-  // ── 소장 카드 (share-card.js frame "keepsake"). 이름·생일·영수증 코드·유료 본문 긴 인용은 넣지 않는다
+  // ── 책 카드(기존 소장 카드, share-card.js frame "keepsake"). 원형·여섯 문양만 — 상대·이름·생일·코드 없음
   const ROOM_GLYPH = {
     rune: () => ({ path: symbolPath("rune-raidho"), vw: 40, vh: 60 }),
     star: () => ({ path: "M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z", vw: 40, vh: 40, fill: true }),
@@ -3840,43 +3508,40 @@
     sibyl: () => ({ path: symbolPath("icon-sibyl"), vw: 40, vh: 40 }),
   };
   function buildKeepsakeCard() {
-    const { rep } = reportView;
-    const c = rep.codes;
+    const C = BookCore.contentFrom(window);
+    const c = myCodes();
     const K = T.keepsake;
     const me = T.archetypes[c.arch].name;
+    const keyword = c.band != null && C.timeline ? BookCore.timelineStages(C, c.arch, c.band).find((s) => s.now).keyword : "";
+    const close = (C.close || []).find((e) => e.code === c.arch);
     return {
       file: K.file, text: strip(K.shareText),
       opts: {
         theme: Object.assign({}, CARD_THEME.story, { wax: "#7c2a22", waxRim: "#9a3a2c" }), frame: "keepsake", seed: 211,
         topBadge: strip(K.badge),
         title: me, titleSize: 96,
-        pair: c.partner ? { left: me, right: T.archetypes[c.partner].name, mark: "×" } : { text: strip(K.map) },
-        keyword: rep.card.keyword,
+        pair: { text: strip(K.map) },
+        keyword,
         roomGrid: { cells: CHAPTER_ORDER.map((room) => Object.assign(ROOM_GLYPH[room](), { color: CARD_THEME[room].accent, done: c[room] != null })) },
-        closeLine: { text: rep.card.closeLine, maxLines: 2 },
+        closeLine: { text: close ? close.cardLine : "", maxLines: 2 },
       },
     };
   }
-  js("report-share").addEventListener("click", (e) => reportView && shareCard(e.currentTarget, buildKeepsakeCard));
+  js("report-share").addEventListener("click", async (e) => {
+    const btn = e.currentTarget;
+    if (!currentArchetype()) return;
+    try {
+      await Promise.all([loadFile("data-book-arch.js"), loadFile("data-book-flow.js")]);
+    } catch (err) {
+      return toast(T.toast.shareFail);
+    }
+    shareCard(btn, buildKeepsakeCard);
+  });
 
-  // ── 시작: 결제 설정 → 진입점, successUrl·failUrl로 돌아온 경우 처리
-  async function paidBoot() {
-    clearPaidSamples();
-    const qs = new URLSearchParams(location.search);
-    const ret = qs.get("pay");
-    if (ret === "success") {
-      // 정해진 세 값만 보낸다. 새로고침·뒤로 가기로 다시 와도 서버가 같은 리포트를 준다(멱등)
-      startUnseal({ paymentKey: String(qs.get("paymentKey") || ""), orderId: String(qs.get("orderId") || ""), amount: Number(qs.get("amount")) });
-    }
-    await loadPayConfig();
-    applyPayUi();
-    if (ret === "fail") {
-      stripQuery();
-      if (Pay.enabled) {
-        payFailed = failKind(String(qs.get("code") || "")); // failUrl의 code(토스 오류 코드)로 종류만 정한다
-        go("deeper", { instant: true });
-      }
-    }
+  // ── 시작: 마크업 견본 비우기, 옛 영수증 칸 정리 (주소의 query는 시작할 때 지운다 — 광고·분석은 그 뒤에만)
+  function bookBoot() {
+    clearSource();
+    updateBookLines();
   }
 
   // ═════════ 7단계: 여섯 문이 모이는 결말 (spec 7-6) ═════════
@@ -3908,7 +3573,7 @@
 
   // ═════════ (12단계) 광고로 여는 조각 · 배너 · GA4 (common/ads.js, common/analytics.js) ═════════
   // 설정은 data.js 맨 위 ads·analytics 한 곳. ID가 모두 비면 아무것도 불러오지 않고 잠금·쿠키 줄·FAQ 광고 안내도 없다(지금과 같음).
-  // 광고·분석은 주소에 query가 없을 때만 시작한다(stripQuery 뒤, 두 부품도 스스로 다시 확인).
+  // 광고·분석은 주소에 query가 없을 때만 시작한다(시작할 때 query를 지운 뒤, 두 부품도 스스로 다시 확인).
   // 분석 이벤트 값은 아래 허용 목록 안의 낱말뿐이다: 방 이름, 원형 코드, 단계·방법 이름. 입력값·세부 번호·코드는 실릴 자리가 없다(6장).
   // (운영자 결정 2026-10-01) ads.lockAlways면 광고단위가 없어도 잠금을 보인다 — 광고가 없으면 누르는 즉시 "광고 없음" 안내와 함께 열린다
   const LOCK_ON = Ads.rewardedConfigured(T.ads) || (T.ads && T.ads.lockAlways === true);
@@ -3918,10 +3583,10 @@
     so_room_view: { room: CHAPTER_ORDER },
     so_result: { room: CHAPTER_ORDER, archetype: ARCHETYPES },
     so_story: { step: ["3of6", "6of6"] },
-    so_unlock: { room: CHAPTER_ORDER, outcome: UNLOCK_OUTCOMES },
+    so_unlock: { room: CHAPTER_ORDER, chapter: BOOK_IDS, outcome: UNLOCK_OUTCOMES }, // (13단계) 책 장은 chapter, slot은 보내지 않는다
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
     so_resume: { step: ["made", "used", "failed"] },
-    so_book: { step: ["preview", "pay_click"] },
+    so_book: { step: ["toc", "cover", "read", "done"], chapter: BOOK_IDS }, // (13단계 13-8) 옛 preview·pay_click은 뺌
   };
   let booted = false;
   let externalOn = false;
@@ -3950,7 +3615,6 @@
         track("so_story", { step });
       });
     }
-    if (name === "deeper" && Pay.enabled) track("so_book", { step: "preview" });
   }
 
   // 입구: 쿠키 한 줄(광고·분석 ID가 하나라도 있을 때), FAQ 광고 안내(보상형 광고단위가 있을 때)
@@ -3985,7 +3649,7 @@
   function markOpened(room) {
     const cur = openedRooms();
     const o = {};
-    CHAPTER_ORDER.forEach((r) => (cur[r] === 1 || r === room) && (o[r] = 1)); // 방 이름 표시만
+    CHAPTER_ORDER.concat(BOOK_IDS.map((id) => "book-" + id)).forEach((r) => (cur[r] === 1 || r === room) && (o[r] = 1)); // 방 이름·"book-<장 id>" 표시만
     try {
       window.sessionStorage.setItem(UNLOCK_KEY, JSON.stringify(o));
     } catch (e) {
@@ -4059,18 +3723,27 @@
   const hash = location.hash.replace("#", "");
   const hashRoom = roomOfScreen(hash) || (CHAPTER_ORDER.includes(hash) ? hash : null);
   let first = "hub";
-  if (filledRooms().length && hash) {
+  // (13단계) 옛 결제·책 주소(#deeper·#unseal·#report)와 옛 영수증 칸으로 오면 책 목차로
+  let oldReceipt = false;
+  try {
+    oldReceipt = Boolean(window.sessionStorage.getItem(OLD_RECEIPT_KEY));
+    window.sessionStorage.removeItem(OLD_RECEIPT_KEY);
+  } catch (e) {
+    /* 저장소 없음 */
+  }
+  if (["report", "deeper", "unseal"].includes(hash) || oldReceipt) first = "report";
+  else if (filledRooms().length && hash) {
     if (hash === "story") first = "story";
     else if (CHAPTER_ORDER.includes(hash)) first = roomTarget(hash);
     else if (CHAPTER_ORDER.includes(hashRoom) && !TRANSIENT_TO(hash)) first = hash === `${hashRoom}-result` && isDone(hashRoom) ? roomTarget(hashRoom) : hash;
   }
   renderHub();
   setTopbar("hub");
-  // (12단계, 검수 메모) 결제 복귀(?pay=success|fail)가 아닌 query(fbclid·utm_* 등)는 시작할 때 지운다 → 광고·분석을 켤 수 있다.
-  // 결제 복귀 query는 그대로 두고, 기존 흐름이 stripQuery()를 부른 뒤에 광고·분석이 시작된다.
-  if (location.search && !["success", "fail"].includes(new URLSearchParams(location.search).get("pay"))) history.replaceState(history.state, "", location.pathname + location.hash);
+  // (12단계 12-4, 13단계) 주소의 query(fbclid·utm_*·옛 결제 복귀 ?pay= 등)는 시작할 때 모두 지운다 → 그 뒤에만 광고·분석을 켠다.
+  // 결제는 은퇴했으므로 ?pay=… 값은 읽지도 보내지도 않는다.
+  bookBoot();
+  if (location.search) history.replaceState(history.state, "", location.pathname + location.hash);
   go(first, { instant: true, replace: true });
-  paidBoot();
   booted = true;
   startExternal();
 

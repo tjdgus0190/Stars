@@ -6,7 +6,7 @@
 //   node tools/strange-oracle/mock-server.js [--src] [--port 8787] [--mode mock|off]
 //     기본(dist 모드): 정적 = dist/public, 함수 = dist/api   → 실제 배포 모양 그대로 (D-4 점검은 이 모드로)
 //     --src         : 정적 = 저장소 루트, 함수 = products/strange-oracle/api (고치면서 바로 보기)
-//                     pay.json은 {"api":true}로 바꿔 내려 주고, 제품 폴더 안 api/ 경로는 정적으로 내주지 않는다
+//                     제품 폴더 안 api/ 경로는 정적으로 내주지 않는다 (13단계: 화면은 /api를 부르지 않음)
 //   열기: http://127.0.0.1:8787/products/strange-oracle/
 //   시험 지름길: http://127.0.0.1:8787/__dev/skip  (여섯 방을 마친 상태로 나의 이야기, ?rooms=3·?to=hub 가능)
 //
@@ -27,8 +27,9 @@ const PORT = Number(arg("--port", 8787));
 process.env.PAY_MODE = arg("--mode", process.env.PAY_MODE || "mock");
 const STATIC = SRC ? ROOT : path.join(ROOT, "dist", "public");
 const API = SRC ? path.join(ROOT, "products", "strange-oracle", "api") : path.join(ROOT, "dist", "api");
-if (!fs.existsSync(STATIC) || !fs.existsSync(API)) {
-  console.error(`폴더가 없습니다: ${STATIC} / ${API}\n먼저 node tools/build-dist.js 를 실행하거나 --src 를 붙이세요.`);
+// (13단계) 배포 폴더는 정적 전용이라 dist/api가 없다 → 함수 폴더가 없으면 /api/*는 모두 404 (정적 호스팅과 같음)
+if (!fs.existsSync(STATIC)) {
+  console.error(`폴더가 없습니다: ${STATIC}\n먼저 node tools/build-dist.js 를 실행하거나 --src 를 붙이세요.`);
   process.exit(1);
 }
 if (process.env.PAY_MODE === "mock" && process.env.TOSS_SECRET_KEY) console.warn("주의: TOSS_SECRET_KEY가 있어 mock 모드가 꺼집니다.");
@@ -40,6 +41,7 @@ const TYPES = {
 const handlers = {};
 function handlerFor(name) {
   if (!/^[a-z][a-z0-9-]*$/.test(name)) return null; // 밑줄·점으로 시작하는 파일은 함수가 아니다 (Vercel 규칙)
+  if (!fs.existsSync(API)) return null;
   const file = path.join(API, name + ".js");
   if (!fs.existsSync(file)) return null;
   return (handlers[name] = handlers[name] || require(file));
@@ -96,10 +98,6 @@ location.replace("${P}#${to}");
   if (SRC && /\/api(\/|$)/.test(rel)) {
     log(404);
     return notFound(res);
-  }
-  if (SRC && rel === "/products/strange-oracle/pay.json") {
-    res.writeHead(200, { "Content-Type": TYPES[".json"], "Cache-Control": "no-store" }).end('{ "api": true }\n');
-    return log(200);
   }
   let file = path.join(STATIC, rel);
   if (!file.startsWith(STATIC)) return res.writeHead(403).end();

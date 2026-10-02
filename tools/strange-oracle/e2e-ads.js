@@ -201,7 +201,7 @@ const STUB_ADS = `(function () {
   check("이벤트: 허용 이름만 (so_*), 자동 page_view·scroll·form 없음", evs.every((e) => /^so_(visit|room_view|result|story|unlock|share|resume|book)$/.test(e[1])) && !evs.some((e) => /page_view|scroll|form_|view_search/.test(e[1])), [...new Set(evs.map((e) => e[1]))].join(","));
   check("이벤트: so_unlock request/closed/granted/unavailable 기록", ["request", "closed", "granted", "unavailable"].every((o) => evs.some((e) => e[1] === "so_unlock" && e[2].outcome === o)));
   check("이벤트: so_resume made·so_story 6of6·so_result(room·archetype만)", evs.some((e) => e[1] === "so_resume" && e[2].step === "made") && evs.some((e) => e[1] === "so_story" && e[2].step === "6of6") && evs.filter((e) => e[1] === "so_result").every((e) => Object.keys(e[2]).sort().join() === "archetype,room"));
-  check("이벤트 속성 키는 room·archetype·step·method·outcome뿐", evs.every((e) => Object.keys(e[2] || {}).every((k) => ["room", "archetype", "step", "method", "outcome"].includes(k))));
+  check("이벤트 속성 키는 room·chapter·archetype·step·method·outcome뿐", evs.every((e) => Object.keys(e[2] || {}).every((k) => ["room", "chapter", "archetype", "step", "method", "outcome"].includes(k))));
 
   // 내 정보 지우기 → 잠금 기록도 사라짐
   await ev("document.querySelector('[data-js=clear-open]').click()");
@@ -214,11 +214,11 @@ const STUB_ADS = `(function () {
   // 수집 (전수 검색용) — 이 페이지 기록은 goto 때 사라지므로 지금 모은다
   const dump1 = await ev("JSON.stringify({ dl: (window.dataLayer||[]).map(a => [...a]), g: window.__gcalls || [], a: window.__acalls || [], ins: [...document.querySelectorAll('ins.adsbygoogle')].map(i => i.outerHTML) })");
 
-  // ═══ 3. 결제 복귀 주소: query가 지워지기 전에는 아무것도 안 불러옴 ═══
-  const nExt = ext.length;
+  // ═══ 3. 옛 결제 복귀 주소 (13단계: 결제 은퇴 → 다른 query처럼 시작할 때 지우고, 그 뒤에만 광고·분석) ═══
   await b.goto(`${BASE}?pay=success&paymentKey=${PAYKEY}&orderId=${ORDERID}&amount=3900`);
-  await sleep(1500);
-  check("결제 복귀(success): query 남아 있는 동안 구글 script 0·dataLayer·googletag·adsbygoogle 없음·가로챈 요청 0", (await googleTags()).length === 0 && (await ev("!window.dataLayer && !window.googletag && !window.adsbygoogle && location.search.length > 0")) && ext.length === nExt, await ev("location.search"));
+  await waitFor("location.search === '' && Array.isArray(window.dataLayer)", 5000);
+  const dl0 = await ev("JSON.stringify((window.dataLayer||[]).map(a => [...a]))");
+  check("옛 결제 복귀(success): query 지운 뒤 시작·/api 요청 0·인자에 시험값 0", (await ev("location.search")) === "" && !b.log.requests.some((r) => /\/api\//.test(r)) && !dl0.includes(PAYKEY) && !dl0.includes(ORDERID), await ev("location.search"));
   await b.goto(`${BASE}?pay=fail&code=PAY_PROCESS_CANCELED&orderId=${ORDERID}&paymentKey=${PAYKEY}`);
   await waitFor("location.search === '' && Array.isArray(window.dataLayer)", 5000);
   const dump2 = await ev("JSON.stringify({ dl: (window.dataLayer||[]).map(a => [...a]), href: location.href, tags: [...document.scripts].map(s => s.src) })");
