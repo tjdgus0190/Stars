@@ -8,6 +8,7 @@
 //     --src         : 정적 = 저장소 루트, 함수 = products/strange-oracle/api (고치면서 바로 보기)
 //                     pay.json은 {"api":true}로 바꿔 내려 주고, 제품 폴더 안 api/ 경로는 정적으로 내주지 않는다
 //   열기: http://127.0.0.1:8787/products/strange-oracle/
+//   시험 지름길: http://127.0.0.1:8787/__dev/skip  (여섯 방을 마친 상태로 나의 이야기, ?rooms=3·?to=hub 가능)
 //
 // Vercel 흉내: /api/<이름>은 api/<이름>.js가 있고 이름이 밑줄·점으로 시작하지 않을 때만 함수로 실행, 그 밖(/api/_lib/…, /api/_paid/…)은 404.
 // PAY_MODE는 --mode 값(기본 mock). mock은 TOSS_SECRET_KEY가 비어 있어야 켜진다(core.js 안전장치).
@@ -64,6 +65,32 @@ const server = http.createServer(async (req, res) => {
     }
     await h(req, res);
     return log(res.statusCode);
+  }
+  // 시험 전용 지름길(이 모의 서버에만 있다, 배포 폴더에는 없다): 방을 돌지 않고 앞의 N개 방을 마친 상태로 바로 연다
+  //   /__dev/skip            → 여섯 방 모두 마친 상태로 "나의 이야기"(#story)
+  //   /__dev/skip?rooms=3    → 앞 세 방(오검·별·데칸)만 마친 상태
+  //   /__dev/skip?to=hub     → 도착 화면을 입구 등 다른 화면으로 (기본 story)
+  //   시험용 가짜 프로필(이름 "테스트", 1995-03-25 14:37)을 이 탭의 sessionStorage에만 넣는다
+  if (rel === "/__dev/skip") {
+    const n = Math.min(6, Math.max(0, Number(url.searchParams.get("rooms") || 6) | 0));
+    const to = /^[a-z-]+$/.test(url.searchParams.get("to") || "") ? url.searchParams.get("to") : "story";
+    const P = "/products/strange-oracle/";
+    const html = `<!DOCTYPE html><meta charset="utf-8"><title>시험 지름길</title>
+${["data.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"].map((f) => `<script src="${P}${f}"></script>`).join("\n")}
+<script>
+var R = ["ogham","star","decan","tzolkin","rune","sibyl"].slice(0, ${n}), v = {};
+if (R.indexOf("ogham") > -1) v.ogham = { ogham: 2, archetype: OGHAM[2].archetype };
+if (R.indexOf("star") > -1) v.star = { nak: 4, west: 0, sunRashi: 11, moonRashi: 1, archetype: NAKSHATRAS[4].archetype };
+if (R.indexOf("decan") > -1) v.decan = { decan: 10, when: null, archetype: DECANS[10].archetype };
+if (R.indexOf("tzolkin") > -1) v.tzolkin = { number: 4, sign: 19, archetype: TZOLKIN_SIGNS[19].archetype };
+if (R.indexOf("rune") > -1) v.rune = { picks: [RUNES[0].code, RUNES[5].code, RUNES[10].code], topic: "me", archetype: RUNES[10].archetype };
+if (R.indexOf("sibyl") > -1) v.sibyl = { sors: 12, topic: "love", archetype: ORACLES[12].archetype };
+sessionStorage.clear();
+sessionStorage.setItem("strange-oracle", JSON.stringify({ profile: { name: "테스트", birth: { y: 1995, m: 3, d: 25 }, time: { h: 14, min: 37 } }, visits: v }));
+location.replace("${P}#${to}");
+</script>`;
+    res.writeHead(200, { "Content-Type": TYPES[".html"], "Cache-Control": "no-store" }).end(html);
+    return log(200);
   }
   // 원본 폴더 모드: 제품 안 api/ 폴더는 정적으로 내주지 않는다 (배포에서는 build-dist가 public 밖으로 뺀다)
   if (SRC && /\/api(\/|$)/.test(rel)) {
