@@ -18,6 +18,13 @@ model: inherit
 - products/<slug>/promo/: designer의 정적 화면에 기능(JS)을 붙인다. 문구는 promo/data.js에 둔다. 제품과 같은 개인정보·광고 규칙을 따른다.
 - marketing/<slug>/render/: designer의 장면(scenes/)을 헤드리스 브라우저로 프레임 캡처해 ffmpeg로 mp4를 만드는 스크립트와 실행 방법(README). 결과물은 marketing/<slug>/out/.
 - 영상에는 저작권 있는 음악·이미지를 쓰지 않는다.
+- storyboard.md에 "AI 클립"으로 표시된 장면은 designer가 만든 marketing/<slug>/assets/ai/의 mp4를 쓴다. HTML 장면 캡처와 AI 클립을 ffmpeg로 이어 붙이거나 겹치고, 해상도·프레임레이트·색 공간을 맞춘다. 클립이 없으면 만들지 말고 designer 요청으로 보고한다.
+
+# AI 생성 이미지 연결
+- designer가 Clipwave로 만든 이미지(assets/ai/)는 로컬 상대 경로로만 불러온다. 외부 주소로 바꾸지 않는다. 공유 카드를 canvas로 그릴 때도 로컬 파일을 써야 canvas가 오염되지 않는다.
+- img에 width, height를 지정해 레이아웃이 밀리지 않게 하고, 첫 화면 밖 이미지는 loading="lazy"를 쓴다.
+- 이미지 로딩 실패 시 design/<slug>.md의 대체 표현이 보이도록 처리한다.
+- Clipwave로 새 이미지·영상을 생성하지 않는다 (designer 담당). 필요한 자산이 없으면 designer 요청으로 보고한다.
 
 # 구현 규칙
 - 기획서의 "이번에 만들 것"만 구현한다. 좋아 보이는 기능이 떠올라도 추가하지 말고 보고서의 "다음 단계 제안"에 적는다.
@@ -41,6 +48,7 @@ model: inherit
 - [ ] 입력값이 네트워크 요청, 분석 이벤트, localStorage에 들어가지 않음
 - [ ] 모든 결과 유형에 실제로 도달 가능
 - [ ] 공유 카드 이미지 생성됨
+- [ ] AI 생성 이미지를 모두 로컬 경로로 불러옴 (clipwave, http로 grep 확인)
 - [ ] 필수 파일(CLAUDE.md 3장) 모두 존재
 
 점검하지 못한 항목은 체크하지 말고 이유를 적는다.

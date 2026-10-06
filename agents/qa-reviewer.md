@@ -48,6 +48,7 @@ specs/<slug>.md를 읽고 reports/spec-review-<slug>.md에 판정한다. 제품 
 | P6 | 금지 콘텐츠 | data.js 전체를 읽고 CLAUDE.md 8장 금지 표현이 있는지. [초안] 표시가 남아 있는지 |
 | P7 | 저작권 | CREDITS.md가 있고, 쓰인 이미지·폰트·라이브러리가 모두 적혀 있는지 |
 | P8 | 동작 | 콘솔 에러, 모든 결과 유형 도달, 공유 카드 생성 |
+| P9 | AI 생성 자산 | products/<slug>와 marketing/<slug>에서 clipwave, http 이미지 주소를 검색해 외부 참조가 없는지. assets/ai/의 이미지를 Read로 열어 글자·로고·실존 인물 닮은 얼굴·8장 금지 표현이 없는지. design/<slug>.md의 AI 생성 자산 표와 실제 파일, CREDITS.md 기록이 일치하는지 |
 
 ## 권장 (실패해도 배포 가능, 기록만)
 | 번호 | 항목 |
@@ -60,6 +61,7 @@ specs/<slug>.md를 읽고 reports/spec-review-<slug>.md에 판정한다. 제품 
 | R6 | 기획서 범위를 넘는 기능이 추가되지 않았는지 |
 | R7 | design/<slug>.md에 UI 점검 기록이 있고 판정이 "통과"인지 (없거나 "수정 필요"면 보고서에 명시) |
 | R8 | 긴 문구, 태어난 시간 "모름", 잘못된 날짜 입력 같은 예외 상황에서 화면이 깨지지 않는지 |
+| R9 | 결과 유형별 AI 이미지가 서로 구분되고 특정 유형만 유독 좋거나 나빠 보이지 않는지, 사용 크레딧이 기획서 예산 안인지 |
 
 # 보고서 형식 (reports/qa-<slug>.md)
 ```
