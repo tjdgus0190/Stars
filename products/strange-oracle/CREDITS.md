@@ -33,6 +33,10 @@ Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키
 | Astronomy Engine (Don Cross) | 2.1.19 | 달·태양 황경, 장동, ΔT | MIT | https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js (SRI sha384 고정) |
 - 출처: https://github.com/cosinekitty/astronomy , npm `astronomy-engine`.
 
+| lunar-javascript (6tail) | 1.7.7 | 만신의 방(saju.js) 만세력: 간지·절기 시각·일진 | MIT (npm 레지스트리 package.json `license`) | https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.7/lunar.js (SRI sha384-CkiJVUh8zHLFNZYeiszeRw7KEWYDIf1yIZ+jVnZt+omUzQLv2ilCE94w1VItn8uH, 방 문을 누를 때 지연 로드) |
+- 출처: https://github.com/6tail/lunar-javascript , npm `lunar-javascript`. 파일 크기 435,942바이트(gzip 112,997).
+- saju.js의 시간대 표(서머타임·UTC+8:30)는 IANA tz database 2026c(Asia/Seoul)의 전환점을 숫자로 옮겨 적은 것(퍼블릭 도메인 데이터).
+
 ## 2단계 계산 방법 (calc.js)
 - 촐킨(마야 260일력): 외부 라이브러리 없이 날짜 산술로 직접 계산.
   - 상관 계수: **GMT(Goodman–Martinez–Thompson) 584283** — 장주기 0.0.0.0.0 = 율리우스 적일 584283. 출처: Wikipedia "Mesoamerican Long Count calendar" (https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar — "The generally accepted correlation constant is the Modified Thompson 2, 'Goodman–Martinez–Thompson', or GMT correlation of 584,283 days", 2026-09-27 조회), Wikipedia "Maya calendar" (https://en.wikipedia.org/wiki/Maya_calendar). 운영자 결정 25번으로 확정.
