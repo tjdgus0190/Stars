@@ -14,7 +14,21 @@ const OUT = path.join(__dirname, "out");
 const PROD = path.resolve(__dirname, "..", "..", "products", "strange-oracle");
 const out = [];
 const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${name}${extra !== "" ? "  — " + extra : ""}`; out.push(l); console.log(l); };
-const ORDER = ["ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
+const ORDER = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]; // (14단계) 새 순서
+// (14-6) 방 문구 파일은 지연 불러오기라 페이지에 전역이 없을 수 있다 → 시험 방문 기록은 node에서 만든다
+const DATA = (() => { const w = {}; for (const f of ["data-saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"]) require("vm").runInNewContext(require("fs").readFileSync(require("path").resolve(__dirname, "..", "..", "products", "strange-oracle", f), "utf8"), { window: w }); return w; })();
+const SajuLib = require("../../products/strange-oracle/saju.js");
+function seedVisits(R) {
+  const v = {};
+  if (R.includes("saju")) v.saju = { code: 532, archetype: DATA.SAJU.stems[SajuLib.decodeCode(532).S1].archetype };
+  if (R.includes("ogham")) v.ogham = { ogham: 2, archetype: DATA.OGHAM[2].archetype };
+  if (R.includes("star")) v.star = { nak: 4, west: 0, sunRashi: 11, moonRashi: 1, archetype: DATA.NAKSHATRAS[4].archetype };
+  if (R.includes("decan")) v.decan = { decan: 10, when: null, archetype: DATA.DECANS[10].archetype };
+  if (R.includes("tzolkin")) v.tzolkin = { number: 4, sign: 19, archetype: DATA.TZOLKIN_SIGNS[19].archetype };
+  if (R.includes("rune")) v.rune = { picks: [DATA.RUNES[0].code, DATA.RUNES[5].code, DATA.RUNES[10].code], topic: "me", archetype: DATA.RUNES[10].archetype };
+  if (R.includes("sibyl")) v.sibyl = { sors: 12, topic: "love", archetype: DATA.ORACLES[12].archetype };
+  return v;
+}
 const NAME = "김서윤";
 
 // 책 문장 목록 (13단계: data-book-*.js 전부, 옛 api/_paid에서 옮긴 문장 + 궁합 새 모듈), 12자 이상. 무료 칸(key·summary)과 원래 같은 문장은 build-dist.js와 같은 규칙으로 뺀다.
@@ -51,16 +65,7 @@ function paidSentences() {
   const noHScroll = async (label) => { const w = await ev("[document.documentElement.scrollWidth, window.innerWidth]"); check(`360px 가로 넘침 없음 (${label})`, w[0] <= w[1], w.join("/")); };
   const doors = () => ev(`${JSON.stringify(ORDER)}.map(r => { const d = document.querySelector('[data-js=hub-door-' + r + ']'); return r + ':' + ['is-visited','is-next','is-locked'].filter(c => d.classList.contains(c)).join('+') + (d.getAttribute('aria-disabled') === 'true' ? '(aria)' : ''); }).join(' ')`);
   const store = () => ev("sessionStorage.getItem('strange-oracle') || ''");
-  const seed = (rooms, profile = { name: NAME, birth: { y: 1995, m: 3, d: 25 } }) => ev(`(() => {
-    const R = ${JSON.stringify(rooms)}, v = {};
-    if (R.includes('ogham')) v.ogham = { ogham: 2, archetype: OGHAM[2].archetype };
-    if (R.includes('star')) v.star = { nak: 4, west: 0, sunRashi: 11, moonRashi: 1, archetype: NAKSHATRAS[4].archetype };
-    if (R.includes('decan')) v.decan = { decan: 10, when: null, archetype: DECANS[10].archetype };
-    if (R.includes('tzolkin')) v.tzolkin = { number: 4, sign: 19, archetype: TZOLKIN_SIGNS[19].archetype };
-    if (R.includes('rune')) v.rune = { picks: [RUNES[0].code, RUNES[5].code, RUNES[10].code], topic: 'me', archetype: RUNES[10].archetype };
-    if (R.includes('sibyl')) v.sibyl = { sors: 12, topic: 'love', archetype: ORACLES[12].archetype };
-    sessionStorage.setItem('strange-oracle', JSON.stringify({ profile: ${JSON.stringify(profile)}, visits: v }));
-  })()`);
+  const seed = (rooms, profile = { name: NAME, birth: { y: 1995, m: 3, d: 25 } }) => ev(`sessionStorage.setItem('strange-oracle', ${JSON.stringify(JSON.stringify({ profile, visits: seedVisits(rooms) }))})`);
   const freeLeak = async (room) => {
     const text = await ev(`document.querySelector('#screen-${room}-result').innerText`);
     return PAID.filter((s) => text.includes(s));
@@ -80,24 +85,28 @@ function paidSentences() {
   check("새 세션 + #rune 딥링크 → 입구", await waitScreen("screen-hub", 4000));
   check("인트로 화면·옛 뒤로 버튼 마크업 없음", (await ev("!document.querySelector('#screen-intro') && !document.querySelector('[data-js=topbar-back]')")));
   check("입구에서는 입구 버튼 숨김", await has("[data-js=topbar-home]", "is-hidden"));
-  check("주 버튼 = 첫 번째 문 열기(Ⅰ 오검)", (await txt("[data-js=hub-cta-label]")) === (await ev("TEXT.hub.cta.first")) && (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "ogham");
+  check("주 버튼 = 첫 번째 문 열기(Ⅰ 만신)", (await txt("[data-js=hub-cta-label]")) === (await ev("TEXT.hub.cta.first")) && (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "saju");
   check("지금까지의 이야기 = 0방이면 숨김", await has("[data-js=hub-sofar]", "is-hidden"));
   // 보이는 답 합계 300자 이상 (13단계: 5번 문답은 책 문답, 결제 문답 은퇴)
   const faq = await ev("[...document.querySelectorAll('[data-js=hub-faq] dd')].filter(d => d.offsetHeight > 0).reduce((a, d) => a + d.textContent.replace('[초안] ', '').length, 0)");
   check("자주 묻는 것: 펼친 채 보이는 답 합계 300자 이상", faq >= 300, String(faq));
   check("13단계: FAQ 결제 문답 훅 없음·가격 말 없음", await ev("!document.querySelector('[data-js=hub-faq-paid]') && !/[0-9],[0-9]{3}\\s*원|결제/.test(document.querySelector('[data-js=hub-faq]').innerText)"));
-  check("입구 광고 1개", (await ev("document.querySelectorAll('#screen-hub [data-js=ad-slot]').length")) === 1);
+  check("입구 광고 0개(14-2)", (await ev("document.querySelectorAll('#screen-hub [data-js=ad-slot], #screen-hub [data-ad]').length")) === 0);
   check("첫 화면(스크롤 전)에 주 버튼·여정 칩 보임", await ev("(() => { const r = (s) => document.querySelector(s).getBoundingClientRect(); return r('[data-js=hub-cta]').bottom <= innerHeight && document.querySelector('.journey__chip').getBoundingClientRect().bottom <= innerHeight; })()"));
   check("입구 전에는 저장소 비어 있음", (await store()) === "");
   const d0 = await doors();
-  check("문 상태: Ⅰ만 is-next, Ⅱ~Ⅵ 잠김(aria-disabled)", d0 === "ogham:is-next star:is-locked(aria) decan:is-locked(aria) tzolkin:is-locked(aria) rune:is-locked(aria) sibyl:is-locked(aria)", d0);
+  check("문 상태: Ⅰ만 is-next, Ⅱ~Ⅶ 잠김(aria-disabled)", d0 === "saju:is-next ogham:is-locked(aria) star:is-locked(aria) decan:is-locked(aria) tzolkin:is-locked(aria) rune:is-locked(aria) sibyl:is-locked(aria)", d0);
   await click("[data-js=hub-door-decan]");
   await sleep(60);
   check("잠긴 문 누름 → 흔들림 + 안내, 이동 없음", (await has("[data-js=hub-door-decan]", "is-denied")) && (await active()) === "screen-hub");
   await noHScroll("입구");
   await shot(P + "01-hub.png");
 
-  // ═══ 2. 주 버튼 → 상징 떠오름 → Ⅰ 오검 시작 ═══
+  // ═══ 2. 주 버튼 → 상징 떠오름 → Ⅱ 오검 시작 (만신을 마친 상태. 만신의 방 흐름은 e2e-saju.js) ═══
+  await seed(["saju"], {});
+  await b.goto(BASE);
+  await waitScreen("screen-hub", 3000);
+  check("14-6: 입구가 그려진 뒤 다음 방(오검) 파일을 미리 받음", await waitFor("Boolean(window.OGHAM)", 6000));
   const t0 = Date.now();
   await click("[data-js=hub-cta]");
   check("상징 오버레이 재생(data-room=ogham)", (await ev("document.querySelector('[data-js=sigil-rise]').dataset.room")) === "ogham" && !(await has("[data-js=sigil-rise]", "is-hidden")));
@@ -109,7 +118,7 @@ function paidSentences() {
   check("→ 오검 시작 화면", await waitScreen("screen-ogham-intro", 3000));
   const dt = Date.now() - t0;
   check(reduced ? "움직임 줄이기: 전환 400ms 이하(+측정 여유 250ms)" : "움직임: 건너뛰기로 1.2초 전에 도착", reduced ? dt <= 650 : dt < 1200, dt + "ms");
-  check("방 화면 상단: 입구 버튼 + 'I 오검의 방 1/6'", !(await has("[data-js=topbar-home]", "is-hidden")) && (await txt("[data-js=read-label]")).replace(/\s+/g, " ").trim() === "I 오검의 방 1/6");
+  check("방 화면 상단: 입구 버튼 + 'II 오검의 방 2/7'", !(await has("[data-js=topbar-home]", "is-hidden")) && (await txt("[data-js=read-label]")).replace(/\s+/g, " ").trim() === "II 오검의 방 2/7");
   check("주소 해시 = 화면 이름(#ogham-intro)", (await ev("location.hash")) === "#ogham-intro");
   const greet = await sayLine("#screen-ogham-intro", "guide-greet");
   check("9단계: 방 시작 인사(안내자) 보이고 글자 있음", greet.shown && greet.text.length > 0, greet.text);
@@ -127,7 +136,7 @@ function paidSentences() {
   await sleep(300);
   const sh = await roomShape("ogham");
   check("방 결과: 장 목차·장 섹션·봉인·장 사이 광고 0개", sh.chapters === 0, JSON.stringify(sh));
-  check("핵심 풀이 채움 + 광고 1개 + '나의 이야기 보기' 링크 없음(U7)", sh.reading >= 3 && sh.ads === 1 && sh.goStory === 0, JSON.stringify(sh));
+  check("핵심 풀이 채움 + 광고 0개(14-2) + '나의 이야기 보기' 링크 없음(U7)", sh.reading >= 3 && sh.ads === 0 && sh.goStory === 0, JSON.stringify(sh));
   check("13단계: 방 결과 책 한 줄 보임(결제 상태와 무관)", sh.bookLine === false);
   const leak1 = await freeLeak("ogham");
   check("D-4 확장: 무료 화면에 유료 문장(identity.rest·event.lede 포함) 0", leak1.length === 0, leak1.slice(0, 2).join(" | "));
@@ -154,17 +163,17 @@ function paidSentences() {
   await ev("history.back()");
   await sleep(700);
   check("한 번 더 뒤로 → 입구", (await active()) === "screen-hub" && (await ev("location.href.startsWith('http://127.0.0.1:8788/')")));
-  check("입구: 1/6 · 지금까지 줄(오검 결과 이름) 1개, '?' 줄은 만들지 않음(10-6)", (await txt("[data-js=hub-progress-count]")) === "1/6" && (await ev("document.querySelectorAll('[data-js=sofar-line]').length")) === 1 && (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await txt("[data-js=sofar-result]")) === (await ev("OGHAM[JSON.parse(sessionStorage.getItem('strange-oracle')).visits.ogham.ogham].title")));
-  check("주 버튼 = II 별의 방 열기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "star" && (await txt("[data-js=hub-cta-num]")) === "II");
-  await click("[data-js=sofar-line]");
+  check("입구: 2/7 · 지금까지 줄(만신·오검 결과 이름) 2개, '?' 줄은 만들지 않음(10-6)", (await txt("[data-js=hub-progress-count]")) === "2/7" && (await ev("document.querySelectorAll('[data-js=sofar-line]').length")) === 1 && (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await txt("[data-js=sofar-result]")) === (await ev("OGHAM[JSON.parse(sessionStorage.getItem('strange-oracle')).visits.ogham.ogham].title")));
+  check("주 버튼 = III 별의 방 열기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "star" && (await txt("[data-js=hub-cta-num]")) === "III");
+  await click("[data-js=sofar-line][data-room=ogham]");
   check("지금까지 줄 → 결과 다시 보기(번쩍)", await waitScreen("screen-ogham-result", 3000));
   await click("#screen-ogham-result [data-js=result-next-door]");
-  check("다음 문 → 상징(별) → Ⅱ 별의 방 시작", (await ev("document.querySelector('[data-js=sigil-rise]').dataset.room")) === "star" && (await waitScreen("screen-star-intro", 3000)));
+  check("다음 문 → 상징(별) → Ⅲ 별의 방 시작", (await ev("document.querySelector('[data-js=sigil-rise]').dataset.room")) === "star" && (await waitScreen("screen-star-intro", 3000)));
   await click("[data-js=topbar-home]");
   check("입구 버튼 → 입구", await waitScreen("screen-hub", 3000));
 
   // ═══ 5. 입력 건너뜀(U3)·의식 건너뛰기(U4): 데칸 ═══
-  await seed(["ogham", "star"]);
+  await seed(["saju", "ogham", "star"]);
   await b.goto(BASE);
   await waitScreen("screen-hub", 3000);
   await click("[data-js=hub-cta]");
@@ -184,7 +193,7 @@ function paidSentences() {
   check("정보 바꿔 다시 보기 → 입력 화면", await waitScreen("screen-decan-input", 3000));
 
   // ═══ 6. 별·촐킨·룬 무료 화면 ═══
-  await seed(["ogham", "star", "decan", "tzolkin", "rune"]);
+  await seed(["saju", "ogham", "star", "decan", "tzolkin", "rune"]);
   for (const room of ["star", "tzolkin", "rune"]) {
     await b.goto(BASE + "#" + room);
     await waitScreen(`screen-${room}-result`, 3000);
@@ -387,14 +396,14 @@ function paidSentences() {
   check("10-1: 복원한 시빌라 — 주제 복원, 질문 자리는 비어 있음(원래도 저장하지 않음)", (await txt("#screen-sibyl-result [data-js=sibyl-result-category]")) === (await ev("TEXT.sibyl.topics.love.label")) && (await txt("#screen-sibyl-result [data-js=sibyl-result-question]")) === "");
 
   // (e) 10-7 이름 미리 채움: 오검에서 넣은 이름이 별·룬 입력에 보인다
-  await seed(["ogham"], { name: NAME });
+  await seed(["saju", "ogham"], { name: NAME });
   await b.goto(BASE);
   await ev("StrangeOracle.go('star-input')");
   await waitScreen("screen-star-input", 3000);
   const savedStar = await txt("#screen-star-input [data-js=saved-info-value]");
   await click("#screen-star-input [data-js=saved-info-edit]");
   check("10-7: 별의 방 입력 — 앞 방 이름이 저장된 정보로 보이고, 다시 입력하면 이름 칸에 미리 채워짐", savedStar.includes(NAME) && (await ev("document.querySelector('[data-js=star-name]').value")) === NAME);
-  await seed(["ogham", "star", "decan", "tzolkin"], { name: NAME, birth: { y: 1995, m: 3, d: 25 } });
+  await seed(["saju", "ogham", "star", "decan", "tzolkin"], { name: NAME, birth: { y: 1995, m: 3, d: 25 } });
   await b.goto(BASE);
   await ev("StrangeOracle.go('rune-input')");
   await waitScreen("screen-rune-input", 3000);
@@ -409,7 +418,7 @@ function paidSentences() {
   const deadScan = (scope) => ev(`(() => { const sc = document.querySelector(${JSON.stringify(scope)}); const t = sc.innerText; return { price: /[0-9],[0-9]{3}\\s*원/.test(t), soon: t.includes('곧 열'), dead: [...sc.querySelectorAll('button[disabled], button[aria-disabled=true]')].filter(b => b.offsetHeight > 0 && !b.closest('[data-js^=hub-door-]')).length, book: /한 권의 책|책을 준비/.test(t) }; })()`);
   const hookCount = (scope) => ev(`[...document.querySelectorAll(['result-archetype-sway', 'hub-archetype-sway', 'result-bridge', 'story-half'].map(k => ${JSON.stringify(scope)} + ' [data-js=' + k + ']').join(','))].filter(e => e.offsetHeight > 0 && e.textContent.trim()).length`);
   const swayWant = (n, arch) => ev(`TEXT.result.archetypeSway.replace('{arch}', TEXT.archetypes[${JSON.stringify(arch)}].name).replace('{n}', ${n})`);
-  await seed(["ogham", "star", "decan"]);
+  await seed(["saju", "ogham", "star", "decan"]);
   await b.goto(BASE + "#hub");
   await waitScreen("screen-hub", 3000);
   const arch3 = await ev("StrangeOracle.currentArchetype()");
@@ -439,7 +448,7 @@ function paidSentences() {
     const hooks = await hookCount(sc);
     check(`H3·H4 ${room} 결과: 원형 한 줄(남은 문 3) · 다리 = 질문 1문장 45자 이내 · 가격·'곧'·죽은 버튼 0 · 떡밥 ${hooks}개(≤3)`, sway === (await swayWant(3, arch3)) && br.ok && !dead.price && !dead.soon && dead.dead === 0 && hooks <= 3, sway + " / " + br.t);
   }
-  await seed(["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
+  await seed(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
   await b.goto(BASE + "#story");
   await waitScreen("screen-story", 3000);
   const six = await ev("(() => { const vis = (e) => e && e.offsetHeight > 0; return { paid: vis(document.querySelector('[data-js=story-paid]')), note: vis(document.querySelector('[data-js=story-book]')), half: vis(document.querySelector('[data-js=story-half]')), noteBtn: document.querySelector('[data-js=story-book]').querySelectorAll('button:not([disabled])').length === 1 }; })()");

@@ -267,7 +267,7 @@
   }
 
   const api = {
-    LUNAR_URL, LUNAR_SRI, STEMS, BRANCHES, STEM_KO, BRANCH_KO, ELEMENTS, GROUPS, ARCHETYPE_BY_STEM, KR_OFFSETS,
+    LUNAR_URL, LUNAR_SRI, STEMS, BRANCHES, STEM_KO, BRANCH_KO, ELEMENTS, STEM_EL, BRANCH_EL, GROUPS, ARCHETYPE_BY_STEM, KR_OFFSETS,
     loadLunar, isLunarReady, useLibrary,
     compute, selectModules, encodeCode, decodeCode,
     clockToUtc, krOffsetAt, yearMonthAt, dayHourAt,

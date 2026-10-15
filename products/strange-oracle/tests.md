@@ -704,3 +704,14 @@
 
 ## SOG2 `saju` 칸 (saju.js `encodeCode`/`decodeCode`)
 값 = ((((일간×5 + 많은)×5 + 적은)×2 + 비어있음)×5 + 우세)×2 + 시각앎 + 1, 범위 1~5000(0 = 없음). 대운 방향·성별은 넣지 않는다. 1~5000 왕복 시험 통과, 성별만 바꾼 세 입력의 코드가 같음.
+
+## 14단계 F4-B1 · 순서·만신의 방·이어가기·광고 제거 (2026-10-15, developer)
+- 순서: `CHAPTER_ORDER` = 만신 → 오검 → 별 → 데칸 → 촐킨 → 룬 → 시빌라. 열 수 있는 방 = 마친 방 + 순서상 첫 미완 방.
+- 이어가기 코드 SOG2 = "SOG2" + 12자 + 검사 1자 = 17자. 필드 = SOG1의 8칸(ogham 21·star 28·decan 37·tzolkin 261·rune 13825·runeTopic 5·sibyl 33·sibylTopic 6) 뒤에 saju 5001(0 = 없음, 1~5000 = Saju.encodeCode). 기수 곱 약 2^58.4.
+  - 유효: (가) 새 순서로 이어짐, (나) saju = 0 + 옛 순서(오검부터)로 이어짐. SOG1(15자)은 해독만, 옛 순서만, 만신 = 없음.
+  - 대운 방향·성별은 넣지 않는다.
+- 시험: tools/strange-oracle/saju-b1.test.js(단위), tools/strange-oracle/e2e-saju.js(화면, 41개). 원형 분포·조합 분량 결과는 tools/strange-oracle/out/saju-archetype-dist.txt·saju-combos.txt.
+- 원형 분포(무작위 1,000명, 생일 1950~2009, 시각 앎 70%, 다른 방 결과는 균등 무작위): 1/7·2/7 ruler 21.2% · explorer 18.5% · 나머지 9~11%. 25% 넘는 원형 없음. 7/7 ruler 15.4% · explorer 15.3%.
+  - 2/7이 1/7과 같은 까닭: 두 방 태그가 다르면 동률이라 앞 방(만신)이 이긴다.
+- 성별 차이 시험(e2e-saju 4절): 남·여·밝히지 않음 세 번의 요청 URL·gtag 인자·SOG2·공유 카드 픽셀·sessionStorage(profile 제외)·localStorage·쿠키가 같음.
+- 광고: 첫 화면 소스(주석 제외)에 adsbygoogle·googletag·ads.js·잠금 버튼 0, 시험 전체에서 광고 주소 요청 0. e2e-ads.js는 은퇴(삭제).

@@ -1,7 +1,10 @@
 // 낯선 점술관 — 화면 동작.
 // 문구는 모두 data.js(TEXT)·data-runes.js(RUNES)·data-stars.js(NAKSHATRAS·RASHIS·PLANETS)
 // ·data-ogham.js(OGHAM)·data-decans.js(DECANS)·data-tzolkin.js(TZOLKIN_SIGNS·TZOLKIN_NUMBERS)·data-oracles.js(ORACLES·ORACLE_TOPICS)에서 가져온다.
-// 계산: astro.js(별), calc.js(오검·데칸·촐킨·시빌라 뽑기, 한글 로마자).
+// ·data-saju.js(SAJU, 만신의 방).
+// 계산: astro.js(별), calc.js(오검·데칸·촐킨·시빌라 뽑기, 한글 로마자), saju.js(만신의 방, lunar-javascript).
+// (14단계 14-6) 방 문구 파일과 계산 라이브러리는 첫 화면에서 받지 않는다. 그 방 화면으로 갈 때(go) 받고,
+//   입구가 그려진 뒤 한가할 때 다음 방 파일을 미리 받는다. 이 탭에 마친 방이 있으면 그 방 파일을 모두 받은 뒤 화면을 그린다.
 // 요소는 id 또는 data-js로 찾는다(class 이름에 기능을 걸지 않음). 상태는 is-* class를 붙였다 뗀다.
 //
 // 개인정보 (CLAUDE.md 6장 sessionStorage 예외):
@@ -14,17 +17,73 @@
 //  - 네트워크 전송·localStorage·쿠키·URL에는 어떤 입력값도 넣지 않는다. (8단계 U1: URL 해시에는 화면 이름만 쓴다 — history.pushState)
 (function () {
   "use strict";
+  // ───────── (14-6) 방 파일 지연 불러오기 ─────────
+  // 같은 출처 파일과 jsdelivr(버전 고정 + SRI)만. 같은 파일은 한 번만 받고, 실패하면 다음 시도에서 다시 받는다.
+  const ASTRONOMY = { src: "https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js", integrity: "sha384-LTVHvxfbG3XHla4Lu0C0s9U18B2sBOuzJIeOoVHm2t05SOOORvMbBMEVjXrGau9g" };
+  const ROOM_FILES = {
+    saju: ["data-saju.js", "saju.js"],
+    ogham: ["data-ogham.js"],
+    star: ["data-stars.js", ASTRONOMY, "astro.js"],
+    decan: ["data-decans.js", ASTRONOMY, "astro.js"],
+    tzolkin: ["data-tzolkin.js"],
+    rune: ["data-runes.js"],
+    sibyl: ["data-oracles.js"],
+  };
+  const scriptLoads = {};
+  function loadScript(f) {
+    const src = typeof f === "string" ? f : f.src;
+    if (!scriptLoads[src])
+      scriptLoads[src] = new Promise((res, rej) => {
+        const el = document.createElement("script");
+        el.src = src;
+        el.async = false; // 받은 순서대로 실행 (astronomy-engine → astro.js)
+        if (f.integrity) {
+          el.integrity = f.integrity;
+          el.crossOrigin = "anonymous";
+        }
+        el.onload = res;
+        el.onerror = () => {
+          delete scriptLoads[src];
+          el.remove();
+          rej(new Error("load " + src));
+        };
+        document.head.append(el);
+      });
+    return scriptLoads[src];
+  }
+  const roomLoads = {};
+  let onRoomLoaded = null; // main()의 bindData (방 문구 전역을 다시 묶는다)
+  const roomReady = {};
+  // 방 파일을 받는다. 만신의 방은 lunar-javascript도 받아 본다(실패해도 방 파일은 열림 — 계산할 때 다시 시도)
+  function ensureRoom(room) {
+    if (!ROOM_FILES[room]) return Promise.resolve();
+    if (!roomLoads[room])
+      roomLoads[room] = Promise.all(ROOM_FILES[room].map(loadScript)).then(() => {
+        roomReady[room] = true;
+        if (onRoomLoaded) onRoomLoaded(room);
+      }, (e) => {
+        delete roomLoads[room];
+        throw e;
+      });
+    return roomLoads[room];
+  }
+  const ensureRooms = (rooms) => Promise.all(rooms.filter(Boolean).map(ensureRoom));
+  const idle = (fn) => ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 4000 }) : setTimeout(fn, 2000));
+  // 이 탭에 저장된 마친 방(또는 지름길로 들어온 방) → 그 파일을 모두 받은 뒤 화면을 그린다
+  let savedRooms = [];
+  try {
+    const raw = JSON.parse(window.sessionStorage.getItem("strange-oracle") || "null");
+    savedRooms = raw && raw.visits && typeof raw.visits === "object" ? Object.keys(raw.visits).filter((r) => ROOM_FILES[r]) : [];
+  } catch (e) {
+    savedRooms = [];
+  }
+  ensureRooms(savedRooms).then(main, main);
+
+  function main() {
   const T = window.TEXT;
-  const RUNES = window.RUNES;
-  const NAKS = window.NAKSHATRAS;
-  const RASHIS = window.RASHIS;
-  const PLANETS = window.PLANETS;
-  const OGHAM = window.OGHAM;
-  const DECANS = window.DECANS;
-  const TZ_SIGNS = window.TZOLKIN_SIGNS;
-  const TZ_NUMBERS = window.TZOLKIN_NUMBERS;
-  const ORACLES = window.ORACLES;
-  const ORACLE_TOPICS = window.ORACLE_TOPICS;
+  // 방 문구(방 파일을 받기 전에는 undefined. 받은 뒤 bindData가 다시 묶는다)
+  let RUNES, NAKS, RASHIS, PLANETS, OGHAM, DECANS, TZ_SIGNS, TZ_NUMBERS, ORACLES, ORACLE_TOPICS, SAJU, Saju, Astro;
+  let RUNE_BY_CODE = {};
   const Calc = window.Calc;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const root = document.documentElement;
@@ -60,19 +119,21 @@
 
   // ───────── 방 구성 (기획서 고정값) ─────────
   // 나의 이야기 장 순서 (방문 순서와 무관). 동점일 때도 이 순서로 앞선 장이 이긴다
-  // paycode.js(브라우저·서버 공용) 한 곳에서 읽는다 (spec 7-1): Ⅰ오검 Ⅱ별 Ⅲ데칸 Ⅳ촐킨 Ⅴ룬 Ⅵ시빌라
+  // paycode.js 한 곳에서 읽는다 (spec 14-1): Ⅰ만신 Ⅱ오검 Ⅲ별 Ⅳ데칸 Ⅴ촐킨 Ⅵ룬 Ⅶ시빌라
   const CHAPTER_ORDER = window.PayCode.CHAPTER_ORDER;
-  const OPEN_ROOMS = CHAPTER_ORDER; // 2단계: 여섯 방 모두 출시됨 (출시 범위. 세션 진행 잠금은 아래 isUnlocked — 다른 축)
-  const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
+  const OPEN_ROOMS = CHAPTER_ORDER; // 일곱 방 모두 출시 (세션 진행 잠금은 아래 isUnlocked — 다른 축)
+  const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII"];
   // 1~39 로마 숫자 (신탁 번호 I~XXXII)
   const roman = (n) => "X".repeat(Math.floor(n / 10)) + ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n % 10];
   const chapterOf = (room) => CHAPTER_ORDER.indexOf(room) + 1;
-  // (7단계) 강제 순차 진행 (spec 7-2): 문 N은 문 N-1의 결과까지 마쳐야(state.visits[room]) 열린다
+  // (14-1) 강제 순서: 열 수 있는 방 = 마친 방 + "순서상 첫 번째로 마치지 않은 방" 하나.
+  //   옛 상태(오검~룬 마침, 만신 미완)도 막다른 곳 없이 Ⅰ 만신 → Ⅶ 시빌라로 이어진다.
   const isDone = (room) => Boolean(state.visits[room]);
-  const isUnlocked = (room) => CHAPTER_ORDER.slice(0, CHAPTER_ORDER.indexOf(room)).every(isDone);
   const nextRoom = () => CHAPTER_ORDER.find((r) => !isDone(r)) || null;
+  const isUnlocked = (room) => isDone(room) || room === nextRoom();
   const MOON_SVG = '<svg viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg>';
   const ROOM_ICON = {
+    saju: '<svg viewBox="0 0 40 40"><use href="#icon-saju" /></svg>',
     rune: '<svg viewBox="0 0 40 60"><use href="#rune-raidho" /></svg>',
     star: MOON_SVG,
     ogham: '<svg viewBox="0 0 40 80"><use href="#ogham-beith" /></svg>',
@@ -80,7 +141,6 @@
     tzolkin: '<svg viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg>',
     sibyl: '<svg viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg>',
   };
-  const RUNE_BY_CODE = Object.fromEntries(RUNES.map((r, i) => [r.code, Object.assign({ index: i }, r)]));
   const ARCHETYPES = Object.keys(T.archetypes);
   const FONTS = { serif: "'Gowun Batang', serif", latin: "'Cinzel', 'Gowun Batang', serif", glyph: "'Noto Sans Runic', 'Segoe UI Historic', sans-serif" };
   const CARD_THEME = {
@@ -92,16 +152,19 @@
     decan: { bgTop: "#080717", bgBottom: "#2e1706", accent: "#fcbc7c", text: "#f5f2e9", muted: "#b8b8ce" },
     tzolkin: { bgTop: "#080717", bgBottom: "#00282a", accent: "#80ded7", text: "#f5f2e9", muted: "#b8b8ce" },
     sibyl: { bgTop: "#080717", bgBottom: "#2c1026", accent: "#fab8a8", text: "#f5f2e9", muted: "#b8b8ce" },
+    saju: { bgTop: "#080717", bgBottom: "#2a1a0e", accent: "#f2a585", text: "#f5f2e9", muted: "#c8bca8" }, // (14단계) --room-h 25 · 단청 주홍 (designer 확인)
   };
   const SIBYL_TOPIC_KEYS = Object.keys(T.sibyl.topics);
 
   // ───────── 저장 (sessionStorage, 이 탭 한정) ─────────
   const STORE_KEY = "strange-oracle";
-  const UNLOCK_KEY = "strange-oracle-unlock"; // (12단계 12-2) 광고로 연 방 이름 표시만 {"ogham":1,…}. 입력값·결과 번호·코드는 넣지 않는다
+  const UNLOCK_KEY = "strange-oracle-unlock"; // 12·13단계 광고 잠금 표시 칸(은퇴). 옛 탭에 남아 있으면 "내 정보 지우기"에서 지운다
   // (8단계) 인트로가 없어져 started 칸은 쓰지 않는다. 새 세션 = 마친 방이 없음 → 입구부터
   const emptyState = () => ({ profile: {}, visits: {} });
   function validVisit(room, v) {
     if (!v || !ARCHETYPES.includes(v.archetype)) return false;
+    // (14단계) 만신의 방: 결과 코드(1~5000, Saju.encodeCode)만. 원국 8글자·성별·대운은 저장하지 않는다
+    if (room === "saju") return Number.isInteger(v.code) && v.code >= 1 && v.code <= 5000 && Boolean(SAJU && SAJU.stems[Saju.decodeCode(v.code).S1]);
     if (room === "rune") return Array.isArray(v.picks) && v.picks.length === 3 && v.picks.every((c) => RUNE_BY_CODE[c]) && T.rune.topics[v.topic];
     // (10단계) 이어가기 코드로 복원한 별의 방: 나크샤트라 번호만 있고 서양 별자리·해/달 라시는 없다(restored)
     if (room === "star") return Number.isInteger(v.nak) && NAKS[v.nak] && (v.restored === true || (RASHIS[v.west] && RASHIS[v.sunRashi] && RASHIS[v.moonRashi]));
@@ -125,6 +188,31 @@
       return emptyState();
     }
   }
+  // 방 문구 전역을 다시 묶는다 (ensureRoom이 파일을 받은 뒤 부른다)
+  function bindData(room) {
+    RUNES = window.RUNES;
+    NAKS = window.NAKSHATRAS;
+    RASHIS = window.RASHIS;
+    PLANETS = window.PLANETS;
+    OGHAM = window.OGHAM;
+    DECANS = window.DECANS;
+    TZ_SIGNS = window.TZOLKIN_SIGNS;
+    TZ_NUMBERS = window.TZOLKIN_NUMBERS;
+    ORACLES = window.ORACLES;
+    ORACLE_TOPICS = window.ORACLE_TOPICS;
+    Astro = window.Astro;
+    Saju = window.Saju;
+    RUNE_BY_CODE = RUNES ? Object.fromEntries(RUNES.map((r, i) => [r.code, Object.assign({ index: i }, r)])) : {};
+    if (window.SAJU && SAJU !== window.SAJU) {
+      SAJU = window.SAJU;
+      mergeSajuText();
+    }
+    // 받은 방의 화면에만 문구를 다시 채운다 (이미 그린 다른 방 결과의 안내자 대사·{who} 치환을 덮지 않도록)
+    if (room && screens) $$(`section[data-room="${room}"]`).forEach((sec) => applyText(sec));
+  }
+  let screens = null; // 아래 "화면 전환"에서 채운다 (bindData가 먼저 불릴 수 있어 let)
+  bindData();
+  onRoomLoaded = bindData;
   let state = load();
   function save() {
     try {
@@ -147,7 +235,7 @@
     $$("input[data-js], textarea[data-js]").forEach((el) => (el.type === "checkbox" || el.type === "radio" ? (el.checked = false) : (el.value = "")));
     if (typeof readSet !== "undefined") readSet.clear();
     resetSibyl();
-    [js("star-hour"), js("star-minute")].forEach((el) => (el.disabled = false));
+    [js("star-hour"), js("star-minute"), js("saju-hour"), js("saju-minute")].forEach((el) => (el.disabled = false));
     closeResume(); // 펼쳐 둔 이어가기 코드 표시·입력 칸을 닫고 비운다 (입력 칸 값은 위에서 이미 비움)
   }
   const filledRooms = () => CHAPTER_ORDER.filter((r) => state.visits[r]);
@@ -176,20 +264,25 @@
   }
 
   // ───────── 정적 문구 채우기 ─────────
-  function applyText() {
-    $$("[data-t]").forEach((el) => (el.textContent = get(el.dataset.t) ?? ""));
-    $$("[data-h]").forEach((el) => (el.innerHTML = get(el.dataset.h) ?? ""));
-    $$("[data-ph]").forEach((el) => (el.placeholder = get(el.dataset.ph) ?? ""));
-    $$("[data-aria]").forEach((el) => el.setAttribute("aria-label", get(el.dataset.aria) ?? ""));
-    $$("[data-list]").forEach((el) => (el.innerHTML = (get(el.dataset.list) || []).map((p) => `<p>${p}</p>`).join("")));
+  function applyText(scope = document) {
+    $$("[data-t]", scope).forEach((el) => (el.textContent = get(el.dataset.t) ?? ""));
+    $$("[data-h]", scope).forEach((el) => (el.innerHTML = get(el.dataset.h) ?? ""));
+    $$("[data-ph]", scope).forEach((el) => (el.placeholder = get(el.dataset.ph) ?? ""));
+    $$("[data-aria]", scope).forEach((el) => el.setAttribute("aria-label", get(el.dataset.aria) ?? ""));
+    $$("[data-list]", scope).forEach((el) => (el.innerHTML = (get(el.dataset.list) || []).map((p) => `<p>${p}</p>`).join("")));
+    if (scope !== document) {
+      if (RASHIS) jsAll("rashi-label", scope).forEach((el, i) => (el.textContent = RASHIS[i].ko.replace("자리", "")));
+      if (TZ_SIGNS) jsAll("tzolkin-sign-label", scope).forEach((el, i) => (el.textContent = TZ_SIGNS[i].latin.toUpperCase()));
+      return;
+    }
     // 장 번호는 CHAPTER_ORDER에서 (마크업 data-n은 예비값)
     jsAll("room-chapter-num").forEach((el) => {
       const room = el.closest("[data-room]")?.dataset.room;
       el.textContent = fill(T.storyChapter, { n: CHAPTER_ORDER.includes(room) ? chapterOf(room) : el.dataset.n });
     });
-    jsAll("rashi-label").forEach((el, i) => (el.textContent = RASHIS[i].ko.replace("자리", "")));
+    if (RASHIS) jsAll("rashi-label").forEach((el, i) => (el.textContent = RASHIS[i].ko.replace("자리", "")));
     // 촐킨 톱니 카르투슈 20개: 유카텍 이름 대문자 (SVG text)
-    jsAll("tzolkin-sign-label").forEach((el, i) => (el.textContent = TZ_SIGNS[i].latin.toUpperCase()));
+    if (TZ_SIGNS) jsAll("tzolkin-sign-label").forEach((el, i) => (el.textContent = TZ_SIGNS[i].latin.toUpperCase()));
     document.title = T.meta.title;
     const desc = $('meta[name="description"]');
     if (desc) desc.content = T.meta.description;
@@ -242,7 +335,7 @@
   }
 
   // ───────── 화면 전환 ─────────
-  const screens = {};
+  screens = {};
   $$('section[id^="screen-"]').forEach((s) => (screens[s.id.slice(7)] = s));
   let currentName = "hub";
   let swapTimer = 0;
@@ -331,6 +424,17 @@
   });
 
   function go(name, opts = {}) {
+    const want = roomOfScreen(name);
+    if (want && ROOM_FILES[want] && !roomReady[want]) {
+      body.classList.add("is-loading");
+      return ensureRoom(want).then(() => {
+        body.classList.remove("is-loading");
+        go(name, opts);
+      }, () => {
+        body.classList.remove("is-loading");
+        toast(T.toast.loadFail || "");
+      });
+    }
     name = gate(name);
     const next = screens[name];
     if (!next) return;
@@ -355,7 +459,10 @@
       setTopbar(name);
       window.scrollTo(0, 0);
       enter[name]?.();
-      onScreen(name, next); // (12단계) 배너 채우기·화면 이벤트
+      if (/-input$/.test(name)) syncNotice(next);
+      if (name === "saju-intro") sajuGateOpen();
+      onScreen(name, next); // 화면 이벤트(GA4)
+      if (name === "hub" || /-result$/.test(name)) prefetchNext();
     };
     currentName = name; // 전환 중에 다시 불려도 이전 화면 기준으로 기록하지 않게
     if (prev && prev !== next && !reduceMotion && !opts.instant) {
@@ -519,6 +626,10 @@
   const clip = (s, n = 60) => ([...s].length > n ? [...s].slice(0, n - 1).join("") + "…" : s);
   // 결과 이름·핵심 한 줄 (공개 data). c = 결과 코드 모양(영수증 코드와 같음: 룬은 돌 번호 3개, 촐킨은 {number, sign})
   function headOf(room, c) {
+    if (room === "saju") {
+      const st = SAJU.stems[Saju.decodeCode(c.saju).S1];
+      return { title: strip(st.title), key: strip(st.key) };
+    }
     if (room === "rune") {
       const rs = c.rune.map((i) => RUNES[i]);
       return { title: rs.map((r) => r.name).join(" · "), key: strip(rs[1].key) };
@@ -555,7 +666,8 @@
       ["is-visited", "is-next", "is-locked"].forEach((c) => door.classList.toggle(c, c === st));
       if (st === "is-locked") door.setAttribute("aria-disabled", "true");
       else door.removeAttribute("aria-disabled");
-      js("hub-door-badge", door).textContent = fill(T.hub.badge, { n: chapterOf(room) });
+      const badge = js("hub-door-badge", door); // Ⅰ 대문에는 배지가 없다(번호는 door__num)
+      if (badge) badge.textContent = fill(T.hub.badge, { n: chapterOf(room) });
     }
     // 진행 + 지금까지의 이야기 (1방 이상)
     show(js("hub-sofar"), n > 0);
@@ -626,7 +738,7 @@
   // 지금 방문 기록 → 이어가기 코드에 담을 값 (결과 번호와 주제 키뿐)
   function resumeCodes() {
     const v = state.visits;
-    return Object.assign(myRoomCodes(), { runeTopic: v.rune ? v.rune.topic : null, sibylTopic: v.sibyl ? v.sibyl.topic : null });
+    return Object.assign(myRoomCodes(), { saju: v.saju ? v.saju.code : null, runeTopic: v.rune ? v.rune.topic : null, sibylTopic: v.sibyl ? v.sibyl.topic : null });
   }
   resumeEl.makeToggle.addEventListener("click", () => {
     const open = resumeEl.makeToggle.getAttribute("aria-expanded") !== "true";
@@ -656,6 +768,7 @@
   // 결과 번호 → 방문 기록. 원형 태그는 공개 데이터에서 다시 찾는다. 데이터에 없는 번호면 null
   function visitsFromCodes(c) {
     const v = {};
+    if (c.saju != null) v.saju = SAJU && Saju.decodeCode(c.saju) && { code: c.saju, archetype: SAJU.stems[Saju.decodeCode(c.saju).S1].archetype };
     if (c.ogham != null) v.ogham = OGHAM[c.ogham] && { ogham: c.ogham, archetype: OGHAM[c.ogham].archetype };
     if (c.star != null) v.star = NAKS[c.star] && { nak: c.star, restored: true, archetype: NAKS[c.star].archetype };
     if (c.decan != null) v.decan = DECANS[c.decan] && { decan: c.decan, when: null, archetype: DECANS[c.decan].archetype };
@@ -664,9 +777,17 @@
     if (c.sibyl != null) v.sibyl = ORACLES[c.sibyl] && { sors: c.sibyl, topic: c.sibylTopic, archetype: ORACLES[c.sibyl].archetype };
     return Object.keys(v).every((room) => validVisit(room, v[room])) ? v : null;
   }
-  function restoreFromCode() {
+  async function restoreFromCode() {
     if (filledRooms().length) return; // 넣기는 마친 방이 없을 때만
     const r = Resume.decode(resumeEl.input.value);
+    if (r.codes) {
+      // (14-6) 복원할 방 파일을 모두 받은 뒤 그린다
+      try {
+        await ensureRooms(CHAPTER_ORDER.filter((room) => r.codes[room] != null));
+      } catch (e) {
+        return toast(T.toast.loadFail || "");
+      }
+    }
     const visits = r.codes ? visitsFromCodes(r.codes) : null;
     if (!visits) {
       track("so_resume", { step: "failed" });
@@ -707,7 +828,7 @@
   }, true);
 
   // ───────── 입력 화면 공통 ─────────
-  const editing = { rune: false, star: false, ogham: false, decan: false, tzolkin: false };
+  const editing = { saju: false, rune: false, star: false, ogham: false, decan: false, tzolkin: false };
   function digitsOnly(el, next) {
     el.addEventListener("input", () => {
       const clean = el.value.replace(/\D/g, "");
@@ -884,6 +1005,7 @@
   // (13단계) 방 결과의 책 한 줄: 결제 상태와 무관하게 떡밥(hook) + "책에서 이 방의 장 열기 →"(그 장 표지로). 옛 "여섯 문 끝…" 줄은 숨김
   function updateBookLines() {
     jsAll("result-book-line").forEach((el) => {
+      if (el.closest('[data-room="saju"]')) return show(el, false); // 만신 장은 책에 아직 없다(F4-B2)
       show(el, true);
       el.dataset.state = "open";
       show(js("book-line-note", el), false);
@@ -1897,10 +2019,342 @@
     };
   });
 
+  // ═════════ (14단계 14-1) Ⅰ 만신의 방 ═════════
+  // 화면: saju-intro(① 대문) → saju-input(② 채비: 이름·생년월일·시각·성별 + 6장 고지) → saju-ritual(③ rice → rung, ④ gongsu) → saju-result
+  // 개인정보(6장): 네 값은 state.profile(sessionStorage, 이 탭)에만. 성별은 profile.gender("m"|"f"|"x")이고 "내 정보 지우기" 대상이다.
+  //   이어가기 코드·분석 이벤트·공유 카드·URL·서버 요청에는 성별·원국 8글자·대운을 넣지 않는다.
+  //   visits.saju에는 결과 코드(Saju.encodeCode, 1~5000)와 원형만 둔다. 원국 표·대운은 화면을 그릴 때 profile로 다시 계산한다.
+  // 문구: 원본은 data-saju.js(SAJU.text) 하나다. 마크업의 data-t 키(saju.*·guides.saju·bridges.saju·privacy.noticeProfile)로 길만 잇는다.
+  const GENDER_OF = { m: "male", f: "female", x: "none" };
+  const SAJU_GROUP_KEY = { bigeop: "bigyeop", siksang: "siksang", jaeseong: "jaeseong", gwanseong: "gwanseong", inseong: "inseong" }; // saju.js 묶음 이름 → data-saju.js groups 키
+  const SAJU_PILLARS = ["year", "month", "day", "hour"];
+  const SAJU_STEP_MS = 360; // 글자 사이 (design 14단계 3절)
+  const SAJU_INK_MS = 560; // 글자 하나가 번지는 시간
+  function mergeSajuText() {
+    const X = SAJU.text;
+    const I = X.input || {};
+    const R = X.result || {};
+    const pl = R.pillarLabelsLong || []; // [시주, 일주, 월주, 년주] (오른쪽→왼쪽 표기 순)
+    T.guides.saju = X.guide;
+    T.bridges.saju = X.bridge;
+    T.privacy.noticeProfile = I.notice;
+    if (!T.privacy.noticeReuse) T.privacy.noticeReuse = I.noticeReuse;
+    const G = I.genderOptions || {};
+    const RS = X.ritualSteps || {};
+    const rice = RS.rice || {};
+    const gongsu = RS.gongsu || {};
+    const H = R.headings || {};
+    T.saju = {
+      intro: X.intro,
+      input: Object.assign({}, I, { dateLabel: I.birthLabel, dateWhy: I.birthWhy, genderM: G.male, genderF: G.female, genderX: G.none }),
+      ritual: { bellLabel: rice.bellLabel, hint: rice.hint, hourUnknown: rice.unknownHour, done: rice.done, call: gongsu.call, callSub: gongsu.callSub, go: gongsu.next },
+      pillars: { hour: pl[0], day: pl[1], month: pl[2], year: pl[3], unknown: R.unknownCell },
+      elements: R.elementNames || {},
+      result: Object.assign({}, R, {
+        boardTitle: R.pillarsTitle, selfNote: R.pillarsHint, hourNote: R.sixNote, restoredBoard: R.restoredPillars,
+        ohaengTitle: R.elementsTitle, s4Ask: R.daeunNone, s4Edit: R.daeunNoneLink,
+        s1Title: H.s1, s4Title: H.s4, s5Title: H.s5,
+      }),
+      errors: X.errors || {},
+      loading: X.loading || {},
+      card: X.card || {},
+    };
+  }
+  // (14-1) 뒤의 방 입력 고지: 이 탭에 이미 넣은 값이 있으면 "이미 넣은 값을 씁니다" 한 줄. "내 정보 지우기" 뒤에는 원래 고지
+  function syncNotice(scr) {
+    const room = scr.dataset.room;
+    if (room === "saju" || room === "sibyl") return;
+    const span = $('[data-js="privacy-notice"] [data-t]', scr);
+    if (!span) return;
+    const p = state.profile;
+    const reuse = Boolean(p.name || p.birth) && T.privacy.noticeReuse;
+    span.textContent = reuse || (get(span.dataset.t) ?? "");
+  }
+
+  const sajuIntro = screens["saju-intro"];
+  const sajuInput = screens["saju-input"];
+  const sajuRitual = screens["saju-ritual"];
+  const sajuResult = screens["saju-result"];
+  let sajuCalc = null; // Saju.compute 결과 (메모리만)
+  let sajuView = null;
+  let sajuBusy = false;
+
+  // ① 대문: 들어올 때 닫힌 문이 0.6초 뒤 열린다. 화면을 누르면 바로 열림. 움직임 줄이기면 처음부터 열림
+  function sajuGateOpen() {
+    const g = js("saju-gate", sajuIntro);
+    g.classList.toggle("is-closed", !reduceMotion);
+    if (!reduceMotion) later(() => g.classList.remove("is-closed"), 600);
+  }
+  sajuIntro.addEventListener("click", () => js("saju-gate", sajuIntro).classList.remove("is-closed"));
+
+  // ② 채비
+  const sf = {
+    name: js("saju-name"), y: js("saju-year"), m: js("saju-month"), d: js("saju-day"),
+    h: js("saju-hour"), mi: js("saju-minute"), unknown: js("saju-time-unknown"),
+  };
+  const sajuGender = jsAll("saju-gender-opt", sajuInput);
+  digitsOnly(sf.y, sf.m);
+  digitsOnly(sf.m, sf.d);
+  digitsOnly(sf.d, sf.h);
+  digitsOnly(sf.h, sf.mi);
+  digitsOnly(sf.mi);
+  js("saju-form").addEventListener("submit", (e) => e.preventDefault());
+  function sajuErr(k, msg) {
+    js(`saju-${k}-field`).classList.toggle("is-error", Boolean(msg));
+    const e = js(`saju-${k}-error`);
+    e.textContent = msg || "";
+    show(e, Boolean(msg));
+  }
+  const syncUnknown = () => [sf.h, sf.mi].forEach((el) => {
+    el.disabled = sf.unknown.checked;
+    if (sf.unknown.checked) el.value = "";
+  });
+  sf.unknown.addEventListener("change", () => {
+    syncUnknown();
+    sajuErr("time", "");
+  });
+  sf.name.addEventListener("input", () => sajuErr("name", ""));
+  [sf.y, sf.m, sf.d].forEach((el) => el.addEventListener("input", () => sajuErr("date", "")));
+  [sf.h, sf.mi].forEach((el) => el.addEventListener("input", () => sajuErr("time", "")));
+  sajuGender.forEach((r) => r.addEventListener("change", () => sajuErr("gender", "")));
+  enter["saju-input"] = () => {
+    const p = state.profile;
+    show(js("saved-info", sajuInput), false);
+    ["name", "date", "time", "gender"].forEach((k) => sajuErr(k, ""));
+    sf.name.value = p.name || "";
+    sf.y.value = p.birth ? p.birth.y : "";
+    sf.m.value = p.birth ? p.birth.m : "";
+    sf.d.value = p.birth ? p.birth.d : "";
+    sf.unknown.checked = p.time === null;
+    sf.h.value = p.time ? p.time.h : "";
+    sf.mi.value = p.time ? pad2(p.time.m) : "";
+    syncUnknown();
+    sajuGender.forEach((r) => (r.checked = r.value === p.gender));
+  };
+  function readSaju() {
+    const E = T.saju.errors;
+    const name = sf.name.value.trim();
+    const y = Number(sf.y.value), m = Number(sf.m.value), d = Number(sf.d.value);
+    const errs = {};
+    if (!name || [...name].length > 10) errs.name = E.name;
+    if (!(sf.y.value.length === 4 && Calc.validDate(y, m, d))) errs.date = E.birth;
+    else if (y < 1930 || Date.UTC(y, m - 1, d) > Date.now()) errs.date = E.birthRange;
+    let time = null;
+    if (!sf.unknown.checked) {
+      const h = Number(sf.h.value), mi = sf.mi.value === "" ? 0 : Number(sf.mi.value);
+      if (sf.h.value === "" || h > 23 || mi > 59) errs.time = E.time;
+      else time = { h, m: mi };
+    }
+    const g = (sajuGender.find((r) => r.checked) || {}).value;
+    if (!GENDER_OF[g]) errs.gender = E.gender;
+    ["name", "date", "time", "gender"].forEach((k) => sajuErr(k, errs[k]));
+    const first = ["name", "date", "time", "gender"].find((k) => errs[k]);
+    if (first) {
+      ({ name: sf.name, date: sf.y, time: sf.h, gender: sajuGender[0] })[first].focus();
+      return null;
+    }
+    return { name, birth: { y, m, d }, time, gender: g };
+  }
+  js("saju-input-go").addEventListener("click", () => {
+    const v = readSaju();
+    if (!v) return;
+    Object.assign(state.profile, v); // 6장 예외: 이 탭의 sessionStorage profile에만 (고지는 버튼 바로 위 privacy-notice)
+    save();
+    editing.saju = false;
+    startSaju();
+  });
+  function calcFromProfile() {
+    const p = state.profile;
+    if (!p.birth || p.time === undefined || !Saju || !Saju.isLunarReady()) return null;
+    try {
+      return Saju.compute({ y: p.birth.y, m: p.birth.m, d: p.birth.d, time: p.time ? { h: p.time.h, mi: p.time.m } : null, gender: GENDER_OF[p.gender] || "none" });
+    } catch (e) {
+      return null;
+    }
+  }
+  // 만세력(lunar-javascript)을 받아 계산한 뒤 의식으로. 받지 못하면 안내 한 줄 + 같은 버튼으로 다시 시도(막다른 곳 없음)
+  async function startSaju() {
+    if (sajuBusy) return;
+    sajuBusy = true;
+    const btns = [js("saju-input-go"), js("saju-intro-go")];
+    btns.forEach((b) => (b.classList.add("is-loading"), b.setAttribute("aria-busy", "true")));
+    try {
+      await Saju.loadLunar();
+      sajuCalc = calcFromProfile();
+    } catch (e) {
+      sajuCalc = null;
+    } finally {
+      sajuBusy = false;
+      btns.forEach((b) => (b.classList.remove("is-loading"), b.removeAttribute("aria-busy")));
+    }
+    if (!sajuCalc) {
+      const L = T.saju.loading;
+      return toast([L.fail, L.retry].filter(Boolean).join(T.common.sep));
+    }
+    go("saju-ritual");
+  }
+
+  // 원국 칸 채우기 (쌀 위 = 글자만, 결과 = 글자 + 독음·오행)
+  function paintPillars(list, c, withSmall) {
+    SAJU_PILLARS.forEach((k) => {
+      const li = $(`[data-pillar="${k}"]`, list);
+      const p = c.pillars[k];
+      li.classList.toggle("is-unknown", !p);
+      const chars = $$(".wonguk__char", li);
+      [["stem", p && p.stem], ["branch", p && p.branch]].forEach(([kind, i], n) => {
+        const el = chars[n];
+        if (!p) {
+          el.removeAttribute("data-el");
+          el.innerHTML = "";
+          return;
+        }
+        const elName = Saju.ELEMENTS[(kind === "stem" ? Saju.STEM_EL : Saju.BRANCH_EL)[i]];
+        const ko = (kind === "stem" ? Saju.STEM_KO : Saju.BRANCH_KO)[i];
+        const elLabel = T.saju.elements[elName];
+        el.dataset.el = elName;
+        el.innerHTML = `<b>${(kind === "stem" ? Saju.STEMS : Saju.BRANCHES)[i]}</b>` + (withSmall ? `<small>${esc(elLabel ? ko + T.common.sep + elLabel : ko)}</small>` : "");
+      });
+    });
+  }
+
+  // ③ 쌀점과 방울 → ④ 공수
+  enter["saju-ritual"] = () => {
+    const c = sajuCalc;
+    sajuRitual.dataset.stage = "rice";
+    if (!c) return;
+    paintPillars(js("saju-ritual-pillars", sajuRitual), c, false);
+    show(js("saju-hour-unknown", sajuRitual), false);
+    js("saju-ritual-hint", sajuRitual).textContent = T.saju.ritual.hint || "";
+    const st = SAJU.stems[c.dayStem];
+    js("saju-gongsu-stem", sajuRitual).textContent = st.hanja;
+    js("saju-gongsu-call", sajuRitual).textContent = fill(T.saju.ritual.call || "", { name: st.name, stem: st.name });
+  };
+  js("saju-bell", sajuRitual).addEventListener("click", () => {
+    if (sajuRitual.dataset.stage !== "rice" || !sajuCalc) return;
+    buzz(30);
+    sajuRitual.dataset.stage = "rung";
+    js("saju-ritual-hint", sajuRitual).textContent = "";
+    const n = sajuCalc.pillars.hour ? 8 : 6;
+    show(js("saju-hour-unknown", sajuRitual), !sajuCalc.pillars.hour);
+    later(() => {
+      sajuRitual.dataset.stage = "gongsu";
+      js("saju-gongsu-go", sajuRitual).focus({ preventScroll: true });
+    }, reduceMotion ? 0 : (n - 1) * SAJU_STEP_MS + SAJU_INK_MS + 200);
+  });
+  js("saju-gongsu-go", sajuRitual).addEventListener("click", () => {
+    if (!sajuCalc) return;
+    renderSaju({ code: sajuCalc.code }, true);
+    go("saju-result");
+  });
+
+  // 결과 (14-1 결과 화면 순서)
+  const sajuParas = (list) => (Array.isArray(list) ? list : [list]).filter(Boolean).map((p) => `<p>${p}</p>`).join("");
+  function renderSaju(v, fresh) {
+    const scr = sajuResult;
+    const R = T.saju.result;
+    let calc = sajuCalc && sajuCalc.code === v.code ? sajuCalc : calcFromProfile();
+    if (calc && calc.code !== v.code) calc = null; // 프로필이 바뀌었거나(다른 방에서 고침) 이어가기 코드로 복원한 방 → 원국 없이
+    const sel = calc ? calc.select : Saju.decodeCode(v.code);
+    const st = SAJU.stems[sel.S1];
+    if (fresh) {
+      state.visits.saju = { code: v.code, archetype: st.archetype };
+      save();
+    }
+    sajuView = { sel, st, calc };
+    renderGuideText(scr, "saju");
+    js("saju-stem-seal", scr).dataset.el = Saju.ELEMENTS[Saju.STEM_EL[sel.S1]];
+    js("saju-stem-hanja", scr).textContent = st.hanja;
+    js("result-title", scr).textContent = strip(st.title);
+    js("result-key", scr).innerHTML = st.key;
+    js("result-meta", scr).textContent = strip(fill(R.meta, { who: whoOf(state.profile.name || "") }));
+
+    // 한지 판: 원국 표·경우별 안내·오행 막대 (복원이면 표·막대 대신 한 줄)
+    js("saju-board", scr).classList.toggle("is-restored", !calc);
+    js("saju-wonguk", scr).hidden = !calc;
+    js("saju-ohaeng", scr).hidden = !calc;
+    show(js("saju-restored-note", scr), !calc);
+    show(js("saju-hour-note", scr), Boolean(calc && !calc.pillars.hour));
+    const jd = calc && calc.flags.jieDay;
+    const jn = js("saju-jeolip-note", scr);
+    jn.textContent = jd ? fill(jd.year ? R.jieqiYear : R.jieqiMonth, { alt: jd.month.after.hanja, altYear: jd.year ? jd.year.after.hanja : "" }) : "";
+    show(jn, Boolean(jd));
+    if (calc) {
+      paintPillars(js("saju-wonguk", scr), calc, true);
+      jsAll("saju-ohaeng-row", scr).forEach((row) => {
+        const el = row.dataset.el;
+        const n = calc.elements[el];
+        row.style.setProperty("--n", n);
+        row.classList.toggle("is-empty", n === 0);
+        row.classList.toggle("is-most", el === sel.S2a);
+        row.classList.toggle("is-least", el === sel.S2b.element);
+        js("saju-ohaeng-count", row).textContent = String(n);
+      });
+    }
+
+    // 풀이 S1 → S2a → S2b → S3 → S4
+    js("saju-s1-body", scr).innerHTML = sajuParas(st.body);
+    js("saju-s2a-body", scr).innerHTML = sajuParas(SAJU.elements.many[sel.S2a]);
+    js("saju-s2b-body", scr).innerHTML = sajuParas(SAJU.elements[sel.S2b.kind][sel.S2b.element]);
+    const H = R.headings || {};
+    const elName = (el) => T.saju.elements[el] || "";
+    const grp = SAJU.groups[SAJU_GROUP_KEY[sel.S3]];
+    const head = (key, t) => {
+      const el = $(`[data-t="saju.result.${key}"], [data-js="saju-${key}"]`, scr);
+      el.removeAttribute("data-t");
+      el.dataset.js = `saju-${key}`;
+      el.textContent = t || "";
+    };
+    head("s2aTitle", fill(H.s2a, { element: elName(sel.S2a) }));
+    head("s3Title", fill(H.s3, { group: grp.name }));
+    js("saju-s2b-title", scr).textContent = fill(sel.S2b.kind === "empty" ? H.s2bEmpty : H.s2b, { element: elName(sel.S2b.element) });
+    js("saju-s3-body", scr).innerHTML = sajuParas(grp.text);
+    const dw = calc && calc.daewoon;
+    show(js("saju-s4", scr), Boolean(dw));
+    show(js("saju-s4-ask", scr), !dw);
+    js("saju-s4-body", scr).innerHTML = dw ? sajuParas(fill(SAJU.daeun[dw.direction], { age: fill(dw.approx ? R.daeunAgeApprox : R.daeunAge, { n: dw.startAge }) })) : "";
+    const ask = $('[data-t="saju.result.s4Ask"], [data-js="saju-s4-ask-text"]', scr);
+    ask.removeAttribute("data-t");
+    ask.dataset.js = "saju-s4-ask-text";
+    ask.textContent = (calc ? R.daeunNone : R.restoredDaeun) || "";
+
+    renderArchetypeLine(scr, st.archetype, st.archetypeWhy);
+    renderSway(js("result-archetype-sway", scr));
+    js("saju-s5", scr).textContent = strip(st.gongsu); // S5 만신의 공수(안내자 close 자리)
+    renderBookLine(scr, st.event && st.event.hook);
+    Disclaimer.mount(js("disclaimer-slot", scr));
+    renderPassage(scr);
+  }
+  const sajuEdit = (focusGender) => {
+    editing.saju = true;
+    go("saju-input");
+    if (focusGender) setTimeout(() => sajuGender[0].focus(), 400);
+  };
+  js("result-retry", sajuResult).addEventListener("click", () => sajuEdit(false));
+  js("saju-s4-edit", sajuResult).addEventListener("click", () => sajuEdit(true));
+  // 공유 카드: 일간 이름·한자·결과 이름·원형만 (원국 8글자·성별·이름·생일·대운 없음, 14-1·design 9절)
+  function buildSajuCard() {
+    const { st } = sajuView;
+    const C = T.saju.card;
+    return {
+      file: C.file, text: strip(fill(C.shareText, { name: st.title })),
+      opts: {
+        theme: CARD_THEME.saju, eyebrow: strip(C.eyebrow || ""), seed: 71 + SAJU.stems.indexOf(st),
+        title: strip(st.title), subtitle: `${st.name} ${st.hanja}`,
+        lines: [strip(st.key)],
+        badges: [strip(C.badge || ""), T.archetypes[st.archetype].name],
+        guideSignature: { name: T.guides.saju.name, line: strip(T.guides.saju.signature) },
+      },
+    };
+  }
+
   // ═════════ (8단계 U3) 방 시작 화면: 필요한 값이 프로필에 있으면 입력 화면을 건너뛰고 바로 의식 ═════════
   // 입력칸이 있는 방은 오검(이름)·별(생년월일·시각)·데칸·촐킨(생년월일). 룬 주제·시빌라 질문은 방의 본질이라 입력 화면을 그대로 둔다
   function savedValueOf(room) {
     const p = state.profile;
+    if (room === "saju")
+      return p.name && p.birth && p.time !== undefined && GENDER_OF[p.gender]
+        ? [p.name, fill(T.common.date, p.birth), p.time ? fill(T.common.time, { h: p.time.h, mm: pad2(p.time.m) }) : T.common.timeUnknown].join(T.common.sep)
+        : null;
     if (room === "ogham") return p.name && Calc.ogham(p.name) ? p.name : null;
     if (room === "star")
       return p.birth && p.time !== undefined
@@ -1927,6 +2381,7 @@
     if (!savedValueOf(room)) return go(inputName);
     editing[room] = false;
     const p = state.profile;
+    if (room === "saju") return startSaju();
     if (room === "ogham") {
       oghamCalc = Calc.ogham(p.name);
       return go("ogham-ritual");
@@ -1945,6 +2400,7 @@
   }
   // "전체 다시 보기"·테스트용: 저장된 결과 코드로 결과를 다시 그린다 (fresh=false면 저장하지 않음)
   const RENDER = {
+    saju: renderSaju,
     rune: renderRune, star: renderStar, ogham: renderOgham, decan: renderDecan, tzolkin: renderTzolkin,
     sibyl: (v, fresh) => renderSibyl(v, fresh, ""),
   };
@@ -1957,6 +2413,10 @@
   }
   function visitType(room) {
     const v = state.visits[room];
+    if (room === "saju") {
+      const st = SAJU.stems[Saju.decodeCode(v.code).S1];
+      return `${st.name} ${st.hanja}`;
+    }
     const E = T.story.evidenceType;
     if (room === "rune") {
       const [p, n, x] = v.picks.map((c) => RUNE_BY_CODE[c]);
@@ -1971,6 +2431,7 @@
   // 나의 이야기 요약 (문단 배열)
   function visitSummary(room) {
     const v = state.visits[room];
+    if (room === "saju") return SAJU.stems[Saju.decodeCode(v.code).S1].summary;
     if (room === "rune") return runeSummary(v);
     if (room === "ogham") return OGHAM[v.ogham].summary;
     if (room === "decan") return DECANS[v.decan].summary;
@@ -2242,7 +2703,7 @@
       },
     };
   }
-  const CARD_BUILD = { rune: buildRuneCard, star: buildStarCard, ogham: buildOghamCard, decan: buildDecanCard, tzolkin: buildTzolkinCard, sibyl: buildSibylCard };
+  const CARD_BUILD = { saju: buildSajuCard, rune: buildRuneCard, star: buildStarCard, ogham: buildOghamCard, decan: buildDecanCard, tzolkin: buildTzolkinCard, sibyl: buildSibylCard };
   ["result-share", "result-share-top"].forEach((name) => {
     CHAPTER_ORDER.forEach((room) => js(name, screens[`${room}-result`]).addEventListener("click", (e) => shareCard(e.currentTarget, CARD_BUILD[room])));
   });
@@ -2266,8 +2727,9 @@
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   const OLD_RECEIPT_KEY = "strange-oracle-receipt"; // 12단계까지 영수증 코드 칸. 남아 있으면 지우고 목차로 보낸다(13-4)
-  const BOOK_IDS = ["open", ...CHAPTER_ORDER, "flow", "match", "deep", "close"];
-  const AD_FREE = new Set(["open", "close"]); // 여는 글·닫는 글은 광고 없이 열린다 (13-2)
+  const BOOK_ROOMS = CHAPTER_ORDER.filter((r) => r !== "saju"); // (F4-B1) Ⅰ 만신 장(api/_paid/book/book-saju.js)은 F4-B2에서 책에 넣는다
+  const BOOK_IDS = ["open", ...BOOK_ROOMS, "flow", "match", "deep", "close"];
+  const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
   const FILES = { open: ["data-book-arch.js"], deep: ["data-book-arch.js"], close: ["data-book-arch.js"], flow: ["data-book-flow.js"], match: ["data-book-match.js", "data-book-bond.js"] };
   CHAPTER_ORDER.forEach((r) => (FILES[r] = [`data-book-${r}.js`]));
 
@@ -2354,6 +2816,7 @@
       decan: v.decan ? v.decan.decan : null,
       tzolkin: v.tzolkin ? { number: v.tzolkin.number, sign: v.tzolkin.sign } : null,
       sibyl: v.sibyl ? v.sibyl.sors : null,
+      saju: v.saju ? v.saju.code : null, // (14단계) 결과 코드만
     };
   }
 
@@ -2390,10 +2853,10 @@
   // ── 장 상태 (13-2)
   const roomsDone = () => filledRooms().length;
   const available = (id) => (CHAPTER_ORDER.includes(id) ? isDone(id) : id === "close" ? roomsDone() === CHAPTER_ORDER.length : roomsDone() > 0);
-  const needsAd = (id) => LOCK_ON && !AD_FREE.has(id);
-  const isOpen = (id) => !needsAd(id) || openedRooms()["book-" + id] === 1;
+  // (14-2) 광고 잠금 은퇴: 그 방을 마쳤으면(available) 장이 열린다. 결제(pay.mode) 잠금은 F4-B2
+  const isOpen = () => true;
   const readSet = new Set(); // 이 화면에서 끝까지 읽은 장 (메모리만)
-  const chapterState = (id) => (!available(id) ? "need-room" : !isOpen(id) ? "can-open" : readSet.has(id) ? "read" : "opened");
+  const chapterState = (id) => (!available(id) ? "need-room" : readSet.has(id) ? "read" : "opened");
   const chapterName = (id) =>
     CHAPTER_ORDER.includes(id) ? fill(T.topbar.room, { num: ROMAN[chapterOf(id) - 1], name: T.rooms[id].name })
       : id === "open" ? T.book.toc.open : id === "close" ? T.book.toc.close : T.book.parts[id === "flow" ? "timeline" : id];
@@ -2545,10 +3008,6 @@
   typeInputs.forEach((r) => r.addEventListener("change", () => js("book-match-type").removeAttribute("aria-invalid")));
   function setCoverState(st) {
     cover.dataset.state = st;
-    const u = js("book-unlock");
-    u.disabled = st === "waiting";
-    if (st === "waiting") u.setAttribute("aria-busy", "true");
-    else u.removeAttribute("aria-busy");
     syncOpenBtn();
   }
   function syncOpenBtn() {
@@ -2559,7 +3018,6 @@
     if (f) b.setAttribute("aria-busy", "true");
     else b.removeAttribute("aria-busy");
   }
-  const setStatus = (html) => (js("book-unlock-status").innerHTML = html);
   const needsFlowDate = (id) => id === "flow" && !state.profile.birth;
   function openCover(id, keep) {
     if (!available(id)) return showToc();
@@ -2572,7 +3030,7 @@
     cover.dataset.chapter = id;
     const room = CHAPTER_ORDER.includes(id);
     const c = myCodes();
-    js("chapter-cover-part").textContent = room ? T.book.part1.num : AD_FREE.has(id) ? "" : T.book.part2.num;
+    js("chapter-cover-part").textContent = room ? T.book.part1.num : PART0.has(id) ? "" : T.book.part2.num;
     const mark = $(`[data-js=book-chapter][data-chapter="${id}"] .chapter-row__mark`, reportScr);
     js("chapter-cover-mark").innerHTML = room && mark ? mark.innerHTML : "";
     js("chapter-cover-title").textContent = chapterName(id);
@@ -2641,34 +3099,6 @@
     }
     return {};
   }
-  async function unlock(noPartner) {
-    const id = coverId;
-    if (!id || cover.dataset.state !== "locked") return;
-    if (!prepare(id, noPartner)) return;
-    setCoverState("waiting");
-    setStatus(esc(T.book.unlock.loading));
-    track("so_unlock", { chapter: id, outcome: "request" });
-    const r = await Ads.rewarded({ slot: "book-unlock", room: id });
-    const result = UNLOCK_OUTCOMES.includes(r) ? r : "unavailable";
-    track("so_unlock", { chapter: id, outcome: result });
-    if (coverId !== id || reader.dataset.view !== "cover") return;
-    if (result === "closed") {
-      setCoverState("locked");
-      setStatus(esc(T.book.unlock.closed));
-      return;
-    }
-    markOpened("book-" + id); // 장 id 표시만 (13-2)
-    setCoverState("open");
-    if (result === "unavailable") {
-      setStatus(esc(T.book.unlock.unavailable)); // 광고가 없어 그냥 열림 → 안내를 보이고 펼치기는 사용자가
-      js("book-chapter-open").focus();
-    } else setStatus(`<span class="visually-hidden">${esc(T.book.unlock.opened)}</span>`);
-    const ok = await fetchChapter(id);
-    if (coverId !== id || reader.dataset.view !== "cover") return;
-    if (!ok) return setCoverState("fail");
-    if (result === "granted") readChapter(id, matchInput || {}, 0); // 광고를 끝까지 봤으면 바로 첫 쪽 (design 0)
-  }
-  js("book-unlock").addEventListener("click", () => unlock(false));
   async function openNow(noPartner) {
     const id = coverId;
     if (!id || !isOpen(id) || cover.dataset.state === "waiting") return;
@@ -2680,10 +3110,10 @@
     readChapter(id, pre, 0);
   }
   js("book-chapter-open").addEventListener("click", () => openNow(false));
-  js("book-match-nopartner").addEventListener("click", () => (cover.dataset.state === "locked" ? unlock(true) : openNow(true)));
+  js("book-match-nopartner").addEventListener("click", () => openNow(true));
   js("book-load-retry").addEventListener("click", () => {
     const id = coverId;
-    fetchChapter(id).then((ok) => coverId === id && ok && setCoverState(isOpen(id) ? "open" : "locked")); // 광고는 다시 보지 않는다(열림 표시는 이미 남김)
+    fetchChapter(id).then((ok) => coverId === id && ok && setCoverState("open"));
   });
   // 이어 읽기: 같은 탭에서만. 궁합은 상대 정보가 메모리에서 사라졌으므로 표지(입력)로, 복원한 탭 등 열림 표시가 없으면 표지로
   async function resume() {
@@ -3571,19 +4001,14 @@
     if (!e.target.closest("[data-go]")) endFinale();
   });
 
-  // ═════════ (12단계) 광고로 여는 조각 · 배너 · GA4 (common/ads.js, common/analytics.js) ═════════
-  // 설정은 data.js 맨 위 ads·analytics 한 곳. ID가 모두 비면 아무것도 불러오지 않고 잠금·쿠키 줄·FAQ 광고 안내도 없다(지금과 같음).
-  // 광고·분석은 주소에 query가 없을 때만 시작한다(시작할 때 query를 지운 뒤, 두 부품도 스스로 다시 확인).
-  // 분석 이벤트 값은 아래 허용 목록 안의 낱말뿐이다: 방 이름, 원형 코드, 단계·방법 이름. 입력값·세부 번호·코드는 실릴 자리가 없다(6장).
-  // (운영자 결정 2026-10-01) ads.lockAlways면 광고단위가 없어도 잠금을 보인다 — 광고가 없으면 누르는 즉시 "광고 없음" 안내와 함께 열린다
-  const LOCK_ON = Ads.rewardedConfigured(T.ads) || (T.ads && T.ads.lockAlways === true);
-  const UNLOCK_OUTCOMES = ["request", "granted", "unavailable", "closed"];
+  // ═════════ GA4 (common/analytics.js) — (14-2) 광고는 걷어 냈다. common/ads.js는 저장소에 그대로 두고 부르지 않는다 ═════════
+  // 분석은 주소에 query가 없을 때만 시작한다(시작할 때 query를 지운 뒤, 부품도 스스로 다시 확인).
+  // 분석 이벤트 값은 아래 허용 목록 안의 낱말뿐이다: 방 이름, 원형 코드, 단계·방법 이름. 입력값·세부 번호·코드·성별은 실릴 자리가 없다(6장).
   const EVENTS = {
     so_visit: {},
     so_room_view: { room: CHAPTER_ORDER },
     so_result: { room: CHAPTER_ORDER, archetype: ARCHETYPES },
     so_story: { step: ["3of6", "6of6"] },
-    so_unlock: { room: CHAPTER_ORDER, chapter: BOOK_IDS, outcome: UNLOCK_OUTCOMES }, // (13단계) 책 장은 chapter, slot은 보내지 않는다
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done"], chapter: BOOK_IDS }, // (13단계 13-8) 옛 preview·pay_click은 뺌
@@ -3593,9 +4018,7 @@
   function startExternal() {
     if (!booted || externalOn || location.search) return;
     externalOn = true;
-    Ads.init(T.ads);
     if (Analytics.init({ ga4: T.analytics.ga4, title: T.meta.title, events: EVENTS })) track("so_visit");
-    Ads.fill(screens[currentName]);
   }
   function track(name, props) {
     if (externalOn) Analytics.track(name, props);
@@ -3603,7 +4026,6 @@
   const storySent = new Set();
   function onScreen(name, scr) {
     if (!externalOn) return;
-    Ads.fill(scr);
     const room = roomOfScreen(name);
     if (CHAPTER_ORDER.includes(room) && name === `${room}-intro`) track("so_room_view", { room });
     if (CHAPTER_ORDER.includes(room) && name === `${room}-result` && state.visits[room]) track("so_result", { room, archetype: state.visits[room].archetype });
@@ -3617,9 +4039,8 @@
     }
   }
 
-  // 입구: 쿠키 한 줄(광고·분석 ID가 하나라도 있을 때), FAQ 광고 안내(보상형 광고단위가 있을 때)
-  js("cookie-line").hidden = !(Ads.anyConfigured(T.ads) || Analytics.configured(T.analytics.ga4));
-  js("hub-faq-adnote").hidden = !LOCK_ON;
+  // 입구: 쿠키 한 줄(GA4 ID가 있을 때만)
+  js("cookie-line").hidden = !Analytics.configured(T.analytics.ga4);
 
   // 공유 이벤트: 방법만 (공유 글·주소·카드 내용은 보내지 않는다)
   const shareRoom = () => {
@@ -3635,86 +4056,19 @@
     else if (t.closest('[data-js="share-kakao-slot"] button')) track("so_share", Object.assign(shareRoom(), { method: "kakao" }));
   });
 
-  // ── 잠금: 여섯 방 결과의 흐름 풀이 단락(turn-text) 하나 (12-1·12-2). 잠긴 동안 문장은 DOM에 넣지 않는다.
-  //    잠금은 방 완료·다음 문·나의 이야기·원형·이어가기 코드·공유 카드와 무관하다(화면의 이 단락만).
-  const turnHtml = {};
-  function openedRooms() {
-    try {
-      const o = JSON.parse(window.sessionStorage.getItem(UNLOCK_KEY) || "{}");
-      return o && typeof o === "object" ? o : {};
-    } catch (e) {
-      return {};
-    }
+  // 흐름 풀이 한 단락(turn-text)은 늘 무료로 보인다 (14-2)
+  function setTurn(room, scr, html) {
+    js("turn-text", js("result-turn", scr)).innerHTML = html;
   }
-  function markOpened(room) {
-    const cur = openedRooms();
-    const o = {};
-    CHAPTER_ORDER.concat(BOOK_IDS.map((id) => "book-" + id)).forEach((r) => (cur[r] === 1 || r === room) && (o[r] = 1)); // 방 이름·"book-<장 id>" 표시만
-    try {
-      window.sessionStorage.setItem(UNLOCK_KEY, JSON.stringify(o));
-    } catch (e) {
-      /* 저장이 막힌 브라우저: 이 화면에서만 열린다 */
-    }
-  }
-  function setTurn(room, scr, html, noLock) {
-    const box = js("result-turn", scr);
-    const text = js("turn-text", box);
-    const lock = js("unlock", box);
-    const btn = js("unlock-btn", box);
-    turnHtml[room] = html;
-    const locked = !noLock && LOCK_ON && openedRooms()[room] !== 1;
-    box.classList.toggle("is-locked", locked);
-    box.classList.remove("is-opening");
-    lock.hidden = !locked;
-    lock.classList.remove("is-waiting", "is-closed");
-    btn.disabled = false;
-    btn.removeAttribute("aria-busy");
-    js("unlock-status", box).textContent = "";
-    text.innerHTML = locked ? "" : html;
-  }
-  function openTurn(room, box, result) {
-    const text = js("turn-text", box);
-    const status = js("unlock-status", box);
-    js("unlock", box).hidden = true;
-    box.classList.remove("is-locked");
-    box.classList.add("is-opening");
-    const done = () => box.classList.remove("is-opening");
-    box.addEventListener("animationend", done, { once: true });
-    setTimeout(done, 700);
-    text.innerHTML = turnHtml[room] || "";
-    text.setAttribute("tabindex", "-1");
-    text.focus({ preventScroll: true });
-    if (result === "unavailable") status.textContent = T.unlock.unavailable;
-    else status.innerHTML = `<span class="visually-hidden">${esc(T.unlock.opened)}</span>`;
-  }
-  CHAPTER_ORDER.forEach((room) => {
-    const box = js("result-turn", screens[`${room}-result`]);
-    const lock = js("unlock", box);
-    const btn = js("unlock-btn", box);
-    const status = js("unlock-status", box);
-    btn.addEventListener("click", async () => {
-      if (lock.classList.contains("is-waiting") || lock.hidden) return;
-      lock.classList.remove("is-closed");
-      lock.classList.add("is-waiting");
-      btn.disabled = true;
-      btn.setAttribute("aria-busy", "true");
-      status.textContent = T.unlock.loading;
-      track("so_unlock", { room, outcome: "request" });
-      const r = await Ads.rewarded({ slot: "room-unlock", room });
-      const result = UNLOCK_OUTCOMES.includes(r) ? r : "unavailable";
-      track("so_unlock", { room, outcome: result });
-      lock.classList.remove("is-waiting");
-      btn.disabled = false;
-      btn.removeAttribute("aria-busy");
-      if (result === "closed") {
-        lock.classList.add("is-closed");
-        status.textContent = T.unlock.closed;
-        return;
-      }
-      markOpened(room);
-      openTurn(room, box, result);
+
+  // (14-6) 다음 방 파일 미리 받기: 입구·결과 화면이 그려진 뒤 한가할 때. 만신의 방이면 만세력 라이브러리도
+  function prefetchNext() {
+    const room = nextRoom();
+    if (!room) return;
+    idle(() => {
+      ensureRoom(room).then(() => room === "saju" && Saju.loadLunar().catch(() => {}), () => {});
     });
-  });
+  }
 
   // ═════════ 시작 ═════════
   applyText();
@@ -3739,6 +4093,7 @@
   }
   renderHub();
   setTopbar("hub");
+  if (state.visits.saju && Saju) Saju.loadLunar().catch(() => {}); // 원국 표는 생일이 있을 때만 다시 그린다
   // (12단계 12-4, 13단계) 주소의 query(fbclid·utm_*·옛 결제 복귀 ?pay= 등)는 시작할 때 모두 지운다 → 그 뒤에만 광고·분석을 켠다.
   // 결제는 은퇴했으므로 ?pay=… 값은 읽지도 보내지도 않는다.
   bookBoot();
@@ -3754,5 +4109,7 @@
     renderRune: (v) => renderRune(v, false), renderStar: (v) => renderStar(v, false),
     renderOgham: (v) => renderOgham(v, false), renderDecan: (v) => renderDecan(v, false),
     renderTzolkin: (v) => renderTzolkin(v, false), renderSibyl: (v) => renderSibyl(v, false, ""),
+    renderSaju: (v) => renderSaju(v, false), ensureRooms,
   };
+  }
 })();

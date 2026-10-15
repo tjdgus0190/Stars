@@ -16,10 +16,12 @@
   const RANDOM_LEN = 14;
   const LEN = PREFIX.length + PAYLOAD_LEN + RANDOM_LEN + 1;
   const ARCHETYPES = ["warrior", "sage", "lover", "rebel", "caregiver", "explorer", "creator", "ruler"];
-  // 나의 이야기 장 순서 Ⅰ~Ⅵ (spec 7-1, 결정 39). 브라우저(app.js)와 서버(api/_lib/core.js)가 이 배열 하나만 쓴다.
-  // 부호화(FIELDS)와는 무관하다 — 이 배열을 바꿔도 기존 영수증 코드는 그대로 해독된다.
-  const CHAPTER_ORDER = Object.freeze(["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
-  const ROOMS = CHAPTER_ORDER;
+  // 나의 이야기 장 순서 Ⅰ~Ⅶ (spec 14-1, 결정 91: 만신이 맨 앞). 강제 순서·장 번호·문 번호가 모두 이 배열을 따른다.
+  // 부호화(FIELDS)와는 무관하다 — 이 배열을 바꿔도 기존 영수증 코드는 그대로 해독된다(영수증 코드에는 saju 칸이 없다).
+  const CHAPTER_ORDER = Object.freeze(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
+  // 13단계까지의 순서(오검부터). SOG1 코드와 saju = 0인 SOG2 코드(옛 상태)의 순서 검사에 쓴다
+  const LEGACY_ORDER = Object.freeze(["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
+  const ROOMS = LEGACY_ORDER; // 영수증 코드(SO1, 휴면)의 방 칸
   // [이름, 기수]. 값 0 = 없음(방에 안 감·상대 없음·관계 없음), 1 이상 = 실제 값 + 1
   const FIELDS = [
     ["rune", 24 * 24 * 24 + 1], // 룬 세 개(과거·현재·미래) 번호 0~23 → p0*576 + p1*24 + p2 + 1
@@ -129,15 +131,22 @@
   const groups = (code) => String(code).match(/.{1,4}/g) || [];
   const pretty = (code) => groups(code).join("-");
 
-  // ═════════ 이어가기 코드 (10단계, spec 10-1 b) ═════════
+  // ═════════ 이어가기 코드 (10단계 SOG1 → 14단계 SOG2) ═════════
+  // (14단계 14-1) 만들 때는 늘 SOG2 = "SOG2" + 12자 + 검사 1자 = 17자. 필드는 SOG1의 R_FIELDS 8개 뒤에 ["saju", 5001] 하나.
+  //   saju 칸 = Saju.encodeCode(): 일간·많은·적은 오행·비어 있음·우세 묶음·시각 앎/모름 (대운 방향·성별은 없다).
+  //   유효한 모양 두 가지: (가) 값이 있는 방이 새 순서 Ⅰ 만신부터 빠짐없이, (나) saju = 0이고 나머지가 옛 순서(오검부터) 빠짐없이.
+  // SOG1(15자)은 해독만 한다: 옛 순서로 이어져 있어야 하고, 만신은 "없음"이다.
   // 모양: "SOG1" + 결과 코드 10자 + 검사 1자 = 15자. 같은 글자표·혼합 기수·검사 글자 방식. 무작위 부분 없음(같은 결과면 같은 코드).
   // 담는 것: 마친 방의 결과 번호(위 FIELDS의 방 여섯 칸과 같은 값 범위) + 룬 주제·시빌라 주제 번호. 그 밖에는 아무것도 없다
   //   (이름·생년월일·시각·질문·나이 구간·원형·상대·영수증·결제 여부 없음). 서버는 이 코드를 받지 않는다(브라우저 화면 전용).
   // 이 코드로 태어난 날을 거의 알아낼 수 있으므로 입력값에 준해 다룬다: 저장·전송·기록(console) 금지. 이 파일은 계산만 한다.
   // 필드 표는 tests.md 「10단계 · 이어가기 코드」. 순서·기수·주제 배열 순서를 바꾸면 기존 코드가 모두 깨진다.
-  const R_PREFIX = "SOG1";
-  const R_PAYLOAD_LEN = 10;
+  const R1 = { prefix: "SOG1", payload: 10 };
+  const R2 = { prefix: "SOG2", payload: 12 };
+  const R_PREFIX = R2.prefix;
+  const R_PAYLOAD_LEN = R2.payload;
   const R_LEN = R_PREFIX.length + R_PAYLOAD_LEN + 1;
+  const R1_LEN = R1.prefix.length + R1.payload + 1;
   const RUNE_TOPICS = Object.freeze(["me", "love", "work", "money"]); // data.js rune.topics의 키 (문구 아님)
   const SIBYL_TOPICS = Object.freeze(["exam", "love", "work", "relation", "self"]); // data.js sibyl.topics의 키
   const R_FIELDS = [
@@ -145,22 +154,26 @@
     ["rune", 24 * 24 * 24 + 1], ["runeTopic", RUNE_TOPICS.length + 1],
     ["sibyl", 32 + 1], ["sibylTopic", SIBYL_TOPICS.length + 1],
   ];
+  const R2_FIELDS = R_FIELDS.concat([["saju", 5000 + 1]]);
   const looksResume = (input) => /^S[O0]G/.test(String(input || "").toUpperCase().replace(/[^0-9A-Z]/g, ""));
   const looksReceipt = (input) => /^S[O0][1IL]/.test(String(input || "").toUpperCase().replace(/[^0-9A-Z]/g, ""));
   // 강제 순서(결정 37): 값이 있는 방은 Ⅰ부터 빠짐없이 이어져야 한다
-  const inOrder = (c) => {
-    const has = CHAPTER_ORDER.map((r) => c[r] != null);
+  const chain = (order, c) => {
+    const has = order.map((r) => c[r] != null);
     return has[0] && has.every((h, i) => !h || i === 0 || has[i - 1]);
   };
-  // codes: { ogham, star, decan, sibyl: 번호|null, tzolkin:{number,sign}|null, rune:[i,i,i]|null, runeTopic, sibylTopic: 주제 키|null }
+  // (가) 새 순서로 이어짐 또는 (나) 만신 없음 + 옛 순서로 이어짐
+  const inOrder = (c) => chain(CHAPTER_ORDER, c) || (c.saju == null && chain(LEGACY_ORDER, c));
+  // codes: { saju: 1~5000|null, ogham, star, decan, sibyl: 번호|null, tzolkin:{number,sign}|null, rune:[i,i,i]|null, runeTopic, sibylTopic: 주제 키|null }
   function resumeEncode(c) {
     if (!inOrder(c)) throw new Error("ResumeCode: 방 순서");
     const d = toDigits(Object.assign({ arch: ARCHETYPES[0], band: 0 }, c));
     d.runeTopic = c.rune ? RUNE_TOPICS.indexOf(c.runeTopic) + 1 : 0;
     d.sibylTopic = c.sibyl != null ? SIBYL_TOPICS.indexOf(c.sibylTopic) + 1 : 0;
     if ((c.rune && !d.runeTopic) || (c.sibyl != null && !d.sibylTopic)) throw new Error("ResumeCode: 주제");
+    d.saju = c.saju == null ? 0 : c.saju;
     let n = 0n;
-    for (const [name, radix] of R_FIELDS) {
+    for (const [name, radix] of R2_FIELDS) {
       const v = d[name];
       if (!Number.isInteger(v) || v < 0 || v >= radix) throw new Error("ResumeCode: 범위 밖 " + name);
       n = n * BigInt(radix) + BigInt(v);
@@ -173,25 +186,31 @@
     return R_PREFIX + payload + checkChar(payload);
   }
   // 해독: { codes } 또는 { error: "receipt"(영수증 코드를 넣음) | "shape"(모양·검사 글자·범위) | "order"(방 순서) }
+  // SOG1·SOG2 둘 다 받는다. 4번째 글자(1 또는 2)로 고른다. SOG1을 해독하면 saju = null
   function resumeDecode(input) {
     if (looksReceipt(input)) return { error: "receipt" };
     let s = String(input || "").toUpperCase().replace(/[^0-9A-Z]/g, "");
-    if (!/^S[O0]G[1IL]/.test(s)) return { error: "shape" };
-    s = R_PREFIX + s.slice(4).replace(/O/g, "0").replace(/[IL]/g, "1");
-    if (s.length !== R_LEN || [...s.slice(4)].some((ch) => val(ch) < 0)) return { error: "shape" };
-    const payload = s.slice(4, R_LEN - 1);
-    if (checkChar(payload) !== s[R_LEN - 1]) return { error: "shape" };
+    if (!/^S[O0]G[1IL2]/.test(s)) return { error: "shape" };
+    const v2 = /^S[O0]G2/.test(s);
+    const R = v2 ? R2 : R1;
+    const LEN = v2 ? R_LEN : R1_LEN;
+    const FIELDS_ = v2 ? R2_FIELDS : R_FIELDS;
+    s = R.prefix + s.slice(4).replace(/O/g, "0").replace(/[IL]/g, "1");
+    if (s.length !== LEN || [...s.slice(4)].some((ch) => val(ch) < 0)) return { error: "shape" };
+    const payload = s.slice(4, LEN - 1);
+    if (checkChar(payload) !== s[LEN - 1]) return { error: "shape" };
     let n = 0n;
     for (const ch of payload) n = n * 32n + BigInt(val(ch));
     const d = {};
-    for (let i = R_FIELDS.length - 1; i >= 0; i--) {
-      const [name, radix] = R_FIELDS[i];
+    for (let i = FIELDS_.length - 1; i >= 0; i--) {
+      const [name, radix] = FIELDS_[i];
       d[name] = Number(n % BigInt(radix));
       n /= BigInt(radix);
     }
     if (n !== 0n) return { error: "shape" };
     const all = fromDigits(Object.assign({ arch: 0, band: 0, partner: 0, relOgham: 0, relDecan: 0, relTzolkin: 0 }, d));
     const codes = {
+      saju: d.saju ? d.saju : null,
       ogham: all.ogham, star: all.star, decan: all.decan, tzolkin: all.tzolkin, rune: all.rune, sibyl: all.sibyl,
       runeTopic: d.runeTopic ? RUNE_TOPICS[d.runeTopic - 1] : null,
       sibylTopic: d.sibylTopic ? SIBYL_TOPICS[d.sibylTopic - 1] : null,
@@ -199,13 +218,13 @@
     // 주제는 그 방이 있을 때만, 룬 세 돌은 서로 달라야 한다(앱이 만들 수 없는 값 = 오타·위조)
     if (Boolean(codes.rune) !== Boolean(codes.runeTopic) || (codes.sibyl != null) !== Boolean(codes.sibylTopic)) return { error: "shape" };
     if (codes.rune && new Set(codes.rune).size !== 3) return { error: "shape" };
-    if (!roomsOf(codes).length) return { error: "shape" };
-    if (!inOrder(codes)) return { error: "order" };
+    if (!CHAPTER_ORDER.some((r) => codes[r] != null)) return { error: "shape" };
+    if (v2 ? !inOrder(codes) : !chain(LEGACY_ORDER, codes)) return { error: "order" };
     return { codes };
   }
-  const Resume = { encode: resumeEncode, decode: resumeDecode, looksResume, looksReceipt, pretty, PREFIX: R_PREFIX, LEN: R_LEN, FIELDS: R_FIELDS, RUNE_TOPICS, SIBYL_TOPICS };
+  const Resume = { encode: resumeEncode, decode: resumeDecode, looksResume, looksReceipt, pretty, PREFIX: R_PREFIX, LEN: R_LEN, FIELDS: R2_FIELDS, LEGACY: { PREFIX: R1.prefix, LEN: R1_LEN, FIELDS: R_FIELDS }, RUNE_TOPICS, SIBYL_TOPICS };
 
-  const api = { encode, decode, normalize, groups, pretty, roomsOf, ARCHETYPES, ROOMS, CHAPTER_ORDER, FIELDS, LEN, Resume };
+  const api = { encode, decode, normalize, groups, pretty, roomsOf, ARCHETYPES, ROOMS, CHAPTER_ORDER, LEGACY_ORDER, FIELDS, LEN, Resume };
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.PayCode = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -33,20 +33,6 @@ window.TEXT = {
   //   운영자가 계정에서 만든 값을 넣는다(공개 값이지만 에이전트가 지어내지 않는다). 모양이 틀리면 node tools/build-dist.js가 오류로 멈춘다.
   // analytics.ga4: GA4 측정 ID "G-XXXXXXXXXX". 넣기 전에 GA4 데이터 스트림의 '향상된 측정'을 반드시 끈다(12-5)
   analytics: { ga4: "" },
-  // ads.adsenseClient: 애드센스 게시자 ID "ca-pub-숫자16자리". 넣으면 build-dist가 배포 폴더에 ads.txt를 만든다. 자동 광고는 애드센스 계정에서 꺼 둔다
-  // ads.slots: 배너 자리별 네트워크(net: "adsense" 또는 "adfit")와 광고 단위 ID(id, 애드센스는 숫자 10자리 안팎).
-  //   "adfit"은 운영자 결정 41번 전에는 채우지 않는다(카카오 주소는 CLAUDE.md 3장 예외에 없음, 콘솔 경고만)
-  // ads.rewardedUnit: 구글 애드 매니저 보상형 광고단위 경로 "/네트워크코드/광고단위이름". 비어 있고 lockAlways가 false면 잠그지 않는다
-  // ads.label: 채워진 배너 위 작은 표시 글자 (문구, 최대 4자)
-  // ads.lockAlways: true면 보상형 광고단위가 아직 없어도 잠금 상자를 보인다(운영자 결정 2026-10-01).
-  //   광고가 없는 동안 버튼을 누르면 "지금은 보여 드릴 광고가 없어 그냥 열었어요"와 함께 바로 열린다. rewardedUnit을 넣으면 실제 광고가 나온다
-  ads: {
-    adsenseClient: "",
-    slots: { hub: { net: "adsense", id: "" }, "result-end": { net: "adsense", id: "" }, "story-end": { net: "adsense", id: "" }, "book-toc": { net: "adsense", id: "" } }, // book-toc: 13단계 책 목차 맨 아래
-    rewardedUnit: "",
-    lockAlways: true,
-    label: "광고",
-  },
 
   // 브라우저 탭 제목·검색 설명. index.html <head>의 title·description과 같은 문장으로 맞춰 둘 것
   // (검색·공유 미리보기는 JS 실행 전 값을 읽는다. 여기를 고치면 index.html 맨 위 두 줄도 같이 고쳐 주세요)
@@ -91,15 +77,6 @@ window.TEXT = {
   // ── (8단계) 기다리는 의식의 건너뛰기 힌트 (U4, 최대 12자)
   ritual: { skipHint: "누르면 바로 보기" },
 
-  // ── (12단계 12-2·12-3) 광고로 여는 흐름 풀이 단락 (여섯 방 결과의 잠금 상자). 각 최대 30자. button에는 "광고"가 반드시 들어간다(길이·초 표기 금지)
-  unlock: {
-    note: "이 방의 흐름 풀이 한 단락이 남아 있어요", // 잠금 상자 안내
-    button: "광고 한 편 보고 열기", // 잠금 버튼 (권장 12자 이내)
-    loading: "광고를 불러오는 중이에요", // 누른 뒤 기다리는 동안
-    closed: "끝까지 보면 열려요. 다시 누를 수 있어요", // 광고를 중간에 닫았을 때
-    unavailable: "지금은 보여 드릴 광고가 없어 그냥 열었어요", // 광고가 없거나 불러오지 못해 그냥 열 때
-    opened: "흐름 풀이가 열렸어요", // 화면에 안 보이고 스크린리더만 읽음
-  },
 
   // ── 개인정보 (CLAUDE.md 6장 sessionStorage 예외). 입력 화면 공통
   privacy: {
@@ -221,6 +198,7 @@ window.TEXT = {
   // name: 방 이름 (허브 문 최대 9자·2줄, 떡밥 카드 최대 9자)
   // chapterName: 나의 이야기 장 이름 (방 시작 알약·떡밥 카드·등뼈)
   rooms: {
+    saju: { name: "만신의 방", short: "만신", chapterName: "타고난 그릇" }, // (14단계) data-saju.js text.room에서 옮김 — 입구가 방 파일보다 먼저 그려지므로 여기 둔다
     ogham: { name: "오검의 방", short: "오검", chapterName: "뿌리" },
     star: { name: "별의 방", short: "별", chapterName: "마음결" },
     decan: { name: "데칸의 방", short: "데칸", chapterName: "숨은 재능" },
@@ -236,6 +214,7 @@ window.TEXT = {
     doorsAria: "방 고르기",                   // 화면 읽기 프로그램용 이름
     // 여섯 방의 문 (7단계 순서 Ⅰ~Ⅵ). 방 이름은 위 rooms에서. origin 최대 10자 / reads 한 줄 소개 최대 12자
     doors: {
+      saju: { origin: "한국 · 사주 명리", reads: "타고난 그릇" }, // (14단계) data-saju.js text.room에서 옮김
       ogham: { origin: "켈트 · 나무 문자", reads: "나의 뿌리" },
       star: { origin: "인도 · 베다", reads: "지금의 속마음" },
       decan: { origin: "이집트 · 별자리", reads: "잠들어 있는 재능" },
@@ -286,8 +265,6 @@ window.TEXT = {
         { q: "내 정보는 어디에 남나요?", a: "이름과 생년월일은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요." },
         { q: "한 권의 책은 무엇인가요?", a: "방마다 네 장 전체와 숨은 장, 시기별 흐름·궁합·원형 심층을 엮은 무료 책이에요. 장마다 짧은 광고 한 편을 보면 열리고, 보여 드릴 광고가 없으면 그냥 열려요. 원형은 지금까지 지난 방으로 엮어요." }, // (13단계) 책 문답 (q 최대 20자, a 최대 150자)
       ],
-      // (12단계) 2번째 문답("결과는 어떻게 읽나요?") 답 끝 한 줄. 잠금이 켜져 있을 때(ads.rewardedUnit 또는 ads.lockAlways)만 보인다. 300자 소개 글 합계에서 뺀다 (최대 60자)
-      adNote: "방마다 흐름 풀이 한 단락은 짧은 광고 한 편을 보면 열려요. 광고가 없으면 그냥 열려요.",
     },
     clearNote: "입력한 정보는 위쪽 막대의 \"내 정보 지우기\"로 언제든 지울 수 있어요.", // (최대 45자)
   },
@@ -923,13 +900,6 @@ window.TEXT = {
       retry: "다시 시도",   // (최대 8자)
       loadFail: "이 장을 불러오지 못했어요. 연결을 확인해 주세요", // (최대 40자)
       readLabel: "{chapter} · {n} / {total}", // 상단 막대 장 안 쪽 번호 (자동 형식)
-    },
-    unlock: { // 장 표지 잠금. button에 "광고" 필수, 초·횟수 표기 금지 (각 최대 30자, button 권장 16)
-      button: "광고 한 편 보고 열기",
-      loading: "광고를 불러오고 있어요",
-      unavailable: "지금은 보여 드릴 광고가 없어 그냥 열었어요",
-      closed: "광고를 끝까지 보면 열려요. 다시 누를 수 있어요",
-      opened: "이 장이 열렸어요", // 낭독만
     },
     match: { // 궁합 표지 입력. 값은 메모리에만 (13-4)
       consent: "상대의 이름과 생년월일은 이 브라우저 안의 계산에만 쓰고, 저장하거나 어디에도 보내지 않아요. 상대가 괜찮은지 먼저 물어봐 주세요.",

@@ -69,18 +69,21 @@ const server = http.createServer(async (req, res) => {
     return log(res.statusCode);
   }
   // 시험 전용 지름길(이 모의 서버에만 있다, 배포 폴더에는 없다): 방을 돌지 않고 앞의 N개 방을 마친 상태로 바로 연다
-  //   /__dev/skip            → 여섯 방 모두 마친 상태로 "나의 이야기"(#story)
-  //   /__dev/skip?rooms=3    → 앞 세 방(오검·별·데칸)만 마친 상태
+  //   /__dev/skip            → 일곱 방 모두 마친 상태로 "나의 이야기"(#story)
+  //   /__dev/skip?rooms=3    → 새 순서(14-1)의 앞 세 방(만신·오검·별)만 마친 상태
+  //   /__dev/skip?legacy=1   → 옛 상태: 13단계 순서 오검~룬(5방) 마침, 만신 미완 (rooms=N이면 옛 순서 앞 N개, 최대 6)
   //   /__dev/skip?to=hub     → 도착 화면을 입구 등 다른 화면으로 (기본 story)
   //   시험용 가짜 프로필(이름 "테스트", 1995-03-25 14:37)을 이 탭의 sessionStorage에만 넣는다
   if (rel === "/__dev/skip") {
-    const n = Math.min(6, Math.max(0, Number(url.searchParams.get("rooms") || 6) | 0));
+    const legacy = url.searchParams.get("legacy") === "1";
+    const n = Math.min(legacy ? 6 : 7, Math.max(0, Number(url.searchParams.get("rooms") || (legacy ? 5 : 7)) | 0));
     const to = /^[a-z-]+$/.test(url.searchParams.get("to") || "") ? url.searchParams.get("to") : "story";
     const P = "/products/strange-oracle/";
     const html = `<!DOCTYPE html><meta charset="utf-8"><title>시험 지름길</title>
-${["data.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"].map((f) => `<script src="${P}${f}"></script>`).join("\n")}
+${["data.js", "data-saju.js", "saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"].map((f) => `<script src="${P}${f}"></script>`).join("\n")}
 <script>
-var R = ["ogham","star","decan","tzolkin","rune","sibyl"].slice(0, ${n}), v = {};
+var R = ${legacy ? '["ogham","star","decan","tzolkin","rune","sibyl"]' : '["saju","ogham","star","decan","tzolkin","rune","sibyl"]'}.slice(0, ${n}), v = {};
+if (R.indexOf("saju") > -1) v.saju = { code: 532, archetype: SAJU.stems[Saju.decodeCode(532).S1].archetype };
 if (R.indexOf("ogham") > -1) v.ogham = { ogham: 2, archetype: OGHAM[2].archetype };
 if (R.indexOf("star") > -1) v.star = { nak: 4, west: 0, sunRashi: 11, moonRashi: 1, archetype: NAKSHATRAS[4].archetype };
 if (R.indexOf("decan") > -1) v.decan = { decan: 10, when: null, archetype: DECANS[10].archetype };
@@ -88,7 +91,7 @@ if (R.indexOf("tzolkin") > -1) v.tzolkin = { number: 4, sign: 19, archetype: TZO
 if (R.indexOf("rune") > -1) v.rune = { picks: [RUNES[0].code, RUNES[5].code, RUNES[10].code], topic: "me", archetype: RUNES[10].archetype };
 if (R.indexOf("sibyl") > -1) v.sibyl = { sors: 12, topic: "love", archetype: ORACLES[12].archetype };
 sessionStorage.clear();
-sessionStorage.setItem("strange-oracle", JSON.stringify({ profile: { name: "테스트", birth: { y: 1995, m: 3, d: 25 }, time: { h: 14, min: 37 } }, visits: v }));
+sessionStorage.setItem("strange-oracle", JSON.stringify({ profile: { name: "테스트", birth: { y: 1995, m: 3, d: 25 }, time: { h: 14, m: 37 } }, visits: v }));
 location.replace("${P}#${to}");
 </script>`;
     res.writeHead(200, { "Content-Type": TYPES[".html"], "Cache-Control": "no-store" }).end(html);

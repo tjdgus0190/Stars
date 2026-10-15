@@ -280,7 +280,7 @@
            상태 class는 다른 문과 같다(.is-locked / .is-next / .is-visited). hidden은 F4(developer)가 CHAPTER_ORDER에 saju를 넣을 때 지운다
            (지금 JS는 saju를 모르므로 눌러도 열 방이 없다 — 기존 동작 보호) -->
       <nav class="doors" data-aria="hub.doorsAria" data-js="hub-doors">
-        <button class="door door--gate is-next" type="button" data-room="saju" data-go="saju-intro" data-js="hub-door-saju" hidden>
+        <button class="door door--gate is-next" type="button" data-room="saju" data-go="saju-intro" data-js="hub-door-saju">
           <span class="door__frame" aria-hidden="true"><span class="door__relief"></span></span>
           <span class="door__num" aria-hidden="true">I</span>
           <span class="door__portal" aria-hidden="true">
@@ -454,9 +454,7 @@
         <h2 class="faq__title" id="faq-title" data-t="hub.faq.title">자주 묻는 것</h2>
         <dl class="faq__list" data-js="hub-faq">
           <div class="faq__item"><dt data-t="hub.faq.items.0.q">무엇을 보나요?</dt><dd data-t="hub.faq.items.0.a">켈트 오검, 베다 별자리, 이집트 데칸, 마야 촐킨, 북유럽 룬, 로마 신탁까지 여섯 문화의 점술로 당신의 뿌리·속마음·숨은 재능·다가올 순환·과거와 미래·오늘의 질문을 차례로 비춰 봐요.</dd></div>
-          <div class="faq__item"><dt data-t="hub.faq.items.1.q">결과는 어떻게 읽나요?</dt><dd data-t="hub.faq.items.1.a">방마다 결과 이름과 핵심 풀이가 나오고, 여섯 조각은 여덟 원형 가운데 하나로 모여 나의 이야기 한 편이 돼요.</dd>
-            <!-- (12단계 D2) 보상형 ID가 있을 때만 hidden 해제. 300자 소개 글 합계에서 뺀다. 디자인은 5번(결제) 답 끝이었으나 결제 꺼짐이면 그 문답이 통째로 숨어(결정 66) 1번 답 끝으로 옮김 (디자인 메모 안 (b)) -->
-            <dd class="faq__ad-note" data-js="hub-faq-adnote" data-t="hub.faq.adNote" hidden>방마다 흐름 풀이 한 단락은 짧은 광고 한 편을 보면 열려요. 광고가 없으면 그냥 열려요.</dd></div>
+          <div class="faq__item"><dt data-t="hub.faq.items.1.q">결과는 어떻게 읽나요?</dt><dd data-t="hub.faq.items.1.a">방마다 결과 이름과 핵심 풀이가 나오고, 여섯 조각은 여덟 원형 가운데 하나로 모여 나의 이야기 한 편이 돼요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">뿌리에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름과 생년월일은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
           <!-- (13단계) 책 문답: 장마다 광고 한 편, 광고가 없으면 그냥 열림, 무엇이 담기는지 (답 150자). 결제 문답은 은퇴 -->
@@ -945,13 +943,6 @@
           <li class="thread__step is-key"><span class="thread__when" data-t="rune.result.when.2"></span><span class="thread__word" data-js="thread-word"></span></li>
         </ol>
         <p class="turn__text" data-js="turn-text"></p>
-        <!-- (12단계) 잠금 상자. 보상형 ID가 비면 hidden 그대로(잠금 UI 0개). 잠글 때 JS: .turn에 .is-locked + 이 상자 hidden 해제(turn-text는 비운 채). 기다림 .is-waiting / 중간에 닫음 .is-closed / 열림: 상자 hidden, .turn에서 .is-locked 빼고 .is-opening -->
-        <div class="unlock" data-js="unlock" hidden>
-          <p class="unlock__note" data-t="unlock.note">이 방의 흐름 풀이 한 단락이 남아 있어요</p>
-          <button class="btn btn--secondary unlock__btn" type="button" data-js="unlock-btn"><svg class="unlock__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5v6l4.8-3z" fill="currentColor"/></svg><span data-t="unlock.button">광고 한 편 보고 열기</span></button>
-        </div>
-        <!-- (12단계) 잠금 결과 안내 한 줄(JS 문구: unlock.loading / unlock.closed / unlock.unavailable / unlock.opened). opened는 .visually-hidden으로 낭독만 -->
-        <p class="unlock-status" data-js="unlock-status" role="status" aria-live="polite"></p>
       </aside>
 
       <!-- (8단계) 핵심 풀이 한 덩어리 (장 번호·제목 없음). JS: identity.lede + body 앞 단락들(누적 750자 규칙) + facts + identity.close.
@@ -1291,13 +1282,6 @@
           <span class="twist__to" data-js="twist-to"></span>
         </div>
         <p class="turn__text" data-js="turn-text"></p>
-        <!-- (12단계) 잠금 상자. 보상형 ID가 비면 hidden 그대로(잠금 UI 0개). 잠글 때 JS: .turn에 .is-locked + 이 상자 hidden 해제(turn-text는 비운 채). 기다림 .is-waiting / 중간에 닫음 .is-closed / 열림: 상자 hidden, .turn에서 .is-locked 빼고 .is-opening -->
-        <div class="unlock" data-js="unlock" hidden>
-          <p class="unlock__note" data-t="unlock.note">이 방의 흐름 풀이 한 단락이 남아 있어요</p>
-          <button class="btn btn--secondary unlock__btn" type="button" data-js="unlock-btn"><svg class="unlock__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5v6l4.8-3z" fill="currentColor"/></svg><span data-t="unlock.button">광고 한 편 보고 열기</span></button>
-        </div>
-        <!-- (12단계) 잠금 결과 안내 한 줄(JS 문구: unlock.loading / unlock.closed / unlock.unavailable / unlock.opened). opened는 .visually-hidden으로 낭독만 -->
-        <p class="unlock-status" data-js="unlock-status" role="status" aria-live="polite"></p>
         <p class="turn__note" data-js="result-time-note"></p>
       </aside>
       <!-- (10단계 10-1 b) 코드로 복원한 상태: 생일이 있어야 그릴 수 있는 부분(위 반전 카드 등, 범위는 developer가 tests.md에 기록)을 숨기고 이 한 줄을 그 자리에 보인다.
@@ -1535,13 +1519,6 @@
           <p class="name-branch__latin" data-js="ogham-name-latin"></p>
         </div>
         <p class="turn__text" data-js="turn-text"></p>
-        <!-- (12단계) 잠금 상자. 보상형 ID가 비면 hidden 그대로(잠금 UI 0개). 잠글 때 JS: .turn에 .is-locked + 이 상자 hidden 해제(turn-text는 비운 채). 기다림 .is-waiting / 중간에 닫음 .is-closed / 열림: 상자 hidden, .turn에서 .is-locked 빼고 .is-opening -->
-        <div class="unlock" data-js="unlock" hidden>
-          <p class="unlock__note" data-t="unlock.note">이 방의 흐름 풀이 한 단락이 남아 있어요</p>
-          <button class="btn btn--secondary unlock__btn" type="button" data-js="unlock-btn"><svg class="unlock__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5v6l4.8-3z" fill="currentColor"/></svg><span data-t="unlock.button">광고 한 편 보고 열기</span></button>
-        </div>
-        <!-- (12단계) 잠금 결과 안내 한 줄(JS 문구: unlock.loading / unlock.closed / unlock.unavailable / unlock.opened). opened는 .visually-hidden으로 낭독만 -->
-        <p class="unlock-status" data-js="unlock-status" role="status" aria-live="polite"></p>
       </aside>
 
       <!-- 고증 한 줄: 실제로 전해지는 것과 이 방이 새로 붙인 해석을 구분 (기획서 「방 설계 상세」) -->
@@ -1858,13 +1835,6 @@
           <span class="twist__to" data-js="twist-to"></span>
         </div>
         <p class="turn__text" data-js="turn-text"></p>
-        <!-- (12단계) 잠금 상자. 보상형 ID가 비면 hidden 그대로(잠금 UI 0개). 잠글 때 JS: .turn에 .is-locked + 이 상자 hidden 해제(turn-text는 비운 채). 기다림 .is-waiting / 중간에 닫음 .is-closed / 열림: 상자 hidden, .turn에서 .is-locked 빼고 .is-opening -->
-        <div class="unlock" data-js="unlock" hidden>
-          <p class="unlock__note" data-t="unlock.note">이 방의 흐름 풀이 한 단락이 남아 있어요</p>
-          <button class="btn btn--secondary unlock__btn" type="button" data-js="unlock-btn"><svg class="unlock__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5v6l4.8-3z" fill="currentColor"/></svg><span data-t="unlock.button">광고 한 편 보고 열기</span></button>
-        </div>
-        <!-- (12단계) 잠금 결과 안내 한 줄(JS 문구: unlock.loading / unlock.closed / unlock.unavailable / unlock.opened). opened는 .visually-hidden으로 낭독만 -->
-        <p class="unlock-status" data-js="unlock-status" role="status" aria-live="polite"></p>
         <p class="turn__note" data-js="result-choice-note"></p>
       </aside>
 
@@ -2127,13 +2097,6 @@
           <span class="gear-pair__item"><span class="gear-pair__sign" data-js="tzolkin-sign-name"></span><span class="gear-pair__label" data-t="tzolkin.result.signLabel">스무 문양</span></span>
         </div>
         <p class="turn__text" data-js="turn-text"></p>
-        <!-- (12단계) 잠금 상자. 보상형 ID가 비면 hidden 그대로(잠금 UI 0개). 잠글 때 JS: .turn에 .is-locked + 이 상자 hidden 해제(turn-text는 비운 채). 기다림 .is-waiting / 중간에 닫음 .is-closed / 열림: 상자 hidden, .turn에서 .is-locked 빼고 .is-opening -->
-        <div class="unlock" data-js="unlock" hidden>
-          <p class="unlock__note" data-t="unlock.note">이 방의 흐름 풀이 한 단락이 남아 있어요</p>
-          <button class="btn btn--secondary unlock__btn" type="button" data-js="unlock-btn"><svg class="unlock__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5v6l4.8-3z" fill="currentColor"/></svg><span data-t="unlock.button">광고 한 편 보고 열기</span></button>
-        </div>
-        <!-- (12단계) 잠금 결과 안내 한 줄(JS 문구: unlock.loading / unlock.closed / unlock.unavailable / unlock.opened). opened는 .visually-hidden으로 낭독만 -->
-        <p class="unlock-status" data-js="unlock-status" role="status" aria-live="polite"></p>
       </aside>
 
       <!-- 고증 한 줄: 실제로 전해지는 것과 이 방이 새로 붙인 해석을 구분 (기획서 「방 설계 상세」) -->
@@ -2356,13 +2319,6 @@
         </p>
         <blockquote class="scroll-quote" data-js="sibyl-scroll-quote"></blockquote>
         <p class="turn__text" data-js="turn-text"></p>
-        <!-- (12단계) 잠금 상자. 보상형 ID가 비면 hidden 그대로(잠금 UI 0개). 잠글 때 JS: .turn에 .is-locked + 이 상자 hidden 해제(turn-text는 비운 채). 기다림 .is-waiting / 중간에 닫음 .is-closed / 열림: 상자 hidden, .turn에서 .is-locked 빼고 .is-opening -->
-        <div class="unlock" data-js="unlock" hidden>
-          <p class="unlock__note" data-t="unlock.note">이 방의 흐름 풀이 한 단락이 남아 있어요</p>
-          <button class="btn btn--secondary unlock__btn" type="button" data-js="unlock-btn"><svg class="unlock__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5v6l4.8-3z" fill="currentColor"/></svg><span data-t="unlock.button">광고 한 편 보고 열기</span></button>
-        </div>
-        <!-- (12단계) 잠금 결과 안내 한 줄(JS 문구: unlock.loading / unlock.closed / unlock.unavailable / unlock.opened). opened는 .visually-hidden으로 낭독만 -->
-        <p class="unlock-status" data-js="unlock-status" role="status" aria-live="polite"></p>
       </aside>
 
       <!-- 고증 한 줄: 실제로 전해지는 것과 이 방이 새로 붙인 해석을 구분 (기획서 「방 설계 상세」) -->
@@ -2480,6 +2436,7 @@
             <li class="arch-mark arch-mark--lg" style="--i:3"><span>4</span></li>
             <li class="arch-mark arch-mark--lg" style="--i:4"><span>5</span></li>
             <li class="arch-mark arch-mark--lg" style="--i:5"><span>6</span></li>
+            <li class="arch-mark arch-mark--lg" style="--i:6"><span>7</span></li>
           </ol>
           <p class="story-progress__count" data-js="story-count"></p>
         </div>
@@ -2531,6 +2488,7 @@
         <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="4"><span class="spine-item__node" aria-hidden="true">4</span><div class="spine-item__body" data-js="story-chapter-body"></div></li>
         <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="5"><span class="spine-item__node" aria-hidden="true">5</span><div class="spine-item__body" data-js="story-chapter-body"></div></li>
         <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="6"><span class="spine-item__node" aria-hidden="true">6</span><div class="spine-item__body" data-js="story-chapter-body"></div></li>
+        <li class="spine-item is-upcoming" data-js="story-chapter" data-chapter="7"><span class="spine-item__node" aria-hidden="true">7</span><div class="spine-item__body" data-js="story-chapter-body"></div></li>
       </ol>
 
       <!-- (11단계 H5) 3/6 중간 결말: 마친 방이 정확히 3개일 때만 화면에 .is-half → 이 블록 .is-hidden 해제,
@@ -2838,12 +2796,8 @@
           </fieldset>
 
           <div class="chapter-cover__actions">
-            <!-- 잠금 버튼: 12단계 잠금 버튼과 같은 모양(보조 버튼 + 재생 아이콘). 문구에 "광고" 필수 -->
-            <button class="btn btn--secondary btn--block unlock__btn chapter-unlock" type="button" data-js="book-unlock"><svg class="unlock__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5v6l4.8-3z" fill="currentColor"/></svg><span data-t="book.unlock.button">광고 한 편 보고 열기</span></button>
             <!-- 열림: 펼치기(이 화면의 주 버튼). 장 파일을 아직 받는 중이면 disabled + aria-busy + .is-fetching -->
             <button class="btn btn--primary btn--block chapter-open" type="button" data-js="book-chapter-open" data-t="book.chapter.open">펼치기</button>
-            <!-- 결과 한 줄 (JS 문구: book.unlock.loading / closed / unavailable / opened — opened는 .visually-hidden으로 낭독만) -->
-            <p class="unlock-status" data-js="book-unlock-status" role="status" aria-live="polite"></p>
             <div class="chapter-fail" data-js="book-load-fail" role="alert">
               <p class="chapter-fail__text" data-t="book.chapter.loadFail">이 장을 불러오지 못했어요. 연결을 확인해 주세요</p>
               <button class="btn btn--secondary btn--small" type="button" data-js="book-load-retry" data-t="book.chapter.retry">다시 시도</button>
@@ -3161,18 +3115,9 @@
   <script src="../../common/share-card.js"></script>
   <script src="../../common/share-buttons.js"></script>
   <script src="../../common/disclaimer.js"></script>
-  <script src="../../common/ads.js"></script>
   <script src="../../common/analytics.js"></script>
   <script src="data.js"></script>
-  <script src="data-runes.js"></script>
-  <script src="data-stars.js"></script>
-  <script src="data-ogham.js"></script>
-  <script src="data-decans.js"></script>
-  <script src="data-tzolkin.js"></script>
-  <script src="data-oracles.js"></script>
   <script src="data-volume.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js" integrity="sha384-LTVHvxfbG3XHla4Lu0C0s9U18B2sBOuzJIeOoVHm2t05SOOORvMbBMEVjXrGau9g" crossorigin="anonymous"></script>
-  <script src="astro.js"></script>
   <script src="calc.js"></script>
   <script src="paycode.js"></script>
   <script src="book.js"></script>
