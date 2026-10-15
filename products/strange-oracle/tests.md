@@ -715,3 +715,15 @@
   - 2/7이 1/7과 같은 까닭: 두 방 태그가 다르면 동률이라 앞 방(만신)이 이긴다.
 - 성별 차이 시험(e2e-saju 4절): 남·여·밝히지 않음 세 번의 요청 URL·gtag 인자·SOG2·공유 카드 픽셀·sessionStorage(profile 제외)·localStorage·쿠키가 같음.
 - 광고: 첫 화면 소스(주석 제외)에 adsbygoogle·googletag·ads.js·잠금 버튼 0, 시험 전체에서 광고 주소 요청 0. e2e-ads.js는 은퇴(삭제).
+
+### 14단계 F4-B1 · 시험 이름과 수 (2026-10-15 마지막 실행)
+| 시험 | 실행 | 결과 |
+|---|---|---|
+| 단위 (`tools/strange-oracle/*.test.js`) | `node --test "tools/strange-oracle/*.test.js"` | 69개 중 63 통과. 실패 6은 api.test.js의 휴면 토스 서버 시험(confirm·멱등·위조·재열람·mock 모드·7-1 순서 단일화)이며 F4-B2에서 지운다 |
+| 그중 saju-b1.test.js (새로) | 같음 | 8개 통과: 순서 · SOG2 새 상태 1~7방 왕복 · 옛 상태 1~6방 왕복 · 순서 거부 · SOG1 해독 · 성별 없음 · 원형 분포 1,000명 · 조합 12,000개 빈칸 0 |
+| 그중 resume.test.js (SOG2로 갱신) | 같음 | 모두 통과 (1~7방 왕복, 17자, 한 글자 오타 13×31 거부, 새·옛 순서 규칙) |
+| e2e-saju.js (새로) | `node tools/strange-oracle/e2e-saju.js` | 41 PASS / 0 FAIL (+ INFO 1: 360×640에서 고지 아래 끝 24px이 버튼 띠에 가려짐, designer F6) |
+| e2e-flow.js reduced (새 순서로 갱신) | `node tools/strange-oracle/e2e-flow.js reduced` | 127 PASS / 0 FAIL |
+| e2e-flow.js motion | `node tools/strange-oracle/e2e-flow.js motion` | 128 PASS / 0 FAIL |
+| e2e-book.js (seed를 node로, 광고 잠금 시험 은퇴) | `node tools/strange-oracle/e2e-book.js` | 49 PASS / 0 FAIL / SKIP 1 (13-7.10 첫 화면 결제 0 — F4-B2 pay.mode). 만신 장은 목차에 없는 것을 기대값으로 둠(B2에서 넣음) |
+| e2e-ads.js | — | 은퇴(삭제). 광고 0건 확인은 e2e-saju 7절 |

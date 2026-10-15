@@ -163,7 +163,7 @@ function paidSentences() {
   await ev("history.back()");
   await sleep(700);
   check("한 번 더 뒤로 → 입구", (await active()) === "screen-hub" && (await ev("location.href.startsWith('http://127.0.0.1:8788/')")));
-  check("입구: 2/7 · 지금까지 줄(만신·오검 결과 이름) 2개, '?' 줄은 만들지 않음(10-6)", (await txt("[data-js=hub-progress-count]")) === "2/7" && (await ev("document.querySelectorAll('[data-js=sofar-line]').length")) === 1 && (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await txt("[data-js=sofar-result]")) === (await ev("OGHAM[JSON.parse(sessionStorage.getItem('strange-oracle')).visits.ogham.ogham].title")));
+  check("입구: 2/7 · 지금까지 줄(만신·오검 결과 이름) 2개, '?' 줄은 만들지 않음(10-6)", (await txt("[data-js=hub-progress-count]")) === "2/7" && (await ev("document.querySelectorAll('[data-js=sofar-line]').length")) === 2 && (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await txt("[data-js=sofar-line][data-room=ogham] [data-js=sofar-result]")) === (await ev("OGHAM[JSON.parse(sessionStorage.getItem('strange-oracle')).visits.ogham.ogham].title")));
   check("주 버튼 = III 별의 방 열기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "star" && (await txt("[data-js=hub-cta-num]")) === "III");
   await click("[data-js=sofar-line][data-room=ogham]");
   check("지금까지 줄 → 결과 다시 보기(번쩍)", await waitScreen("screen-ogham-result", 3000));
@@ -258,7 +258,7 @@ function paidSentences() {
   await waitScreen("screen-hub", 3000);
   check("10-1: 0/6 — '이어가기 코드가 있어요' 보임, 패널 접힘, 3/6 한 줄·만들기 없음", !(await hiddenEl("[data-js=resume-enter-toggle]")) && (await hiddenEl("[data-js=resume-enter-panel]")) && (await hiddenEl("[data-js=hub-half]")) && (await hiddenEl("[data-js=resume-make-toggle]")));
   check("10-1: 입력 칸 autocomplete=off, name 없음, form 밖", await ev("(() => { const i = document.querySelector('[data-js=resume-input]'); return i.getAttribute('autocomplete') === 'off' && !i.hasAttribute('name') && !i.closest('form') && document.querySelector('[data-js=resume-go]').type === 'button'; })()"));
-  check("10-2: 카카오 키가 비어 있으면 자리 7곳 모두 비어 있음(버튼 없음)", await ev("TEXT.kakao.jsKey === '' && document.querySelectorAll('[data-js=share-kakao-slot]').length === 7 && [...document.querySelectorAll('[data-js=share-kakao-slot]')].every(s => s.childNodes.length === 0) && !window.Kakao"));
+  check("10-2: 카카오 키가 비어 있으면 자리 8곳(방 7 + 나의 이야기) 모두 비어 있음(버튼 없음)", await ev("TEXT.kakao.jsKey === '' && document.querySelectorAll('[data-js=share-kakao-slot]').length === 8 && [...document.querySelectorAll('[data-js=share-kakao-slot]')].every(s => s.childNodes.length === 0) && !window.Kakao"));
   check("10-6: 숨긴 여정 줄(journey-path·journey-step) 마크업 0", (await ev("document.querySelectorAll('[data-js=journey-step], [data-js=journey-path], .journey__path').length")) === 0);
   check("10-3 a: 화면 문구(data.js)에 리포트·소장판·더 깊은 이야기·DEEPER STORY 0건", await ev("!/리포트|소장판|더 깊은 이야기|DEEPER STORY/.test(JSON.stringify(TEXT))"));
   check("10-7: 영문뿐인 윗줄은 모두 lang=en 또는 aria-hidden", await ev("[...document.querySelectorAll('[data-t]')].filter(e => /yebrow$/.test(e.dataset.t) && /^[\\x20-\\x7e]+$/.test(e.textContent.trim()) && /[A-Za-z]/.test(e.textContent)).every(e => e.closest('[lang=en]') || e.closest('[aria-hidden=true]'))"));
@@ -268,12 +268,12 @@ function paidSentences() {
   check("10-1: 틀린 코드 → 모양 오류 한 줄, 복원 안 됨", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.shape")) && (await store()) === "" && (await ev("document.querySelector('[data-js=resume-input]').getAttribute('aria-invalid')")) === "true");
   await enterCode("SO1A-B2C3-D4E5-F6G7-H8J9-K0MN-PQRS-TV", "enter");
   check("10-1: 영수증 코드(SO1…)를 넣음 → '이 칸이 아니에요' 오류", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.receipt")) && (await store()) === "");
-  // Ⅰ·Ⅲ만 있는 코드(순서 어긋남): 시험용으로 직접 짠다
+  // (14단계) 만신 없음 + Ⅱ 오검 + Ⅳ 데칸(별 빠짐) SOG2 코드(순서 어긋남): 시험용으로 직접 짠다
   const badOrder = await ev(`(() => { const R = PayCode.Resume, A = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; let n = 0n; const d = { ogham: 3, decan: 11 };
-    for (const [k, r] of R.FIELDS) n = n * BigInt(r) + BigInt(d[k] || 0); let pl = ""; for (let i = 0; i < 10; i++) { pl = A[Number(n % 32n)] + pl; n /= 32n; }
-    let c = 0; for (let i = 0; i < 10; i++) c += (2 * i + 1) * A.indexOf(pl[i]); return R.PREFIX + pl + A[c % 32]; })()`);
+    for (const [k, r] of R.FIELDS) n = n * BigInt(r) + BigInt(d[k] || 0); let pl = ""; for (let i = 0; i < 12; i++) { pl = A[Number(n % 32n)] + pl; n /= 32n; }
+    let c = 0; for (let i = 0; i < 12; i++) c += (2 * i + 1) * A.indexOf(pl[i]); return R.PREFIX + pl + A[c % 32]; })()`);
   await enterCode(badOrder);
-  check("10-1: 순서가 안 맞는 코드(Ⅰ·Ⅲ) → 순서 오류, 복원 안 됨", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.order")) && (await store()) === "");
+  check("10-1: 순서가 안 맞는 코드(만신 없음·Ⅱ·Ⅳ) → 순서 오류, 복원 안 됨", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.order")) && (await store()) === "");
   check("10-1: 오류 뒤에도 주소 변화·페이지 이동·요청 없음", (await ev("location.href")) === url0 && b.log.requests.length === req0 && (await active()) === "screen-hub");
 
   // (b) 3/6: 절반 한 줄 + 코드 만들기 (360x640에서 경고가 복사 버튼 위에 함께 보임)
@@ -297,7 +297,7 @@ function paidSentences() {
   const reqMake = b.log.requests.length;
   const code3 = await makeCode();
   await sleep(reduced ? 200 : 1000); // 움직임 모드는 html scroll-behavior: smooth라 패널까지 스크롤이 끝나길 기다린다
-  check("10-1: 코드 만들기 → SOG1 + 4자 묶음(15자, 20자 이내)", /^SOG1-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{3}$/.test(code3), code3.replace(/[0-9A-Z]/g, "#"));
+  check("10-1: 코드 만들기 → SOG2 + 4자 묶음(17자, 20자 이내)", /^SOG2-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]$/.test(code3), code3.replace(/[0-9A-Z]/g, "#"));
   const lay = await ev("(() => { const r = (n) => document.querySelector('[data-js=' + n + ']').getBoundingClientRect(); const c = r('resume-code'), w = r('resume-warn'), b = r('resume-copy'); return { codeTop: Math.round(c.top), warnTop: Math.round(w.top), warnBottom: Math.round(w.bottom), copyTop: Math.round(b.top), copyBottom: Math.round(b.bottom), h: innerHeight, warnLen: document.querySelector('[data-js=resume-warn]').textContent.trim().length }; })()");
   check("10-1: 360x640 — 코드 → 경고 → 복사 버튼 순서로 한 화면 안(접힘·스크롤 밖 아님)", lay.codeTop >= 0 && lay.warnTop >= lay.codeTop && lay.warnBottom <= lay.copyTop && lay.copyBottom <= lay.h && lay.warnLen > 20, JSON.stringify(lay));
   check("10-1: 경고에 '태어난 날을 알아낼 수 있' 포함, '개인정보 없음·안전'류 0", await ev("(() => { const t = TEXT.resume.make.warn; return t.includes('태어난 날을 알아낼 수 있') && !/안전|개인정보가 없|개인정보 없/.test(t); })()"));
@@ -325,11 +325,11 @@ function paidSentences() {
   await enterCode(code3.toLowerCase(), "enter");
   const after3 = await snap();
   check("10-1: 코드 복원(Enter) → 같은 방 3개 마침·같은 원형·같은 결과 줄", after3 === before3, after3);
-  check("10-1: 복원 뒤 다음 문 = Ⅳ 촐킨, 복원 완료 한 줄 보임(출처 문구)", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "tzolkin" && !(await hiddenEl("[data-js=resume-restored]")) && (await txt("[data-js=resume-restored]")) === (await ev("TEXT.resume.restored")));
+  check("10-1: 복원 뒤 다음 문 = Ⅳ 데칸, 복원 완료 한 줄 보임(출처 문구)", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "decan" && !(await hiddenEl("[data-js=resume-restored]")) && (await txt("[data-js=resume-restored]")) === (await ev("TEXT.resume.restored")));
   check("10-1: 복원 직후 입력 칸 비어 있음·넣기 링크 숨김", (await ev("document.querySelector('[data-js=resume-input]').value")) === "" && (await hiddenEl("[data-js=resume-enter-toggle]")));
-  check("10-1: 복원하는 동안 요청 0건·주소 변화 없음·코드가 저장소에 없음", b.log.requests.length === reqR && (await ev("location.href")) === urlR && (await leakHere()).length === 0);
+  check("10-1: 복원하는 동안 방 문구 파일(14-6) 외 요청 0건·주소 변화 없음·코드가 저장소에 없음", b.log.requests.slice(reqR).every((r) => /^GET (http:\/\/127\.0\.0\.1:8788\/products\/strange-oracle\/[a-z-]+\.js|https:\/\/cdn\.jsdelivr\.net\/)/.test(r)) && (await ev("location.href")) === urlR && (await leakHere()).length === 0);
   const st3 = JSON.parse(await store());
-  check("10-1: sessionStorage에는 결과 코드만(이름·생일 없음, 별은 nak·restored만)", Object.keys(st3.profile).length === 0 && st3.restored === true && Object.keys(st3.visits).join() === "ogham,star,decan" && Object.keys(st3.visits.star).sort().join() === "archetype,nak,restored", JSON.stringify(st3).replace(/[0-9]/g, "#").slice(0, 160));
+  check("10-1: sessionStorage에는 결과 코드만(이름·생일 없음, 별은 nak·restored만)", Object.keys(st3.profile).length === 0 && st3.restored === true && Object.keys(st3.visits).join() === "saju,ogham,star" && Object.keys(st3.visits.star).sort().join() === "archetype,nak,restored", JSON.stringify(st3).replace(/[0-9]/g, "#").slice(0, 160));
   await shot(P + "11-resume-restored.png");
   // 복원 상태의 방 결과: 이름 자리 = "당신", 입력값이 필요한 부분은 숨기고 안내 한 줄
   await click("[data-js=sofar-line][data-room=star]");
@@ -374,7 +374,7 @@ function paidSentences() {
 
   // (d) 마친 방 1~6개 왕복
   let rt = 0;
-  for (let n = 1; n <= 6; n++) {
+  for (let n = 1; n <= 7; n++) {
     await seed(ORDER.slice(0, n));
     await b.goto(BASE);
     await waitScreen("screen-hub", 3000);
@@ -386,8 +386,8 @@ function paidSentences() {
     await enterCode(code);
     if ((await snap()) === before && JSON.parse(before).rooms.length === n) rt++;
   }
-  check("10-1: 마친 방 1~6개 각각 — 코드로 복원하면 같은 방·같은 원형·같은 결과 이름", rt === 6, rt + "/6");
-  check("10-1: 복원으로 6/6 → 주 버튼 = 나의 이야기 보기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.go")) === "story");
+  check("10-1: 마친 방 1~7개 각각 — 코드로 복원하면 같은 방·같은 원형·같은 결과 이름", rt === 7, rt + "/7");
+  check("10-1: 복원으로 7/7 → 주 버튼 = 나의 이야기 보기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.go")) === "story");
   await b.goto(BASE + "#rune");
   await waitScreen("screen-rune-result", 3000);
   check("10-1: 복원한 룬의 방 — 주제가 코드에서 복원됨, 이름 인셋 자리에 안내 한 줄", (await txt("#screen-rune-result [data-js=result-meta]")).includes(await ev("TEXT.rune.topics.me.label")) && (await ev("(() => { const n = document.querySelector('#screen-rune-result [data-js=reading-body] [data-js=restore-note]'); return !!n && n.offsetParent !== null && !document.querySelector('#screen-rune-result [data-js=rune-name-runes]'); })()")));
@@ -418,25 +418,25 @@ function paidSentences() {
   const deadScan = (scope) => ev(`(() => { const sc = document.querySelector(${JSON.stringify(scope)}); const t = sc.innerText; return { price: /[0-9],[0-9]{3}\\s*원/.test(t), soon: t.includes('곧 열'), dead: [...sc.querySelectorAll('button[disabled], button[aria-disabled=true]')].filter(b => b.offsetHeight > 0 && !b.closest('[data-js^=hub-door-]')).length, book: /한 권의 책|책을 준비/.test(t) }; })()`);
   const hookCount = (scope) => ev(`[...document.querySelectorAll(['result-archetype-sway', 'hub-archetype-sway', 'result-bridge', 'story-half'].map(k => ${JSON.stringify(scope)} + ' [data-js=' + k + ']').join(','))].filter(e => e.offsetHeight > 0 && e.textContent.trim()).length`);
   const swayWant = (n, arch) => ev(`TEXT.result.archetypeSway.replace('{arch}', TEXT.archetypes[${JSON.stringify(arch)}].name).replace('{n}', ${n})`);
-  await seed(["saju", "ogham", "star", "decan"]);
+  await seed(["saju", "ogham", "star"]);
   await b.goto(BASE + "#hub");
   await waitScreen("screen-hub", 3000);
   const arch3 = await ev("StrangeOracle.currentArchetype()");
-  check("H3 입구: 3/6 흔들리는 원형 한 줄 = 템플릿({arch}·남은 문 3)", !(await has("[data-js=hub-archetype-sway]", "is-hidden")) && (await txt("[data-js=hub-archetype-sway]")) === (await swayWant(3, arch3)), await txt("[data-js=hub-archetype-sway]"));
+  check("H3 입구: 3/7 흔들리는 원형 한 줄 = 템플릿({arch}·남은 문 4)", !(await has("[data-js=hub-archetype-sway]", "is-hidden")) && (await txt("[data-js=hub-archetype-sway]")) === (await swayWant(4, arch3)), await txt("[data-js=hub-archetype-sway]"));
   check("H5 입구: 3/6이면 나의 이야기 링크 글자 = hub.sofar.half (요소 수 그대로)", (await txt("[data-js=hub-story-label]")) === (await ev("TEXT.hub.sofar.half")) && !(await has("[data-js=hub-half]", "is-hidden")));
   const hubDead = await deadScan("#screen-hub");
   check("11-5 off 입구: 가격 0 · '곧' 0 · 눌리지 않는 버튼 0 · 떡밥 3개 이하", !hubDead.price && !hubDead.soon && hubDead.dead === 0 && (await hookCount("#screen-hub")) <= 3, JSON.stringify(hubDead));
   await ev("StrangeOracle.go('story')");
   await waitScreen("screen-story", 3000);
-  const half = await ev("(() => { const sc = document.querySelector('#screen-story'); const vis = (e) => e && e.offsetHeight > 0; const next = sc.querySelector('[data-js=story-half-next]'); const share = sc.querySelector('[data-js=story-share]'); return { isHalf: sc.classList.contains('is-half'), half: vis(sc.querySelector('[data-js=story-half]')), slots: [...sc.querySelectorAll('[data-js=story-half-slot]')].filter(vis).length, next: vis(next) && next.dataset.go === 'tzolkin-intro', primary: [...sc.querySelectorAll('.btn--primary')].filter(vis).length, shareSecondary: share.classList.contains('btn--secondary'), paid: vis(sc.querySelector('[data-js=story-paid]')), close: sc.querySelector('[data-js=story-half-close]').textContent, spine46: [...sc.querySelectorAll('[data-js=story-chapter]')].slice(3).filter(vis).length }; })()");
-  check("H5 나의 이야기 3/6: is-half · 중간 맺음 · 남은 칸 3 · 다음 문(촐킨) · 주 버튼은 다음 문 하나(공유는 보조) · 책 카드 숨김(off)", half.isHalf && half.half && half.slots === 3 && half.next && half.primary === 0 && half.shareSecondary && !half.paid && half.close.length > 0 && half.spine46 === 0, JSON.stringify(half));
+  const half = await ev("(() => { const sc = document.querySelector('#screen-story'); const vis = (e) => e && e.offsetHeight > 0; const next = sc.querySelector('[data-js=story-half-next]'); const share = sc.querySelector('[data-js=story-share]'); return { isHalf: sc.classList.contains('is-half'), half: vis(sc.querySelector('[data-js=story-half]')), slots: [...sc.querySelectorAll('[data-js=story-half-slot]')].filter(vis).length, next: vis(next) && next.dataset.go === 'decan-intro', primary: [...sc.querySelectorAll('.btn--primary')].filter(vis).length, shareSecondary: share.classList.contains('btn--secondary'), paid: vis(sc.querySelector('[data-js=story-paid]')), close: sc.querySelector('[data-js=story-half-close]').textContent, spine46: [...sc.querySelectorAll('[data-js=story-chapter]')].slice(3).filter(vis).length }; })()");
+  check("H5 나의 이야기 3/7: is-half · 중간 맺음 · 남은 칸 3 · 다음 문(데칸) · 주 버튼은 다음 문 하나(공유는 보조) · 책 카드 숨김(off)", half.isHalf && half.half && half.slots === 3 && half.next && half.primary === 0 && half.shareSecondary && !half.paid && half.close.length > 0 && half.spine46 === 0, JSON.stringify(half));
   const storyDead = await deadScan("#screen-story");
   check("11-5 off 나의 이야기 3/6: 가격 0 · '곧' 0 · 눌리지 않는 버튼 0 · 책 말 0 · 떡밥 3개 이하", !storyDead.price && !storyDead.soon && storyDead.dead === 0 && !storyDead.book && (await hookCount("#screen-story")) <= 3, JSON.stringify(storyDead));
   await noHScroll("나의 이야기 3/6");
   await shot(P + "11-story-half.png");
   await click("[data-js=story-half-next]");
-  check("H5 다음 문 → Ⅳ 촐킨 시작(강제 순서 그대로)", await waitScreen("screen-tzolkin-intro", 4000), await active());
-  for (const room of ["ogham", "star", "decan"]) {
+  check("H5 다음 문 → Ⅳ 데칸 시작(강제 순서 그대로)", await waitScreen("screen-decan-intro", 4000), await active());
+  for (const room of ["saju", "ogham", "star"]) {
     await ev("StrangeOracle.go('story')");
     await waitScreen("screen-story", 3000);
     await click("[data-js=story-chapter-reread][data-room=" + room + "]");
@@ -446,7 +446,7 @@ function paidSentences() {
     const br = await ev(`(() => { const e = document.querySelector('${sc} [data-js=result-bridge]'); const t = e.textContent.replace('[초안] ', ''); return { ok: t === TEXT.bridges['${room}'].replace('[초안] ', '') && [...t].length <= 45 && /\\?$/.test(t) && (t.match(/[.?!]/g) || []).length === 1, t }; })()`);
     const dead = await deadScan(sc);
     const hooks = await hookCount(sc);
-    check(`H3·H4 ${room} 결과: 원형 한 줄(남은 문 3) · 다리 = 질문 1문장 45자 이내 · 가격·'곧'·죽은 버튼 0 · 떡밥 ${hooks}개(≤3)`, sway === (await swayWant(3, arch3)) && br.ok && !dead.price && !dead.soon && dead.dead === 0 && hooks <= 3, sway + " / " + br.t);
+    check(`H3·H4 ${room} 결과: 원형 한 줄(남은 문 4) · 다리 = 질문 1문장 45자 이내 · 가격·'곧'·죽은 버튼 0 · 떡밥 ${hooks}개(≤3)`, sway === (await swayWant(4, arch3)) && br.ok && !dead.price && !dead.soon && dead.dead === 0 && hooks <= 3, sway + " / " + br.t);
   }
   await seed(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
   await b.goto(BASE + "#story");
@@ -455,7 +455,7 @@ function paidSentences() {
   const sixDead = await deadScan("#screen-story");
   check("13단계 6/6 나의 이야기: 결제 카드 없음 · 책 목차 열기 버튼 1개 · 가격·'곧'·죽은 버튼 0 · H5 없음", !six.paid && six.note && six.noteBtn && !six.half && !sixDead.price && !sixDead.soon && sixDead.dead === 0, JSON.stringify(six) + JSON.stringify(sixDead));
   const sixRes = [];
-  for (const room of ["ogham", "star", "decan", "tzolkin", "rune", "sibyl"]) {
+  for (const room of ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]) {
     await ev("StrangeOracle.go('story')");
     await waitScreen("screen-story", 3000);
     await click("[data-js=story-chapter-reread][data-room=" + room + "]");

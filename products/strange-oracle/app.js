@@ -616,6 +616,7 @@
 
   // ───────── 0. 입구 (8단계: 새 세션의 첫 화면, spec 8-2) ─────────
   const SIG = {
+    saju: '<svg class="sig" viewBox="0 0 40 40"><use href="#icon-saju" /></svg>',
     ogham: '<svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg>',
     star: '<svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg>',
     decan: '<svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg>',
@@ -2468,7 +2469,19 @@
     const half = n === 3;
     storyScr.classList.toggle("is-half", half);
     show(js("story-half", storyScr), half);
-    js("story-half-next", storyScr).classList.remove("is-opening");
+    const halfNext = js("story-half-next", storyScr);
+    halfNext.classList.remove("is-opening");
+    // (14단계) 중간 맺음의 다음 문 = 순서상 첫 미완 방 (마크업 견본은 옛 순서의 촐킨)
+    const hn = nextRoom();
+    if (hn) {
+      halfNext.dataset.room = hn;
+      halfNext.dataset.go = `${hn}-intro`;
+      $(".next-door__glyph", halfNext).innerHTML = SIG[hn];
+      $(".next-door__num", halfNext).textContent = ROMAN[chapterOf(hn) - 1];
+      const nm = $(".next-door__name", halfNext);
+      nm.removeAttribute("data-t");
+      nm.textContent = T.rooms[hn].name;
+    }
     const shareBtn = js("story-share", storyScr);
     shareBtn.classList.toggle("btn--primary", !half);
     shareBtn.classList.toggle("btn--secondary", half);
@@ -2843,7 +2856,9 @@
     if (loadState[id] === "ok") return Promise.resolve(true);
     loadState[id] = "loading";
     syncOpenBtn();
-    return Promise.all(FILES[id].map(loadFile)).then(() => true, () => false).then((ok) => {
+    // (14-6) 궁합·시기별 흐름은 상대·나의 오검·데칸·촐킨을 계산하므로 그 방 파일(데칸은 astronomy-engine)도 받는다
+    const needs = id === "match" || id === "flow" ? [ensureRooms(["ogham", "decan", "tzolkin"])] : [];
+    return Promise.all(FILES[id].map(loadFile).concat(needs)).then(() => true, () => false).then((ok) => {
       loadState[id] = ok ? "ok" : "fail";
       if (coverId === id) syncOpenBtn();
       return ok;
@@ -2943,7 +2958,7 @@
       const st = chapterState(id);
       li.dataset.state = st;
       if (CHAPTER_ORDER.includes(id)) js("book-chapter-sub", li).textContent = isDone(id) ? headOf(id, c).title : "";
-      js("book-chapter-state", li).textContent = st === "need-room" ? needLine(id) : st === "can-open" ? T.book.toc.canOpen : st === "read" ? T.book.toc.reread : T.book.toc.opened;
+      js("book-chapter-state", li).textContent = st === "need-room" ? needLine(id) : st === "read" ? T.book.toc.reread : T.book.toc.opened;
       js("book-chapter-time", li).textContent = fill(T.book.time, { n: minutes(chapterChars(id)) });
     });
     const bm = readBookmark();
@@ -3044,8 +3059,7 @@
     const flowForm = js("book-flow-date");
     flowForm.hidden = !needsFlowDate(id);
     cover.classList.toggle("has-form", needsFlowDate(id));
-    setStatus("");
-    setCoverState(isOpen(id) ? "open" : "locked");
+    setCoverState("open"); // (14-2) 광고 잠금 은퇴: 열 수 있는 장은 곧바로 열림
     window.scrollTo(0, 0);
     track("so_book", { step: "cover", chapter: id });
     // 표지를 여는 순간 받기 시작한다(광고를 보는 동안 받음, 13-5)

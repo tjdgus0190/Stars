@@ -86,7 +86,8 @@ test("SOG1: 옛 코드 해독 → 만신 없음, 옛 순서만 받음", () => {
   assert.deepStrictEqual([ok.codes.ogham, ok.codes.star, ok.codes.decan], [2, 4, 6]);
   assert.strictEqual(R.decode(mk({ ogham: 3, decan: 7 })).error, "order"); // 오검 + 별 빠짐 + 데칸
   assert.strictEqual(R.decode(mk({ star: 2 })).error, "order");
-  assert.strictEqual(R.decode(mk({ ogham: 3, star: 5 }).slice(0, 14) + "0").error, "shape");
+  const good = mk({ ogham: 3, star: 5 });
+  assert.strictEqual(R.decode(good.slice(0, 14) + (good[14] === "0" ? "1" : "0")).error, "shape");
 });
 
 test("이어가기 코드에 성별·대운이 없다: 성별만 다른 세 사람의 코드가 같다", () => {

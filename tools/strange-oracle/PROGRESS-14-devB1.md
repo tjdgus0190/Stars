@@ -11,11 +11,12 @@
 | 5 | 만신의 방 화면 연결, 숨은 장 제목 하나로 | 완료(코드) |
 | 6 | 광고 제거 | 완료(코드) |
 | 7 | 지연 불러오기 | 완료(코드) |
-| 8 | 시험: saju-b1.test.js·e2e-saju.js 새로, e2e-flow 일부 갱신(78 통과, 나머지 남음), e2e-book 미갱신, e2e-ads 은퇴 | 진행 중 |
-| 9 | 전체 통과, tests.md 기록, 보고 | 대기 |
+| 8 | 시험: saju-b1·e2e-saju 새로, resume·e2e-flow·e2e-book 갱신, e2e-ads 은퇴 | 완료 |
+| 9 | 전체 통과(api.test.js 옛 6건 제외), tests.md 기록 | 완료 |
 
 ## 메모
 - 패치 스크립트(스크래치): patch-html-data.js(index.html·data.js·book-saju title), patch-app.js + saju-room.js(app.js). 원래 app.js는 git에 있음.
 - data-saju.js에 없는 키(F5): saju.ritual.*(bell·bellLabel·hourUnknown·go·call), saju.elements 이름(목·화…), result.s1~s4Title·s2bEmptyTitle·s2bFewTitle, input.genderM/F/X·yearAria 등, toast.loadFail
 - 책: Ⅰ 만신 장은 BOOK_ROOMS에서 뺌(F4-B2). 만신 결과의 책 한 줄 숨김.
 - 남은 일: e2e-flow 10-1(SOG1→SOG2 기대값)·H5 3/6·카카오 자리 수·seed 목록, e2e-book 5건, motion 모드 미실행, 360×640 고지 24px 가려짐(designer)
+- 2차(마무리): app.js 버그 3건 고침 — 책 표지 setStatus 잔재, SIG에 saju 없음(입구 지금까지 줄), 중간 맺음 다음 문 고정(촐킨)→nextRoom, 궁합·흐름 장이 데칸 계산(astronomy) 파일을 받지 않던 것
