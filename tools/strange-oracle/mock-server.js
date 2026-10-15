@@ -1,17 +1,26 @@
-// 낯선 점술관 6단계 — 로컬 모의 서버 (Node 내장 모듈만, 계정·키·설치 없음)
-// 정적 파일 + /api/* 함수(Vercel 함수와 같은 파일)를 한 서버에서 띄운다. Vercel CLI(vercel dev)는 로그인이 필요해 쓰지 않는다.
+// 낯선 점술관 — 로컬 모의 서버 = 시험 페이지 (Node 내장 모듈만, 계정·키·설치 없음). spec 14-5 (결정 89·93·94)
 //
 // 사용:
 //   node tools/build-dist.js                               (dist 모드일 때 먼저)
-//   node tools/strange-oracle/mock-server.js [--src] [--port 8787] [--mode mock|off]
-//     기본(dist 모드): 정적 = dist/public, 함수 = dist/api   → 실제 배포 모양 그대로 (D-4 점검은 이 모드로)
-//     --src         : 정적 = 저장소 루트, 함수 = products/strange-oracle/api (고치면서 바로 보기)
-//                     제품 폴더 안 api/ 경로는 정적으로 내주지 않는다 (13단계: 화면은 /api를 부르지 않음)
+//   node tools/strange-oracle/mock-server.js [--src] [--port 8787] [--mode off|test] [--host 0.0.0.0]
+//     기본(dist 모드): 정적 = dist/public → 실제 배포 모양 그대로
+//     --src         : 정적 = 저장소 루트 (고치면서 바로 보기). 제품 안 api/ 경로는 정적으로 내주지 않는다
+//     --mode off    : (기본) 배포판과 같다. 결제·책 화면 없음. /api/book은 503
+//     --mode test   : 시험 페이지. data.js의 pay.mode를 **응답할 때만** "test"로 바꾼다(파일은 고치지 않음).
+//                     /api/book은 함수 netlify/functions/book.js의 handle()을 그대로 불러 흉내 낸다(PASS_MODE=test).
+//                     유료 원본 products/strange-oracle/api/_paid/book/에서 읽는다(함수 묶음과 같은 원본, 배포 폴더에는 없음).
+//                     모의 열람 코드는 시작할 때 새로 만들어 터미널에만 찍는다(파일·저장소에 쓰지 않음).
+//     --host        : 같은 와이파이의 휴대폰으로 볼 때만 0.0.0.0. 외부 공개 주소에는 올리지 않는다.
 //   열기: http://127.0.0.1:8787/products/strange-oracle/
-//   시험 지름길: http://127.0.0.1:8787/__dev/skip  (여섯 방을 마친 상태로 나의 이야기, ?rooms=3·?to=hub 가능)
 //
-// Vercel 흉내: /api/<이름>은 api/<이름>.js가 있고 이름이 밑줄·점으로 시작하지 않을 때만 함수로 실행, 그 밖(/api/_lib/…, /api/_paid/…)은 404.
-// PAY_MODE는 --mode 값(기본 mock). mock은 TOSS_SECRET_KEY가 비어 있어야 켜진다(core.js 안전장치).
+// 시험 지름길(이 모의 서버에만 있다, 배포 폴더·본 페이지에는 없다):
+//   /__dev/skip                 → 일곱 방을 고정 표본 결과로 마친 상태로 "나의 이야기"(#story)
+//   /__dev/skip?rooms=3         → 새 순서(14-1)의 앞 세 방(만신·오검·별)만 마친 상태
+//   /__dev/skip?legacy=1        → 옛 상태: 13단계 순서 오검~룬(5방) 마침, 만신 미완 (rooms=N이면 옛 순서 앞 N개, 최대 6)
+//   /__dev/skip?paid=1          → (test) 시험 열람 상태: sessionStorage strange-oracle-pass에 모의 코드. paid=0(기본)은 결제 전
+//   /__dev/skip?to=book         → 책 목차로 도착 (to=hub 등 다른 화면도 가능, 기본 story)
+//   예: /__dev/skip?rooms=7&paid=1&to=book  → 일곱 방 마침 + 결제한 상태로 책 12장이 모두 열림 (결정 89 "별도 시험 페이지")
+//   시험용 가짜 프로필(이름 "테스트", 1995-03-25 14:37)을 이 탭의 sessionStorage에만 넣는다
 // 요청 본문은 찍지 않는다. 주소·상태 코드만 한 줄씩 출력한다.
 const http = require("http");
 const fs = require("fs");
@@ -24,31 +33,27 @@ const arg = (name, def) => {
 };
 const SRC = process.argv.includes("--src");
 const PORT = Number(arg("--port", 8787));
-process.env.PAY_MODE = arg("--mode", process.env.PAY_MODE || "mock");
+const HOST = arg("--host", "127.0.0.1");
+const MODE = arg("--mode", "off") === "test" ? "test" : "off";
 const STATIC = SRC ? ROOT : path.join(ROOT, "dist", "public");
-const API = SRC ? path.join(ROOT, "products", "strange-oracle", "api") : path.join(ROOT, "dist", "api");
-// (13단계) 배포 폴더는 정적 전용이라 dist/api가 없다 → 함수 폴더가 없으면 /api/*는 모두 404 (정적 호스팅과 같음)
+const PAID = path.join(ROOT, "products", "strange-oracle", "api", "_paid", "book");
+const Book = require(path.join(ROOT, "netlify", "functions", "book.js"));
+const PayCode = require(path.join(ROOT, "products", "strange-oracle", "paycode.js"));
 if (!fs.existsSync(STATIC)) {
   console.error(`폴더가 없습니다: ${STATIC}\n먼저 node tools/build-dist.js 를 실행하거나 --src 를 붙이세요.`);
   process.exit(1);
 }
-if (process.env.PAY_MODE === "mock" && process.env.TOSS_SECRET_KEY) console.warn("주의: TOSS_SECRET_KEY가 있어 mock 모드가 꺼집니다.");
+const MOCK_PASS = PayCode.Pass.make(); // 시작할 때마다 새로
+const ENV = { PASS_MODE: MODE === "test" ? "test" : "", BOOK_PASS_HASHES: MODE === "test" ? Book.hashOf(MOCK_PASS) : "" };
 
 const TYPES = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
   ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".json": "application/json; charset=utf-8", ".md": "text/plain; charset=utf-8",
 };
-const handlers = {};
-function handlerFor(name) {
-  if (!/^[a-z][a-z0-9-]*$/.test(name)) return null; // 밑줄·점으로 시작하는 파일은 함수가 아니다 (Vercel 규칙)
-  if (!fs.existsSync(API)) return null;
-  const file = path.join(API, name + ".js");
-  if (!fs.existsSync(file)) return null;
-  return (handlers[name] = handlers[name] || require(file));
-}
 const notFound = (res) => res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("없는 파일");
+const PAY_RE = /(\bpay:\s*\{\s*mode:\s*)"off"/;
 
-const server = http.createServer(async (req, res) => {
+const server = http.createServer((req, res) => {
   const url = new URL(req.url, "http://x");
   let rel;
   try {
@@ -57,27 +62,31 @@ const server = http.createServer(async (req, res) => {
     return notFound(res);
   }
   const log = (status) => console.log(`${req.method} ${url.pathname} ${status}`);
-  // 함수
-  if (rel === "/api" || rel.startsWith("/api/")) {
-    const name = rel.slice(5);
-    const h = handlerFor(name);
-    if (!h) {
-      log(404);
-      return notFound(res);
-    }
-    await h(req, res);
-    return log(res.statusCode);
+  // 함수 book 흉내 (본문은 읽기만, 찍지 않음)
+  if (rel === "/api/book") {
+    let body = "";
+    let big = false;
+    req.on("data", (c) => {
+      body += c;
+      if (body.length > 4096) big = true;
+    });
+    req.on("end", () => {
+      const r = Book.handle({ method: req.method, body: big ? "x".repeat(600) : body, ip: req.socket.remoteAddress }, ENV, PAID);
+      res.writeHead(r.status, r.headers).end(r.body);
+      log(r.status);
+    });
+    return;
   }
-  // 시험 전용 지름길(이 모의 서버에만 있다, 배포 폴더에는 없다): 방을 돌지 않고 앞의 N개 방을 마친 상태로 바로 연다
-  //   /__dev/skip            → 일곱 방 모두 마친 상태로 "나의 이야기"(#story)
-  //   /__dev/skip?rooms=3    → 새 순서(14-1)의 앞 세 방(만신·오검·별)만 마친 상태
-  //   /__dev/skip?legacy=1   → 옛 상태: 13단계 순서 오검~룬(5방) 마침, 만신 미완 (rooms=N이면 옛 순서 앞 N개, 최대 6)
-  //   /__dev/skip?to=hub     → 도착 화면을 입구 등 다른 화면으로 (기본 story)
-  //   시험용 가짜 프로필(이름 "테스트", 1995-03-25 14:37)을 이 탭의 sessionStorage에만 넣는다
+  if (rel === "/api" || rel.startsWith("/api/")) {
+    log(404);
+    return notFound(res);
+  }
   if (rel === "/__dev/skip") {
     const legacy = url.searchParams.get("legacy") === "1";
     const n = Math.min(legacy ? 6 : 7, Math.max(0, Number(url.searchParams.get("rooms") || (legacy ? 5 : 7)) | 0));
-    const to = /^[a-z-]+$/.test(url.searchParams.get("to") || "") ? url.searchParams.get("to") : "story";
+    const toQ = url.searchParams.get("to") || "";
+    const to = toQ === "book" ? "report" : /^[a-z-]+$/.test(toQ) ? toQ : "story";
+    const paid = url.searchParams.get("paid") === "1" && MODE === "test";
     const P = "/products/strange-oracle/";
     const html = `<!DOCTYPE html><meta charset="utf-8"><title>시험 지름길</title>
 ${["data.js", "data-saju.js", "saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"].map((f) => `<script src="${P}${f}"></script>`).join("\n")}
@@ -92,12 +101,12 @@ if (R.indexOf("rune") > -1) v.rune = { picks: [RUNES[0].code, RUNES[5].code, RUN
 if (R.indexOf("sibyl") > -1) v.sibyl = { sors: 12, topic: "love", archetype: ORACLES[12].archetype };
 sessionStorage.clear();
 sessionStorage.setItem("strange-oracle", JSON.stringify({ profile: { name: "테스트", birth: { y: 1995, m: 3, d: 25 }, time: { h: 14, m: 37 } }, visits: v }));
+${paid ? `sessionStorage.setItem("strange-oracle-pass", ${JSON.stringify(MOCK_PASS)});` : ""}
 location.replace("${P}#${to}");
 </script>`;
     res.writeHead(200, { "Content-Type": TYPES[".html"], "Cache-Control": "no-store" }).end(html);
     return log(200);
   }
-  // 원본 폴더 모드: 제품 안 api/ 폴더는 정적으로 내주지 않는다 (배포에서는 build-dist가 public 밖으로 뺀다)
   if (SRC && /\/api(\/|$)/.test(rel)) {
     log(404);
     return notFound(res);
@@ -113,14 +122,16 @@ location.replace("${P}#${to}");
       log(404);
       return notFound(res);
     }
+    // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로)
+    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(PAY_RE, '$1"test"'));
     res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-store" });
     res.end(data);
   });
 });
-server.listen(PORT, "127.0.0.1", () => {
-  console.log(`모의 서버 (${SRC ? "원본 폴더" : "dist"} · PAY_MODE=${process.env.PAY_MODE})`);
+server.listen(PORT, HOST, () => {
+  console.log(`모의 서버 (${SRC ? "원본 폴더" : "dist"} · mode=${MODE})`);
   console.log(`  정적: ${STATIC}`);
-  console.log(`  함수: ${API}`);
   console.log(`  열기: http://127.0.0.1:${PORT}/products/strange-oracle/`);
+  if (MODE === "test") console.log(`  모의 열람 코드(이 실행에서만 유효): ${PayCode.Pass.pretty(MOCK_PASS)}`);
 });
 module.exports = server;

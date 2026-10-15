@@ -1,6 +1,8 @@
 // 13단계 E3: 광고로 여는 책 e2e (옛 e2e-paid.js 대체 — 결제 흐름은 은퇴). 헤드리스 Edge, 정적 배포 폴더.
 // 구글 주소 요청은 CDP Fetch로 가로채 가짜 스크립트로 답한다(실제 구글 요청 0건). 시험용 ID는 페이지가 뜰 때 window.TEXT에 끼워 넣는다.
-// 준비: node tools/build-dist.js ; node tools/strange-oracle/mock-server.js --port 8788 --mode off
+// 준비: node tools/build-dist.js ; node tools/strange-oracle/mock-server.js --port 8788 --mode test
+// (14단계 F4-B2) 책은 결제를 켠 시험 페이지(test)에만 있다. 시험은 모의 열람 코드(/__dev/skip?paid=1이 넣는 값)를 seed에 함께 넣어 "결제한 탭"으로 시작한다.
+// 결제 전 화면·틀린 코드·off 배포판 DOM 0은 e2e-pay.js가 본다.
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-book.js
 // 결과: 콘솔 PASS/FAIL + tools/strange-oracle/out/e2e-book.txt (+ out/book-variety-e2e.txt)
 const { launch } = require("./cdp.js");
@@ -11,7 +13,7 @@ const OUT = path.join(__dirname, "out");
 const out = [];
 const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${name}${extra !== "" ? "  — " + extra : ""}`; out.push(l); console.log(l); };
 const ORDER = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]; // (14단계) 새 순서
-const BOOK_ROOMS = ORDER.filter((r) => r !== "saju"); // (F4-B1) Ⅰ 만신 장은 F4-B2에서 책에 들어온다 → 지금 목차에는 없음
+const BOOK_ROOMS = ORDER; // (F4-B2) Ⅰ 만신 장 포함 → 책 12장
 // (14-6) 방 문구 파일은 지연 불러오기라 페이지에 전역이 없을 수 있다 → 시험 방문 기록은 node에서 만든다
 const DATA = (() => { const w = {}; for (const f of ["data-saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"]) require("vm").runInNewContext(require("fs").readFileSync(require("path").resolve(__dirname, "..", "..", "products", "strange-oracle", f), "utf8"), { window: w }); return w; })();
 const SajuLib = require("../../products/strange-oracle/saju.js");
@@ -90,11 +92,12 @@ const STUB_ADS = `(function () {
   const rows = () => ev("Object.fromEntries([...document.querySelectorAll('[data-js=book-chapter]')].map(li => [li.dataset.chapter, li.dataset.state]))");
   const click = (sel) => ev(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) throw new Error("no " + ${JSON.stringify(sel)}); el.click(); return true; })()`);
   const row = (id) => click(`[data-js=book-chapter][data-chapter=${id}] [data-js=book-chapter-btn]`);
-  const seed = (rooms, profile = PROFILE) => ev(`sessionStorage.setItem('strange-oracle', ${JSON.stringify(JSON.stringify({ profile, visits: seedVisits(rooms) }))})`);
-  const fresh = async (rooms, hash = "#report", profile) => {
+  let PASS = "";
+  const seed = (rooms, profile = PROFILE, paid = true) => ev(`sessionStorage.setItem('strange-oracle', ${JSON.stringify(JSON.stringify({ profile, visits: seedVisits(rooms) }))}); ${paid ? `sessionStorage.setItem('strange-oracle-pass', ${JSON.stringify(PASS)});` : ""} true`);
+  const fresh = async (rooms, hash = "#report", profile, paid = true) => {
     await b.goto(BASE);
     await ev("sessionStorage.clear()");
-    await seed(rooms, profile);
+    await seed(rooms, profile, paid);
     await b.goto(BASE + hash);
     await waitFor(`document.querySelector('.screen.is-active')?.id === 'screen-${hash === "#report" ? "report" : hash.slice(1)}'`);
   };
@@ -106,6 +109,11 @@ const STUB_ADS = `(function () {
   const toPages = () => waitFor("document.querySelector('[data-js=book-reader]').dataset.view === 'pages'", 6000);
 
   // ═══ A. 기본 설정 (ID 없음, lockAlways true → 누르면 광고 없음 안내와 함께 바로 열림) ═══
+  // 0. 모의 열람 코드 (시험 페이지 지름길이 넣는 값을 읽는다)
+  await b.goto("http://127.0.0.1:8788/__dev/skip?rooms=0&paid=1&to=hub");
+  await waitFor("location.pathname.endsWith('/strange-oracle/') || location.pathname.endsWith('index.html')", 5000);
+  PASS = await ev("sessionStorage.getItem('strange-oracle-pass') || ''");
+  check("시험 페이지: /__dev/skip?paid=1이 모의 열람 코드를 넣음 (test 모드 서버)", /^SOP[0-9A-Z]{13}$/.test(PASS));
   // 1. 첫 화면
   await b.goto(BASE);
   await ev("sessionStorage.clear()");
@@ -114,26 +122,25 @@ const STUB_ADS = `(function () {
   await sleep(300);
   const firstReq = b.log.requests.slice(nReq0);
   check("13-7.1 첫 화면: data-book-*.js·/api/ 요청 0건, pay.json 요청 0", !firstReq.some((r) => /data-book-|\/api\/|pay\.json/.test(r)), firstReq.filter((r) => /data-book-|\/api\//.test(r)).join(" "));
-  // SKIP 13-7.10: index.html에 designer의 결제 화면 template(pay-tpl, 3,900원)이 들어와 있다. pay.mode off에서 걷어 내는 일은 F4-B2 몫이라 이번에는 건너뛴다
-  out.push("SKIP  13-7.10 첫 화면 소스: 가격·토스·결제 화면 0 — F4-B2(pay.mode)에서 처리"); console.log(out[out.length - 1]);
+  check("test: 결제 전 화면을 template에서 꺼냄(#screen-deeper, 비활성)·template 없음 (off의 DOM 0은 e2e-pay)", await ev("!!document.querySelector('#screen-deeper') && !document.querySelector('#screen-deeper.is-active') && !document.querySelector('[data-js=pay-tpl]')"));
   check("입구 책 카드: 0/6 상태 none·state0 문구·목차 보기 버튼", await ev("(() => { const c = document.querySelector('[data-js=hub-book]'); return c.dataset.state === 'none' && document.querySelector('[data-js=hub-book-hint]').textContent === TEXT.hub.book.state0 && document.querySelector('[data-js=hub-book-go]').offsetHeight > 0; })()"));
 
   // 2. 0/7 목차
-  check("F4-B1: 목차에 Ⅰ 만신 장 없음(B2에서 넣음)", await ev("!document.querySelector('[data-js=book-chapter][data-chapter=saju]')"));
+  check("F4-B2: 목차에 Ⅰ 만신 장 있음(오검 앞)", await ev("(() => { const ids = [...document.querySelectorAll('[data-js=book-chapter]')].map(li => li.dataset.chapter); return ids.indexOf('saju') === ids.indexOf('ogham') - 1 && ids.length === 12; })()"));
   await click("[data-js=hub-book-go]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   const r0 = await rows();
-  check("13-7.2 0/7: 모든 장 '지나면 열려요'(need-room), 광고 버튼 0 (11장, 만신 장 없음)", Object.values(r0).every((s) => s === "need-room") && Object.keys(r0).length === 11 && (await ev("[...document.querySelectorAll('[data-js=book-chapter-state]')].every(e => /열려요|\\[초안\\]/.test(e.textContent))")), JSON.stringify(r0));
+  check("13-7.2 0/7: 모든 장 '지나면 열려요'(need-room), 광고 버튼 0 (12장)", Object.values(r0).every((s) => s === "need-room") && Object.keys(r0).length === 12 && (await ev("[...document.querySelectorAll('[data-js=book-chapter-state]')].every(e => /열려요|\\[초안\\]/.test(e.textContent))")), JSON.stringify(r0));
   await row("match");
   check("0/6: 잠긴 행을 누르면 안내만(목차 그대로)", (await view()) === "toc");
 
   // 2/7 (만신·오검)
   await fresh(["saju", "ogham"]);
   const r1 = await rows();
-  check("14-2 2/7: 여는 글·오검·흐름·궁합·심층 열림(광고 잠금 없음)·나머지 방·닫는 글 잠김",
-    r1.open === "opened" && ["ogham", "flow", "match", "deep"].every((k) => r1[k] === "opened") && ["star", "decan", "tzolkin", "rune", "sibyl", "close"].every((k) => r1[k] === "need-room"), JSON.stringify(r1));
+  check("14-4 2/7 결제함: 여는 글·만신·오검·흐름·궁합·심층 열림·나머지 방·닫는 글 '지나면 열려요'(59번)",
+    r1.open === "opened" && ["saju", "ogham", "flow", "match", "deep"].every((k) => r1[k] === "opened") && ["star", "decan", "tzolkin", "rune", "sibyl", "close"].every((k) => r1[k] === "need-room"), JSON.stringify(r1));
   check("목차: 원형 이름·안내 줄({n}=2)·배너 자리 없음(14-2)", await ev("(() => { const a = document.querySelector('[data-js=book-home-arch]'); return !a.hidden && a.textContent === TEXT.archetypes[StrangeOracle.currentArchetype()].name && document.querySelector('[data-js=book-home-lede]').textContent === TEXT.book.toc.lede.replace('{n}', 2) && !document.querySelector('#screen-report [data-ad]'); })()"));
-  check("목차: 잠긴 장의 문장 0 (장 파일 아직 안 받음)", !b.log.requests.some((r) => /data-book-(ogham|match|flow|star)/.test(r)));
+  check("목차: 유료 장 문장 0 (함수 book 요청 아직 0건)", !b.log.requests.some((r) => /\/api\/book/.test(r)));
 
   // 3. 입구 → 궁합 첫 쪽 탭 수 (기본 설정: 광고 없음 → 안내 + 펼치기)
   await b.goto(BASE + "#hub");
@@ -156,7 +163,7 @@ const STUB_ADS = `(function () {
   await click("[data-js=book-chapter-open]"); taps++;
   check("13-7.3 입구 → 궁합 첫 쪽 탭 4번 이하(지금 3번)", (await toPages()) && taps <= 4, `${taps}번`);
   const friendText = await pageText();
-  check("궁합 본문: 쌍 머리·요약·방별 관계·마지막 문단 = M1 함께 해 볼 한 가지·장 끝 쪽", await ev(`(() => { const pages = [...document.querySelectorAll('[data-js=book-page]')]; const last = pages[pages.length - 1]; const prev = pages[pages.length - 2].textContent; const me = StrangeOracle.currentArchetype(); return last.querySelector('[data-js=chapter-end]') && BOOK_BOND.first.friend && Object.values(BOOK_BOND.first.friend).some(x => prev.includes(x.together.slice(-25))); })()`));
+  check("궁합 본문: 쌍 머리·요약·방별 관계·마지막 문단 = M1 함께 해 볼 한 가지·장 끝 쪽", await ev(`(() => { const pages = [...document.querySelectorAll('[data-js=book-page]')]; const last = pages[pages.length - 1]; const prev = pages[pages.length - 2].textContent; const me = StrangeOracle.currentArchetype(); return last.querySelector('[data-js=chapter-end]') && BOOK_MATCH.bond.first.friend && Object.values(BOOK_MATCH.bond.first.friend).some(x => prev.includes(x.together.slice(-25))); })()`));
   check("궁합 본문에 undefined·{ } 자리 0", !/undefined|\{(room|name|key)\}/.test(friendText));
   // 장 안 리더
   const pg = await ev("(() => { const P = [...document.querySelectorAll('[data-js=book-page]')]; return { n: P.length, over: P.filter(p => { const bd = p.querySelector('.book-page__body'); return bd.scrollHeight > bd.clientHeight + 1; }).length, folio: P[0].querySelector('[data-js=book-page-total]').textContent, label: document.querySelector('[data-js=read-label]').textContent, ads: document.querySelectorAll('#screen-report .ad-slot.is-filled').length, w: document.documentElement.scrollWidth <= innerWidth }; })()");
@@ -214,16 +221,25 @@ const STUB_ADS = `(function () {
   await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))");
   await sleep(100);
   const end = await ev("(() => { const cur = document.querySelector('[data-js=book-page].is-current'); const n = cur.querySelector('[data-js=chapter-end-next]'); return { end: !!cur.querySelector('[data-js=chapter-end]'), next: n && !n.classList.contains('is-hidden') ? n.dataset.next : null }; })()");
-  check("13-7.7 마지막 쪽 = 장 끝 쪽: 다음 장(오검)·목차로", end.end && end.next === "ogham", JSON.stringify(end));
+  check("13-7.7 마지막 쪽 = 장 끝 쪽: 다음 장(Ⅰ 만신)·목차로", end.end && end.next === "saju", JSON.stringify(end));
   await click("[data-js=book-page].is-current [data-js=chapter-end-next]");
   await sleep(200);
-  check("다음 장(열림) → 그 장 첫 쪽으로 바로 (14-2: 잠금 없음)", (await toPages()) && (await ev("document.querySelector('[data-js=chapter-cover]').dataset.chapter")) === "ogham");
-  await waitFor("!!window.BOOK_OGHAM", 4000);
-  check("13-7.5 장 파일 이름은 방 단위(번호·query 없음)", b.log.requests.filter((r) => /data-book-/.test(r)).every((r) => /\/data-book-[a-z]+\.js$/.test(r)));
+  check("다음 장(열림) → 그 장 첫 쪽으로 바로 (14-2: 잠금 없음)", (await toPages()) && (await ev("document.querySelector('[data-js=chapter-cover]').dataset.chapter")) === "saju");
+  await waitFor("!!window.BOOK_SAJU", 4000);
+  const bookBodies = b.log.bodies.filter((x) => /\/api\/book$/.test(x.url));
+  check("14-7.13 함수 book 요청: 주소에 query 없음·본문은 pass·file 두 칸뿐·file은 장 이름", bookBodies.length > 0 && bookBodies.every((x) => { try { const o = JSON.parse(x.body); return Object.keys(o).sort().join() === "file,pass" && /^[a-z]+$/.test(o.file); } catch (e) { return false; } }), `${bookBodies.length}건`);
+  check("공개 책 파일은 data-book-free.js 하나뿐", b.log.requests.filter((r) => /data-book-/.test(r)).every((r) => /\/data-book-free\.js$/.test(r)));
   check("숨은 장 제목(결정 65 공개)·결과 이름·분량 표지에 보임", await ev("(() => { const c = document.querySelector('[data-js=chapter-cover]'); return !c.querySelector('[data-js=chapter-cover-hidden-row]').hidden && c.querySelector('[data-js=chapter-cover-result]').textContent.length > 0 && /\\d/.test(c.querySelector('[data-js=chapter-cover-volume]').textContent); })()"));
   await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 5000);
   await click("[data-js=book-chapter-open]");
   await toPages();
+  await click("[data-js=book-toc-open]");
+  await waitFor("document.querySelector('[data-js=book-reader]').dataset.view === 'toc'", 2000);
+  await row("ogham");
+  await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 5000);
+  await click("[data-js=book-chapter-open]");
+  await toPages();
+  await waitFor("!!window.BOOK_OGHAM", 4000);
   const og = await ev("(() => { const t = [...document.querySelectorAll('[data-js=book-page]')].map(p => p.textContent).join(' '); return { hidden: t.includes(BOOK_OGHAM.hidden[2].title), shadow: t.includes(BOOK_OGHAM.full[2].shadow.body[0].slice(0, 20)) }; })()");
   check("오검 장: Ⅰ~Ⅳ장·숨은 장 본문", og.hidden && og.shadow, JSON.stringify(og));
 
@@ -237,17 +253,18 @@ const STUB_ADS = `(function () {
   check("흐름 장 첫 쪽", await toPages());
   check("흐름: 생년월일을 profile에 저장(6장 예외)", (await ev("JSON.parse(sessionStorage.getItem('strange-oracle')).profile.birth.y")) === 1995);
 
-  // 옛 주소·옛 영수증 칸 → 목차
+  // #deeper = 결제 전 화면(test), 옛 영수증 칸 → 목차
   await b.goto(BASE + "#deeper");
-  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
-  check("옛 #deeper → 책 목차", (await active()) === "screen-report" && (await view()) === "toc");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  check("test: #deeper → 결제 전 화면", (await active()) === "screen-deeper");
   await ev("sessionStorage.setItem('strange-oracle-receipt', 'SO1TESTCODE')");
   await b.goto(BASE + "#hub");
   await sleep(200);
   check("옛 영수증 칸 → 지우고 목차로", (await active()) === "screen-report" && (await ev("sessionStorage.getItem('strange-oracle-receipt')")) === null);
+  const nReqPay = b.log.requests.length;
   await b.goto(BASE + "?pay=success&paymentKey=PK_TEST&orderId=ORDER_TEST&amount=3900#hub");
   await sleep(300);
-  check("옛 결제 복귀 주소: query 지움·/api 요청 0", (await ev("location.search")) === "" && !b.log.requests.some((r) => /\/api\//.test(r)));
+  check("옛 결제 복귀 주소: query 지움·/api 요청 0", (await ev("location.search")) === "" && !b.log.requests.slice(nReqPay).some((r) => /\/api\//.test(r)));
 
   // 방 결과의 책 한 줄 → 그 장 표지
   await fresh(["saju", "ogham", "star"], "#star-result");
@@ -261,9 +278,9 @@ const STUB_ADS = `(function () {
   await click("[data-js=story-book-link]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   const r6 = await rows();
-  check("7/7: 닫는 글 열림·방 장 여섯 모두 열림(만신 장은 B2)", r6.close === "opened" && BOOK_ROOMS.every((k) => r6[k] === "opened") && !("saju" in r6), JSON.stringify(r6));
+  check("7/7 결제함: 12장 모두 열림(만신 포함)", Object.keys(r6).length === 12 && Object.values(r6).every((s) => s === "opened"), JSON.stringify(r6));
   // 룬·시빌라·데칸 장 열기 (큰 파일)
-  for (const id of ["rune", "sibyl", "decan"]) {
+  for (const id of ["saju", "rune", "sibyl", "decan"]) {
     await click("[data-js=book-toc-open]").catch(() => {});
     await waitFor("document.querySelector('[data-js=book-reader]').dataset.view === 'toc'", 2000);
     await row(id);
@@ -272,6 +289,10 @@ const STUB_ADS = `(function () {
     const ok = await toPages();
     const st = await ev("(() => { const P = [...document.querySelectorAll('[data-js=book-page]')]; return { n: P.length, over: P.filter(p => { const bd = p.querySelector('.book-page__body'); return bd.scrollHeight > bd.clientHeight + 1; }).length, ms: Number(document.querySelector('[data-js=book-reader]').dataset.pagedMs) }; })()");
     check(`${id} 장: 쪽 나눔·넘침 0`, ok && st.n > 3 && st.over === 0, JSON.stringify(st));
+    if (id === "saju") {
+      const sj = await ev("(() => { const t = [...document.querySelectorAll('[data-js=book-page]')].map(p => p.textContent).join(' '); const c = JSON.parse(sessionStorage.getItem('strange-oracle')).visits.saju.code; const s = Math.floor((c - 1) / 500), g = Math.floor((c - 1) / 2) % 5; return { rest: t.includes(BOOK_SAJU.full[s].identity.rest[0].slice(0, 30)), hidden: t.includes(BOOK_SAJU.hidden[g].body[0].slice(0, 30)), title: t.includes(SAJU.groups[Object.keys(SAJU.groups)[g]].hiddenTitle), bad: /undefined|\\{\\w+\\}/.test(t) }; })()");
+      check("Ⅰ 만신 장: Ⅰ장 나머지·숨은 장(묶음 제목 = data-saju.js hiddenTitle)·빈칸 0", sj.rest && sj.hidden && sj.title && !sj.bad, JSON.stringify(sj));
+    }
   }
 
   // ═══ B·C. (14-2) 광고 은퇴: 보상형 광고·배너·lockAlways 시험은 뺐다(e2e-ads.js도 은퇴). GA4만 남는다 ═══
@@ -284,7 +305,7 @@ const STUB_ADS = `(function () {
   await sleep(100);
   await ev("document.querySelector('[data-js=clear-confirm]').click()");
   await sleep(200);
-  check("내 정보 지우기 → 열림 표시·이어 읽기·입력 모두 없음", (await ev("['strange-oracle', 'strange-oracle-unlock', 'strange-oracle-bookmark'].every(k => sessionStorage.getItem(k) === null)")));
+  check("내 정보 지우기 → 열람 코드·이어 읽기·입력 모두 없음", (await ev("['strange-oracle', 'strange-oracle-unlock', 'strange-oracle-bookmark', 'strange-oracle-pass'].every(k => sessionStorage.getItem(k) === null)")));
 
   // ═══ 개인정보 전수 검색 (13-7.11) ═══
   const store = await ev("JSON.stringify({ s: Object.fromEntries(Object.keys(sessionStorage).map(k => [k, sessionStorage.getItem(k)])), l: localStorage.length, c: document.cookie })");

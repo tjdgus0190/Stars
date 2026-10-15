@@ -36,7 +36,9 @@ const NAME = "김서윤";
 function paidSentences() {
   const set = new Set();
   const collect = (v) => (typeof v === "string" ? v.length >= 12 && set.add(v) : Array.isArray(v) ? v.forEach(collect) : v && typeof v === "object" && Object.entries(v).forEach(([k, x]) => k !== "code" && collect(x)));
-  for (const f of fs.readdirSync(PROD).filter((n) => /^data-book-.*\.js$/.test(n))) {
+  // (14단계 F4-B2) 여는·닫는 글(data-book-free.js) + 유료 원본 api/_paid/book/book-*.js
+  const BOOKS = ["data-book-free.js"].concat(fs.readdirSync(path.join(PROD, "api", "_paid", "book")).map((n) => path.join("api", "_paid", "book", n)));
+  for (const f of BOOKS) {
     const w = {};
     vm.runInNewContext(fs.readFileSync(path.join(PROD, f), "utf8"), { window: w });
     Object.values(w).forEach(collect);

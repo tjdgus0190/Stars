@@ -1,9 +1,11 @@
 // 낯선 점술관 — 한 권의 책 조립 (13단계 spec 13-5). 문구 없음, 로직만.
-// 휴면 서버 api/_lib/core.js의 hiddenEntry·fullRoom·pairCode·timelineStages·buildReport 순서 규칙을 그대로 옮긴 것이다.
-// core.js는 고치지 않는다. 같은 결과 코드 → 같은 문단 배열 (tools/strange-oracle/book.test.js 동일성 시험).
+// 13단계 휴면 서버 core.js(F4-B2에서 지움)의 hiddenEntry·fullRoom·pairCode·timelineStages·buildReport 순서 규칙을 옮긴 것이다.
+// (14단계 F4-B2) 문구 원본: 여는 글·닫는 글 = 공개 data-book-free.js(BOOK_FREE), 유료 10장 = api/_paid/book/book-*.js를
+//   함수 book이 열람 코드 확인 뒤 JSON으로 주면 app.js가 같은 전역 이름(BOOK_SAJU…BOOK_ARCH)에 넣는다.
 // 입력은 결과 코드·원형·나이 구간(+ 궁합은 관계 유형·방 코드)뿐이다. 이름·생년월일 원문은 받지 않는다(6장).
-// 문구 C = 지연 불러오기 파일 data-book-*.js의 전역(BOOK_OGHAM…BOOK_ARCH)을 contentFrom(window)로 묶은 것.
-//   C = { open, deep, close, timeline, match, matchRooms, full: {방: […]}, hidden: {방: […]} } — 아직 안 불러온 칸은 비어 있다.
+// 문구 C = 전역(BOOK_FREE·BOOK_SAJU…BOOK_ARCH)을 contentFrom(window)로 묶은 것.
+//   C = { open, deep, close, timeline, match, matchRooms, bond, full: {방: […]}, hidden: {방: […]} } — 아직 안 받은 칸은 비어 있다.
+// 만신(saju) 결과 코드(1~5000, saju.js encodeCode)에서 일간 = (code-1)/500의 몫, 우세 십신 묶음 = ((code-1)/2의 몫) % 5 (saju.js 없이 계산).
 (function (root, factory) {
   const PayCode = typeof module === "object" && module.exports ? require("./paycode.js") : root.PayCode;
   const api = factory(PayCode);
@@ -13,7 +15,7 @@
   "use strict";
   const ARCH = PayCode.ARCHETYPES;
   const CHAPTER_ORDER = PayCode.CHAPTER_ORDER;
-  const ROOM_GLOBAL = { ogham: "BOOK_OGHAM", star: "BOOK_STAR", decan: "BOOK_DECAN", tzolkin: "BOOK_TZOLKIN", rune: "BOOK_RUNE", sibyl: "BOOK_SIBYL" };
+  const ROOM_GLOBAL = { saju: "BOOK_SAJU", ogham: "BOOK_OGHAM", star: "BOOK_STAR", decan: "BOOK_DECAN", tzolkin: "BOOK_TZOLKIN", rune: "BOOK_RUNE", sibyl: "BOOK_SIBYL" };
 
   function contentFrom(w) {
     const C = { full: {}, hidden: {} };
@@ -22,8 +24,9 @@
       if (x) [C.full[r], C.hidden[r]] = [x.full, x.hidden];
     }
     if (w.BOOK_FLOW) C.timeline = w.BOOK_FLOW;
-    if (w.BOOK_MATCH) [C.match, C.matchRooms] = [w.BOOK_MATCH.pairs, w.BOOK_MATCH.rooms];
-    if (w.BOOK_ARCH) [C.open, C.deep, C.close] = [w.BOOK_ARCH.open, w.BOOK_ARCH.deep, w.BOOK_ARCH.close];
+    if (w.BOOK_MATCH) [C.match, C.matchRooms, C.bond] = [w.BOOK_MATCH.pairs, w.BOOK_MATCH.rooms, w.BOOK_MATCH.bond];
+    if (w.BOOK_FREE) [C.open, C.close] = [w.BOOK_FREE.open, w.BOOK_FREE.close];
+    if (w.BOOK_ARCH) C.deep = w.BOOK_ARCH.deep;
     return C;
   }
   const byCode = (list) => Object.fromEntries((list || []).map((e) => [e.code, e]));
@@ -31,8 +34,11 @@
 
   const paras = (v) => (Array.isArray(v) ? v.slice() : v ? [v] : []);
   const insertAt = (arr, i, item) => [...arr.slice(0, i), item, ...arr.slice(i)];
+  const sajuStem = (code) => Math.floor((code - 1) / 500);
+  const sajuGroup = (code) => Math.floor((code - 1) / 2) % 5;
   function hiddenEntry(C, room, codes) {
     const list = C.hidden[room];
+    if (room === "saju") return list[sajuGroup(codes.saju)];
     if (room === "rune") return list[codes.rune[1]];
     if (room === "tzolkin") return list[codes.tzolkin.sign];
     return list[codes[room]];
@@ -53,7 +59,7 @@
         hidden,
       };
     }
-    const e = list[room === "tzolkin" ? codes.tzolkin.sign : codes[room]];
+    const e = list[room === "tzolkin" ? codes.tzolkin.sign : room === "saju" ? sajuStem(codes.saju) : codes[room]];
     const eb = e.event.body;
     const ch2 = insertAt(eb, Math.min(2, eb.length), e.event.quote);
     const out = {
@@ -150,5 +156,5 @@
     return { chapters, card, codes };
   }
 
-  return { contentFrom, hiddenEntry, fullRoom, pairCode, timelineStages, openChapter, deepChapter, closeChapter, timelineChapter, mapChapter, matchChapter, buildReport, ARCH };
+  return { sajuStem, sajuGroup, contentFrom, hiddenEntry, fullRoom, pairCode, timelineStages, openChapter, deepChapter, closeChapter, timelineChapter, mapChapter, matchChapter, buildReport, ARCH };
 });

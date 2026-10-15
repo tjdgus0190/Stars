@@ -1,0 +1,21 @@
+# 낯선 점술관 — Netlify 설정 (spec 14-5, 결정 93). 저장소 루트에 둔다. Netlify 화면 설정·push·환경 변수는 운영자가 한다.
+# 배포 브랜치: Netlify 운영(production) 브랜치는 release. 에이전트는 main에만 커밋하고 release는 만지지 않는다.
+#   QA 판정 "배포 가능" 뒤에만 운영자가 main → release 병합·push. main 브랜치 배포·미리보기 배포(deploy preview)는 끈다(HANDOFF 1장).
+# 공개되는 것은 dist/public뿐이다. 제품 폴더·저장소 루트를 publish로 지정하지 않는다(유료 원본 api/_paid가 정적 주소로 새지 않게).
+
+[build]
+  command = "node tools/build-dist.js"   # 유료 문장 지문 누출·pay.mode off·api 폴더 검사가 실패하면 빌드가 멈춰 배포되지 않는다
+  publish = "dist/public"
+
+[functions]
+  directory = "netlify/functions"
+  # 함수 book이 읽을 유료 원본. 함수 묶음에만 들어가고 정적 주소로는 내려받을 수 없다.
+  included_files = ["products/strange-oracle/api/_paid/book/**"]
+
+# 화면은 /api/book으로 부른다 → 함수로 잇는다. 1차 배포판(pay.mode off)은 부르지 않고,
+# 환경 변수 PASS_MODE·BOOK_PASS_HASHES가 없으면 함수는 모든 요청에 503을 준다(안전).
+[[redirects]]
+  from = "/api/book"
+  to = "/.netlify/functions/book"
+  status = 200
+  force = true

@@ -34,6 +34,41 @@ window.TEXT = {
   // analytics.ga4: GA4 측정 ID "G-XXXXXXXXXX". 넣기 전에 GA4 데이터 스트림의 '향상된 측정'을 반드시 끈다(12-5)
   analytics: { ga4: "" },
 
+  // ── (14단계 14-4) 결제 설정 + 결제 전 화면 문구. 설정 칸(mode·verify·price·stores)은 문구가 아니다.
+  // mode: "off" = 본 페이지(배포판, 결정 94) — 결제 화면·열람 코드 칸·책(목차·장·여는/닫는 글)·방 결과의 책 한 줄·입구 책 카드·FAQ 책 문답을 모두 숨긴다.
+  //       "test" = 시험 페이지에서만. 이 파일은 고치지 않는다: node tools/strange-oracle/mock-server.js --mode test 가 응답할 때만 바꾼다.
+  //       "live" = 운영자만, specs 54·39·62번과 계획서 live 조건을 마친 뒤. node tools/build-dist.js는 이 값이 "off"가 아니면 실패한다(live 때 그 검사를 함께 푼다).
+  //   ※ mode는 이 묶음의 첫 줄이어야 한다(모의 서버가 이 모양으로 찾는다).
+  // verify: "code" = 열람 코드 칸 + 함수 book (계획서 안 1·2) / "none" = 구매 링크만, 코드 칸 없음 (안 3)
+  // amount: 원 단위 숫자. stores: 구매처 { name, url }. ko = 한국어 화면, global = 그 밖(4차, 지금은 쓰지 않음). url이 비면 구매 버튼 비활성 + storeEmpty 한 줄
+  // 아래 문구 칸("")은 copywriter가 F5에서 채운다. 비어 있으면 화면에 빈칸으로 나온다(시험 페이지에서만 보임).
+  pay: {
+    mode: "off",
+    verify: "code",
+    amount: 3900,
+    stores: { ko: { name: "", url: "" }, global: { name: "", url: "" } },
+    testBand: "",        // 맨 위 띠 (test에서만)
+    eyebrow: "",
+    title: "",
+    what: { title: "", totalLabel: "", total: "", free: "", item: "" }, // total: 합계 "{n}" 자리(만 자 단위 숫자) / item: 장 한 줄 분량 "{n}" 자리(글자 수)
+    price: { title: "", text: "", unit: "" }, // text: "{price}" 자리(쉼표 붙은 숫자, 예 3,900) / unit: 구매처 포인트 표기(운영자 확인 뒤)
+    store: { title: "", note: "" },
+    how: { title: "", body: "" },
+    refund: { title: "", body: "", link: "" },
+    agree: "",
+    buy: "",
+    storeEmpty: "",
+    newTab: "",
+    back: "",
+    tocLocked: "",       // 목차·장 끝: 결제 전 유료 장의 상태 한 줄
+    tocCta: "",          // 목차에서 결제 전 화면으로 가는 토스트 (잠긴 장을 눌렀을 때)
+    pass: {
+      link: "", placeholder: "", go: "", help: "",
+      ok: "",            // 열람 코드 확인 뒤 한 줄
+      errors: { shape: "", receipt: "", resume: "", fail: "", offline: "", wait: "" },
+    },
+  },
+
   // 브라우저 탭 제목·검색 설명. index.html <head>의 title·description과 같은 문장으로 맞춰 둘 것
   // (검색·공유 미리보기는 JS 실행 전 값을 읽는다. 여기를 고치면 index.html 맨 위 두 줄도 같이 고쳐 주세요)
   meta: {
@@ -794,6 +829,7 @@ window.TEXT = {
       shape: "코드 모양이 맞지 않아요. 다시 확인해 주세요.",
       order: "방 순서가 맞지 않는 코드예요. 다시 만들어 주세요.",
       receipt: "이어가기 코드가 아니에요. 다시 확인해 주세요.", // (13단계) 영수증 칸은 은퇴
+      pass: "", // (14-4) 이어가기 칸에 열람 코드(SOP)를 넣었을 때 "열람 코드는 책에서 넣어요" (F5 copywriter)
     },
     restored: "코드에 담긴 결과를 불러왔어요. 호칭은 ‘당신’이에요", // 복원 직후 입구 한 줄. 출처가 드러나게 (최대 30자)
     needInput: "이 부분은 생일을 다시 넣으면 보여요", // 복원 상태의 별의 방 (최대 30자)

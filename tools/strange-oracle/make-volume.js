@@ -3,18 +3,25 @@
 // 표는 글자 수(공백 포함)만 담는다. 유료 문장은 한 글자도 넣지 않는다.
 // 세는 방식은 app.js renderReport(책)와 같다: 여는 글 + 방마다(Ⅰ장 공개 핵심 풀이 + ch1Rest + Ⅱ~Ⅳ + 숨은 장 본문) + 시기별 흐름·궁합·원형 심층 + 닫는 글.
 // 룬·시빌라 "고른 주제" 단락은 빼고 센다(구매 직후와 재열람이 같은 값, spec 11-6 F3). 숨은 장 제목·구간 표지·관계 이름표도 세지 않는다(app.js SKIP_KEYS).
-// 생성 뒤 무작위 코드 조합으로 "표 합계 = buildReport 실제 글자 수"를 대조한다(불일치면 exit 1).
+// 생성 뒤 무작위 코드 조합으로 "표 합계 = book.js buildReport 실제 글자 수"를 대조한다(불일치면 exit 1). (14단계) 원본 = data-book-free.js + api/_paid/book/
 "use strict";
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 const SRC = path.join(__dirname, "..", "..", "products", "strange-oracle");
-const core = require(path.join(SRC, "api", "_lib", "core.js"));
 const PayCode = require(path.join(SRC, "paycode.js"));
+const Book = require(path.join(SRC, "book.js"));
 
 const w = {};
-for (const f of ["data.js", "data-runes.js", "data-stars.js", "data-ogham.js", "data-decans.js", "data-tzolkin.js", "data-oracles.js"])
+for (const f of ["data.js", "data-saju.js", "data-runes.js", "data-stars.js", "data-ogham.js", "data-decans.js", "data-tzolkin.js", "data-oracles.js"])
   vm.runInNewContext(fs.readFileSync(path.join(SRC, f), "utf8"), { window: w });
+// (14단계 F4-B2) 책 문구: 공개 data-book-free.js(여는·닫는 글) + 유료 원본 api/_paid/book/book-*.js. 숫자만 꺼내고 문장은 쓰지 않는다
+const BW = {};
+vm.runInNewContext(fs.readFileSync(path.join(SRC, "data-book-free.js"), "utf8"), { window: BW });
+const PAID = path.join(SRC, "api", "_paid", "book");
+for (const f of fs.readdirSync(PAID).filter((n) => /^book-.*\.js$/.test(n))) vm.runInNewContext(fs.readFileSync(path.join(PAID, f), "utf8"), { window: BW });
+const CONTENT = Book.contentFrom(BW);
+const core = { buildReport: (c) => Book.buildReport(CONTENT, c) }; // 13단계 core.buildReport와 같은 모양 (book.js)
 const T = w.TEXT;
 const strip = (h) => String(h).replace(/<[^>]*>/g, "");
 const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (m, k) => (k in v ? v[k] : m));
@@ -32,6 +39,10 @@ const PUB = { star: w.NAKSHATRAS, ogham: w.OGHAM, decan: w.DECANS, tzolkin: w.TZ
 
 // ── 실제 글자 수 (app.js renderReport와 같은 셈)
 function bookCh1Len(room, c, rest) {
+  if (room === "saju") {
+    const st = w.SAJU.stems[Book.sajuStem(c.saju)];
+    return [st.identity.title, st.identity.lede, ...st.body, ...(rest || [])].reduce((a, t) => a + len(strip(t)), 0);
+  }
   if (room === "rune") {
     const rs = c.rune.map((i) => w.RUNES[i]);
     const R = T.rune.result;
@@ -62,6 +73,10 @@ function roomOnly(room, val) {
   return bookCh1Len(room, c, fr.ch1Rest) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs]);
 }
 const V = { room: {}, rune: {}, open: {}, close: {}, deep: {}, timeline: {}, map: {}, pair: {}, rel: {}, avg: {} };
+// 만신: 일간 10 × 우세 묶음 5 = 50칸, 칸 번호 = 일간*5 + 묶음 (app.js chapterChars와 같은 식). 대표 코드 = 그 일간·묶음의 첫 코드
+const sajuCode = (s, g) => s * 500 + g * 2 + 1;
+V.room.saju = [];
+for (let s = 0; s < 10; s++) for (let g = 0; g < 5; g++) V.room.saju.push(roomOnly("saju", sajuCode(s, g)));
 V.room.ogham = w.OGHAM.map((_, i) => roomOnly("ogham", i));
 V.room.star = w.NAKSHATRAS.map((_, i) => roomOnly("star", i));
 V.room.decan = w.DECANS.map((_, i) => roomOnly("decan", i));
@@ -102,7 +117,7 @@ for (const [room, key] of [["ogham", "relOgham"], ["decan", "relDecan"], ["tzolk
     V.rel[`${room}-g${g}`] = charsOf(m.rooms);
   }
 const mean = (xs) => Math.round(xs.reduce((a, b) => a + b, 0) / xs.length);
-for (const r of ["ogham", "star", "decan", "tzolkin", "sibyl"]) V.avg[r] = mean(V.room[r]);
+for (const r of ["saju", "ogham", "star", "decan", "tzolkin", "sibyl"]) V.avg[r] = mean(V.room[r]);
 V.avg.rune = V.rune.base + mean(V.rune.past) + mean(V.rune.now) + mean(V.rune.next);
 V.avg.open = mean(Object.values(V.open));
 V.avg.close = mean(Object.values(V.close));
@@ -115,7 +130,7 @@ function fromTable(c) {
   let n = V.open[c.arch] + V.close[c.arch] + V.deep[c.arch] + V.timeline[c.arch][c.band];
   for (const r of ROOMS) {
     if (c[r] == null) continue;
-    n += r === "rune" ? V.rune.base + V.rune.past[c.rune[0]] + V.rune.now[c.rune[1]] + V.rune.next[c.rune[2]] : r === "tzolkin" ? V.room.tzolkin[c.tzolkin.sign] : V.room[r][c[r]];
+    n += r === "saju" ? V.room.saju[Book.sajuStem(c.saju) * 5 + Book.sajuGroup(c.saju)] : r === "rune" ? V.rune.base + V.rune.past[c.rune[0]] + V.rune.now[c.rune[1]] + V.rune.next[c.rune[2]] : r === "tzolkin" ? V.room.tzolkin[c.tzolkin.sign] : V.room[r][c[r]];
   }
   if (c.partner) {
     const ia = ARCH.indexOf(c.arch), ib = ARCH.indexOf(c.partner);
@@ -134,9 +149,10 @@ for (let t = 0; t < 3000; t++) {
   const c = {
     arch: ARCH[rnd(ARCH.length)], band: rnd(7), partner,
     relOgham: partner && t % 3 ? rnd(relMax("ogham")) : null, relDecan: partner && t % 5 ? rnd(relMax("decan")) : null, relTzolkin: partner && t % 7 ? rnd(relMax("tzolkin")) : null,
-    ogham: rnd(w.OGHAM.length), star: rnd(w.NAKSHATRAS.length), decan: rnd(w.DECANS.length), tzolkin: { number: 1 + rnd(13), sign: rnd(w.TZOLKIN_SIGNS.length) }, rune, sibyl: rnd(w.ORACLES.length),
+    saju: 1 + rnd(5000), ogham: rnd(w.OGHAM.length), star: rnd(w.NAKSHATRAS.length), decan: rnd(w.DECANS.length), tzolkin: { number: 1 + rnd(13), sign: rnd(w.TZOLKIN_SIGNS.length) }, rune, sibyl: rnd(w.ORACLES.length),
   };
-  if (t % 10 === 9) ["star", "decan", "tzolkin", "rune", "sibyl"].slice(rnd(5)).forEach((r) => (c[r] = null)); // 옛 영수증(방 6개 미만)
+  if (t % 10 === 9) ["star", "decan", "tzolkin", "rune", "sibyl"].slice(rnd(5)).forEach((r) => (c[r] = null)); // 방 일부만
+  if (t % 4 === 3) c.saju = null; // 만신 미완(옛 상태)
   checked++;
   if (fromTable(c) !== actual(c)) bad++;
 }

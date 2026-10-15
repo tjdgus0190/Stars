@@ -727,3 +727,68 @@
 | e2e-flow.js motion | `node tools/strange-oracle/e2e-flow.js motion` | 128 PASS / 0 FAIL |
 | e2e-book.js (seed를 node로, 광고 잠금 시험 은퇴) | `node tools/strange-oracle/e2e-book.js` | 49 PASS / 0 FAIL / SKIP 1 (13-7.10 첫 화면 결제 0 — F4-B2 pay.mode). 만신 장은 목차에 없는 것을 기대값으로 둠(B2에서 넣음) |
 | e2e-ads.js | — | 은퇴(삭제). 광고 0건 확인은 e2e-saju 7절 |
+
+
+## 14단계 F4-B2 · 유료 원본·결제 흐름(test)·배포 구조 (2026-10-15, developer)
+
+### 유료 원본 이동 (14-4, 한 번만)
+- 옛 공개 `data-book-*.js` 10개 → `api/_paid/book/book-{ogham,star,decan,tzolkin,rune,sibyl,flow,match,arch}.js`(유료 원본) + `data-book-free.js`(여는 글·닫는 글, 공개). `book-saju.js`는 F3에서 이미 그 자리에 있었다.
+- 궁합 다양화(옛 `data-book-bond.js`)는 `book-match.js` 안 `BOOK_MATCH.bond`로 **원문 텍스트 그대로**(주석 52줄 보존) 붙였다(14-4 표 "옛 bond 포함").
+- 무손실 검사(옛 전역 값 = 새 전역 값 deepEqual + 문자열·문장·글자 수):
+
+| 전역 | 문자열 | 문장 | 글자 | 결과 |
+|---|---|---|---|---|
+| BOOK_ARCH(→ free open·close + arch deep) | 187 | 368 | 14,733 | 같음 |
+| BOOK_BOND(→ BOOK_MATCH.bond) | 148 | 679 | 26,879 | 같음 |
+| BOOK_DECAN | 1,135 | 2,586 | 109,965 | 같음 |
+| BOOK_FLOW | 392 | 867 | 27,802 | 같음 |
+| BOOK_MATCH | 346 | 908 | 42,836 | 같음 |
+| BOOK_OGHAM | 665 | 1,328 | 57,935 | 같음 |
+| BOOK_RUNE | 1,053 | 2,314 | 93,375 | 같음 |
+| BOOK_SIBYL | 896 | 2,340 | 96,737 | 같음 |
+| BOOK_STAR | 1,005 | 2,102 | 82,208 | 같음 |
+| BOOK_TZOLKIN | 600 | 1,311 | 59,611 | 같음 |
+| **합계** | **6,427** | **14,803** | **612,081** | **같음** |
+
+- 13-7의 6 "core.js와 동일성" 시험은 은퇴(core.js 지움). 대신 book.test.js가 유료 원본으로 12장 조립(표본 457개, 만신 포함)·만신 50조합을 본다.
+- 이후 문구 수정은 `api/_paid/book/`에서만, 수정 뒤 `node tools/strange-oracle/make-volume.js`(분량 표, 3,000건 대조 불일치 0).
+
+### 결제 흐름·함수
+- `pay.mode`(data.js): off = 배포판, test = 모의 서버 `--mode test`가 응답할 때만, live = 운영자. `pay.verify` code/none, `pay.amount` 3900, `pay.stores.ko/global`.
+- 함수 `netlify/functions/book.js`: POST `{pass, file}` 두 칸뿐, file 허용 목록 10개(saju·ogham·star·decan·tzolkin·rune·sibyl·flow·match·arch), 코드 SHA-256이 `BOOK_PASS_HASHES`에 있으면 그 장 JSON, IP별 10분 틀림 10회 넘으면 429(메모리만), 모든 응답 no-store, `PASS_MODE`가 live·test가 아니면 503.
+- 열람 코드 `SOP` + 12자 + 검사 1자(paycode.js `Pass`). 코드·해시는 `node tools/strange-oracle/make-pass.js [개수]`가 터미널에만 찍는다. 모의 서버는 시작할 때마다 새 모의 코드를 만든다.
+- off에서 걷어 내는 DOM: `#screen-report`(책 전체), pay-tpl template, 입구 책 카드, 방 결과 책 한 줄 7개, 나의 이야기 책 버튼, FAQ 책 문답(items.4).
+
+### build-dist 새 검사 (실패하면 exit 1)
+- 유료 문장 지문: 유료 파일 문자열(30자 이상)마다 가운데 최대 60자, 공개 방 문구와 글자 그대로 같은 문자열 9개는 뺌 → **4,636개**(arch 108 · decan 832 · flow 223 · match 402 · ogham 471 · rune 742 · saju 170 · sibyl 653 · star 640 · tzolkin 395), dist/public 텍스트 28개에서 **0건**.
+  - 24자 지문으로는 방 문구와 우연히 겹치는 구절 6건이 잡혀(모두 문장 재사용, 누출 아님) 60자로 늘렸다.
+- 음성 시험(2026-10-15 손으로): 유료 파일을 제품 폴더에 복사 → "② 누출" 실패, data.js pay.mode를 "test"로 → "③" 실패. 둘 다 원래대로 되돌린 뒤 통과.
+- `api/`·`_paid`·`__dev`·옛 data-book-*.js·book-*.js·legal/refund.html 없음, 첫 화면이 data-book·/api를 부르지 않음. ads.txt 생성·Ads.check는 은퇴(GA4 모양 검사만 남김).
+
+### 14단계 F4-B2 · 시험 이름과 수 (2026-10-15 마지막 실행, 모의 서버 8788 `--mode test`)
+| 시험 | 수 | 결과 |
+|---|---|---|
+| 단위 `node --test "tools/strange-oracle/*.test.js"` | 63 | 통과 (api.test.js 6건 은퇴, pay.test.js 11건 새로, book.test.js 동일성 2건 → 12장 조립·만신 50조합 2건) |
+| e2e-saju | 41 | 통과 |
+| e2e-book (test, 결제한 탭) | 54 | 통과 |
+| e2e-flow reduced | 127 | 통과 (3회 중 1회 "10-1 마친 방 1~7개 복원" 4/7 실패 → 다시 두 번 통과. 시간 의존 흔들림, 원인 미확인) |
+| e2e-flow motion | 128 | 통과 |
+| e2e-pay (새로, test + off 서버 8791을 직접 띄움) | 29 | 통과 |
+
+- e2e-pay가 보는 것: 결제 전 화면 1~8 순서(360×640)·시험 띠·구매처 비면 버튼 비활성, SO1·SOG·모양 틀림 = 안내 + 요청 0, 틀린 코드 = fail(요청 1), 서버 없음 = offline, 맞는 코드 = 목차·유료 장 열림·7/7 전 구매면 지나지 않은 방은 need-room(59번), 이어가기 칸 SOP = 안내·요청 0, `/__dev/skip?rooms=7&paid=1&to=book` 12장 모두 첫 쪽·마지막 쪽, legacy=1, 함수 요청 본문 두 칸, 내 정보 지우기, off DOM 0·#report·#deeper 막다른 곳 0·/api 요청 0.
+- 미실시: 14-7의 14 성별 차이 시험(세 번 실행 비교)은 이번 e2e에 넣지 못했다.
+
+## 14단계 · 성능 (14-6, `node tools/strange-oracle/perf.js`, 2026-10-15)
+조건: 360×640, 1.6Mbps·150ms, CPU 4배, 캐시 비움, 모의 서버(test, **압축 안 함**), 각 3회 중앙값. 헤드리스 Edge.
+
+| 항목 | 측정 | 기준 | 판정 |
+|---|---|---|---|
+| 1 첫 화면 ①+② | 9.85초 (10.12/9.76/9.85), 다시 잰 값 9.07초 — ①(입구 제목·첫 문 버튼 보임 + 앱 시작 끝)만으로 9.07초 | 3.0초 이하 | **미달** |
+| 1 첫 화면 전송량 | 5초 안 800KB / 다시 잰 값 203KB (한가할 때 미리 받는 만신 파일 포함, 압축 전) | 13단계보다 줄어야 함 | 13단계 값 미측정 → **비교 못 함** |
+| 2 방 전환 미리 받음(만신) | 312ms (425/312/289) | 300ms 이하 | **미달(근소)** |
+| 2 방 전환 처음 받음(오검) | 1,612ms (1612/1619/1599), 로딩 표시까지 308ms | 1,500ms 이하, 표시 300ms 안 | **미달(근소)** |
+| 3 쪽 넘김 움직임 줄이기 | 6ms, 긴 작업 0, fps 150 이상 | 100ms 이하 | 통과 |
+| 3 쪽 넘김 애니메이션 | 886ms(애니메이션 끝까지), 긴 작업 0, fps 58~60 | 450ms 이하 | **미달**(재는 끝점이 "애니메이션이 모두 끝난 때"라 기준의 "다음 쪽이 보일 때"보다 늦을 수 있음, 미확인) |
+| 4 의식 연출 긴 작업 | 미측정 | 0개 | 미측정 |
+
+- 첫 화면 ①이 9초인 원인은 이번에 찾지 않았다(글꼴 대기·입구 연출·app.js 시작 순서 가운데 무엇인지 미확인). F4 뒤 별도 작업으로 제안.

@@ -123,6 +123,11 @@
   const CHAPTER_ORDER = window.PayCode.CHAPTER_ORDER;
   const OPEN_ROOMS = CHAPTER_ORDER; // 일곱 방 모두 출시 (세션 진행 잠금은 아래 isUnlocked — 다른 축)
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII"];
+  // (14단계 14-4) 결제 모드: data.js pay.mode. off(본 페이지, 결정 94) = 책·결제 요소를 DOM에서 모두 걷어 낸다. test(시험 페이지)·live = 책 + 결제 전 화면
+  const PAY = T.pay || {};
+  const PAY_MODE = PAY.mode === "test" || PAY.mode === "live" ? PAY.mode : "off";
+  const BOOK_ON = PAY_MODE !== "off";
+  const PASS_KEY = "strange-oracle-pass"; // 확인된 열람 코드(탭을 닫으면 사라짐). 이어가기 코드에는 넣지 않는다
   // 1~39 로마 숫자 (신탁 번호 I~XXXII)
   const roman = (n) => "X".repeat(Math.floor(n / 10)) + ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n % 10];
   const chapterOf = (room) => CHAPTER_ORDER.indexOf(room) + 1;
@@ -227,6 +232,7 @@
       window.sessionStorage.removeItem(UNLOCK_KEY); // (12단계) 광고로 연 방 표시도 지운다 (13단계: 연 장 표시 book-* 포함)
       window.sessionStorage.removeItem("strange-oracle-bookmark"); // (13단계) 이어 읽기 장 id·쪽 번호
       window.sessionStorage.removeItem("strange-oracle-receipt"); // 12단계까지의 영수증 코드 칸
+      window.sessionStorage.removeItem(PASS_KEY); // (14-4) 열람 코드도 "내 정보 지우기"로 함께 지운다
     } catch (e) {
       /* 무시 */
     }
@@ -414,7 +420,7 @@
   }
   addEventListener("popstate", (e) => {
     let name = (e.state && e.state.so) || location.hash.replace("#", "") || "hub";
-    if (name === "deeper" || name === "unseal") name = "report"; // (13단계) 은퇴한 결제 화면 → 책 목차
+    if (name === "unseal" || (name === "deeper" && !BOOK_ON)) name = "report"; // 은퇴한 영수증 화면 → 책 목차 (off면 report도 없어 아래에서 멈춤)
     if (!screens[name]) return; // 책 안 목차 이동 등 화면이 아닌 해시
     if (sig) sig.end();
     if (TRANSIENT_TO(name)) name = "hub";
@@ -723,6 +729,7 @@
     if (open) window.scrollTo(0, Math.max(0, panel.getBoundingClientRect().top + window.scrollY - js("topbar").getBoundingClientRect().height - 12));
   }
   function resumeError(msg) {
+    delete resumeEl.error.dataset.kind;
     resumeEl.error.textContent = msg;
     show(resumeEl.error, Boolean(msg));
     if (msg) resumeEl.input.setAttribute("aria-invalid", "true");
@@ -780,6 +787,11 @@
   }
   async function restoreFromCode() {
     if (filledRooms().length) return; // 넣기는 마친 방이 없을 때만
+    if (BOOK_ON && window.PayCode.Pass.looksPass(resumeEl.input.value)) {
+      resumeError(T.resume.errors.pass); // (14-4) 열람 코드는 책에서 넣는다. 서버 요청 없음
+      resumeEl.error.dataset.kind = "pass"; // 시험용 표시 (문구 칸이 비어 있어도 어느 안내인지 알 수 있게)
+      return resumeEl.input.focus();
+    }
     const r = Resume.decode(resumeEl.input.value);
     if (r.codes) {
       // (14-6) 복원할 방 파일을 모두 받은 뒤 그린다
@@ -1005,8 +1017,8 @@
   }
   // (13단계) 방 결과의 책 한 줄: 결제 상태와 무관하게 떡밥(hook) + "책에서 이 방의 장 열기 →"(그 장 표지로). 옛 "여섯 문 끝…" 줄은 숨김
   function updateBookLines() {
+    if (!BOOK_ON) return; // off: 책 한 줄은 DOM에서 걷어 냈다
     jsAll("result-book-line").forEach((el) => {
-      if (el.closest('[data-room="saju"]')) return show(el, false); // 만신 장은 책에 아직 없다(F4-B2)
       show(el, true);
       el.dataset.state = "open";
       show(js("book-line-note", el), false);
@@ -1015,6 +1027,7 @@
     });
   }
   function renderBookLine(scr, hook) {
+    if (!BOOK_ON) return;
     js("book-line-hook", scr).innerHTML = hook || "";
     updateBookLines();
   }
@@ -2740,11 +2753,64 @@
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   const OLD_RECEIPT_KEY = "strange-oracle-receipt"; // 12단계까지 영수증 코드 칸. 남아 있으면 지우고 목차로 보낸다(13-4)
-  const BOOK_ROOMS = CHAPTER_ORDER.filter((r) => r !== "saju"); // (F4-B1) Ⅰ 만신 장(api/_paid/book/book-saju.js)은 F4-B2에서 책에 넣는다
+  // (14단계 F4-B2) 책 12장 = 여는 글 + 방 7장(Ⅰ 만신 포함) + 시기별 흐름·궁합·원형 심층 + 닫는 글. 유료는 여는 글·닫는 글을 뺀 10장.
+  //  - 여는 글·닫는 글: 공개 정적 파일 data-book-free.js (무료 맛보기)
+  //  - 유료 10장: 함수 book(POST /api/book, 본문 { pass, file } 두 칸뿐)이 열람 코드를 확인한 뒤 JSON으로 준다. 받은 값은 같은 전역(BOOK_SAJU…)에 둔다.
+  //    결과 코드·입력값은 보내지 않는다(6장). file 이름은 장 단위 고정 문자열(허용 목록 10개).
+  const BOOK_ROOMS = CHAPTER_ORDER;
   const BOOK_IDS = ["open", ...BOOK_ROOMS, "flow", "match", "deep", "close"];
   const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
-  const FILES = { open: ["data-book-arch.js"], deep: ["data-book-arch.js"], close: ["data-book-arch.js"], flow: ["data-book-flow.js"], match: ["data-book-match.js", "data-book-bond.js"] };
-  CHAPTER_ORDER.forEach((r) => (FILES[r] = [`data-book-${r}.js`]));
+  const PAID_IDS = new Set([...BOOK_ROOMS, "flow", "match", "deep"]);
+  const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { flow: "flow", match: "match", deep: "arch" });
+  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { flow: "BOOK_FLOW", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
+  const FREE_FILE = "data-book-free.js";
+  const BOOK_API = "/api/book";
+  let memPass = "";
+  const readPass = () => {
+    try {
+      return window.PayCode.Pass.normalize(window.sessionStorage.getItem(PASS_KEY) || "");
+    } catch (e) {
+      return "";
+    }
+  };
+  const writePass = (p) => {
+    try {
+      if (p) window.sessionStorage.setItem(PASS_KEY, p);
+      else window.sessionStorage.removeItem(PASS_KEY);
+    } catch (e) {
+      /* 저장이 막힌 브라우저: 이 화면에서만 */
+    }
+    memPass = p || "";
+  };
+  const passNow = () => readPass() || memPass;
+  // 함수 book 부르기 → { ok, data } 또는 { kind: fail | wait | offline }. 본문은 pass·file 두 칸뿐, 응답은 저장하지 않는다(no-store)
+  async function callBook(pass, file) {
+    try {
+      const r = await fetch(BOOK_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pass, file }), cache: "no-store", credentials: "omit" });
+      if (r.status === 200) {
+        const j = await r.json();
+        return j && j.file === file && j.data ? { ok: true, data: j.data } : { kind: "offline" };
+      }
+      return { kind: r.status === 401 || r.status === 400 ? "fail" : r.status === 429 ? "wait" : "offline" };
+    } catch (e) {
+      return { kind: "offline" };
+    }
+  }
+  const paidLoading = {};
+  function loadPaid(file) {
+    if (window[PAID_GLOBAL[file]]) return Promise.resolve();
+    if (!paidLoading[file])
+      paidLoading[file] = callBook(passNow(), file).then((r) => {
+        delete paidLoading[file];
+        if (!r.ok) {
+          if (r.kind === "fail") writePass(""); // 코드가 더는 통하지 않음(폐기 등) → 결제 전 상태로
+          throw new Error(r.kind);
+        }
+        window[PAID_GLOBAL[file]] = r.data;
+      });
+    return paidLoading[file];
+  }
+  const sajuHiddenTitle = (c) => strip(SAJU.groups[Object.keys(SAJU.groups)[BookCore.sajuGroup(c.saju)]].hiddenTitle || "");
 
   // data-t가 붙은 요소를 한 덩어리 안에서만 다시 채운다 (복제한 틀에 쓴다)
   const textIn = (el) => $$("[data-t]", el).forEach((x) => (x.textContent = get(x.dataset.t) ?? ""));
@@ -2858,7 +2924,8 @@
     syncOpenBtn();
     // (14-6) 궁합·시기별 흐름은 상대·나의 오검·데칸·촐킨을 계산하므로 그 방 파일(데칸은 astronomy-engine)도 받는다
     const needs = id === "match" || id === "flow" ? [ensureRooms(["ogham", "decan", "tzolkin"])] : [];
-    return Promise.all(FILES[id].map(loadFile).concat(needs)).then(() => true, () => false).then((ok) => {
+    const get = PART0.has(id) ? loadFile(FREE_FILE) : loadPaid(PAID_FILE[id]);
+    return Promise.all([get].concat(needs)).then(() => true, () => false).then((ok) => {
       loadState[id] = ok ? "ok" : "fail";
       if (coverId === id) syncOpenBtn();
       return ok;
@@ -2868,10 +2935,10 @@
   // ── 장 상태 (13-2)
   const roomsDone = () => filledRooms().length;
   const available = (id) => (CHAPTER_ORDER.includes(id) ? isDone(id) : id === "close" ? roomsDone() === CHAPTER_ORDER.length : roomsDone() > 0);
-  // (14-2) 광고 잠금 은퇴: 그 방을 마쳤으면(available) 장이 열린다. 결제(pay.mode) 잠금은 F4-B2
-  const isOpen = () => true;
+  // (14-4) 유료 10장은 열람 코드가 확인된 탭에서만 열린다. 7/7 전에 사도 되고, 지나지 않은 방의 장은 그 방을 지나면 열린다(59번)
+  const isOpen = (id) => !PAID_IDS.has(id) || Boolean(passNow());
   const readSet = new Set(); // 이 화면에서 끝까지 읽은 장 (메모리만)
-  const chapterState = (id) => (!available(id) ? "need-room" : readSet.has(id) ? "read" : "opened");
+  const chapterState = (id) => (!available(id) ? "need-room" : !isOpen(id) ? "can-open" : readSet.has(id) ? "read" : "opened");
   const chapterName = (id) =>
     CHAPTER_ORDER.includes(id) ? fill(T.topbar.room, { num: ROMAN[chapterOf(id) - 1], name: T.rooms[id].name })
       : id === "open" ? T.book.toc.open : id === "close" ? T.book.toc.close : T.book.parts[id === "flow" ? "timeline" : id];
@@ -2887,6 +2954,7 @@
     if (CHAPTER_ORDER.includes(id)) {
       const x = c[id];
       if (x == null) return BV.avg[id];
+      if (id === "saju") return BV.room.saju[BookCore.sajuStem(x) * 5 + BookCore.sajuGroup(x)];
       return id === "rune" ? BV.rune.base + BV.rune.past[x[0]] + BV.rune.now[x[1]] + BV.rune.next[x[2]] : id === "tzolkin" ? BV.room.tzolkin[x.sign] : BV.room[id][x];
     }
     if (id === "flow") return a && c.band != null ? BV.timeline[a][c.band] : BV.avg.timeline;
@@ -2917,6 +2985,7 @@
 
   // ── 입구 책 카드 · 방 결과 책 한 줄 · 나의 이야기 버튼 (가격 0, 13-1)
   function renderBookCard() {
+    if (!BOOK_ON) return;
     const n = roomsDone();
     const card = js("hub-book");
     card.dataset.state = n === 0 ? "none" : n === CHAPTER_ORDER.length ? "all" : "some";
@@ -2925,6 +2994,7 @@
   }
   let coverNext = null; // 책 화면에 들어가자마자 열 장 표지 (방 결과 링크)
   const goBook = (id) => {
+    if (!BOOK_ON) return;
     coverNext = id || null;
     go("report");
   };
@@ -2958,7 +3028,7 @@
       const st = chapterState(id);
       li.dataset.state = st;
       if (CHAPTER_ORDER.includes(id)) js("book-chapter-sub", li).textContent = isDone(id) ? headOf(id, c).title : "";
-      js("book-chapter-state", li).textContent = st === "need-room" ? needLine(id) : st === "read" ? T.book.toc.reread : T.book.toc.opened;
+      js("book-chapter-state", li).textContent = st === "need-room" ? needLine(id) : st === "can-open" ? PAY.tocLocked || "" : st === "read" ? T.book.toc.reread : T.book.toc.opened;
       js("book-chapter-time", li).textContent = fill(T.book.time, { n: minutes(chapterChars(id)) });
     });
     const bm = readBookmark();
@@ -2972,7 +3042,7 @@
     coverId = null;
     setView("toc");
     renderToc();
-    loadFile("data-book-arch.js").catch(() => {}); // 목차를 처음 열 때 여는 글·심층·닫는 글 파일 (13-5)
+    loadFile(FREE_FILE).catch(() => {}); // 목차를 처음 열 때 여는 글·닫는 글 (무료 맛보기)
     window.scrollTo(0, 0);
     track("so_book", { step: "toc" });
   }
@@ -2991,6 +3061,7 @@
     btn.addEventListener("click", () => {
       const li = btn.closest("[data-js=book-chapter]");
       if (li.dataset.state === "need-room") return toast(js("book-chapter-state", li).textContent); // 안내만 (강제 순서 그대로)
+      if (li.dataset.state === "can-open") return goPay(); // (14-4) 결제 전 → 결제 전 화면
       openCover(li.dataset.chapter);
     })
   );
@@ -3036,6 +3107,7 @@
   const needsFlowDate = (id) => id === "flow" && !state.profile.birth;
   function openCover(id, keep) {
     if (!available(id)) return showToc();
+    if (!isOpen(id)) return goPay();
     if (!keep || coverId !== id) {
       clearForms();
       matchInput = null;
@@ -3068,7 +3140,7 @@
       if (ok && room) {
         const C = BookCore.contentFrom(window);
         const e = BookCore.hiddenEntry(C, id, c);
-        js("chapter-cover-hidden").textContent = e ? e.title : "";
+        js("chapter-cover-hidden").textContent = e ? (id === "saju" ? sajuHiddenTitle(c) : e.title) : "";
         hid.hidden = !e;
       }
       if (!ok && cover.dataset.state === "open" && reader.dataset.view === "cover") setCoverState("fail");
@@ -3173,6 +3245,11 @@
   }
   // 방별 장 Ⅰ장 앞부분: 방에서 본 핵심 풀이를 결과 코드로 공개 data에서 다시 조립 (identity.lede + body + ch1Rest)
   function bookCh1(room, c, rest) {
+    if (room === "saju") {
+      // (14단계) Ⅰ 만신 장 Ⅰ장 = data-saju.js stems[일간].identity(title·lede) + body(S1) + 유료 identity.rest (book-saju.js 머리 주석)
+      const st = SAJU.stems[BookCore.sajuStem(c.saju)];
+      return [{ text: strip(st.identity.title), sub: true }].concat([st.identity.lede, ...st.body, ...(rest || [])].map((t) => ({ text: strip(t) })));
+    }
     if (room === "rune") {
       const rs = c.rune.map((i) => RUNES[i]);
       const R = T.rune.result;
@@ -3234,7 +3311,7 @@
       if (pre.p) {
         const mine = mineForRelation(state.profile.birth || null);
         const codes = Object.assign({ arch: me, partner: pre.p.arch }, relations(mine, pre.p));
-        m = BookCore.matchChapter(C, codes, window.BOOK_BOND, { type: pre.type, mine, partner: pre.p, peeks: peeksOf(pre.p) });
+        m = BookCore.matchChapter(C, codes, C.bond, { type: pre.type, mine, partner: pre.p, peeks: peeksOf(pre.p) });
       } else m = BookCore.mapChapter(C, me);
       pair[2].textContent = m.you ? T.archetypes[m.you].name : R.mapYou;
       const bodyEl = js("report-match");
@@ -3264,7 +3341,7 @@
       paras(js("book-ch3", el), fr.ch3);
       const tail = topicTail(fr, c);
       paras(js("book-ch4", el), tail ? fr.ch4.concat(tail) : fr.ch4);
-      paras(js("book-hidden", el), [fr.hidden.title].concat(fr.hidden.paragraphs));
+      paras(js("book-hidden", el), [id === "saju" ? sajuHiddenTitle(c) : fr.hidden.title].concat(fr.hidden.paragraphs));
     }
     // 장 끝 쪽: 다음 장(열 수 있는 다음 장, 잠겼으면 그 장 표지) + 목차로
     const next = BOOK_IDS.slice(BOOK_IDS.indexOf(id) + 1).find(available) || null;
@@ -3274,7 +3351,7 @@
     nb.classList.toggle("is-hidden", !next);
     js("chapter-end-next-name").textContent = next ? chapterName(next) : "";
     const ns = js("chapter-end-next-state");
-    ns.textContent = next && !isOpen(next) ? T.book.toc.canOpen : "";
+    ns.textContent = next && !isOpen(next) ? PAY.tocLocked || "" : "";
   }
   js("chapter-end-next").addEventListener("click", (e) => {
     const next = e.currentTarget.dataset.next;
@@ -3975,7 +4052,7 @@
     const btn = e.currentTarget;
     if (!currentArchetype()) return;
     try {
-      await Promise.all([loadFile("data-book-arch.js"), loadFile("data-book-flow.js")]);
+      await Promise.all([loadFile(FREE_FILE), isOpen("flow") ? loadPaid("flow") : null]); // 시기별 흐름 낱말은 결제한 탭에서만, 아니면 빈칸
     } catch (err) {
       return toast(T.toast.shareFail);
     }
@@ -3984,8 +4061,121 @@
 
   // ── 시작: 마크업 견본 비우기, 옛 영수증 칸 정리 (주소의 query는 시작할 때 지운다 — 광고·분석은 그 뒤에만)
   function bookBoot() {
+    if (!BOOK_ON) return offStrip();
     clearSource();
     updateBookLines();
+  }
+  // (14-4 off, 결정 94) 본 페이지: 결제 화면·열람 코드 칸·책(목차·장·여는/닫는 글)·방 결과의 책 한 줄·입구 책 카드·나의 이야기 책 버튼·FAQ 책 문답을
+  // DOM에서 걷어 낸다(숨김이 아니라 제거 → DOM 0개). pay-tpl template은 꺼내지 않고 지운다. "준비 중" 같은 문구도 없다
+  function offStrip() {
+    const gone = [reportScr, js("pay-tpl"), js("hub-book"), js("story-book"), ...jsAll("result-book-line")];
+    const faq = $('[data-t="hub.faq.items.4.q"]');
+    if (faq) gone.push(faq.closest(".faq__item"));
+    gone.forEach((el) => el && el.remove());
+    delete screens.report;
+  }
+
+  // ═════════ (14단계 14-4) 결제 전 화면 (test·live에서만 template에서 꺼냄) ═════════
+  // 순서 고정: 1 받는 것 → 2 가격 → 3 구매처 → 4 열람 방법 → 5 환불·청약철회 → 6 동의 → 7 구매하러 가기 → 8 열람 코드 넣기.
+  // 결제 SDK·토스 로더·영수증 코드(SO1)는 없다. 열람 코드 칸은 이어가기 칸 규칙(제출 폼 아님, name 없음, autocomplete off, console·주소·분석에 넣지 않음).
+  let payScr = null;
+  function goPay() {
+    if (payScr) go("deeper");
+  }
+  if (BOOK_ON) {
+    const tplEl = js("pay-tpl");
+    tplEl.after(tplEl.content.cloneNode(true));
+    tplEl.remove();
+    payScr = js("screen-deeper");
+    screens.deeper = payScr;
+    applyText(payScr);
+    const pass = { input: js("pass-input", payScr), err: js("pass-error", payScr), status: js("pass-status", payScr), panel: js("pass-panel", payScr), toggle: js("pass-toggle", payScr), go: js("pass-go", payScr) };
+    const agree = js("pay-agree", payScr), buy = js("pay-buy", payScr);
+    const store = (PAY.stores && PAY.stores.ko) || {};
+    const syncBuy = () => buy.setAttribute("aria-disabled", String(!store.url || !agree.checked));
+    const passMsg = (kind) => {
+      pass.err.dataset.kind = kind || "";
+      pass.err.textContent = kind ? PAY.pass.errors[kind] || "" : "";
+      show(pass.err, Boolean(kind)); // 문구 칸이 비어 있어도(F5 전) 자리는 보인다
+    };
+    enter.deeper = () => {
+      const list = js("pay-chapters", payScr);
+      list.textContent = "";
+      let sum = 0;
+      [...PAID_IDS].forEach((id) => {
+        const n = chapterChars(id);
+        sum += n;
+        const li = document.createElement("li");
+        li.className = "pay-list__item";
+        const a = document.createElement("span");
+        a.className = "pay-list__name";
+        a.textContent = chapterName(id);
+        const b = document.createElement("span");
+        b.className = "pay-list__vol";
+        b.textContent = fill(PAY.what.item || "", { n: comma(Math.round(n / 100) * 100) });
+        li.append(a, b);
+        list.append(li);
+      });
+      js("pay-total", payScr).textContent = fill(PAY.what.total || "", { n: (Math.round(sum / 1000) / 10).toLocaleString("ko-KR") });
+      js("pay-price", payScr).textContent = fill(PAY.price.text || "", { price: comma(PAY.amount) });
+      js("pay-price-unit", payScr).textContent = PAY.price.unit || "";
+      js("pay-store-name", payScr).textContent = store.name || "";
+      show(js("pay-test-band", payScr), PAY_MODE === "test");
+      show(js("pay-refund-link", payScr), false); // legal/refund.html은 13단계에 은퇴해 배포 폴더에 없다 → 링크 숨김 (14-3 legal은 F5)
+      buy.href = store.url || "#";
+      show(js("pay-store-empty", payScr), !store.url);
+      syncBuy();
+      passMsg("");
+      show(pass.status, false);
+      window.scrollTo(0, 0);
+      track("so_pay", { step: "view" });
+    };
+    leave.deeper = () => {
+      pass.input.value = "";
+      passMsg("");
+    };
+    agree.addEventListener("change", syncBuy);
+    buy.addEventListener("click", (e) => {
+      if (buy.getAttribute("aria-disabled") === "true") return e.preventDefault();
+      track("so_pay", { step: "store" });
+    });
+    if (PAY.verify === "none") js("pass-enter", payScr).remove();
+    else {
+      pass.toggle.addEventListener("click", () => {
+        const open = pass.toggle.getAttribute("aria-expanded") !== "true";
+        pass.toggle.setAttribute("aria-expanded", String(open));
+        show(pass.panel, open);
+        if (open) pass.input.focus();
+      });
+      let busy = false;
+      const submit = async () => {
+        if (busy) return;
+        const r = window.PayCode.Pass.check(pass.input.value);
+        if (r.error) return passMsg(r.error); // receipt(SO1) · resume(SOG) · shape — 서버에 묻지 않는다
+        busy = true;
+        pass.go.disabled = true;
+        passMsg("");
+        const res = await callBook(r.pass, "arch");
+        busy = false;
+        pass.go.disabled = false;
+        if (!res.ok) {
+          track("so_pay", { step: "pass_fail" });
+          return passMsg(res.kind);
+        }
+        writePass(r.pass);
+        window.BOOK_ARCH = res.data;
+        pass.input.value = "";
+        track("so_pay", { step: "pass_ok" });
+        toast(PAY.pass.ok || "");
+        go("report");
+      };
+      pass.go.addEventListener("click", submit);
+      pass.input.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        submit();
+      });
+    }
   }
 
   // ═════════ 7단계: 여섯 문이 모이는 결말 (spec 7-6) ═════════
@@ -4026,6 +4216,7 @@
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done"], chapter: BOOK_IDS }, // (13단계 13-8) 옛 preview·pay_click은 뺌
+    so_pay: { step: ["view", "store", "pass_ok", "pass_fail"] }, // (14-4) 단계 이름만. 코드·결과 코드 없음 (off에서는 부르지 않음)
   };
   let booted = false;
   let externalOn = false;
@@ -4099,7 +4290,7 @@
   } catch (e) {
     /* 저장소 없음 */
   }
-  if (["report", "deeper", "unseal"].includes(hash) || oldReceipt) first = "report";
+  if (BOOK_ON && (["report", "deeper", "unseal"].includes(hash) || oldReceipt)) first = hash === "deeper" ? "deeper" : "report";
   else if (filledRooms().length && hash) {
     if (hash === "story") first = "story";
     else if (CHAPTER_ORDER.includes(hash)) first = roomTarget(hash);

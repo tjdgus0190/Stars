@@ -1,18 +1,20 @@
-# 인계 문서 (2026-10-06)
+# 인계 문서 (2026-10-15 갱신, 14단계 F4-B2)
 
 다른 세션(Claude Code 클라우드 세션 등)에서 이 저장소 작업을 이어 갈 때 먼저 읽는 문서다.
 규칙은 **CLAUDE.md**가 기준이고, 이 문서는 현재 상태와 일하는 요령만 적는다. 둘이 다르면 CLAUDE.md가 이긴다.
 
 ## 1. 지금 상태 한눈에
-- 제품은 하나다: `products/strange-oracle` "낯선 점술관". 세계의 여섯 점술 방(오검 → 별 → 데칸 → 촐킨 → 룬 → 시빌라)을 돌고 결과를 모아 "나의 이야기"와 "한 권의 책"으로 엮는다.
-- meta.json status는 "검수통과"다. 가장 최근 QA는 **13단계 "광고로 여는 책" 배포 가능**이다(reports/qa-strange-oracle.md 맨 끝).
-- **수익 구조(운영자 결정 69~82)**
-  - 결제는 없다. 운영자에게 사업자등록이 없어 결제를 화면에서 걷어 냈다.
-  - 무료판에 배너를 단다.
-  - 방마다 "흐름 풀이" 한 단락과 책의 장 9개를 **보상형 광고 한 편으로 연다**(장 하나에 광고 하나).
-  - 광고 키가 아직 없어서, 지금은 누르면 "지금은 보여 드릴 광고가 없어 그냥 열었어요"와 함께 바로 열린다(data.js `ads.lockAlways: true`).
-- **배포:** 운영자가 Netlify에 `dist/public` 폴더를 끌어다 올린다. 에이전트는 배포·push·계정 작업을 하지 않는다(CLAUDE.md 10장).
-- **서버 결제 코드:** `api/`, `api/_lib/core.js`, 토스 연동은 저장소에 휴면으로 남아 있고 배포 폴더에는 들어가지 않는다. `paycode.js`는 이어가기 코드가 쓰므로 살아 있다.
+- 제품은 하나다: `products/strange-oracle` "낯선 점술관". 일곱 점술 방(Ⅰ 만신 → 오검 → 별 → 데칸 → 촐킨 → 룬 → 시빌라, 결정 91)을 돌고 결과를 모아 "나의 이야기"와 "한 권의 책"(12장)으로 엮는다.
+- 14단계(일곱 번째 방·결제 복귀) 개발 중이다. F4(developer)는 B1·B2까지 끝났고 다음은 F5(copywriter 문구) → F6(UI 점검) → F7(QA)이다. 13단계판은 배포하지 않았다(결정 92).
+- **수익 구조(14단계, 결정 85·94)**
+  - 광고는 걷어 냈다(14-2). GA4 분석만 남는다(ID가 비면 아무것도 불러오지 않음).
+  - 책 12장 가운데 유료 10장을 3,900원에 판다(외부 플랫폼 + 열람 코드, specs/proposal-strange-oracle-payment-postype.md). 여는 글·닫는 글은 무료.
+  - **본 페이지(배포판)는 `pay.mode = "off"`**: 결제 화면·책이 DOM에 없다. 결제는 시험 페이지(모의 서버 `--mode test`)에서만 시험한다. live 전환은 운영자 몫(specs 54·39·62번, 계획서 7장).
+- **배포(결정 93, 14-5): GitHub 연결 Netlify.** 저장소 루트 `netlify.toml`이 `node tools/build-dist.js`로 `dist/public`을 만들고, 함수 하나(`netlify/functions/book.js`)를 붙인다. 본 페이지 = `dist/public` + 함수 `book`.
+  - **배포 브랜치 흐름:** Netlify 운영 브랜치는 `release`다. **에이전트는 `main`에만 커밋하고 `release`는 만지지 않는다**(만들기·병합·push 모두 안 함). QA 판정이 "배포 가능"일 때만 **운영자가** `main`을 `release`에 병합하고 push한다 → Netlify가 빌드·배포한다. `main` 브랜치 배포·미리보기 배포는 끈다(14-5 운영자 설정 7가지).
+  - GitHub 연결 첫 push 전에 저장소가 **비공개**인지 운영자가 확인한다(유료 원본이 저장소에 있음, 62번).
+  - 에이전트는 배포·push·계정 작업을 하지 않는다(CLAUDE.md 10장).
+- **유료 원본:** `products/strange-oracle/api/_paid/book/` 한 곳뿐이다. 공개 폴더에 들어가지 않고 함수 묶음(`included_files`)으로만 서버에 간다. 옛 토스 api·core.js·move-book은 지웠다(F4-B2). `paycode.js`는 이어가기 코드(SOG)와 열람 코드 모양(SOP)에 쓴다.
 
 ## 2. 문서 지도 (결정의 출처)
 | 무엇 | 어디 |
@@ -48,23 +50,27 @@
 
 ## 4. 빌드·시험
 ```
-node tools/build-dist.js                       # dist/public 생성 + 점검([초안] 0, 첫 화면 책 문장 0, api·refund 없음)
+node tools/build-dist.js                       # dist/public 생성 + 점검(pay.mode off · 유료 문장 지문 누출 0 · api/_paid/__dev 없음 · 첫 화면 책 파일 0). 실패하면 exit 1 → Netlify 배포도 멈춤
 node --test "tools/strange-oracle/*.test.js"    # 단위 시험 (glob을 따옴표로 감쌀 것. 폴더만 주면 Node 24에서 실패)
-node tools/strange-oracle/mock-server.js --port 8788 --mode off   # e2e가 쓰는 서버 (백그라운드로 띄운다)
-node tools/strange-oracle/e2e-book.js
+node tools/strange-oracle/mock-server.js --port 8788 --mode test  # 시험 페이지 = e2e가 쓰는 서버 (백그라운드). off는 배포판과 같음
+node tools/strange-oracle/e2e-saju.js
+node tools/strange-oracle/e2e-book.js           # 결제한 탭으로 책 12장
 node tools/strange-oracle/e2e-flow.js reduced   # motion도 있음
-node tools/strange-oracle/e2e-ads.js            # 가짜 광고·분석 ID를 실행 중에만 넣고 구글 요청을 가로챈다. 실제 구글 전송 0
+node tools/strange-oracle/e2e-pay.js            # 결제 흐름(test) + off 배포판 DOM 0 (off 서버 8791을 스스로 띄우고 끔)
+node tools/strange-oracle/perf.js               # 14-6 성능 (몇 분 걸림)
+node tools/strange-oracle/make-pass.js 1        # 운영자용: 열람 코드·해시를 터미널에만 찍음 (저장소·문서에 적지 말 것)
 ```
-- 마지막으로 확인한 수치: 단위 51, e2e-book 60, e2e-flow reduced 126, motion 127, e2e-ads 55, 모두 실패 0.
+- 마지막으로 확인한 수치(2026-10-15 F4-B2): 단위 63, e2e-saju 41, e2e-book 54, e2e-flow reduced 127, motion 128, e2e-pay 29, 모두 실패 0. e2e-ads는 은퇴(광고 제거). 성능은 tests.md 「14단계 · 성능」(첫 화면 등 미달 항목 있음).
 - **화면 시험 브라우저:** e2e는 tools/strange-oracle/cdp.js로 헤드리스 **Microsoft Edge**를 띄운다. 경로는 `EDGE_PATH` 환경 변수이고, 없으면 윈도우 기본 경로를 쓴다. 리눅스 클라우드에서는 Chrome·Chromium 경로를 `EDGE_PATH`에 넣어야 할 수 있다(미확인).
-- **시험 지름길(모의 서버에만 있음, 배포 폴더에는 없음):** `http://127.0.0.1:<포트>/__dev/skip`은 여섯 방을 마친 상태로 시작한다. `?rooms=3`이나 `?to=hub`도 쓸 수 있다.
-- **모의 서버 재시작:** 서버는 시작할 때 파일을 읽어 둔다. 문구·코드를 고친 뒤에는 build-dist를 다시 하고 서버를 재시작한다.
+- **시험 페이지 = 모의 서버 지름길(모의 서버에만 있음, 배포 폴더·본 페이지에는 없음, 결정 89):** `http://127.0.0.1:<포트>/__dev/skip`은 일곱 방을 마친 상태로 시작한다. `?rooms=N`(새 순서 앞 N개), `?paid=1`(시험 열람 상태, test 모드에서만), `?to=book`(목차)·`?to=hub`, `?legacy=1`(옛 상태). 예: `/__dev/skip?rooms=7&paid=1&to=book` = 12장 모두 열림. 모의 열람 코드는 서버를 켤 때마다 새로 만들어 터미널에만 찍는다.
+- **모의 서버 재시작:** 문구·코드를 고친 뒤에는 build-dist를 다시 하고 서버를 재시작한다(test 모드는 data.js의 pay.mode를 응답할 때만 test로 바꾸고 파일은 고치지 않는다). 포트 8787은 쓰지 않는다.
 
 ## 5. 문구를 고칠 때 지켜야 할 순서
-- **책 본문의 원본은 `api/_paid/*.js`다.** 공개 파일 `data-book-*.js`는 거기서 만든다.
-  - 고치는 순서: 원본 수정 → `node tools/strange-oracle/move-book.js`(무손실 검사 포함) → `node tools/strange-oracle/make-volume.js`(분량 표, 불일치 0이어야 함).
-  - data-book-*.js를 직접 고치면 다음 move-book 실행 때 덮인다.
-- **궁합 다양화 문구는 `data-book-bond.js`다.** 원본에서 만드는 파일이 아니므로 직접 고친다(관계 유형 4개: lover·friend·work·family).
+- **책 유료 문장의 유일한 원본은 `products/strange-oracle/api/_paid/book/book-*.js`다(14-4).** 방별 장 7개(`book-saju`…`book-sibyl`), `book-flow`(시기별 흐름), `book-match`(궁합 + 궁합 다양화 `bond`, 관계 유형 4개: lover·friend·work·family), `book-arch`(원형 심층).
+  - 고치는 순서: 원본 수정 → `node tools/strange-oracle/make-volume.js`(분량 표 data-volume.js, 불일치 0) → `node tools/build-dist.js`(유료 문장 누출 0이어야 함).
+  - 여는 글·닫는 글(무료 맛보기)은 공개 `products/strange-oracle/data-book-free.js`에서 고친다.
+  - 유료 문장을 제품 폴더의 다른 파일(data.js 등)에 옮겨 적지 않는다(CLAUDE.md 7장). build-dist 지문 검사가 막는다.
+  - 옛 `data-book-*.js`·`move-book.js`·`api/_paid/*.js`(옛 원본)는 F4-B2에서 지웠다(git 기록에는 남음).
 - **화면 문구는 data.js에 있다.** 디자이너가 마크업에 `[초안]` 견본을 넣는다. 그래서 copywriter가 문구를 넣은 뒤에는 **index.html 정리가 꼭 필요하다**: data-t 요소는 확정 문구로 채우고, 남은 `[초안]`은 가장 안쪽 요소만 비운다. 이 정리를 빠뜨려 QA에서 떨어진 적이 있다. 빌드에 "[초안] 없음"이 떠야 한다.
 - **8장 콘텐츠 규칙이 엄격하다.** 건강 표현 26곳과 단정 표현 19곳을 걷어 낸 이력이 있다(reports/copy-strange-oracle.md). 새 문구에도 금지어 검색을 한다.
 

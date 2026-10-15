@@ -1,5 +1,6 @@
-// 13단계 E3 단위 시험: 브라우저 책 조립(products/strange-oracle/book.js) = 휴면 서버 core.js buildReport (13-7의 6),
-// 궁합 모듈 조립(13-7의 8), 옮긴 파일 무손실(13-5), 다양성 실측(13-7의 9 → out/book-variety.txt).
+// 책 조립 단위 시험 (book.js). 14단계 F4-B2: core.js 동일성 시험(13-7의 6)은 은퇴하고 이동 무손실(tests.md 「14단계 · 유료 원본 이동」)로 대신한다.
+// 지금 보는 것: 12장 조립(만신 포함) 빈칸·undefined 0, 만신 장 일간 10 × 묶음 5, 궁합 모듈 조립(13-7의 8), 다양성 실측(→ out/book-variety.txt).
+// 문구는 공개 data-book-free.js + 유료 원본 api/_paid/book/book-*.js (함수 book이 주는 것과 같은 값).
 // 실행: node --test "tools/strange-oracle/*.test.js"
 "use strict";
 const test = require("node:test");
@@ -9,7 +10,6 @@ const path = require("path");
 const vm = require("vm");
 
 const PROD = path.resolve(__dirname, "..", "..", "products", "strange-oracle");
-const core = require(path.join(PROD, "api", "_lib", "core.js"));
 const Book = require(path.join(PROD, "book.js"));
 const PayCode = require(path.join(PROD, "paycode.js"));
 const ARCH = PayCode.ARCHETYPES;
@@ -21,11 +21,12 @@ const W = { console };
 W.window = W;
 const load = (f) => vm.runInNewContext(fs.readFileSync(path.join(PROD, f), "utf8"), W, { filename: f });
 ["data.js", "data-ogham.js", "data-decans.js", "data-tzolkin.js", "calc.js"].forEach(load);
-fs.readdirSync(PROD).filter((f) => /^data-book-.*\.js$/.test(f)).forEach(load);
+load("data-saju.js");
+load("data-book-free.js");
+fs.readdirSync(path.join(PROD, "api", "_paid", "book")).filter((f) => /^book-.*\.js$/.test(f)).forEach((f) => load(path.join("api", "_paid", "book", f)));
 const plain = (x) => JSON.parse(JSON.stringify(x));
-const BOND = plain(W.BOOK_BOND);
-const PUB = plain(Book.contentFrom(W)); // 브라우저 경로(data-book-*.js 전역)로 묶은 문구
-const SRC = core.CONTENT; // 휴면 서버가 쓰는 원본 문구
+const PUB = plain(Book.contentFrom(W)); // 브라우저가 받는 것과 같은 전역(BOOK_FREE·BOOK_SAJU…BOOK_ARCH)으로 묶은 문구
+const BOND = PUB.bond;
 
 // ── 표본 (tests.md 13단계에 같은 정의) ──
 function samples() {
@@ -47,26 +48,48 @@ function samples() {
         const g = k < 4 ? { relOgham: k % 3, relDecan: k, relTzolkin: k % 3 } : { relOgham: null, relDecan: null, relTzolkin: null };
         out.push(Object.assign({ arch: ARCH[a], band: k % 7, partner: ARCH[b], decan: (a * 8 + b) % 36 }, g));
       }
-  // 여섯 방 모두 + 상대 없음(궁합 지도) 원형마다
-  for (let a = 0; a < 8; a++) out.push({ arch: ARCH[a], band: a % 7, ogham: a, star: a, decan: a, tzolkin: { number: a + 1, sign: a }, rune: [a, a + 1, a + 2], sibyl: a, partner: null });
+  // 일곱 방 모두 + 상대 없음(궁합 지도) 원형마다
+  for (let a = 0; a < 8; a++) out.push({ arch: ARCH[a], band: a % 7, saju: a * 600 + a * 2 + 1, ogham: a, star: a, decan: a, tzolkin: { number: a + 1, sign: a }, rune: [a, a + 1, a + 2], sibyl: a, partner: null });
+  // 만신: 일간 10 × 우세 묶음 5
+  for (let s = 0; s < 10; s++) for (let g = 0; g < 5; g++) out.push({ arch: ARCH[(s + g) % 8], band: g, saju: s * 500 + g * 2 + 1 + (s % 2) });
   return out;
 }
 
-test("동일성: 브라우저 조립 = core.js buildReport (원본 문구, 새 모듈 끔)", () => {
+// 문자열 전부가 비어 있지 않고 undefined·{자리} 없음
+function allText(v, out = []) {
+  if (typeof v === "string") out.push(v);
+  else if (Array.isArray(v)) v.forEach((x) => allText(x, out));
+  // 만신 숨은 장 제목은 유료 파일에 없고 공개 data-saju.js groups[묶음].hiddenTitle에만 있다(app.js sajuHiddenTitle) → 그 칸만 뺀다
+  else if (v && typeof v === "object")
+    Object.entries(v).forEach(([k, x]) => {
+      if (k === "codes") return;
+      allText(v.room === "saju" && k === "hidden" ? Object.assign({}, x, { title: "-" }) : x, out);
+    });
+  else if (v === undefined) out.push(undefined);
+  return out;
+}
+test("12장 조립: 표본 전부(만신 포함) 빈 칸·undefined 0, 결정적", () => {
   const S = samples();
-  let n = 0;
   for (const c of S) {
-    assert.deepStrictEqual(Book.buildReport(SRC, c), core.buildReport(c), JSON.stringify(c));
-    n++;
+    const r = Book.buildReport(PUB, c);
+    const t = allText(r.chapters);
+    assert.ok(t.every((x) => typeof x === "string" && x.trim() && !/undefined|\{\w+\}/.test(x)), JSON.stringify(c));
+    assert.deepStrictEqual(Book.buildReport(PUB, c), r);
   }
-  assert.ok(n >= 400, `표본 ${n}개`);
+  assert.ok(S.length >= 450, `표본 ${S.length}개`);
 });
-
-test("동일성: 공개 파일(data-book-*.js)로 묶은 문구 = 원본 문구 (옮긴 직후, 무손실)", (t) => {
-  const r = require("./move-book.js").check(require("./move-book.js").plan());
-  // 옮긴 뒤 copywriter가 data-book-*.js를 고치면 원본과 달라지는 것이 정상(13-5) → 그때는 건너뛴다
-  if (!r.ok) return t.skip("data-book-*.js가 옮긴 뒤 고쳐짐 (원본과 다름은 정상)");
-  for (const c of samples().slice(0, 60)) assert.deepStrictEqual(plain(Book.buildReport(PUB, c)), plain(core.buildReport(c)));
+test("만신 장: 일간 10 × 우세 묶음 5 = 50 조합, Ⅰ~Ⅳ장·숨은 장 본문이 있고 일간·묶음이 코드대로", () => {
+  const Saju = require(path.join(PROD, "saju.js"));
+  for (let s = 0; s < 10; s++)
+    for (let g = 0; g < 5; g++) {
+      const code = s * 500 + g * 2 + 1;
+      const d = Saju.decodeCode(code);
+      assert.strictEqual(Book.sajuStem(code), d.S1);
+      assert.strictEqual(Book.sajuGroup(code), ["bigeop", "siksang", "jaeseong", "gwanseong", "inseong"].indexOf(d.S3));
+      const fr = Book.fullRoom(PUB, "saju", { saju: code });
+      assert.ok(fr.ch1Rest.length && fr.ch2.length > 2 && fr.ch3.length > 2 && fr.ch4.length > 1 && fr.hidden.paragraphs.length, code);
+      assert.strictEqual(fr.hidden.paragraphs[0], PUB.hidden.saju[g].body[0]);
+    }
 });
 
 // ── 궁합 모듈 ──

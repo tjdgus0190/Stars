@@ -224,7 +224,33 @@
   }
   const Resume = { encode: resumeEncode, decode: resumeDecode, looksResume, looksReceipt, pretty, PREFIX: R_PREFIX, LEN: R_LEN, FIELDS: R2_FIELDS, LEGACY: { PREFIX: R1.prefix, LEN: R1_LEN, FIELDS: R_FIELDS }, RUNE_TOPICS, SIBYL_TOPICS };
 
-  const api = { encode, decode, normalize, groups, pretty, roomsOf, ARCHETYPES, ROOMS, CHAPTER_ORDER, LEGACY_ORDER, FIELDS, LEN, Resume };
+  // ── (14단계 14-4) 열람 코드 SOP: "SOP" + 무작위 12자(Crockford Base32, 약 60비트) + 검사 1자 = 16자. 화면 표기 SOP-XXXX-XXXX-XXXXX.
+  //   브라우저는 모양만 본다(서버 요청 전에 SO1·SOG·모양 틀림을 걸러 냄). 진짜인지는 함수 book이 해시로 확인한다.
+  //   코드 원문은 저장소에 쓰지 않는다: 운영자가 tools/strange-oracle/make-pass.js로 만든다.
+  const P_PREFIX = "SOP", P_LEN = 16;
+  function passNormalize(input) {
+    let s = String(input || "").toUpperCase().replace(/[^0-9A-Z]/g, "");
+    if (!/^S[O0]P/.test(s)) return "";
+    s = P_PREFIX + s.slice(3).replace(/O/g, "0").replace(/[IL]/g, "1");
+    if (s.length !== P_LEN || [...s.slice(3)].some((c) => val(c) < 0)) return "";
+    return checkChar(s.slice(3, P_LEN - 1)) === s[P_LEN - 1] ? s : "";
+  }
+  // 열람 코드 칸에 넣은 값 → { pass } 또는 { error: receipt(SO1) | resume(SOG) | shape }
+  function passCheck(input) {
+    if (looksReceipt(input)) return { error: "receipt" };
+    if (looksResume(input)) return { error: "resume" };
+    const pass = passNormalize(input);
+    return pass ? { pass } : { error: "shape" };
+  }
+  const looksPass = (input) => /^S[O0]P/.test(String(input || "").toUpperCase().replace(/[^0-9A-Z]/g, ""));
+  function passMake() {
+    const body = randomChars(P_LEN - 4);
+    return P_PREFIX + body + checkChar(body);
+  }
+  const passPretty = (s) => `${s.slice(0, 3)}-${s.slice(3, 7)}-${s.slice(7, 11)}-${s.slice(11)}`;
+  const Pass = { normalize: passNormalize, check: passCheck, looksPass, make: passMake, pretty: passPretty, PREFIX: P_PREFIX, LEN: P_LEN };
+
+  const api = { encode, decode, normalize, groups, pretty, roomsOf, ARCHETYPES, ROOMS, CHAPTER_ORDER, LEGACY_ORDER, FIELDS, LEN, Resume, Pass };
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.PayCode = api;
 })(typeof window !== "undefined" ? window : globalThis);
