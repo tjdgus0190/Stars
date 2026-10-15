@@ -527,3 +527,65 @@ QA(reports/qa-strange-oracle.md "11단계 묶음 1 검수") 필수 지적: 유�
 - 원형 바뀜 정직성: book.toc.lede, FAQ 책 문답 끝 문장.
 - 7장 소개 글: FAQ 답 합계 549자(300자 이상).
 - 시험: build-dist "[초안] 없음"·책 문구 배포 점검 통과, 단위 51/51, e2e-book 60/0, e2e-flow(reduced) 126/0, e2e-ads 55/0.
+
+
+## 14단계 F5 (copywriter, 2026-10-15) — 결제·열람 코드 문구, 만신의 방 빈 키, 광고·옛 순서 정리, legal 3종
+
+기준: specs 14-2·14-3·14-4, 운영자 결정 83~94. 빈 키는 대조 스크립트 하나(index.html data-t·data-h·data-ph·data-aria·data-list와 app.js `T.` 참조 → data.js + data-saju.js, mergeSajuText 적용 뒤)로 찾았다. 처음 42개 → 지금 1개(`saju.ritual.bell`, 아래 developer 확인 1).
+
+### 1. 결제 전 화면·열람 코드 (data.js `pay.*`, test·live에서만 보임)
+| 키 | 전 | 후 |
+|---|---|---|
+| pay.testBand | "" | 시험 중 — 아직 판매하지 않아요 |
+| pay.eyebrow / title | "" | THE WHOLE BOOK / 한 권의 책 전체 열기 |
+| pay.what.* | "" | 받는 것 · 합계 · 약 {n}만 자 · 약 {n}자 · 무료 범위 한 줄(여는 글·닫는 글·목차, 지나지 않은 방의 장) |
+| pay.price.* | "" | 가격 · {price}원 · unit은 비워 둠(포스타입 P 환산은 운영자 확인 뒤) |
+| pay.stores.ko.name | "" | 포스타입 (url은 비워 둠 → 구매 버튼 비활성 + "판매 준비 중") |
+| pay.store.* | "" | 어디서 사나요 · "— 이 서비스 밖의 판매 사이트예요. 그곳에 가입·로그인해야 살 수 있어요." |
+| pay.how.* | "" | 어떻게 읽나요 · SOP 열람 코드를 넣으면 10장이 열림, 다시 볼 때는 구매처 내 구매 목록 |
+| pay.refund.* | "" | 환불·청약철회 · 시험 전용 문장(구매처 정책, 구매 뒤 청약철회 제한될 수 있음, 무료 맛보기 먼저) · 구매·환불 안내 전문 |
+| pay.agree / buy / storeEmpty / newTab / back | "" | 확인 동의 한 줄 / 구매하러 가기 / 판매 준비 중 / 구매처가 새 탭으로 열려요 / 목차로 돌아가기 |
+| pay.tocLocked / tocCta | "" | 구매하면 열려요 / 책 전체를 여는 안내로 갈게요 |
+| pay.pass.* | "" | 이미 샀어요 · 열람 코드 넣기 / SOP-XXXX-XXXX-XXXXX / 열기 / 붙여 넣기 안내 / 확인 뒤 한 줄 |
+| pay.pass.errors.* | "" | shape·receipt(14-4 문장 그대로)·resume("이어가기 코드는 입구에서 넣어요")·fail·offline·wait |
+| resume.errors.pass | "" | 열람 코드는 책에서 넣어요 |
+| toast.loadFail | (없음) | 불러오지 못했어요. 연결을 확인해 주세요 |
+
+### 2. 만신의 방 빈 키 (content-work/out-14/text.json → `node content-work/apply-14.js` → data-saju.js)
+- input.yearAria·monthAria·dayAria·hourAria·minuteAria: 출생 연도 / 출생 월 / 출생 일 / 태어난 시 / 태어난 분
+- result.s2aTitle·s3Title: 넉넉한 기운 / 앞선 결 (결과 때 app.js가 headings의 {element}·{group} 판으로 덮어씀, 그 전 빈칸 방지용)
+- ritualSteps.rice.bell: 방울 흔들기 (app.js 매핑에 `bell`이 없어 아직 화면에 안 닿음)
+- 오행 이름·s2bEmpty·성별 셋·s4Title·대운 나이 표제는 이미 차 있었다(대조 결과 빈칸 아님).
+- apply-14.js가 book-saju.js 머리 주석을 옛 문장으로 되쓰는 것을 발견해 그 파일은 git의 F4 판으로 되돌렸다(본문 변화 없음).
+
+### 3. 광고 문구·옛 순서(여섯→일곱) 정리 (data.js)
+| 자리 | 전 | 후 |
+|---|---|---|
+| privacy.cookieLine | 방문 통계와 광고에 구글 쿠키를 써요… | 방문 통계에 구글 애널리틱스 쿠키를 써요. 입력한 정보는 보내지 않아요. |
+| hub.book.desc | …장마다 광고 한 편이면 열려요 | 일곱 방의 장과 흐름·궁합을 엮은 책, 3,900원이에요 |
+| book.toc.canOpen | 광고 보고 열기 | 구매하면 열려요 |
+| FAQ 4번 | 한 권의 책은 무엇인가요?(광고로 열림) | 한 권의 책은 어떻게 사나요?(유료 10장·포스타입 3,900원·열람 코드·무료 맛보기) — off에서는 app.js가 지움 |
+| FAQ 0~3번 | 여섯 문화·뿌리부터 | 만신의 사주 명리 포함 일곱 문화, 타고난 그릇부터, 입력 네 가지(성별 포함). 0~3번 답 합계 496자(300자 이상) |
+| meta.title / description | 오검~시빌라, "사주도 타로도 아닌 여섯" | 사주 포함 일곱 |
+| intro.summary | 사주도 타로도 아닌 여섯 낯선 점술로… | 만신의 사주에서 로마의 신탁까지, 일곱 점술로 받는 나의 이야기 |
+| 방별 "나의 이야기 N장" | 오검 1·별 2·데칸 3·촐킨 4·룬 5·시빌라 6 | 오검 2·별 3·데칸 4·촐킨 5·룬 6·시빌라 7 (21곳) |
+| {n}/6장 (result.goStory·story.count·card.story) | /6 | /7 |
+| finale·bridges.sibyl·nextDoor.finale·bookLine.locked·book(ledeAll·needAll·part1·blurbs) | 여섯 | 일곱, 시작은 "타고난 그릇" |
+| 3방 시점(hub.half·sofar.half·story.half) | 절반 | "세 문을 지났어요"·"세 장까지 온 이야기 보기"·"세 장의 이야기"(일곱 방에서 3개는 절반이 아님) |
+| hub.journey.chips | 여섯 방 무료 · 읽기 약 14분 | 일곱 방 무료 · 입력은 한 번만 (14분은 여섯 방 실측이라 뺌) |
+| og.title / sub | 여섯 방 / 오검~시빌라 | 일곱 방 / 만신·오검·별·데칸·촐킨·룬·시빌라 |
+- 만신→오검 떡밥: data-saju.js text.bridge("타고난 그릇을 보았으니, 그 그릇에 이름은 어떤 뿌리를 새겼을까요?")가 이미 있어 그대로 두고 data.js 주석에 연결을 적었다.
+
+### 4. legal 3종 (14-3)
+- privacy.html: 광고 항목·광고 쿠키·"광고로 연 장" 저장 항목 삭제, 제4조의2를 GA4만으로. 성별(첫 방에서 받음, 대운 방향 계산에만, 브라우저 안·sessionStorage·전송 없음) 추가. 결제를 켤 때 쓸 제4조의3(열람 코드와 장 묶음 이름만 함수로, IP는 함수 메모리 10분·저장 없음, 호스팅 기록, 구매는 포스타입, sessionStorage 코드)은 **HTML 주석**으로 준비(off 배포판에 안 실림).
+- terms.html: 제3조 광고 삭제, 조 번호 당김, 일곱 방·성별 반영, 무료 범위를 방·나의 이야기로. 판매 조항(제2조의2 유료 콘텐츠: 포스타입 3,900원, 열람 코드 본인만, 문장 갱신)은 주석으로 준비, 포인트 환산·판매자 표시는 ◯◯.
+- refund.html: "구매·환불 안내"로 다시 씀(포스타입·SOP 열람 코드 기준, 영수증 코드·봉인 해제 문장 삭제, 겹친 `<body>` 정리). 근거 조항·포스타입 환불 원문·처리 방법·기간·문의처·시행일은 ◯◯(지어내지 않음). build-dist가 이미 배포 폴더에서 빼므로 off 배포에는 안 들어간다(14-3대로). live 때 다시 넣을지는 운영자 결정.
+
+### 5. HANDOFF 3-6 문구 2건 (api/_paid/book/book-match.js `BOOK_MATCH.bond`)
+- peekLine: "그 방이 건네는 한 줄" → "그 방이 그 사람에게 건넨 한 줄" (인용 안 "당신은…"의 주체를 밝힘, QA 13단계 권장 2)
+- pairOverride["warrior-rebel"][3]: "새로운 프로젝트를 시작할 때" → "둘이 무언가를 새로 시작할 때" (네 관계 유형 공용, 권장 3). 다른 쌍의 일 예시는 이미 skip이거나 일상어(작은 프로젝트·마감) 수준이라 그대로 둠.
+- make-volume.js 불일치 0, build-dist 유료 문장 지문 누출 0.
+
+### 6. 8장 금지어 검색
+- 바뀐 줄(추가 줄) 기준: 화면 문구 0건(주석 "반드시" 1건은 "꼭"으로 바꿈).
+- 파일 전체: data.js 2건(모두 기존 주석 "반드시"), terms.html 2건("공식적인 심리 진단이 아니므로" 면책 문장), data-saju.js·privacy·refund 0건. 화면에 보이는 금지 표현 0건.
