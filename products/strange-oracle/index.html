@@ -111,6 +111,14 @@
     <symbol id="guide-rune" viewBox="0 0 48 64"><path d="M9 3C13 18 11 38 4 61M9 3C19 10 23 28 19 44M13 20C15 34 13 48 10 61M19 44L22 61" /><path d="M20 43c4.6 5.2 14.8 5.6 22.2-.2 1.8-1.4.8-4-1.4-3.4l-4.4 1.2M20 43l-.8-4.6c-.2-1.6 1-2.8 2.6-2.6l13.2 1.8" /><path d="M24.2 36.2q.6-3.4 3.8-3.4t3.6 3.8M33 37.4q.8-3 3.4-2.8t2.8 3.4" /><path d="M27.2 33.8l1.6 2.4M35.4 34.8v2.4" stroke-width="1.2" /></symbol>
     <symbol id="guide-sibyl" viewBox="0 0 48 64"><path d="M22 7c-6 0-10 4.4-10 10.4 0 3.6 1.4 6 3 8l-1 12M22 7c5 0 8.4 3.4 8.4 8.2l2.4 4.4-2.2 1v3.4c0 1.8-1.4 2.8-3.2 2.6l-2.6-.4v4.8" /><path d="M13 12.5q-2.6-1.4-4 .6 2 1.4 4-.6ZM12.4 17.6q-2.8-.6-3.8 1.8 2.4.8 3.8-1.8ZM13.4 22.4q-2.6.2-3 2.8 2.4.2 3-2.8ZM16.6 8.6q-1.8-2.4-4.2-1.4 1.6 2.2 4.2 1.4ZM21 6.8q-.6-2.8-3.2-2.8.6 2.8 3.2 2.8Z" fill="currentColor" stroke="none" /><path d="M4 61c1-12 6-19 14-21.4 5-1.4 9 0 11.4 3.4M29.4 43V61" /><path d="M36 52V38.6c0-1.4 2.6-1.4 2.6 0V35c0-1.4 2.6-1.4 2.6 0v2.2c0-1.4 2.6-1.4 2.6 0V47c0 3-1 5.4-2.6 7.6M36 44.6c-1.8-2.2-4.4-1.6-3.8.8L36 52" /></symbol>
   </svg>
+  <!-- ═════════ (14단계) 만신의 방: 방울 아이콘 · 한옥 대문 아이콘 · 안내자 「만신」 실루엣 (선 도형, fill:none + stroke) ═════════
+       안내자 이미지 교체 자리: Clipwave 예산(58번)이 정해져 이미지를 확정하면 guide-saju를 쓰는 <svg>를
+       <img class="guide-figure guide-figure--img" src="assets/ai/guide-saju.webp" alt=""> 로 바꾼다 (design 14단계 6절) -->
+  <svg class="rune-sprite" aria-hidden="true" focusable="false">
+    <symbol id="icon-saju" viewBox="0 0 40 40"><path d="M20 3v9M13 12h14M14 12v5.5M26 12v5.5M20 12v13.5" /><path d="M10.5 21a3.5 3.5 0 0 1 7 0l.8 3h-8.6ZM22.5 21a3.5 3.5 0 0 1 7 0l.8 3h-8.6ZM16.5 29a3.5 3.5 0 0 1 7 0l.8 3h-8.6Z" /><path d="M15 33c-1 2.6 0 4.4-1 6M20 33v6M25 33c1 2.6 0 4.4 1 6" /></symbol>
+    <symbol id="icon-hanok" viewBox="0 0 40 40"><path d="M2 13Q20 3 38 13M6 12Q20 7 34 12M4 14.5h32" /><path d="M8 15v21M32 15v21M11 18h18v18H11ZM20 18v18" /><path d="M14 21v12M17 21v12M23 21v12M26 21v12" stroke-width="0.8" /><circle cx="18" cy="28" r="1.2" /><circle cx="22" cy="28" r="1.2" /><path d="M3 36.5h34" /></symbol>
+    <symbol id="guide-saju" viewBox="0 0 48 64"><circle cx="24" cy="11" r="5.5" /><path d="M19 7.5q5-4.5 10 0M28.5 9.5q3.5 1 3 4.5" /><path d="M21 17.5l3 4 3-4" /><path d="M18.5 18.5c-4.5 1.6-6.6 5.2-7.6 9.4L7 36M29.5 18.5c4.5 1.6 6.6 5.2 7.6 9.4L40 32" /><path d="M17 30h14M18 30c-3 10-6 21-9 31h30c-3-10-6-21-9-31" /><path d="M24 30v31" stroke-width="0.8" /><path d="M40 32L33 18.5M40 32L37.5 15.5M40 32L43 15.6M40 32L46.5 19M33 18.5A14.5 14.5 0 0 1 46.5 19" /><path d="M7 36v5" /><circle cx="4.8" cy="44" r="2.1" /><circle cx="9.2" cy="44" r="2.1" /><circle cx="7" cy="47.8" r="2.1" /><path d="M5.6 50.5v8M8.4 50.5c1 3 0 5.6 1 8.6" stroke-width="0.9" /></symbol>
+  </svg>
 
   <!-- ═════════ 우주 배경 (CSS만. 성운·오로라·원근 별·먼지·유성) ═════════ -->
   <div class="cosmos" aria-hidden="true">
@@ -136,6 +144,7 @@
     <span class="sigil-rise__veil"></span>
     <span class="sigil-rise__mark">
       <span class="sigil-rise__halo"></span>
+      <span class="sigil-rise__art" data-for="saju"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-saju" /></svg></span>
       <span class="sigil-rise__art" data-for="ogham"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
       <span class="sigil-rise__art" data-for="star"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span>
       <span class="sigil-rise__art" data-for="decan"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></span>
@@ -198,11 +207,22 @@
            data-go·data-room을 JS가 다음 문으로 바꾼다.
            (결정 52) 주 버튼 = 고대의 문. 진짜 <button> 하나. 문짝·장식은 aria-hidden, 읽히는 이름은 hub-cta-label 문구.
            누르면 JS가 .is-entering을 붙인다 → 문짝이 조금 벌어지고 빛이 새며 8-3 상징 떠오름으로 이어진다 -->
-      <button class="hub-cta hub-gate" type="button" data-js="hub-cta" data-room="decan" data-go="decan-intro">
+      <!-- (14단계) 다음 방이 Ⅰ 만신(data-room="saju")이면 같은 버튼이 CSS만으로 한옥 대문이 된다: 기와 지붕(hub-gate__roof)·띠살 문짝·문고리(hub-gate__ring)가 보이고
+           아치 몰딩·여섯 상징·열쇠 봉인(hub-gate__carve)은 숨는다. 다른 방이 다음이면 지붕·문고리는 숨고 지금의 고대 문 그대로. 정적 값은 0/7 모습 -->
+      <button class="hub-cta hub-gate" type="button" data-js="hub-cta" data-room="saju" data-go="saju-intro">
+        <span class="hub-gate__roof" aria-hidden="true">
+          <svg viewBox="0 0 260 64" focusable="false">
+            <path class="hub-gate__tiles" d="M4 44Q130 2 256 44L248 50Q130 16 12 50Z" />
+            <path class="hub-gate__ridge" d="M58 22Q130 4 202 22" />
+            <path class="hub-gate__eave" d="M12 50Q130 16 248 50M20 56H240" />
+            <path class="hub-gate__dancheong" d="M30 56H230V63H30Z" />
+          </svg>
+          <span class="hub-gate__chime"><i></i></span>
+        </span>
         <span class="hub-gate__door" aria-hidden="true">
           <span class="hub-gate__light"></span>
-          <span class="hub-gate__leaf hub-gate__leaf--l"><span class="hub-gate__panel"></span><span class="hub-gate__panel hub-gate__panel--low"></span></span>
-          <span class="hub-gate__leaf hub-gate__leaf--r"><span class="hub-gate__panel"></span><span class="hub-gate__panel hub-gate__panel--low"></span></span>
+          <span class="hub-gate__leaf hub-gate__leaf--l"><span class="hub-gate__panel"></span><span class="hub-gate__panel hub-gate__panel--low"></span><span class="hub-gate__ring"></span></span>
+          <span class="hub-gate__leaf hub-gate__leaf--r"><span class="hub-gate__panel"></span><span class="hub-gate__panel hub-gate__panel--low"></span><span class="hub-gate__ring"></span></span>
           <svg class="hub-gate__carve" viewBox="0 0 200 280" focusable="false">
             <path class="hub-gate__arch" d="M6 280V100A94 94 0 0 1 194 100V280" />
             <path class="hub-gate__arch hub-gate__arch--in" d="M16 280V100A84 84 0 0 1 184 100V280" />
@@ -223,7 +243,7 @@
           <span class="hub-gate__dust"><i></i><i></i><i></i><i></i><i></i><i></i></span>
         </span>
         <span class="hub-gate__plate">
-          <span class="hub-cta__num" data-js="hub-cta-num" aria-hidden="true">III</span>
+          <span class="hub-cta__num" data-js="hub-cta-num" aria-hidden="true">I</span>
           <span class="hub-cta__label" data-js="hub-cta-label"></span>
         </span>
       </button>
@@ -256,10 +276,29 @@
       <!-- (7단계) 여섯 개의 고대 문. 순서 Ⅰ오검 → Ⅱ별 → Ⅲ데칸 → Ⅳ촐킨 → Ⅴ룬 → Ⅵ시빌라 (장 번호 = 진행 순서).
            상태 class (JS): .is-locked(봉인, aria-disabled="true") / .is-next(지금 열 수 있는 문, 은은히 빛남) / .is-visited(지나온 문)
            누른 순간 .is-entering. 잠긴 문도 누를 수 있다(JS가 안내 토스트) — disabled 속성은 쓰지 않는다 -->
+      <!-- (14단계) 일곱 문: Ⅰ 한옥 대문(door--gate)이 맨 앞 한 줄을 다 쓰고, 그 뒤에 "대문을 지나면 열리는 세상의 문" 여섯이 3×2로 늘어선다.
+           상태 class는 다른 문과 같다(.is-locked / .is-next / .is-visited). hidden은 F4(developer)가 CHAPTER_ORDER에 saju를 넣을 때 지운다
+           (지금 JS는 saju를 모르므로 눌러도 열 방이 없다 — 기존 동작 보호) -->
       <nav class="doors" data-aria="hub.doorsAria" data-js="hub-doors">
-        <button class="door is-visited" type="button" data-room="ogham" data-go="ogham-intro" data-js="hub-door-ogham">
-          <span class="door__frame" aria-hidden="true"><span class="door__relief"></span><span class="door__rivets"></span></span>
+        <button class="door door--gate is-next" type="button" data-room="saju" data-go="saju-intro" data-js="hub-door-saju" hidden>
+          <span class="door__frame" aria-hidden="true"><span class="door__relief"></span></span>
           <span class="door__num" aria-hidden="true">I</span>
+          <span class="door__portal" aria-hidden="true">
+            <span class="door__swirl"></span>
+            <span class="door__glyph"><svg class="door__icon door__icon--hanok" viewBox="0 0 40 40"><use href="#icon-hanok" /></svg></span>
+            <svg class="door__seal wax-seal"><use href="#i-seal"/></svg>
+          </span>
+          <span class="door__text">
+            <span class="door__name" data-t="rooms.saju.name">[초안] 만신의 방</span>
+            <span class="door__origin" data-t="hub.doors.saju.origin">[초안] 한국 · 사주 명리</span>
+            <span class="door__reads" data-t="hub.doors.saju.reads">[초안] 타고난 그릇</span>
+          </span>
+          <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
+          <span class="door__badge" data-js="hub-door-badge"></span>
+        </button>
+        <button class="door is-locked" type="button" data-room="ogham" data-go="ogham-intro" data-js="hub-door-ogham">
+          <span class="door__frame" aria-hidden="true"><span class="door__relief"></span><span class="door__rivets"></span></span>
+          <span class="door__num" aria-hidden="true">II</span>
           <span class="door__portal" aria-hidden="true">
             <span class="door__swirl"></span>
             <span class="door__glyph"><svg class="door__icon door__icon--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
@@ -271,9 +310,9 @@
           <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
-        <button class="door is-visited" type="button" data-room="star" data-go="star-intro" data-js="hub-door-star">
+        <button class="door is-locked" type="button" data-room="star" data-go="star-intro" data-js="hub-door-star">
           <span class="door__frame" aria-hidden="true"><span class="door__relief"></span><span class="door__rivets"></span></span>
-          <span class="door__num" aria-hidden="true">II</span>
+          <span class="door__num" aria-hidden="true">III</span>
           <span class="door__portal" aria-hidden="true">
             <span class="door__swirl"></span>
             <span class="door__glyph"><svg class="door__moon" viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg></span>
@@ -285,9 +324,9 @@
           <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
           <span class="door__badge" data-js="hub-door-badge"></span>
         </button>
-        <button class="door is-next" type="button" data-room="decan" data-go="decan-intro" data-js="hub-door-decan">
+        <button class="door is-locked" type="button" data-room="decan" data-go="decan-intro" data-js="hub-door-decan">
           <span class="door__frame" aria-hidden="true"><span class="door__relief"></span><span class="door__rivets"></span></span>
-          <span class="door__num" aria-hidden="true">III</span>
+          <span class="door__num" aria-hidden="true">IV</span>
           <span class="door__portal" aria-hidden="true">
             <span class="door__swirl"></span>
             <span class="door__glyph"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></span>
@@ -301,7 +340,7 @@
         </button>
         <button class="door is-locked" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="hub-door-tzolkin">
           <span class="door__frame" aria-hidden="true"><span class="door__relief"></span><span class="door__rivets"></span></span>
-          <span class="door__num" aria-hidden="true">IV</span>
+          <span class="door__num" aria-hidden="true">V</span>
           <span class="door__portal" aria-hidden="true">
             <span class="door__swirl"></span>
             <span class="door__glyph"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span>
@@ -315,7 +354,7 @@
         </button>
         <button class="door is-locked" type="button" data-room="rune" data-go="rune-intro" data-js="hub-door-rune">
           <span class="door__frame" aria-hidden="true"><span class="door__relief"></span><span class="door__rivets"></span></span>
-          <span class="door__num" aria-hidden="true">V</span>
+          <span class="door__num" aria-hidden="true">VI</span>
           <span class="door__portal" aria-hidden="true">
             <span class="door__swirl"></span>
             <span class="door__glyph runic">ᚱ</span>
@@ -329,7 +368,7 @@
         </button>
         <button class="door is-locked" type="button" data-room="sibyl" data-go="sibyl-intro" data-js="hub-door-sibyl">
           <span class="door__frame" aria-hidden="true"><span class="door__relief"></span><span class="door__rivets"></span></span>
-          <span class="door__num" aria-hidden="true">VI</span>
+          <span class="door__num" aria-hidden="true">VII</span>
           <span class="door__portal" aria-hidden="true">
             <span class="door__swirl"></span>
             <span class="door__glyph"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></span>
@@ -363,12 +402,12 @@
         <ol class="so-far__list" data-js="hub-sofar-list">
           <li class="so-far__item is-done" data-room="ogham"><button class="so-far__line" type="button" data-js="sofar-line" data-room="ogham" data-go="ogham-result">
             <span class="so-far__mark" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
-            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">I · </span><span data-t="rooms.ogham.name"></span> · <b data-js="sofar-result"></b></span><span class="so-far__key" data-js="sofar-key"></span></span>
+            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">II · </span><span data-t="rooms.ogham.name"></span> · <b data-js="sofar-result"></b></span><span class="so-far__key" data-js="sofar-key"></span></span>
             <span class="so-far__go" aria-hidden="true">›</span>
           </button></li>
           <li class="so-far__item is-done" data-room="star"><button class="so-far__line" type="button" data-js="sofar-line" data-room="star" data-go="star-result">
             <span class="so-far__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span>
-            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">II · </span><span data-t="rooms.star.name"></span> · <b data-js="sofar-result"></b></span><span class="so-far__key" data-js="sofar-key"></span></span>
+            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">III · </span><span data-t="rooms.star.name"></span> · <b data-js="sofar-result"></b></span><span class="so-far__key" data-js="sofar-key"></span></span>
             <span class="so-far__go" aria-hidden="true">›</span>
           </button></li>
         </ol>
@@ -426,13 +465,303 @@
         </dl>
       </section>
 
-      <!-- 광고 자리 1 (허브: 소개 글 아래). ads.js가 채우면 .is-filled -->
-      <div class="ad-slot" data-js="ad-slot" data-ad="hub"></div>
       <!-- (12단계) 바닥글 줄: 광고 자리(hub)와 지우기 안내 한 줄을 사이에 두고 떨어진다. 쿠키 줄은 광고·분석 ID가 하나라도 있을 때만 hidden 해제 -->
       <div class="hub-foot">
         <p class="hub-clear-note" data-t="hub.clearNote">입력한 정보는 위쪽 막대의 "내 정보 지우기"로 언제든 지울 수 있어요.</p>
         <p class="hub-cookie" data-js="cookie-line" hidden><span data-t="privacy.cookieLine">방문 통계와 광고에 구글 쿠키를 써요. 입력한 이름·생일은 보내지 않아요.</span> <a class="hub-cookie__link" href="legal/privacy.html" data-t="legal.links.privacy">개인정보처리방침</a></p>
       </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         (14단계) Ⅰ 만신의 방 — 한국 · 사주 명리. 설계: design/strange-oracle.md 「14단계」
+         의식 4단계 = 화면 3개: ① 대문(시작 화면) → ② 채비(입력 네 칸 + 6장 고지) → ③ 쌀점과 방울 → ④ 공수(의식 화면의 data-stage)
+         바탕은 밤의 신당(먹빛·촛불), 읽을 것(원국 표·오행 막대)은 한지 종이 위. 오방색은 채도를 낮춰 오행 색으로만 쓴다.
+         [초안] 문구는 copywriter가 data.js·data-saju.js에 넣은 뒤 지운다 (HANDOFF 5장 순서). data-js 칸은 JS가 채운다.
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ═════════ 1-K. 만신의 방: 시작 = 의식 1단계 「대문」 ═════════
+         JS: 화면에 들어올 때 saju-gate에 .is-closed를 붙였다가 약 0.6초 뒤 뗀다 → 문짝이 안쪽으로 열리고(약 1.1초) 풍경이 한 번 흔들린다. 탭하면 바로 뗀다.
+         기본(클래스 없음) = 열린 최종 모습. 움직임 줄이기에서는 .is-closed여도 열린 모습(CSS).
+         8-3 상징 떠오름의 도착 자리(room-emblem)는 열린 대문 안 마당이다. 움직임 줄이기: 처음부터 열린 모습 -->
+    <section class="screen screen--dock room-intro room-intro--saju" id="screen-saju-intro" data-js="screen-saju-intro" data-room="saju" data-preview="1. 만신의 방 — 대문 (의식 1단계)">
+      <div class="shrine-bg" aria-hidden="true">
+        <span class="shrine-bg__cloth shrine-bg__cloth--l"><i data-el="wood"></i><i data-el="fire"></i><i data-el="earth"></i><i data-el="metal"></i><i data-el="water"></i></span>
+        <span class="shrine-bg__cloth shrine-bg__cloth--r"><i data-el="water"></i><i data-el="metal"></i><i data-el="earth"></i><i data-el="fire"></i><i data-el="wood"></i></span>
+        <span class="shrine-bg__candle shrine-bg__candle--l"></span>
+        <span class="shrine-bg__candle shrine-bg__candle--r"></span>
+      </div>
+      <header class="room-head">
+        <div class="saju-gate" data-js="saju-gate" aria-hidden="true">
+          <svg class="saju-gate__roof" viewBox="0 0 240 56" focusable="false">
+            <path class="saju-gate__tiles" d="M2 40Q120 0 238 40L230 46Q120 14 10 46Z" />
+            <path class="saju-gate__ridge" d="M52 19Q120 3 188 19" />
+            <path class="saju-gate__eave" d="M10 46Q120 14 230 46M26 52H214" />
+            <path class="saju-gate__band" d="M36 50H204V56H36Z" />
+          </svg>
+          <span class="saju-gate__chime" data-js="saju-chime"><i></i></span>
+          <span class="saju-gate__frame">
+            <span class="saju-gate__yard"></span>
+            <div class="room-emblem room-emblem--saju" data-js="room-emblem"><svg class="room-emblem__icon" viewBox="0 0 40 40"><use href="#icon-saju" /></svg></div>
+            <span class="saju-gate__leaf saju-gate__leaf--l"><span class="saju-gate__ring"></span></span>
+            <span class="saju-gate__leaf saju-gate__leaf--r"><span class="saju-gate__ring"></span></span>
+          </span>
+          <span class="saju-gate__sill"></span>
+        </div>
+        <!-- 안내자 「만신」: SVG 실루엣(한복·방울·부채). 이미지 교체 자리 — 확정 이미지가 생기면 이 svg를 img로 (맨 위 sprite 주석) -->
+        <svg class="guide-figure guide-figure--saju" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg>
+        <p class="eyebrow" lang="en" data-t="saju.intro.eyebrow">[초안] MANSIN · KOREAN SAJU</p>
+        <h1 class="room-head__title" data-t="saju.intro.title">[초안] 만신의 방</h1>
+        <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="1"></span> <span data-t="rooms.saju.chapterName">[초안] 타고난 그릇</span></p>
+        <p class="room-head__pitch" data-t="saju.intro.pitch">[초안] 태어난 날의 여덟 글자로 읽는, 타고난 그릇 이야기</p>
+        <div class="say say--greet" data-js="guide-greet">
+          <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">[초안] 만신</b></p>
+          <p class="say__line" data-t="guides.saju.greet">[초안] 어서 오게, 먼 길 오느라 애썼구먼. 여기서 자네 그릇을 먼저 보고 나면, 세상의 여섯 문을 더 지나게 될 것이여. 툇마루에 편히 앉게.</p>
+        </div>
+      </header>
+
+      <div class="lore" data-js="saju-lore" data-list="saju.intro.lore">
+        <p>[초안] 사주는 태어난 해·달·날·시를 하늘의 글자(천간)와 땅의 글자(지지) 한 쌍씩, 모두 여덟 글자로 적은 것이에요. 이 방은 그 여덟 글자에 담긴 다섯 기운의 많고 적음으로 타고난 그릇을 읽어요.</p>
+      </div>
+
+      <p class="room-saved is-hidden" data-js="room-saved"><span class="room-saved__value" data-js="room-saved-value"></span> <button class="room-saved__edit" type="button" data-js="room-saved-edit" data-t="room.saved.edit">바꾸기</button></p>
+      <div class="cta-dock">
+        <button class="btn btn--primary btn--block" type="button" data-go="saju-input" data-js="saju-intro-go" data-t="saju.intro.go">[초안] 대문 안으로 들어가기</button>
+      </div>
+    </section>
+
+    <!-- ═════════ 2-K. 만신의 방: 입력 = 의식 2단계 「채비」 ═════════
+         포기 불가: 네 칸 + 고지 + 시작 버튼이 360×640 한 화면(스크롤 없음). 칸마다 왜 묻는지 한 줄(라벨 옆 field__why, 16자 이내).
+         새는 길 막기: 제출되는 폼이 아니다(JS가 submit 막음). 이름·생일 칸에 name 없음 + autocomplete="off". 성별 라디오의 name은 묶음용일 뿐 어디에도 보내지 않는다.
+         6장 고지(privacy-notice)는 시작 버튼 바로 위, 누르기 전에 보인다. 오검·별 방의 고지는 F4가 "이미 넣은 값을 씁니다" 한 줄로 바꾼다(14-1) -->
+    <section class="screen screen--dock room-input room-input--saju" id="screen-saju-input" data-js="screen-saju-input" data-room="saju" data-preview="2. 만신의 방 — 채비 (입력 네 칸 + 6장 고지, 360×640 한 화면)">
+      <header class="room-head room-head--compact">
+        <h1 class="room-head__title" data-t="saju.input.title">[초안] 네 가지만 알려 주게</h1>
+      </header>
+
+      <div class="saved-info is-hidden" data-js="saved-info">
+        <p class="saved-info__label" data-t="privacy.savedLabel"></p>
+        <p class="saved-info__value" data-js="saved-info-value"></p>
+        <p class="saved-info__ask" data-t="privacy.savedAsk"></p>
+        <button class="btn btn--text saved-info__edit" type="button" data-js="saved-info-edit" data-t="privacy.savedEdit"></button>
+      </div>
+
+      <form class="form form--saju" data-js="saju-form" novalidate>
+        <div class="field" data-js="saju-name-field">
+          <label class="field__label" for="saju-name"><span data-t="saju.input.nameLabel">[초안] 이름</span> <span class="field__why" data-t="saju.input.nameWhy">[초안] 부를 이름과 오검 글자에</span></label>
+          <input class="input" id="saju-name" data-js="saju-name" type="text" maxlength="10" autocomplete="off" data-ph="saju.input.namePlaceholder" placeholder="예: 김서윤" />
+          <p class="field__error is-hidden" data-js="saju-name-error" role="alert"></p>
+        </div>
+
+        <fieldset class="field" data-js="saju-date-field">
+          <legend class="field__label"><span data-t="saju.input.dateLabel">[초안] 생년월일</span> <span class="field__why" data-t="saju.input.dateWhy">[초안] 여덟 글자와 별·데칸·촐킨에</span></legend>
+          <div class="field__row">
+            <input class="input input--num date-y" data-js="saju-year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="1995" data-aria="saju.input.yearAria" />
+            <span class="field__unit" data-t="common.units.y"></span>
+            <input class="input input--num date-md" data-js="saju-month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="3" data-aria="saju.input.monthAria" />
+            <span class="field__unit" data-t="common.units.m"></span>
+            <input class="input input--num date-md" data-js="saju-day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="21" data-aria="saju.input.dayAria" />
+            <span class="field__unit" data-t="common.units.d"></span>
+          </div>
+          <p class="field__solar" data-t="saju.input.solarNote">[초안] 양력으로 넣어 주세요</p>
+          <p class="field__error is-hidden" data-js="saju-date-error" role="alert"></p>
+        </fieldset>
+
+        <fieldset class="field" data-js="saju-time-field">
+          <legend class="field__label"><span data-t="saju.input.timeLabel">[초안] 태어난 시각</span> <span class="field__why" data-t="saju.input.timeWhy">[초안] 시주와 별의 방에</span></legend>
+          <div class="field__row field__row--time">
+            <input class="input input--num date-md" data-js="saju-hour" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="15" data-aria="saju.input.hourAria" />
+            <span class="field__unit" data-t="common.units.h"></span>
+            <input class="input input--num date-md" data-js="saju-minute" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="30" data-aria="saju.input.minuteAria" />
+            <span class="field__unit" data-t="common.units.min"></span>
+            <!-- "모름" 한 번 누르기: 체크하면 JS가 시·분 칸을 disabled + 비움 -->
+            <label class="chip-toggle"><input type="checkbox" data-js="saju-time-unknown" /><span data-t="saju.input.timeUnknown">[초안] 모름</span></label>
+          </div>
+          <p class="field__error is-hidden" data-js="saju-time-error" role="alert"></p>
+        </fieldset>
+
+        <fieldset class="field" data-js="saju-gender-field">
+          <legend class="field__label"><span data-t="saju.input.genderLabel">[초안] 성별</span> <span class="field__why" data-t="saju.input.genderWhy">[초안] 대운의 방향을 정하는 데만</span></legend>
+          <div class="seg" data-js="saju-gender">
+            <label class="seg__opt"><input type="radio" name="saju-gender" value="m" data-js="saju-gender-opt" /><span data-t="saju.input.genderM">[초안] 남</span></label>
+            <label class="seg__opt"><input type="radio" name="saju-gender" value="f" data-js="saju-gender-opt" /><span data-t="saju.input.genderF">[초안] 여</span></label>
+            <label class="seg__opt"><input type="radio" name="saju-gender" value="x" data-js="saju-gender-opt" /><span data-t="saju.input.genderX">[초안] 밝히지 않음</span></label>
+          </div>
+          <p class="field__error is-hidden" data-js="saju-gender-error" role="alert"></p>
+        </fieldset>
+      </form>
+
+      <p class="notice notice--privacy notice--saju" data-js="privacy-notice">
+        <svg class="notice__icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span data-t="privacy.noticeProfile">[초안] 이름·생년월일·태어난 시각·성별은 이 기기의 이 탭에만 잠시 보관되고 어디에도 보내지 않아요. 위쪽 막대의 ‘내 정보 지우기’로 언제든 지울 수 있어요.</span>
+      </p>
+
+      <div class="cta-dock">
+        <button class="btn btn--primary btn--block" type="button" data-js="saju-input-go" data-t="saju.input.go">[초안] 소반 앞에 앉기</button>
+      </div>
+    </section>
+
+    <!-- ═════════ 3-K. 만신의 방: 의식 3·4단계 「쌀점과 방울」 → 「공수」 ═════════
+         data-stage (JS) = rice(방울을 기다림) | rung(방울을 흔듦: 여덟 글자가 년→월→일→시 순서로 붓글씨처럼 한 자씩, 약 3초) | gongsu(만신이 일간을 부름 + 결과 열기 버튼)
+         방울(saju-bell)을 탭하면 rung. 다 떠오르면 JS가 gongsu로. 넘기기는 탭(공수 버튼). 움직임 줄이기: rung의 글자가 한꺼번에 보이고 곧바로 gongsu.
+         글자 칸: li[data-pillar] style="--k:0~3"(년 0 · 월 1 · 일 2 · 시 3), 글자마다 data-el = wood|fire|earth|metal|water(오행 색 점).
+         시각 모름: 시주 li에 .is-unknown → 두 글자 대신 "모름", saju-hour-unknown 한 줄("시는 하늘만 알지") hidden 해제.
+         정적 값: 다 떠오른 모습(rung) -->
+    <section class="screen ritual ritual--saju" id="screen-saju-ritual" data-js="screen-saju-ritual" data-room="saju" data-stage="rung" data-preview="3. 만신의 방 — 쌀점과 방울 → 공수 (정적 검토: 여덟 글자가 다 떠오른 모습)">
+      <div class="shrine-bg" aria-hidden="true">
+        <span class="shrine-bg__cloth shrine-bg__cloth--l"><i data-el="wood"></i><i data-el="fire"></i><i data-el="earth"></i><i data-el="metal"></i><i data-el="water"></i></span>
+        <span class="shrine-bg__cloth shrine-bg__cloth--r"><i data-el="water"></i><i data-el="metal"></i><i data-el="earth"></i><i data-el="fire"></i><i data-el="wood"></i></span>
+        <span class="shrine-bg__candle shrine-bg__candle--l"></span>
+        <span class="shrine-bg__candle shrine-bg__candle--r"></span>
+      </div>
+
+      <div class="say say--ritual" data-js="guide-ritual">
+        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg>
+        <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">[초안] 만신</b></p>
+        <p class="say__line ritual__guide" data-js="saju-ritual-guide" data-t="guides.saju.ritual" aria-live="polite">[초안] 방울을 한 번 흔들어 보게. 쌀 위에 자네 글자가 한 자씩 앉을 것이여.</p>
+      </div>
+
+      <div class="soban-stage">
+        <div class="soban" aria-hidden="true">
+          <span class="soban__top"><span class="soban__rice"></span></span>
+          <span class="soban__legs"></span>
+          <ol class="wonguk wonguk--rice" data-js="saju-ritual-pillars">
+            <li class="wonguk__col" data-pillar="year" style="--k:0"><span class="wonguk__char" data-el="wood"><b>甲</b></span><span class="wonguk__char" data-el="water"><b>子</b></span></li>
+            <li class="wonguk__col" data-pillar="month" style="--k:1"><span class="wonguk__char" data-el="fire"><b>丙</b></span><span class="wonguk__char" data-el="wood"><b>寅</b></span></li>
+            <li class="wonguk__col is-self" data-pillar="day" style="--k:2"><span class="wonguk__char" data-el="earth"><b>戊</b></span><span class="wonguk__char" data-el="fire"><b>午</b></span></li>
+            <li class="wonguk__col" data-pillar="hour" style="--k:3"><span class="wonguk__char" data-el="metal"><b>庚</b></span><span class="wonguk__char" data-el="metal"><b>申</b></span><span class="wonguk__unknown" data-t="saju.pillars.unknown">[초안] 모름</span></li>
+          </ol>
+        </div>
+        <button class="bell" type="button" data-js="saju-bell" data-aria="saju.ritual.bellLabel" aria-label="[초안] 방울 흔들기">
+          <span class="bell__ring" aria-hidden="true"></span>
+          <svg class="bell__icon" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><use href="#icon-saju" /></svg>
+          <span class="bell__label" data-t="saju.ritual.bell">[초안] 방울 흔들기</span>
+        </button>
+      </div>
+
+      <p class="saju-ritual__hour is-hidden" data-js="saju-hour-unknown" data-t="saju.ritual.hourUnknown">[초안] 시는 하늘만 알지</p>
+      <p class="norn-hint" data-js="saju-ritual-hint" aria-live="polite"></p>
+
+      <!-- 4단계 공수: data-stage="gongsu"일 때만 보인다. gongsu-call은 템플릿 saju.ritual.call("자네는 {stem}이여")을 JS가 채움 -->
+      <div class="gongsu" data-js="saju-gongsu">
+        <p class="gongsu__stem" data-js="saju-gongsu-stem" aria-hidden="true">戊</p>
+        <p class="gongsu__call" data-js="saju-gongsu-call" aria-live="polite">[초안] 자네는 무토여</p>
+        <button class="btn btn--primary btn--block gongsu__go" type="button" data-js="saju-gongsu-go" data-t="saju.ritual.go">[초안] 공수 듣기</button>
+      </div>
+    </section>
+
+    <!-- ═════════ 4-K. 만신의 방: 결과 ═════════
+         순서(14-1): 결과 이름·일간 한자 → (공유) → 원국 표 → 오행 막대 → S1~S4 → 원형 한 줄 → S5(만신의 공수) → 떡밥·책 한 줄 → 이 방의 기준 → 면책 → 공유·다음 문(Ⅱ 오검)
+         공유 카드에는 일간 이름·한자·오행 막대·원형만. 원국 8글자와 성별은 넣지 않는다(카드 그리는 코드는 developer, 명세는 design 14단계 9절) -->
+    <section class="screen result result--saju" id="screen-saju-result" data-js="screen-saju-result" data-room="saju" data-preview="4. 만신의 방 — 결과">
+      <div class="say say--open" data-js="guide-open">
+        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg>
+        <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">[초안] 만신</b></p>
+        <p class="say__line" data-t="guides.saju.open">[초안] {who}의 여덟 글자를 쌀 위에 펼쳐 보았구먼. 어디 하나씩 읽어 보세.</p>
+      </div>
+
+      <div class="capture capture--saju" data-js="result-capture">
+        <span class="capture__flash" aria-hidden="true"></span>
+        <p class="capture__eyebrow" data-t="saju.result.eyebrow">[초안] 낯선 점술관 · 만신의 방</p>
+        <!-- 일간 도장: 한자 한 자(saju-stem-hanja) + 오행 색 테(data-el) -->
+        <div class="stem-seal" data-js="saju-stem-seal" data-el="earth" aria-hidden="true"><span class="stem-seal__hanja" data-js="saju-stem-hanja">戊</span></div>
+        <!-- 결과 이름: 360px에서 한 줄(8자 이내 권장, 최대 12자 — design 14단계 텍스트 길이 표) -->
+        <h1 class="capture__title" data-js="result-title">[초안] 무토 — 너른 들의 흙</h1>
+        <p class="capture__key" data-js="result-key">[초안] 넓게 받아 단단히 품는 사람</p>
+        <p class="capture__meta" data-js="result-meta"></p>
+      </div>
+
+      <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop"></button>
+
+      <!-- 원국 판: 한지 종이. 시각 모름이면 시주 칸 "모름" + saju-hour-note. 절입일+시각 모름이면 saju-jeolip-note(JS가 템플릿 채움).
+           이어가기 코드로 복원한 방: 표·막대 대신 saju-restored-note 한 줄(.is-hidden 해제), wonguk·ohaeng은 hidden -->
+      <section class="hanji-board" data-js="saju-board" aria-labelledby="saju-board-title">
+        <h2 class="hanji-board__title" id="saju-board-title" data-t="saju.result.boardTitle">[초안] 여덟 글자</h2>
+        <ol class="wonguk" data-js="saju-wonguk">
+          <li class="wonguk__col" data-pillar="year"><span class="wonguk__label" data-t="saju.pillars.year">[초안] 년주</span><span class="wonguk__char" data-el="wood"><b>甲</b><small>갑 · 목</small></span><span class="wonguk__char" data-el="water"><b>子</b><small>자 · 수</small></span></li>
+          <li class="wonguk__col" data-pillar="month"><span class="wonguk__label" data-t="saju.pillars.month">[초안] 월주</span><span class="wonguk__char" data-el="fire"><b>丙</b><small>병 · 화</small></span><span class="wonguk__char" data-el="wood"><b>寅</b><small>인 · 목</small></span></li>
+          <li class="wonguk__col is-self" data-pillar="day"><span class="wonguk__label" data-t="saju.pillars.day">[초안] 일주</span><span class="wonguk__char" data-el="earth"><b>戊</b><small>무 · 토</small></span><span class="wonguk__char" data-el="fire"><b>午</b><small>오 · 화</small></span></li>
+          <li class="wonguk__col" data-pillar="hour"><span class="wonguk__label" data-t="saju.pillars.hour">[초안] 시주</span><span class="wonguk__char" data-el="metal"><b>庚</b><small>경 · 금</small></span><span class="wonguk__char" data-el="metal"><b>申</b><small>신 · 금</small></span><span class="wonguk__unknown" data-t="saju.pillars.unknown">[초안] 모름</span></li>
+        </ol>
+        <p class="hanji-board__self" data-t="saju.result.selfNote">[초안] 테두리 친 글자가 ‘나’를 뜻하는 일간이에요</p>
+        <p class="hanji-board__note is-hidden" data-js="saju-hour-note" data-t="saju.result.hourNote">[초안] 시각을 알면 두 글자가 더해져 달라질 수 있어요</p>
+        <p class="hanji-board__note is-hidden" data-js="saju-jeolip-note"></p>
+        <p class="hanji-board__note is-hidden" data-js="saju-restored-note" data-t="saju.result.restoredBoard">[초안] 생일·시각을 다시 넣으면 여덟 글자가 보여요</p>
+
+        <!-- 오행 막대: li style="--n:개수" (0~8). 0이면 .is-empty(점선 빈 막대, 숫자 0). 많은 오행 .is-most, 적은/비어 있는 오행 .is-least -->
+        <figure class="ohaeng" data-js="saju-ohaeng" aria-labelledby="saju-ohaeng-title">
+          <figcaption class="ohaeng__title" id="saju-ohaeng-title" data-t="saju.result.ohaengTitle">[초안] 다섯 기운</figcaption>
+          <ul class="ohaeng__list">
+            <li class="ohaeng__row" data-el="wood" style="--n:2" data-js="saju-ohaeng-row"><span class="ohaeng__name" data-t="saju.elements.wood">[초안] 목</span><span class="ohaeng__bar" aria-hidden="true"><i></i></span><b class="ohaeng__count" data-js="saju-ohaeng-count">2</b></li>
+            <li class="ohaeng__row" data-el="fire" style="--n:2" data-js="saju-ohaeng-row"><span class="ohaeng__name" data-t="saju.elements.fire">[초안] 화</span><span class="ohaeng__bar" aria-hidden="true"><i></i></span><b class="ohaeng__count" data-js="saju-ohaeng-count">2</b></li>
+            <li class="ohaeng__row" data-el="earth" style="--n:1" data-js="saju-ohaeng-row"><span class="ohaeng__name" data-t="saju.elements.earth">[초안] 토</span><span class="ohaeng__bar" aria-hidden="true"><i></i></span><b class="ohaeng__count" data-js="saju-ohaeng-count">1</b></li>
+            <li class="ohaeng__row is-most" data-el="metal" style="--n:3" data-js="saju-ohaeng-row"><span class="ohaeng__name" data-t="saju.elements.metal">[초안] 금</span><span class="ohaeng__bar" aria-hidden="true"><i></i></span><b class="ohaeng__count" data-js="saju-ohaeng-count">3</b></li>
+            <li class="ohaeng__row is-empty is-least" data-el="water" style="--n:0" data-js="saju-ohaeng-row"><span class="ohaeng__name" data-t="saju.elements.water">[초안] 수</span><span class="ohaeng__bar" aria-hidden="true"><i></i></span><b class="ohaeng__count" data-js="saju-ohaeng-count">0</b></li>
+          </ul>
+        </figure>
+      </section>
+
+      <!-- 풀이 S1~S4: 모듈마다 작은 제목 + 문단. S4는 성별이 "밝히지 않음"이거나 복원한 방이면 saju-s4 대신 saju-s4-ask(한 줄 + 입력으로 가는 글자 링크) -->
+      <section class="reading reading--saju" data-js="result-reading" aria-labelledby="saju-reading-title">
+        <h2 class="reading__title" id="saju-reading-title"><span class="reading__rule" aria-hidden="true"></span><span data-t="result.readingTitle">핵심 풀이</span><span class="reading__rule" aria-hidden="true"></span></h2>
+        <div class="saju-module" data-js="saju-s1"><h3 class="saju-module__title" data-t="saju.result.s1Title">[초안] 타고난 그릇</h3><div class="prose" data-js="saju-s1-body"><p>[초안] 일간 본문 약 1,800자가 여기 들어와요. 성향·일·관계·배움 순서로 단락이 나뉘어요.</p></div></div>
+        <div class="saju-module" data-js="saju-s2a"><h3 class="saju-module__title" data-t="saju.result.s2aTitle">[초안] 넉넉한 기운</h3><div class="prose" data-js="saju-s2a-body"><p>[초안] 많은 오행 약 350자</p></div></div>
+        <div class="saju-module" data-js="saju-s2b"><h3 class="saju-module__title" data-js="saju-s2b-title">[초안] 채워 갈 기운</h3><div class="prose" data-js="saju-s2b-body"><p>[초안] 적은·비어 있는 오행 약 350자</p></div></div>
+        <div class="saju-module" data-js="saju-s3"><h3 class="saju-module__title" data-t="saju.result.s3Title">[초안] 힘이 쏠린 자리</h3><div class="prose" data-js="saju-s3-body"><p>[초안] 우세 십신 묶음 약 600자</p></div></div>
+        <div class="saju-module" data-js="saju-s4"><h3 class="saju-module__title" data-t="saju.result.s4Title">[초안] 십 년마다 바뀌는 계절</h3><div class="prose" data-js="saju-s4-body"><p>[초안] 대운 방향 약 250자 · 첫 대운 약 N세</p></div></div>
+        <p class="saju-module__ask is-hidden" data-js="saju-s4-ask"><span data-t="saju.result.s4Ask">[초안] 성별을 넣으면 대운의 방향을 읽어 드려요</span> <button class="text-link" type="button" data-js="saju-s4-edit" data-t="saju.result.s4Edit">[초안] 성별 넣기</button></p>
+      </section>
+
+      <aside class="archetype-line" data-js="result-archetype">
+        <span class="archetype-line__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>
+        </span>
+        <p class="archetype-line__text"><span class="archetype-line__label" data-t="result.archetypeLabel"></span> <b data-js="result-archetype-name"></b> — <span data-js="result-archetype-why"></span></p>
+        <p class="archetype-line__sway" data-js="result-archetype-sway"></p>
+      </aside>
+
+      <!-- S5 만신의 공수: 마무리 = 실행 가능한 긍정 조언. 안내자 close 자리와 같은 컴포넌트에 한지 띠를 두른다 -->
+      <div class="say say--close say--gongsu" data-js="guide-close">
+        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg>
+        <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">[초안] 만신</b></p>
+        <p class="say__line" data-js="saju-s5">[초안] 따로 할 것은 없네. 아침에 물 한 잔 마시며 오늘 할 일 셋만 정하게. 그 셋을 끝내는 날이 쌓이면 자네 그릇이 제 모양을 찾을 것이여.</p>
+      </div>
+
+      <!-- 떡밥(다음 방 Ⅱ 오검) + 책 한 줄: 11-1·13단계 규칙 그대로. pay.mode가 off면 JS가 book-line째 숨김(떡밥은 다리 문장 쪽에 남음) -->
+      <div class="book-line" data-js="result-book-line" data-state="locked">
+        <svg class="book-line__icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h5.5A2.5 2.5 0 0 1 11 7v9a2 2 0 0 0-2-2H3ZM17 4.5h-5.5A2.5 2.5 0 0 0 9 7v9a2 2 0 0 1 2-2h6Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        <p class="book-line__text"><span class="book-line__hook" data-js="book-line-hook"></span> <span class="book-line__note" data-js="book-line-note"></span></p>
+        <button class="book-line__link is-hidden" type="button" data-js="result-book-link"><span data-js="book-line-link-label"></span> <span aria-hidden="true">→</span></button>
+      </div>
+
+      <!-- 이 방의 기준 한 줄: 기관 이름(대조처) 금지 (14-1 시각 처리 8) -->
+      <p class="saju-basis" data-js="saju-basis" data-t="saju.result.basis">[초안] 양력·한국 시계 기준, 서울 경도 30분 보정</p>
+
+      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
+
+      <div class="result-more">
+        <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
+        <span class="share-links"><button class="text-link" type="button" data-js="share-link-copy" data-t="share.copyLink">링크 복사</button><span class="share-kakao-slot" data-js="share-kakao-slot"></span></span>
+        <span class="result-more__dot" aria-hidden="true">·</span>
+        <button class="text-link" type="button" data-js="result-retry" data-t="result.retryLink">정보 바꿔 보기</button>
+        <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+      </div>
+
+      <section class="passage" data-js="result-passage" aria-labelledby="saju-bridge-title">
+        <h2 class="visually-hidden" id="saju-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
+        <div class="say say--bridge" data-js="guide-bridge">
+          <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">[초안] 만신</b></span></p>
+          <p class="passage__bridge" data-js="result-bridge" data-t="bridges.saju">[초안] 그릇은 보았으니, 이제 그 뿌리가 어느 나무에 닿았는지 보러 가세. 대문 밖 첫 문은 숲의 필경사가 지키고 있네.</p>
+        </div>
+        <button class="next-door" type="button" data-room="ogham" data-go="ogham-intro" data-js="result-next-door">
+          <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
+          <span class="next-door__glyph" aria-hidden="true"><svg class="sig sig--tall" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></span>
+          <span class="next-door__num" aria-hidden="true">II</span>
+          <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
+          <span class="next-door__name" data-t="rooms.ogham.name"></span>
+        </button>
+      </section>
+
+      <div class="page-end" aria-hidden="true"><svg class="page-end__glyph" viewBox="0 0 40 40"><use href="#icon-saju" /></svg></div>
     </section>
 
     <!-- ═════════ 1-R. 룬의 방: 시작 ═════════ -->
@@ -678,7 +1007,7 @@
         <button class="next-door" type="button" data-room="sibyl" data-go="sibyl-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></span>
-          <span class="next-door__num" aria-hidden="true">VI</span>
+          <span class="next-door__num" aria-hidden="true">VII</span>
           <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.sibyl.name"></span>
         </button>
@@ -687,7 +1016,6 @@
       <div class="page-end" aria-hidden="true"><span>ᛟ</span></div>
 
       <!-- 광고 자리 3 (결과: 맨 아래). 결과 화면 광고는 이 둘로 최대 2개 -->
-      <div class="ad-slot" data-js="ad-slot" data-ad="result-end"></div>
     </section>
 
     <!-- ═════════ 1-S. 별의 방: 시작 ═════════ -->
@@ -1031,7 +1359,7 @@
         <button class="next-door" type="button" data-room="decan" data-go="decan-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></span>
-          <span class="next-door__num" aria-hidden="true">III</span>
+          <span class="next-door__num" aria-hidden="true">IV</span>
           <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.decan.name"></span>
         </button>
@@ -1039,7 +1367,6 @@
 
       <div class="page-end" aria-hidden="true"><span>☾</span></div>
 
-      <div class="ad-slot" data-js="ad-slot" data-ad="result-end"></div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
@@ -1275,7 +1602,7 @@
         <button class="next-door" type="button" data-room="star" data-go="star-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__moon" viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg></span>
-          <span class="next-door__num" aria-hidden="true">II</span>
+          <span class="next-door__num" aria-hidden="true">III</span>
           <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.star.name"></span>
         </button>
@@ -1283,7 +1610,6 @@
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></div>
 
-      <div class="ad-slot" data-js="ad-slot" data-ad="result-end"></div>
     </section>
 
     <!-- ═════════ 1. 데칸의 방: 시작 ═════════ -->
@@ -1600,7 +1926,7 @@
         <button class="next-door" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__icon" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span>
-          <span class="next-door__num" aria-hidden="true">IV</span>
+          <span class="next-door__num" aria-hidden="true">V</span>
           <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.tzolkin.name"></span>
         </button>
@@ -1608,7 +1934,6 @@
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></div>
 
-      <div class="ad-slot" data-js="ad-slot" data-ad="result-end"></div>
     </section>
 
     <!-- ═════════ 1. 촐킨의 방: 시작 ═════════ -->
@@ -1869,7 +2194,7 @@
         <button class="next-door" type="button" data-room="rune" data-go="rune-intro" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><span class="runic">ᚱ</span></span>
-          <span class="next-door__num" aria-hidden="true">V</span>
+          <span class="next-door__num" aria-hidden="true">VI</span>
           <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.rune.name"></span>
         </button>
@@ -1877,7 +2202,6 @@
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></div>
 
-      <div class="ad-slot" data-js="ad-slot" data-ad="result-end"></div>
     </section>
 
     <!-- ═════════ 1. 시빌라 신탁의 방: 시작 ═════════ -->
@@ -2099,7 +2423,7 @@
         <button class="next-door" type="button" data-room="hall" data-go="finale" data-js="result-next-door">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph next-door__glyph--star" aria-hidden="true">✦</span>
-          <span class="next-door__num" aria-hidden="true">I–VI</span>
+          <span class="next-door__num" aria-hidden="true">I–VII</span>
           <span class="next-door__label" data-t="result.nextDoor.finale">여섯 문을 하나로 잇기</span>
           <span class="next-door__name" data-t="result.nextDoor.finaleName">나의 이야기</span>
         </button>
@@ -2107,7 +2431,6 @@
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></div>
 
-      <div class="ad-slot" data-js="ad-slot" data-ad="result-end"></div>
     </section>
 
     <!-- ═════════ 7. 여섯 문이 모이는 결말 (7단계) ═════════
@@ -2225,7 +2548,7 @@
         <button class="next-door story-half__door" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="story-half-next">
           <span class="next-door__leaves" aria-hidden="true"><span class="next-door__leaf next-door__leaf--l"></span><span class="next-door__leaf next-door__leaf--r"></span><span class="next-door__light"></span></span>
           <span class="next-door__glyph" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span>
-          <span class="next-door__num" aria-hidden="true">IV</span>
+          <span class="next-door__num" aria-hidden="true">V</span>
           <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
           <span class="next-door__name" data-t="rooms.tzolkin.name"></span>
         </button>
@@ -2248,7 +2571,6 @@
 
       <div class="page-end" aria-hidden="true"><span>✦</span></div>
 
-      <div class="ad-slot" data-js="ad-slot" data-ad="story-end"></div>
     </section>
 
     <!-- 공용 장식 symbol (책 장식선·밀랍 인장) -->
@@ -2439,8 +2761,6 @@
             <a href="legal/privacy.html" data-t="legal.links.privacy">개인정보처리방침</a>
           </nav>
           <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
-          <!-- 배너 book-toc (13-3): 목차 맨 아래, 면책 아래. 장 카드·이어 읽기·공유 버튼과는 법적 고지 줄·면책·여백 48px로 떨어진다 -->
-          <div class="ad-slot" data-js="ad-slot" data-ad="book-toc"></div>
         </div>
 
         <!-- ── 장 표지 (data-view="cover") ── 배너 없음.
@@ -2741,6 +3061,87 @@
         <div class="page-end" data-js="page-end" aria-hidden="true"><span>✦</span></div>
       </div>
     </section>
+
+    <!-- ═════════ 6-P. (14단계) 결제 전 화면 — pay.mode가 test·live일 때만 (결정 94) ═════════
+         template 안에 둔다: off(배포판)에서는 DOM에 결제 요소가 0개여야 한다(14-7의 8). JS(F4)가 test·live에서만 template을 꺼내 main 끝에 붙이고
+         applyText를 그 조각에도 돌린 뒤 screens 맵에 'deeper'로 등록한다. off면 template째 지운다(또는 build-dist가 걷는다 — developer가 정해 보고).
+         순서 고정(14-4): 1 받는 것 → 2 가격 → 3 구매처 → 4 열람 방법 → 5 환불·청약철회 → 6 동의 → 7 구매하러 가기 → 8 열람 코드 넣기.
+         결제 SDK·토스 로더·영수증 코드(SO1)·#screen-unseal은 되살리지 않는다 -->
+    <template data-js="pay-tpl">
+    <section class="screen pay" id="screen-deeper" data-js="screen-deeper" data-room="hall" data-preview="6-P. 결제 전 화면 (test·live에서만)">
+      <!-- test에서만: 맨 위 띠. live면 JS가 hidden -->
+      <p class="pay-band" data-js="pay-test-band" role="note"><span class="pay-band__dot" aria-hidden="true"></span><span data-t="pay.testBand">[초안] 시험 중 — 아직 판매하지 않아요</span></p>
+
+      <header class="room-head room-head--compact">
+        <p class="eyebrow" lang="en" data-t="pay.eyebrow">[초안] THE WHOLE BOOK</p>
+        <h1 class="room-head__title" data-t="pay.title">[초안] 한 권의 책 전체 열기</h1>
+      </header>
+
+      <!-- 1 받는 것: 10장과 장마다 분량(실측), 합계. li는 JS가 data-volume 실측값으로 만든다 (아래는 견본 3줄 + 가장 긴 이름 1줄) -->
+      <section class="pay-sec" aria-labelledby="pay-what-title">
+        <h2 class="pay-sec__title" id="pay-what-title"><span class="pay-sec__num" aria-hidden="true">1</span><span data-t="pay.what.title">[초안] 받는 것</span></h2>
+        <ol class="pay-list" data-js="pay-chapters">
+          <li class="pay-list__item"><span class="pay-list__name">[초안] Ⅰ 만신의 방 — 네 장과 숨은 장</span><span class="pay-list__vol">[초안] 약 3,800자</span></li>
+          <li class="pay-list__item"><span class="pay-list__name">[초안] Ⅱ 오검의 방</span><span class="pay-list__vol">[초안] 약 3,600자</span></li>
+          <li class="pay-list__item"><span class="pay-list__name">[초안] 시기별 흐름</span><span class="pay-list__vol">[초안] 약 2,400자</span></li>
+          <li class="pay-list__item"><span class="pay-list__name">[초안] 원형 궁합과 방별 관계, 관계 유형 네 가지 읽기</span><span class="pay-list__vol">[초안] 약 12,000자</span></li>
+        </ol>
+        <p class="pay-total"><span data-t="pay.what.totalLabel">[초안] 합계</span> <b data-js="pay-total">[초안] 약 6만 자</b></p>
+        <p class="pay-note" data-t="pay.what.free">[초안] 여는 글·닫는 글과 목차는 결제 없이 먼저 읽을 수 있어요. 아직 지나지 않은 방의 장은 그 방을 지나면 열려요.</p>
+      </section>
+
+      <!-- 2 가격 -->
+      <section class="pay-sec pay-sec--row" aria-labelledby="pay-price-title">
+        <h2 class="pay-sec__title" id="pay-price-title"><span class="pay-sec__num" aria-hidden="true">2</span><span data-t="pay.price.title">[초안] 가격</span></h2>
+        <p class="pay-price"><b data-js="pay-price">[초안] 3,900원</b> <span class="pay-price__unit" data-js="pay-price-unit">[초안] (구매처 포인트 표기는 운영자 확인 뒤)</span></p>
+      </section>
+
+      <!-- 3 구매처: pay.stores[언어] 이름. 가입·로그인 필요 -->
+      <section class="pay-sec" aria-labelledby="pay-store-title">
+        <h2 class="pay-sec__title" id="pay-store-title"><span class="pay-sec__num" aria-hidden="true">3</span><span data-t="pay.store.title">[초안] 어디서 사나요</span></h2>
+        <p class="pay-sec__body"><b data-js="pay-store-name">[초안] 외부 판매 플랫폼</b> <span data-t="pay.store.note">[초안] 에서 팔아요. 그 사이트에 가입·로그인해야 살 수 있어요.</span></p>
+      </section>
+
+      <!-- 4 열람 방법 -->
+      <section class="pay-sec" aria-labelledby="pay-how-title">
+        <h2 class="pay-sec__title" id="pay-how-title"><span class="pay-sec__num" aria-hidden="true">4</span><span data-t="pay.how.title">[초안] 어떻게 읽나요</span></h2>
+        <p class="pay-sec__body" data-t="pay.how.body">[초안] 구매한 글 안에 있는 열람 코드를 이 화면 아래 칸에 넣으면 책 전체가 열려요.</p>
+      </section>
+
+      <!-- 5 환불·청약철회: 정확한 문장은 운영자 확인 뒤 copywriter. 그 전에는 시험 전용 문장. refund 링크는 test에서만 -->
+      <section class="pay-sec" aria-labelledby="pay-refund-title">
+        <h2 class="pay-sec__title" id="pay-refund-title"><span class="pay-sec__num" aria-hidden="true">5</span><span data-t="pay.refund.title">[초안] 환불·청약철회</span></h2>
+        <p class="pay-sec__body" data-t="pay.refund.body">[초안] 구매처의 환불 정책을 따라요. 디지털 콘텐츠라 열람한 뒤에는 취소가 제한될 수 있어요. (시험 전용 문장)</p>
+        <a class="text-link pay-sec__link" href="legal/refund.html" data-js="pay-refund-link" data-t="pay.refund.link">[초안] 구매·환불 안내 전문</a>
+      </section>
+
+      <!-- 6 동의 → 7 구매하러 가기. 동의 전에는 aria-disabled="true"(JS). 구매처 주소가 비면 버튼 비활성 + pay-store-empty 한 줄 -->
+      <div class="pay-act">
+        <label class="check pay-agree"><input type="checkbox" data-js="pay-agree" /><span data-t="pay.agree">[초안] 위 내용(받는 것·가격·환불 조건)을 확인했어요</span></label>
+        <a class="btn btn--primary btn--block pay-buy" data-js="pay-buy" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true"><span data-t="pay.buy">[초안] 구매하러 가기</span><svg class="pay-buy__ext" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9 3h4v4M13 3 7.5 8.5M11 9.5V13H3V5h3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <p class="pay-act__note is-hidden" data-js="pay-store-empty" data-t="pay.storeEmpty">[초안] 판매 준비 중</p>
+        <p class="pay-act__note" data-t="pay.newTab">[초안] 구매처가 새 탭으로 열려요</p>
+      </div>
+
+      <!-- 8 열람 코드 넣기 (pay.verify = "code"일 때만. "none"이면 JS가 pass-enter째 지움).
+           10-1 이어가기 칸 규칙: 제출 폼 아님, name 없음, autocomplete="off", console·주소·분석에 넣지 않음. 접두어 SOP.
+           오류 4종(JS 문구): pay.pass.errors.shape(모양) / receipt(SO1) / resume(SOG) / fail(확인 안 됨) / offline(서버에 닿지 않음) — 각 한 줄 + 목차로 가는 길 -->
+      <div class="pass-enter" data-js="pass-enter">
+        <button class="text-link pass-enter__toggle" type="button" data-js="pass-toggle" aria-expanded="false" aria-controls="pass-panel"><span id="pass-link" data-t="pay.pass.link">[초안] 이미 샀어요 · 열람 코드 넣기</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
+        <div class="pass-enter__panel is-hidden" id="pass-panel" data-js="pass-panel" role="group" aria-labelledby="pass-link">
+          <div class="receipt-open__row">
+            <input class="input receipt-open__input" id="pass-input" data-js="pass-input" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="40" enterkeyhint="done" aria-labelledby="pass-link" aria-describedby="pass-help" data-ph="pay.pass.placeholder" placeholder="SOP-…" />
+            <button class="btn btn--secondary receipt-open__go" type="button" data-js="pass-go" data-t="pay.pass.go">[초안] 열기</button>
+          </div>
+          <p class="receipt-open__how" id="pass-help" data-t="pay.pass.help">[초안] 구매한 글에 적힌 코드를 그대로 붙여 넣어 주세요</p>
+          <p class="field__error is-hidden" data-js="pass-error" role="alert"></p>
+          <p class="share-status is-hidden" data-js="pass-status" role="status"></p>
+        </div>
+      </div>
+
+      <button class="text-link pay-back" type="button" data-go="report" data-js="pay-back"><span aria-hidden="true">←</span> <span data-t="pay.back">[초안] 목차로 돌아가기</span></button>
+    </section>
+    </template>
   </main>
   <!-- ═════════ 내 정보 지우기 확인 ═════════ -->
   <dialog class="dialog" data-js="clear-dialog" aria-labelledby="clear-title">

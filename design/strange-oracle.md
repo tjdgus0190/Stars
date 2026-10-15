@@ -2348,3 +2348,335 @@ designer (작업 E5). developer E3·copywriter E4 뒤, 실제 문구([초안] 0)
 
 ### 남은 참고 (판정에 영향 없음)
 - 궁합·흐름 생년월일 칸의 자리표시(1994 / 11 / 2 등)가 값처럼 보일 수 있다 — 기존 입력 화면과 같은 방식이라 이번에는 두었다.
+
+
+## 14단계: 일곱 번째 방과 결제 복귀 (디자인, F2 · 2026-10-15)
+
+기준: specs/strange-oracle.md 「14단계」 전체(14-1~14-9), 운영자 결정 83~94. 마크업은 index.html, 스타일은 style.css 맨 끝 「14단계」 블록에 있다.
+JS·data*.js는 고치지 않았다. 아래 7절(광고)에서 "지금 지운 것"만 지웠다.
+
+### 0. 디자인 방향
+- **고요한 신당:** 다른 여섯 방과 같은 밤의 어둠 위에 옻칠한 나무빛(`--room-h: 25`)과 촛불 두 점, 오방색 천 다섯 가닥만 둔다. 공포·굿 연출은 쓰지 않는다(작두·귀신·부적 0).
+- **단정한 한국풍:** 기와 지붕·띠살 문짝·문고리·풍경·소반·쌀·방울. 모두 CSS 도형과 인라인 SVG로 만들었고 그림 파일은 0개다.
+- **읽을 것은 한지 위:** 원국 표·오행 막대·일간 도장은 한지색 판(`--hanji`)에 먹색 글자로 둔다. 가독성이 가장 높은 곳에 핵심 정보를 모은다. 화려함은 대문·의식에, 결과는 깔끔하게 둔다(결정 87).
+
+**해석 한 가지 (운영자 확인 1):** 기획 14-1은 색 방향을 "한지의 바랜 미색 바탕"이라고 적었다. 화면 전체를 밝은 바탕으로 바꾸면 상단 막대·우주 배경·하단 버튼 띠 등 공통 요소와 따로 놀고, 방을 오갈 때 밝기가 크게 튄다. 그래서 **바탕은 밤, 읽는 면은 한지**로 해석했다. 화면 전체를 한지 바탕으로 원하면 알려 주면 바꾼다(CSS 토큰만 바꾸면 되는 범위는 아니고 공통 요소 덮어쓰기가 필요하다).
+
+### 1. 사용자 흐름 (의식 4단계 = 화면 3개)
+| 화면 | 의식 단계 | 목적 | 사용자가 할 단 하나의 행동 | 다음 |
+|---|---|---|---|---|
+| 입구 `#screen-hub` | — | 첫 문을 연다 | 한옥 대문(주 버튼 "첫 번째 문 열기") 누르기 | 1-K |
+| 1-K `#screen-saju-intro` | ① 대문 | 대문이 열리고 풍경이 한 번 울림, 만신의 첫 인사 | "대문 안으로 들어가기" | 2-K |
+| 2-K `#screen-saju-input` | ② 채비 | 네 칸 입력 + 6장 고지 | "소반 앞에 앉기" | 3-K |
+| 3-K `#screen-saju-ritual` `data-stage="rice"` | ③ 쌀점과 방울 | 방울 흔들기 | 방울 탭 | 같은 화면 `rung` |
+| 같은 화면 `rung` | ③ | 여덟 글자가 년→월→일→시로 한 자씩 떠오름(약 3초) | 보기만 함 | `gongsu` |
+| 같은 화면 `gongsu` | ④ 공수 | 만신이 일간을 부름("자네는 무토여") | "공수 듣기" | 4-K |
+| 4-K `#screen-saju-result` | — | 결과 읽기 | 다음 문(Ⅱ 오검) | 오검 시작 |
+
+- 넘기기는 탭이다(방울, 공수 버튼). 기다리는 연출은 대문 1.1초와 글자 3초뿐이다.
+- **움직임 줄이기:** 대문은 처음부터 열린 모습이다. 방울을 누르면 여덟 글자가 한꺼번에 보이고, JS가 곧바로 `gongsu`로 넘긴다(developer).
+
+### 2. 입구: Ⅰ 한옥 대문과 일곱 문
+**주 버튼(고대의 문) = 다음 방에 따라 모양이 바뀐다.** 마크업은 하나다.
+- `button.hub-gate[data-room="saju"]`(JS가 이미 다음 방을 `data-room`에 넣는다)이면 CSS만으로 한옥 대문이 된다.
+  - 보이는 것: 기와 지붕 `hub-gate__roof`(단청 띠 포함), 띠살 문짝(창호지에 불빛), 문고리 `hub-gate__ring`, 처마 풍경 `hub-gate__chime`
+  - 숨는 것: 아치 몰딩·여섯 상징·열쇠 봉인 `hub-gate__carve`
+- 다른 방이 다음이면 지금의 고대 문 그대로다. 지붕·문고리는 숨는다.
+- **높이는 늘지 않는다**(결정 52·59 "첫 3초 요소 수·자리 그대로"). 문 높이를 1.4 → 1.12배로 줄이고 지붕(약 51px)을 얹어 합이 거의 같다(257px → 약 251px).
+- 누를 때(`.is-entering`) 문짝이 벌어지는 동작은 기존 그대로다.
+
+**일곱 문 배치 (`nav.doors`)**
+- Ⅰ 대문 `button.door.door--gate[data-js="hub-door-saju"]`이 맨 앞에서 한 줄을 모두 쓴다. 가로형으로 왼쪽에 한옥 아이콘, 오른쪽에 이름·출처·읽는 것이 놓인다. 위 테두리에 기와색·단청색 띠를 둔다.
+- 그 뒤로 "대문을 지나면 열리는 세상의 문" 여섯이 지금처럼 3×2로 놓인다. 문 번호는 Ⅱ~Ⅶ로 고쳤다.
+- 같은 번호 고침: 결과 화면 "다음 문" 번호(+1), 나의 이야기 반환점 문(Ⅳ→Ⅴ), 결말 문(Ⅰ–Ⅶ), 지금까지의 이야기 정적 견본(Ⅱ·Ⅲ)
+- "대문을 지나면…"은 새 줄을 더하지 않는다(첫 화면 요소 수 유지). 기존 `hub.journey.order` 한 줄의 문구로 copywriter가 담는다(제안: "대문을 지나면 세상의 여섯 문이 차례로 열려요").
+- 칩 "여섯 방 무료" → "일곱 방 무료"는 data.js 문구라 copywriter(F5)가 바꾼다.
+- **`hidden` 주의:** Ⅰ 대문 문에는 지금 `hidden`이 붙어 있다. 지금 JS는 `saju`를 몰라서 누르면 열 방이 없기 때문이다. **F4가 `CHAPTER_ORDER`에 saju를 넣을 때 `hidden`을 지운다.**
+
+### 3. 만신의 방 화면별 명세
+**바탕 (1-K·3-K 공통 `.shrine-bg`):** 위 양쪽 구석에 오방색 천 다섯 가닥(폭 5px, 투명도 0.55)과, 아래 양쪽에 촛불빛 원 두 개를 둔다. 천은 6초 주기로 2.5°, 촛불은 3.4초 주기로 투명도만 움직인다(transform·opacity만). 움직임 줄이기면 멈춘다. 포기 가능 항목이다.
+
+**1-K 대문 (`.saju-gate`)** 위에서 아래 순서:
+1. 대문: 기와 지붕 → 기둥·인방 → 문짝 두 짝 → 문지방. 폭은 188px이다.
+   - 문 안 마당에 촛불빛이 고이고, 8-3 상징 떠오름의 도착 자리(`room-emblem`, 64px)가 그 안에 있다.
+   - 처마 끝에 풍경이 달려 있다.
+2. 안내자 만신: 대문 오른쪽 아래, 44×59px
+3. 영문 윗줄 → 방 이름 → 장 번호 → 한 줄 소개 → 첫 인사(`say--greet`) → lore → 주 버튼
+
+- 상태: 기본(클래스 없음)이 **열린 최종 모습**이다. JS는 들어올 때 `.is-closed`를 붙였다가 0.6초 뒤 뗀다. 그러면 문짝이 안쪽으로 74° 열리고(1.1초), 풍경이 한 번 흔들린다(1.6초). 탭하면 바로 뗀다.
+- 첫 인사에는 "세상의 여섯 문을 더 지날 것"을 담는다(copywriter, 14-1).
+
+**2-K 채비 (입력 네 칸 + 6장 고지)** 위에서 아래 순서:
+1. 짧은 제목 한 줄(19px)
+2. 이름
+3. 생년월일(연·월·일) + "양력으로 넣어 주세요" 한 줄
+4. 태어난 시각(시·분 + **"모름" 칩**)
+5. 성별(**남 / 여 / 밝히지 않음** 세 칸)
+6. 6장 고지(`privacy-notice`, 자물쇠 아이콘)
+7. 시작 버튼
+
+- 칸마다 라벨 옆에 "왜 묻는지"(`field__why`, 13px 회색, 앞에 "·")를 둔다. 줄을 따로 쓰지 않아 높이를 아낀다.
+- "모름"·성별은 진짜 checkbox·radio를 투명하게 덮은 칩이다. 키보드·낭독이 그대로 되고 JS 없이도 선택이 보인다.
+- 오류: 칸마다 `field__error`(`role="alert"`). 오류가 보이면 스크롤이 생겨도 된다(기본 상태만 한 화면 기준).
+- 비활성: 시각 "모름"을 체크하면 JS가 시·분 칸을 `disabled`로 하고 비운다.
+- 고지는 시작 버튼 **바로 위에서 누르기 전에** 보인다. 하단 버튼 띠(`cta-dock`)는 흐름 안에 있어 고지를 가리지 않는다.
+
+**360×640 한 화면 계산 (코드 기준, 실제 렌더 확인은 F6)**
+
+| 요소 | 높이(px) |
+|---|---|
+| 상단 막대 | 52 |
+| 위 여백 | 8 |
+| 제목 | 4 + 25 + 12 = 41 |
+| 이름 | 20 + 4 + 48 = 72 |
+| 생년월일 + 양력 한 줄 | 72 + 4 + 18 = 94 |
+| 시각 | 72 |
+| 성별 | 20 + 4 + 46 = 70 |
+| 칸 사이 | 12 × 3 = 36 |
+| 고지(4줄, 13px·1.5) | 12 + 78 + 16 = 106 |
+| 버튼 띠 | 12 + 48 + 16 = 76 |
+| **합** | **≈ 627 ≤ 640** |
+
+- 라벨+이유가 한 줄을 넘으면 넘친다. 그래서 4-10절 표의 글자 수 제한을 지켜야 한다.
+- 고지가 3줄이면 여유는 약 33px이다.
+
+**3-K 쌀점과 방울 → 공수**
+- 위에서 아래 순서: 만신 한마디(`say--ritual`) → 소반(나무 둥근 상판, 흰 쌀, 다리) → 쌀 위의 원국 4기둥(`wonguk--rice`) → 방울 버튼(96px, 아이콘 56px, 라벨)
+- `data-stage` 상태:
+
+| 값 | 화면 |
+|---|---|
+| `rice` | 쌀 위 글자 칸은 비어 있다. 방울이 2.6초 주기로 4° 살짝 흔들린다(누르라는 신호) |
+| `rung` | 방울이 크게 한 번 흔들리고, 울림 고리 두 번이 퍼진다. 글자가 **년→월→일→시**, 기둥마다 천간→지지 순서로 0.36초 간격 붓글씨처럼 떠오른다(위에서 아래로 먹이 번지는 clip-path + 투명도, 0.56초). 8자 합 약 3초 |
+| `gongsu` | 방울이 숨는다. 한지 도장에 일간 한자(88px) → "자네는 무토여"(22px) → 주 버튼 "공수 듣기"가 나타난다 |
+
+- 시각 모름: 시주 칸이 점선 "모름"이고, 아래에 "시는 하늘만 알지" 한 줄(`saju-hour-unknown`)이 나온다.
+- 성능: 움직이는 것은 글자 8개(clip-path·opacity·transform), 방울 1개, 천 10가닥, 촛불 2개뿐이다. blur·filter 애니메이션과 canvas는 없다.
+
+**4-K 결과** (14-1 순서. 공유 버튼은 다른 방처럼 카드 바로 아래에 하나 둔다)
+1. 만신 한마디(open)
+2. **캡처 카드**: 윗줄 → 일간 도장(한지 사각, 오행 색 테, 한자 52px) → 결과 이름 → 한 줄 요약
+3. 공유(위)
+4. **한지 판**
+   - "여덟 글자" 제목
+   - 원국 표: 오른쪽부터 년·월·일·시, 칸마다 한자 32px + 한글 독음·오행 13px + 오행 색 점. 일간 칸은 주홍 테
+   - "테두리 친 글자가 ‘나’" 한 줄
+   - 경우별 안내(시각 모름 / 절입일 / 복원)
+   - 오행 막대
+5. 핵심 풀이: S1 → S2a → S2b → S3 → S4. 모듈마다 마름모 표시가 붙은 작은 제목이 있다. 성별 "밝히지 않음"이거나 복원한 방이면 S4 대신 한 줄 + "성별 넣기" 글자 링크(`saju-s4-ask`)를 둔다.
+6. 원형 한 줄
+7. **S5 만신의 공수**: 안내자 close 자리에 한지 빛 띠와 주홍 왼쪽 선. 17px 본문
+8. 떡밥·책 한 줄(`result-book-line`, 13단계 틀 그대로. off면 JS가 숨김)
+9. "이 방의 기준" 한 줄(13px, 기관 이름 금지)
+10. 면책(disclaimer.js)
+11. 공유·링크 복사·정보 바꿔 보기
+12. 다리 문장 + 다음 문 Ⅱ 오검
+
+- 복원한 방(이어가기 코드)은 한지 판에 `.is-restored`를 붙인다. 그러면 원국 표가 숨고 `saju-restored-note` 한 줄이 보인다. 오행 막대는 일간·많은·적은 오행 코드로 다시 그릴 수 없으니 developer가 `saju-ohaeng`에 `hidden`을 붙인다.
+
+### 4. 원국 표와 오행 막대
+- **8글자 한 줄 (포기 불가):** 4기둥은 `grid-template-columns: repeat(4, 1fr)`라 어떤 폭에서도 줄이 바뀌지 않는다.
+  - 360px 계산: 내용 폭 320 − 판 안쪽 여백 32 − 테두리 2 = 286. 칸 사이 8 × 3을 빼면 칸 하나가 약 65px이다.
+  - 한자 32px, 독음 "갑 · 목" 약 45px가 다 들어간다. 쌀 위 칸은 약 51px에 한자 28px이다.
+- 순서: 화면은 전통 표기대로 오른쪽→왼쪽(년주가 오른쪽)이다. DOM은 년→시라서 낭독 순서와 떠오르는 순서가 같다(`direction: rtl`은 grid에만 쓴다).
+- 오행 막대: 한 줄 = 이름(목·화·토·금·수) | 막대 | 개수다.
+  - 막대 길이 = 개수 / 8(6글자일 때도 8을 기준으로 해서 "두 글자가 빈" 느낌을 그대로 둔다)
+  - 0개 `.is-empty`: 점선 빈 막대에 숫자 0
+  - 많은 오행 `.is-most`: 막대 테
+  - 적은·비어 있는 오행 `.is-least`: 이름에 점선 밑줄
+  - 막대는 0.7초 동안 왼쪽에서 자란다(scaleX). 움직임 줄이기면 바로 보인다.
+- 색만으로 구분하지 않는다. 늘 이름·숫자 글자가 붙는다.
+
+### 5. 색과 글꼴
+| 토큰 | 값 | 쓰임 |
+|---|---|---|
+| `[data-room="saju"]` | `--accent-h: 18`, 채도 배율 0.9, `--room-h: 25` | 단청 주홍(강조, 명도 0.84 동명도 유지) · 옻칠 나무의 밤 바탕 |
+| `--hanji` / `--hanji-lit` | oklch(0.93 0.022 85) / (0.8 0.06 75) | 한지 판·도장 / 불빛 비친 창호지(대문) |
+| `--hanji-ink` / `-muted` | oklch(0.24 0.025 50) / (0.42 0.03 55) | 한지 위 글자: 대비 약 12:1 / 약 6:1 (AA 통과, 계산값) |
+| `--wood` `--wood-hi` `--wood-dark` `--roof` `--dancheong-green` `--dancheong-red` | 표는 CSS 참조 | 대문·소반·기와·단청 |
+| `--el-wood` `--el-fire` `--el-earth` `--el-metal` `--el-water` | 모두 L 0.56(동명도), hue 165·28·80·85(채도 0.015)·265 | 오행 = 오방 청·적·황·백·흑. 백은 흰 비단의 그늘빛, 흑은 먹빛 쪽색으로 같은 명도에 맞췄다. 한지 위 약 3.8:1, 밤 바탕 위 약 4.3:1(그래픽 3:1 이상) |
+
+- 글꼴은 새로 더하지 않았다(제품당 2개 규칙). 한자는 `--font-hanja` = Gowun Batang → Noto Serif KR → 시스템 명조 순이다.
+- **미확인:** jsdelivr fontsource Gowun Batang 분할 파일에 한자(甲乙…子丑…) 글리프가 있는지 모른다. 없으면 기기 기본 명조로 보인다. F6에서 실제 화면으로 확인한다.
+
+### 6. 안내자 「만신」 (결정 51·9-2, 58번)
+- **Clipwave를 쓰지 않았다**(크레딧 예산 미정). SVG 선 그림 `symbol#guide-saju`(48×64)이고, 다른 안내자와 같은 선 굵기·강조색을 쓴다.
+  - 차림: 쪽진 머리, 한복 저고리·치마, 오른손에 부채, 왼손에 방울과 늘어진 끈
+  - 나이·성별을 강조하지 않고, 실존 인물이 아니다.
+- 등장 위치는 9-2 그대로다: 시작 화면 대문 오른쪽 아래, 의식, 결과 처음과 끝, 다리.
+- **이미지 교체 자리:** index.html 맨 위 sprite 주석에 표시했다. 이미지를 확정하면 `<svg class="guide-figure guide-figure--saju">…</svg>`를 `<img class="guide-figure guide-figure--img" src="assets/ai/guide-saju.webp" alt="">`로 바꾼다.
+  - 크기 44×59(시작 화면), 30×40(say)
+  - 생성 조건(designer.md): 글자 없음, 투명 또는 어두운 바탕, 200KB 이하
+  - CREDITS.md 기록과 크레딧 예산 승인이 먼저다.
+
+### 7. 광고 자리를 걷어 낸 뒤의 배치 (14-2)
+**지금(F2) 지운 것: 마크업만, JS가 참조하지 않는 것**
+- `div.ad-slot[data-ad]` 9개: 입구 `hub`, 여섯 방 결과 `result-end` 6개, 나의 이야기 `story-end`, 책 목차 `book-toc`. 각 자리의 광고 설명 주석 2줄도 지웠다.
+  - app.js는 이 요소를 부르지 않는다(grep 확인). ads.js는 `[data-ad]`를 querySelectorAll로만 찾으므로 없으면 아무것도 하지 않는다.
+  - **영향:** `tools/strange-oracle/e2e-ads.js` 전체와 `e2e-book.js`의 "ID 있음: 목차 배너 채움 ≤1"(278줄 부근) 확인은 이제 실패한다. 14-7의 11대로 **F4가 은퇴시키거나 "광고 0건" 확인으로 바꾼다.**
+- 지운 뒤 배치
+  - 입구 FAQ 다음에는 바로 바닥글(지우기 안내·쿠키 줄)이 온다.
+  - 결과 끝은 장식(`page-end`)으로 끝난다.
+  - 책 목차는 면책에서 끝난다.
+  - 배너가 없어도 비는 구역이 없다. 사이 여백은 기존 구역 여백(`--space-10`~`12`)이 맡는다.
+
+**F4(developer)가 지울 것: JS가 참조해서 지금 지우면 오류가 나는 것**
+
+| 요소 | 위치 | 참조하는 JS |
+|---|---|---|
+| `div.unlock`·`unlock-btn`·`p.unlock-status` (방마다 `aside.turn` 안, 6곳) | 결과 | app.js 3662~3694줄 부근 `js("unlock", box)` 등 |
+| `dd.faq__ad-note[data-js="hub-faq-adnote"]` | 입구 FAQ | app.js 3622줄 |
+| `p.hub-cookie[data-js="cookie-line"]` (문구만 "분석 쿠키"로 copywriter. 요소는 GA4 때문에 남김) | 입구 바닥글 | app.js 3621줄 `Ads.anyConfigured` |
+| `<script src="../../common/ads.js">` | 맨 아래 | app.js `Ads.*` 호출 |
+| 책의 `book-unlock` 버튼·`book-unlock-status`·장 표지 `data-state` 광고 상태 | `#screen-report` | book 쪽 JS |
+
+- `common/ads.js` 파일은 지우지도 고치지도 않는다(14-2).
+- **designer가 F6에서 정리할 것:** style.css의 `.ad-slot*`·`.unlock*`·`.hub [data-ad="hub"]`·`.faq__ad-note` 규칙. 쓰는 요소가 사라진 뒤에 지운다.
+
+### 8. 결제 전 화면과 열람 코드 (test·live에서만, 결정 94)
+- 위치: `<template data-js="pay-tpl">` 안의 `section#screen-deeper`(main 맨 끝)
+  - off(배포판)에서는 DOM에 결제 요소가 0개여야 한다(14-7의 8). 그래서 template에 넣었다.
+  - JS(F4)가 test·live에서만 꺼내 붙이고 `applyText`를 그 조각에도 돌린 뒤 screens 맵에 `deeper`로 등록한다. off면 template째 지운다. 또는 build-dist가 걷는다(developer가 정함).
+- 순서는 14-4에 고정이다. 모든 항목이 구매 버튼보다 위에 있다.
+
+| 순서 | 항목 | 표시 |
+|---|---|---|
+| 1 | 받는 것 | 10장 목록, 장마다 분량, 합계. 분량은 실측만 쓰고 JS가 `pay-chapters`에 li를 만든다 |
+| 2 | 가격 | 3,900원. 포인트 단위는 작은 줄로 |
+| 3 | 구매처 | 이름 + 가입·로그인 필요 |
+| 4 | 열람 방법 | — |
+| 5 | 환불·청약철회 | 시험 전용 문장 + `legal/refund.html` 링크(test만) |
+| 6 | 동의 체크 | — |
+| 7 | 구매하러 가기 | `<a target="_blank" rel="noopener noreferrer">`. 동의 전에는 `aria-disabled="true"`, 구매처 주소가 비면 비활성 + "판매 준비 중" |
+| 8 | "이미 샀어요 · 열람 코드 넣기" | 접는 칸 |
+
+- 맨 위 **test 띠**("시험 중 — 아직 판매하지 않아요"): 노란 점선 상자, `pay-test-band`. live면 `hidden`.
+- 열람 코드 칸은 10-1 이어가기 칸과 같은 컴포넌트(`receipt-open__row`)와 같은 새는 길 막기를 쓴다: 제출 폼 아님, name 없음, `autocomplete="off"`.
+- 오류 한 줄: `pass-error`(`role="alert"`). 상태 한 줄: `pass-status`. 아래에 "목차로 돌아가기"를 두어 막다른 곳이 없다.
+- `pay.verify = "none"`이면 JS가 `pass-enter`째 지운다.
+- 7/7 전 구매 뒤 지나지 않은 방의 장에 붙는 "그 방을 지나면 열려요"는 책 장 표지(13단계 `chapter-cover[data-state]`)의 새 상태다. 문구 키는 copywriter, 상태 연결은 F4다. 시각은 기존 `need-room` 상태를 그대로 쓴다.
+
+### 9. 공유 카드 (1080×1920, 만신의 방)
+- 위아래 250px 안전 영역은 비워 둔다. 바탕은 다른 방 카드와 같은 밤색에 `--room-h: 25`다.
+- 위에서 아래 순서
+
+| 순서 | 요소 | 크기·위치 |
+|---|---|---|
+| 1 | 윗줄 "낯선 점술관 · 만신의 방" | 36px, y 300 |
+| 2 | 기와 지붕 한 줄 장식 | 폭 720, y 360~430 |
+| 3 | 일간 도장 | 한지 사각 300×300, 한자 190px, 오행 색 테, y 470~770 |
+| 4 | 결과 이름 | 72px, 한 줄, y 860 |
+| 5 | 한 줄 요약 | 40px, 두 줄까지 |
+| 6 | 오행 막대 5줄 | 한지 판 840×420, 이름 40px·막대 높이 28·개수, y 1080~1500 |
+| 7 | 원형 한 줄 | 40px, y 1560 |
+| 8 | 주소 | 28px, y 1640 |
+
+- **넣지 않는 것:** 원국 8글자, 성별, 이름, 생년월일, 대운. 14-7의 15: 생일만 바꿔도 카드의 원국 영역이 없어야 한다. 원국 칸 자체를 두지 않는다.
+- 그리는 코드는 developer, 확인은 F6이다.
+
+### 10. 텍스트 길이 제한 (copywriter용, 360px · 공백 포함)
+| 키 | 최대 | 넘으면 |
+|---|---|---|
+| `rooms.saju.name` | 6자 | 문 이름이 두 줄 |
+| `hub.doors.saju.origin` / `.reads` | 12자 / 10자 | 가로형 문이 높아짐 |
+| `saju.intro.title` / `.pitch` | 8자 / 32자 | 제목 줄바꿈 / 3줄 |
+| `guides.saju.greet` | 90자 | 첫 화면 아래로 밀림(스크롤 허용) |
+| `saju.input.title` | 14자 | 19px 한 줄. **넘으면 2-K 한 화면이 깨짐** |
+| `saju.input.*Label` + `*Why` | 라벨 6자 + 이유 14자 = 합 20자 | **넘으면 2-K 한 화면이 깨짐** |
+| `saju.input.solarNote` | 18자 | 위와 같음 |
+| `saju.input.genderX` | 6자 | 세 칸 중 셋째 칸 폭 |
+| `privacy.noticeProfile` | 80자(4줄) | **넘으면 2-K 한 화면이 깨짐**. 14-1 필수 내용(네 항목·이 탭에만·전송 없음·지우기 위치)은 꼭 담는다 |
+| `saju.input.go` / `saju.intro.go` | 12자 | 버튼 한 줄 |
+| `guides.saju.ritual` | 50자 | 소반이 아래로 밀림 |
+| `saju.ritual.call` 템플릿 "자네는 {stem}이여" | 12자 | 22px 한 줄 |
+| `saju.ritual.hourUnknown` | 14자 | 한 줄 |
+| 결과 이름(일간 10개) | **8자 권장, 10자까지 한 줄** | 11자 이상은 두 줄(balance) |
+| 결과 한 줄 요약 | 24자 | 두 줄 |
+| `saju.pillars.*` | 3자 | 칸 폭 65px |
+| `saju.elements.*` | 1자(+ 한자 선택) | 이름 칸 2.25em |
+| `saju.result.s*Title` | 12자 | 한 줄 |
+| `saju.result.basis` | 30자 | 두 줄 |
+| `saju.result.restoredBoard` / `s4Ask` | 30자 | 두 줄 |
+| `pay.testBand` | 20자 | 한 줄 |
+| 결제 장 이름(목록) | 26자 | 두 줄까지 허용 |
+
+### 11. developer 전달 사항
+**data-js 훅 (새로 만든 것)**
+
+| data-js | 화면 | 역할 |
+|---|---|---|
+| `screen-saju-intro` / `-input` / `-ritual` / `-result` | 1-K~4-K | 화면. `data-go`: `saju-intro`·`saju-input`·`saju-result` |
+| `hub-door-saju` | 입구 | Ⅰ 대문 문. **`hidden` 해제는 F4** |
+| `saju-gate` | 1-K | `.is-closed` 붙였다 떼기(1절) |
+| `saju-chime` | 1-K | 풍경(CSS만, JS 불필요) |
+| `saju-intro-go` | 1-K | 시작 버튼(`/-intro-go$/` 규칙 그대로) |
+| `saju-lore` | 1-K | `data-list="saju.intro.lore"` |
+| `saju-form` | 2-K | 제출 막기 |
+| `saju-name` `saju-year` `saju-month` `saju-day` `saju-hour` `saju-minute` | 2-K | 입력 |
+| `saju-time-unknown` | 2-K | 체크 시 시·분 `disabled` + 비움 |
+| `saju-gender` / `saju-gender-opt` | 2-K | 라디오 묶음(value m·f·x) |
+| `saju-name-error` `saju-date-error` `saju-time-error` `saju-gender-error` | 2-K | 오류 한 줄 |
+| `saju-name-field` `saju-date-field` `saju-time-field` `saju-gender-field` | 2-K | `.is-error` 붙일 곳 |
+| `privacy-notice` | 2-K | 6장 고지(다른 방과 같은 이름) |
+| `saju-input-go` | 2-K | 시작 |
+| `saju-ritual-pillars` | 3-K | 쌀 위 원국. li `style="--k:0~3"`, 글자 span `data-el`, 시주 `.is-unknown` |
+| `saju-bell` | 3-K | 방울. 누르면 화면 `data-stage="rung"` |
+| `saju-ritual-guide` / `saju-ritual-hint` | 3-K | 만신 한 줄 / 보조 한 줄 |
+| `saju-hour-unknown` | 3-K | 시각 모름 한 줄(`.is-hidden` 해제) |
+| `saju-gongsu` `saju-gongsu-stem` `saju-gongsu-call` `saju-gongsu-go` | 3-K | 공수 단계(`data-stage="gongsu"`일 때 CSS가 보임) |
+| `saju-stem-seal`(`data-el`) / `saju-stem-hanja` | 4-K | 일간 도장 |
+| `result-title` `result-key` `result-meta` `result-capture` `result-share-top` 등 | 4-K | 다른 방과 같은 이름 |
+| `saju-board` | 4-K | 한지 판. 복원이면 `.is-restored` |
+| `saju-wonguk` | 4-K | 원국 표(쌀 위와 같은 구조 + `wonguk__label`, `small` 독음·오행) |
+| `saju-hour-note` / `saju-jeolip-note` / `saju-restored-note` | 4-K | 경우별 한 줄(`.is-hidden` 해제). 절입은 템플릿 |
+| `saju-ohaeng` / `saju-ohaeng-row` / `saju-ohaeng-count` | 4-K | 막대. row에 `style="--n:개수"`, `.is-empty` `.is-most` `.is-least` |
+| `saju-s1`~`saju-s4`(+ `-body`), `saju-s2b-title` | 4-K | 모듈. S2b 제목은 "비어 있는/적은"에 따라 JS가 바꿈 |
+| `saju-s4-ask` / `saju-s4-edit` | 4-K | 성별 없음·복원일 때 S4 대신. edit는 2-K로 |
+| `saju-s5` | 4-K | 만신의 공수 본문 |
+| `saju-basis` | 4-K | 이 방의 기준 |
+| `pay-tpl` | main 끝 | 결제 화면 template |
+| `screen-deeper` `pay-test-band` `pay-chapters` `pay-total` `pay-price` `pay-price-unit` `pay-store-name` `pay-refund-link` `pay-agree` `pay-buy` `pay-store-empty` `pass-enter` `pass-toggle` `pass-panel` `pass-input` `pass-go` `pass-error` `pass-status` `pay-back` | 6-P | 8절 |
+
+**상태 class와 속성**
+- 의식 단계: `#screen-saju-ritual[data-stage]` = `rice` | `rung` | `gongsu`. 정적 값 `rung`은 검토용이니 들어올 때 `rice`로 둔다.
+- 원국: `wonguk__col.is-self`(일주), `.is-unknown`(시주 모름)
+- 오행 행: `.is-empty`, `.is-most`, `.is-least`
+- 대문: `.is-closed`
+- 결과 한지 판: `.is-restored`
+- 입구 주 버튼: 다음 방이 saju면 `data-room="saju"`만으로 한옥 대문이 된다(JS 수정 불필요).
+- 일간 도장·막대 색: 모든 오행 요소에 `data-el` = `wood` | `fire` | `earth` | `metal` | `water`
+
+**data-t 새 키 (copywriter가 data.js·data-saju.js에 넣을 자리)**
+- 방: `rooms.saju.name`, `rooms.saju.chapterName`
+- 입구 문: `hub.doors.saju.origin`, `hub.doors.saju.reads`
+- 안내자: `guides.saju.name`, `.greet`, `.ritual`, `.open`(`{who}` 템플릿)
+- 다리: `bridges.saju`
+- 시작 화면: `saju.intro.eyebrow`, `.title`, `.pitch`, `.lore`(배열), `.go`
+- 입력 화면: `saju.input.title`, `nameLabel`, `nameWhy`, `namePlaceholder`, `dateLabel`, `dateWhy`, `yearAria`, `monthAria`, `dayAria`, `solarNote`, `timeLabel`, `timeWhy`, `hourAria`, `minuteAria`, `timeUnknown`, `genderLabel`, `genderWhy`, `genderM`, `genderF`, `genderX`, `go`
+- 고지: `privacy.noticeProfile`
+- 의식: `saju.ritual.bell`, `bellLabel`, `hourUnknown`, `go`, `call`(템플릿, JS)
+- 원국: `saju.pillars.year`, `month`, `day`, `hour`, `unknown`
+- 오행: `saju.elements.wood`, `fire`, `earth`, `metal`, `water`
+- 결과: `saju.result.eyebrow`, `boardTitle`, `selfNote`, `hourNote`, `restoredBoard`, `ohaengTitle`, `s1Title`, `s2aTitle`, `s3Title`, `s4Title`, `s4Ask`, `s4Edit`, `basis`
+- 결제: `pay.testBand`, `eyebrow`, `title`, `what.title`, `what.totalLabel`, `what.free`, `price.title`, `store.title`, `store.note`, `how.title`, `how.body`, `refund.title`, `refund.body`, `refund.link`, `agree`, `buy`, `storeEmpty`, `newTab`, `pass.link`, `pass.placeholder`, `pass.go`, `pass.help`, `back`
+
+**그 밖에 F4가 할 것**
+1. 오검·별 입력 화면의 처음 저장 고지를 "이미 넣은 값을 씁니다" 한 줄로 바꾼다. 마크업은 그대로 두고 문구 키만 바꾼다.
+2. 3-K 방울은 진짜 `<button>`이다. 탭 외에 Enter·Space로도 울린다.
+3. 원국 글자는 **화면 표시만** 한다. 공유 카드·URL·분석에는 넣지 않는다.
+4. 방 문구 지연 불러오기를 할 때, 만신의 방 화면은 `data-saju.js`가 오기 전에도 의식 첫 단계(대문)를 먼저 보여 줄 수 있다(14-6의 2 "0.3초 안에 로딩 표시나 의식 첫 단계").
+
+### 12. 합격 기준 대조 (코드로 계산. 실제 화면은 F6에서 확인)
+| 기준 | 판단 | 근거 |
+|---|---|---|
+| 360px 넘침 없음 | 계산상 통과 | 고정 폭 요소: 대문 188(+지붕 216), 소반 min(300, 100%), 안내자 `min(50%+100px, 100%−44px)`, 입구 지붕 239. 모두 내용 폭 320 이하. 원국·오행·결제 목록은 `minmax(0,1fr)`·`min-width:0` |
+| 8글자 한 줄 | 계산상 통과 | 원국 4기둥 비접힘 grid(칸 약 65px). 결과 이름은 7vw ≈ 25px × 10자 = 250px |
+| 입력 네 칸 360×640 한 화면 | 계산상 통과(≈627px) | 3절 표. 10절 글자 수 제한이 조건 |
+| 무거운 효과 없음 | 통과 | 그림 파일 0, 새 글꼴 0, blur·canvas 없음. 애니메이션은 transform·opacity·clip-path(글자 8개)뿐 |
+| prefers-reduced-motion | 통과 | 천·촛불·풍경·방울 멈춤, 대문 처음부터 열림, 글자 한꺼번에, 막대 바로 |
+| [초안] | 견본 106곳 | copywriter가 data.js에 넣은 뒤 지운다. **지금 build-dist의 "[초안] 0" 검사는 실패한다(기존 흐름과 같음)** |
+
+### 13. 운영자가 확인·판단할 것
+1. 0절의 해석이 맞는지: 바탕은 밤의 신당, 읽는 면만 한지
+2. 만신 SVG 실루엣으로 1차 출시해도 되는지(58번 Clipwave 예산)
+3. 한자 글꼴(Gowun Batang 한자 포함 여부 미확인): 기기 명조로 보여도 되는지. 안 되면 한자 전용 글꼴 하나를 더 받아야 한다(용량 증가, 3장 CDN 규칙 안에서 다시 판단)
