@@ -499,7 +499,8 @@
     if (fromEl) fromEl.classList.add(openCls);
     if (!reduceMotion) buzz(20);
     const total = reduceMotion ? 400 : flash ? 500 : 1200;
-    const swapAt = reduceMotion ? 200 : flash ? 250 : 1000;
+    // (14-6) 움직임 줄이기: 문장 빛이 보인 뒤 100ms에 방 화면으로 (예전 200ms. 방 전환 0.3초 기준, designer 확인 필요)
+    const swapAt = reduceMotion ? 100 : flash ? 250 : 1000;
     sigil.classList.add(flash && !reduceMotion ? "is-flash" : "is-playing");
     const s = { swapped: false, emblem: null, t: [] };
     s.swap = () => {
@@ -794,12 +795,16 @@
     }
     const r = Resume.decode(resumeEl.input.value);
     if (r.codes) {
-      // (14-6) 복원할 방 파일을 모두 받은 뒤 그린다
+      // (14-6) 복원할 방 파일을 모두 받은 뒤 그린다. 받는 동안 로딩 표시(go()와 같은 is-loading)
+      body.classList.add("is-loading");
       try {
         await ensureRooms(CHAPTER_ORDER.filter((room) => r.codes[room] != null));
       } catch (e) {
         return toast(T.toast.loadFail || "");
+      } finally {
+        body.classList.remove("is-loading");
       }
+      if (filledRooms().length) return; // 받는 동안 두 번 눌린 경우: 먼저 끝난 복원만 쓴다
     }
     const visits = r.codes ? visitsFromCodes(r.codes) : null;
     if (!visits) {
@@ -2061,7 +2066,7 @@
     T.saju = {
       intro: X.intro,
       input: Object.assign({}, I, { dateLabel: I.birthLabel, dateWhy: I.birthWhy, genderM: G.male, genderF: G.female, genderX: G.none }),
-      ritual: { bellLabel: rice.bellLabel, hint: rice.hint, hourUnknown: rice.unknownHour, done: rice.done, call: gongsu.call, callSub: gongsu.callSub, go: gongsu.next },
+      ritual: { bell: rice.bell, bellLabel: rice.bellLabel, hint: rice.hint, hourUnknown: rice.unknownHour, done: rice.done, call: gongsu.call, callSub: gongsu.callSub, go: gongsu.next },
       pillars: { hour: pl[0], day: pl[1], month: pl[2], year: pl[3], unknown: R.unknownCell },
       elements: R.elementNames || {},
       result: Object.assign({}, R, {
@@ -3378,7 +3383,7 @@
   const pagesBox = js("book-pages");
   const src = js("book-source");
   const srcEnd = [js("chapter-end", src)];
-  const TURN_SAFETY = 700; // animationend가 오지 않을 때의 안전장치 (--turn-dur 520ms)
+  const TURN_SAFETY = 560; // animationend가 오지 않을 때의 안전장치 (--turn-dur 380ms, 14-6)
   let book = null; // { pages: [{ el, part, chap, label }], chapStart, chapLen, key }
   let cur = 0;
   let turning = false;
@@ -4271,6 +4276,7 @@
     const room = nextRoom();
     if (!room) return;
     idle(() => {
+      if (window.performance && performance.mark) performance.mark("so-prefetch"); // 성능 시험(perf.js)이 미리 받기 시작 시점을 구분한다
       ensureRoom(room).then(() => room === "saju" && Saju.loadLunar().catch(() => {}), () => {});
     });
   }

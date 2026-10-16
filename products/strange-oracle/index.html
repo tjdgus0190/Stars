@@ -26,6 +26,17 @@
 
   <link rel="stylesheet" href="../../common/base.css" />
   <link rel="stylesheet" href="style.css" />
+  <!-- (14-6 성능) 스크립트는 head에서 defer로: HTML을 받는 동안 함께 받고, 실행 순서는 아래 순서 그대로(문서 해석 뒤) -->
+  <script defer src="../../common/share-card.js"></script>
+  <script defer src="../../common/share-buttons.js"></script>
+  <script defer src="../../common/disclaimer.js"></script>
+  <script defer src="../../common/analytics.js"></script>
+  <script defer src="data.js"></script>
+  <script defer src="data-volume.js"></script>
+  <script defer src="calc.js"></script>
+  <script defer src="paycode.js"></script>
+  <script defer src="book.js"></script>
+  <script defer src="app.js"></script>
 </head>
 
 <!-- 화면 문구는 모두 data.js(+ data-runes.js, data-stars.js)에 있다. 이 파일의 글자 자리는 비어 있고 JS가 채운다.
@@ -3142,15 +3153,5 @@
 
   <p class="toast" data-js="toast" role="status" aria-live="polite"></p>
 
-  <script src="../../common/share-card.js"></script>
-  <script src="../../common/share-buttons.js"></script>
-  <script src="../../common/disclaimer.js"></script>
-  <script src="../../common/analytics.js"></script>
-  <script src="data.js"></script>
-  <script src="data-volume.js"></script>
-  <script src="calc.js"></script>
-  <script src="paycode.js"></script>
-  <script src="book.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>

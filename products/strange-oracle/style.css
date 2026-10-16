@@ -3783,7 +3783,7 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
   --book-line: 30px;                   /* 본문 한 줄 = 17px 글자 × 약 1.76 */
   --page-run-h: 22px;                  /* 머리글(달리는 제목) */
   --page-folio-h: 22px;                /* 쪽 번호 */
-  --turn-dur: 520ms;
+  --turn-dur: 380ms;                   /* (14-6 성능) 520ms → 380ms: 쪽 넘김 0.45초 기준. 넘김 모양은 그대로 (developer, designer 확인 필요) */
   --turn-ease: cubic-bezier(0.3, 0.1, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -4760,4 +4760,15 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
   .ritual--saju:is([data-stage="rung"], [data-stage="gongsu"]) .wonguk--rice .wonguk__char b { animation: none; opacity: 1; }
   .bell__icon, .bell__ring { animation: none !important; }
   .ritual--saju[data-stage="gongsu"] .gongsu, .ohaeng__bar i { animation: none; }
+}
+
+/* ───────── (14-6 성능, developer — designer 확인 필요) ─────────
+   입구 첫 화면 아래쪽(지금까지·책 안내·묻고 답하기·바닥글)은 화면 가까이 올 때 배치한다.
+   첫 배치(Layout)가 360px·CPU 4배에서 약 1.2~1.5초 걸렸고, 대부분이 이 아래쪽 글이었다. 보이는 모양은 그대로다. */
+.hub > .so-far,
+.hub > .book-card,
+.hub > .faq,
+.hub > .hub-foot {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
 }

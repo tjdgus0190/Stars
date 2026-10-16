@@ -25,6 +25,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const zlib = require("zlib");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const arg = (name, def) => {
@@ -124,7 +125,14 @@ location.replace("${P}#${to}");
     }
     // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로)
     if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(PAY_RE, '$1"test"'));
-    res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-store" });
+    // (14-6) 배포처(Netlify)처럼 글자 파일은 압축해서 보낸다 → 성능 측정이 실제 전송량(압축 후)과 맞는다
+    const type = TYPES[path.extname(file)] || "application/octet-stream";
+    const head = { "Content-Type": type, "Cache-Control": "no-store", Vary: "Accept-Encoding" };
+    if (/^(text\/|application\/json|image\/svg)/.test(type) && /gzip/.test(req.headers["accept-encoding"] || "")) {
+      data = zlib.gzipSync(data, { level: 6 });
+      head["Content-Encoding"] = "gzip";
+    }
+    res.writeHead(200, head);
     res.end(data);
   });
 });

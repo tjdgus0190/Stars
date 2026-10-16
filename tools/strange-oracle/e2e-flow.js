@@ -252,6 +252,9 @@ function paidSentences() {
     if (how === "enter") await pressEnter("[data-js=resume-input]");
     else await click("[data-js=resume-go]");
     await sleep(150);
+    // (14-6) 복원은 방 파일을 모두 받은 뒤 그린다 → 받는 동안(is-loading)은 기다린다 (예전 4/7 간헐 실패 원인)
+    for (let i = 0; i < 100 && (await ev("document.body.classList.contains('is-loading')")); i++) await sleep(50);
+    await sleep(100);
   };
 
   // (a) 0/6 입구: 넣기 링크만, 입력 칸 규칙
