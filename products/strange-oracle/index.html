@@ -440,8 +440,8 @@
         </div>
       </section>
 
-      <!-- (13단계) 한 권의 책 카드: 결제 없이 늘 보인다. data-state (JS) = none(0/6) | some(1~5/6) | all(6/6).
-           desc = "장마다 짧은 광고 한 편으로 열려요"(hub.book.desc, 입구에서 광고를 밝히는 유일한 줄) · hint = hub.book.state0 / stateSome({n}) / stateAll.
+      <!-- (13·14단계) 한 권의 책 카드. data-state (JS) = none(0/7) | some(1~6/7) | all(7/7). 배포판(pay.mode off)에는 책 요소가 없다.
+           desc = hub.book.desc · hint = hub.book.state0 / stateSome({n}) / stateAll.
            가격·결제 문구 없음. 버튼 = 목차로 (hub.book.goToc) -->
       <aside class="book-card" data-js="hub-book" data-state="some" aria-labelledby="book-card-title">
         <span class="book-card__cover" aria-hidden="true">
@@ -460,7 +460,7 @@
         <button class="btn btn--secondary btn--block book-card__go" type="button" data-js="hub-book-go" data-t="hub.book.goToc">목차 보기</button>
       </aside>
 
-      <!-- (8단계) 자주 묻는 것: 광고 심사용 소개 글(300자 이상)을 대체. 접지 않고 펼친 채 (글자 수가 접힌 칸에 숨지 않게) -->
+      <!-- (8단계) 자주 묻는 것: 소개 글(300자 이상)을 대신한다. 접지 않고 펼친 채 (글자 수가 접힌 칸에 숨지 않게) -->
       <section class="faq" aria-labelledby="faq-title">
         <h2 class="faq__title" id="faq-title" data-t="hub.faq.title">자주 묻는 것</h2>
         <dl class="faq__list" data-js="hub-faq">
@@ -468,13 +468,13 @@
           <div class="faq__item"><dt data-t="hub.faq.items.1.q">결과는 어떻게 읽나요?</dt><dd data-t="hub.faq.items.1.a">방마다 결과 이름과 핵심 풀이가 나와요. 이름은 그 점술이 본 당신의 한 모습이고, 풀이는 요즘의 마음이나 생활에 비춰 읽으면 돼요. 마음에 닿는 문장은 붙잡고, 맞지 않는 부분은 가볍게 넘겨도 괜찮아요. 일곱 조각은 여덟 원형 가운데 하나로 모여 나의 이야기 한 편이 되는데, 방을 하나 지날 때마다 앞선 원형이 바뀔 수 있어요. 정답을 맞히는 풀이가 아니라 지금의 나를 비춰 보는 이야기예요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">타고난 그릇에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요. 첫 방에서 넣은 정보는 뒤의 방들이 이어서 써요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름·생년월일·태어난 시각·성별은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
-          <!-- (13단계) 책 문답: 장마다 광고 한 편, 광고가 없으면 그냥 열림, 무엇이 담기는지 (답 150자). 결제 문답은 은퇴 -->
+          <!-- (14단계) 책 문답: 무엇이 담기는지 (답 150자). 시험 페이지(test)에서만 구매 문답 -->
           <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">일곱 방의 장 전체와 숨은 장, 시기별 흐름·궁합·원형 심층까지 유료 10장을 엮은 책이에요. 포스타입에서 3,900원에 사고, 구매한 글의 열람 코드를 넣으면 열려요. 여는 글·닫는 글과 목차는 무료예요.</dd>
           </div>
         </dl>
       </section>
 
-      <!-- (12단계) 바닥글 줄: 광고 자리(hub)와 지우기 안내 한 줄을 사이에 두고 떨어진다. 쿠키 줄은 광고·분석 ID가 하나라도 있을 때만 hidden 해제 -->
+      <!-- (12·14단계) 바닥글 줄: 지우기 안내 다음 줄. 쿠키 줄은 분석 ID가 있을 때만 hidden 해제 -->
       <div class="hub-foot">
         <p class="hub-clear-note" data-t="hub.clearNote">입력한 정보는 위쪽 막대의 "내 정보 지우기"로 언제든 지울 수 있어요.</p>
         <p class="hub-cookie" data-js="cookie-line" hidden><span data-t="privacy.cookieLine">방문 통계에 구글 애널리틱스 쿠키를 써요. 입력한 정보는 보내지 않아요.</span> <a class="hub-cookie__link" href="legal/privacy.html" data-t="legal.links.privacy">개인정보처리방침</a></p>
@@ -998,7 +998,7 @@
         <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
-      <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
+      <!-- (7단계) 이야기 다리 + 다음 문. 위: 원형 줄, 아래: 보조 링크·장식 -->
       <section class="passage" data-js="result-passage" aria-labelledby="rune-bridge-title">
         <h2 class="visually-hidden" id="rune-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.rune)은 그대로 -->
@@ -1017,7 +1017,6 @@
 
       <div class="page-end" aria-hidden="true"><span>ᛟ</span></div>
 
-      <!-- 광고 자리 3 (결과: 맨 아래). 결과 화면 광고는 이 둘로 최대 2개 -->
     </section>
 
     <!-- ═════════ 1-S. 별의 방: 시작 ═════════ -->
@@ -1343,7 +1342,7 @@
         <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
-      <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
+      <!-- (7단계) 이야기 다리 + 다음 문. 위: 원형 줄, 아래: 보조 링크·장식 -->
       <section class="passage" data-js="result-passage" aria-labelledby="star-bridge-title">
         <h2 class="visually-hidden" id="star-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.star)은 그대로 -->
@@ -1579,7 +1578,7 @@
         <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
-      <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
+      <!-- (7단계) 이야기 다리 + 다음 문. 위: 원형 줄, 아래: 보조 링크·장식 -->
       <section class="passage" data-js="result-passage" aria-labelledby="ogham-bridge-title">
         <h2 class="visually-hidden" id="ogham-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.ogham)은 그대로 -->
@@ -1896,7 +1895,7 @@
         <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
-      <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
+      <!-- (7단계) 이야기 다리 + 다음 문. 위: 원형 줄, 아래: 보조 링크·장식 -->
       <section class="passage" data-js="result-passage" aria-labelledby="decan-bridge-title">
         <h2 class="visually-hidden" id="decan-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.decan)은 그대로 -->
@@ -2157,7 +2156,7 @@
         <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
-      <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
+      <!-- (7단계) 이야기 다리 + 다음 문. 위: 원형 줄, 아래: 보조 링크·장식 -->
       <section class="passage" data-js="result-passage" aria-labelledby="tzolkin-bridge-title">
         <h2 class="visually-hidden" id="tzolkin-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.tzolkin)은 그대로 -->
@@ -2379,7 +2378,7 @@
         <p class="share-status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
       </div>
 
-      <!-- (7단계) 이야기 다리 + 다음 문. 이 블록 바로 위·아래에는 광고를 두지 않는다 (위: 원형 줄, 아래: 보조 링크·장식) -->
+      <!-- (7단계) 이야기 다리 + 다음 문. 위: 원형 줄, 아래: 보조 링크·장식 -->
       <section class="passage" data-js="result-passage" aria-labelledby="sibyl-bridge-title">
         <h2 class="visually-hidden" id="sibyl-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.sibyl)은 그대로 -->
@@ -2504,14 +2503,14 @@
 
       <!-- (11단계 H5) 3/6 중간 결말: 마친 방이 정확히 3개일 때만 화면에 .is-half → 이 블록 .is-hidden 해제,
            spine의 4~6장 줄(.is-available/.is-upcoming)은 CSS가 숨긴다. 결제 상태와 무관하게 보임(책 카드는 묶음 2).
-           강제 순서상 3/6의 다음 방은 늘 Ⅳ 촐킨이라 칸·문은 정적이다 -->
+           강제 순서상 3/7(만신·오검·별) 뒤 다음 문은 Ⅳ 데칸(JS가 채움), 남은 칸은 Ⅴ 촐킨·Ⅵ 룬·Ⅶ 시빌라로 정적이다 (14단계 F6) -->
       <section class="story-half is-hidden" data-js="story-half" aria-labelledby="story-half-title">
         <h2 class="visually-hidden" id="story-half-title" data-t="story.half.title">세 장의 이야기</h2>
         <p class="story-half__close" data-js="story-half-close" data-t="story.half.close">타고난 그릇과 뿌리와 마음결, 세 장이 지금의 당신을 그렸어요. 남은 네 문에서는 숨은 재능과 순환, 내일, 오늘의 질문을 만나요.</p>
         <ol class="story-half__slots">
-          <li class="story-half__slot" data-js="story-half-slot" data-room="tzolkin"><span class="story-half__num" aria-hidden="true">IV</span><svg class="sig" viewBox="0 0 40 40" aria-hidden="true"><use href="#icon-tzolkin" /></svg><span class="story-half__name" data-t="rooms.tzolkin.name">촐킨의 방</span><span class="story-half__wait" data-t="story.half.slot">다음 문에서 열려요</span></li>
-          <li class="story-half__slot" data-js="story-half-slot" data-room="rune"><span class="story-half__num" aria-hidden="true">V</span><svg class="sig sig--rune" viewBox="0 0 40 60" aria-hidden="true"><use href="#rune-raidho" /></svg><span class="story-half__name" data-t="rooms.rune.name">룬의 방</span><span class="story-half__wait" data-t="story.half.slot">다음 문에서 열려요</span></li>
-          <li class="story-half__slot" data-js="story-half-slot" data-room="sibyl"><span class="story-half__num" aria-hidden="true">VI</span><svg class="sig" viewBox="0 0 40 40" aria-hidden="true"><use href="#icon-sibyl" /></svg><span class="story-half__name" data-t="rooms.sibyl.name">시빌라 신탁의 방</span><span class="story-half__wait" data-t="story.half.slot">다음 문에서 열려요</span></li>
+          <li class="story-half__slot" data-js="story-half-slot" data-room="tzolkin"><span class="story-half__num" aria-hidden="true">V</span><svg class="sig" viewBox="0 0 40 40" aria-hidden="true"><use href="#icon-tzolkin" /></svg><span class="story-half__name" data-t="rooms.tzolkin.name">촐킨의 방</span><span class="story-half__wait" data-t="story.half.slot">다음 문에서 열려요</span></li>
+          <li class="story-half__slot" data-js="story-half-slot" data-room="rune"><span class="story-half__num" aria-hidden="true">VI</span><svg class="sig sig--rune" viewBox="0 0 40 60" aria-hidden="true"><use href="#rune-raidho" /></svg><span class="story-half__name" data-t="rooms.rune.name">룬의 방</span><span class="story-half__wait" data-t="story.half.slot">다음 문에서 열려요</span></li>
+          <li class="story-half__slot" data-js="story-half-slot" data-room="sibyl"><span class="story-half__num" aria-hidden="true">VII</span><svg class="sig" viewBox="0 0 40 40" aria-hidden="true"><use href="#icon-sibyl" /></svg><span class="story-half__name" data-t="rooms.sibyl.name">시빌라 신탁의 방</span><span class="story-half__wait" data-t="story.half.slot">다음 문에서 열려요</span></li>
         </ol>
         <!-- 주 버튼: 방 결과의 다음 문과 같은 컴포넌트 -->
         <button class="next-door story-half__door" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="story-half-next">
@@ -2553,10 +2552,10 @@
       </symbol>
     </svg>
 
-    <!-- ═════════ 6-R. 한 권의 책 (13단계: 광고로 여는 책, 결정 75~82) ═════════
+    <!-- ═════════ 6-R. 한 권의 책 (13단계 틀 + 14단계 결제 복귀, 결정 85·94) ═════════
          한 화면 안의 세 보기 — book-reader[data-view] = "toc"(목차 = 책의 집) | "cover"(장 표지 = 잠긴 장의 문) | "pages"(장 안 리더, 결정 53).
          toc·cover는 화면이 위아래로 스크롤되고, pages만 한 화면에 고정된다. 가격·결제 문구 없음.
-         설계: design/strange-oracle.md 「13단계: 광고로 여는 책 (디자인)」 -->
+         설계: design/strange-oracle.md 「13단계」·「14단계」 8절 -->
     <section class="screen report book" id="screen-report" data-js="screen-report" data-room="hall" data-preview="6-R. 한 권의 책 — 목차 (정적 검토: 3/6, 장 카드 네 상태)">
       <div class="book-reader" data-js="book-reader" data-view="toc">
 
@@ -2578,7 +2577,7 @@
             <span aria-hidden="true">→</span>
           </button>
 
-          <!-- 장 목록 (순서 고정). li[data-state] = need-room(아직 못 엶) | can-open(광고 한 편으로 열 수 있음) | opened(열림, 읽기) | read(다 읽음, 다시 읽기).
+          <!-- 장 목록 (순서 고정). li[data-state] = need-room(아직 못 엶) | can-open(열 수 있음) | opened(열림, 읽기) | read(다 읽음, 다시 읽기).
                상태 글은 JS가 book.toc.needRoom({room}) / needAll / canOpen / opened / reread 로 넣는다. 아이콘은 CSS가 상태에 맞게 그린다.
                잠긴 장의 문장은 이 목록에 없다 (결과 이름·한 줄 소개·읽는 시간만) -->
           <nav class="chapters" data-js="book-chapters" aria-labelledby="book-home-title">
@@ -2746,8 +2745,7 @@
 
         <!-- ── 장 표지 (data-view="cover") ── 배너 없음.
              data-chapter = 장 id (open·ogham·star·decan·tzolkin·rune·sibyl·flow·match·deep·close)
-             data-state = locked(잠김: 광고 버튼) | waiting(광고 결과 기다림: 버튼 disabled + aria-busy) | open(열림: 펼치기) | fail(장 파일 불러오기 실패: 다시 시도)
-             광고 중간에 닫음(closed)은 locked + book-unlock-status 한 줄. 광고 없음(unavailable)은 open + 한 줄 -->
+             data-state = open(열림: 펼치기) | fail(장 파일 불러오기 실패: 다시 시도) -->
         <div class="chapter-cover" data-js="chapter-cover" data-chapter="match" data-state="locked" aria-labelledby="chapter-cover-title">
           <div class="leather chapter-cover__leather">
             <span class="leather__spine" aria-hidden="true"></span>
@@ -2768,7 +2766,7 @@
           </div>
 
           <!-- 궁합만 (data-chapter="match"): 상대 정보 + 관계 유형. 값은 메모리에만 (sessionStorage에도 넣지 않음, 13-4).
-               새로고침·이어 읽기로 오면 빈 칸으로 다시 보인다. 광고 버튼·펼치기를 누르면 먼저 이 칸을 확인한다 -->
+               새로고침·이어 읽기로 오면 빈 칸으로 다시 보인다. 펼치기를 누르면 먼저 이 칸을 확인한다 -->
           <form class="chapter-form chapter-form--match" data-js="book-match-form" novalidate>
             <p class="notice notice--partner">
               <svg class="notice__icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="13.5" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c.6-3 2.6-4.5 5-4.5s4.4 1.5 5 4.5M12 12.6c2.3-.4 4.9.6 5.6 3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -2825,7 +2823,7 @@
               <p class="chapter-fail__text" data-t="book.chapter.loadFail">이 장을 불러오지 못했어요. 연결을 확인해 주세요</p>
               <button class="btn btn--secondary btn--small" type="button" data-js="book-load-retry" data-t="book.chapter.retry">다시 시도</button>
             </div>
-            <!-- 궁합만: 상대 없이 여덟 원형 지도. 잠겨 있으면 같은 광고 한 편 뒤에 열린다 -->
+            <!-- 궁합만: 상대 없이 여덟 원형 지도 -->
             <button class="text-link chapter-cover__alt" type="button" data-js="book-match-nopartner" data-t="book.match.noPartner">상대 없이 궁합 지도 보기</button>
             <button class="text-link chapter-cover__toc" type="button" data-js="book-cover-toc"><span aria-hidden="true">‹</span> <span data-t="book.chapter.toToc">목차로</span></button>
           </div>
