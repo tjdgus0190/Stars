@@ -11,7 +11,7 @@ Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키
 
 ## 이미지
 - 별하늘 배경, 룬 주머니, 룬 돌, 별 바퀴: CSS·SVG·Canvas로 코드에서 직접 그림. 외부 이미지 없음.
-- og-image.png(1200x630): 2026-09-30 다시 만듦. tools/strange-oracle/make-og.js가 index.html의 여섯 문 상징·장식선 SVG(designer 직접 제작)와 제품 글꼴(Gowun Batang·Cinzel)로 그려 헤드리스 Edge로 찍는다. AI·외부 이미지 없음.
+- og-image.png(1200x630): 2026-10-16 다시 만듦(14단계, 일곱 방). tools/strange-oracle/make-og.js가 index.html의 일곱 문 상징·장식선 SVG(designer 직접 제작)와 제품 글꼴(Gowun Batang·Cinzel)로 그려 헤드리스 Edge로 찍는다. AI·외부 이미지 없음.
 - 룬 글자와 ☾ 기호: 유니코드 문자. 룬 획(SVG)·별 바퀴·원형 문장: designer가 코드로 직접 그림.
 - 공유 카드(1080x1920)의 돌·아치·초승달: common/share-card.js와 app.js가 canvas로 직접 그림.
 - (9단계) 방의 안내자 실루엣 SVG 6개(오검 필경사의 손·별 점성가의 손가락·데칸 해시계 관리인의 손·촐킨 석판·룬 예언자의 망토와 손·시빌라 옆모습과 손): designer가 index.html 안에 코드로 직접 그림. 외부 이미지·참고 그림 없음.

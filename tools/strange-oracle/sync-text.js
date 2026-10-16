@@ -13,7 +13,7 @@ const M=T.meta||{},O=T.og||{};let meta=0;
 const setAttr=(re,val)=>{if(val==null)return;h=h.replace(re,(m,a,b)=>{meta++;return a+escA(val)+b;});};
 h=h.replace(/<title>[^<]*<\/title>/,()=>{meta++;return `<title>${esc(M.title)}</title>`;});
 setAttr(/(<meta name="description" content=")[^"]*(")/,M.description);
-setAttr(/(<meta property="og:title" content=")[^"]*(")/,O.title||M.title);
+setAttr(/(<meta property="og:title" content=")[^"]*(")/,M.title);
 setAttr(/(<meta property="og:description" content=")[^"]*(")/,O.description||M.description);
 console.log({changed:n,meta,missingKeys:[...new Set(miss)].slice(0,20)});
 fs.writeFileSync(file,h);

@@ -37,12 +37,12 @@ const DRAW = `(async () => {
     stars += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(2) + '" fill="#f5f2e9" opacity="' + o.toFixed(2) + '"/>';
     n++;
   }
-  // 여섯 문 상징 (Ⅰ 오검 · Ⅱ 별 · Ⅲ 데칸 · Ⅳ 촐킨 · Ⅴ 룬 · Ⅵ 시빌라): 원 88px, 간격 28px, 중심 y 236
-  const SYM = [["ogham-beith", 26, 52], ["icon-star", 44, 44], ["icon-decan", 44, 44], ["icon-tzolkin", 44, 44], ["rune-raidho", 30, 45], ["icon-sibyl", 44, 44]];
-  const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
+  // (14단계) 일곱 문 상징 (Ⅰ 만신 · Ⅱ 오검 · Ⅲ 별 · Ⅳ 데칸 · Ⅴ 촐킨 · Ⅵ 룬 · Ⅶ 시빌라): 원 88px, 간격 28px, 중심 y 236, 가운데 정렬
+  const SYM = [["icon-saju", 44, 44], ["ogham-beith", 26, 52], ["icon-star", 44, 44], ["icon-decan", 44, 44], ["icon-tzolkin", 44, 44], ["rune-raidho", 30, 45], ["icon-sibyl", 44, 44]];
+  const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII"];
   let doors = "";
   SYM.forEach(([id, w, h], i) => {
-    const cx = 310 + i * 116, cy = 236;
+    const cx = 600 + (i - (SYM.length - 1) / 2) * 116, cy = 236;
     doors += '<circle cx="' + cx + '" cy="' + cy + '" r="43.25" fill="url(#og-glow)" stroke="' + BRONZE + '" stroke-width="1.5"/>'
       + '<use href="#' + id + '" x="' + (cx - w / 2) + '" y="' + (cy - h / 2) + '" width="' + w + '" height="' + h + '" style="color:' + HI + ';fill:none;stroke:' + HI + ';stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"/>'
       + '<text x="' + cx + '" y="308" text-anchor="middle" font-family="Cinzel, serif" font-weight="500" font-size="18" fill="' + BRONZE + '">' + ROMAN[i] + '</text>';

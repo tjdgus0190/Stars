@@ -74,7 +74,9 @@ function copyDir(src, dest, exclude = new Set()) {
 }
 
 fs.rmSync(DIST, { recursive: true, force: true });
-copyDir(path.join(ROOT, "common"), path.join(PUBLIC, "common"));
+// (14-2·14-7의 7) 광고는 걷어 냈다: common/ads.js는 저장소에 남기되 배포 폴더에는 넣지 않는다
+const COMMON_EXCLUDE = new Set(["ads.js"]);
+copyDir(path.join(ROOT, "common"), path.join(PUBLIC, "common"), COMMON_EXCLUDE);
 for (const slug of PRODUCTS) copyDir(path.join(ROOT, "products", slug), path.join(PUBLIC, "products", slug), PRODUCT_EXCLUDE);
 // 제품 index.html 복사본: og:image 절대 경로, og:url·canonical 추가 (site.url이 있을 때만)
 for (const slug of PRODUCTS) {
@@ -114,6 +116,7 @@ const publicTexts = [];
       if (/(^|\/)legal\/refund\.html$/.test(rel)) fails.push(`① public/${rel} 있음`);
       if (/(^|\/)data-book-(?!free\.js$)[^/]*\.js$/.test(rel) || /(^|\/)book-[a-z]+\.js$/.test(rel)) fails.push(`① 옛 책 파일·유료 파일 public/${rel}`);
       if (/__dev/.test(rel)) fails.push(`① public/${rel}`);
+      if (/(^|\/)ads\.js$/.test(rel)) fails.push(`① 광고 부품 public/${rel} (14-7의 7)`);
       if (/\.(js|html|css|json|txt|md|svg|xml)$/.test(e.name)) publicTexts.push(fs.readFileSync(p, "utf8"));
     }
   }
@@ -182,4 +185,4 @@ for (const slug of PRODUCTS) {
 if (fails.length) {
   console.error("  실패: 배포 점검 — " + fails.slice(0, 15).join(" | "));
   process.exitCode = 1;
-} else console.log("  배포 점검 통과 (pay.mode off · api/·_paid·__dev·옛 책 파일 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
+} else console.log("  배포 점검 통과 (pay.mode off · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
