@@ -124,6 +124,15 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("A2 1 받는 것(10장)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 10, JSON.stringify(lay));
   check("A3 판매자 정보 줄 5칸(신고 줄은 값이 없어 숨김)·legal 3종 링크·결제 버튼은 <button>(href 없음)·옛 칸 2개 없음", lay.seller === 5 && lay.legal === 3 && lay.tag === "BUTTON" && !lay.href && !lay.old);
   check("A4 동의 전 비활성·시험 띠·userid(모의 값) 있으면 '판매 준비 중' 숨김·가로 넘침 0", lay.buyOff && lay.band && !lay.empty && lay.wide);
+  // K. (15단계 QA 1차 필수 1) test: 판매자 정보 줄 legal 링크 3개가 200이고 결제 문단이 주석 밖에 보인다
+  const legalHrefs = await ev(`[...document.querySelectorAll('#screen-deeper .pay-seller__legal a')].map((a) => a.href)`);
+  const legalRes = [];
+  for (const u of legalHrefs) { const r = await fetch(u); legalRes.push({ u: u.replace(/^.*\/legal\//, ""), s: r.status, t: await r.text() }); }
+  check("K1 test: 판매자 정보 줄 legal 링크 3개(refund·terms·privacy) 모두 200", legalRes.length === 3 && legalRes.every((x) => x.s === 200) && ["refund.html", "terms.html", "privacy.html"].every((n) => legalRes.some((x) => x.u === n)), legalRes.map((x) => `${x.u} ${x.s}`).join(" · "));
+  const legalText = (n) => (legalRes.find((x) => x.u === n) || { t: "" }).t;
+  const vis = (n) => legalText(n).replace(/<!--[\s\S]*?-->/g, ""); // 주석 밖 본문
+  check("K2 test: privacy 제4조의3·terms 제2조의2 결제 문단과 목차 줄이 주석 밖에 보임", /id="s4-3"/.test(vis("privacy.html")) && /href="#s4-3"/.test(vis("privacy.html")) && /페이앱/.test(vis("privacy.html")) && /id="s2-2"/.test(vis("terms.html")) && /href="#s2-2"/.test(vis("terms.html")) && /3,900원/.test(vis("terms.html")));
+  check("K3 test: 결제가 꺼진 판 문장('결제를 받지 않으므로'·'판매하는 상품이나 결제가 없습니다') 0·표지 주석 0·refund 본문 있음", !/결제를 받지 않으므로/.test(vis("privacy.html")) && !/판매하는 상품이나 결제가 없습니다/.test(vis("terms.html")) && !legalRes.some((x) => /pay:(on|off)\s*-->/.test(x.t)) && /환불/.test(vis("refund.html")));
   await click("[data-js=pay-agree]");
   check("A5 동의하면 결제 버튼 활성", (await ev("document.querySelector('[data-js=pay-buy]').getAttribute('aria-disabled')")) === "false");
   check("A6 결제하기 전 SDK 요청 0 (첫 화면·목차·결제 전 화면)", sdkN() === sdk0 && sdk0 === 0, `${sdkN()}`);
@@ -392,7 +401,11 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("I6 분석 스크립트 없음(GA4 ID 빈칸)·dataLayer 없음", (await ev("typeof window.dataLayer")) === "undefined" && reqs(/googletagmanager|google-analytics/) === 0);
   const dump = JSON.stringify(await storeDump());
   check("I7 /__dev/pay-store에 R·시험 휴대폰 번호 0건", !allReqs.some((r) => dump.includes(r)) && !/01099990000/.test(dump));
-  const errs = b.log.errors.filter((e) => !/favicon|\/api\/|40[0-9]|429|503|ERR_|net::|payapp-lite/.test(e));
+  // (QA 권장 4) 외부 글꼴 CDN의 일시 CORS·네트워크 오류는 따로 기록만 한다(실패로 세지 않음). 우리 출처 오류는 그대로 실패
+  const FONT_CDN = /cdn\.jsdelivr\.net\/npm\/@fontsource/;
+  const fontErrs = b.log.errors.filter((e) => FONT_CDN.test(e) && !e.includes("127.0.0.1"));
+  if (fontErrs.length) { const l = `INFO  I8 참고: 외부 글꼴 CDN 오류 ${fontErrs.length}건(실패로 세지 않음) — ${fontErrs[0].slice(0, 160)}`; out.push(l); console.log(l); }
+  const errs = b.log.errors.filter((e) => !fontErrs.includes(e)).filter((e) => !/favicon|\/api\/|40[0-9]|429|503|ERR_|net::|payapp-lite/.test(e));
   check("I8 test: 콘솔 오류 0 (일부러 낸 401·403·404·429·503·연결 실패 제외)", errs.length === 0, errs.slice(0, 3).join(" | "));
 
   // ═══ J. off (배포판과 같은 data.js) ═══
@@ -422,6 +435,13 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       check(`J4 off: #${h} → 막다른 곳 없이 화면 하나(${a})`, Boolean(a) && !/report|deeper|paycheck|paypopup/.test(a));
     }
     check("J5 off: /api·payapp 요청 0", !b.log.requests.slice(nOff).some((r) => /\/api\/|payapp/.test(r)));
+    // (15단계 QA 1차 필수 1·권장 2) off: legal 결제 문단 0·refund.html 404·index.html 원본에 결제 template·판매자 ◯◯ 0
+    const get = async (p) => { const r = await fetch(`${OFF}/products/strange-oracle/${p}`); return { s: r.status, t: await r.text() }; };
+    const [oPriv, oTerms, oRefund, oIndex] = [await get("legal/privacy.html"), await get("legal/terms.html"), await get("legal/refund.html"), await get("index.html")];
+    check("J6 off: privacy·terms 200, 결제 문단(제4조의3·제2조의2·페이앱·목차 줄)·표지 0, '결제 없음' 문장 있음, refund.html 404",
+      oPriv.s === 200 && oTerms.s === 200 && oRefund.s === 404 && !/s4-3|s2-2|페이앱|3,900|pay:(on|off)/.test(oPriv.t + oTerms.t) && /결제를 받지 않으므로/.test(oPriv.t) && /판매하는 상품이나 결제가 없습니다/.test(oTerms.t),
+      `privacy ${oPriv.s} · terms ${oTerms.s} · refund ${oRefund.s}`);
+    check("J7 off: index.html 원본(소스 보기)에 pay-tpl·pay-toc-tpl template·'판매자 ◯◯'·표지 0", oIndex.s === 200 && !/pay-tpl|pay-toc-tpl|판매자 ◯◯|pay:(on|off)\s*-->/.test(oIndex.t));
   } finally {
     srv.kill();
   }

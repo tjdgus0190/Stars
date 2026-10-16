@@ -46,12 +46,13 @@
    - 쿠키·행태정보 고지가 법적으로 충분한지는 미확인이다(43번).
    - 간편 로그인(카카오 등)은 CLAUDE.md 3·6장 개정 전까지 보류한다(37번).
 6. **페이앱 결제 live 전(15단계 G7, 15-6·15-7)**
-   - 페이앱 가맹·업종 확인(64번)·결제수단 설정. data.js `pay.payapp.userid`·`shopname`, `pay.contact`(문의처), 판매자 정보 줄 `pay.seller.*`의 ◯◯, legal 3종의 ◯◯를 채운다. 비거나 ◯◯가 남으면 live 빌드가 멈춘다(build-dist ⑦).
+   - 페이앱 가맹·업종 확인(64번)·결제수단 설정. data.js `pay.payapp.userid`·`shopname`, `pay.contact`(문의처), 판매자 정보 줄 `pay.seller.*`의 ◯◯, legal 3종의 ◯◯를 채운다(주석 안 메모의 ◯◯도 지운다 — ⑦은 원본 legal 전체를 본다). 비거나 ◯◯가 남으면 live 빌드가 멈춘다(build-dist ⑦).
    - `pay.payapp.openpaytype`의 간편결제 코드 목록(지금 `card,kakaopay,naverpay,smilepay,applepay,payco`)이 페이앱 개발 문서와 맞는지 확인한다(미확인, 72번). 휴대폰·가상계좌·계좌이체 코드는 넣지 않는다.
    - **Netlify 환경 변수(이름만, 값은 저장소·문서에 쓰지 않는다):** `PASS_MODE`(live), `PAYAPP_USERID`, `PAYAPP_LINKKEY`, `PAYAPP_LINKVAL`, `PASS_SECRET`(무작위 32바이트 이상, 한 번 정하면 바꾸지 않음), `BOOK_PASS_HASHES`(수동 코드), `SITE_URL`(return이 돌려보낼 제품 페이지 주소), `PAY_DEBUG_FIELDS`(실결제 시험 ⑦ 동안만 1).
    - 첫 배포 뒤 Netlify 화면에서 함수 `pay`·`book`의 Node 런타임이 22 이상인지 확인한다(미확인). 아니면 런타임 지정을 운영자가 Netlify 화면에서 고른다.
    - 실결제 1건 + 취소(15-6 ①~⑧, 특히 ⑥ returnurl 본문에 linkkey·linkval이 없는지). 결과는 tests.md 「15단계 · 실결제」에 날짜와 통과 여부만.
    - 그 뒤 data.js `pay.mode`를 live로, build-dist ③ off 가드를 live 허용으로 함께 고친다(⑦ live 가드는 남긴다).
+   - **legal 결제 문단·refund.html(15단계 QA 1차 필수 1):** 주석을 풀 일은 없다. legal 결제 문단·목차 줄은 `<!-- pay:on -->…<!-- /pay:on -->`, 결제가 꺼진 판의 짝 문장(제1조 "결제 없음" 등)은 `<!-- pay:off -->…<!-- /pay:off -->` 표지 안에 있고, build-dist가 `pay.mode`대로 한쪽을 걷어 낸다(`tools/pay-sections.js`, off는 index.html 결제 template도 걷어 냄). `legal/refund.html`은 **mode live일 때 build-dist가 배포 폴더에 자동으로 넣는다**(off에서는 빠짐). live 빌드 뒤 확인: ① `dist/public/products/strange-oracle/legal/refund.html`이 있다 ② privacy·terms에 제4조의3·제2조의2가 보이고 "결제를 받지 않으므로"가 없다 ③ build-dist ⑦이 refund.html 없음·pay:on 구획 없음·배포판 legal ◯◯를 잡는다. 시험 페이지(모의 서버 `--mode test`)는 같은 함수로 결제 문단과 refund.html을 내준다.
 7. **배포를 막지 않는 정리 4건**(QA 13단계 권장)
    - 옛 결제 주석
    - 궁합 엿보기 문장에 "당신은…"이 섞이는 것(data-book-bond.js `peekLine`)

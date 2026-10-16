@@ -2732,11 +2732,13 @@
             </ol>
           </nav>
 
+          <!-- pay:on -->
           <!-- (15단계 15-5) 목차의 "내 열람 코드 보기" — 결제 요소라 template 안에 둔다(off DOM 0). JS가 test·live에서만 이 자리에 꺼내 붙이고,
                이 탭에 strange-oracle-pass가 있을 때만 .is-hidden 해제. 누르면 pay-code-dialog(코드 카드)를 연다. off면 template째 지운다 -->
           <template data-js="pay-toc-tpl">
           <p class="book-home__code is-hidden" data-js="book-code-row"><button class="text-link book-home__code-btn" type="button" data-js="book-show-code"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="7" cy="10" r="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.2 10H17M14.5 10v2.6M16.6 10v1.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span data-t="pay.showCode">내 열람 코드 보기</span></button></p>
           </template>
+          <!-- /pay:on -->
 
           <!-- 책 카드 공유 (기존 소장 카드: 원형·여섯 문양, 상대 이름 없음). 보조 버튼 — 이 화면에 주 버튼 없음(장 카드가 주 행동) -->
           <div class="book-home__share">
@@ -3061,6 +3063,7 @@
       </div>
     </section>
 
+    <!-- pay:on -->
     <!-- ═════════ 6-P. (14·15단계) 결제 — pay.mode가 test·live일 때만 (결정 94, 15단계 페이앱) ═════════
          template 안에 둔다: off(배포판)에서는 DOM에 결제 요소가 0개여야 한다(14-7의 8, 15-8의 1). JS가 test·live에서만 template 내용 전부를
          (최상위 요소 4개: #screen-deeper · #screen-paycheck · #screen-paypopup · dialog pay-code-dialog) 꺼내 붙이고 applyText를 돌린다. off면 template째 지운다.
@@ -3257,6 +3260,7 @@
       </div>
     </dialog>
     </template>
+    <!-- /pay:on -->
   </main>
   <!-- ═════════ 내 정보 지우기 확인 ═════════ -->
   <dialog class="dialog" data-js="clear-dialog" aria-labelledby="clear-title">

@@ -25,6 +25,9 @@
 //   /api/pay/* = 함수 pay.js handle() + 메모리 저장소(Blobs 대신), /api/book = 함수 book.js handle() + 같은 저장소(Blobs pass/ 확인)
 //   /__dev/payapp-lite.js(가짜 SDK, 이동·팝업) · /__dev/payapp/checkout(가짜 결제창) · /__dev/pay-switch · /__dev/pay-store
 //   data.js 응답에서 pay.payapp.sdk(공식 주소) → /__dev/payapp-lite.js, 빈 pay.payapp.userid → 모의 값
+// (15단계 QA 1차 필수 1) 제품 HTML(index.html·legal/*.html)의 결제 표지(<!-- pay:on -->·<!-- pay:off -->, tools/pay-sections.js):
+//   --mode test면 원본(products/strange-oracle/)에서 읽어 test 판으로 내준다 → legal 결제 문단이 보이고 legal/refund.html도 열린다(배포 폴더에는 없음).
+//   --src면 원본을 mode대로 처리한다. dist 모드 off는 build-dist가 이미 off 판으로 만든 파일 그대로. 원본 파일은 고치지 않는다.
 // 요청 본문은 찍지 않는다. 주소·상태 코드만 한 줄씩 출력한다.
 const http = require("http");
 const fs = require("fs");
@@ -44,6 +47,9 @@ const STATIC = SRC ? ROOT : path.join(ROOT, "dist", "public");
 const PAID = path.join(ROOT, "products", "strange-oracle", "api", "_paid", "book");
 const Book = require(path.join(ROOT, "netlify", "functions", "book.js"));
 const PayCode = require(path.join(ROOT, "products", "strange-oracle", "paycode.js"));
+const PaySec = require(path.join(ROOT, "tools", "pay-sections.js"));
+const og = require(path.join(ROOT, "tools", "og-tags.js"));
+const PRODUCT = path.join(ROOT, "products", "strange-oracle");
 if (!fs.existsSync(STATIC)) {
   console.error(`폴더가 없습니다: ${STATIC}\n먼저 node tools/build-dist.js 를 실행하거나 --src 를 붙이세요.`);
   process.exit(1);
@@ -59,6 +65,16 @@ const TYPES = {
 };
 const notFound = (res) => res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("없는 파일");
 const PAY_RE = /(\bpay:\s*\{\s*mode:\s*)"off"/;
+// (14-6) 배포처(Netlify)처럼 글자 파일은 압축해서 보낸다 → 성능 측정이 실제 전송량(압축 후)과 맞는다
+function send(req, res, type, data) {
+  const head = { "Content-Type": type, "Cache-Control": "no-store", Vary: "Accept-Encoding" };
+  if (/^(text\/|application\/json|image\/svg)/.test(type) && /gzip/.test(req.headers["accept-encoding"] || "")) {
+    data = zlib.gzipSync(data, { level: 6 });
+    head["Content-Encoding"] = "gzip";
+  }
+  res.writeHead(200, head);
+  res.end(data);
+}
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, "http://x");
@@ -119,6 +135,23 @@ location.replace("${P}#${to}");
     log(404);
     return notFound(res);
   }
+  // 결제 표지 처리 (머리 설명). test·--src에서만 원본을 읽는다
+  const page = rel.match(/^\/products\/strange-oracle\/(index\.html|legal\/[a-z-]+\.html)?$/);
+  if (page && (MODE === "test" || SRC)) {
+    const pageRel = page[1] || "index.html";
+    const srcFile = path.join(PRODUCT, pageRel);
+    if (!fs.existsSync(srcFile) || (pageRel === "legal/refund.html" && !PaySec.isOn(MODE))) {
+      log(404);
+      return notFound(res);
+    }
+    let html = fs.readFileSync(srcFile, "utf8");
+    if (pageRel === "index.html" && !SRC) {
+      const site = og.readSiteUrl(fs.readFileSync(path.join(PRODUCT, "data.js"), "utf8"));
+      if (site) html = og.injectOg(html, site); // build-dist와 같은 og 처리
+    }
+    send(req, res, TYPES[".html"], Buffer.from(PaySec.strip(html, MODE)));
+    return log(200);
+  }
   let file = path.join(STATIC, rel);
   if (!file.startsWith(STATIC)) return res.writeHead(403).end();
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
@@ -132,15 +165,7 @@ location.replace("${P}#${to}");
     }
     // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로)
     if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"')));
-    // (14-6) 배포처(Netlify)처럼 글자 파일은 압축해서 보낸다 → 성능 측정이 실제 전송량(압축 후)과 맞는다
-    const type = TYPES[path.extname(file)] || "application/octet-stream";
-    const head = { "Content-Type": type, "Cache-Control": "no-store", Vary: "Accept-Encoding" };
-    if (/^(text\/|application\/json|image\/svg)/.test(type) && /gzip/.test(req.headers["accept-encoding"] || "")) {
-      data = zlib.gzipSync(data, { level: 6 });
-      head["Content-Encoding"] = "gzip";
-    }
-    res.writeHead(200, head);
-    res.end(data);
+    send(req, res, TYPES[path.extname(file)] || "application/octet-stream", data);
   });
 });
 server.listen(PORT, HOST, () => {

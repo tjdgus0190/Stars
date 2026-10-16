@@ -37,6 +37,9 @@ Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키
 - 출처: https://github.com/6tail/lunar-javascript , npm `lunar-javascript`. 파일 크기 435,942바이트(gzip 112,997).
 - saju.js의 시간대 표(서머타임·UTC+8:30)는 IANA tz database 2026c(Asia/Seoul)의 전환점을 숫자로 옮겨 적은 것(퍼블릭 도메인 데이터).
 
+| @netlify/blobs (Netlify) | 11.1.4 | 결제 기록 저장(서버 함수 pay·book 전용, 배포 화면에는 없음) | MIT (node_modules/@netlify/blobs/package.json `license`) | npm, 루트 package.json·package-lock.json에 고정 (CDN으로 불러오지 않음) |
+- 출처: https://github.com/netlify/blobs , npm `@netlify/blobs`. 함께 묶이는 전이 의존성은 package-lock.json의 고정 버전을 따른다.
+
 ## 2단계 계산 방법 (calc.js)
 - 촐킨(마야 260일력): 외부 라이브러리 없이 날짜 산술로 직접 계산.
   - 상관 계수: **GMT(Goodman–Martinez–Thompson) 584283** — 장주기 0.0.0.0.0 = 율리우스 적일 584283. 출처: Wikipedia "Mesoamerican Long Count calendar" (https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar — "The generally accepted correlation constant is the Modified Thompson 2, 'Goodman–Martinez–Thompson', or GMT correlation of 584,283 days", 2026-09-27 조회), Wikipedia "Maya calendar" (https://en.wikipedia.org/wiki/Maya_calendar). 운영자 결정 25번으로 확정.

@@ -13,6 +13,10 @@
 //   ⑤ site.url·GA4 ID 모양
 //   ⑥ (15단계) pay.payapp.sdk = 페이앱 공식 주소   ⑦ live 가드: pay.mode live인데 payapp.userid·pay.contact가 비었거나 pay 문구·legal에 ◯◯
 //   ⑧ dist/public 텍스트에 linkkey·linkval·PASS_SECRET·PAYAPP_·PAY_DEBUG·__dev 0건
+//   ⑨ (15단계 QA 1차 필수 1) 결제 표지: 제품 HTML(index.html·legal/*.html)의 <!-- pay:on -->/<!-- pay:off --> 짝이 맞고, 배포판에 표지가 남지 않음.
+//      pay.mode off → pay:on 구획(legal 결제 문단·목차 줄, index.html 결제 template)을 걷어 내고 legal/refund.html을 넣지 않는다.
+//      pay.mode live → pay:off 구획을 걷어 내고 legal/refund.html을 넣는다(⑦ live 가드: refund.html 있음, privacy·terms에 pay:on 구획 있음, 배포판 legal ◯◯ 0).
+//      처리 함수는 tools/pay-sections.js (모의 서버 --mode test도 같은 함수로 legal·index를 test 판으로 내준다)
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -27,6 +31,8 @@ const PUBLIC = path.join(DIST, "public");
 const PAYAPP_SDK = "https://lite.payapp.kr/public/api/v2/payapp-lite.js"; // (15-7) 페이앱 공식 SDK 주소 (결정 98: 최신 판, 버전 고정 대상 아님)
 const SECRET_WORDS = ["linkkey", "linkval", "PASS_SECRET", "PAYAPP_", "PAY_DEBUG", "__dev"]; // (15-7) dist/public 텍스트에 0건이어야 하는 낱말
 const og = require("./og-tags.js");
+const PaySec = require("./pay-sections.js");
+const MODES = {}; // slug → pay.mode
 const fails = [];
 
 const readData = (slug) => {
@@ -62,6 +68,7 @@ for (const slug of PRODUCTS) {
     // ③ (14-4, 결정 94) 배포판은 결제 화면을 숨긴다. pay.mode가 "off"가 아니면 실패.
     //    live로 바꿀 때(운영자, specs 54·39·62번과 계획서 live 조건을 마친 뒤): 아래 조건을 "off" 또는 "live"를 허용하도록 함께 고친다. "test"는 언제나 실패여야 한다.
     const mode = T.pay ? T.pay.mode : "off";
+    MODES[slug] = mode;
     if (mode !== "off") fails.push(`③ products/${slug}/data.js pay.mode = "${mode}" (배포판은 "off"만)`);
     // ⑥ (15단계 15-7) 페이앱 SDK 주소는 공식 주소 그대로(모의 주소가 섞이지 않게). off에서도 본다
     const pa = (T.pay && T.pay.payapp) || {};
@@ -95,6 +102,35 @@ fs.rmSync(DIST, { recursive: true, force: true });
 const COMMON_EXCLUDE = new Set(["ads.js"]);
 copyDir(path.join(ROOT, "common"), path.join(PUBLIC, "common"), COMMON_EXCLUDE);
 for (const slug of PRODUCTS) copyDir(path.join(ROOT, "products", slug), path.join(PUBLIC, "products", slug), PRODUCT_EXCLUDE);
+// ⑨ (15단계 QA 1차 필수 1) 결제 표지 처리. live면 legal/refund.html을 넣는다(off·test는 넣지 않음 — test는 배포 금지 ③, 시험 페이지에서는 모의 서버가 내준다)
+for (const slug of PRODUCTS) {
+  const mode = MODES[slug];
+  const src = path.join(ROOT, "products", slug);
+  const dst = path.join(PUBLIC, "products", slug);
+  const refundSrc = path.join(src, "legal", "refund.html");
+  if (mode === "live" && fs.existsSync(refundSrc)) fs.copyFileSync(refundSrc, path.join(dst, "legal", "refund.html"));
+  const pages = ["index.html"].concat(fs.existsSync(path.join(dst, "legal")) ? fs.readdirSync(path.join(dst, "legal")).filter((n) => /\.html$/.test(n)).map((n) => "legal/" + n) : []);
+  for (const rel of pages) {
+    const f = path.join(dst, rel);
+    const html = fs.readFileSync(f, "utf8");
+    const bad = PaySec.problem(html);
+    if (bad) fails.push(`⑨ products/${slug}/${rel} 결제 표지 ${bad}`);
+    const out = PaySec.strip(html, mode);
+    if (/<!--\s*\/?pay:(on|off)\s*-->/.test(out)) fails.push(`⑨ public/products/${slug}/${rel}에 결제 표지가 남음`);
+    fs.writeFileSync(f, out);
+  }
+  if (mode === "off" && /data-js="pay-(toc-)?tpl"/.test(fs.readFileSync(path.join(dst, "index.html"), "utf8"))) fails.push(`⑨ off: public/products/${slug}/index.html에 결제 template이 남음`);
+  // ⑦ live 가드 추가: refund.html이 배포 폴더에 있는가 · privacy·terms에 pay:on 구획이 있는가 · 배포판 legal에 ◯◯ 0
+  if (mode === "live") {
+    if (!fs.existsSync(path.join(dst, "legal", "refund.html"))) fails.push(`⑦ live: public/products/${slug}/legal/refund.html 없음`);
+    for (const n of ["privacy.html", "terms.html"]) {
+      const s = path.join(src, "legal", n);
+      if (!fs.existsSync(s) || PaySec.count(fs.readFileSync(s, "utf8"), "on") === 0) fails.push(`⑦ live: products/${slug}/legal/${n}에 pay:on 결제 구획이 없음`);
+    }
+    for (const rel of pages.filter((r) => r.startsWith("legal/")))
+      if (fs.readFileSync(path.join(dst, rel), "utf8").includes("◯◯")) fails.push(`⑦ live: public/products/${slug}/${rel}에 ◯◯가 남음`);
+  }
+}
 // 제품 index.html 복사본: og:image 절대 경로, og:url·canonical 추가 (site.url이 있을 때만)
 for (const slug of PRODUCTS) {
   const file = path.join(PUBLIC, "products", slug, "index.html");
@@ -130,7 +166,7 @@ const publicTexts = [];
       else if (e.name.startsWith("_")) fails.push(`① _로 시작하는 폴더 public/${rel}/`);
       walk(p);
     } else {
-      if (/(^|\/)legal\/refund\.html$/.test(rel)) fails.push(`① public/${rel} 있음`);
+      if (/(^|\/)legal\/refund\.html$/.test(rel) && !Object.values(MODES).includes("live")) fails.push(`① public/${rel} 있음 (live에서만 넣는다)`);
       if (/(^|\/)data-book-(?!free\.js$)[^/]*\.js$/.test(rel) || /(^|\/)book-[a-z]+\.js$/.test(rel)) fails.push(`① 옛 책 파일·유료 파일 public/${rel}`);
       if (/__dev/.test(rel)) fails.push(`① public/${rel}`);
       if (/(^|\/)ads\.js$/.test(rel)) fails.push(`① 광고 부품 public/${rel} (14-7의 7)`);
@@ -206,4 +242,4 @@ for (const slug of PRODUCTS) {
 if (fails.length) {
   console.error("  실패: 배포 점검 — " + fails.slice(0, 15).join(" | "));
   process.exitCode = 1;
-} else console.log("  배포 점검 통과 (pay.mode off · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
+} else console.log("  배포 점검 통과 (pay.mode off · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
