@@ -1,0 +1,9 @@
+{
+  "name": "sha-app-factory",
+  "private": true,
+  "description": "낯선 점술관 서버리스 함수 의존성(Netlify Blobs). 화면은 빌드 도구 없이 순수 HTML·CSS·JS다.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@netlify/blobs": "11.1.4"
+  }
+}

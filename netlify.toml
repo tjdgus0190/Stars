@@ -19,3 +19,13 @@
   to = "/.netlify/functions/book"
   status = 200
   force = true
+
+# (15단계, spec 15-3·15-7) 페이앱 결제: /api/pay/feedback·status·return → 함수 pay (경로 유지).
+# 함수 pay는 PASS_MODE·PAYAPP_USERID·PAYAPP_LINKKEY·PAYAPP_LINKVAL·PASS_SECRET(32바이트 이상) 중 하나라도 없으면 503(안전).
+# 결제 기록은 Netlify Blobs 저장소 "strange-oracle-pay"(strong). @netlify/blobs는 루트 package.json에 버전 고정(Node 22.12 이상 필요).
+# included_files는 함수 book만 쓰지만 [functions] 공용 설정이라 그대로 둔다(pay 묶음에도 유료 원본이 들어가나 정적 주소로는 나가지 않음).
+[[redirects]]
+  from = "/api/pay/*"
+  to = "/.netlify/functions/pay/:splat"
+  status = 200
+  force = true

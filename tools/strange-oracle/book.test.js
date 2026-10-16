@@ -211,3 +211,152 @@ test("다양성 실측 → out/book-variety.txt", () => {
   console.log(lines.join("\n"));
   assert.ok(same.length > 0 && types.length === 1200);
 });
+
+// ════ 함수 book (netlify/functions/book.js) — 14단계 F4-B2 시험을 pay.test.js에서 옮기고 15단계 Blobs 확인을 더함 ════
+// 15-6 "book.test.js": Blobs paid 통과, cancelled 403, 읽기 실패 503(틀린 시도로 안 셈), 환경 변수 수동 코드 통과 유지. 합격 28.
+// 시험 코드·비밀값은 이 실행 안에서 무작위로 만들고 버린다(파일·저장소에 쓰지 않음).
+{
+  const crypto = require("crypto");
+  const { execFileSync } = require("child_process");
+  const ROOT = path.resolve(__dirname, "..", "..");
+  const PAIDDIR = path.join(PROD, "api", "_paid", "book");
+  const Fn = require(path.join(ROOT, "netlify", "functions", "book.js"));
+  const Pay = require(path.join(ROOT, "netlify", "functions", "pay.js"));
+  const { MemStore } = require("./mem-store.js");
+  const { Pass } = PayCode;
+  const CODE = Pass.make();
+  const SECRET = crypto.randomBytes(32).toString("hex");
+  const ENV = { PASS_MODE: "test", BOOK_PASS_HASHES: Fn.hashOf(CODE), PASS_SECRET: SECRET };
+  let ipN = 0;
+  const call = async (body, opts = {}) => {
+    const r = await Fn.handle({ method: opts.method || "POST", body: typeof body === "string" ? body : JSON.stringify(body), ip: opts.ip || `10.0.0.${++ipN}` }, opts.env || ENV, PAIDDIR, opts.now, opts.store || null);
+    return Object.assign(r, { json: r.body ? JSON.parse(r.body) : null });
+  };
+  // 함수 pay가 쓰는 모양 그대로 기록을 만든다
+  const paidRecord = (store, mul, state = "paid") => {
+    const r = crypto.randomBytes(16).toString("hex");
+    const P = Pay.passOf(SECRET, r);
+    const ph = Pay.hashOfPass(SECRET, P);
+    store.map.set("mul/" + mul, JSON.stringify({ ph, state, at: new Date().toISOString() }));
+    store.map.set("pass/" + ph, JSON.stringify({ mul_no: mul, state, at: new Date().toISOString() }));
+    return { r, P, ph };
+  };
+
+  test("함수 book: 허용 목록은 정확히 10개, 유료 원본 파일과 1:1", () => {
+    assert.deepStrictEqual([...Fn.ALLOW].sort(), ["arch", "decan", "flow", "match", "ogham", "rune", "saju", "sibyl", "star", "tzolkin"]);
+    assert.deepStrictEqual(fs.readdirSync(PAIDDIR).filter((f) => f.endsWith(".js")).map((f) => f.replace(/^book-|\.js$/g, "")).sort(), [...Fn.ALLOW].sort());
+  });
+  test("함수 book: 수동 코드(BOOK_PASS_HASHES) + 허용 file → 200, no-store, 저장소를 읽지 않음", async () => {
+    const store = new MemStore();
+    store.failRead = true; // 읽으면 503이 날 상태에서도 수동 코드는 통과
+    for (const file of Fn.ALLOW) {
+      const r = await call({ pass: Pass.pretty(CODE).toLowerCase(), file }, { store });
+      assert.strictEqual(r.status, 200, file);
+      assert.strictEqual(r.headers["Cache-Control"], "no-store");
+      assert.strictEqual(r.json.file, file);
+    }
+    assert.strictEqual(store.log.length, 0);
+    assert.ok((await call({ pass: CODE, file: "match" })).json.data.bond.first, "궁합 다양화 모듈(bond) 포함");
+  });
+  test("함수 book: 허용 목록 밖 file 400, 두 칸뿐, 405", async () => {
+    for (const file of ["../x", "book-ogham", "OGHAM", "ogham.js", "../../../etc/passwd", "", "open", "close", ["ogham"], null])
+      assert.strictEqual((await call({ pass: CODE, file })).status, 400, JSON.stringify(file));
+    assert.strictEqual((await call({ pass: CODE, file: "arch", name: "김서윤" })).status, 400);
+    assert.strictEqual((await call({ pass: CODE, file: "arch", codes: 532 })).status, 400);
+    assert.strictEqual((await call({ pass: CODE })).status, 400);
+    assert.strictEqual((await call("not json")).status, 400);
+    assert.strictEqual((await call("x".repeat(600))).status, 400);
+    assert.strictEqual((await call({ pass: CODE, file: "arch" }, { method: "GET" })).status, 405);
+  });
+  test("함수 book: 틀린 코드 401, 같은 IP 10분 10회 넘으면 429, 10분 뒤 풀림", async () => {
+    const ip = "10.9.9.9";
+    const now = 1_000_000;
+    const wrong = Pass.make();
+    for (let i = 0; i < 10; i++) assert.strictEqual((await call({ pass: wrong, file: "arch" }, { ip, now: now + i, store: new MemStore() })).status, 401, `틀림 ${i + 1}`);
+    assert.strictEqual((await call({ pass: CODE, file: "arch" }, { ip, now: now + 20 })).status, 429);
+    assert.strictEqual((await call({ pass: "SOP-모양틀림", file: "arch" }, { ip: "10.9.9.8", now })).status, 401);
+    assert.strictEqual((await call({ pass: CODE, file: "arch" }, { ip, now: now + 10 * 60 * 1000 + 1 })).status, 200);
+    assert.strictEqual((await call({ pass: CODE, file: "arch" }, { ip: "10.9.9.7", now })).status, 200, "다른 IP는 영향 없음");
+  });
+  test("함수 book: PASS_MODE가 비면 503, 해시가 비면 401, 여러 수동 코드", async () => {
+    assert.strictEqual((await call({ pass: CODE, file: "arch" }, { env: {} })).status, 503);
+    assert.strictEqual((await call({ pass: CODE, file: "arch" }, { env: { PASS_MODE: "live", BOOK_PASS_HASHES: "" } })).status, 401);
+    assert.strictEqual((await call({ pass: CODE, file: "arch" }, { env: { PASS_MODE: "live", BOOK_PASS_HASHES: `${Fn.hashOf(Pass.make())},${ENV.BOOK_PASS_HASHES}` } })).status, 200);
+  });
+  test("함수 book (15단계): Blobs pass/ paid → 200, cancelled → 403 cancelled, 기록 없음 → 401", async () => {
+    const store = new MemStore();
+    const a = paidRecord(store, "1001");
+    const r1 = await call({ pass: Pass.pretty(a.P), file: "arch" }, { store });
+    assert.strictEqual(r1.status, 200);
+    assert.deepStrictEqual(store.log.map((l) => l[1]), ["pass/" + a.ph, "cancel/1001"], "pass/·cancel/ 두 번 읽기");
+    const c = paidRecord(store, "1002", "cancelled");
+    const r2 = await call({ pass: c.P, file: "arch" }, { store });
+    assert.strictEqual(r2.status, 403);
+    assert.deepStrictEqual(r2.json, { error: "cancelled" });
+    assert.strictEqual((await call({ pass: Pass.make(), file: "arch" }, { store })).status, 401);
+  });
+  test("함수 book (합격 28): pass/가 paid라도 cancel/<mul_no>가 있으면 403, cancel/ 읽기 실패면 503", async () => {
+    const store = new MemStore();
+    const a = paidRecord(store, "2001");
+    store.map.set("cancel/2001", JSON.stringify({ mul_no: "2001", state: "cancelled", at: new Date().toISOString() }));
+    assert.strictEqual((await call({ pass: a.P, file: "arch" }, { store })).status, 403);
+    const b = paidRecord(store, "2002");
+    store.failRead = (k) => k.startsWith("cancel/");
+    assert.strictEqual((await call({ pass: b.P, file: "arch" }, { store })).status, 503);
+  });
+  test("함수 book (검수 E): Blobs 읽기 실패 → 503, 틀린 시도로 세지 않음(12번 실패 뒤에도 429 아님)", async () => {
+    const store = new MemStore();
+    const a = paidRecord(store, "3001");
+    store.failRead = true;
+    const ip = "10.7.7.7";
+    for (let i = 0; i < 12; i++) assert.strictEqual((await call({ pass: a.P, file: "arch" }, { store, ip })).status, 503);
+    store.failRead = false;
+    assert.strictEqual((await call({ pass: a.P, file: "arch" }, { store, ip })).status, 200);
+  });
+  test("함수 book: PASS_SECRET이 비었거나 32바이트 미만이면 Blobs를 읽지 않고 401", async () => {
+    const store = new MemStore();
+    const a = paidRecord(store, "4001");
+    for (const s of ["", "short", "x".repeat(31)]) {
+      store.log = [];
+      assert.strictEqual((await call({ pass: a.P, file: "arch" }, { store, env: Object.assign({}, ENV, { PASS_SECRET: s }) })).status, 401);
+      assert.strictEqual(store.log.length, 0);
+    }
+  });
+  test("함수 book: Netlify handler 형식, 본문 base64도 받음", async () => {
+    process.env.PASS_MODE = "test";
+    process.env.BOOK_PASS_HASHES = ENV.BOOK_PASS_HASHES;
+    try {
+      const r = await Fn.handler({ httpMethod: "POST", headers: { "x-nf-client-connection-ip": "10.1.1.1" }, isBase64Encoded: true, body: Buffer.from(JSON.stringify({ pass: CODE, file: "flow" })).toString("base64") });
+      assert.strictEqual(r.statusCode, 200);
+      assert.strictEqual(r.headers["Cache-Control"], "no-store");
+      assert.strictEqual(JSON.parse(r.body).file, "flow");
+    } finally {
+      delete process.env.PASS_MODE;
+      delete process.env.BOOK_PASS_HASHES;
+    }
+  });
+  test("열람 코드 모양: SOP+12+검사 1자, 표기·소문자·헷갈리는 글자, SO1·SOG는 따로", () => {
+    for (let i = 0; i < 200; i++) {
+      const c = Pass.make();
+      assert.match(c, /^SOP[0-9A-HJKMNP-TV-Z]{13}$/);
+      assert.strictEqual(Pass.normalize(Pass.pretty(c).toLowerCase()), c);
+      assert.deepStrictEqual(Pass.check(` ${Pass.pretty(c)} `), { pass: c });
+      const bad = c.slice(0, 8) + (c[8] === "0" ? "1" : "0") + c.slice(9);
+      assert.strictEqual(Pass.check(bad).error, "shape");
+    }
+    assert.strictEqual(Pass.check("SO1-ABCD-EFGH").error, "receipt");
+    assert.strictEqual(Pass.check("SOG2-ABCD-EFGH-JKMN").error, "resume");
+    assert.strictEqual(Pass.check("").error, "shape");
+    assert.ok(Pass.looksPass("sop-1234") && !Pass.looksPass("SOG2"));
+  });
+  test("make-pass: 코드·해시만 터미널에, 해시 = 함수가 쓰는 해시, 파일을 쓰지 않음", () => {
+    const before = execFileSync("git", ["status", "--porcelain"], { cwd: ROOT, encoding: "utf8" });
+    const out = execFileSync(process.execPath, [path.join(__dirname, "make-pass.js"), "2"], { encoding: "utf8" });
+    const codes = [...out.matchAll(/코드 \d: (SOP-\S+)/g)].map((m) => m[1]);
+    const hashes = [...out.matchAll(/해시 \d: ([0-9a-f]{64})/g)].map((m) => m[1]);
+    assert.strictEqual(codes.length, 2);
+    codes.forEach((c, i) => assert.strictEqual(Fn.hashOf(c), hashes[i]));
+    assert.ok(out.includes(`BOOK_PASS_HASHES=${hashes.join(",")}`));
+    assert.strictEqual(execFileSync("git", ["status", "--porcelain"], { cwd: ROOT, encoding: "utf8" }), before);
+  });
+}

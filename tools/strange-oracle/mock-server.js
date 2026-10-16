@@ -21,6 +21,10 @@
 //   /__dev/skip?to=book         → 책 목차로 도착 (to=hub 등 다른 화면도 가능, 기본 story)
 //   예: /__dev/skip?rooms=7&paid=1&to=book  → 일곱 방 마침 + 결제한 상태로 책 12장이 모두 열림 (결정 89 "별도 시험 페이지")
 //   시험용 가짜 프로필(이름 "테스트", 1995-03-25 14:37)을 이 탭의 sessionStorage에만 넣는다
+// (15단계, spec 15-6) test 모드에는 모의 페이앱(tools/strange-oracle/mock-pay.js)이 붙는다:
+//   /api/pay/* = 함수 pay.js handle() + 메모리 저장소(Blobs 대신), /api/book = 함수 book.js handle() + 같은 저장소(Blobs pass/ 확인)
+//   /__dev/payapp-lite.js(가짜 SDK, 이동·팝업) · /__dev/payapp/checkout(가짜 결제창) · /__dev/pay-switch · /__dev/pay-store
+//   data.js 응답에서 pay.payapp.sdk(공식 주소) → /__dev/payapp-lite.js, 빈 pay.payapp.userid → 모의 값
 // 요청 본문은 찍지 않는다. 주소·상태 코드만 한 줄씩 출력한다.
 const http = require("http");
 const fs = require("fs");
@@ -45,7 +49,9 @@ if (!fs.existsSync(STATIC)) {
   process.exit(1);
 }
 const MOCK_PASS = PayCode.Pass.make(); // 시작할 때마다 새로
+const PAYMOCK = MODE === "test" ? require("./mock-pay.js").createPayMock({ port: PORT }) : null;
 const ENV = { PASS_MODE: MODE === "test" ? "test" : "", BOOK_PASS_HASHES: MODE === "test" ? Book.hashOf(MOCK_PASS) : "" };
+const bookEnv = () => (PAYMOCK ? Object.assign({}, ENV, { PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET }) : ENV);
 
 const TYPES = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -71,13 +77,14 @@ const server = http.createServer((req, res) => {
       body += c;
       if (body.length > 4096) big = true;
     });
-    req.on("end", () => {
-      const r = Book.handle({ method: req.method, body: big ? "x".repeat(600) : body, ip: req.socket.remoteAddress }, ENV, PAID);
+    req.on("end", async () => {
+      const r = await Book.handle({ method: req.method, body: big ? "x".repeat(600) : body, ip: req.socket.remoteAddress }, bookEnv(), PAID, Date.now(), PAYMOCK ? PAYMOCK.store : null);
       res.writeHead(r.status, r.headers).end(r.body);
       log(r.status);
     });
     return;
   }
+  if (PAYMOCK && PAYMOCK.route(req, res, rel, url, log)) return;
   if (rel === "/api" || rel.startsWith("/api/")) {
     log(404);
     return notFound(res);
@@ -124,7 +131,7 @@ location.replace("${P}#${to}");
       return notFound(res);
     }
     // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로)
-    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(PAY_RE, '$1"test"'));
+    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"')));
     // (14-6) 배포처(Netlify)처럼 글자 파일은 압축해서 보낸다 → 성능 측정이 실제 전송량(압축 후)과 맞는다
     const type = TYPES[path.extname(file)] || "application/octet-stream";
     const head = { "Content-Type": type, "Cache-Control": "no-store", Vary: "Accept-Encoding" };

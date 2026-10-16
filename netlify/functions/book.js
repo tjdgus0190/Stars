@@ -2,7 +2,10 @@
 // 받는 것: POST 본문 { pass, file } 두 칸뿐. 이름·생년월일·시각·성별·결과 코드는 받지 않는다(CLAUDE.md 6장, 3장 서버리스 예외보다 좁다).
 //   file은 허용 목록 10개 중 하나(정확히 같은 문자열). 목록 밖 값(경로 문자 포함)은 파일을 읽지 않고 거부한다.
 //   파일 이름은 허용 목록의 고정 문자열로만 만든다(입력값을 경로에 붙이지 않음).
-// 코드 확인: 코드를 정규화(대문자, 공백·하이픈 제거)한 뒤 SHA-256(hex)이 환경 변수 BOOK_PASS_HASHES(쉼표로 나눈 목록)에 있으면 통과.
+// 코드 확인(spec 15-3 "함수 book 수정"): ① 코드를 정규화(대문자, 공백·하이픈 제거)한 뒤 SHA-256(hex)이 환경 변수 BOOK_PASS_HASHES(쉼표로 나눈 목록)에 있으면 통과.
+//   ② 아니면 Netlify Blobs pass/<ph>(ph = HMAC(PASS_SECRET, "hash:"+코드), 함수 pay가 씀)가 paid이고 cancel/<그 mul_no>가 없으면 통과(마지막 방어선).
+//      cancelled면 403 { error: "cancelled" }. Blobs 읽기 실패는 503(틀린 시도로 세지 않음). PASS_SECRET이 비었거나 32바이트 미만이면 ②는 건너뛴다.
+//      ①로 통과한 수동 코드는 Blobs를 읽지 않는다.
 //   코드 원문·해시는 저장소에 쓰지 않는다. 운영자가 tools/strange-oracle/make-pass.js로 만들어 Netlify 환경 변수에 넣는다.
 //   PASS_MODE 환경 변수가 "live" 또는 "test"가 아니면(비어 있으면) 모두 503 → 1차 배포판(pay.mode off)에서는 아무것도 주지 않는다.
 // 틀린 코드 반복: 이 함수 인스턴스 메모리에서 접속 IP별로 10분 동안 틀린 횟수를 세고, 10회를 넘으면 그 10분이 끝날 때까지 429.
@@ -14,6 +17,7 @@ const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 const crypto = require("crypto");
+const Pay = require("./pay.js");
 
 const FILES = Object.freeze({
   saju: "BOOK_SAJU", ogham: "BOOK_OGHAM", star: "BOOK_STAR", decan: "BOOK_DECAN", tzolkin: "BOOK_TZOLKIN",
@@ -67,8 +71,9 @@ function addFail(ip, now) {
   if (fails.size > 5000) for (const [k, v] of fails) if (now - v.since > WINDOW_MS) fails.delete(k); // 메모리 정리
 }
 
-// 핵심 (모의 서버도 이것을 그대로 부른다). req = { method, body(문자열), ip }, env = { PASS_MODE, BOOK_PASS_HASHES }, dir = 유료 폴더
-function handle(req, env, dir, now = Date.now()) {
+// 핵심 (모의 서버도 이것을 그대로 부른다). req = { method, body(문자열), ip }, env = { PASS_MODE, BOOK_PASS_HASHES, PASS_SECRET }, dir = 유료 폴더
+// store = 함수 pay와 같은 모양의 기록 저장소(없으면 ②를 건너뜀). 15단계부터 async(Blobs 읽기)
+async function handle(req, env, dir, now = Date.now(), store = null) {
   const H = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" };
   const send = (status, obj) => ({ status, headers: H, body: typeof obj === "string" ? obj : JSON.stringify(obj) });
   if (req.method !== "POST") return send(405, { error: "method" });
@@ -94,8 +99,21 @@ function handle(req, env, dir, now = Date.now()) {
   const valid = String(env.BOOK_PASS_HASHES || "").split(",").map((s) => s.trim().toLowerCase()).filter((s) => /^[0-9a-f]{64}$/.test(s));
   const h = hashOf(b.pass);
   if (!valid.some((v) => v.length === h.length && crypto.timingSafeEqual(Buffer.from(v), Buffer.from(h)))) {
-    addFail(ip, now);
-    return send(401, { error: "pass" });
+    if (!store || !Pay.secretOk(env.PASS_SECRET)) {
+      addFail(ip, now);
+      return send(401, { error: "pass" });
+    }
+    let st;
+    try {
+      st = await Pay.passState(store, env.PASS_SECRET, normalize(b.pass));
+    } catch (e) {
+      return send(503, { error: "store" });
+    }
+    if (st === "cancelled") return send(403, { error: "cancelled" });
+    if (st !== "paid") {
+      addFail(ip, now);
+      return send(401, { error: "pass" });
+    }
   }
   if (!dir) return send(500, { error: "server" });
   try {
@@ -110,7 +128,7 @@ async function handler(event) {
   const hd = event.headers || {};
   const ip = hd["x-nf-client-connection-ip"] || String(hd["x-forwarded-for"] || "").split(",")[0].trim();
   const body = event.isBase64Encoded ? Buffer.from(event.body || "", "base64").toString("utf8") : event.body;
-  const r = handle({ method: event.httpMethod, body, ip }, process.env, paidDir());
+  const r = await handle({ method: event.httpMethod, body, ip }, process.env, paidDir(), Date.now(), Pay.blobStore(event));
   return { statusCode: r.status, headers: r.headers, body: r.body };
 }
 
