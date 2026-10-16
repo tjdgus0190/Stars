@@ -2958,3 +2958,274 @@ JS·data*.js는 고치지 않았다. 아래 7절(광고)에서 "지금 지운 �
 - build-dist 통과([초안] 없음·유료 문장 지문 0·배포 점검 통과). 단위 89/89, e2e-saju 41, e2e-book 54, e2e-flow reduced 127·motion 128, e2e-pay 62 — 모두 실패 0.
 - e2e-pay 첫 실행은 61/62였다. 실패 1건(I8 콘솔 오류 0)은 jsdelivr 글꼴 파일(gowun-batang woff2)의 CORS 오류 한 줄로, CDN 쪽 일시 응답이었다(이번 CSS 수정과 무관). 다시 돌려 62/62 통과. 같은 일이 되풀이되면 developer가 볼 것.
 - 참고: 8상태를 `data-state`로 차례로 바꿔 찍을 때 noreq 화면 아래에 빈 테두리가 한 번 보였는데, 직전 상태의 버튼이 사라지는 중에 찍힌 것이다. 실제 흐름(`#paid`, R 없음)으로 찍은 noreq에는 없다.
+
+## 16단계: 친구 궁합 지도 (디자인, H1 · 2026-10-17)
+
+기준: specs/strange-oracle.md 16-2(화면 흐름)·16-3(지도 화면·배치)·16-9(합격 기준). 진행표 `tools/strange-oracle/PROGRESS-16-design.md`.
+
+### 0. 디자인 방향 (결정 87: 화려하되 깔끔, 가독성)
+- 지도는 "밤하늘의 별자리판"처럼 보이게 한다. 금빛 오각형 테두리가 그려지고, 옅은 점선 동심 오각형 3개와 가운데에서 꼭짓점으로 가는 가는 선을 둔다. 친구 아이콘은 순위 차례로 별처럼 떠오른다.
+- 화려함은 처음 그릴 때 한 번(약 1.7초)과 주인 둘레의 느린 후광 하나로만 낸다. 그 뒤로는 정지 화면이고, 글자는 모두 짙은 바탕 위 HTML 글자다(SVG 글자를 쓰지 않아 크기가 고정되고 또렷하다).
+- 색은 기존 동명도 규칙을 따른다. 축 5개와 띠 4개 모두 명도 0.84·채도 0.10이고 hue만 다르다. 낮은 띠도 같은 밝기라서 "나쁜 색"이 없다(8장).
+  - 축: act 금 85, talk 얼음 230, heart 촛불 35, order 숲 150, free 달 295.
+  - 띠: 0 금, 1 청록 190, 2 달, 3 얼음.
+- 그 밖의 언어는 기존 것을 그대로 쓴다: 코드 카드(점선 상자 + 고정폭 글자), pass-enter 접힌 칸, 결제 확인 화면의 `data-state`/`data-when` 방식, 호박색 점선 "쉼" 상자, 공용 dialog.
+
+### 1. 위치와 off 배포판 DOM 0 (16-8)
+| 무엇 | 위치 | off에서 |
+|---|---|---|
+| 지도 요소 전부 | `</main>` 바로 앞 `<template data-js="map-tpl">`, `<!-- map:on -->…<!-- /map:on -->` 안 | 표지째 걷어 냄(build-dist ⑪) |
+| 자리 3곳 `map-slot-hub`·`map-slot-finale`·`map-slot-story` | 입구 `hub-head` 위 / 결말 [나의 이야기 펼치기] 아래 / 나의 이야기 맨 끝(`page-end` 뒤) — 모두 `hidden` 빈 div | 각각 map:on 표지 안 → 걷어 냄 |
+| FAQ 지도 문답 2개 | 입구 FAQ 목록 끝 | map:on 표지 안 |
+| 내 정보 지우기 선택 칸 2개 `.clear-map` | `clear-dialog` 안, 결제 경고 줄 아래 | map:on 표지 안 |
+
+- template의 최상위 요소 11개(꺼내는 단위): ① `svg.map-sprite`(아이콘 24 symbol) ② `section.map-card` ③ `aside.map-invite` ④ `button.map-hub-link` ⑤ `#screen-map-consent` ⑥ `#screen-map` ⑦ `#screen-map-friend` ⑧ `dialog map-key-dialog` ⑨ `dialog map-pop-dialog` ⑩ `dialog map-pick-dialog` ⑪ `dialog map-confirm-dialog`.
+- **①을 먼저 문서에 붙여야** 나머지의 `<use href="#map-iNN">`가 보인다(template 안의 symbol은 참조되지 않는다).
+- ⑤~⑦ 화면과 ⑧~⑪ dialog는 `main` 안 결제 template 뒤에 붙인다. ②는 slot finale·story에 하나씩 **복제**한다. 복제할 때 카드 안 id(`map-card-title`·`map-birth-input`·`map-birth-error`·`map-key-panel`·`map-key-link`·`map-del-panel`·`map-del-link`)와 그것을 가리키는 `for`·`aria-controls`·`aria-labelledby`·`aria-describedby`에 꼬리(`-finale`/`-story`)를 붙여 중복 id를 막는다(H3).
+- 지도 파일(map.js·data-map.js)은 지도 입구를 누르거나 `#join`으로 들어올 때만 불러온다(16-2의 9). template 꺼내기도 그때 한다. 그러면 첫 화면 DOM·요청이 지금과 같다.
+
+### 2. 사용자 흐름
+| 화면 | 목적 | 단 하나의 행동 | 다음 |
+|---|---|---|---|
+| 지도 카드 `create` | 지도가 무엇인지 알기 | [내 친구 지도 만들기] | 나이 확인 → 동의 |
+| 지도 카드 `birth` | 이 탭에 생년월일이 없을 때 나이 확인 | 생년월일 넣고 [확인] | 동의 또는 `young` |
+| 지도 카드 `young` | 만 14세 미만 안내 | [나의 이야기로] | 나의 이야기 |
+| 동의 화면 | 보내는 것 알고 동의 | [보내기] | 주인: 열람 키 카드 / 친구: 친구 결과 |
+| 열람 키 카드 | 키 보관 | 체크 → [지도 보러 가기] | 지도 화면 |
+| 지도 화면 | 친구 궁합 한눈에 | 아이콘·순위 누르기 | 점수 팝업 |
+| 초대 띠(입구) | 누가 초대했는지 | (행동 없음, 평소 시작 버튼) | 일곱 방 |
+| 지도 카드 `join` | 참여 | [궁합 보러 참여하기] | 나이 확인 → 동의 |
+| 친구 결과 | 둘의 궁합 + 삭제 코드 | [복사] | — |
+
+- 막다른 곳 0: 모든 상태에 버튼 또는 [나의 이야기로]가 있다. `locked`·`locked-join`은 [다음 방으로].
+
+### 3. 화면별 명세
+
+**② 지도 카드 `.map-card`** — `data-state` 하나로 바뀐다.
+- 위에서 아래: 오각형 문양(72px, 친구 점 3개가 천천히 반짝임) → eyebrow FRIEND MAP → 제목 → 상태별 본문·버튼 → 접힌 칸 2개.
+
+| data-state | 언제 | 보이는 것 |
+|---|---|---|
+| `locked` | 주인, 일곱 방 미완 | "일곱 방을 모두 마치면 … (n/7)" + [다음 방으로] + 접힌 칸 2 |
+| `locked-join` | 초대받은 친구, 미완 | "n/7 · 일곱 방을 마치면 ○○님 지도에 참여할 수 있어요" + [다음 방으로] |
+| `create` | 7/7, 이 기기에 키 없음 | 한 줄 소개 + [내 친구 지도 만들기](주) + 접힌 칸 2 |
+| `view` | 이 기기에 키 있음 | 한 줄 + [내 친구 지도 보기](주) + 접힌 칸 2 |
+| `join` | 초대받은 친구, 7/7 | 주인 아이콘 + "○○님의 친구 지도예요…" + [궁합 보러 참여하기](주) |
+| `joined` | 이 탭에서 이미 참여 | "이미 참여했어요" + [내 결과 보기] |
+| `birth` | 나이 확인에 생년월일이 없음 | 안내 + 날짜 칸(inputmode numeric) + [확인] + 오류 줄 |
+| `young` | 만 14세 미만 | 안내 상자 + [나의 이야기로] |
+| `down` | 지도 서버 쉼 | 호박색 점선 상자 + [다시 시도] |
+| `loading` | 요청 중 | 가는 막대(무한) |
+
+- 접힌 칸: "다른 기기에서 만든 지도 열기 · 열람 키 넣기"(SOM), "지도에 보낸 내 기록 지우기 · 삭제 코드 넣기"(SOD). 모양·오류 줄은 결제의 열람 코드 칸과 같다. SOP·SOG를 넣으면 오류 줄에 "이건 책 열람 코드/이어가기 코드예요"(문구 키는 developer가 정함).
+- 결말 화면의 "화면을 누르면 넘어가요"가 이 카드를 누를 때 반응하지 않게 해야 한다(H3).
+
+**③ 초대 띠 `.map-invite`** — 입구 `hub-head` 위 한 줄 띠(고정 위치 아님, 시작 버튼을 덮지 않는다). 높이 약 40~60px(2줄까지).
+- `data-state`: `invited`(아이콘 + "○○님이 친구 지도에 초대했어요 · 일곱 방을 마치면 궁합이 보여요") · `mine`(+ [내 친구 지도 보기]) · `joined`(+ [내 결과 보기]) · `closed`(이유 없이 한 문장, 점선·흐림) · `down`(점선·흐림).
+- **H5 확인할 것:** 띠가 있을 때 360×640에서 입구 시작 버튼이 스크롤 없이 보이는지(지금 입구 여백 기준으로 약 50px가 밀린다. 미확인).
+
+**④ 입구 작은 링크 `.map-hub-link`** — 키가 있을 때만. 오른쪽 정렬 알약(높이 36px), 오각형 선 + "내 친구 지도 →".
+
+**⑤ 동의 화면 `#screen-map-consent`** — `data-role`(owner|friend)이 문구만 바꾸고(`data-role-when`), `data-state`(form|sending|unsure|down)가 상태를 바꾼다.
+- 순서(모두 [보내기] 위): 제목 → (쉼 상자) → 별명 칸(비어 있음, 글자 수 `0/8`) + 도움말 + 오류 줄 → 아이콘 24개(6열 × 4줄, 기본 선택 없음) → 고지 표(보내는 것[강조 바탕, 원형 이름 두 개 굵게] · 보내지 않는 것 · 누가 보나요 · 어디에(◯◯) · 얼마나 · 지우는 법) → 선택 사항 한 줄 → 동의 체크(처음 꺼짐) → (unsure 상자) → [보내기](처음 `disabled`) · [보내지 않기].
+- 별명이 막히면: 칸에 `aria-invalid="true"`(빨간 테두리) + `map-nick-error`에 한 줄(`map.nickErr.name` "실명 대신 별명을 적어 주세요" / `birth` "생일 숫자 대신 다른 별명을 적어 주세요" / 그 밖의 거르기) + [보내기] `disabled`. 확인 뒤 보내기는 없다.
+- `sending`: [보내기]에 `aria-busy="true"` → 글자 대신 도는 고리(움직임 줄이기면 정지 고리). `unsure`: 호박색 상자 + 버튼 글자를 `map.consent.resend`로.
+
+**⑥ 지도 화면 `#screen-map`** — `data-state` = loading | ready | empty | notfound | down.
+- 순서: 제목("○○의 친구 지도") + 인원(n/30명) → 오각형 무대 → 안내 한 줄 → 초대 링크 [복사](주)·[공유] → 순위 "가까운 순" → 보관 기간 한 줄 → 지도 관리(접힘) → 면책 → [나의 이야기로].
+- `empty`: 무대에 주인만 + "초대 링크를 보내면 친구가 여기 모여요" + [초대 링크 복사]. `notfound`: 안내 상자 + [새로 만들기]·[이 기기에서 지도 잊기]. `down`: 쉼 상자만(무대 숨김).
+- 초대를 닫았으면 `map-invite-box`에 `.is-closed` → 복사·공유가 숨고 "초대를 닫았어요…" 한 줄.
+- 관리 메뉴(`details`): 열람 키 다시 보기 · 초대 닫기 · 초대 링크 바꾸기 · 열람 키 바꾸기 · 이 기기에서 지도 잊기 · 지도 전체 지우기(빨간 글자). 이미 닫힌 초대면 [초대 닫기]에 `.is-hidden`. 키가 이 기기에 없으면 [열람 키 다시 보기]에 `.is-hidden`.
+
+**⑦ 친구 결과 `#screen-map-friend`** — 제목 "○○님과 나" → 궁합 묶음(`.map-match--card`: 두 아이콘을 띠 색 빛줄로 잇기 → 원형 → 점수(큰 숫자) + 띠 알약 → 다섯 축 막대 → 관계 한 줄 → 잘 맞는 결 / 이렇게 해 보세요 → 상세 궁합 줄) → 삭제 코드 카드(점선, SOD 코드 + [복사] + 안내 + [내 기록 지우기]) → [나도 친구 지도 만들기] → 면책 → [나의 이야기로].
+
+**⑧ 열람 키 카드 `dialog[data-js=map-key-dialog]`** — 코드 카드 모양. eyebrow → 제목 → SOM 코드 상자 + [복사](코드 아래) → 사실 3줄(1줄 보통, **"되찾을 수 없음"·"90일 뒤 자동 삭제" 2줄은 호박색 바탕으로 강조**) → 초대 링크(주소 상자 `user-select: all` + [링크 복사]·[공유]) → 체크 "키를 복사했거나 적어 두었어요"(강조 상자) → [지도 보러 가기](처음 `disabled`).
+- 체크를 켜야 `disabled`가 풀린다. Esc(`cancel` 이벤트)와 바깥 누르기도 체크 전에는 막는다(H3). "열람 키 다시 보기"로 열 때도 같은 규칙(체크는 처음 꺼짐).
+- 코드 글자: 고정폭 15~18px. 하이픈에서만 줄이 바뀌고(`overflow-wrap: normal`, `text-wrap: balance`) 360px에서 두 줄로 나뉜다.
+
+**⑨ 점수 팝업 `dialog[data-js=map-pop-dialog]`** — `.map-match--pop`(친구 카드와 같은 구조, 친구 아이콘 하나 + 별명 제목) + [닫기] + [이 친구 지우기](주인 화면에서만. 친구 쪽에서는 쓰지 않으므로 `.is-hidden`). 막대는 열 때 왼쪽에서 차오른다(축마다 70ms 간격, 0.7초).
+- 가장 높은 축 막대 행에 `.is-top`(굵은 이름·밝은 막대), 가장 낮은 축 행에 `.is-low`(모양은 보통과 같음, 깎아 보이지 않게. 표지일 뿐).
+- 상세 궁합 줄: `map-deep-paid`/`map-deep-free` 둘 다 처음 `.is-hidden`. pay off면 그대로 둔다(16-3의 3). 가격·결제 버튼 없음.
+
+**⑩ 선택 목록 `dialog[data-js=map-pick-dialog]`** — 제목 "여기 모인 친구" + 순위와 같은 줄 모양(아이콘·별명·점수) + [닫기]. 줄을 누르면 팝업으로 바꿔 연다.
+
+**⑪ 확인 대화 `dialog[data-js=map-confirm-dialog]`** — 하나를 동작마다 문구만 바꿔 쓴다. 동작: `eraseFriend`·`eraseMap`·`closeInvite`·`rotateInvite`·`rotateKey`·`forget`·`leave`. 확인 버튼은 지우기·잊기·떠나기면 `btn--danger`(기본), 닫기·바꾸기면 JS가 `btn--primary`로 바꾼다.
+
+**내 정보 지우기 선택 칸** — `clear-map-leave`(이 탭에 삭제 코드가 있을 때), `clear-map-forget`(이 기기에 열람 키가 있을 때)의 `.is-hidden`을 푼다. 둘 다 숨어 있으면 묶음째 안 보인다(CSS `:has`). 체크는 처음 꺼짐.
+
+### 4. 오각형 무대 (16-3의 1·2)
+- **좌표계:** 외접원 반지름 100(꼭짓점 k 방향 = −90° + 72°×k). 무대 viewBox `-130 -130 260 245`이다. 위쪽 30·좌우 30·아래 약 34 단위가 꼭짓점 이름 자리다.
+- **크기:** 무대 가로 = 화면 내용 폭, 최대 360px. 360px 화면에서 320×302px, 480px 화면에서 360×339px(측정). 1단위 = 1.23px(360) / 1.385px(480).
+- **아이콘 지름 16단위 고정**(`--map-d`). 360px에서 20px, 480px에서 22px. 화면이 커져도 단위를 바꾸지 않는다. 누르는 영역은 아이콘 둘레 6px 더(`::before`).
+- **친구 자리:** JS는 견본 `button.map-node`를 복제해 `style="--x:…;--y:…;--i:순번"`(좌표 단위, 소수 둘째 자리)과 `data-band`(0~3)만 넣는다. CSS가 `left = (x+130)/260`, `top = (y+130)/245`로 옮기고 가운데 맞춘다.
+- **꼭짓점 이름 5개:** HTML 글자(12px, 굵게, 축 색, 짙은 알약 바탕)라서 무대 크기와 상관없이 크기가 같다. 자리(단위): 0 (0, −106) 위로 · 1 (101, −37) 위로 · 2 (59, 87) 아래로 · 3 (−59, 87) 아래로 · 4 (−101, −37) 위로. 360px에서 6자까지 잘리지 않는다(측정, "[초안] 함께 움직이기" 13자 견본도 넘침 0).
+  - 1·4번 이름은 반지름 80 바깥이라 친구 아이콘(반지름 ≤ 71 + 8 = 79)과 겹치지 않는다.
+- **주인:** 가운데(0, 0) 같은 지름 16, 금빛 테두리 + 후광 고리가 4.8초에 한 번 숨쉰다. 별명은 제목에만 둔다(가운데 이름표는 친구와 겹치므로 두지 않음).
+- **겹침 처리:** 거리·각도 계산은 16-3의 2 그대로(map.js). 디자인은 겹친 아이콘 선택 목록(⑩)만 맡는다.
+  - 누르기 판정: 무대의 누른 점에서 반지름 `d/2 + 6px` 안에 중심이 있는 친구를 모두 모은다. 1명이면 팝업, 2명 이상이면 선택 목록.
+  - 키보드: 아이콘 버튼은 Tab으로 하나씩 간다(`:focus-visible`이면 흰 고리 + 이름표를 늘 보임). 순위 목록이 같은 일을 하므로 아이콘 버튼에 `tabindex="-1"`을 줘도 된다(H3 판단).
+
+### 5. 이름표 규칙 (30명에서 읽히게) — 합격 기준 "30명 이름표가 읽히는 방법"
+1. 이름표는 11px, **최대 4.6em**(한글 약 4자)까지 보이고 넘치면 말줄임(…)이다. 크기를 줄여서 우겨넣지 않는다(11px 아래는 읽기 어려움).
+2. **순위 차례로**(가까운 친구부터) 하나씩 자리를 정한다. 아이콘 둘레 네 자리를 **아래 b → 위 t → 오른쪽 r → 왼쪽 l** 순서로 시도한다(`data-label` 속성, 기본 아래).
+3. 그 자리의 이름표 상자가 다음 중 하나와 겹치면 다음 자리로 간다.
+   - 다른 친구·주인 아이콘
+   - 이미 보이는 이름표
+   - 꼭짓점 이름
+   - 무대 밖
+4. 네 자리 모두 안 되면 `.is-label-hidden`(이름표 숨김). 이름은 순위 목록에 늘 있다(16-3의 2).
+5. 누르거나 포커스한 아이콘(`.is-selected`/`:focus-visible`)은 숨김이어도 이름표를 짙은 바탕으로 맨 위에 보인다.
+6. 판정은 그린 뒤 `getBoundingClientRect`로 하고, 화면 폭이 바뀌면(`resize`) 다시 한다. 결정적이다(같은 기록·같은 폭이면 같은 결과).
+- **측정(designer 점검용 정적 견본):** 30명, 점수 무작위, 각도는 한 축 근처에 몰리게 둔 조밀한 경우. 360px에서 12/30, 480px에서 14/30 이름표가 보였다.
+  - 이 측정의 규칙 1~4는 developer가 그대로 옮기면 된다.
+  - 친구가 10명 안팎이면 대부분 보인다(미측정, H5에서 0·1·10·30명 확인).
+
+### 6. 움직임과 prefers-reduced-motion
+| 무엇 | 보통 | 움직임 줄이기 |
+|---|---|---|
+| 무대 첫 그리기(JS가 `.map-stage`에 `.is-drawn`) | 테두리 선 그리기 0.9초 → 고리·바큇살 0.7초 → 꼭짓점 이름 차례로 → 아이콘이 순위 차례로 35ms 간격(30명 약 1.7초) | 모두 없음, 바로 최종 모습 |
+| 주인 후광 | 4.8초 숨쉬기(무한, 긴 글 읽는 중 `body.is-reading`이면 멈춤) | 없음 |
+| 카드 문양 점 | 3.6초 반짝임 | 없음 |
+| 팝업·친구 카드 막대 | 0.7초 차오름 | 없음 |
+| 초대 띠 | 위에서 내려오며 나타남 | 없음 |
+| 보내는 중 | 도는 고리 | 정지 고리 |
+| 아이콘 고르기 | 1.06배 + 빛 | 크기 변화 없음 |
+- `.is-drawn`은 지도를 **처음 열 때 한 번만** 붙인다. 지우기·다시 시도 뒤에는 붙이지 않는다(번쩍임 방지).
+
+### 7. 아이콘 24개 (designer 직접 제작, `map-i01`~`map-i24`)
+- 24×24 선 그림(stroke 2, 둥근 끝), 채움 없음 → 작아도 모양이 뭉개지지 않는다.
+  - 01 초승달 · 02 해 · 03 별 · 04 불꽃 · 05 잎 · 06 물결 · 07 산 · 08 열쇠
+  - 09 깃털 · 10 물고기 · 11 고양이 · 12 구름 · 13 번개 · 14 꽃 · 15 나무 · 16 소용돌이
+  - 17 닻 · 18 나침반 · 19 종 · 20 등불 · 21 모래시계 · 22 수정 · 23 나비 · 24 물방울
+- 사람 얼굴·글자·상표 없음. 읽기 프로그램용 이름은 `map.icons.iNN`(copywriter)이다.
+- 시간이 모자라면 12개로 줄인다(16-10의 3): 13~24 label을 지우면 된다(격자는 6열 2줄).
+
+### 8. 텍스트 길이 제한 (copywriter용, 360px · 공백 포함)
+| 키 | 최대 | 넘치면 |
+|---|---|---|
+| `map.axis.*` (꼭짓점·막대 이름) | 6자 | 꼭짓점 이름이 이웃 선에 닿음 / 막대 이름 말줄임 |
+| `map.band.*` | 10자 (16-4) | 순위 줄에서 말줄임 |
+| `map.card.title` | 12자 | 2줄 |
+| `map.card.lead`·`viewLead`·`locked`·`lockedJoin`·`join` | 60자 | 3줄 |
+| `map.card.create`·`view`·`join`·`myResult`·`next` | 14자 | 버튼 한 줄 유지 |
+| `map.keyEnter.link`·`map.delEnter.link` | 26자 | 2줄 |
+| `map.age.ask` | 70자 | 3줄 |
+| `map.age.blocked` | 70자 | 3줄 |
+| `map.down` | 40자 | 2줄 (버튼 줄바꿈) |
+| `map.invite.*`(띠) | 36자 | 띠가 3줄이 되면 입구 시작 버튼이 밀림 — **2줄 이내** |
+| `map.consent.title*` | 14자 | 2줄 |
+| `map.consent.nickHelp` | 36자 | 2줄 |
+| `map.nickErr.*` | 30자 | 2줄 |
+| 고지 표 `*Label`(dt) | 6자 | dt 칸(6.2em)에서 줄바꿈 |
+| 고지 표 값(dd) | 80자 | 줄바꿈(허용) |
+| `map.consent.agree` | 50자 | 3줄 |
+| `map.consent.sendBtn`·`cancel`·`resend` | 10자 | 버튼 한 줄 |
+| `map.key.use`·`lost`·`expire` | 각 70자 | 3줄 |
+| `map.key.ack` | 20자 | 1~2줄 |
+| `map.key.close` | 10자 | 버튼 한 줄 |
+| `map.view.hint` | 60자 | 2줄 |
+| `map.view.empty` | 30자 | 2줄 |
+| `map.view.notFound` | 60자 | 3줄 |
+| `map.manage.*` | 16자 | 한 줄 |
+| `map.confirm.*.title` | 20자 / `.text` 80자 / `.ok` 10자 | 2줄 / 4줄 / 버튼 한 줄 |
+| `pairLine` | 45자 (16-4) | 3줄 |
+| `axisStrong` | 30자 | 2줄 |
+| `axisTip` | 50자 | 3줄 |
+| `map.match.deepPaid`·`deepFree` | 30자 | 2줄 |
+| `map.del.body` | 80자 | 4줄 |
+| 별명(사용자 입력) | 8자 | 지도 이름표 4자 말줄임, 순위·팝업은 전부(순위는 넘치면 말줄임) |
+
+### 9. developer 전달 사항 (H3)
+**상태 규칙**
+- `.map-card`·`.map-invite`·`.map-consent`·`.map-screen`·`.map-friend`는 `data-state`만 바꾼다. 안쪽 `[data-when]`(공백으로 여러 값)에 그 상태가 없으면 CSS가 숨긴다. 보이는 쪽은 원래 display를 유지한다.
+- 동의 화면 주인/친구는 `data-role`.
+- 화면 전환은 기존 `.screen` + `.is-active` 규칙(`screens.mapConsent`·`map`·`mapFriend`로 등록, `applyText`를 꺼낸 요소 모두에 돌림).
+- `disabled`: [보내기]·[지도 보러 가기]·[다시 시도](429 Retry-After 동안).
+- `.is-hidden`: 공용(접힌 칸 패널, 오류 줄, 상세 궁합 줄, 관리 항목, clear 선택 칸, 팝업 [이 친구 지우기]).
+
+**data-js 훅**
+
+| data-js | 어디 | 역할 |
+|---|---|---|
+| `map-tpl` | template | 전부 |
+| `map-slot-hub`·`map-slot-finale`·`map-slot-story` | 자리 | 채우면 `hidden` 해제 |
+| `map-sprite` | ① | 먼저 붙임 |
+| `map-card` | ② | 카드(복제) |
+| `map-card-count` | ② | n (locked·locked-join 두 곳) |
+| `map-owner-name` | ②③⑤ | 주인 별명(여러 곳, 묶음 안에서 모두 채움) |
+| `map-card-next` | ② | 다음 방으로 |
+| `map-create`·`map-view`·`map-join`·`map-my-result` | ② | 주 버튼 |
+| `map-birth-input`·`map-birth-go`·`map-birth-error` | ② | 생년월일 한 번 묻기(메모리만) |
+| `map-age-back` | ② | 나의 이야기로 |
+| `map-retry` | ②⑤⑥⑦ | 다시 시도(쉼 상자 안) |
+| `map-key-toggle`·`map-key-panel`·`map-key-input`·`map-key-go`·`map-key-error` | ② | 열람 키 넣기 |
+| `map-del-toggle`·`map-del-panel`·`map-del-input`·`map-del-go`·`map-del-error`·`map-del-status` | ② | 삭제 코드 넣기 |
+| `map-invite`·`map-invite-icon`(use)·`map-invite-view`·`map-invite-result` | ③ | 초대 띠 |
+| `map-hub-link` | ④ | 입구 링크 |
+| `screen-map-consent` | ⑤ | 화면 |
+| `map-nick`·`map-nick-count`·`map-nick-error` | ⑤ | 별명, 글자 수 "n/8", 막힘 |
+| `map-icons` | ⑤ | 라디오 묶음(`name="map-icon"`, value `i01`~`i24`) |
+| `map-send-arch` | ⑤ | "(주 원형 ○○ · 보조 원형 ○○)" |
+| `map-consent-who-friend` | ⑤ | 친구용 누가 보나요(주인 별명 포함) |
+| `map-agree` | ⑤ | 동의 체크 |
+| `map-send`·`map-consent-cancel` | ⑤ | 보내기·보내지 않기 |
+| `screen-map`·`map-title`·`map-count`·`map-count-max` | ⑥ | 제목·인원 |
+| `map-stage` | ⑥ | `.is-drawn` 붙이는 곳, 누르기 판정 |
+| `map-owner-icon`(use) | ⑥ | 주인 아이콘 |
+| `map-nodes`·`map-node` | ⑥ | 친구 아이콘(견본 복제, `data-id`, `data-band`, `data-label`, `.is-label-hidden`, `.is-selected`) |
+| `map-invite-box`·`map-link-copy`·`map-link-share`·`map-kakao-slot`·`map-link-status` | ⑥ | 초대 링크(`.is-closed`) |
+| `map-rank`·`map-rank-row` | ⑥ | 순위(견본 li 복제, `data-id`, `data-band`) |
+| `map-keep` | ⑥ | 보관 기간 한 줄 |
+| `map-key-show`·`map-invite-close`·`map-invite-rotate`·`map-key-rotate`·`map-forget`·`map-erase-all` | ⑥ | 관리(`map-forget`은 notfound 상자에도) |
+| `map-new` | ⑥ | 새로 만들기(notfound) |
+| `map-disclaimer`·`map-friend-disclaimer` | ⑥⑦ | disclaimer.js 자리 |
+| `map-back`·`map-friend-back` | ⑥⑦ | 나의 이야기로 |
+| `screen-map-friend`·`map-friend-title` | ⑦ | 화면·제목 |
+| `map-match` | ⑦⑨ | 궁합 묶음(`data-band`) — 아래 이름은 **묶음 안에서** 찾는다 |
+| `map-match-icon-a`·`map-match-icon-b`(use) | 〃 | 주인·친구 아이콘(팝업은 b만) |
+| `map-match-name`·`map-match-arch`·`map-match-score`·`map-match-band` | 〃 | 별명·원형·점수·띠 |
+| `map-bars` / `map-bar-val` | 〃 | li 5개 고정 순서(act·talk·heart·order·free), `style="--k;--v"`, `data-axis`, `.is-top`·`.is-low` |
+| `map-match-pairline`·`map-match-strong`·`map-match-tip` | 〃 | 문장 |
+| `map-deep-paid`·`map-deep-free` | 〃 | 상세 궁합 줄(16-3의 3) |
+| `map-del-value`·`map-del-copy`·`map-del-copy-status`·`map-leave` | ⑦ | 삭제 코드 카드 |
+| `map-friend-make` | ⑦ | 나도 만들기 |
+| `map-key-dialog`·`map-key-value`·`map-key-copy`·`map-key-invite`·`map-invite-url`·`map-key-link-copy`·`map-key-link-share`·`map-key-status`·`map-key-ack`·`map-key-close` | ⑧ | 열람 키 카드 |
+| `map-pop-dialog`·`map-pop-close`·`map-pop-erase` | ⑨ | 팝업 |
+| `map-pick-dialog`·`map-pick-list`·`map-pick-row`·`map-pick-close` | ⑩ | 선택 목록 |
+| `map-confirm-dialog`·`map-confirm-title`·`map-confirm-text`·`map-confirm-ok`·`map-confirm-cancel` | ⑪ | 확인 대화 |
+| `clear-map-leave`(+`-check`)·`clear-map-forget`(+`-check`) | clear-dialog | 선택 칸 |
+
+**data-t 키(견본, 키 구조 최종 결정은 H3)**
+- 화면 문구는 `map.*`로 data-map.js에 둔다. 단 FAQ는 `hub.faq.map.0/1.q/a`, 지도 파일을 못 불러왔을 때 줄은 data.js `map.down`이다(16-2의 9).
+- 별명·인원·날짜처럼 값이 섞이는 줄(`map-card-locked`·`map-card-join-text`·`map-title`·`map-keep`·`map-friend-title`·`map-send-arch`·`map-consent-who-friend`)은 data-t 없이 data-js로 두었다. JS가 data-map.js 틀 문장(예: `map.card.locked` "… ({n}/7)")에 값을 끼워 채운다. 키 이름은 H3가 정한다.
+- 축 이름 `map.axis.<키>`는 꼭짓점과 막대 두 곳에 같은 키로 쓴다. 아이콘 이름은 `map.icons.iNN`이다.
+
+**그 밖**
+- 복사 버튼: 결제 코드 카드와 같다. 누르면 `.is-copied` + 글자를 `map.copied`로 바꾸고, 상태 줄에 한 줄을 보인다. 실패하면 코드가 `user-select: all`이라 길게 눌러 고를 수 있다는 한 줄을 보인다.
+- 열람 키·삭제 코드·초대 ID는 이 카드와 6장 예외 2의 저장소에만 둔다. console·분석·URL에 쓰지 않는다.
+- 광고·제휴·가격은 지도 요소 어디에도 없다(16-9의 13).
+
+### 10. 합격 기준 대조 (H1, 코드로 측정 — designer 점검용 정적 견본)
+- 측정 방법: template을 꺼내 붙인 정적 견본(앱 JS 없음), 헤드리스 Edge(cdp.js, 모바일 에뮬레이션)로 쟀다. 견본은 scratchpad에 두었고 저장소에는 넣지 않았다.
+
+| 기준 | 결과 |
+|---|---|
+| 360px 넘침 없음 | 동의·지도(30명)·친구 결과·지도 카드·초대 띠·입구 링크 동시 표시, 가로 넘침 요소 0, scrollWidth 360 (480도 0) |
+| 오각형이 360×640 한 화면 | 지도 화면 위에서 무대 아래 끝까지 491px(+ 상단 막대 52 = 543 < 640). 제목이 2줄이어도 들어감 |
+| 30명 아이콘 오각형 안 | 반지름 ≤ 71 + 8 < 80.9(배치 규칙) — 견본 30명 모두 안 |
+| 아이콘 지름 16 고정 | 360px 20px / 480px 22px, 단위 고정 |
+| 30명 이름표 | 5절 규칙. 조밀한 견본 12/30(360)·14/30(480) 표시, 나머지는 순위·선택 시 보임 |
+| prefers-reduced-motion | 6절 표 전부 `@media (prefers-reduced-motion: reduce)`에 있음 |
+| 광고·가격 0 | 지도 마크업에 광고 슬롯·가격·결제 버튼 없음. 상세 궁합 줄은 처음 숨김 |
+| 태그 짝·중복 id | 추가분의 열고 닫는 태그 수가 HEAD 대비 같은 차이(기존 주석 속 태그 때문) · 문서 중복 id 0(카드 복제 시 꼬리는 1절) |
+| CSS 괄호 짝 | 0 |
+
+- 미확인(H5로 넘김):
+  - 실제 앱 JS로 돌린 화면
+  - 초대 띠가 있을 때 입구 시작 버튼 위치
+  - 0·1·10명일 때의 모습
+  - 다크 외 환경 대비
+
+### 11. 운영자가 확인·판단할 것
+- 지도 화면에서 이름표가 30명 중 절반 이하만 보이는 것을 받아들일지 정해 주세요. 지금 규칙은 순위가 높은 친구부터 이름을 보이고, 나머지는 순위 목록에서 보게 합니다. 글자를 11px보다 줄이지는 않았습니다.
+- 축 색(금·얼음·장밋빛·숲·달)과 띠 색이 "점수가 낮으면 나쁜 색"으로 보이지 않는지 화면에서 확인해 주세요(H5에서 캡처).
