@@ -4073,7 +4073,7 @@
   // (14-4 off, 결정 94) 본 페이지: 결제 화면·열람 코드 칸·책(목차·장·여는/닫는 글)·방 결과의 책 한 줄·입구 책 카드·나의 이야기 책 버튼·FAQ 책 문답을
   // DOM에서 걷어 낸다(숨김이 아니라 제거 → DOM 0개). pay-tpl template은 꺼내지 않고 지운다. "준비 중" 같은 문구도 없다
   function offStrip() {
-    const gone = [reportScr, js("pay-tpl"), js("hub-book"), js("story-book"), ...jsAll("result-book-line")];
+    const gone = [reportScr, js("pay-tpl"), js("hub-book"), js("story-book"), js("book-toc-open"), ...jsAll("result-book-line")]; // 상단 막대의 목차 버튼도 책 요소 (F6 지적)
     const faq = $('[data-t="hub.faq.items.4.q"]');
     if (faq) gone.push(faq.closest(".faq__item"));
     gone.forEach((el) => el && el.remove());

@@ -152,7 +152,7 @@ const PAID = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl", "flo
   await sleep(800);
   try {
     const nOff = b.log.requests.length;
-    const DOM0 = "#screen-report, #screen-deeper, template, [data-js=pay-tpl], [data-js=hub-book], [data-js=result-book-line], [data-js=story-book], [data-js=story-book-link], [data-js=pass-enter], [data-js=book-chapter], [data-t='hub.faq.items.4.q']";
+    const DOM0 = "#screen-report, #screen-deeper, template, [data-js=pay-tpl], [data-js=hub-book], [data-js=result-book-line], [data-js=story-book], [data-js=story-book-link], [data-js=pass-enter], [data-js=book-chapter], [data-t='hub.faq.items.4.q'], [data-js=book-toc-open]";
     const counts = {};
     check("off: 지름길 rooms=7(결제 표시 없음) → 나의 이야기", await skip(OFF, "rooms=7&paid=1", "screen-story"));
     counts.story = await ev(`document.querySelectorAll(${JSON.stringify(DOM0)}).length`);
