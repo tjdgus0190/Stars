@@ -4827,6 +4827,12 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .code-card__double.is-hidden { display: none; }
 .code-card__text { line-height: var(--lh-ui); text-align: left; word-break: keep-all; }
 .code-card__tab { font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-faint); text-align: left; word-break: keep-all; }
+/* G5: 코드가 2개 이상이면 코드 상자를 조금 좁혀 360×640에서도 [책 읽으러 가기]까지 스크롤 없이 보이게 한다(3개 이상은 기존대로 dialog 안 스크롤) */
+.code-card__body:has(.code-card__list > li + li) { gap: var(--space-2); padding-top: var(--space-5); }
+.code-card__list:has(> li + li) { gap: var(--space-2); }
+.code-card__list:has(> li + li) .code-card__item { padding-block: var(--space-2); }
+/* G5: 결제창 팝업 안에서는 상단 막대(입구·내 정보 지우기)를 숨긴다 — 누를 일이 없고 팝업 탭의 sessionStorage를 건드리지 않게(design 15단계 4절) */
+body:has(#screen-paypopup.is-active) .topbar { display: none; }
 
 /* ── 목차의 "내 열람 코드 보기" (책 카드 공유 위, 작은 글 링크) ── */
 .book-home__code { margin-top: var(--space-6); text-align: center; }
