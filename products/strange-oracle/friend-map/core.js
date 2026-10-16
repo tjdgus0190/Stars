@@ -272,7 +272,7 @@
       const allowed = String(env.ALLOWED_ORIGIN || "");
       if (env.MAP_MODE !== "live" || !allowed) return out(503, { error: "off" }); // 설정이 덜 된 채 열리지 않게
       if (!req.origin || req.origin !== allowed) return out(403, { error: "origin" }); // Origin 없음도 403
-      const cors = { "Access-Control-Allow-Origin": allowed, Vary: "Origin" };
+      const cors = { "Access-Control-Allow-Origin": allowed, "Access-Control-Expose-Headers": "Retry-After", Vary: "Origin" }; // Expose: 다른 출처 화면이 429의 Retry-After를 읽게
       if (req.method === "OPTIONS") {
         return { status: 204, headers: Object.assign({ "Access-Control-Allow-Methods": "POST", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Max-Age": "600", "Cache-Control": "no-store" }, cors), body: "" };
       }
