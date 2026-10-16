@@ -13,3 +13,6 @@
 | 9 | I8 글꼴 CORS | 완료 | 재현 안 됨. jsdelivr ACAO 있음. 요청 중단·일시 오류 추정, 배포를 막지 않음 |
 | 10 | off 배포판 | 완료 | J1~J5 통과 |
 | 11 | 보고서 | 완료 | reports/qa-strange-oracle.md 「15단계 QA (G6 1차)」, 판정 수정 필요 |
+
+## 2차 재검수 (2026-10-17)
+- 1f9cc2a 기준. 단위 89/0, e2e-pay 67/0(K1~K3·J6·J7 포함), build-dist 통과, live 가드 사본 시험 A~D 통과 → 판정 배포 가능
