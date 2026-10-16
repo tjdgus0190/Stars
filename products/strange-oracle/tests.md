@@ -814,3 +814,47 @@
 - 같은 코드에서도 첫 화면이 2.4초~5.6초로 크게 흔들린다(이 PC에서 CPU 4배 + 실제 jsdelivr 글꼴). 3회 중앙값이 매번 다를 수 있다.
 - 남은 첫 화면 원인(추적으로 확인): style.css(압축 65KB)가 1.5초쯤 도착 → 첫 배치 약 0.95초(객체 340개인데 느림, 글꼴·text-wrap을 꺼도 크게 줄지 않음 — 원인 미확인) → app.js 실행 약 0.2~0.4초 → 글꼴이 도착할 때마다 다시 배치(① 뒤 100~240ms 긴 작업).
 - 글꼴 CSS를 그리기를 막지 않게(media="print" 뒤 all) 바꿔 보았으나 ①이 줄지 않아(3.34초) 되돌렸다.
+
+## 15단계 · 페이앱 결제 화면 쪽 (G3, 2026-10-16, developer)
+
+### 바뀐 것
+- app.js: [결제하기]를 누르면 R(`crypto.getRandomValues` 128비트, 소문자 16진수 32자)을 만들어 sessionStorage `strange-oracle-payreq`(최근 3개, 새것부터)에 넣는다. 그 **뒤에** `pay.payapp.sdk`를 `<script>`로 한 번 붙인다(실패하거나 10초가 지나면 sdkfail). 결제창 값은 15-2 표의 12칸이고 recvphone은 넘기지 않는다.
+- 결제 확인 `#screen-paycheck` 8상태. 묻기 규칙: 한 회차 30초 동안 2초마다 가장 새 R 하나를 묻고, 나머지 R은 회차 끝([다시 확인]이면 회차 시작)에 한 번씩 묻는다. 회차는 하나만 돌고 한 회차 요청은 최대 17회다.
+  - 400이면 그 R을 버린다.
+  - 429면 busy가 되고 [다시 확인]은 Retry-After초(없으면 60초) 뒤 활성이다.
+  - 503이거나 서버에 닿지 않으면 offline이 되고 R은 남긴다.
+- #paid 복귀: 같은 출처 `window.opener`가 있으면 팝업 화면을 보이고 `postMessage({type:"so-paid"})`만 보낸다. 없으면 이 탭의 R로 묻는다. R이 없으면 noreq다.
+- 코드 카드는 두 번 결제면 코드를 여러 개 보이고 double 줄을 단다. [복사]는 버튼을 눌렀을 때만 클립보드를 쓴다. 목차 "내 열람 코드 보기", 결제 전 화면 "이미 열려 있어요"도 만들었다.
+- book 403 `cancelled`면 pass를 지우고 errors.cancelled 토스트를 보인다. 503이면 pass를 지우지 않는다. "내 정보 지우기"는 payreq·pass를 모두 지운다. payreq가 있으면 확인 창에 경고 줄을 보인다.
+- off에서는 template 두 개와 `clear-warn-pay`를 DOM에서 걷어 낸다.
+- 분석 이벤트 so_pay step: view·start·done·pass_ok·pass_fail(값 없음).
+- data.js `pay.*`를 15-7 키 구조로 바꿨다. 새 문구는 `[초안]`으로 둔다(G4).
+- 가짜 결제창: `tools/strange-oracle/payapp-mock.html`은 designer 견본에서 data-act·data-field 이름만 mock-pay.js 계약에 맞춘 것이다.
+
+### build-dist 새 검사
+- ⑥ `pay.payapp.sdk`가 공식 주소와 정확히 같은지 본다.
+- ⑦ live 가드: live인데 userid·contact가 비었거나 pay 문구·legal에 ◯◯가 있으면 실패한다.
+- ⑧ dist/public에 linkkey·linkval·PASS_SECRET·PAYAPP_·PAY_DEBUG·__dev가 0건이어야 한다.
+- 수동 시험(data.js를 잠시 고쳤다가 되돌림)
+  - mode live + 빈 값: ⑦ 6건으로 실패(userid·contact·pay ◯◯·legal 3종)
+  - userid·contact 채움: ⑦ 4건
+  - ◯◯를 pay에서 지움: legal 3건과 ③만 남음
+  - sdk 주소 변조: ⑥으로 실패
+  - 되돌린 뒤: 통과
+
+### 시험 이름과 수 (2026-10-16 마지막 실행, 모의 서버 8788 `--mode test`)
+| 시험 | 결과 |
+|---|---|
+| `node --test "tools/strange-oracle/*.test.js"` | 89 통과 / 0 실패 |
+| e2e-saju | 41 / 0 |
+| e2e-book | 54 / 0 |
+| e2e-flow reduced · motion | 127 / 0 · 128 / 0 |
+| e2e-pay (15-8의 1~4·7·9~12·14~16·18·25·26, 이동·팝업, off) | 62 / 0 |
+
+- e2e-pay 실측
+  - 회차당 status 요청 14~15회(17 이하). 회차를 3번 되풀이해도 429가 없다.
+  - 모양 틀린 r 11회 뒤 429이고 Retry-After 598초였다.
+  - 팝업 방식은 CDP 진짜 마우스 클릭으로 시험했고 헤드리스 Edge에서 팝업이 막히지 않았다. 실제 브라우저·실제 SDK의 팝업 차단은 미확인이다(G7 ④).
+- 미확인
+  - 헤드리스 클립보드 권한: [복사]는 "복사됨" 또는 "복사 실패" 안내 한 줄 중 하나가 뜨는 것까지만 봤다.
+  - 실제 페이앱 SDK의 함수 이름·인자 모양(setDefault·setParam·payrequest)과 openpaytype 코드 목록

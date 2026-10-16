@@ -11,6 +11,8 @@
 //   ③ 배포판 pay.mode = "off" (결정 94)
 //   ④ 첫 화면(index.html이 정적으로 부르는 파일)이 data-book-*.js를 부르지 않음
 //   ⑤ site.url·GA4 ID 모양
+//   ⑥ (15단계) pay.payapp.sdk = 페이앱 공식 주소   ⑦ live 가드: pay.mode live인데 payapp.userid·pay.contact가 비었거나 pay 문구·legal에 ◯◯
+//   ⑧ dist/public 텍스트에 linkkey·linkval·PASS_SECRET·PAYAPP_·PAY_DEBUG·__dev 0건
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -22,6 +24,8 @@ const PRODUCTS = ["strange-oracle"]; // 배포할 제품
 const HOME = "strange-oracle"; // dist 첫 화면이 이동할 제품
 const PRODUCT_EXCLUDE = new Set(["meta.json", "tests.md", "api", "pay.json", "refund.html"]); // refund.html: legal/ 안 환불 정책(13단계 은퇴, 14-3 legal은 F5)
 const PUBLIC = path.join(DIST, "public");
+const PAYAPP_SDK = "https://lite.payapp.kr/public/api/v2/payapp-lite.js"; // (15-7) 페이앱 공식 SDK 주소 (결정 98: 최신 판, 버전 고정 대상 아님)
+const SECRET_WORDS = ["linkkey", "linkval", "PASS_SECRET", "PAYAPP_", "PAY_DEBUG", "__dev"]; // (15-7) dist/public 텍스트에 0건이어야 하는 낱말
 const og = require("./og-tags.js");
 const fails = [];
 
@@ -59,6 +63,19 @@ for (const slug of PRODUCTS) {
     //    live로 바꿀 때(운영자, specs 54·39·62번과 계획서 live 조건을 마친 뒤): 아래 조건을 "off" 또는 "live"를 허용하도록 함께 고친다. "test"는 언제나 실패여야 한다.
     const mode = T.pay ? T.pay.mode : "off";
     if (mode !== "off") fails.push(`③ products/${slug}/data.js pay.mode = "${mode}" (배포판은 "off"만)`);
+    // ⑥ (15단계 15-7) 페이앱 SDK 주소는 공식 주소 그대로(모의 주소가 섞이지 않게). off에서도 본다
+    const pa = (T.pay && T.pay.payapp) || {};
+    if (pa.sdk !== PAYAPP_SDK) fails.push(`⑥ products/${slug}/data.js pay.payapp.sdk가 공식 주소가 아님 ("${pa.sdk}")`);
+    // ⑦ live 가드(검수 권장 5): 위 ③ off 가드를 운영자가 풀어도 남는다. live인데 운영자 값이 비었거나 ◯◯가 남으면 실패
+    if (mode === "live") {
+      if (!String(pa.userid || "").trim()) fails.push(`⑦ live: products/${slug}/data.js pay.payapp.userid가 비어 있음`);
+      if (!String(T.pay.contact || "").trim()) fails.push(`⑦ live: products/${slug}/data.js pay.contact(문의처)가 비어 있음`);
+      if (JSON.stringify(T.pay).includes("◯◯")) fails.push(`⑦ live: products/${slug}/data.js pay.* 문구에 ◯◯가 남음`);
+      const legal = path.join(ROOT, "products", slug, "legal");
+      if (fs.existsSync(legal))
+        for (const f of fs.readdirSync(legal).filter((n) => /\.html$/.test(n)))
+          if (fs.readFileSync(path.join(legal, f), "utf8").includes("◯◯")) fails.push(`⑦ live: products/${slug}/legal/${f}에 ◯◯가 남음`);
+    }
   }
 }
 
@@ -117,7 +134,11 @@ const publicTexts = [];
       if (/(^|\/)data-book-(?!free\.js$)[^/]*\.js$/.test(rel) || /(^|\/)book-[a-z]+\.js$/.test(rel)) fails.push(`① 옛 책 파일·유료 파일 public/${rel}`);
       if (/__dev/.test(rel)) fails.push(`① public/${rel}`);
       if (/(^|\/)ads\.js$/.test(rel)) fails.push(`① 광고 부품 public/${rel} (14-7의 7)`);
-      if (/\.(js|html|css|json|txt|md|svg|xml)$/.test(e.name)) publicTexts.push(fs.readFileSync(p, "utf8"));
+      if (/\.(js|html|css|json|txt|md|svg|xml)$/.test(e.name)) {
+        const t = fs.readFileSync(p, "utf8");
+        publicTexts.push(t);
+        for (const w of SECRET_WORDS) if (t.includes(w)) fails.push(`⑧ public/${rel}에 "${w}" 있음`); // (15-7) 결제 비밀값 이름·모의 길 0건
+      }
     }
   }
 })(PUBLIC);
@@ -185,4 +206,4 @@ for (const slug of PRODUCTS) {
 if (fails.length) {
   console.error("  실패: 배포 점검 — " + fails.slice(0, 15).join(" | "));
   process.exitCode = 1;
-} else console.log("  배포 점검 통과 (pay.mode off · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
+} else console.log("  배포 점검 통과 (pay.mode off · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");

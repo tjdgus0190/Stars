@@ -128,6 +128,9 @@
   const PAY_MODE = PAY.mode === "test" || PAY.mode === "live" ? PAY.mode : "off";
   const BOOK_ON = PAY_MODE !== "off";
   const PASS_KEY = "strange-oracle-pass"; // 확인된 열람 코드(탭을 닫으면 사라짐). 이어가기 코드에는 넣지 않는다
+  // (15단계 15-2) 결제 확인용 무작위 값 R(128비트, 소문자 16진수 32자). 결제할 때마다 새로, 최근 3개까지 새것부터. 입력값에 준해 다룬다(console·분석·URL·localStorage 금지)
+  const PAYREQ_KEY = "strange-oracle-payreq";
+  let onClearPay = null; // 결제 화면이 붙으면(test·live) 묻기 회차·코드 목록을 멈추고 비우는 함수
   // 1~39 로마 숫자 (신탁 번호 I~XXXII)
   const roman = (n) => "X".repeat(Math.floor(n / 10)) + ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n % 10];
   const chapterOf = (room) => CHAPTER_ORDER.indexOf(room) + 1;
@@ -233,9 +236,11 @@
       window.sessionStorage.removeItem("strange-oracle-bookmark"); // (13단계) 이어 읽기 장 id·쪽 번호
       window.sessionStorage.removeItem("strange-oracle-receipt"); // 12단계까지의 영수증 코드 칸
       window.sessionStorage.removeItem(PASS_KEY); // (14-4) 열람 코드도 "내 정보 지우기"로 함께 지운다
+      window.sessionStorage.removeItem(PAYREQ_KEY); // (15-2) 결제 확인용 R도 지운다 → 이 탭에서 책이 자동으로 열리지 않음(확인 창 경고 줄)
     } catch (e) {
       /* 무시 */
     }
+    if (onClearPay) onClearPay();
     state = emptyState();
     Object.keys(editing).forEach((k) => (editing[k] = false));
     $$("input[data-js], textarea[data-js]").forEach((el) => (el.type === "checkbox" || el.type === "radio" ? (el.checked = false) : (el.value = "")));
@@ -611,7 +616,16 @@
 
   // ───────── 내 정보 지우기 ─────────
   const dialog = js("clear-dialog");
-  js("clear-open").addEventListener("click", () => (dialog.showModal ? dialog.showModal() : dialog.setAttribute("open", "")));
+  js("clear-open").addEventListener("click", () => {
+    let req = false;
+    try {
+      req = Boolean(JSON.parse(window.sessionStorage.getItem(PAYREQ_KEY) || "[]").length); // (15-2) 결제 확인 중일 때만 경고 줄
+    } catch (e) {
+      /* 저장소 없음 */
+    }
+    show(js("clear-warn-pay"), req);
+    dialog.showModal ? dialog.showModal() : dialog.setAttribute("open", "");
+  });
   js("clear-cancel").addEventListener("click", () => dialog.close());
   js("clear-confirm").addEventListener("click", () => {
     clearAll();
@@ -2796,7 +2810,11 @@
         const j = await r.json();
         return j && j.file === file && j.data ? { ok: true, data: j.data } : { kind: "offline" };
       }
-      return { kind: r.status === 401 || r.status === 400 ? "fail" : r.status === 429 ? "wait" : "offline" };
+      if (r.status === 403) {
+        const j = await r.json().catch(() => null); // (15-3) 취소된 결제의 코드 → 403 { error: "cancelled" }
+        return { kind: j && j.error === "cancelled" ? "cancelled" : "fail" };
+      }
+      return { kind: r.status === 401 || r.status === 400 ? "fail" : r.status === 429 ? "wait" : "offline" }; // 503(저장소 장애 포함)·그 밖 = offline: 코드를 지우지 않는다(검수 E)
     } catch (e) {
       return { kind: "offline" };
     }
@@ -2808,7 +2826,8 @@
       paidLoading[file] = callBook(passNow(), file).then((r) => {
         delete paidLoading[file];
         if (!r.ok) {
-          if (r.kind === "fail") writePass(""); // 코드가 더는 통하지 않음(폐기 등) → 결제 전 상태로
+          if (r.kind === "fail" || r.kind === "cancelled") writePass(""); // 코드가 더는 통하지 않음(폐기·취소) → 결제 전 상태로. 503은 지우지 않음
+          if (r.kind === "cancelled") toast(PAY.pass.errors.cancelled || "");
           throw new Error(r.kind);
         }
         window[PAID_GLOBAL[file]] = r.data;
@@ -3041,6 +3060,7 @@
     show(js("book-resume"), ok);
     if (ok) js("book-resume-text").textContent = fill(T.book.toc.resume, { chapter: chapterName(bm.id), page: bm.page });
     Disclaimer.mount(js("disclaimer-slot", reportScr));
+    show(js("book-code-row"), Boolean(passNow())); // (15-5) 이 탭에 열람 코드가 있을 때만 "내 열람 코드 보기"
   }
   function showToc() {
     clearForms();
@@ -4073,17 +4093,21 @@
   // (14-4 off, 결정 94) 본 페이지: 결제 화면·열람 코드 칸·책(목차·장·여는/닫는 글)·방 결과의 책 한 줄·입구 책 카드·나의 이야기 책 버튼·FAQ 책 문답을
   // DOM에서 걷어 낸다(숨김이 아니라 제거 → DOM 0개). pay-tpl template은 꺼내지 않고 지운다. "준비 중" 같은 문구도 없다
   function offStrip() {
-    const gone = [reportScr, js("pay-tpl"), js("hub-book"), js("story-book"), js("book-toc-open"), ...jsAll("result-book-line")]; // 상단 막대의 목차 버튼도 책 요소 (F6 지적)
+    const gone = [reportScr, js("pay-tpl"), js("pay-toc-tpl"), js("clear-warn-pay"), js("hub-book"), js("story-book"), js("book-toc-open"), ...jsAll("result-book-line")]; // 상단 막대의 목차 버튼도 책 요소 (F6 지적)
     const faq = $('[data-t="hub.faq.items.4.q"]');
     if (faq) gone.push(faq.closest(".faq__item"));
     gone.forEach((el) => el && el.remove());
     delete screens.report;
   }
 
-  // ═════════ (14단계 14-4) 결제 전 화면 (test·live에서만 template에서 꺼냄) ═════════
-  // 순서 고정: 1 받는 것 → 2 가격 → 3 구매처 → 4 열람 방법 → 5 환불·청약철회 → 6 동의 → 7 구매하러 가기 → 8 열람 코드 넣기.
-  // 결제 SDK·토스 로더·영수증 코드(SO1)는 없다. 열람 코드 칸은 이어가기 칸 규칙(제출 폼 아님, name 없음, autocomplete off, console·주소·분석에 넣지 않음).
+  // ═════════ (14·15단계) 결제 — 결제 전 화면 · 결제 확인 · 팝업 · 코드 카드 (test·live에서만 template에서 꺼냄) ═════════
+  // 결제 전 순서 고정(15-4): 1 받는 것 → 2 가격 → 3 결제 방법·판매자 → 4 열람 방법 → 5 환불 → 6 동의 → 7 결제하기 → 8 열람 코드 넣기 → 판매자 정보 줄.
+  // 페이앱 SDK는 [결제하기]를 누른 뒤에만 <script>로 한 번 붙인다(CLAUDE.md 3장). 첫 화면·목차·결제 전 화면에서는 부르지 않는다.
+  // 개인정보 (6장, 15-8의 11~14): 결제창에 넘기는 값은 15-2 표의 값뿐(이름·생일·결과 없음, 휴대폰 번호는 넘기지 않음).
+  //  R(결제 확인용 무작위 값)·P(열람 코드)는 sessionStorage(payreq·pass)에만 둔다. console·분석·주소·localStorage·쿠키에 넣지 않는다.
+  //  함수 status로는 { r } 한 칸만, 팝업의 postMessage에는 { type }만 보낸다. 분석 이벤트는 단계 이름뿐.
   let payScr = null;
+  let payReturn = null; // #paid 복귀 처리(시작 때 부름). off면 null
   function goPay() {
     if (payScr) go("deeper");
   }
@@ -4092,17 +4116,35 @@
     tplEl.after(tplEl.content.cloneNode(true));
     tplEl.remove();
     payScr = js("screen-deeper");
+    const checkScr = js("screen-paycheck");
+    const popScr = js("screen-paypopup");
+    const codeDlg = js("pay-code-dialog");
     screens.deeper = payScr;
-    applyText(payScr);
+    screens.paycheck = checkScr;
+    screens.paypopup = popScr;
+    [payScr, checkScr, popScr, codeDlg].forEach((el) => applyText(el));
+    const tocTpl = js("pay-toc-tpl"); // 목차 "내 열람 코드 보기" 줄
+    if (tocTpl) {
+      tocTpl.after(tocTpl.content.cloneNode(true));
+      tocTpl.remove();
+      applyText(js("book-code-row"));
+    }
+    const PA = PAY.payapp || {};
     const pass = { input: js("pass-input", payScr), err: js("pass-error", payScr), status: js("pass-status", payScr), panel: js("pass-panel", payScr), toggle: js("pass-toggle", payScr), go: js("pass-go", payScr) };
-    const agree = js("pay-agree", payScr), buy = js("pay-buy", payScr);
-    const store = (PAY.stores && PAY.stores.ko) || {};
-    const syncBuy = () => buy.setAttribute("aria-disabled", String(!store.url || !agree.checked));
+    const agree = js("pay-agree", payScr), buy = js("pay-buy", payScr), act = js("pay-act", payScr);
+    const syncBuy = () => buy.setAttribute("aria-disabled", String(!PA.userid || !agree.checked));
     const passMsg = (kind) => {
       pass.err.dataset.kind = kind || "";
       pass.err.textContent = kind ? PAY.pass.errors[kind] || "" : "";
-      show(pass.err, Boolean(kind)); // 문구 칸이 비어 있어도(F5 전) 자리는 보인다
+      show(pass.err, Boolean(kind)); // 문구 칸이 비어 있어도 자리는 보인다
     };
+    // 판매자 정보 줄·문의처·시험 띠 (한 번만)
+    show(js("pay-seller-reg", payScr), Boolean(PAY.seller && PAY.seller.reg));
+    show(js("pay-test-band", payScr), PAY_MODE === "test");
+    js("paycheck-test-band", checkScr).hidden = PAY_MODE !== "test";
+    js("paycheck-contact-value", checkScr).textContent = PAY.contact || "";
+    ["paycheck-contact", "paycheck-contact-late", "paycheck-contact-noreq"].forEach((n) => show(js(n, checkScr), Boolean(PAY.contact)));
+
     enter.deeper = () => {
       const list = js("pay-chapters", payScr);
       list.textContent = "";
@@ -4123,12 +4165,9 @@
       });
       js("pay-total", payScr).textContent = fill(PAY.what.total || "", { n: (Math.round(sum / 1000) / 10).toLocaleString("ko-KR") });
       js("pay-price", payScr).textContent = fill(PAY.price.text || "", { price: comma(PAY.amount) });
-      js("pay-price-unit", payScr).textContent = PAY.price.unit || "";
-      js("pay-store-name", payScr).textContent = store.name || "";
-      show(js("pay-test-band", payScr), PAY_MODE === "test");
-      show(js("pay-refund-link", payScr), false); // legal/refund.html은 13단계에 은퇴해 배포 폴더에 없다 → 링크 숨김 (14-3 legal은 F5)
-      buy.href = store.url || "#";
-      show(js("pay-store-empty", payScr), !store.url);
+      show(js("pay-refund-link", payScr), false); // legal/refund.html은 지금 배포 폴더에서 빠진다(build-dist) → 본문 링크 숨김. 결제 문단은 G4
+      act.classList.toggle("is-opened", Boolean(passNow())); // (검수 권장 4) 이 탭에서 책이 이미 열려 있으면 결제 버튼 대신 안내
+      show(js("pay-store-empty", payScr), !PA.userid);
       syncBuy();
       passMsg("");
       show(pass.status, false);
@@ -4140,47 +4179,342 @@
       passMsg("");
     };
     agree.addEventListener("change", syncBuy);
-    buy.addEventListener("click", (e) => {
-      if (buy.getAttribute("aria-disabled") === "true") return e.preventDefault();
-      track("so_pay", { step: "store" });
-    });
-    if (PAY.verify === "none") js("pass-enter", payScr).remove();
-    else {
-      pass.toggle.addEventListener("click", () => {
-        const open = pass.toggle.getAttribute("aria-expanded") !== "true";
-        pass.toggle.setAttribute("aria-expanded", String(open));
-        show(pass.panel, open);
-        if (open) pass.input.focus();
+
+    // ── R 목록 (sessionStorage strange-oracle-payreq, 최근 3개 새것부터)
+    const readReq = () => {
+      try {
+        const a = JSON.parse(window.sessionStorage.getItem(PAYREQ_KEY) || "[]");
+        return Array.isArray(a) ? a.filter((r) => /^[0-9a-f]{32}$/.test(r)).slice(0, 3) : [];
+      } catch (e) {
+        return [];
+      }
+    };
+    const writeReq = (list) => {
+      try {
+        if (list.length) window.sessionStorage.setItem(PAYREQ_KEY, JSON.stringify(list.slice(0, 3)));
+        else window.sessionStorage.removeItem(PAYREQ_KEY);
+      } catch (e) {
+        /* 저장이 막힌 브라우저: 페이지 이동 방식 복귀는 "찾지 못함"이 된다 */
+      }
+    };
+    const dropReq = (r) => writeReq(readReq().filter((x) => x !== r));
+    const newReq = () => {
+      const b = new Uint8Array(16);
+      window.crypto.getRandomValues(b);
+      const r = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
+      writeReq([r, ...readReq().filter((x) => x !== r)]);
+      return r;
+    };
+
+    // ── 결제 확인 화면 상태 (data-state 하나, design 15단계 3절)
+    const checkBtn = js("paycheck-check", checkScr), retryBtn = js("paycheck-retry", checkScr);
+    let retryTimer = 0;
+    const setCheck = (st) => {
+      checkScr.dataset.state = st;
+      checkBtn.disabled = st === "checking"; // 회차 중에는 [결제 확인하기] 비활성(회차 겹침 없음)
+      if (st !== "busy") {
+        clearTimeout(retryTimer);
+        retryBtn.disabled = false;
+      }
+    };
+
+    // ── 페이앱 SDK: 버튼을 누른 뒤에만, 한 번만. 실패(오류·10초)면 sdkfail
+    let sdkLoading = null;
+    function loadSdk() {
+      if (window.PayApp) return Promise.resolve();
+      if (sdkLoading) return sdkLoading;
+      sdkLoading = new Promise((ok, no) => {
+        const s = document.createElement("script");
+        let done = false;
+        let t = 0;
+        const fail = () => {
+          if (done) return;
+          done = true;
+          clearTimeout(t);
+          s.remove();
+          sdkLoading = null;
+          no(new Error("sdk"));
+        };
+        t = setTimeout(fail, 10000);
+        s.onload = () => {
+          if (!window.PayApp) return fail();
+          done = true;
+          clearTimeout(t);
+          ok();
+        };
+        s.onerror = fail;
+        s.src = PA.sdk;
+        document.head.append(s);
       });
-      let busy = false;
-      const submit = async () => {
-        if (busy) return;
-        const r = window.PayCode.Pass.check(pass.input.value);
-        if (r.error) return passMsg(r.error); // receipt(SO1) · resume(SOG) · shape — 서버에 묻지 않는다
-        busy = true;
-        pass.go.disabled = true;
-        passMsg("");
-        const res = await callBook(r.pass, "arch");
-        busy = false;
-        pass.go.disabled = false;
-        if (!res.ok) {
-          track("so_pay", { step: "pass_fail" });
-          return passMsg(res.kind);
-        }
-        writePass(r.pass);
-        window.BOOK_ARCH = res.data;
-        pass.input.value = "";
-        track("so_pay", { step: "pass_ok" });
-        toast(PAY.pass.ok || "");
-        go("report");
-      };
-      pass.go.addEventListener("click", submit);
-      pass.input.addEventListener("keydown", (e) => {
-        if (e.key !== "Enter") return;
-        e.preventDefault();
-        submit();
-      });
+      return sdkLoading;
     }
+    // 결제창 값 (15-2 표). 사이트 출처: live는 site.url(배포 주소)에서, 그 밖(test = 모의 서버)·빈 값은 지금 출처
+    const siteOrigin = () => {
+      try {
+        return PAY_MODE === "live" && T.site && T.site.url ? new URL(T.site.url).origin : location.origin;
+      } catch (e) {
+        return location.origin;
+      }
+    };
+    function openCheckout(r) {
+      const P = window.PayApp;
+      const o = siteOrigin();
+      P.setDefault("userid", PA.userid);
+      P.setDefault("shopname", PA.shopname || "");
+      const v = { goodname: PA.goodname, price: String(PAY.amount), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return`, var1: r, var2: PA.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y" };
+      Object.keys(v).forEach((k) => P.setParam(k, v[k]));
+      P.payrequest();
+    }
+    function startPay(r) {
+      setCheck("wait");
+      if (currentName !== "paycheck") go("paycheck");
+      loadSdk().then(
+        () => openCheckout(r),
+        () => setCheck("sdkfail")
+      );
+    }
+    buy.addEventListener("click", () => {
+      if (buy.getAttribute("aria-disabled") === "true" || passNow()) return;
+      track("so_pay", { step: "start" });
+      startPay(newReq()); // 누를 때마다 새 R → 저장한 뒤에야 SDK
+    });
+    js("paycheck-sdk-retry", checkScr).addEventListener("click", () => startPay(readReq()[0] || newReq()));
+
+    // ── 상태 묻기 (15-2 묻기 규칙): 한 회차 30초, 2초마다 가장 새 R 하나(약 15회) + 나머지 R(최대 2개)은 회차 끝(또는 [다시 확인] 때) 한 번씩 → 최대 17회.
+    //    회차는 한 번에 하나만. 응답: paid(P) · cancelled · pending · 400 · 429(Retry-After) · 503/닿지 않음
+    async function askStatus(r) {
+      try {
+        const res = await fetch("/api/pay/status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ r }), cache: "no-store", credentials: "omit" });
+        if (res.status === 429) {
+          const s = parseInt(res.headers.get("Retry-After") || "", 10);
+          return { err: "busy", after: s > 0 && s < 3600 ? s : 60 };
+        }
+        if (res.status === 400) return { err: "bad" };
+        if (res.status !== 200) return { err: "offline" };
+        const j = await res.json();
+        if (j && j.state === "paid" && window.PayCode.Pass.looksPass(j.pass || "")) return { state: "paid", pass: window.PayCode.Pass.normalize(j.pass) };
+        if (j && (j.state === "cancelled" || j.state === "pending")) return { state: j.state };
+        return { err: "offline" };
+      } catch (e) {
+        return { err: "offline" };
+      }
+    }
+    const ROUND_MS = 30000, ASK_GAP = 2000;
+    let roundGen = 0, roundOn = false;
+    const stopRound = () => {
+      roundGen++;
+      roundOn = false;
+    };
+    const pause = (ms) => new Promise((ok) => setTimeout(ok, ms));
+    async function runRound(restFirst) {
+      if (roundOn) return; // 회차 겹침 없음
+      if (!readReq().length) return setCheck("noreq");
+      roundOn = true;
+      const gen = ++roundGen;
+      setCheck("checking");
+      const paid = [];
+      let rest = false;
+      // 나머지 R 한 번씩. 오류면 그 결과를 돌려준다
+      const askRest = async () => {
+        rest = true;
+        for (const r of readReq().slice(1)) {
+          const x = await askStatus(r);
+          if (gen !== roundGen) return null;
+          if (x.err === "bad") dropReq(r);
+          else if (x.err) return x;
+          else if (x.state === "paid") {
+            paid.push(x.pass);
+            dropReq(r);
+          } else if (x.state === "cancelled") dropReq(r);
+        }
+        return null;
+      };
+      const end = (x) => {
+        if (gen !== roundGen) return;
+        roundOn = false;
+        if (paid.length) return payDone(paid);
+        if (x && x.err === "busy") return busyFor(x.after);
+        if (x && x.err) return setCheck("offline"); // R은 그대로 둔다(검수 E)
+        setCheck(x && x.state ? x.state : readReq().length ? "late" : "noreq");
+      };
+      const t0 = Date.now();
+      if (restFirst) {
+        const e = await askRest();
+        if (gen !== roundGen) return;
+        if (e) return end(e);
+      }
+      for (;;) {
+        const r = readReq()[0];
+        if (!r) break;
+        const x = await askStatus(r);
+        if (gen !== roundGen) return;
+        if (x.err === "bad") {
+          dropReq(r);
+          continue;
+        }
+        if (x.err) return end(x);
+        if (x.state === "paid") {
+          paid.unshift(x.pass);
+          dropReq(r);
+          if (!rest) await askRest(); // 같은 탭에서 두 번 결제했는지 (코드를 모두 보인다)
+          return end(null);
+        }
+        if (x.state === "cancelled") {
+          dropReq(r);
+          return end({ state: "cancelled" });
+        }
+        if (Date.now() - t0 + ASK_GAP >= ROUND_MS) break;
+        await pause(ASK_GAP);
+        if (gen !== roundGen) return;
+      }
+      if (!rest) {
+        const e = await askRest();
+        if (gen !== roundGen) return;
+        if (e) return end(e);
+      }
+      end(null);
+    }
+    function busyFor(sec) {
+      setCheck("busy");
+      retryBtn.disabled = true; // Retry-After초(없으면 60초) 뒤 활성
+      clearTimeout(retryTimer);
+      retryTimer = setTimeout(() => (retryBtn.disabled = false), sec * 1000);
+    }
+    checkBtn.addEventListener("click", () => runRound(false));
+    retryBtn.addEventListener("click", () => {
+      if (!retryBtn.disabled) runRound(true);
+    });
+    leave.paycheck = () => stopRound(); // [돌아가기]·[목차로]: 묻기를 멈춘다. R은 지우지 않는다(늦은 통보 대비)
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && currentName === "paycheck" && ["wait", "late", "offline"].includes(checkScr.dataset.state)) runRound(false);
+    });
+    // 팝업 복귀 신호: 같은 출처, { type: "so-paid" }만
+    window.addEventListener("message", (e) => {
+      if (e.origin !== location.origin || !e.data || e.data.type !== "so-paid") return;
+      if (currentName !== "paycheck") go("paycheck");
+      runRound(false);
+    });
+    js("paycheck-to-pass", checkScr).addEventListener("click", () => {
+      go("deeper");
+      pass.toggle.setAttribute("aria-expanded", "true");
+      show(pass.panel, true);
+      setTimeout(() => pass.input.focus(), 400);
+    });
+    js("paypopup-close", popScr).addEventListener("click", () => window.close());
+
+    // ── 결제완료 → writePass(P) → 책 → 코드 카드 (두 번 결제면 코드를 모두)
+    let issued = []; // 이 화면에서 받은 코드(메모리만)
+    function payDone(codes) {
+      stopRound();
+      const fresh = codes.filter((c, i) => codes.indexOf(c) === i);
+      issued = fresh.concat(issued.filter((c) => !fresh.includes(c)));
+      writePass(fresh[0]);
+      track("so_pay", { step: "done" });
+      coverNext = null;
+      go("report");
+      openCodeCard();
+    }
+    // ── 코드 카드 (15-5)
+    const codeList = js("code-list", codeDlg);
+    const codeTpl = js("code-item", codeDlg).cloneNode(true);
+    const codeStatus = js("code-status", codeDlg);
+    function openCodeCard() {
+      const now = passNow();
+      const codes = (now ? [now] : []).concat(issued.filter((c) => c !== now));
+      if (!codes.length) return;
+      codeList.textContent = "";
+      codes.forEach((c) => {
+        const li = codeTpl.cloneNode(true);
+        js("code-value", li).textContent = window.PayCode.Pass.pretty(c);
+        const btn = js("code-copy", li);
+        btn.textContent = PAY.issued.copy || "";
+        btn.classList.remove("is-copied");
+        btn.addEventListener("click", () => {
+          const ok = () => {
+            btn.classList.add("is-copied");
+            btn.textContent = PAY.issued.copied || "";
+            codeStatus.textContent = PAY.issued.copied || "";
+            show(codeStatus, true);
+          };
+          const no = () => {
+            codeStatus.textContent = PAY.issued.copyFail || "";
+            show(codeStatus, true);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(window.PayCode.Pass.pretty(c)).then(ok, no);
+          else no();
+        });
+        codeList.append(li);
+      });
+      show(js("code-double", codeDlg), codes.length > 1);
+      codeStatus.textContent = "";
+      show(codeStatus, false);
+      if (codeDlg.open) return;
+      if (codeDlg.showModal) codeDlg.showModal();
+      else codeDlg.setAttribute("open", "");
+    }
+    js("code-close", codeDlg).addEventListener("click", () => (codeDlg.close ? codeDlg.close() : codeDlg.removeAttribute("open")));
+    js("pay-opened-code", payScr).addEventListener("click", openCodeCard);
+    const showCodeBtn = js("book-show-code");
+    if (showCodeBtn) showCodeBtn.addEventListener("click", openCodeCard);
+    onClearPay = () => {
+      stopRound();
+      issued = [];
+    };
+
+    // ── #paid 복귀(15-2): 팝업이면 원래 탭에 신호만(이 창의 저장소는 읽지 않음), 아니면 이 탭의 R로 묻기
+    payReturn = () => {
+      let opener = null;
+      try {
+        if (window.opener && window.opener !== window && window.opener.location.origin === location.origin) opener = window.opener;
+      } catch (e) {
+        opener = null; // 다른 출처: 페이지 이동 방식으로
+      }
+      if (opener) {
+        try {
+          opener.postMessage({ type: "so-paid" }, location.origin);
+        } catch (e) {
+          /* 원래 창이 닫힘 */
+        }
+        show(js("topbar"), false); // 팝업 안에서는 상단 막대(내 정보 지우기 등)를 숨긴다
+        return { first: "paypopup" };
+      }
+      return { first: "paycheck", after: () => runRound(false) };
+    };
+
+    pass.toggle.addEventListener("click", () => {
+      const open = pass.toggle.getAttribute("aria-expanded") !== "true";
+      pass.toggle.setAttribute("aria-expanded", String(open));
+      show(pass.panel, open);
+      if (open) pass.input.focus();
+    });
+    let passBusy = false;
+    const submit = async () => {
+      if (passBusy) return;
+      const r = window.PayCode.Pass.check(pass.input.value);
+      if (r.error) return passMsg(r.error); // receipt(SO1) · resume(SOG) · shape — 서버에 묻지 않는다
+      passBusy = true;
+      pass.go.disabled = true;
+      passMsg("");
+      const res = await callBook(r.pass, "arch");
+      passBusy = false;
+      pass.go.disabled = false;
+      if (!res.ok) {
+        track("so_pay", { step: "pass_fail" });
+        return passMsg(res.kind); // fail · wait · offline · cancelled(15-3)
+      }
+      writePass(r.pass);
+      window.BOOK_ARCH = res.data;
+      pass.input.value = "";
+      track("so_pay", { step: "pass_ok" });
+      toast(PAY.pass.ok || "");
+      go("report");
+    };
+    pass.go.addEventListener("click", submit);
+    pass.input.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      submit();
+    });
   }
 
   // ═════════ 7단계: 여섯 문이 모이는 결말 (spec 7-6) ═════════
@@ -4221,7 +4555,7 @@
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done"], chapter: BOOK_IDS }, // (13단계 13-8) 옛 preview·pay_click은 뺌
-    so_pay: { step: ["view", "store", "pass_ok", "pass_fail"] }, // (14-4) 단계 이름만. 코드·결과 코드 없음 (off에서는 부르지 않음)
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
   };
   let booted = false;
   let externalOn = false;
@@ -4296,7 +4630,13 @@
   } catch (e) {
     /* 저장소 없음 */
   }
-  if (BOOK_ON && (["report", "deeper", "unseal"].includes(hash) || oldReceipt)) first = hash === "deeper" ? "deeper" : "report";
+  // (15-2) 결제 복귀 #paid(페이앱 → /api/pay/return → 303)와 결제 확인 화면 새로고침(#paycheck): 팝업이면 팝업 화면, 아니면 이 탭의 R로 묻기
+  let payAfter = null;
+  if (BOOK_ON && payReturn && (hash === "paid" || hash === "paycheck")) {
+    const pr = payReturn();
+    first = pr.first;
+    payAfter = pr.after || null;
+  } else if (BOOK_ON && (["report", "deeper", "unseal"].includes(hash) || oldReceipt)) first = hash === "deeper" ? "deeper" : "report";
   else if (filledRooms().length && hash) {
     if (hash === "story") first = "story";
     else if (CHAPTER_ORDER.includes(hash)) first = roomTarget(hash);
@@ -4309,7 +4649,8 @@
   // 결제는 은퇴했으므로 ?pay=… 값은 읽지도 보내지도 않는다.
   bookBoot();
   if (location.search) history.replaceState(history.state, "", location.pathname + location.hash);
-  go(first, { instant: true, replace: true });
+  go(first, { instant: true, replace: true }); // #paid는 화면 이름(#paycheck·#paypopup)으로 바뀐다(R·결제 값은 주소에 없음)
+  if (payAfter) payAfter();
   booted = true;
   startExternal();
 

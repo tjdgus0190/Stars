@@ -7,6 +7,12 @@
   command = "node tools/build-dist.js"   # 유료 문장 지문 누출·pay.mode off·api 폴더 검사가 실패하면 빌드가 멈춰 배포되지 않는다
   publish = "dist/public"
 
+# (15단계 G3) Node 버전: @netlify/blobs 11은 Node 22.12 이상이 필요하다(package.json에는 engines 칸이 없다).
+# NODE_VERSION은 빌드 이미지의 Node 버전이다. 함수 실행 환경도 이 값(22)을 따르는지는 미확인 — Netlify 문서상 함수는 빌드 Node 버전을 따르는 것이 기본이나,
+# 운영자가 첫 배포 뒤 Netlify 화면(Functions → 함수 pay → Runtime)에서 Node.js 22 이상인지 확인한다. 아니면 환경 변수 AWS_LAMBDA_JS_RUNTIME = "nodejs22.x"를 Netlify 화면에서 넣는다(미확인).
+[build.environment]
+  NODE_VERSION = "22"
+
 [functions]
   directory = "netlify/functions"
   # 함수 book이 읽을 유료 원본. 함수 묶음에만 들어가고 정적 주소로는 내려받을 수 없다.
