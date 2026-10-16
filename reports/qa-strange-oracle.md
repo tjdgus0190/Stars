@@ -999,3 +999,110 @@
 
 ### meta.json
 - status "검수통과"를 확인했다(그대로 둠).
+
+## 15단계 QA (G6 1차, 2026-10-16)
+
+### 판정: 수정 필요
+대상 커밋은 09bde57(G5 통과)이다. 결제 함수·화면·6장 처리는 기준을 모두 만족했다. 다만 15-8 합격 기준 15(legal 3종 결제 문단이 test에서 보임)를 만족하지 못했고, CREDITS.md에 새 서버 라이브러리가 빠져 있다(P7). 그래서 아래 2건을 고친 뒤 2차 재검수를 해야 한다.
+
+### 직접 돌린 시험 (모의 서버 8788 `--mode test`)
+- 모의 서버는 마지막 커밋보다 먼저 켜진 상태였다. 그래서 끄고 build-dist 뒤 다시 켰다. 포트 8787은 건드리지 않았다.
+
+| 시험 | 결과 |
+|---|---|
+| `node tools/build-dist.js` | 통과: [초안] 없음, 유료 문장 지문 4,637개 → 0건, pay.mode off, SDK 공식 주소, 비밀값 이름·`__dev` 0건. 경고는 ga4·site.url 빈 값(운영자 몫)뿐이다 |
+| 단위 `node --test "tools/strange-oracle/*.test.js"` | 89 통과 / 0 실패 |
+| e2e-saju | 41 / 0 |
+| e2e-book | 54 / 0 |
+| e2e-flow reduced | 127 / 0 |
+| e2e-flow motion | 128 / 0 |
+| e2e-pay(test 이동·팝업 + off 8791) | 62 / 0. I8(콘솔 오류 0)도 통과했다 |
+| 모의 서버 로그에서 시험 휴대폰 번호 `01099990000` 검색 | 0건 |
+
+### 결과표
+| 번호 | 결과 | 근거 | 수정 방법 |
+|---|---|---|---|
+| pay 인증 | 통과 | pay.js:33-35·163-166: 양쪽 SHA-256 뒤 timingSafeEqual을 쓴다(길이가 달라도 예외가 없다). pay.js:61-65: 빈 USERID·LINKKEY·LINKVAL, PASS_MODE가 test·live가 아닐 때, PASS_SECRET이 32바이트 미만일 때 세 길 모두 503 | — |
+| 금액·var2·var1 | 통과 | pay.js:171-175: 요청(1)·결제완료(4)만 price 3900·var2 `so-book-1`·var1 32자 16진수를 본다. 취소는 인증만 본다(B-1, 183-190). mul_no 모양 제한(키 주입 방지) | — |
+| 쓰기 순서·멱등·취소 경쟁 | 통과 | onPaid(99-130)는 시작에서 cancel/을 확인하고, mul/(onlyIfNew) → pass/(onlyIfNew) 순서로 쓴 뒤 끝에서 cancel/을 다시 본다. 결제완료 경로에는 cancel/ 쓰기가 0건이다. onCancel(133-144)은 cancel/ → mul/ → 같은 mul_no의 pass/ 순서다. 단위 시험 합격 5·6·20~23·27·28과 3차 권장 1이 통과했다 | — |
+| 횟수 제한·Retry-After·no-store | 통과 | pay.js:195-213: 모양 틀림 11회째, 전체 121회째에 429와 Retry-After를 준다. pending은 세지 않는다. 모든 응답에 `Cache-Control: no-store` | — |
+| 휴대폰 번호 | 통과 | 인증 뒤 읽는 칸은 pay_state·mul_no·var1·price·var2뿐이다. recvphone은 읽지 않는다. 저장소·응답·로그에 0건(단위 합격 13, e2e I7, 모의 서버 로그 0건) | — |
+| 로그 | 통과 | console은 `PAY_DEBUG_FIELDS=1`일 때 칸 이름·상태 숫자·참거짓만 남긴다(pay.js:159-162). 그 밖의 console은 0건이다. book.js도 0건 | 권장 1 참고 |
+| return | 통과 | 본문을 읽지 않고 303으로 보낸다. SITE_URL 모양을 검사하고, 비면 상대 경로를 쓴다. R·결제 값을 붙이지 않는다 | — |
+| book 마지막 방어선 | 통과 | book.js:99-117: 수동 해시를 쓰면 Blobs를 읽지 않는다. 그 밖에는 passState(pass/ paid + cancel/ 없음)를 본다. cancelled면 403, 읽기 실패면 503(틀린 시도로 세지 않음), PASS_SECRET이 짧으면 ②를 건너뛴다 | — |
+| netlify.toml·package | 통과 | `/api/pay/*` → `pay/:splat`, `/api/book` 유지, NODE_VERSION 22, `@netlify/blobs` 11.1.4 고정, package-lock.json 커밋됨(integrity 있음). 함수 실행 Node 버전은 미확인이다(운영자 G7) | — |
+| 6장 R·P | 통과 | R은 sessionStorage `payreq`에만 둔다(app.js:4184-4207). 분석 이벤트는 `so_pay {step: view·start·done·pass_ok·pass_fail}`뿐이다. postMessage는 `{type}`만 보낸다. e2e I1~I6(URL·본문·console·localStorage·쿠키 0, status `{r}`, book `pass·file`)이 통과했다 | — |
+| 6장 SDK 요청 | 통과 | SDK는 버튼을 누른 뒤에만 한 번 불러오고, 결제창 값은 15-2 표의 값뿐이다(app.js:4259-4266). e2e I4에서 결제창 쪽 값에 입력값 0건 | — |
+| 7장 결제 전 고지 | 통과 | data.js pay: 받는 것 → 가격 → 결제 방법·판매자(휴대폰 줄 포함) → 열람 방법 → 환불 → 동의 → 결제하기 → 코드 넣기, 버튼 아래 판매자 정보 줄. 환불 B안 문장("결제한 날부터 7일 안 … 전액 환불")이 있고 청약철회 제한 문장은 0건이다 | — |
+| 7장 결제한 사람만 열람 | 통과 | 유료 원본은 `api/_paid`에만 있고 dist에는 없다(지문 0). book은 코드 확인 뒤에만 준다 | — |
+| 7장 live 가드 | 통과 | 아래 「live 가드 시험」 | — |
+| **15-8 기준 15 legal 결제 문단(test)** | **수정 필요** | 필수 1 | 필수 1 |
+| **P7 CREDITS** | **수정 필요** | 필수 2 | 필수 2 |
+| 11장 | 통과(위 2건 제외) | og-image.png 1200×630(152,866바이트), 면책·소개 글은 기존대로 유지, [초안] 0, dist 비밀값 이름·`__dev` 0 | — |
+| off 배포판 | 통과 | e2e-pay J1~J5: 결제·책 DOM 0, `#report·#deeper·#paid·#paycheck` → 입구, /api·payapp 요청 0 | 권장 2 |
+| 8장 새 문구 | 통과 | pay.* 문구에 "100%"·결제를 재촉하는 표현·[초안] 0건 | — |
+
+### live 가드 시험 (15-8 기준 15)
+- 저장소 파일은 건드리지 않았다. scratchpad에 `tools/build-dist.js`·`og-tags.js`·`common/`·`products/strange-oracle/`를 복사한 사본을 만들어 그 data.js·legal만 바꿨다. 지시는 "data.js를 잠시 바꿨다가 되돌림"이었지만, 같은 시험을 원본에 손대지 않는 방식으로 했다. git status로 원본이 바뀌지 않았음을 확인했다.
+
+| 사본 상태 | 결과 |
+|---|---|
+| A: mode live, userid·contact 빈 값, ◯◯ 남음 | 실패(exit 1): ③과 ⑦ userid·contact·pay ◯◯·legal 3종 ◯◯ |
+| B: userid·contact·data.js ◯◯ 채움, legal ◯◯ 남음 | 실패: ③과 ⑦ legal 3종 |
+| C: 모두 채움 | 실패: ③ off 가드만(정상) |
+| D: contact가 공백뿐 | 실패: ⑦ contact |
+| E: userid만 빈 값 | 실패: ⑦ userid |
+| F: mode off | 통과 |
+
+### 수정 필요 항목 상세
+**필수 1. legal 3종 결제 문단이 test에서 보이지 않고, 판매자 정보 줄의 "구매·환불 안내"가 404다 (15-8 기준 15·9, CLAUDE.md 7장)** — 담당: developer(build-dist·모의 서버·HANDOFF). 문장은 이미 있으므로 copywriter 작업은 없다.
+- 현상
+  - `legal/privacy.html:98~`와 `terms.html:64~`의 결제 문단은 HTML 주석 안에 있다. "결제를 켤 때 주석을 풀라"는 방식이라 test에서도 보이지 않는다.
+  - `build-dist.js:25` PRODUCT_EXCLUDE에 `refund.html`이 있다. 그래서 모의 서버(test, dist 모양)에서 `legal/refund.html`이 404다.
+  - 결제 전 화면 본문의 환불 링크는 app.js:4168이 숨긴다. 하지만 판매자 정보 줄의 링크(index.html 약 3162줄 `pay-seller__legal`의 `legal/refund.html`)는 그대로 보인다 → test에서 막다른 곳이 된다.
+- 재현
+  1. `node tools/build-dist.js`
+  2. `node tools/strange-oracle/mock-server.js --port 8788 --mode test`
+  3. `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8788/products/strange-oracle/legal/refund.html` → 404
+  4. privacy.html·terms.html에서 주석을 뺀 본문에 "us-east-2"·"페이앱" 0건(같은 주소를 curl로 받아 확인)
+- live 위험: HANDOFF 3-6의 live 절차에는 "refund.html을 배포 폴더에 넣기"와 "privacy·terms 결제 문단 주석 풀기"가 없다. live 가드 ⑦은 legal 원본의 ◯◯만 본다. 그래서 운영자가 주석 안의 ◯◯만 채우면, 환불 안내가 404이고 개인정보처리방침에 결제 문단이 없는 채로 live 빌드가 통과할 수 있다.
+- 고칠 방법(예)
+  - 결제 문단을 표지(예: `<!-- pay:start -->…<!-- pay:end -->`)로 감싸 원본에서는 보이게 둔다. build-dist가 mode off일 때만 그 구간과 refund.html을 빼게 한다.
+  - 모의 서버 test는 결제 문단·refund.html을 내주게 한다.
+  - live 가드 ⑦에 두 검사를 더한다: dist에 refund.html이 있는지, privacy·terms의 결제 문단이 주석 밖에 있는지.
+  - e2e-pay에 "판매자 줄 세 링크 200, 결제 문단 보임(test)"을 더한다.
+  - HANDOFF 3-6 live 절차를 고친다.
+
+**필수 2. CREDITS.md에 `@netlify/blobs`가 없다 (P7)** — 담당: developer
+- 현상: `products/strange-oracle/CREDITS.md` 「외부 라이브러리」에 netlify·blobs 기록이 0건이다. 함수 `pay`·`book`이 쓰고 함수 묶음에 들어가는 라이브러리다. 라이선스는 MIT다(`node_modules/@netlify/blobs/package.json` license). package-lock 기준으로 전이 의존성 45개도 함께 묶인다.
+- 재현: `grep -n -i "blobs\|netlify" products/strange-oracle/CREDITS.md` → 0건
+- 고칠 방법: 「외부 라이브러리」 표에 `@netlify/blobs | 11.1.4 | 결제 기록 저장(서버 함수 pay·book) | MIT | npm, package-lock.json 고정` 한 줄을 넣는다. 전이 의존성은 package-lock.json을 따른다는 한 줄을 붙인다.
+- 페이앱 SDK는 우리가 배포하지 않는 결제사 스크립트라 필수는 아니다. 기록해 두면 좋다.
+
+### 권장 사항 (배포를 막지 않음)
+1. `PAY_DEBUG_FIELDS=1`이면 칸 이름 로그가 **인증 전에** 찍힌다(pay.js:159). 값은 없지만, 켜 둔 동안 위조 요청으로 로그를 채울 수 있다. G7 ⑦은 칸 이름이 달라 인증이 실패하는 경우도 보아야 하므로 지금 위치도 이유가 있다. 운영자는 실결제 시험 직후 바로 끈다.
+2. off 배포판 `dist/public/.../index.html` 원본(주석 제외)에 결제 마크업이 들어 있다: "결제" 36회, "3,900" 3회, "판매자 ◯◯" 등 ◯◯ 6회. 화면 DOM은 JS가 지워 0개이므로(J2) 합격 기준 1은 만족한다. 다만 소스 보기·검색 로봇에는 보인다. live 가드 ⑦은 index.html 정적 ◯◯를 보지 않는다(data-t가 data.js 값으로 덮으므로 화면에는 문제가 없다). off일 때 build-dist가 결제 구간을 빼면 필수 1과 함께 정리된다.
+3. 횟수 제한 Map 정리(pay.js:80, book.js:71)는 항목이 5,000개를 넘으면 요청마다 전체를 돈다. 지금 규모에서는 문제가 없다.
+4. **e2e-pay I8 글꼴 CORS 오류**
+   - 이번 실행(62/0)에서는 재현되지 않았다.
+   - jsdelivr는 글꼴의 200 응답과 404 응답 모두에 `access-control-allow-origin: *`를 준다(curl로 확인). 그래서 우리 설정이나 SRI 문제는 아니다.
+   - 원인은 **추정**이다. 결제창 이동·팝업 닫기로 글꼴 요청이 중간에 끊기거나 일시적인 네트워크·CDN 오류로 응답이 실패하면, 크롬이 이를 "blocked by CORS policy"로 기록하는 경우로 보인다(미확인).
+   - 글꼴은 대체 글꼴로 표시되고 기능에는 영향이 없다. **배포를 막지 않는다.**
+   - 시험을 안정시키는 방법: I8 거르개에 글꼴 주소(`cdn.jsdelivr.net/npm/@fontsource`)의 CORS 줄을 넣는다. 또는 결제 버튼을 누르기 전에 `document.fonts.ready`를 기다린다.
+
+### 확인하지 못한 것과 이유
+- 실제 페이앱 SDK·통보 형식·returnurl 본문(linkkey 노출 여부): 시험 모드가 없다. 운영자 G7 ①~⑧
+- 실제 Netlify Blobs 동작(strong 일관성, onlyIfNew 응답 모양): 단위 시험은 메모리 저장소와 라이브러리 지원 여부만 확인했다. 실제 동작은 G7 ①
+- 함수 실행 환경의 Node 22 적용 여부: 운영자가 Netlify 화면에서 확인
+- `openpaytype` 코드 목록이 페이앱 문서와 맞는지(72번)
+- legal 문장의 법적 충분성과 환불 B안의 법률 확인(68번)
+
+### live 전 운영자 값 필요 (15-8 기준 15)
+- data.js: `pay.payapp.userid`·`shopname`, `pay.contact`, `pay.method.seller`의 ◯◯, `pay.seller.name·phone·email·address`(reg는 신고하면)
+- legal/refund.html: 시행일, 부가세, 판매자, 페이앱 운영사, 문의처, 7일 뒤 기준, 본인 확인 정보, 처리 기간, 운영 시간
+- legal/privacy.html: 문의처, GA4 보관 기간, 국외 이전 세부, 결제 기록 보관 기간(70번), 문의 정보 삭제 기한, 페이앱 운영사, 보호책임자 성명·연락처
+- legal/terms.html: 문의처, 판매자 정보
+- Netlify 환경 변수 8개(HANDOFF 3-6), `site.url`
+
+### meta.json
+- status "검수통과"를 그대로 두었다(14단계 2차 판정). 15단계 판정은 "수정 필요"이므로, 위 2건을 고친 뒤 2차 재검수에서 "배포 가능"이 나와야 15단계 결과를 `release`에 병합할 수 있다. 지금 `main`은 off 배포판이라 기능상 14단계 배포판과 같지만, 병합 판단은 운영자가 한다.
