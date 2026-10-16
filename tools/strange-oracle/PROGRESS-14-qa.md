@@ -15,3 +15,4 @@
 | 10 | 성능 판단 | 완료 | |
 | 11 | 보고서 작성 | 완료 | |
 - 판정: 수정 필요 (dist/public/common/ads.js, og-image 옛 순서). 보고서 reports/qa-strange-oracle.md 「14단계 QA」에 기록 완료.
+- 2차 재검수: 배포 가능 (보고서 「14단계 QA (2차)」)
