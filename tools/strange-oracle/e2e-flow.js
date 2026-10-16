@@ -92,7 +92,9 @@ function paidSentences() {
   // 보이는 답 합계 300자 이상 (13단계: 5번 문답은 책 문답, 결제 문답 은퇴)
   const faq = await ev("[...document.querySelectorAll('[data-js=hub-faq] dd')].filter(d => d.offsetHeight > 0).reduce((a, d) => a + d.textContent.replace('[초안] ', '').length, 0)");
   check("자주 묻는 것: 펼친 채 보이는 답 합계 300자 이상", faq >= 300, String(faq));
-  check("13단계: FAQ 결제 문답 훅 없음·가격 말 없음", await ev("!document.querySelector('[data-js=hub-faq-paid]') && !/[0-9],[0-9]{3}\\s*원|결제/.test(document.querySelector('[data-js=hub-faq]').innerText)"));
+  // (14단계) 결제는 pay.mode에 따른다: off(배포판)면 가격·결제 말 0, test(시험 페이지)면 구매 문답이 보이는 것이 맞다 — off의 결제 DOM 0은 e2e-pay가 따로 본다
+  const PAY_OFF = await ev("TEXT.pay.mode === 'off'");
+  check("13단계: FAQ 결제 문답 훅 없음·가격 말 없음 (off일 때만)", !PAY_OFF || await ev("!document.querySelector('[data-js=hub-faq-paid]') && !/[0-9],[0-9]{3}\\s*원|결제/.test(document.querySelector('[data-js=hub-faq]').innerText)"));
   check("입구 광고 0개(14-2)", (await ev("document.querySelectorAll('#screen-hub [data-js=ad-slot], #screen-hub [data-ad]').length")) === 0);
   check("첫 화면(스크롤 전)에 주 버튼·여정 칩 보임", await ev("(() => { const r = (s) => document.querySelector(s).getBoundingClientRect(); return r('[data-js=hub-cta]').bottom <= innerHeight && document.querySelector('.journey__chip').getBoundingClientRect().bottom <= innerHeight; })()"));
   check("입구 전에는 저장소 비어 있음", (await store()) === "");
@@ -430,7 +432,7 @@ function paidSentences() {
   check("H3 입구: 3/7 흔들리는 원형 한 줄 = 템플릿({arch}·남은 문 4)", !(await has("[data-js=hub-archetype-sway]", "is-hidden")) && (await txt("[data-js=hub-archetype-sway]")) === (await swayWant(4, arch3)), await txt("[data-js=hub-archetype-sway]"));
   check("H5 입구: 3/6이면 나의 이야기 링크 글자 = hub.sofar.half (요소 수 그대로)", (await txt("[data-js=hub-story-label]")) === (await ev("TEXT.hub.sofar.half")) && !(await has("[data-js=hub-half]", "is-hidden")));
   const hubDead = await deadScan("#screen-hub");
-  check("11-5 off 입구: 가격 0 · '곧' 0 · 눌리지 않는 버튼 0 · 떡밥 3개 이하", !hubDead.price && !hubDead.soon && hubDead.dead === 0 && (await hookCount("#screen-hub")) <= 3, JSON.stringify(hubDead));
+  check("11-5 입구: 가격 0(off일 때) · '곧' 0 · 눌리지 않는 버튼 0 · 떡밥 3개 이하", (!PAY_OFF || !hubDead.price) && !hubDead.soon && hubDead.dead === 0 && (await hookCount("#screen-hub")) <= 3, JSON.stringify(hubDead));
   await ev("StrangeOracle.go('story')");
   await waitScreen("screen-story", 3000);
   const half = await ev("(() => { const sc = document.querySelector('#screen-story'); const vis = (e) => e && e.offsetHeight > 0; const next = sc.querySelector('[data-js=story-half-next]'); const share = sc.querySelector('[data-js=story-share]'); return { isHalf: sc.classList.contains('is-half'), half: vis(sc.querySelector('[data-js=story-half]')), slots: [...sc.querySelectorAll('[data-js=story-half-slot]')].filter(vis).length, next: vis(next) && next.dataset.go === 'decan-intro', primary: [...sc.querySelectorAll('.btn--primary')].filter(vis).length, shareSecondary: share.classList.contains('btn--secondary'), paid: vis(sc.querySelector('[data-js=story-paid]')), close: sc.querySelector('[data-js=story-half-close]').textContent, spine46: [...sc.querySelectorAll('[data-js=story-chapter]')].slice(3).filter(vis).length }; })()");
