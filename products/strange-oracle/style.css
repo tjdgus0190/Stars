@@ -4738,3 +4738,106 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
   content-visibility: auto;
   contain-intrinsic-size: auto 480px;
 }
+
+/* ═════════ 15단계 G1 — 페이앱 결제 (template 안 · test·live에서만). 명세: design/strange-oracle.md 「15단계」 ═════════
+   14단계 결제 전 화면(.pay-*)의 언어를 그대로 잇는다: 얇은 선 구획, 청동 번호 원, sans 작은 글, 촛불색은 기다림·주의에만 */
+
+/* 결제 전 화면: 3 결제 방법·판매자 */
+.pay-method__seller { margin-top: var(--space-2); padding: var(--space-2) var(--space-3); border-left: 2px solid var(--accent-line); font-family: var(--font-sans); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-strong); word-break: keep-all; overflow-wrap: anywhere; }
+
+/* 7 결제하기: 같은 탭 <button> (옛 새 탭 아이콘 .pay-buy__ext 없음) */
+.pay-buy[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+/* 이미 열려 있음: .pay-act.is-opened → 동의·버튼·준비 중 줄을 숨기고 안내 상자만 */
+.pay-opened { display: none; }
+.pay-act.is-opened > :not(.pay-opened) { display: none; }
+.pay-act.is-opened .pay-opened { display: grid; justify-items: center; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--accent-line); border-radius: var(--radius-lg); background: var(--c-surface-1); text-align: center; }
+.pay-opened__icon { width: 24px; height: 24px; color: var(--accent); }
+.pay-opened__text { font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-strong); word-break: keep-all; }
+
+/* 판매자 정보 줄 (버튼 아래, 조용하게). dt·dd 두 칸, 긴 주소는 줄바꿈 */
+.pay-seller { margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid var(--c-line); font-family: var(--font-sans); }
+.pay-seller__title { margin-bottom: var(--space-2); font-size: var(--fs-xs); font-weight: 700; color: var(--c-text-muted); }
+.pay-seller__list { display: grid; gap: var(--space-1); margin: 0; }
+.pay-seller__row { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: var(--space-2); font-size: var(--fs-xs); line-height: 1.55; }
+.pay-seller__row.is-hidden { display: none; }
+.pay-seller__row dt { color: var(--c-text-faint); word-break: keep-all; }
+.pay-seller__row dd { margin: 0; min-width: 0; color: var(--c-text-muted); word-break: keep-all; overflow-wrap: anywhere; }
+.pay-seller__legal { gap: 0 var(--space-3); margin-top: var(--space-2); }
+.pay-seller__legal a { font-size: var(--fs-xs); color: var(--c-text-muted); }
+
+/* ── 결제 확인 (#screen-paycheck) · 팝업 (#screen-paypopup) ── 가운데 정렬 한 단: 봉인 표지 + 한 줄 + 버튼 */
+.paycheck, .paypopup { text-align: center; }
+.paycheck > .pay-band { text-align: left; }
+.paycheck [data-when] { display: none; }
+.paycheck[data-state="wait"] [data-when~="wait"],
+.paycheck[data-state="checking"] [data-when~="checking"],
+.paycheck[data-state="late"] [data-when~="late"],
+.paycheck[data-state="cancelled"] [data-when~="cancelled"],
+.paycheck[data-state="noreq"] [data-when~="noreq"],
+.paycheck[data-state="busy"] [data-when~="busy"],
+.paycheck[data-state="offline"] [data-when~="offline"],
+.paycheck[data-state="sdkfail"] [data-when~="sdkfail"] { display: block; }
+.paycheck[data-state="wait"] .btn[data-when~="wait"],
+.paycheck[data-state="checking"] .btn[data-when~="checking"],
+.paycheck[data-state="late"] .btn[data-when~="late"],
+.paycheck[data-state="cancelled"] .btn[data-when~="cancelled"],
+.paycheck[data-state="noreq"] .btn[data-when~="noreq"],
+.paycheck[data-state="busy"] .btn[data-when~="busy"],
+.paycheck[data-state="offline"] .btn[data-when~="offline"],
+.paycheck[data-state="sdkfail"] .btn[data-when~="sdkfail"] { display: flex; }
+.paycheck [data-when].is-hidden { display: none !important; }     /* 문의처가 비면 JS가 숨김 */
+.paycheck .btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+/* 봉인 표지 96px: 바깥 점선 고리 + 책 문양. 상태별 색 */
+.paycheck__seal { position: relative; width: 96px; height: 96px; margin: var(--space-8) auto var(--space-5); color: var(--accent); }
+.paycheck__ring { position: absolute; inset: 0; width: 100%; height: 100%; }
+.paycheck__glyph { position: absolute; inset: 28px; width: 40px; height: 40px; filter: drop-shadow(0 0 8px var(--accent-glow)); }
+.paycheck[data-state="checking"] .paycheck__ring { animation: paycheck-turn 6s linear infinite; }
+.paycheck[data-state="checking"] .paycheck__glyph { animation: moon-breathe 2.4s ease-in-out infinite; }
+.paycheck:is([data-state="late"], [data-state="busy"], [data-state="offline"], [data-state="sdkfail"]) .paycheck__seal { color: oklch(0.78 0.13 75); }   /* 시험 띠(.pay-band)와 같은 호박색 계열 */
+.paycheck:is([data-state="cancelled"], [data-state="noreq"]) .paycheck__seal { color: var(--c-text-faint); }
+.paycheck:is([data-state="cancelled"], [data-state="noreq"]) .paycheck__glyph { filter: none; }
+.paycheck__seal--done .paycheck__glyph { animation: moon-breathe 3.2s ease-in-out infinite; }
+@keyframes paycheck-turn { to { transform: rotate(360deg); } }
+
+.paycheck__title { font-size: var(--fs-xl); line-height: var(--lh-tight); color: var(--c-text-strong); text-wrap: balance; word-break: keep-all; }
+.paycheck__msg { display: grid; gap: var(--space-2); max-width: 22em; margin: var(--space-3) auto 0; }
+.paycheck__line { font-size: var(--fs-md); line-height: var(--lh-ui); color: var(--c-text); text-wrap: pretty; word-break: keep-all; }
+.paycheck__help { font-family: var(--font-sans); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-muted); word-break: keep-all; }
+.paycheck__contact { font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--c-text-muted); overflow-wrap: anywhere; }
+.paycheck__contact b { color: var(--c-text-strong); font-weight: 700; }
+
+/* 로딩: 시간을 약속하지 않는 가는 막대(왕복) */
+.paycheck__loading { position: relative; width: 160px; height: 2px; margin: var(--space-5) auto 0; overflow: hidden; border-radius: 2px; background: var(--c-line); }
+.paycheck__loading span { position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: inherit; background: var(--accent); animation: paycheck-slide 1.4s var(--ease-out) infinite alternate; }
+@keyframes paycheck-slide { to { transform: translateX(150%); } }
+
+.paycheck__act { display: grid; gap: var(--space-2); margin-top: var(--space-8); }
+
+/* ── 코드 카드 (dialog) ── 코드를 크게, [복사]는 코드 아래(360에서 한 줄 넘침 방지) */
+.code-card__body { text-align: center; }
+.code-card__title { text-wrap: balance; }
+.code-card__list { display: grid; gap: var(--space-3); margin: var(--space-2) 0 0; padding: 0; list-style: none; }
+.code-card__item { display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-3); border: 1px dashed var(--accent-line); border-radius: var(--radius-lg); background: var(--c-surface-2); }
+.code-card__code { display: block; max-width: 100%; font-family: var(--font-mono, ui-monospace, "SFMono-Regular", Consolas, monospace); font-size: clamp(1.0625rem, 5.2vw, var(--fs-xl)); font-weight: 700; letter-spacing: 0.06em; line-height: 1.3; color: var(--c-text-strong); overflow-wrap: anywhere; user-select: all; -webkit-user-select: all; }
+.code-card__copy { min-width: 7em; }
+.code-card__copy.is-copied { border-color: var(--accent); color: var(--accent); }
+.code-card__double { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: oklch(0.84 0.12 85 / 0.12); font-family: var(--font-sans); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-strong); text-align: left; word-break: keep-all; }
+.code-card__double.is-hidden { display: none; }
+.code-card__text { line-height: var(--lh-ui); text-align: left; word-break: keep-all; }
+.code-card__tab { font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-faint); text-align: left; word-break: keep-all; }
+
+/* ── 목차의 "내 열람 코드 보기" (책 카드 공유 위, 작은 글 링크) ── */
+.book-home__code { margin-top: var(--space-6); text-align: center; }
+.book-home__code.is-hidden { display: none; }
+.book-home__code-btn svg { width: 18px; height: 18px; flex: none; }
+
+/* ── 내 정보 지우기: 결제 확인 중 경고 한 줄 (payreq 있을 때만) ── */
+.dialog__warn { padding-left: var(--space-2); border-left: 2px solid oklch(0.84 0.12 85 / 0.8); color: var(--c-text); }
+.dialog__warn.is-hidden { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .paycheck[data-state="checking"] .paycheck__ring, .paycheck .paycheck__glyph, .paycheck__seal--done .paycheck__glyph { animation: none; }
+  .paycheck__loading span { animation: none; width: 100%; opacity: 0.5; }
+}

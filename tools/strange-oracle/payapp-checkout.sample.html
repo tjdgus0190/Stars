@@ -1,0 +1,96 @@
+<!doctype html>
+<!-- 15단계 G1 (designer) — 가짜 페이앱 결제창 "견본". 시험 전용, 배포하지 않음(tools/ 아래).
+     모의 서버(G2 developer)가 /__dev/payapp/checkout 으로 낼 화면의 모양만 정한다. JS·통보 동작은 G2가 붙인다.
+     - 받은 값 자리: [data-field] (goodname · price · shopname · paytype). 모의 서버가 글자로 채운다(HTML 이스케이프).
+     - 단추: [data-act] 11개. 이름·뜻은 design/strange-oracle.md 「15단계 · 7. 가짜 결제창」 표.
+     - 실제 페이앱처럼 보이게 꾸미지 않는다(회사 상표·로고 없음). 맨 위 "시험용 가짜 결제창" 띠는 지우지 않는다.
+     - 외부 요청 0: 글꼴·이미지·스크립트를 밖에서 불러오지 않는다. -->
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>시험용 가짜 결제창</title>
+<style>
+  :root { color-scheme: light; --line: #c9ccd3; --ink: #1d2230; --muted: #5d6475; --bg: #f3f4f7; --card: #fff; --pri: #2b5bd7; --warn: #a1540b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  main { max-width: 480px; margin: 0 auto; padding: 16px; }
+  .band { padding: 8px 12px; border: 1px dashed var(--warn); border-radius: 6px; background: #fff4e5; color: var(--warn); font-size: 13px; font-weight: 700; }
+  .card { margin-top: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+  h1 { margin: 0 0 4px; font-size: 18px; }
+  dl { display: grid; grid-template-columns: 6em minmax(0, 1fr); gap: 6px 8px; margin: 12px 0 0; font-size: 14px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  .price { font-size: 20px; font-weight: 700; }
+  fieldset { margin: 16px 0 0; padding: 0; border: 0; }
+  legend { margin-bottom: 6px; font-size: 13px; color: var(--muted); }
+  label.opt { display: flex; align-items: center; gap: 8px; min-height: 40px; }
+  input[type="tel"] { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+  .hint { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+  h2 { margin: 20px 0 8px; font-size: 13px; color: var(--muted); }
+  .acts { display: grid; gap: 8px; }
+  .acts--grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  button { min-height: 44px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; word-break: keep-all; }
+  button.pri { border-color: var(--pri); background: var(--pri); color: #fff; font-weight: 700; }
+  button.bad { border-style: dashed; color: var(--warn); }
+  .log { margin-top: 12px; min-height: 1.5em; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <p class="band" role="note">시험용 가짜 결제창 — 실제 결제·실제 페이앱이 아니에요</p>
+
+  <section class="card" aria-labelledby="t">
+    <h1 id="t">결제하기</h1>
+    <dl>
+      <dt>판매자</dt><dd data-field="shopname">모의 판매자</dd>
+      <dt>상품</dt><dd data-field="goodname">낯선 점술관 한 권의 책</dd>
+      <dt>금액</dt><dd class="price"><span data-field="price">3,900</span>원</dd>
+    </dl>
+
+    <!-- openpaytype으로 받은 결제수단만 보인다(카드·간편결제). 휴대폰·가상계좌·계좌이체는 없어야 한다(결정 99) -->
+    <fieldset>
+      <legend>결제수단 (받은 값: <span data-field="paytype">card,kakaopay,naverpay</span>)</legend>
+      <label class="opt"><input type="radio" name="pt" value="card" checked /> 신용카드</label>
+      <label class="opt"><input type="radio" name="pt" value="easy" /> 간편결제</label>
+    </fieldset>
+
+    <!-- 휴대폰 번호 칸: 이 가짜 창 안에만 있다. 가짜 통보 recvphone에 시험용 번호로 실린다(우리 기록·응답에 0건인지 확인용) -->
+    <fieldset>
+      <legend><label for="ph">휴대폰 번호</label></legend>
+      <input id="ph" type="tel" data-field="recvphone" value="010-0000-0000" autocomplete="off" />
+      <p class="hint">시험용 번호예요. 우리 기록·화면·로그 어디에도 나오면 안 돼요.</p>
+    </fieldset>
+
+    <h2>정상 흐름</h2>
+    <div class="acts">
+      <button class="pri" type="button" data-act="pay">결제 완료</button>
+      <div class="acts acts--grid">
+        <button type="button" data-act="fail">결제 실패</button>
+        <button type="button" data-act="close">창 닫기</button>
+      </div>
+    </div>
+
+    <h2>늦음·취소</h2>
+    <div class="acts acts--grid">
+      <button type="button" data-act="late">완료, 통보 늦게 (40초)</button>
+      <button type="button" data-act="pay-cancel">완료 뒤 취소</button>
+      <button type="button" data-act="cancel-first">취소 먼저</button>
+      <button type="button" data-act="repeat">같은 통보 3번</button>
+      <button type="button" data-act="second">같은 R로 두 번째 결제</button>
+    </div>
+
+    <h2>거부되어야 하는 통보</h2>
+    <div class="acts acts--grid">
+      <button class="bad" type="button" data-act="bad-price">금액 조작</button>
+      <button class="bad" type="button" data-act="bad-linkval">linkval 틀림</button>
+      <button class="bad" type="button" data-act="bad-tag">표지 틀림</button>
+      <button class="bad" type="button" data-act="bad-var1">var1 모양 틀림</button>
+    </div>
+
+    <p class="log" data-js="log" role="status" aria-live="polite"></p>
+  </section>
+</main>
+</body>
+</html>

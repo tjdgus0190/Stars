@@ -2734,3 +2734,181 @@ JS·data*.js는 고치지 않았다. 아래 7절(광고)에서 "지금 지운 �
 
 ### 회귀 시험 (고친 뒤, build-dist 다시 하고 8788 재시작)
 단위 63 통과 · e2e-saju 41 · e2e-book 54 · e2e-pay 29 · e2e-flow reduced 127 · motion 128, 실패 0. build-dist 배포 점검 통과([초안] 없음, 유료 지문 0건).
+
+
+## 15단계: 페이앱 결제 (디자인, G1 · 2026-10-16)
+
+기준: specs/strange-oracle.md 15-2(상태별 화면)·15-4(결제 전 고지)·15-5(코드 카드)·15-6(가짜 결제창)·15-7(키). 14단계 8절(결제 전 화면)을 대체·확장한다.
+
+### 0. 디자인 방향
+- 14단계 결제 전 화면의 언어를 그대로 잇는다: 얇은 선 구획(`.pay-sec`), 청동 번호 원, 본문 serif·보조 sans 작은 글, 노란 점선 시험 띠.
+- 새 화면(결제 확인·팝업)은 **가운데 한 단**이다: 봉인 표지(96px 점선 고리 + 책 문양) → 제목 → 한 줄 → 버튼. 결제는 "의식이 끝나 책이 봉인을 푸는 순간"으로 보이게 하되, 화려한 연출은 넣지 않는다(돈이 오가는 화면은 차분하게).
+- 색 규칙: 기다림·주의(늦음·429·503·SDK 실패) = 시험 띠와 같은 호박색 계열, 끝남(취소·찾지 못함) = 흐린 회색, 묻는 중 = 방 강조색 고리가 천천히 돈다.
+
+### 1. 위치와 DOM 0 (off 배포판)
+| 무엇 | 위치 | off에서 |
+|---|---|---|
+| 결제 전 `#screen-deeper` | `<template data-js="pay-tpl">` 첫 요소 | template째 지움(지금 그대로) |
+| 결제 확인 `#screen-paycheck` | 같은 template, 둘째 | 〃 |
+| 팝업 `#screen-paypopup` | 같은 template, 셋째 | 〃 |
+| 코드 카드 `dialog[data-js=pay-code-dialog]` | 같은 template, 넷째 | 〃 |
+| 목차 "내 열람 코드 보기" | 목차 `book-home` 안 `<template data-js="pay-toc-tpl">` (책 카드 공유 위) | `#screen-report`째 지워지므로 함께 사라짐 |
+| 내 정보 지우기 경고 줄 `clear-warn-pay` | `clear-dialog` 안 `<p class="is-hidden">` | **G3가 off에서 지운다**(`gone` 목록에 추가). 지금 e2e DOM0 선택자에는 걸리지 않음 |
+
+- 지금 app.js는 `tplEl.after(tplEl.content.cloneNode(true))`로 template 내용 **전부**를 붙이므로 최상위 요소가 4개여도 그대로 붙는다. 새 화면은 `screens.paycheck`·`screens.paypopup`으로 등록하고 `applyText`를 네 요소 모두에 돌려야 한다(G3).
+
+### 2. 결제 전 화면 (15-4 순서, 1~6 모두 버튼 위)
+| 순서 | 항목 | 바뀐 점 |
+|---|---|---|
+| 1 | 받는 것 | 그대로 |
+| 2 | 가격 | `pay-price` 한 줄. `pay-price-unit` 칸 **삭제** |
+| 3 | **결제 방법·판매자** | 옛 "어디서 사나요"(`pay-store-name`, `pay.store.*`) 삭제. 본문 + 판매자 강조 줄(`.pay-method__seller`, 왼쪽 강조선) + 휴대폰 번호 안내(작은 회색) |
+| 4 | 열람 방법 | 문구만 15-4로 |
+| 5 | 환불·청약철회 | 문구만(68번 기본값 B). "열람 시작 시 청약철회 제한" 문장 없음 |
+| 6 | 동의 체크 | 문구만 |
+| 7 | **3,900원 결제하기** | `<a target=_blank>` + 새 탭 아이콘 → **`<button type=button>`**. `pay.newTab` 줄 삭제 |
+| — | 판매 준비 중 | `pay-store-empty` 유지(이제 기준은 `pay.payapp.userid` 빈칸) |
+| — | **이미 열려 있어요** | `.pay-act`에 `.is-opened` → 동의·버튼·준비 중 줄이 숨고, 책 아이콘 + "이 탭에서는 책이 이미 열려 있어요" + [내 열람 코드 보기] 상자 |
+| 8 | 열람 코드 넣기 | 그대로(도움말 문구만 "결제 뒤 받은") |
+| — | **판매자 정보 줄** | 버튼 아래 `footer.pay-seller`: dt/dd 두 칸(판매자·연락처·이메일·주소·[통신판매업 신고]·결제대행) + legal 3종 링크(구매·환불 안내, 이용약관, 개인정보처리방침). 신고 줄은 값이 생기면 JS가 `.is-hidden` 해제 |
+
+- 측정(360×640, headless Edge, 가장 긴 견본): 가로 넘침 0. 1~5 구획과 6(동의)이 모두 버튼보다 위, 판매자 정보 줄은 버튼 아래. 버튼 위치는 화면 위에서 약 1,350px(스크롤 필요 — 14단계 F6 참고 5와 같은 해석).
+
+### 3. 결제 확인 화면 `#screen-paycheck` — `data-state` 하나로 바뀐다
+- JS는 `data-state`만 바꾼다. 각 블록의 `data-when`(공백으로 여러 값)에 지금 상태가 있으면 CSS가 보인다.
+
+| data-state | 15-2 상태 | 문구(data-t) | 버튼 | 봉인 표지 |
+|---|---|---|---|---|
+| `wait` | 결제창을 연 뒤 | `pay.wait` | [결제 확인하기](주) · [돌아가기] | 강조색 정지 |
+| `checking` | 묻는 중 | `pay.checking` + 가는 로딩 막대 | [결제 확인하기]는 JS가 `disabled`(회차 중) · [돌아가기] | 고리가 돈다(6초 1바퀴) |
+| `late` | 30초 넘음 / 결제 안 됨 | `pay.late.body` + `pay.late.contact` + 문의처 | [다시 확인](주) · [목차로] | 호박색 |
+| `cancelled` | 취소된 결제 | `pay.pass.errors.cancelled` | [목차로] | 회색 |
+| `noreq` | R 없음 | `pay.noReq.body` + `pay.noReq.contact` + 문의처 | [이미 샀어요 · 열람 코드 넣기](주) · [목차로] | 회색 |
+| `busy` | 429 | `pay.busy` | [다시 확인](주, `Retry-After`초 · 없으면 60초 동안 `disabled`) · [목차로] | 호박색 |
+| `offline` | 503·닿지 않음 | `pay.pass.errors.offline`(기존) | [다시 확인](주) · [목차로] | 호박색 |
+| `sdkfail` | SDK 실패(오류·10초) | `pay.sdkFail` | [다시 시도](주) · [목차로] | 호박색 |
+
+- 결제완료는 이 화면에 상태가 없다: 책(목차)으로 가서 코드 카드를 연다.
+- 문의처 줄(`paycheck-contact*`)은 `pay.contact`가 비면 JS가 `.is-hidden`(CSS가 `!important`로 숨김).
+- 비활성 버튼은 `disabled` 속성(흐리게 0.5). 결제 전 화면 버튼만 기존처럼 `aria-disabled`.
+- 문구 묶음 `paycheck-msg`는 `role=status` `aria-live=polite`라 상태가 바뀌면 읽기 프로그램이 읽는다.
+- 움직임 줄이기: 고리 회전·숨쉬기 없음, 로딩 막대는 반투명 정지 막대.
+- 시험 띠는 `paycheck-test-band`(결제 전 화면 띠와 따로). live면 JS가 `hidden`.
+
+### 4. 팝업 화면 `#screen-paypopup`
+- 같은 출처 `window.opener`가 있을 때 이 화면만 보인다. 봉인 표지(숨쉬기) + "원래 창에서 책이 열려요" + [이 창 닫기]. 다른 버튼 없음.
+- 팝업 안에서는 상단 막대(내 정보 지우기·목차 버튼)를 JS가 숨기기를 권한다(누를 일이 없고, 팝업의 sessionStorage를 건드리지 않게).
+
+### 5. 코드 카드 `dialog[data-js=pay-code-dialog]` (15-5)
+- 위에서 아래: eyebrow "YOUR KEY" → 제목 → 코드 상자(점선 테두리, 고정폭 글꼴 굵게 17~22px, 글자 사이 0.06em, `user-select: all`) → [복사](코드 **아래**, 360에서 한 줄에 코드+버튼을 두면 넘침) → (두 번 결제 줄) → 안내 → 탭 안내(작은 회색) → [책 읽으러 가기].
+- 코드 여러 개: JS가 첫 `code-item` li를 코드마다 복제한다. 두 개 이상이면 `code-double` 줄 `.is-hidden` 해제(호박색 바탕 상자).
+- [복사] 누르면: `navigator.clipboard.writeText`(사용자 버튼 동작일 때만) → 그 버튼에 `.is-copied` + 글자 `pay.issued.copied`, `code-status`에 한 줄. 실패하면 코드가 `user-select: all`이라 길게 눌러 고를 수 있다는 한 줄(문구 키는 copywriter가 정함, 예 `pay.issued.copyFail`).
+- 측정(360×640): 코드 2개 + 두 번 결제 줄일 때 dialog 320×602, 코드 217px, 넘침 0. 코드 3개 이상이면 dialog 안이 세로로 스크롤된다(기본 dialog 동작).
+
+### 6. 목차 "내 열람 코드 보기"
+- 목차 장 목록 아래, 책 카드 공유 버튼 위. 작은 글 링크 버튼(열쇠 아이콘 + 글). 이 탭에 `strange-oracle-pass`가 있을 때만 보인다. 누르면 코드 카드.
+- 결제 전 화면의 "이미 열려 있어요" 상자의 [내 열람 코드 보기]도 같은 코드 카드를 연다.
+
+### 7. 가짜 결제창 (시험 전용) — 견본 `tools/strange-oracle/payapp-checkout.sample.html`
+- 모의 서버(G2)가 `/__dev/payapp/checkout`으로 낼 화면의 **모양 견본**이다. 배포하지 않는다. JS·통보는 G2가 붙인다(이 파일을 읽어 쓰든 모의 서버 안에 옮기든 G2 판단).
+- 단순하게: 시스템 글꼴, 흰 카드 하나, 외부 요청 0, 페이앱 상표·로고 없음, 맨 위 "시험용 가짜 결제창 — 실제 결제·실제 페이앱이 아니에요" 띠는 지우지 않는다. 360px 넘침 0(측정).
+- 받은 값 자리 `[data-field]`: `shopname` · `goodname` · `price` · `paytype`(openpaytype 원문) · `recvphone`(시험용 번호 입력 칸, 이 창 안에만)
+
+| data-act | 단추 | 통보(15-6) |
+|---|---|---|
+| `pay` | 결제 완료 (주 버튼) | 1 → 4, 그다음 `returnurl`로 |
+| `fail` | 결제 실패 | 1만, 돌아감 |
+| `close` | 창 닫기 | 1만, 돌아감 |
+| `late` | 완료, 통보 늦게 (40초) | 40초 뒤 4 |
+| `pay-cancel` | 완료 뒤 취소 | 4 → 9 |
+| `cancel-first` | 취소 먼저 | 9(`var1` 없음) → 4 |
+| `repeat` | 같은 통보 3번 | 4 ×3 |
+| `second` | 같은 R로 두 번째 결제 | 같은 `var1`·다른 `mul_no`로 4 → 그 두 번째만 9 |
+| `bad-price` | 금액 조작 | 틀린 `price` |
+| `bad-linkval` | linkval 틀림 | 틀린 `linkval` |
+| `bad-tag` | 표지 틀림 | 틀린 `var2` |
+| `bad-var1` | var1 모양 틀림 | 모양 틀린 `var1` (15-8의 8. 단추 목록 밖이라 G2가 빼도 됨) |
+
+- 결과 한 줄 자리 `data-js="log"`(`role=status`). 묶음 제목 셋: 정상 흐름 / 늦음·취소 / 거부되어야 하는 통보(점선 버튼).
+- 시간이 모자랄 때 줄이는 순서(15-9 2번)대로 `repeat`·`bad-price`·`bad-tag`·`second` 단추를 빼도 모양은 깨지지 않는다(두 칸 격자).
+
+### 8. 텍스트 길이 제한 (copywriter용, 360px · 공백 포함)
+| 키 | 최대 | 넘치면 |
+|---|---|---|
+| `pay.method.body` | 70자 | 3줄로 늘어남(허용) |
+| `pay.method.seller` | 36자 | 2줄 |
+| `pay.method.phone` | 50자 | 2줄 |
+| `pay.buy` | 12자 | 버튼 한 줄 유지가 목표 |
+| `pay.opened.text` | 24자 | 2줄 |
+| `pay.opened.code` · `pay.showCode` | 12자 | 버튼·링크 2줄 |
+| `pay.seller.labels.*` | 7자 | dt 칸(7em) 안에서 줄바꿈 |
+| `pay.seller.*` 값 | 제한 없음(주소 긴 견본으로 측정) | dd가 줄바꿈 |
+| `pay.check.title` · `pay.popup.title` | 16자 | 2줄 |
+| `pay.wait`·`checking`·`busy`·`sdkFail`·`late.body`·`noReq.body` | 60자 | 3줄 |
+| `pay.late.contact`·`pay.noReq.contact` | 70자 | 3줄 |
+| `pay.check.confirm`·`retry`·`sdkRetry`·`check.back`·`toToc`·`popup.close` | 10자 | 버튼 한 줄 |
+| `pay.issued.title` | 14자 | 2줄 |
+| `pay.issued.body` | 90자 | 4줄 |
+| `pay.issued.tab`·`pay.issued.double` | 50자 | 2~3줄 |
+| `pay.issued.copy`·`copied` | 6자 | 버튼 최소폭 7em |
+| `pay.clearWarnPay` | 45자 | 2줄 |
+
+### 9. developer 전달 사항 (G3)
+**data-js 훅**
+
+| data-js | 화면 | 역할 |
+|---|---|---|
+| `pay-tpl` | — | template. 내용 4요소 전부 붙이고 `applyText` |
+| `pay-buy` | 결제 전 | 이제 `<button>`. 동의 전·userid 빈칸이면 `aria-disabled="true"`. `href`·새 탭 처리 삭제 |
+| `pay-store-empty` | 결제 전 | userid 빈칸이면 `.is-hidden` 해제 |
+| `pay-act` | 결제 전 | 이미 열린 탭이면 `.is-opened` |
+| `pay-opened` | 결제 전 | 안내 상자(CSS가 보임/숨김. JS 불필요) |
+| `pay-opened-code` | 결제 전 | 코드 카드 열기 |
+| `pay-seller` | 결제 전 | 판매자 정보 줄 묶음 |
+| `pay-seller-reg` | 결제 전 | 통신판매업 신고 줄. 값이 있으면 `.is-hidden` 해제 |
+| 삭제 | 결제 전 | `pay-price-unit`, `pay-store-name`. 지금 app.js가 찾고 있어 G1은 **빈 `hidden` span 두 개를 임시로** 남겼다(주석 표시). G3가 app.js 참조를 지울 때 이 span도 지운다 |
+| `screen-paycheck` | 결제 확인 | `data-state` = wait·checking·late·cancelled·noreq·busy·offline·sdkfail |
+| `paycheck-test-band` | 결제 확인 | live면 `hidden` |
+| `paycheck-msg` | 결제 확인 | aria-live 묶음(JS 불필요) |
+| `paycheck-check` | 결제 확인 | [결제 확인하기]. 회차 중 `disabled` |
+| `paycheck-retry` | 결제 확인 | [다시 확인]. busy에서 Retry-After 동안 `disabled` |
+| `paycheck-sdk-retry` | 결제 확인 | [다시 시도] |
+| `paycheck-to-pass` | 결제 확인 | 결제 전 화면으로 + `pass-panel` 펼침 + `pass-toggle` `aria-expanded=true` + `pass-input` 포커스 |
+| `paycheck-back` | 결제 확인 | `data-go="deeper"`. R은 지우지 않음 |
+| `paycheck-toc` | 결제 확인 | `data-go="report"` |
+| `paycheck-contact` · `paycheck-contact-value` | 결제 확인 | 문의처 줄과 값(`pay.contact`). 비면 `paycheck-contact`·`paycheck-contact-late`·`paycheck-contact-noreq` 셋 다 `.is-hidden` |
+| `screen-paypopup` | 팝업 | 팝업일 때만 이 화면 |
+| `paypopup-close` | 팝업 | `window.close()` |
+| `pay-code-dialog` | 코드 카드 | `showModal()` / `close()` |
+| `code-list` · `code-item` · `code-value` | 코드 카드 | 첫 li를 코드마다 복제, `code-value`에 `pretty(P)` |
+| `code-copy` | 코드 카드 | 각 li의 [복사]. 누르면 `.is-copied` |
+| `code-double` | 코드 카드 | 코드 2개 이상이면 `.is-hidden` 해제 |
+| `code-status` | 코드 카드 | 복사 결과 한 줄 |
+| `code-close` | 코드 카드 | 닫기(책 목차 그대로) |
+| `pay-toc-tpl` | 목차 | template. BOOK_ON이면 그 자리에 꺼내 붙이고 applyText |
+| `book-code-row` · `book-show-code` | 목차 | 이 탭에 pass가 있으면 줄 `.is-hidden` 해제, 누르면 코드 카드 |
+| `clear-warn-pay` | 내 정보 지우기 | `payreq`가 있을 때만 `.is-hidden` 해제. **off에서는 지움** |
+
+**data-t 키(새·바뀜) — 문구는 G4, 키 구조는 G3가 15-7에 맞춰 조정 가능. 바꾸면 이 표와 index.html을 같이 고쳐 알려 줄 것**
+- 결제 전: `pay.method.title`·`pay.method.body`·`pay.method.seller`·`pay.method.phone`, `pay.how.body`, `pay.refund.body`, `pay.agree`, `pay.buy`, `pay.opened.text`·`pay.opened.code`, `pay.pass.help`, `pay.seller.title`·`pay.seller.labels.{name,phone,email,address,reg,pg}`·`pay.seller.{name,phone,email,address,reg,pg}`·`pay.seller.refund`·`pay.seller.legalAria`(data-aria)
+- 결제 확인: `pay.check.title`·`pay.check.confirm`·`pay.check.back`, `pay.wait`, `pay.checking`, `pay.late.body`·`pay.late.contact`, `pay.pass.errors.cancelled`, `pay.noReq.body`·`pay.noReq.contact`, `pay.busy`, `pay.sdkFail`, `pay.sdkRetry`, `pay.retry`, `pay.toToc`, `pay.contactLabel`
+- 팝업: `pay.popup.title`·`pay.popup.close`
+- 코드 카드: `pay.issued.eyebrow`·`title`·`copy`·`copied`·`double`·`body`·`tab`·`close`
+- 목차: `pay.showCode` / 지우기: `pay.clearWarnPay`
+- 삭제: `pay.store.title`·`pay.store.note`·`pay.newTab`·`price.unit`(15-7)
+- 15-7 표의 `issued`(제목·안내·복사·복사됨·탭 안내·두 번 결제 안내)와 위 키가 같은 묶음이다. `wait`·`checking`·`late`·`retry`·`noReq`·`popup`·`busy`·`sdkFail`·`opened`·`showCode`·`seller`·`errors.cancelled`·`clearWarnPay`도 같은 이름을 썼다. `pay.check.*`·`pay.sdkRetry`·`pay.toToc`·`pay.contactLabel`·`pay.method.*` 세부는 designer가 더한 자리다.
+
+**상태 class·속성**
+- `.pay-act.is-opened`, `#screen-paycheck[data-state]`, `[data-when]`(CSS 전용, JS가 건드리지 않음), `.code-card__copy.is-copied`, `.is-hidden`(기존 규칙)
+- 마크업의 견본 값(`SOPK-7Q4M-2XD9-FHAT`, 문의처 `◯◯`)은 JS가 덮어쓴다.
+
+### 10. 합격 기준 대조 (G1)
+| 기준 | 결과 |
+|---|---|
+| 360px 넘침 없음 | 결제 전(기본·이미 열림), 결제 확인 8상태, 팝업, 코드 카드(코드 2개), 목차 코드 줄, 가짜 결제창 모두 `scrollWidth` 360, 화면 밖 요소 0 (headless Edge, 앱 JS 없이 template을 풀어 정적으로 측정. 실제 앱 흐름 안에서는 G5에서 다시 본다) |
+| 결제 전 고지 1~6이 버튼보다 위 | 통과(구획 1~5와 동의 6 모두 버튼 위, 판매자 정보 줄은 아래) |
+| 14단계 디자인 언어 유지 | `.pay-sec`·번호 원·시험 띠·`receipt-open` 칸·`dialog`·`btn` 기존 컴포넌트 재사용, 새 색 없음(시험 띠 호박색 재사용) |
+
+### 11. 운영자가 확인·판단할 것
+- 판매자 정보 줄의 표시 범위(69번)를 dt 6칸(판매자·연락처·이메일·주소·통신판매업 신고·결제대행)으로 잡았다. 빼거나 더할 칸이 있으면 알려 주세요.
+- 결제 전 화면은 360×640에서 버튼까지 스크롤이 길다(약 1,350px). 고지를 버튼 위에 모두 두라는 규칙 때문이며 접지 않았다(14단계와 같은 판단).
