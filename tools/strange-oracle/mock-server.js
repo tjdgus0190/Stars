@@ -161,7 +161,13 @@ location.replace("${P}#${to}");
       const site = og.readSiteUrl(fs.readFileSync(path.join(PRODUCT, "data.js"), "utf8"));
       if (site) html = og.injectOg(html, site); // build-dist와 같은 og 처리
     }
-    send(req, res, TYPES[".html"], Buffer.from(PaySec.strip(html, MODE)));
+    send(req, res, TYPES[".html"], Buffer.from(PaySec.map.strip(PaySec.strip(html, MODE), MODE))); // (16단계) 지도 표지도 같은 mode로
+    return log(200);
+  }
+  // (16단계) test: 지도 파일(map.js·data-map.js)은 off 배포 폴더에 없으므로 원본에서 내준다
+  const mapFile = rel.match(/^\/products\/strange-oracle\/((?:data-)?map\.js)$/);
+  if (mapFile && MODE === "test") {
+    send(req, res, TYPES[".js"], fs.readFileSync(path.join(PRODUCT, mapFile[1])));
     return log(200);
   }
   let file = path.join(STATIC, rel);

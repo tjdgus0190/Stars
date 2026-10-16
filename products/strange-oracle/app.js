@@ -130,6 +130,12 @@
   const PASS_KEY = "strange-oracle-pass"; // 확인된 열람 코드(탭을 닫으면 사라짐). 이어가기 코드에는 넣지 않는다
   // (15단계 15-2) 결제 확인용 무작위 값 R(128비트, 소문자 16진수 32자). 결제할 때마다 새로, 최근 3개까지 새것부터. 입력값에 준해 다룬다(console·분석·URL·localStorage 금지)
   const PAYREQ_KEY = "strange-oracle-payreq";
+  // (16단계 16-8) 친구 궁합 지도: data.js map.mode. off(배포판) = 지도 DOM·지도 파일·지도 요청 0. test(시험 페이지)·live = 결말·나의 이야기에 지도 카드
+  const MAP_CFG = T.map || {};
+  const MAPMODE = MAP_CFG.mode === "test" || MAP_CFG.mode === "live" ? MAP_CFG.mode : "off";
+  const MAP_ON = MAPMODE !== "off";
+  const MAP_SES = "strange-oracle-map"; // (16-6) 이 탭: 초대 ID(join)·참여한 초대(joined)·삭제 코드(del). clearAll이 늘 지운다
+  const MAP_KEY = "strange-oracle-mapkey"; // (16-6) 이 기기 localStorage: 주인 열람 키 문자열 하나. "이 기기에서 지도 잊기"로 지운다
   let onClearPay = null; // 결제 화면이 붙으면(test·live) 묻기 회차·코드 목록을 멈추고 비우는 함수
   // 1~39 로마 숫자 (신탁 번호 I~XXXII)
   const roman = (n) => "X".repeat(Math.floor(n / 10)) + ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n % 10];
@@ -237,6 +243,7 @@
       window.sessionStorage.removeItem("strange-oracle-receipt"); // 12단계까지의 영수증 코드 칸
       window.sessionStorage.removeItem(PASS_KEY); // (14-4) 열람 코드도 "내 정보 지우기"로 함께 지운다
       window.sessionStorage.removeItem(PAYREQ_KEY); // (15-2) 결제 확인용 R도 지운다 → 이 탭에서 책이 자동으로 열리지 않음(확인 창 경고 줄)
+      window.sessionStorage.removeItem(MAP_SES); // (16-2의 8) 지도 초대·참여 표시·삭제 코드도 늘 지운다(서버 기록 지우기는 대화 상자의 선택 칸)
     } catch (e) {
       /* 무시 */
     }
@@ -624,11 +631,21 @@
       /* 저장소 없음 */
     }
     show(js("clear-warn-pay"), req);
+    if (MAP_ON) {
+      // (16-2의 8) 선택 칸 두 개(처음 꺼짐): 이 탭에 삭제 코드가 있을 때 / 이 기기에 열람 키가 있을 때만 보인다
+      show(js("clear-map-leave"), Boolean(mapSes().del));
+      show(js("clear-map-forget"), Boolean(mapKeyNow()));
+      ["clear-map-leave-check", "clear-map-forget-check"].forEach((n) => js(n) && (js(n).checked = false));
+    }
     dialog.showModal ? dialog.showModal() : dialog.setAttribute("open", "");
   });
   js("clear-cancel").addEventListener("click", () => dialog.close());
   js("clear-confirm").addEventListener("click", () => {
+    // (16-2의 8) 지도 선택 칸은 clearAll이 입력 칸을 비우기 전에 읽는다
+    const mapLeave = MAP_ON && js("clear-map-leave-check") && js("clear-map-leave-check").checked ? mapSes().del || "" : "";
+    const mapForget = MAP_ON && js("clear-map-forget-check") && js("clear-map-forget-check").checked;
     clearAll();
+    if (MAP_ON) mapAfterClear(mapLeave, mapForget);
     dialog.close();
     toast(T.toast.cleared);
     renderHub();
@@ -4541,7 +4558,7 @@
   };
   leave.finale = () => finaleScr.classList.remove("is-running");
   finaleScr.addEventListener("click", (e) => {
-    if (!e.target.closest("[data-go]")) endFinale();
+    if (!e.target.closest('[data-go], [data-js="map-slot-finale"]')) endFinale(); // (16단계) 지도 카드를 누를 때는 넘기지 않는다
   });
 
   // ═════════ GA4 (common/analytics.js) — (14-2) 광고는 걷어 냈다. common/ads.js는 저장소에 그대로 두고 부르지 않는다 ═════════
@@ -4556,6 +4573,8 @@
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done"], chapter: BOOK_IDS }, // (13단계 13-8) 옛 preview·pay_click은 뺌
     so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
+    // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
+    map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
   let booted = false;
   let externalOn = false;
@@ -4615,8 +4634,158 @@
     });
   }
 
+  // ═════════ (16단계) 친구 궁합 지도 — 입구·자리·지연 불러오기 (specs 16-2·16-6·16-8, design 「16단계」 1절) ═════════
+  // 지도 화면·계산·요청은 map.js(지연 불러오기)가 맡는다. 여기서는 off 걷어 내기, #join= 가로채기, 입구 작은 링크, 내 정보 지우기 연결만 한다.
+  // 지도 파일(data-map.js·map.js)은 결말·나의 이야기(지도 카드 자리)에 들어갈 때, 입구 링크를 누를 때, #join=으로 들어왔을 때만 받는다(첫 화면 요청 0).
+  // 저장: localStorage MAP_KEY(열람 키 하나) · sessionStorage MAP_SES(join·joined·del). 값은 console·분석·주소에 쓰지 않는다.
+  function mapSes() {
+    try {
+      const o = JSON.parse(window.sessionStorage.getItem(MAP_SES) || "null");
+      return o && typeof o === "object" ? o : {};
+    } catch (e) {
+      return {};
+    }
+  }
+  function mapKeyNow() {
+    try {
+      return /^SOM/.test(window.localStorage.getItem(MAP_KEY) || "") ? window.localStorage.getItem(MAP_KEY) : "";
+    } catch (e) {
+      return "";
+    }
+  }
+  if (!MAP_ON) {
+    // off(배포판은 build-dist가 map:on 구획째 걷어 냄): 원본을 그대로 열었을 때도 지도 요소를 DOM에서 지운다
+    const clearMap = js("clear-map-leave");
+    [js("map-tpl"), js("map-slot-hub"), js("map-slot-finale"), js("map-slot-story"), clearMap && clearMap.parentElement, ...$$('[data-t^="hub.faq.map."]').map((el) => el.closest(".faq__item"))].forEach((el) => el && el.remove());
+  }
+  const hubLinkEl = MAP_ON && js("map-tpl") ? js("map-tpl").content.querySelector('[data-js="map-hub-link"]').cloneNode(true) : null;
+  let mapLoad = null;
+  let mapApi = null;
+  // 입구 작은 링크: 이 기기에 열람 키가 있을 때만(지도 파일 없이 붙인다)
+  function refreshHubLink() {
+    const slot = js("map-slot-hub");
+    if (!hubLinkEl || !slot) return;
+    if (mapKeyNow()) {
+      if (!hubLinkEl.isConnected) {
+        slot.append(hubLinkEl);
+        applyText(hubLinkEl);
+      }
+    } else hubLinkEl.remove();
+    slot.hidden = !slot.children.length;
+  }
+  if (hubLinkEl) hubLinkEl.addEventListener("click", () => ensureMap().then((api) => api.openView(), () => {}));
+  // 지도 파일을 못 받으면 그 자리에만 한 줄(data.js map.down)
+  function mapFail() {
+    ["map-slot-finale", "map-slot-story"].forEach((n) => {
+      const slot = js(n);
+      if (!slot || slot.querySelector(".map-card")) return;
+      slot.textContent = "";
+      const box = document.createElement("div");
+      box.className = "map-down";
+      box.setAttribute("role", "status");
+      const p = document.createElement("p");
+      p.className = "map-down__text";
+      p.textContent = MAP_CFG.down || "";
+      box.append(p);
+      slot.append(box);
+      slot.hidden = false;
+    });
+  }
+  function ensureMap() {
+    if (!MAP_ON) return Promise.reject(new Error("map off"));
+    if (!mapLoad)
+      mapLoad = Promise.all([loadScript("data-map.js"), loadScript("map.js")]).then(() => {
+        const TM = window.TEXT_MAP || {};
+        Object.keys(TM).forEach((k) => {
+          if (!(k in T.map)) T.map[k] = TM[k]; // data.js 값(mode·api·down·hubLink·clear)이 우선
+        });
+        mapApi = window.FriendMap.mount({
+          T, js, jsAll, $$, show, fill, applyText,
+          go: (name) => go(name),
+          current: () => currentName,
+          addScreen: (name, el) => (screens[name] = el),
+          onEnter: (name, fn) => {
+            const f = enter[name];
+            enter[name] = () => {
+              if (f) f();
+              fn();
+            };
+          },
+          toast, track,
+          filled: () => filledRooms().length,
+          total: CHAPTER_ORDER.length,
+          goNext: () => {
+            const r = nextRoom();
+            go(r ? `${r}-intro` : "story");
+          },
+          archList: () => CHAPTER_ORDER.map((r) => (state.visits[r] ? state.visits[r].archetype : null)),
+          name: () => state.profile.name || "",
+          birth: () => state.profile.birth || null,
+          siteUrl: SITE_URL,
+          ShareButtons, Disclaimer,
+          bookOn: () => BOOK_ON,
+          paid: () => Boolean(BOOK_ON && passNow()),
+          goBook: (id) => goBook(id),
+          refreshHubLink,
+        });
+        return mapApi;
+      }, (e) => {
+        mapLoad = null;
+        mapFail();
+        throw e;
+      });
+    return mapLoad;
+  }
+  // 지도 카드 자리(결말·나의 이야기)에 들어갈 때: 받고 → 카드 상태를 다시 그린다
+  function mapEnter() {
+    if (MAP_ON) ensureMap().then((api) => api.refresh(), () => {});
+  }
+  ["finale", "story"].forEach((n) => {
+    const f = enter[n];
+    enter[n] = () => {
+      if (f) f();
+      mapEnter();
+    };
+  });
+  // 내 정보 지우기 뒤: 선택 칸대로 서버 기록 지우기(leave)·이 기기에서 지도 잊기
+  function mapAfterClear(del, forgetIt) {
+    if (forgetIt) {
+      if (mapApi) mapApi.forgetQuiet();
+      else {
+        try {
+          window.localStorage.removeItem(MAP_KEY);
+        } catch (e) {
+          /* 저장소 없음 */
+        }
+        track("map_forget");
+      }
+    }
+    if (mapApi) mapApi.reset();
+    if (del) ensureMap().then((api) => api.leaveQuiet(del), () => {});
+    refreshHubLink();
+  }
+
   // ═════════ 시작 ═════════
   applyText();
+  // (16-2의 6) #join=<초대 ID>는 화면 이름으로 읽기 전에 가로챈다: 값을 꺼내 두고 → replaceState로 주소에서 해시를 지운 뒤 → 평소 입구.
+  // 뒤로 가기 기록에도 남지 않는다. off면 해시만 지우고 값은 버린다. 모양(22자 base64url)이 틀리면 조용히 무시
+  let mapJoinNow = false;
+  if (/^#join=/.test(location.hash)) {
+    const inv = location.hash.slice(6);
+    try {
+      history.replaceState(history.state, "", location.pathname + location.search);
+    } catch (e) {
+      /* 기록을 못 쓰는 환경 */
+    }
+    if (MAP_ON && /^[A-Za-z0-9_-]{22}$/.test(inv)) {
+      try {
+        window.sessionStorage.setItem(MAP_SES, JSON.stringify(Object.assign(mapSes(), { join: inv })));
+      } catch (e) {
+        /* 저장 막힘 */
+      }
+      mapJoinNow = true;
+    }
+  }
   // (8단계) 새 세션(이 탭에 마친 방이 없음)은 주소와 상관없이 입구부터 (spec 8-2, 7-2 딥링크 무시).
   // 같은 탭(새로고침·뒤로 가기): 주소 해시의 화면 이름으로 — 방 이름(#rune)이나 방 화면(#rune-result)은 문지기 규칙대로, 의식·결제 화면은 입구로
   const hash = location.hash.replace("#", "");
@@ -4651,6 +4820,10 @@
   if (location.search) history.replaceState(history.state, "", location.pathname + location.hash);
   go(first, { instant: true, replace: true }); // #paid는 화면 이름(#paycheck·#paypopup)으로 바뀐다(R·결제 값은 주소에 없음)
   if (payAfter) payAfter();
+  if (MAP_ON) {
+    refreshHubLink();
+    if (mapJoinNow || mapSes().join) ensureMap().then((api) => api.boot(), () => {}); // 초대 띠(peek)
+  }
   booted = true;
   startExternal();
 

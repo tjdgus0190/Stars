@@ -1,10 +1,14 @@
-# 인계 문서 (2026-10-16 갱신, 15단계 G3)
+# 인계 문서 (2026-10-17 갱신, 16단계 H3)
 
 다른 세션(Claude Code 클라우드 세션 등)에서 이 저장소 작업을 이어 갈 때 먼저 읽는 문서다.
 규칙은 **CLAUDE.md**가 기준이고, 이 문서는 현재 상태와 일하는 요령만 적는다. 둘이 다르면 CLAUDE.md가 이긴다.
 
 ## 1. 지금 상태 한눈에
 - 제품은 하나다: `products/strange-oracle` "낯선 점술관". 일곱 점술 방(Ⅰ 만신 → 오검 → 별 → 데칸 → 촐킨 → 룬 → 시빌라, 결정 91)을 돌고 결과를 모아 "나의 이야기"와 "한 권의 책"(12장)으로 엮는다.
+- **16단계(친구 궁합 지도, 결정 84·95·103, specs 16단계)**: H1(디자인)·H2(서버 friend-map)·H3(화면 map.js·data-map.js 키 구조·app.js 연결·build-dist ⑩~⑬·시험)이 끝났다. 다음은 H4(copywriter: data-map.js·data.js `map.*`·`hub.faq.map` 문구, legal 지도 구획, index.html `[초안]` 정리) → H5(UI 점검) → H6(QA). H7(Cloudflare·live)은 운영자 몫이다.
+  - **본 페이지는 `map.mode = "off"`**: 지도 template·자리·FAQ 문답·clear 선택 칸이 index.html `<!-- map:on -->` 구획 안에 있고 build-dist가 걷어 낸다. map.js·data-map.js도 배포 폴더에 없다. `#join=` 주소는 해시만 지우고 무시한다.
+  - 시험 페이지(모의 서버 `--mode test`)에서는 data.js 응답의 `map.mode`→test, `map.api`→`/__dev/map`이고, 지도 파일은 원본에서 내준다. 지도 파일은 결말·나의 이야기(지도 카드 자리)·입구 링크·`#join=`에서만 불러온다(첫 화면 요청 0).
+  - 저장: localStorage `strange-oracle-mapkey`(주인 열람 키 하나) · sessionStorage `strange-oracle-map`(join·joined·del). 점수·배치·별명 막기·만 14세 확인은 map.js 안(브라우저)에서만.
 - 14단계(일곱 번째 방·결제 복귀)는 F7 QA까지 마쳤고, 지금은 **15단계(페이앱 결제)** 개발 중이다. G1(디자인)·G2(서버)·G3(화면)이 끝났고 다음은 G4(copywriter 문구·legal 결제 문단·index.html [초안] 정리) → G5(UI 점검) → G6(QA)이다. G7(실결제·live)은 운영자 몫이다(specs 15-9).
 - **수익 구조(14단계, 결정 85·94)**
   - 광고는 걷어 냈다(14-2). GA4 분석만 남는다(ID가 비면 아무것도 불러오지 않음).
@@ -75,17 +79,20 @@
 
 ## 4. 빌드·시험
 ```
-node tools/build-dist.js                       # dist/public 생성 + 점검(pay.mode off · 유료 문장 지문 누출 0 · api/_paid/__dev 없음 · 첫 화면 책 파일 0). 실패하면 exit 1 → Netlify 배포도 멈춤
+node tools/build-dist.js                       # dist/public 생성 + 점검(pay.mode off · map.mode off(⑩~⑬) · 유료 문장 지문 누출 0(data-map.js 포함) · api/_paid/__dev·friend-map 없음 · 첫 화면 책 파일 0). 실패하면 exit 1 → Netlify 배포도 멈춤
 node --test "tools/strange-oracle/*.test.js"    # 단위 시험 (glob을 따옴표로 감쌀 것. 폴더만 주면 Node 24에서 실패)
 node tools/strange-oracle/mock-server.js --port 8788 --mode test  # 시험 페이지 = e2e가 쓰는 서버 (백그라운드). off는 배포판과 같음
 node tools/strange-oracle/e2e-saju.js
 node tools/strange-oracle/e2e-book.js           # 결제한 탭으로 책 12장
 node tools/strange-oracle/e2e-flow.js reduced   # motion도 있음
+node tools/strange-oracle/e2e-map.js            # 16단계 친구 지도(브라우저 둘 = 주인·친구, 약 2분) + off 배포판 DOM 0 (off 서버 8792를 스스로 띄우고 끔)
 node tools/strange-oracle/e2e-pay.js            # 15단계 결제 흐름(test, 이동·팝업, 약 4~5분) + off 배포판 DOM 0 (off 서버 8791을 스스로 띄우고 끔)
 node tools/strange-oracle/perf.js               # 14-6 성능 (몇 분 걸림)
 node tools/strange-oracle/make-pass.js 1        # 운영자용: 열람 코드·해시를 터미널에만 찍음 (저장소·문서에 적지 말 것)
 ```
-- 마지막으로 확인한 수치(2026-10-16 15단계 G3): 단위 89, e2e-saju 41, e2e-book 54, e2e-flow reduced 127, motion 128, e2e-pay 62, 모두 실패 0. e2e-ads는 은퇴(광고 제거). 성능은 tests.md 「14단계 · 성능」(첫 화면 등 미달 항목 있음).
+- 마지막으로 확인한 수치(2026-10-17 16단계 H3): 단위 140(map-score 11 포함), e2e-map 78, e2e-saju 41, e2e-book 54·e2e-pay 67(둘 다 지도 `down=1` 상태로), e2e-flow reduced 127, motion 128, 모두 실패 0.
+- **친구 지도 시험(16단계, 모의 서버 test에만):** 지도 요청 `POST /__dev/map/<create|join|peek|view|erase>`, 스위치 `/__dev/map-switch?down=1|0&slow=<ms>&clock=+91d|0&cap=<n>|default&limits=reset`, 저장소 보기 `/__dev/map-store`(`?clear=1`), 지름길 `/__dev/skip?rooms=7&join=<22자>&birth=YYYY-MM-DD`. e2e는 **127.0.0.1**로 연다(localhost면 403). 모의 서버는 map.js·data-map.js를 원본에서 읽으므로 그 두 파일은 고쳐도 재시작이 필요 없지만, app.js·data.js는 build-dist 뒤 재시작해야 한다.
+- 그 전 수치(2026-10-16 15단계 G3): 단위 89, e2e-saju 41, e2e-book 54, e2e-flow reduced 127, motion 128, e2e-pay 62, 모두 실패 0. e2e-ads는 은퇴(광고 제거). 성능은 tests.md 「14단계 · 성능」(첫 화면 등 미달 항목 있음).
 - **결제 시험(15단계, 모의 서버 test에만):** 가짜 SDK `/__dev/payapp-lite.js`(data.js 응답에서만 SDK 주소·userid를 바꿈), 가짜 결제창 `/__dev/payapp/checkout`(모양 = `tools/strange-oracle/payapp-mock.html`, designer 견본 `payapp-checkout.sample.html`과 단추 이름만 다름), 스위치 `/__dev/pay-switch?win=redirect|popup&sdk=ok|fail&store=ok|fail-read|fail-write&env=…&late=<ms>&limits=reset`, 저장소 보기 `/__dev/pay-store`(`?clear=1`). e2e 시작 때 `limits=reset`·`clear=1`을 부른다.
 - **화면 시험 브라우저:** e2e는 tools/strange-oracle/cdp.js로 헤드리스 **Microsoft Edge**를 띄운다. 경로는 `EDGE_PATH` 환경 변수이고, 없으면 윈도우 기본 경로를 쓴다. 리눅스 클라우드에서는 Chrome·Chromium 경로를 `EDGE_PATH`에 넣어야 할 수 있다(미확인).
 - **시험 페이지 = 모의 서버 지름길(모의 서버에만 있음, 배포 폴더·본 페이지에는 없음, 결정 89):** `http://127.0.0.1:<포트>/__dev/skip`은 일곱 방을 마친 상태로 시작한다. `?rooms=N`(새 순서 앞 N개), `?paid=1`(시험 열람 상태, test 모드에서만), `?to=book`(목차)·`?to=hub`, `?legacy=1`(옛 상태). 예: `/__dev/skip?rooms=7&paid=1&to=book` = 12장 모두 열림. 모의 열람 코드는 서버를 켤 때마다 새로 만들어 터미널에만 찍는다.
