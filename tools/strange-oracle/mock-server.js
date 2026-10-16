@@ -28,6 +28,12 @@
 // (15단계 QA 1차 필수 1) 제품 HTML(index.html·legal/*.html)의 결제 표지(<!-- pay:on -->·<!-- pay:off -->, tools/pay-sections.js):
 //   --mode test면 원본(products/strange-oracle/)에서 읽어 test 판으로 내준다 → legal 결제 문단이 보이고 legal/refund.html도 열린다(배포 폴더에는 없음).
 //   --src면 원본을 mode대로 처리한다. dist 모드 off는 build-dist가 이미 off 판으로 만든 파일 그대로. 원본 파일은 고치지 않는다.
+// (16단계, spec 16-7) 모의 지도 서버(tools/strange-oracle/mock-map.js): friend-map/core.js + 메모리 어댑터. 결제 모의와 섞지 않는다.
+//   POST /__dev/map/{create|join|peek|view|erase} · /__dev/map-switch · /__dev/map-store (사용법은 mock-map.js 머리)
+//   --mode test면 MAP_MODE=live, ALLOWED_ORIGIN = http://127.0.0.1:<포트>, data.js 응답에서만 map.mode → "test", map.api → "/__dev/map"
+//   --mode off면 지도 요청은 모두 503(배포판과 같음)
+//   지름길 /__dev/skip?join=<초대 ID 22자> → 이 탭 sessionStorage strange-oracle-map에 {join}(친구 상태로 시작)
+//          /__dev/skip?birth=YYYY-MM-DD   → 가짜 프로필의 생년월일만 바꿈(나이 시험용)
 // 요청 본문은 찍지 않는다. 주소·상태 코드만 한 줄씩 출력한다.
 const http = require("http");
 const fs = require("fs");
@@ -57,6 +63,7 @@ if (!fs.existsSync(STATIC)) {
 const MOCK_PASS = PayCode.Pass.make(); // 시작할 때마다 새로
 const PAYMOCK = MODE === "test" ? require("./mock-pay.js").createPayMock({ port: PORT }) : null;
 const ENV = { PASS_MODE: MODE === "test" ? "test" : "", BOOK_PASS_HASHES: MODE === "test" ? Book.hashOf(MOCK_PASS) : "" };
+const MAPMOCK = require("./mock-map.js").createMapMock({ port: PORT, mode: MODE });
 const bookEnv = () => (PAYMOCK ? Object.assign({}, ENV, { PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET }) : ENV);
 
 const TYPES = {
@@ -101,6 +108,7 @@ const server = http.createServer((req, res) => {
     return;
   }
   if (PAYMOCK && PAYMOCK.route(req, res, rel, url, log)) return;
+  if (MAPMOCK.route(req, res, rel, url, log)) return;
   if (rel === "/api" || rel.startsWith("/api/")) {
     log(404);
     return notFound(res);
@@ -111,6 +119,9 @@ const server = http.createServer((req, res) => {
     const toQ = url.searchParams.get("to") || "";
     const to = toQ === "book" ? "report" : /^[a-z-]+$/.test(toQ) ? toQ : "story";
     const paid = url.searchParams.get("paid") === "1" && MODE === "test";
+    const join = /^[A-Za-z0-9_-]{22}$/.test(url.searchParams.get("join") || "") ? url.searchParams.get("join") : "";
+    const bm = (url.searchParams.get("birth") || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const birth = bm ? `{ y: ${Number(bm[1])}, m: ${Number(bm[2])}, d: ${Number(bm[3])} }` : "{ y: 1995, m: 3, d: 25 }";
     const P = "/products/strange-oracle/";
     const html = `<!DOCTYPE html><meta charset="utf-8"><title>시험 지름길</title>
 ${["data.js", "data-saju.js", "saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"].map((f) => `<script src="${P}${f}"></script>`).join("\n")}
@@ -124,8 +135,9 @@ if (R.indexOf("tzolkin") > -1) v.tzolkin = { number: 4, sign: 19, archetype: TZO
 if (R.indexOf("rune") > -1) v.rune = { picks: [RUNES[0].code, RUNES[5].code, RUNES[10].code], topic: "me", archetype: RUNES[10].archetype };
 if (R.indexOf("sibyl") > -1) v.sibyl = { sors: 12, topic: "love", archetype: ORACLES[12].archetype };
 sessionStorage.clear();
-sessionStorage.setItem("strange-oracle", JSON.stringify({ profile: { name: "테스트", birth: { y: 1995, m: 3, d: 25 }, time: { h: 14, m: 37 } }, visits: v }));
+sessionStorage.setItem("strange-oracle", JSON.stringify({ profile: { name: "테스트", birth: ${birth}, time: { h: 14, m: 37 } }, visits: v }));
 ${paid ? `sessionStorage.setItem("strange-oracle-pass", ${JSON.stringify(MOCK_PASS)});` : ""}
+${join ? `sessionStorage.setItem("strange-oracle-map", ${JSON.stringify(JSON.stringify({ join }))});` : ""}
 location.replace("${P}#${to}");
 </script>`;
     res.writeHead(200, { "Content-Type": TYPES[".html"], "Cache-Control": "no-store" }).end(html);
@@ -164,7 +176,7 @@ location.replace("${P}#${to}");
       return notFound(res);
     }
     // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로)
-    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"')));
+    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"'))));
     send(req, res, TYPES[path.extname(file)] || "application/octet-stream", data);
   });
 });

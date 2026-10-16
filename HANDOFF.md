@@ -53,7 +53,21 @@
    - 실결제 1건 + 취소(15-6 ①~⑧, 특히 ⑥ returnurl 본문에 linkkey·linkval이 없는지). 결과는 tests.md 「15단계 · 실결제」에 날짜와 통과 여부만.
    - 그 뒤 data.js `pay.mode`를 live로, build-dist ③ off 가드를 live 허용으로 함께 고친다(⑦ live 가드는 남긴다).
    - **legal 결제 문단·refund.html(15단계 QA 1차 필수 1):** 주석을 풀 일은 없다. legal 결제 문단·목차 줄은 `<!-- pay:on -->…<!-- /pay:on -->`, 결제가 꺼진 판의 짝 문장(제1조 "결제 없음" 등)은 `<!-- pay:off -->…<!-- /pay:off -->` 표지 안에 있고, build-dist가 `pay.mode`대로 한쪽을 걷어 낸다(`tools/pay-sections.js`, off는 index.html 결제 template도 걷어 냄). `legal/refund.html`은 **mode live일 때 build-dist가 배포 폴더에 자동으로 넣는다**(off에서는 빠짐). live 빌드 뒤 확인: ① `dist/public/products/strange-oracle/legal/refund.html`이 있다 ② privacy·terms에 제4조의3·제2조의2가 보이고 "결제를 받지 않으므로"가 없다 ③ build-dist ⑦이 refund.html 없음·pay:on 구획 없음·배포판 legal ◯◯를 잡는다. 시험 페이지(모의 서버 `--mode test`)는 같은 함수로 결제 문단과 refund.html을 내준다.
-7. **배포를 막지 않는 정리 4건**(QA 13단계 권장)
+7. **친구 궁합 지도 서버 배포(16단계 H7, specs 16-5의 6·16-10, 운영자만 — CLAUDE.md 10장)**
+   - 코드: `products/strange-oracle/friend-map/`(core.js·worker.js·words.js·schema.sql·wrangler.toml). 이 폴더는 build-dist가 배포 폴더에 넣지 않는다. 에이전트는 운영 중인 D1을 읽거나 고치지 않는다.
+   - wrangler는 저장소에 설치하지 않고 운영자 PC에서 `npx wrangler@4.151.1`로 쓴다(2026-10-17 npm 최신으로 확인한 버전. `.wrangler/` 폴더가 생기면 커밋하지 않는다). 아래 명령은 모두 `products/strange-oracle/friend-map/` 폴더에서 실행한다.
+   1. Cloudflare 가입(결제 수단 없이 Workers Free, 74번). 무료 요금제에서 Cron Trigger·Rate Limiting을 쓸 수 있는지, 한도 초과 때 과금이 없는지 확인한다(미확인).
+   2. `npx wrangler@4.151.1 login`
+   3. `npx wrangler@4.151.1 d1 create strange-oracle-map` (위치 힌트는 75번 결정대로, 예: `--location apac`) → 출력된 `database_id`를 wrangler.toml의 `database_id = ""`에 넣는다(비밀값은 아니지만 16-9의 15대로 저장소에는 커밋하지 않는다 — 배포하는 PC의 작업 사본에서만 채우고, `map.test.js`가 저장소의 빈 값을 확인한다).
+   4. `npx wrangler@4.151.1 d1 execute strange-oracle-map --remote --file=schema.sql` (표 maps·friends·quota)
+   5. wrangler.toml `[vars]`: `ALLOWED_ORIGIN`에 본 사이트 출처 하나(예: `https://도메인`, 경로·끝 `/` 없이), `MAP_MODE = "live"`. 둘 중 하나라도 비거나 live가 아니면 Worker는 모든 요청에 503을 준다. (저장소의 wrangler.toml은 빈 값·off로 둔다 — 배포 때만 바꾸거나 `--var`로 넘긴다.)
+   6. Cron: wrangler.toml `[triggers] crons = ["17 3 * * *"]`(하루 한 번 만료 정리)가 배포와 함께 등록된다. 무료에서 안 되면 읽을 때 정리만으로도 만료 지도는 404·삭제된다(처리방침 문구 확인).
+   7. 로그: `[observability] enabled = false`를 유지한다. Cloudflare 화면에서도 Workers Logs·Logpush가 꺼졌는지 본다.
+   8. (선택) Rate Limiting이 무료로 되면 wrangler.toml 맨 아래 `[[ratelimits]]` 주석을 풀고 `namespace_id`(운영자가 정하는 정수)를 넣는다.
+   9. `npx wrangler@4.151.1 deploy` → 나온 Worker 주소(`https://….workers.dev`)를 data.js `map.api`에 넣는다(비밀값 아님).
+   10. 실제 Worker로 한 바퀴(만들기·참여·보기·지우기, 다른 출처·Origin 없음 403) 확인 → `map.mode` live와 build-dist ⑩ 해제(16-8) → `release` 병합·push.
+   - API 토큰·계정 ID는 저장소·문서에 쓰지 않는다. 비밀 환경 변수는 0개다(해시는 비밀값 없이 SHA-256).
+8. **배포를 막지 않는 정리 4건**(QA 13단계 권장)
    - 옛 결제 주석
    - 궁합 엿보기 문장에 "당신은…"이 섞이는 것(data-book-bond.js `peekLine`)
    - 반항아×전사 본문의 일 예시가 비동료 유형에도 나오는 것

@@ -858,3 +858,33 @@
 - 미확인
   - 헤드리스 클립보드 권한: [복사]는 "복사됨" 또는 "복사 실패" 안내 한 줄 중 하나가 뜨는 것까지만 봤다.
   - 실제 페이앱 SDK의 함수 이름·인자 모양(setDefault·setParam·payrequest)과 openpaytype 코드 목록
+
+## 16단계 · 친구 궁합 지도 서버 쪽 (H2, 2026-10-17, developer)
+`node --test tools/strange-oracle/map.test.js` — 40개 통과(전체 단위 129개 실패 0). 같은 시험 17개를 저장소 두 개로 돌린다: 메모리 어댑터(모의 서버와 같음)와 **D1 어댑터(worker.js `d1Store`) + node:sqlite 위 D1 흉내**(schema.sql 그대로, Node 24.21 내장). 실제 D1·Cloudflare 위 동작은 미확인(H7 운영자).
+
+| 덮는 것 | 기준 |
+|---|---|
+| 네 가지 일(create·join·peek·view·erase), 응답 칸 | 16-5의 1 |
+| 남는 칸·빠진 칸·입력값 칸(name·birth·gender) 400, 저장 0 | 16-5의 1, 6장 |
+| 별명 거름(1~8자·숫자 7개·주소 모양·꺾쇠·제어/방향 문자·금칙어 words.js) | 16-2의 3, 16-5의 4 |
+| 404 동일성(없음·틀린 키·틀린 모양·지운 기록·만료: 상태·본문·머리 같음) | 16-5의 1·4 |
+| 409 닫힘·30명(한 명 지우면 자리), peek는 닫힘·찼음도 404 | 16-5의 1·4 |
+| 시간당 10회 → 429 + Retry-After(다음 정시까지 초) | 16-5의 4 |
+| 하루 상한 503(creates·joins·erases), 삭제는 상한에 걸려도 받음 | 16-5의 4 |
+| CORS: 다른 출처·Origin 없음 403, OPTIONS 204, ACAO는 허용 출처만, 자격 증명 없음 | 16-5의 4 |
+| MAP_MODE live 아님·ALLOWED_ORIGIN 빈 값 503, 본문 1KB 넘음 413, 저장소 오류 503 `db` | 16-5의 1·6 |
+| 만료: 주인 활동 +90일 살아 있음 / +91일 지도·친구 함께 삭제, 친구 join·peek·leave는 active를 바꾸지 않음, 주인 view는 늘림, 만든 날 +365 살아 있음 / +366 삭제 | 16-5의 3, 합격 11 |
+| 정리: create 때 만료 지도 최대 20개, Cron(`scheduled`) 전부 + 7일 지난 quota 줄 | 16-5의 3 |
+| rekey·reinvite 뒤 옛 값 404, 새 초대는 열린 상태, `act=open`·짝이 틀린 act 400, 남의 지도 rid 404 | 16-5의 1 |
+| 삭제 즉시 반영(leave·friend·map 뒤 저장소에서 사라짐) | 합격 11 |
+| 저장 칸이 기획서 표와 같음(maps 12칸·friends 8칸·quota 4칸, PRAGMA table_info로도), 키·코드 원문 0, 해시만 | 합격 12 |
+| D1 질의 전부 상수 SQL + bind, schema.sql 위에서 모두 준비됨 | 16-5의 2 |
+| worker.js fetch(Request→Response)·scheduled | 16-5의 6 |
+| 모의 서버 스위치(down·slow·clock·cap·limits)·`/__dev/map-store`·data.js 응답 바꾸기 | 16-7 |
+| friend-map 외부 패키지·console·결제 참조 0, workers.dev·account_id·database_id 값 0, wrangler 설치 흔적 0, 결제 함수에 지도 참조 0 | 합격 15·16 |
+
+- **키 표준형 시험 표본**(map.js도 같은 값을 기대한다): 표준형 `0123456789ABCDEFGHJKMNPQRS` ← 입력 `som-o123456789abcdefghjkmnpqrs`(소문자·O). 해시 = SHA-256(`"SOM" + 표준형`) 16진 64자. `SOD-…`를 열람 키 칸에 넣으면 표준형 아님(서버 404).
+- **권장 4 결정:** 삭제 동작(`leave`·`map`·`friend`)도 `erases`를 1 올린다. 상한에 걸려도 막지 않는다. `close`·`rekey`·`reinvite`만 상한에서 503.
+- 기획서 오류 목록에 405가 없어서, POST·OPTIONS가 아닌 메서드는 400 `method`로 둔다.
+- **배치 측정의 난수와 시드(권장 3, map-score.test.js는 H3):** 기획서·기획 검수의 30명 × 시드 20개 측정은 생성기를 적지 않아 값이 조금 다르다(planner 0/600, QA 1/600). H3는 같은 측정을 **mulberry32, 시드 1~20**(시드 s마다 `mulberry32(s)`로 주인 코드 1개 + 친구 30명의 주·보조 원형을 64개 코드에서 고름)으로 고정하고, 결과 표를 이 문서에 적는다.
+- **권장 2(H3·H5 몫, 메모):** 같은 코드 친구 10명 이상 표본에서 겹친 아이콘 선택 목록이 뜨고 모두 고를 수 있는지를 e2e-map 3 또는 H5 UI 점검에 넣는다.

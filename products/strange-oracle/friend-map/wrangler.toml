@@ -1,0 +1,30 @@
+# 낯선 점술관 · 친구 궁합 지도 Worker 설정 (specs/strange-oracle.md 16-5의 6)
+# 계정 ID·API 토큰·키는 이 파일에 쓰지 않는다. database_id는 비밀값이 아니지만 운영자가 D1을 만든 뒤 채운다(HANDOFF 3장).
+# 확인한 wrangler 버전: 4.151.1 (2026-10-17 npm 기준). 운영자 PC에서 npx wrangler@4.151.1 로 쓰고 저장소에 설치하지 않는다.
+
+name = "strange-oracle-map"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+ALLOWED_ORIGIN = ""   # 본 사이트 출처 하나 (예: "https://도메인"), 끝에 / 없이. 비면 모든 요청 503
+MAP_MODE = "off"      # live일 때만 요청을 받는다. off면 모든 요청 503
+
+[[d1_databases]]
+binding = "DB"
+database_name = "strange-oracle-map"
+database_id = ""      # 운영자가 `npx wrangler d1 create strange-oracle-map` 결과 값을 넣는다
+
+[triggers]
+crons = ["17 3 * * *"] # 하루 한 번(UTC 03:17) 만료 지도·친구 기록, 7일 지난 quota 줄 삭제. 무료 요금제 Cron 가능 여부 미확인(74번)
+
+# Worker 로그(Observability)를 끈다. 요청 본문·키·코드·IP가 Cloudflare 로그에 남지 않게(16-5의 4)
+[observability]
+enabled = false
+
+# 선택: Workers Rate Limiting(IP 기준 분당 10회). 무료 요금제 가능 여부 미확인 — 쓸 수 있으면 운영자가 주석을 푼다.
+# namespace_id는 운영자가 정하는 정수 문자열(비밀값 아님). 바인딩이 없으면 core.js는 하루 상한만 쓴다.
+# [[ratelimits]]
+# name = "RATE_LIMITER"
+# namespace_id = ""
+# simple = { limit = 10, period = 60 }
