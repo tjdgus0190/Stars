@@ -60,3 +60,9 @@
 - 다음(대기): (h) done 뒤 data.js [초안] UI·미리보기·관심사 줄·카드 문구 → 18-9 → 기록 → clean-draft·sync-text·make-volume·build-dist
 
 **J2 끝** (developer, 2026-10-18) — 시험: 단위 168 · check-17 0 · check-17 --stage 18 0 · make-volume 0 · build-dist 통과 · e2e saju 41 · book 96 · pay 69 · map 80 · utm 29 · flow reduced 127 · motion 128 · off-diff-18 off 20화면 차이 0. 첫 화면 파일 목록 같음·새 파일 요청 0, 전송 바이트 +5.8%(off) — 운영자·QA 판단(tests.md 「18단계 · 성능」). 커밋 안 함.
+- data.js [초안] 0 (UI·미리보기·관심사 줄·카드·토스트·받는 것 상태 글자). 길이 때문에 바꾼 것: secs.close "서 있을 곳, 고를 곳"(16자 제한), toc.buyNow "책 전체 열기 · {price}원"(18자), blurbs.cross·story.preview.desc 짧게. 장 이름 확정 「겹치는 곳, 갈리는 곳」
+- 확인 123: hub.book.desc 가격 뺌, pay.tocLocked "결제하면 열려요" → "책에서 열려요"(1~6/7 목차 잠긴 장 줄마다 보여 걸림). FAQ 4는 가격 남김(운영자 판단)
+- 18-9: pay.what.free·refund.body·FAQ 4(12장)·주석, legal refund 제1조·terms 제2조의2·privacy 제4조의3. grep 남은 것: data.js 952 단계 이력 주석, index.html 3594 주석(손대지 않음)
+- reports/copy 18단계 절, specs/selling 18단계 한 줄
+- clean-draft(index.html [초안] 0) → sync-text(changed 4, meta 4) → make-volume(불일치 0, avg.cross 1,919) → build-dist(유료 지문 0, cross 148 포함, 통과) → 단위 시험 10개 전부 fail 0 (cross 13·book 17·pay 25·map 40 등). e2e는 서버를 건드리지 않아 미실행
+- **J3 끝** (2026-10-18)
