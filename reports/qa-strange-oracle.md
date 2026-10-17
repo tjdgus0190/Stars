@@ -1150,3 +1150,102 @@
 
 ### meta.json
 - status "검수통과"를 확인했다(그대로 둠).
+
+## 16단계 QA (H6 1차, 2026-10-17)
+
+### 판정: 배포 가능
+- 기준: specs 16-9 합격 기준 1~17, 운영자 결정 84·95·103, CLAUDE.md 3·6·7·8·11장(2026-10-17 개정 친구 지도 조항).
+- 배포판은 `map.mode = "off"`다. 이 판정은 **지도가 꺼진 배포판**에 대한 것이다. live 전환(H7)은 운영자 몫이고, 아래 "live 전에 할 것"을 함께 마쳐야 한다.
+- 수정 필요 항목은 없다. 권장 5건은 배포를 막지 않는다.
+
+### 직접 돌린 시험 (2026-10-17, 모의 서버 127.0.0.1:8788 `--mode test`)
+- 모의 서버는 H5 커밋(09:53) 전인 09:38에 켜져 있었다. build-dist 뒤 재시작했다. 포트 8787은 건드리지 않았다.
+
+| 시험 | 결과 |
+|---|---|
+| `node tools/build-dist.js` | exit 0, [초안] 없음, 유료 지문 4,637개 누출 0, ⑩~⑫ 통과(경고: ga4·site.url 빈 값, 기존과 같음) |
+| 단위 `node --test "tools/strange-oracle/*.test.js"` | 140 / 140 통과. D1(node:sqlite) 시험 포함, 배치 겹친 채 0/600 |
+| e2e-map | 78 통과 / 0 실패 |
+| e2e-saju | 41 / 0 |
+| e2e-book | 54 / 0 (down=0), **54 / 0 (`down=1`)** |
+| e2e-pay | 67 / 0 (down=0), **67 / 0 (`down=1`)** |
+| e2e-flow reduced · motion | 127 / 0 · 128 / 0 |
+
+### 결과표
+| 기준 | 결과 | 근거 |
+|---|---|---|
+| 1 off 배포판 | 통과 | dist/public에 map.js·data-map.js·friend-map 없음. index.html·legal에 `data-js="map-"`·map:on·제4조의4·제2조의3 0건. e2e-map 8(off 8792): 지도 DOM 0, `#join=` → 입구·해시 지움, 7/7에 지도 카드 0, 지도 요청 0 |
+| 2 test e2e 1~7 | 통과 | e2e-map 78 |
+| 3·4 배치·결정성 | 통과 | map.js:111-154가 16-3의 2 식 그대로(d 16, rMax 71, 0.5/0.5, ±4°). 단위: 시드 20 × 30명 겹친 채 0, 오각형 밖 0, 뒤집힘 0. e2e 3 새로고침 두 번 좌표 같음 |
+| 5 점수 | 통과 | PROFILE·축 점수·백분위 식이 16-4와 같다(map.js:21-84). 대칭·분포 5기준은 map-score 단위 통과 |
+| 6 서버 멈춤 격리 | 통과 | `down=1`로 e2e-book 54·e2e-pay 67 실패 0, e2e-map 6 |
+| 7 첫 화면 지도 파일 0 | 통과 | app.js:4697 지연 불러오기, e2e-map "합격7" |
+| 8 6장 검사 | 통과(권장 1) | 아래 "6장" |
+| 9 동의 화면 | 통과 | index.html:3428-3522: 보내는 것(원형 이름 표시)·보내지 않음·보는 사람(주인/친구)·저장 위치·보관 기간·지우는 법·선택 사항이 모두 [보내기] 위에 있다. 체크·아이콘은 처음 꺼짐, 별명 칸은 비움(map.js:657-660). 실명·성 뺀 이름·생일 조각(YYYY·YYMMDD·MMDD·MDD·MMD) 막기(map.js:183-209), 보내기 직전 다시 검사(map.js:677) |
+| 10 만 14세 | 통과 | ageOf 식이 16-2의 4와 같다(map.js:211). 막힘 때 요청·분석 없음(map.js:617), e2e 7·10 |
+| 11 삭제·자동 삭제 | 통과 | core.js: leave·friend·map 즉시 행 삭제, 만료 = active 90일·created 365일(154), 읽을 때 정리·create 때 20개·Cron. join·leave·peek는 active를 건드리지 않는다(211·238). 단위·e2e 5(+91d → 404, 저장소 빔) |
+| 12 저장 칸 | 통과 | schema.sql·worker.js INSERT 칸이 16-5의 2 표와 같다. 키·코드는 SHA-256만(core.js:182·209) |
+| 13 7장 | 통과 | 지도·팝업·순위·친구 카드에 가격·광고·제휴 0. 상세 궁합 줄은 bookOn·paid로만 보이고(map.js:1013-1016) 가격 없는 문장이다. pay off면 0줄. data-map.js에 유료 지문 0(build-dist) |
+| 14 build-dist ⑩~⑬ | 통과 | 아래 사본 시험 |
+| 15 비밀값·패키지 | 통과 | friend-map에 require·import는 내부 파일만. git에 workers.dev 하위 주소·account_id·database_id 값·.wrangler·wrangler 의존성 0. wrangler.toml은 빈 값·off·observability false |
+| 16 결제와 분리 | 통과 | friend-map에 pay·book·Blobs·SOP 참조 0, netlify/functions에 지도 참조 0 |
+| 17 8장 | 통과 | 아래 "8장" |
+
+### 코드 검토 메모 (friend-map)
+- 경로 다섯 = 일 넷: 16-5의 1 대응표와 같다. `act` 목록 밖(open 등)은 400(core.js:131). 칸이 하나라도 남거나 빠지면 400이고 저장 전이다(core.js:111-114).
+- 키·초대 ID·rid·삭제 코드는 `crypto.getRandomValues` 16바이트(128비트). 404는 없음·만료·틀린 키·틀린 코드·남의 rid가 모두 `{"error":"not_found"}` 하나다. peek는 닫힘·찼음도 404다.
+- 30명은 INSERT…WHERE COUNT < 30 한 문장이다(경쟁에도 넘지 않음). 시간당 10회는 429 + Retry-After. 하루 상한은 creates 1,000·joins 3,000·erases 3,000이다. 삭제(friend·map·leave)는 상한에 걸려도 받는다.
+- CORS: Origin이 ALLOWED_ORIGIN과 정확히 같을 때만 허용한다. Origin이 없어도 403이다. Expose-Headers는 Retry-After다. MAP_MODE가 live가 아니거나 출처가 비면 503이다.
+- console 출력 0(friend-map·map.js). SQL은 모두 상수이고 값은 bind로만 넘긴다. 오류 내용은 응답·로그에 남지 않는다.
+
+### 6장
+- map.js `req`는 create·join·peek·view에서 SEND 표의 칸만 골라 보낸다(map.js:290-294). erase는 호출하는 곳 넷(519·1073·1175·1209)이 모두 `{key, act[, rid]}` 또는 `{del, act:"leave"}`다. `credentials: "omit"`, `referrerPolicy: "no-referrer"`.
+- 저장: localStorage에는 `strange-oracle-mapkey`(SOM 키 하나)만 둔다. sessionStorage `strange-oracle-map`에는 join·joined·del만 둔다(형식을 거른 뒤 저장). 이름·생일·별명은 메모리에만 있다. clearAll은 session 칸을 늘 지운다. 선택 칸 두 개(leave·forget)는 처음 꺼져 있다(app.js:246·636-648).
+- 분석: map_* 7개의 스키마가 `{}`라 매개변수가 실리지 않는다(app.js:4577). page_location은 #·? 앞까지만 보낸다(analytics.js:39).
+- `#join=`은 화면을 읽기 전에 replaceState로 지운다(app.js:4773-4787). off에서는 값을 버린다.
+- e2e-map 6장 검사(e2e-map.js:426-460)를 읽었다. 본문 칸 모양, 요청 URL·본문의 입력값·코드·방 세부, 저장소 원문, URL의 키·초대 ID, 분석 인자의 별명·아이콘·키, console, 쿠키를 본다 → 모두 통과했다. 부족한 점은 권장 1에 적었다.
+
+### 8장 (data-map.js 232줄, data.js `map.*`·`hub.faq.map` 통독)
+- pairLine 36쌍은 모두 "두 사람이 이렇게 하면 좋다" 시점이다. 상대를 깎는 말, 성별 가정, 이별·결혼 시기가 없다. axisTip 5개는 모두 실행할 수 있는 긍정 조언으로 끝난다. band 4개("닮은 결"~"서로 다른 결")는 중립어다.
+- 금지어 검색(최악·피해야·천생연분·100%·운명·반드시·이별·결혼·헤어·건강·질병·사고·죽·꼴찌·나쁜·위험·불행·남자·여자·[초안]): 0건이다(머리 주석의 규칙 설명 1줄은 뺐다).
+- 면책: 지도 화면·친구 카드에 Disclaimer.mount가 있다(map.js:405-406).
+
+### 11장 · live 가드 ⑬ 사본 시험 (scratchpad 사본, 저장소 원본은 고치지 않음)
+| 사본 상태 | 결과 |
+|---|---|
+| A: map.mode live, api·site.url 빈값, ◯◯ 그대로 | ⑩ + ⑬ api·site.url·data-map.js ◯◯·privacy 지도 구획 ◯◯ 넷 모두 실패 |
+| B: 모두 채움 | ⑩만 실패(정상) |
+| C: privacy의 map:on 구획 삭제 | ⑩ + ⑬ "map:on 지도 구획이 없음" |
+| D: data-map.js에만 ◯◯ | ⑩ + ⑬ data-map.js ◯◯ |
+- CREDITS.md:19에 아이콘 24개와 오각형 선이 직접 그린 그림이라고 적혀 있다. og-image·소개 글·면책 문구는 기존 그대로 있다. meta.json status는 "검수통과"이고 그대로 두었다.
+
+### H5 메모 판단 (초대 띠를 본 뒤 서버가 쉼)
+- 막다른 곳이 아니다. 카드는 앞서 받은 peek 결과로 `join` 상태에 남는다. 그래서 [궁합 보러 참여하기]를 누르면 나이 확인 → 동의 화면으로 간다. [보내기]를 누르면 join이 down으로 끝나고, 동의 화면 위에 "지도가 잠시 쉬고 있어요"와 [다시 시도]가 보인다. [보내지 않기]도 그대로 보인다(map.js:728-730, style.css는 data-when 요소만 숨김). 일곱 방·나의 이야기는 영향이 없다(`down=1` e2e 통과).
+- 다만 사용자는 별명·아이콘·동의를 다 채운 뒤에야 쉼을 알게 된다 → 권장 2.
+
+### 권장 (배포를 막지 않음, live 전에 하면 좋음)
+1. **e2e-map 6장 검사 보강 (developer).** 16-7의 6장 목록과 비교해 빠진 것이 둘 있다.
+   - 분석 인자(dataLayer)와 localStorage에 시험 입력값 목록(INPUTS: 이름·생년월일 표기·시각·성별·SOP·SOG·방 세부)을 검색하지 않는다. 지금은 별명·아이콘·키 목록(secrets)만 찾는다(e2e-map.js:455-457).
+   - GA 시험값은 주인 브라우저 A에만 넣는다. 그래서 친구 쪽 map_join·map_leave 분석 인자는 검사되지 않는다.
+   - 코드상으로는 스키마 `{}` 때문에 실릴 수 없음을 확인했다.
+   - 재현: e2e-map.js 457줄 뒤에 `hitIn(dl)`·`hitIn(localStorage 전체)` 검사가 없음을 보면 된다. B 브라우저는 `browser(9642, false)`(ga 꺼짐)이다.
+2. **초대 띠 뒤 서버 쉼 (developer).** startFlow("friend")가 캐시된 peek("ok")를 그대로 쓴다(map.js:555). 참여 카드를 누를 때 peek를 한 번 다시 묻는다(16-2의 6 "참여 단계에서 한 번 더 묻는다"의 취지). 그러면 쉼을 동의 화면 전에 카드에서 알릴 수 있다.
+   - 재현: 친구로 `#join=`을 연다 → 7/7 → `/__dev/map-switch?down=1` → [궁합 보러 참여하기] → 나이·동의를 지나 [보내기]를 눌러야 쉼 안내가 나온다.
+3. **FAQ 지도 문답 (copywriter).** `hub.faq.map[1].a`(data.js:377)는 "90일이 지나면 저절로 지워져요"만 적고 "만든 날부터 최대 1년"이 빠져 있다. 동의 화면·처리방침과 맞추면 좋다.
+4. **off 배포판에 남는 지도 코드·문구 (developer, 기록만).** dist의 app.js(지연 불러오기·`#join` 처리), data.js(`map.*`·`hub.faq.map` 문구), style.css(지도 스타일)에 지도 관련 글자가 남는다. DOM·요청은 0이라 16-9의 1은 만족한다. ⑫가 금지하는 글자도 0이다.
+5. **worker.js readBody 예외 (developer).** 본문 스트림 읽기 오류는 core의 try 밖이다. 그래서 Cloudflare 기본 500이 나간다(로그는 꺼져 있음). 503 `{error:"db"}`로 감싸면 화면 처리와 일관된다. 참고로, 주인 기기에서 남의 `#join=`이나 자기 링크를 열면 boot의 isMine이 자동으로 view를 불러 주인 active가 늘어난다(map.js:574-581). 주인 기기의 동작이라 결정 위반은 아니다.
+
+### live 전에 운영자가 할 것 (H7, 에이전트 몫 아님)
+- 75·76·39번 값: 동의 화면 "저장 위치 ◯◯"(data-map.js:124), privacy 제4조의4의 ◯◯ 넷. ⑬이 잡는다.
+- `map.api`·`site.url`, ⑩ 해제, 실제 Worker로 한 바퀴(다른 출처·Origin 없음 403, 로그 꺼짐).
+
+### 확인하지 못한 것
+- 실제 Cloudflare Workers·D1 동작: wrangler(esbuild)가 CommonJS 모양인 core.js·words.js를 `import … from`으로 묶는지, D1 batch·외래 키 동작, Cron·Rate Limiting 무료 가능 여부, Time Travel 보존 기간. 모의 서버와 node:sqlite로만 확인했고, 실제 확인은 H7 몫이다.
+- 360·480px 화면 모양은 직접 보지 않았다. H5 UI 점검의 "통과"를 따랐다.
+- 처리방침·약관 지도 조항의 법적 충분성(83번).
+
+### 운영자가 브라우저로 직접 확인할 것 (live 때)
+- 친구 기기에서 초대 링크 → 7/7 → 참여 → 삭제 코드 카드. 주인 기기에서 지도·팝업·지우기를 한 번씩 해 본다. 주소창·방문 기록에 열람 키·삭제 코드가 없는지 본다.
+
+### 지운 파일
+- 없음. 시험 사본은 scratchpad에만 만들었다.
