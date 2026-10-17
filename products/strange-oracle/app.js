@@ -4720,12 +4720,25 @@
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
+  // (광고 측정, 제안서 strange-oracle-ads 8장 4번) 캠페인 구분: 광고 링크의 utm은 아래 값과 정확히 같을 때만 page_location에 남긴다.
+  // 다른 query·목록 밖 값이 하나라도 있으면 캠페인 값을 모두 버린다(방문은 query 없는 주소로 기록). 클릭 ID(fbclid·ttclid)는 값을 보지 않고 버린다.
+  // 값을 더하려면 제안서와 marketing/strange-oracle/render/README.md 표도 함께 고친다. 사용자 입력값은 이 목록에 들어갈 수 없다(6장).
+  const CAMPAIGN = {
+    allow: {
+      utm_source: ["instagram", "tiktok"],
+      utm_medium: ["paid_social", "organic"],
+      utm_campaign: ["ad1_seven_doors", "ad2_manshin"],
+      utm_content: ["ad1_seven_doors", "ad2_manshin"],
+    },
+    ignore: ["fbclid", "ttclid"],
+  };
+  const bootSearch = location.search; // 시작할 때 주소에서 지우기 전의 query (분석 부품에만 넘기고 다른 곳에 쓰지 않는다)
   let booted = false;
   let externalOn = false;
   function startExternal() {
     if (!booted || externalOn || location.search) return;
     externalOn = true;
-    if (Analytics.init({ ga4: T.analytics.ga4, title: T.meta.title, events: EVENTS })) track("so_visit");
+    if (Analytics.init({ ga4: T.analytics.ga4, title: T.meta.title, events: EVENTS, utm: { search: bootSearch, allow: CAMPAIGN.allow, ignore: CAMPAIGN.ignore } })) track("so_visit");
   }
   function track(name, props) {
     if (externalOn) Analytics.track(name, props);

@@ -10,7 +10,7 @@
 | disclaimer.js | 있음 | strange-oracle |
 | share-buttons.js | 있음 (2026-09-30, 링크 복사 + 카카오톡 자리) | strange-oracle |
 | ads.js | 있음 (2026-10-01, 배너 채우기 + 보상형) | strange-oracle |
-| analytics.js | 있음 (2026-10-01, GA4 허용 목록) | strange-oracle |
+| analytics.js | 있음 (2026-10-01, GA4 허용 목록 · 2026-10-17 utm 허용 목록) | strange-oracle |
 | affiliate.js | 아직 없음 | - |
 
 ---
@@ -147,6 +147,7 @@ Analytics.init({
   ga4: TEXT.analytics.ga4,          // "G-…", 비거나 틀리면 아무것도 안 함
   title: "고정 제품명",              // page_title
   events: { so_result: { room: ["rune", ...], archetype: ["warrior", ...] }, so_visit: {} }, // 이벤트 → 속성 → 허용 값 목록
+  utm: { search: bootSearch, allow: { utm_source: ["instagram", ...], ... }, ignore: ["fbclid", "ttclid"] }, // (선택) 캠페인 구분
 });
 Analytics.track("so_result", { room: "rune", archetype: "warrior" }); // 보낸 속성 묶음 또는 null
 ```
@@ -154,6 +155,13 @@ Analytics.track("so_result", { room: "rune", archetype: "warrior" }); // 보낸 
 - 값은 목록 안의 문자열만 지나간다 → 이름·생일·질문·코드 같은 입력값은 실릴 수 없다. 세부 결과 번호도 목록에 넣지 않는다.
 - GA4 '향상된 측정'은 운영자가 데이터 스트림 설정에서 끈다(코드만으로 막히는지 미확인).
 - 빈 ID: gtag.js를 불러오지 않고 track은 null. 주소에 `?`가 있는 동안: init·track 모두 아무것도 안 함.
+- 캠페인 구분(utm, 2026-10-17): 제품은 시작할 때 `location.search`를 따로 받아 두고(`bootSearch`) 주소창의 query를 지운 뒤 init에 `utm.search`로 넘긴다.
+  - 허용 키는 `utm_source`·`utm_medium`·`utm_campaign`·`utm_content` 넷뿐(부품에 고정). 값 목록(`utm.allow`)은 제품이 정한다(설정이므로 data.js가 아니라 app.js. strange-oracle은 `CAMPAIGN`). 값 모양은 소문자·숫자·밑줄 1~40자만.
+  - 키·값이 모두 목록과 **정확히**(대소문자 구분, % 디코드 뒤) 같고 `utm_source`가 있을 때만 `page_location` = origin+pathname+`?utm_source=…&utm_medium=…&utm_campaign=…&utm_content=…`(이 순서, 있는 것만).
+  - 다른 키·목록 밖 값·같은 키 두 번·빈 값·깨진 인코딩이 하나라도 있으면 캠페인 값을 모두 버리고 query 없는 주소로 보낸다(방문은 기록). 입력값이 주소에 섞여 들어와도 분석에는 가지 않는다(6장).
+  - `utm.ignore`의 키(광고 플랫폼이 붙이는 클릭 ID: fbclid·ttclid)는 값을 보지 않고 버린다. 섞인 쿼리로 치지 않는다. utm 키는 ignore에 넣어도 검사한다.
+  - 공유 링크에 utm이 남지 않게 제품이 시작할 때 주소창 query를 지운다(strange-oracle은 원래부터 지움 → page_view 전에 이미 없음).
+  - 시험: `tools/strange-oracle/ads.test.js`(analytics utm 4건), `tools/strange-oracle/e2e-utm.js`.
 - 이 부품을 쓰는 제품은 개인정보처리방침에 구글 애널리틱스·쿠키·국외 이전 안내를 넣고, 입구에 쿠키 한 줄을 둔다(strange-oracle 12-5 참고).
 
 ## disclaimer.js

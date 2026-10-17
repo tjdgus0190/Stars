@@ -324,4 +324,5 @@
 3. **Clipwave(B 방식): 쓰지 않는다.** 실사·과한 연출은 본 페이지에 들어왔을 때 오히려 역효과가 날 수 있다. 광고 영상과 실제 페이지의 결이 비슷한 것이 좋으므로 A 방식(제품 화면 결의 HTML 장면 → mp4)으로 만든다.
 4. **효과 측정:** 구글 애널리틱스(GA4)로 한다. 캠페인 구분은 6장 5번 기본값 (a)(정해 둔 utm 값만 page_location에 남김)로 한다.
    - 운영자가 준 값 `410484339`는 숫자 9자리라 GA4 **속성 ID**로 보인다. 페이지에 넣는 값은 데이터 스트림의 **측정 ID**(`G-`로 시작)이며, data.js `analytics.ga4`와 build-dist는 `G-` 형식만 받는다. 측정 ID를 받을 때까지 비워 둔다. 넣기 전에 데이터 스트림의 '향상된 측정'을 끈다(12-5).
+   - (developer 구현 2026-10-17) utm 허용 목록 — 키 넷, 값은 아래뿐(대소문자 구분): `utm_source` instagram·tiktok / `utm_medium` paid_social·organic / `utm_campaign` ad1_seven_doors·ad2_manshin / `utm_content` ad1_seven_doors·ad2_manshin. `utm_source` 필수. 다른 키·목록 밖 값이 하나라도 있으면 캠페인 값을 모두 버리고 query 없는 주소로 기록(방문은 셈). 플랫폼 클릭 ID `fbclid`·`ttclid`는 값을 보내지 않고 버린다. 주소창 query는 시작할 때 지운다(공유 링크에 안 남음). 목록은 `products/strange-oracle/app.js` `CAMPAIGN`, 규칙은 docs/common.md analytics.js, 링크 예는 marketing/strange-oracle/render/README.md.
 5. 나머지(6장 6·7·10·11·13번)는 기본값대로: 결제 성공 이벤트는 live에서 행동 이름만, 픽셀 넣지 않음, 원본 무음, 만 18~34세, 계정·게시는 운영자.

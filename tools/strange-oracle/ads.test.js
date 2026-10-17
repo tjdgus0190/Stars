@@ -192,3 +192,60 @@ test("analytics: 모양이 틀린 측정 ID는 불러오지 않음", () => {
   assert.strictEqual(e.win.Analytics.init({ ga4: "UA-12345-1", events: {} }), false);
   assert.deepStrictEqual(e.scripts(), []);
 });
+
+// ── (광고 측정) 캠페인 utm 허용 목록 — 제안서 strange-oracle-ads 8장 4번 ──
+const UTM_ALLOW = {
+  utm_source: ["instagram", "tiktok"],
+  utm_medium: ["paid_social", "organic"],
+  utm_campaign: ["ad1_seven_doors", "ad2_manshin"],
+  utm_content: ["ad1_seven_doors", "ad2_manshin"],
+};
+const UTM_IGNORE = ["fbclid", "ttclid"];
+
+test("analytics utm: 허용 키·값만 정해진 순서로 남긴다", () => {
+  const c = env().win.Analytics.campaign;
+  assert.strictEqual(c("?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors", UTM_ALLOW, UTM_IGNORE), "utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors");
+  assert.strictEqual(c("?utm_content=ad2_manshin&utm_medium=organic&utm_source=tiktok", UTM_ALLOW, UTM_IGNORE), "utm_source=tiktok&utm_medium=organic&utm_content=ad2_manshin", "순서 고정");
+  assert.strictEqual(c("?utm_source=instagram", UTM_ALLOW, UTM_IGNORE), "utm_source=instagram");
+  assert.strictEqual(c("?utm_source=instagram&utm_medium=paid_social&fbclid=IwAR_x.y-z", UTM_ALLOW, UTM_IGNORE), "utm_source=instagram&utm_medium=paid_social", "클릭 ID는 값 없이 버림");
+  assert.strictEqual(c("?ttclid=E.C.P.abc&utm_source=tiktok", UTM_ALLOW, UTM_IGNORE), "utm_source=tiktok");
+});
+
+test("analytics utm: 거부 — 목록 밖 값·다른 키·섞인 쿼리·source 없음", () => {
+  const c = env().win.Analytics.campaign;
+  ["", "?", "?utm_source=facebook", "?utm_source=instagram&utm_medium=cpc", "?utm_source=instagram&utm_term=saju",
+    "?utm_source=instagram&name=김서윤", "?utm_source=instagram&birth=1995-03-25", "?pay=success&utm_source=instagram",
+    "?utm_medium=paid_social", "?utm_source=instagram&utm_source=tiktok", "?utm_source", "?utm_source=", "?utm_source=instagram&",
+    "?constructor=x&utm_source=instagram", "?__proto__=x", "?utm_source=hasOwnProperty",
+  ].forEach((q) => assert.strictEqual(c(q, UTM_ALLOW, UTM_IGNORE), "", q));
+  assert.strictEqual(c("?utm_source=instagram&fbclid=x", UTM_ALLOW), "", "무시 목록이 없으면 클릭 ID도 섞인 쿼리");
+  assert.strictEqual(c("?utm_source=instagram", null), "", "허용 목록 없음");
+  assert.strictEqual(c("?utm_source=facebook", UTM_ALLOW, ["utm_source"]), "", "utm 키는 무시 목록에 넣어도 검사");
+});
+
+test("analytics utm: 대소문자·인코딩", () => {
+  const c = env().win.Analytics.campaign;
+  ["?utm_source=Instagram", "?UTM_SOURCE=instagram", "?utm_source=INSTAGRAM", "?utm_source=instagram%20", "?utm_source=insta+gram",
+    "?utm_source=instagram%00", "?utm_source=%E0%A4", "?utm_source=%", "?utm_source=instagram%26name%3Dx", "?utm_source=instagram#x"].forEach((q) => assert.strictEqual(c(q, UTM_ALLOW, UTM_IGNORE), "", q));
+  assert.strictEqual(c("?utm_source=%69nstagram", UTM_ALLOW, UTM_IGNORE), "utm_source=instagram", "디코드 뒤 목록 값과 같으면 목록 값 그대로");
+  assert.strictEqual(c("?utm%5Fsource=tiktok", UTM_ALLOW, UTM_IGNORE), "utm_source=tiktok");
+  assert.strictEqual(c("?utm_source=bad_but_listed", { utm_source: ["bad_but_listed", "Bad Value"] }), "utm_source=bad_but_listed");
+  assert.strictEqual(c("?utm_source=Bad%20Value", { utm_source: ["Bad Value"] }), "", "목록에 있어도 소문자·숫자·밑줄 모양이 아니면 거부");
+});
+
+test("analytics utm: init — 허용이면 page_location에 utm만, 거부면 query 없는 주소, 입력값 0건", () => {
+  const events = { so_visit: {} };
+  let e = env();
+  assert.strictEqual(e.win.Analytics.init({ ga4: "G-TEST12345", title: "낯선 점술관", events, utm: { search: "?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&fbclid=SECRETCLICK", allow: UTM_ALLOW, ignore: UTM_IGNORE } }), true);
+  let cfg = [...e.win.dataLayer].map((a) => [...a]).find((a) => a[0] === "config");
+  assert.strictEqual(cfg[2].page_location, "http://127.0.0.1:8788/products/strange-oracle/index.html?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors");
+  assert.ok(!JSON.stringify([...e.win.dataLayer].map((a) => [...a])).includes("SECRETCLICK"));
+  e = env();
+  e.win.Analytics.init({ ga4: "G-TEST12345", events, utm: { search: "?utm_source=instagram&name=%EA%B9%80%EC%84%9C%EC%9C%A4&birth=1995-03-25", allow: UTM_ALLOW, ignore: UTM_IGNORE } });
+  cfg = [...e.win.dataLayer].map((a) => [...a]).find((a) => a[0] === "config");
+  assert.strictEqual(cfg[2].page_location, "http://127.0.0.1:8788/products/strange-oracle/index.html");
+  const all = JSON.stringify([...e.win.dataLayer].map((a) => [...a]));
+  ["김서윤", "1995", "name", "birth", "utm_"].forEach((s) => assert.ok(!all.includes(s), s));
+  e = env("?utm_source=instagram");
+  assert.strictEqual(e.win.Analytics.init({ ga4: "G-TEST12345", events, utm: { search: "?utm_source=instagram", allow: UTM_ALLOW } }), false, "주소창에 query가 남아 있으면 여전히 시작하지 않음(제품이 먼저 지운다)");
+});

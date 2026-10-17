@@ -1,0 +1,139 @@
+// 광고 영상 렌더: 장면 HTML(../scenes/) → 프레임 PNG(임시 폴더) → ffmpeg H.264 mp4(../out/)
+// 사용법·결과는 README.md. 실행: node --experimental-websocket marketing/strange-oracle/render/render.js [ad1|ad2|all] [--check] [--port 8790]
+// - 헤드리스 Edge (tools/strange-oracle/cdp.js 재사용), 뷰포트 1080x1920 · 배율 1 · mobile 아님, 움직임 줄이기 설정 켜지 않음
+// - document.fonts.ready 뒤 모든 애니메이션을 멈추고 프레임 n마다 currentTime = n*1000/30 으로 고정해 캡처
+// - --check: 주소에 #safe를 붙여 1초 간격 확인 컷(+마지막 프레임)을 ../out/check/에 찍고, 자막 줄 수를 check.json에 적는다
+// - 정적 서버는 tools/serve.js를 저장소 루트로, 포트 8790(기본)에 띄우고 끝나면 끈다
+const { spawn, spawnSync } = require("child_process");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { launch, sleep } = require("../../../tools/strange-oracle/cdp.js");
+
+const ROOT = path.resolve(__dirname, "..", "..", "..");
+const OUT = path.resolve(__dirname, "..", "out");
+const CHECK = path.join(OUT, "check");
+const FPS = 30;
+const W = 1080;
+const H = 1920;
+const ADS = {
+  ad1: { scene: "ad1-seven-doors.html", out: "ad1-seven-doors-ko.mp4", frames: 450 },
+  ad2: { scene: "ad2-manshin.html", out: "ad2-manshin-ko.mp4", frames: 270 },
+};
+
+const args = process.argv.slice(2);
+const which = args.find((a) => !a.startsWith("--") && !/^\d+$/.test(a)) || "all";
+const checkOnly = args.includes("--check");
+const PORT = Number(args[args.indexOf("--port") + 1]) || 8790;
+if (PORT === 8787 || PORT === 8788) throw new Error("포트 8787·8788은 쓰지 않는다 (8790 권장)");
+const list = which === "all" ? Object.keys(ADS) : [which];
+if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | all)`);
+
+async function waitServer() {
+  for (let i = 0; i < 50; i++) {
+    try { if ((await fetch(`http://127.0.0.1:${PORT}/marketing/strange-oracle/scenes/common.css`)).ok) return; } catch (e) {}
+    await sleep(100);
+  }
+  throw new Error("정적 서버가 뜨지 않음");
+}
+
+// 장면 준비: 글꼴을 기다리고 모든 애니메이션을 멈춘다
+async function prepare(b, url) {
+  await b.goto(url);
+  const info = await b.evaluate(`(async () => {
+    await document.fonts.ready;
+    document.documentElement.classList.add("is-paused");
+    const fonts = [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family + " " + f.weight);
+    const st = document.querySelector(".stage");
+    return { fonts, anims: document.getAnimations().length, duration: Number(st.dataset.duration), fps: Number(st.dataset.fps),
+      scroll: [document.documentElement.scrollWidth, document.documentElement.scrollHeight] };
+  })()`);
+  return info;
+}
+async function seek(b, n) {
+  await b.evaluate(`(async () => {
+    const t = ${n} * 1000 / ${FPS};
+    document.getAnimations().forEach((a) => { a.pause(); a.currentTime = t; });
+    await document.fonts.ready; // 뒤 장면에서 처음 쓰는 글꼴이 있으면 그 글꼴까지
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  })()`);
+}
+async function capture(b, file) {
+  const r = await b.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false, clip: { x: 0, y: 0, width: W, height: H, scale: 1 } });
+  fs.writeFileSync(file, Buffer.from(r.data, "base64"));
+}
+// 보이는 자막(data-cap)의 줄 수: offsetHeight(변형 영향 없음) / line-height
+const CAPS = `(() => [...document.querySelectorAll("[data-cap]")].map((el) => {
+  const cs = getComputedStyle(el);
+  const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2;
+  return { cap: el.dataset.cap, opacity: Number(cs.opacity), lines: Math.round(el.offsetHeight / lh), text: el.textContent.trim() };
+}).filter((c) => c.opacity > 0.01))()`;
+
+const errs = (b) => b.log.errors.filter((e) => !/favicon.ico/.test(e)); // 정적 서버의 favicon 404는 장면과 무관
+async function renderAd(b, key) {
+  const ad = ADS[key];
+  const base = `http://127.0.0.1:${PORT}/marketing/strange-oracle/scenes/${ad.scene}`;
+  if (checkOnly) {
+    const info = await prepare(b, base + "#safe");
+    fs.mkdirSync(CHECK, { recursive: true });
+    const marks = [];
+    for (let s = 0; s * FPS < ad.frames; s++) marks.push(s * FPS);
+    marks.push(ad.frames - 1);
+    const rows = [];
+    for (const n of marks) {
+      await seek(b, n);
+      const name = `${key}-safe-${String(n).padStart(3, "0")}f-${(n / FPS).toFixed(2)}s.png`;
+      await capture(b, path.join(CHECK, name));
+      rows.push({ frame: n, sec: +(n / FPS).toFixed(3), file: name, caps: await b.evaluate(CAPS) });
+    }
+    return { key, info, rows, errors: errs(b) };
+  }
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), `so-render-${key}-`));
+  try {
+    const info = await prepare(b, base);
+    if (info.duration * FPS !== ad.frames) throw new Error(`${key}: 장면 길이 ${info.duration}초 ≠ ${ad.frames}프레임`);
+    const t0 = Date.now();
+    for (let n = 0; n < ad.frames; n++) {
+      await seek(b, n);
+      await capture(b, path.join(tmp, `f${String(n).padStart(4, "0")}.png`));
+      if (n % 90 === 0) console.log(`  ${key} ${n}/${ad.frames}`);
+    }
+    fs.mkdirSync(OUT, { recursive: true });
+    const out = path.join(OUT, ad.out);
+    const ff = spawnSync("ffmpeg", ["-y", "-loglevel", "error", "-framerate", String(FPS), "-i", path.join(tmp, "f%04d.png"),
+      "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p", "-r", String(FPS),
+      "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv",
+      "-movflags", "+faststart", "-an", out], { stdio: "inherit" });
+    if (ff.status !== 0) throw new Error("ffmpeg 실패");
+    return { key, info, out, sec: (Date.now() - t0) / 1000, errors: errs(b) };
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true }); // 프레임 PNG 임시 파일은 지운다
+  }
+}
+
+(async () => {
+  const srv = spawn(process.execPath, [path.join(ROOT, "tools", "serve.js"), ".", String(PORT)], { cwd: ROOT, stdio: "ignore" });
+  let b;
+  try {
+    await waitServer();
+    b = await launch({ port: 9350, width: W, height: H });
+    await b.send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: 1, mobile: false });
+    const results = [];
+    for (const key of list) {
+      b.log.errors.length = 0;
+      const r = await renderAd(b, key);
+      results.push(r);
+      console.log(`${key}: 글꼴 ${r.info.fonts.length}종(${[...new Set(r.info.fonts)].join(", ")}) · 애니메이션 ${r.info.anims}개 · 문서 ${r.info.scroll.join("x")} · 오류 ${r.errors.length}`);
+      if (r.out) console.log(`  → ${path.relative(ROOT, r.out)} (${r.sec.toFixed(0)}초 걸림)`);
+      if (r.rows) {
+        const bad = r.rows.flatMap((row) => row.caps.filter((c) => c.lines > 2).map((c) => `${row.sec}s ${c.cap} ${c.lines}줄`));
+        console.log(`  확인 컷 ${r.rows.length}장 → out/check/ · 3줄 이상 자막: ${bad.length ? bad.join(", ") : "없음"}`);
+      }
+      if (r.errors.length) console.log("  오류:", r.errors.join(" | "));
+    }
+    if (checkOnly) fs.writeFileSync(path.join(CHECK, "check.json"), JSON.stringify(results.map(({ key, info, rows, errors }) => ({ key, info, errors, rows })), null, 2));
+  } finally {
+    if (b) await b.close();
+    srv.kill();
+  }
+})().catch((e) => { console.error(e); process.exitCode = 1; });
