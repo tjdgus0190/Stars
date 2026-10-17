@@ -930,9 +930,9 @@
 ## 17단계 · 인연의 장·첫 줄·마음 한 줄·성능·작은 일 (I2, 2026-10-17, developer)
 
 ### 인연의 장 (17-2) — 브라우저 고르기
-- 고르는 값은 모두 이 브라우저 안에서만 쓴다(book.js `yeonChapter`, app.js `yeonCtx`): 주·보조 원형(`archPair`, 지도와 같은 규칙), 만 나이 → 구간 b1~b7(`ageOf`·`bandOf`), 만 19세 미만(`isTeen`), 만신 일간 → 오행 계절(`sajuStem`·`ELEMENT_OF_STEM`). 서버로 가는 것은 `{ pass, file: "yeon" }` 두 칸뿐(e2e-book 17-13의 3).
-- 빠진 경우(17-2 표): 보조 = 주 → 4쪽 「한결같은 결」 + 일곱 방 전이면 안내 `notes.more` / 생년월일 없음 → 6쪽 notime 한 칸 + `notes.noAge`(b1 문장 안 씀) / 만신 안 지남 → 7쪽 계절 이름·본문 대신 `notes.noSaju` / 만 19세 미만 → 1~3쪽 자리에 미성년판 3쪽 + 계절, 4·5·6쪽은 지우고 번호를 1부터 다시 매김.
-- 단위 시험 `yeon.test.js`(구간 b1·b4·b7·경계, 만 19세 전날·당일, 빠진 경우, 보조 원형 = 지도 규칙, 일간 시각 모름·23시 30분, 성별만 바꿔도 같음, 옛 이어가기 코드, "받는 것" 글자 수 = 받는 판).
+- 고르는 값은 모두 이 브라우저 안에서만 쓴다(book.js `yeonChapter`, app.js `yeonCtx`): 주·보조 원형(`archPair`, 지도와 같은 규칙), 만 나이 → 구간 b1~b7(`ageOf`·`bandOf`, 19세 미만도 b1 — 결정 114로 미성년판 없음), 만신 일간 → 오행 계절(`sajuStem`·`ELEMENT_OF_STEM`). 서버로 가는 것은 `{ pass, file: "yeon" }` 두 칸뿐(e2e-book 17-13의 3).
+- 빠진 경우(17-2 표): 보조 = 주 → 4쪽 「한결같은 결」 + 일곱 방 전이면 안내 `notes.more` / 생년월일 없음 → 6쪽 notime 한 칸 + `notes.noAge`(b1 문장 안 씀) / 만신 안 지남 → 7쪽 계절 이름·본문 대신 `notes.noSaju` (만 19세 미만판은 결정 114로 없앰: 나이와 관계없이 같은 판).
+- 단위 시험 `yeon.test.js`(구간 b1·b4·b7·경계, 19세 미만(14·18세, 19세 전날·당일)도 기본판+b1, 빠진 경우, 보조 원형 = 지도 규칙, 일간 시각 모름·23시 30분, 성별만 바꿔도 같음, 옛 이어가기 코드, "받는 것" 글자 수 = 받는 판).
 
 ### 화면 연결 (design 「17단계」 5·6·7절)
 - 인연의 장: index.html `<template data-js="yeon-tpl">`의 article을 장을 열 때 복제해 원본 칸 `[data-js=report-yeon]`(book-source 안, 숨김)에 넣고 채운다. 쪽 이름 `book.yeon.secs.*`, 시기 칸 `li.yeon-when__item`(지금 `.is-now`, 나이 칸 `book.yeon.bandNow/bandNext` + `bands`), 계절 이름 `book.yeon.seasons.*` + `data-el`(오행 색), 안내 `yeon-note`는 그 사람에게 해당할 때만 `hidden`을 푼다(아니면 지움).

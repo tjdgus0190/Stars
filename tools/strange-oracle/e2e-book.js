@@ -266,6 +266,17 @@ const STUB_ADS = `(function () {
   check("17-2 인연의 장 첫 쪽", await toPages());
   const yeon = JSON.parse(await ev("JSON.stringify((() => { const ps = [...document.querySelectorAll('[data-js=book-page][data-part=yeon]')]; const src = document.querySelector('[data-js=report-yeon]'); const pg = (sel) => ps.reduce((n, p) => n + p.querySelectorAll(sel).length, 0); return { pages: ps.length, secs: [...src.querySelectorAll('section.yeon-sec')].map(s => s.dataset.page), variant: src.dataset.variant, band: src.querySelectorAll('.yeon-when__item').length, ages: src.querySelectorAll('.yeon-when__age').length, heads: pg('.yeon-sec__head'), nums: [...src.querySelectorAll('.yeon-sec__num')].map(n => n.textContent).join(''), draft: ps.some(p => p.textContent.includes('[초안] 당신')), hiddenNotes: pg('.yeon-sec__note[hidden]') }; })())"));
   check("17-2 인연의 장(yeon-tpl 견본): 기본판 7쪽(끌림·거울·만날 사람·4쪽·장면·시기·계절) + 장 끝, 쪽 머리 7개(번호 1~7), 시기 칸 2개(지금·다음), 견본 본문 0", yeon.variant === "base" && yeon.secs.length === 7 && yeon.secs[0] === "pull" && yeon.secs[5] === "time" && yeon.band === 2 && yeon.ages === 2 && yeon.heads === 7 && yeon.nums === "1234567" && !yeon.draft && yeon.hiddenNotes === 0 && yeon.pages >= 8, JSON.stringify(yeon));
+  // (I4 developer 요청 1) 쪽 머리만 남는 쪽 0: 본문 자식이 모두 장 머리(.book-opening)·쪽 머리 unit(.yeon-sec__head만 감싼 것)인 쪽이 없어야 한다. 360 → 480 → 360
+  const HEADONLY = "JSON.stringify((() => { const ps = [...document.querySelectorAll('[data-js=book-page][data-part=yeon]')]; const hd = (c) => c.classList.contains('book-opening') || (c.children.length === 1 && c.firstElementChild.classList.contains('yeon-sec__head')); return { w: innerWidth, pages: ps.length, headOnly: ps.map((p, i) => [...p.querySelector('.book-page__body').children].every(hd) ? i + 1 : 0).filter(Boolean), firstText: ps.filter((p) => p.querySelector('.yeon-sec__head')).every((p) => p.querySelector('.book-page__body > p, .yeon-when, .yeon-sec__note')) }; })())";
+  const ho = [JSON.parse(await ev(HEADONLY))];
+  for (const w of [480, 360]) {
+    await b.send("Emulation.setDeviceMetricsOverride", { width: w, height: 800, deviceScaleFactor: 2, mobile: true });
+    await sleep(150);
+    await waitFor(`document.querySelectorAll('[data-js=book-page][data-part=yeon]').length > 0 && innerWidth === ${w}`, 5000);
+    await sleep(600); // 다시 나누기(150ms 지연) 뒤
+    ho.push(JSON.parse(await ev(HEADONLY)));
+  }
+  check("I4-1 인연의 장 쪽 머리만 남는 쪽 0 (360·480·360, 쪽 머리가 있는 쪽마다 본문 시작)", ho.every((x) => x.headOnly.length === 0 && x.firstText) && ho[1].w === 480, JSON.stringify(ho));
   const yb = b.log.bodies.filter((x) => /\/api\/book$/.test(x.url)).map((x) => x.body).filter((s) => /yeon/.test(s));
   check("17-13의 3: 인연의 장 요청 본문 = { pass, file: \"yeon\" } 두 칸뿐", yb.length > 0 && yb.every((s) => { const o = JSON.parse(s); return Object.keys(o).sort().join() === "file,pass" && o.file === "yeon"; }), `${yb.length}건`);
 

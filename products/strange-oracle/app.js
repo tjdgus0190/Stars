@@ -2909,14 +2909,14 @@
   //   (17단계) 계산은 book.js BookCore.ageOf·bandOf 한 곳(인연의 장과 같은 함수)
   const ageBand = (b) => BookCore.bandOf(BookCore.ageOf(b, new Date()));
   // (17-2) 인연의 장 고르기 값. 모두 이 브라우저 안에서만 쓰고 보내거나 저장하지 않는다(6장). 분석 이벤트에도 넣지 않는다
-  //   주·보조 원형 = 지도와 같은 규칙(BookCore.archPair) · 나이 구간·만 19세 미만 = 이 탭 profile의 생년월일(없으면 나이 모름)
+  //   주·보조 원형 = 지도와 같은 규칙(BookCore.archPair) · 나이 구간 = 이 탭 profile의 생년월일(없으면 나이 모름, 19세 미만도 b1 — 결정 114)
   //   일간 = 만신 결과 코드(이어가기 코드 SOG2로 돌아온 탭도 코드가 있어 되찾는다. SOG1·옛 상태는 만신 없음)
   function yeonCtx() {
     const b = state.profile.birth;
     const age = b ? BookCore.ageOf(b, new Date()) : null;
     const pair = BookCore.archPair(CHAPTER_ORDER.map((r) => (state.visits[r] ? state.visits[r].archetype : null)));
     const s = state.visits.saju;
-    return { arch: pair ? pair.main : null, sub: pair ? pair.sub : null, allDone: roomsDone() === CHAPTER_ORDER.length, band: age == null ? null : BookCore.bandOf(age), teen: BookCore.isTeen(age), stem: s && s.code ? BookCore.sajuStem(s.code) : null };
+    return { arch: pair ? pair.main : null, sub: pair ? pair.sub : null, allDone: roomsDone() === CHAPTER_ORDER.length, band: age == null ? null : BookCore.bandOf(age), stem: s && s.code ? BookCore.sajuStem(s.code) : null };
   }
   // 원형 합산(무료 방과 같은 규칙): 가장 많이 나온 원형, 동점이면 앞선 장
   function tallyArchetype(tags) {
@@ -3027,7 +3027,7 @@
       return id === "rune" ? BV.rune.base + BV.rune.past[x[0]] + BV.rune.now[x[1]] + BV.rune.next[x[2]] : id === "tzolkin" ? BV.room.tzolkin[x.sign] : BV.room[id][x];
     }
     if (id === "flow") return a && c.band != null ? BV.timeline[a][c.band] : BV.avg.timeline;
-    if (id === "yeon") return BookCore.yeonVolume(BV.yeon, yeonCtx()); // (검수 2차 권장 5) 그 사람이 받는 판(기본·한결같은 결·나이 모름·미성년)의 값
+    if (id === "yeon") return BookCore.yeonVolume(BV.yeon, yeonCtx()); // (검수 2차 권장 5) 그 사람이 받는 판(기본·한결같은 결·나이 모름)의 값
     if (id === "match") return a ? BV.map[a] : BV.avg.map;
     return a ? BV[id][a] : BV.avg[id];
   }
@@ -3394,7 +3394,7 @@
       });
     } else if (id === "yeon") {
       // (17-2, design 「17단계」 5절) 인연의 장: yeon-tpl의 article을 복제해 쪽(section.yeon-sec)마다 이름(data.js book.yeon.secs)·본문·안내 한 줄(book.yeon.notes).
-      //   문장 고르기는 BookCore.yeonChapter. 그 사람에게 없는 쪽(미성년판의 4·5·6쪽 등)은 section을 지우고, 남은 쪽 번호를 1부터 다시 매긴다
+      //   문장 고르기는 BookCore.yeonChapter. 그 사람에게 없는 쪽은 section을 지우고, 남은 쪽 번호를 1부터 다시 매긴다
       const Y = T.book.yeon;
       const cx = yeonCtx();
       const y = BookCore.yeonChapter(C, cx);
@@ -3402,7 +3402,7 @@
       yeonBox.dataset.variant = y.variant;
       const art = yeonTpl ? yeonTpl.querySelector("article").cloneNode(true) : document.createElement("article"); // 견본이 없으면(옛 마크업) 빈 장
       textIn(art);
-      const SLOT = { pull: "pull", mirror: "habit", meet: "meet", twist: "pulse", same: "pulse", scene: "scene", time: "when", season: "season", teenKnow: "pull", teenFriend: "habit", teenPlace: "meet" };
+      const SLOT = { pull: "pull", mirror: "habit", meet: "meet", twist: "pulse", same: "pulse", scene: "scene", time: "when", season: "season" };
       const NAME = { mirror: "habit", twist: "pulse", time: "when" }; // 쪽 이름 키(secs)가 문장 칸 이름과 다른 것
       const bySlot = Object.fromEntries(y.pages.map((pg) => [SLOT[pg.key], pg]));
       let num = 0;
@@ -3676,12 +3676,13 @@
     // 장 머리만 있는 쪽에서 문장 끝으로 잘라 50자 미만만 남으면, 그 조각도 남기지 않고 단락째 다음 쪽(장 표제지)
     const direct = node.parentElement === bd;
     const headPage = direct && [...bd.children].every((c) => c === node || isHead(c));
-    if (k > 0 && headPage && [...words.slice(0, k).join("").replace(/s+/g, " ").trim()].length < SHORT_END) k = 0;
+    if (k > 0 && headPage && [...words.slice(0, k).join("").replace(/\s+/g, " ").trim()].length < SHORT_END) k = 0;
     if (k === 0) {
       // (11단계 C5 필수 5) 문장 끝이 남은 칸 안에 없으면 어절 경계로 자르지 않고 단락째 다음 쪽(장 첫 쪽도 예외 없음).
       // 이 쪽에 장 머리만 남으면 그 쪽은 장 표제지(.is-solo)가 된다. 빈 쪽에서도 첫 문장이 안 들어가는 극단만 어절 경계(F1STAT.wordCut)
       const others = [...bd.children].filter((c) => c !== node);
-      if (direct && others.length) {
+      // (I4) 남는 것이 쪽 머리(인연의 장 .yeon-sec__head unit)뿐이면 단락째 넘기지 않는다(머리만 남는 쪽 금지) → 아래 어절 경계
+      if (direct && others.some((c) => !isSecHead(c))) {
         node.textContent = text;
         node.remove();
         // 이 쪽에 남는 글이 장 머리 + 50자 미만 단락뿐이면 그 짧은 단락도 함께 다음 쪽으로(F1STAT.carry → place가 새 쪽 맨 앞에 담는다)
@@ -3704,6 +3705,9 @@
   const SENT_END = /[.?!…][”’"')\]」』]*$/;
   const F1STAT = { wordCut: 0, longStage: 0 }; // tests.md 보고용 (쪽 나누기마다 새로 센다)
   const isHead = (c) => c.classList.contains("book-opening");
+  // (I4) 인연의 장 쪽 머리(번호+이름 h3)를 wrapUnit으로 감싼 unit. 장 머리(isHead)와 달리 본문 글자로 세지만, 그 뒤 단락과 떨어져 홀로 남으면 안 된다
+  const isSecHead = (c) => c.children.length === 1 && c.firstElementChild.classList.contains("yeon-sec__head");
+  const headish = (c) => isHead(c) || isSecHead(c);
   const onlyHeads = (bd) => [...bd.children].every(isHead);
   // 본문 글자 수 (공백 포함, 머리 장식 제외, 연속 공백은 하나로)
   const bodyChars = (bd) => {
@@ -3796,7 +3800,11 @@
       const blk = prevBd.lastElementChild;
       if (!blk || isHead(blk)) return;
       const left = [...prevBd.children].filter((c) => c !== blk);
-      if (!left.length || left.every(isHead)) return;
+      if (!left.length || left.every(headish)) {
+        // 앞 쪽에 장 머리·쪽 머리만 남게 되면 단락째 넘기지 않는다(I4: 쪽 머리만 남던 원인). 대신 끝 문장들만 함께 넘겨 본다(앞 쪽에 한 문장 이상 남음)
+        if (left.length) moveTail(blk, lastBd);
+        return;
+      }
       const first = lastBd.firstElementChild;
       if (first && first.matches("p.is-cont") && blk.tagName === "P" && !blk.children.length && !first.children.length) {
         // 같은 단락의 앞 조각 + 뒤 조각 → 한 단락으로 합쳐 마지막 쪽에
@@ -3822,7 +3830,7 @@
   function moveTail(blk, lastBd) {
     if (blk.tagName !== "P" || blk.children.length) return false;
     const text = blk.textContent;
-    const sents = text.match(/[^]*?[.?!…]+[”’"')]」』]*(?:s+|$)/g);
+    const sents = text.match(/[^]*?[.?!…]+[”’"')\]」』]*(?:\s+|$)/g);
     if (!sents || sents.join("") !== text || sents.length < 2) return false;
     const first = lastBd.firstElementChild;
     const join = Boolean(first && first.matches("p.is-cont") && !first.children.length); // 마지막 쪽이 blk의 뒷조각으로 시작
@@ -3999,8 +4007,8 @@
           // 장 머리만 있는 쪽에서는 넘기지 않고 이 쪽에서 시작한다(머리만 남는 쪽 금지)
           const others = [...bd.children].filter((c) => c !== node);
           // 넘기면 이 쪽 글이 50자 미만으로 남는 경우(장 머리 + 짧은 단락)는 넘기지 않고 이 쪽에서 문장 끝으로 나눈다(F1 ②와 같은 기준)
-          const keep = bodyChars(bd) - [...node.textContent.replace(/s+/g, " ").trim()].length;
-          if (others.length && !others.every(isHead) && keep >= SHORT_END && (fitsEmpty(node, bd) || linesLeft(node, bd) < 3)) {
+          const keep = bodyChars(bd) - [...node.textContent.replace(/\s+/g, " ").trim()].length;
+          if (others.length && !others.every(headish) && keep >= SHORT_END && (fitsEmpty(node, bd) || linesLeft(node, bd) < 3)) {
             node.remove();
             start();
             place(node, "p");

@@ -157,10 +157,10 @@ for (let t = 0; t < 3000; t++) {
   checked++;
   if (fromTable(c) !== actual(c)) bad++;
 }
-// (17단계) 인연의 장: 판(기본·한결같은 결·나이 모름·만신 미방문·만 19세 미만)마다 표 값 = 실제 조립 글자 수
+// (17단계) 인연의 장: 판(기본·한결같은 결·나이 모름·만신 미방문, 19세 미만판 없음 — 결정 114)마다 표 값 = 실제 조립 글자 수
 let yeonBad = 0;
 for (let t = 0; t < 3000; t++) {
-  const ctx = { arch: ARCH[rnd(8)], sub: t % 3 ? ARCH[rnd(8)] : null, allDone: t % 2 === 0, band: t % 5 ? rnd(7) : null, teen: t % 7 === 0, stem: t % 4 ? rnd(10) : null };
+  const ctx = { arch: ARCH[rnd(8)], sub: t % 3 ? ARCH[rnd(8)] : null, allDone: t % 2 === 0, band: t % 5 ? rnd(7) : null, stem: t % 4 ? rnd(10) : null };
   if (!ctx.sub) ctx.sub = ctx.arch;
   checked++;
   if (Book.yeonVolume(V.yeon, ctx) !== Book.yeonChars(Book.yeonChapter(CONTENT, ctx))) yeonBad++;

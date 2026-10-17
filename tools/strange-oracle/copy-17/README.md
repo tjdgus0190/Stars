@@ -21,16 +21,16 @@
 
 ## 순서 (17-6)
 yeon-pull → yeon-mirror → yeon-meet → yeon-twist → yeon-scene → yeon-time-b1 … b7 → yeon-season
-→ yeon-alt-same → yeon-alt-notime → yeon-alt-teen-know / friend / place → yeon-alt-teen-season
+→ yeon-alt-same → yeon-alt-notime (만 19세 미만판 묶음 4개는 결정 114로 뺌)
 → heart-<방>-<n> (saju, ogham, star, decan, tzolkin, rune, sibyl) → first-<방>-<n>
 
-모두 51묶음, 484항목이다. 무료 떡밥 8줄(data-book-free.js)과 data.js `book.yeon.*` 화면 문구는 이 도구 밖이다. 직접 고친다.
+모두 47묶음, 455항목이다(결정 114로 만 19세 미만판 4묶음 29항목을 뺌). 무료 떡밥 8줄(data-book-free.js)과 data.js `book.yeon.*` 화면 문구는 이 도구 밖이다. 직접 고친다.
 
 ## 항목 (items.json)
 | 칸 | 뜻 |
 |---|---|
-| id | `yeon.<쪽>.<원형>`, `yeon.time.<원형>-b<1~7>`, `yeon.season.<오행>`, `yeon.alt.<same·notime>.<원형>`, `yeon.alt.teen.<know·friend·place>.<원형>`, `yeon.alt.teen.season.<오행>`, `heartLine.<방>.<결과 코드>`, `firstLine.<방>.<결과 코드>` |
-| kind | `yeon.<쪽>` · `yeon.alt.<same·notime·teen>` · `heartLine` · `firstLine` (옛 `shadow.hook`·`advice.hook`과 다름) |
+| id | `yeon.<쪽>.<원형>`, `yeon.time.<원형>-b<1~7>`, `yeon.season.<오행>`, `yeon.alt.<same·notime>.<원형>`, `heartLine.<방>.<결과 코드>`, `firstLine.<방>.<결과 코드>` |
+| kind | `yeon.<쪽>` · `yeon.alt.<same·notime>` · `heartLine` · `firstLine` (옛 `shadow.hook`·`advice.hook`과 다름) |
 | voice | `book` = 책의 화자. 방 이름 = 그 방 안내자 말투(9-1, 말투 카드) |
 | min·max·target | 글자 수(공백 포함) 범위와 목표 |
 | review | `all` = QA가 전부 읽는 항목(17-13의 7) |
@@ -40,7 +40,6 @@ yeon-pull → yeon-mirror → yeon-meet → yeon-twist → yeon-scene → yeon-t
 
 - 룬 firstLine·heartLine은 "지금" 자리에 놓였을 때를 겨냥해 쓴다(17-3).
 - `yeon.time.*-b1`(24세 이하, 19~24세)은 연애를 전제하지 않고 친구·배움의 자리로 쓴다.
-- 미성년판(`yeon.alt.teen.*`)에는 연애 상대·고백·사귐이 0이어야 한다.
 
 ## check-17이 보는 것
 - **금지 목록:** 17-4 표 왼쪽 열 + 건강어. 걸리면 실패한다.

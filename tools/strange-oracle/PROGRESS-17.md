@@ -53,3 +53,12 @@
 | e4 | 성능 2회차(I2 끝): ①+② 3.23초 · CLS 0.002 · 방 전환 미리 받음 372ms(경계 넘음) · 쪽 넘김 433ms. tests.md 「17단계」 절, HANDOFF 갱신 | done |
 | 끝 | 시험: 단위 151 · saju 41 · book 59 · pay 68 · map 80 · flow reduced 127 · motion 128 · make-volume 불일치 0 · build-dist 통과. 커밋 안 함 | done |
 | i3-3 | 말투 카드 7장·대조, HANDOFF 3-8 2건(sage-creator 덮어쓰기 1 추가), selling 한 줄 | done (화면 문구 수정 0, 오검 격식 운영자 확인) |
+
+# 결정 114 · I4 developer 요청 — 2026-10-17
+
+| # | 할 일 | 상태 |
+|---|---|---|
+| j1 | 결정 114: book.js isTeen·TEEN_UNDER·alt-teen 경로 지움(19세 미만도 base+b1), app.js yeonCtx teen·SLOT teen 지움, data.js secs.teen* 3키, book-yeon.js alt.teen 통째로(29항목 11,779자), items.json 29항목·lib.js 묶음 4개, make-volume 다시(불일치 0), yeon.test 19세 미만 시험 바꿈 → 단위 151/0 | done |
+| j2 | I4 요청 1: 원인 = fixShortEnd가 쪽 머리 unit(.yeon-sec__head 감싼 section)을 머리로 안 봐, 마지막 쪽 50자 미만일 때 앞 쪽 단락을 통째로 넘김 → 쪽 머리만 남음. isSecHead·headish 더함(fixShortEnd 멈춤 + 끝 문장만 넘기기 moveTail, splitPara 단락째 넘김 금지, place keep). 오타 /s+/g 2곳 → \s+, moveTail 문장 정규식 \]·\s 빠짐도 고침. e2e-book I4-1(360·480·360) → 60/0 | done |
+| j3 | I4 요청 2(선택) 시기 칸: 360px에서 머리 22 + 칸 324 + 칸 324 = 670px > 쪽 595px → 나눠도 2쪽 그대로(빈칸이 다음 쪽으로 옮겨갈 뿐, 한 칸 글이 두 쪽으로 갈림) → 하지 않음 | done |
+| 끝 | 시험: 단위 151/0 · saju 41 · book 60 · pay 68 · map 80(끝에 map-switch reset) · flow reduced 127 · motion 128 · make-volume 불일치 0 · build-dist 통과 · check-17 실패 0. 커밋 안 함 | done |

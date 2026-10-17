@@ -103,7 +103,7 @@
     const ranked = Object.entries(tally).sort((x, y) => y[1].count - x[1].count || x[1].first - y[1].first).map((e) => e[0]);
     return ranked.length ? { main: ranked[0], sub: ranked[1] || ranked[0] } : null;
   }
-  // 만 나이 (today 기준, 생일 당일부터 한 살 더). 생년월일·나이·미성년 여부는 보내지 않고 저장하지 않는다(6장, 17-2)
+  // 만 나이 (today 기준, 생일 당일부터 한 살 더). 생년월일·나이는 보내지 않고 저장하지 않는다(6장, 17-2)
   function ageOf(b, today) {
     const t = today || new Date();
     let age = t.getFullYear() - b.y;
@@ -111,27 +111,17 @@
     return age;
   }
   // 나이 구간 b1(24세 이하) b2(25~29) … b7(50세 이상) = 0~6 (6-2, 시기별 흐름과 같은 구간)
+  //   결정 114: 만 19세 미만판을 두지 않는다. 19세 미만도 b1(19~24세 문장)을 받는다
   const bandOf = (age) => (age <= 24 ? 0 : Math.min(6, Math.floor((age - 25) / 5) + 1));
-  const TEEN_UNDER = 19; // (97번 기본값) 만 19세 미만 = 미성년판
-  const isTeen = (age) => age != null && age < TEEN_UNDER;
   const ELEMENT_OF_STEM = ["wood", "wood", "fire", "fire", "earth", "earth", "metal", "metal", "water", "water"]; // saju.js STEM_EL·ELEMENTS와 같음(갑을=목 … 임계=수)
-  // ctx = { arch: 주 원형, sub: 보조 원형, allDone: 일곱 방 다 마침, band: 0~6|null(나이 모름), teen: true|false, stem: 만신 일간 0~9|null(만신 미방문) }
-  // 돌려주는 모양: { id, variant: base|teen, pages: [{ key, text, note, bands }] } — key·note는 data.js book.yeon 키 이름(화면 틀 문구는 data.js)
+  // ctx = { arch: 주 원형, sub: 보조 원형, allDone: 일곱 방 다 마침, band: 0~6|null(나이 모름), stem: 만신 일간 0~9|null(만신 미방문) }
+  // 돌려주는 모양: { id, variant: base, pages: [{ key, text, note, bands }] } — key·note는 data.js book.yeon 키 이름(화면 틀 문구는 data.js)
   //   빠진 경우(17-2 표): 보조 = 주 → same(+ 일곱 방 전이면 note more) · 나이 모름 → notime + note noAge(b1 문장을 쓰지 않음)
-  //   만신 미방문 → 계절 쪽 text 없이 note noSaju · 만 19세 미만 → teenKnow·teenFriend·teenPlace + 미성년 계절(4·6쪽 숨김)
+  //   만신 미방문 → 계절 쪽 text 없이 note noSaju · 나이와 관계없이 모두 같은 판(결정 114)
   function yeonChapter(C, ctx) {
     const Y = C.yeon;
     const a = ctx.arch;
     const season = (src) => (ctx.stem == null ? { key: "season", text: null, note: "noSaju" } : { key: "season", text: src[ELEMENT_OF_STEM[ctx.stem]], note: null });
-    if (ctx.teen) {
-      const T = Y.alt.teen;
-      return { id: "yeon", variant: "teen", pages: [
-        { key: "teenKnow", text: T.know[a], note: null },
-        { key: "teenFriend", text: T.friend[a], note: null },
-        { key: "teenPlace", text: T.place[a], note: null },
-        season(T.season),
-      ] };
-    }
     const same = !ctx.sub || ctx.sub === a;
     const time = ctx.band == null
       ? { key: "time", text: Y.alt.notime[a], note: "noAge" }
@@ -152,13 +142,12 @@
   function yeonTable(Y) {
     const m = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, textLen(v)]));
     return { pull: m(Y.pull), mirror: m(Y.mirror), meet: m(Y.meet), twist: m(Y.twist), scene: m(Y.scene), time: m(Y.time), season: m(Y.season),
-      same: m(Y.alt.same), notime: m(Y.alt.notime), teenKnow: m(Y.alt.teen.know), teenFriend: m(Y.alt.teen.friend), teenPlace: m(Y.alt.teen.place), teenSeason: m(Y.alt.teen.season) };
+      same: m(Y.alt.same), notime: m(Y.alt.notime) };
   }
   function yeonVolume(V, ctx) {
     const a = ctx.arch;
     if (!V || !a) return 0;
     const season = (t) => (ctx.stem == null ? 0 : t[ELEMENT_OF_STEM[ctx.stem]]);
-    if (ctx.teen) return V.teenKnow[a] + V.teenFriend[a] + V.teenPlace[a] + season(V.teenSeason);
     const same = !ctx.sub || ctx.sub === a;
     const time = ctx.band == null ? V.notime[a] : [ctx.band, ctx.band + 1].filter((b) => b <= 6).reduce((n, b) => n + V.time[a + "-b" + (b + 1)], 0);
     return V.pull[a] + V.mirror[a] + V.meet[a] + (same ? V.same[a] : V.twist[ctx.sub]) + V.scene[a] + time + season(V.season);
@@ -236,5 +225,5 @@
     return { chapters, card, codes };
   }
 
-  return { archPair, ageOf, bandOf, isTeen, TEEN_UNDER, ELEMENT_OF_STEM, yeonChapter, yeonTable, yeonVolume, yeonChars, sajuStem, sajuGroup, contentFrom, hiddenEntry, fullRoom, pairCode, timelineStages, openChapter, deepChapter, closeChapter, timelineChapter, mapChapter, matchChapter, buildReport, ARCH };
+  return { archPair, ageOf, bandOf, ELEMENT_OF_STEM, yeonChapter, yeonTable, yeonVolume, yeonChars, sajuStem, sajuGroup, contentFrom, hiddenEntry, fullRoom, pairCode, timelineStages, openChapter, deepChapter, closeChapter, timelineChapter, mapChapter, matchChapter, buildReport, ARCH };
 });

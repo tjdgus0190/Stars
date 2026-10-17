@@ -1,4 +1,4 @@
-// 17단계 I2 단위 시험: 인연의 장(17-2) 고르기·빠진 경우 표·만 19세 미만·나이 구간·옛 이어가기 코드·"받는 것" 글자 수(검수 2차 권장 5),
+// 17단계 I2 단위 시험: 인연의 장(17-2) 고르기·빠진 경우 표·19세 미만도 기본판+b1(결정 114)·나이 구간·옛 이어가기 코드·"받는 것" 글자 수(검수 2차 권장 5),
 // 함수 book의 yeon(본문 두 칸 그대로), 문구 도구(apply-17 줄 넣기가 기존 문장을 바꾸지 않음, check-17 금지·오탐 규칙).
 // 실행: node --test "tools/strange-oracle/*.test.js"
 "use strict";
@@ -37,7 +37,7 @@ const C = { yeon: fakeYeon() };
 const V = Book.yeonTable(C.yeon);
 const texts = (ch) => ch.pages.flatMap((p) => [p.text].concat((p.bands || []).map((b) => b.text))).filter(Boolean);
 const tags = (ch) => texts(ch).map((t) => /^<([^>]+)>/.exec(t)[1]);
-const base = { arch: "sage", sub: "rebel", allDone: true, band: 3, teen: false, stem: 2 };
+const base = { arch: "sage", sub: "rebel", allDone: true, band: 3, stem: 2 };
 const day = (y, m, d) => new Date(y, m - 1, d, 12);
 
 test("인연의 장 기본판: 1~3·5쪽 주 원형, 4쪽 보조 원형, 6쪽 지금+다음 구간, 7쪽 일간 오행", () => {
@@ -67,12 +67,8 @@ test("빠진 경우 표 다섯 줄 (17-2)", () => {
   ch = Book.yeonChapter(C, { ...base, stem: null });
   assert.strictEqual(ch.pages[6].text, null);
   assert.strictEqual(ch.pages[6].note, "noSaju");
-  // ④ 만 19세 미만: 미성년판 3쪽 + 미성년 계절, 4·6쪽 숨김, 기본판 문장 0
-  ch = Book.yeonChapter(C, { ...base, teen: true });
-  assert.strictEqual(ch.variant, "teen");
-  assert.deepStrictEqual(ch.pages.map((p) => p.key), ["teenKnow", "teenFriend", "teenPlace", "season"]);
-  assert.deepStrictEqual(tags(ch), ["alt.teen.know.sage", "alt.teen.friend.sage", "alt.teen.place.sage", "alt.teen.season.fire"]);
-  assert.strictEqual(Book.yeonChapter(C, { ...base, teen: true, stem: null }).pages[3].note, "noSaju");
+  // ④ 만 19세 미만판은 없다(결정 114) → 아래 "19세 미만도 기본판+b1" 시험. 원본에도 alt.teen 칸이 없다
+  assert.deepStrictEqual(Object.keys(C.yeon.alt).sort(), ["notime", "same"]);
   // ⑤ 옛 이어가기 코드 → 아래 시험
 });
 
@@ -99,13 +95,21 @@ test("나이 구간 b1·b4·b7 표본과 구간이 바뀌는 생일 경계", () 
   assert.strictEqual(band(1976, 10, 17), 6);
 });
 
-test("만 19세 생일 전날 = 미성년판, 당일 = 기본판", () => {
+test("19세 미만도 기본판 + b1 (결정 114): 만 14·18세, 19세 생일 전날·당일 모두 같은 판", () => {
   const today = day(2026, 10, 17);
-  const ctxOf = (b) => { const age = Book.ageOf(b, today); return { ...base, band: Book.bandOf(age), teen: Book.isTeen(age) }; };
+  const ctxOf = (b) => ({ ...base, band: Book.bandOf(Book.ageOf(b, today)) });
   assert.strictEqual(Book.ageOf({ y: 2007, m: 10, d: 18 }, today), 18);
-  assert.strictEqual(Book.yeonChapter(C, ctxOf({ y: 2007, m: 10, d: 18 })).variant, "teen");
-  assert.strictEqual(Book.yeonChapter(C, ctxOf({ y: 2007, m: 10, d: 17 })).variant, "base");
-  assert.strictEqual(Book.isTeen(null), false, "나이 모름 = 기본판(98번)");
+  assert.strictEqual(Book.isTeen, undefined, "미성년 판정 함수 없음");
+  const want = ["pull.sage", "mirror.sage", "meet.sage", "twist.rebel", "scene.sage", "time.sage-b1", "time.sage-b2", "season.fire"];
+  for (const b of [{ y: 2012, m: 1, d: 1 }, { y: 2008, m: 3, d: 3 }, { y: 2007, m: 10, d: 18 }, { y: 2007, m: 10, d: 17 }, { y: 2004, m: 1, d: 1 }]) {
+    const ctx = ctxOf(b);
+    assert.strictEqual(ctx.band, 0, JSON.stringify(b));
+    const ch = Book.yeonChapter(C, ctx);
+    assert.strictEqual(ch.variant, "base");
+    assert.deepStrictEqual(ch.pages.map((p) => p.key), ["pull", "mirror", "meet", "twist", "scene", "time", "season"]);
+    assert.deepStrictEqual(tags(ch), want);
+    assert.strictEqual(Book.yeonVolume(V, ctx), Book.yeonChars(ch));
+  }
 });
 
 test("일간: 시각 모름·23시 30분 표본, 성별만 바꿔도 인연의 장이 같음", () => {
@@ -133,7 +137,7 @@ function ctxFromCodes(c) {
     decan: c.decan != null && W.DECANS[c.decan].archetype, tzolkin: c.tzolkin && W.TZOLKIN_SIGNS[c.tzolkin.sign].archetype, rune: c.rune && W.RUNES[c.rune[2]].archetype, sibyl: c.sibyl != null && W.ORACLES[c.sibyl].archetype,
   };
   const pair = Book.archPair(ORDER.map((r) => arch[r] || null));
-  return { arch: pair.main, sub: pair.sub, allDone: ORDER.every((r) => arch[r]), band: null, teen: Book.isTeen(null), stem: c.saju ? Book.sajuStem(c.saju) : null };
+  return { arch: pair.main, sub: pair.sub, allDone: ORDER.every((r) => arch[r]), band: null, stem: c.saju ? Book.sajuStem(c.saju) : null };
 }
 test("옛 이어가기 코드: SOG2는 만신 결과 번호로 일간을 되찾음, SOG1은 만신 없음 → 계절 안내. 둘 다 나이 모름 → b1 안 씀", () => {
   const c2 = { saju: 2 * 500 + 7, ogham: 3, star: 5, decan: 7, tzolkin: null, rune: null, sibyl: null, runeTopic: null, sibylTopic: null };
@@ -165,14 +169,13 @@ test('"받는 것" 인연의 장 글자 수 = 그 사람이 받는 판의 실제
   const seen = new Set();
   for (let t = 0; t < 2000; t++) {
     const arch = ARCH[pick(8)];
-    const ctx = { arch, sub: t % 3 ? ARCH[pick(8)] : arch, allDone: t % 2 === 0, band: t % 5 ? pick(7) : null, teen: t % 6 === 0, stem: t % 4 ? pick(10) : null };
+    const ctx = { arch, sub: t % 3 ? ARCH[pick(8)] : arch, allDone: t % 2 === 0, band: t % 5 ? pick(7) : null, stem: t % 4 ? pick(10) : null };
     const ch = Book.yeonChapter(C, ctx);
     assert.strictEqual(Book.yeonVolume(V, ctx), Book.yeonChars(ch), JSON.stringify(ctx));
     seen.add(ch.variant + (ctx.sub === arch ? ":same" : "") + (ctx.band == null ? ":notime" : "") + (ctx.stem == null ? ":nosaju" : ""));
   }
-  assert.ok(seen.size >= 10, `판 ${seen.size}가지`);
-  // 판마다 값이 정말 다름(같은 사람의 미성년판·기본판)
-  assert.notStrictEqual(Book.yeonVolume(V, { ...base, teen: true }), Book.yeonVolume(V, base));
+  assert.strictEqual(seen.size, 8, `판 ${seen.size}가지`); // base × 한결같은 결 × 나이 모름 × 만신 미방문 (19세 미만판 없음)
+  // 판마다 값이 정말 다름
   assert.notStrictEqual(Book.yeonVolume(V, { ...base, band: null }), Book.yeonVolume(V, base));
   // 지금 data-volume.js 표에 yeon 칸이 있고, 원본(book-yeon.js)과 같은 칸 구조
   const BV = {};
@@ -192,12 +195,13 @@ test("함수 book: file yeon → 200, 본문은 { pass, file } 두 칸 그대로
   assert.ok(app.includes("body: JSON.stringify({ pass, file })"));
 });
 
-test("문구 도구: items.json 484항목, 줄 넣기가 원본의 다른 문장을 바꾸지 않음", () => {
+test("문구 도구: items.json 455항목(결정 114로 19세 미만판 29항목 뺌), 줄 넣기가 원본의 다른 문장을 바꾸지 않음", () => {
   const items = L.loadItems();
-  assert.strictEqual(items.length, 146 + 338);
+  assert.strictEqual(items.length, 117 + 338);
+  assert.strictEqual(items.filter((x) => /teen/.test(x.id + x.batch + x.kind)).length, 0);
   assert.strictEqual(items.filter((x) => x.kind === "firstLine").length, 169);
   assert.strictEqual(items.filter((x) => x.kind === "heartLine").length, 169);
-  assert.strictEqual(items.filter((x) => x.review === "all").length, 106); // + 무료 떡밥 8 = 114 (17-13의 7)
+  assert.strictEqual(items.filter((x) => x.review === "all").length, 77); // + 무료 떡밥 8 = 85 (17-13의 7, 19세 미만판 29 뺌)
   assert.strictEqual(new Set(items.map((x) => x.id)).size, items.length);
   // 임시 사본에 줄을 넣고 되읽기
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "so17-"));

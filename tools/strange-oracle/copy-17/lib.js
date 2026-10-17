@@ -30,10 +30,6 @@ const YEON_SLOTS = [
   { batch: "yeon-season", kind: "yeon.season", path: ["season"], keys: ELEMENTS, ...range(350), review: "all", by: "만신 일간 오행" },
   { batch: "yeon-alt-same", kind: "yeon.alt.same", path: ["alt", "same"], keys: ARCH, ...range(300) },
   { batch: "yeon-alt-notime", kind: "yeon.alt.notime", path: ["alt", "notime"], keys: ARCH, ...range(220) },
-  { batch: "yeon-alt-teen-know", kind: "yeon.alt.teen", path: ["alt", "teen", "know"], keys: ARCH, ...range(475), review: "all" },
-  { batch: "yeon-alt-teen-friend", kind: "yeon.alt.teen", path: ["alt", "teen", "friend"], keys: ARCH, ...range(475), review: "all" },
-  { batch: "yeon-alt-teen-place", kind: "yeon.alt.teen", path: ["alt", "teen", "place"], keys: ARCH, ...range(475), review: "all" },
-  { batch: "yeon-alt-teen-season", kind: "yeon.alt.teen", path: ["alt", "teen", "season"], keys: ELEMENTS, ...range(250), review: "all", by: "만신 일간 오행" },
 ];
 const LINE = { firstLine: range(80), heartLine: range(150) };
 
@@ -95,7 +91,7 @@ const YEON_HEAD = `// ═══════════════════�
 // 문구만, 로직 없음. 평문만. 문구는 tools/strange-oracle/apply-17.js로 넣는다(손으로 고쳐도 되지만 키 구조는 바꾸지 않는다).
 //  pull 끌림의 결 · mirror 연애 습관 거울 · meet 만나야 할 사람 · scene 만남의 장면 = 주 원형 8
 //  twist 의외의 끌림 = 보조 원형 8 · time 인연의 시기 = "<주 원형>-b<나이 구간 1~7>" 56 · season 인연의 계절 = 일간 오행 5(wood fire earth metal water)
-//  alt.same 한결같은 결(보조 = 주) 8 · alt.notime 나이 모를 때 8 · alt.teen.know/friend/place 만 19세 미만판 24 · alt.teen.season 5
+//  alt.same 한결같은 결(보조 = 주) 8 · alt.notime 나이 모를 때 8 (만 19세 미만판은 두지 않음, 결정 114)
 // ═══════════════════════════════════════════════════════════════════════
 window.BOOK_YEON = `;
 const writeYeon = (Y) => fs.writeFileSync(YEON_FILE, YEON_HEAD + JSON.stringify(Y, null, 2) + ";\n");
