@@ -749,6 +749,26 @@ QA(reports/qa-strange-oracle.md "11단계 묶음 1 검수") 필수 지적: 유�
 
 ### 8. specs/selling-strange-oracle.md에 17단계 한 줄 더함.
 
+### 9. 결정 114 반영 (developer j1 기록 확인)
+- 만 19세 미만판(`book-yeon.js` alt.teen, 묶음 4개) **29항목·11,779자**가 빠졌다. 19세 미만도 기본판 + 시기 칸 b1(연애 전제 없이 친구·배움)으로 읽는다. data.js `book.yeon.secs.teen*` 3키도 함께 빠짐. 문구 도구는 47묶음 455항목.
+
+### 10. 마무리 (I4 1차 참고 1·2)
+**마음 한 줄 머리말 겹침 (참고 1)** — 판단: 머리말 1줄을 바꾼다.
+- 마음 한 줄 169개 중 57개(47 "마음이 가는…" + 10 "마음 가는…")가 머리말과 같은 말로 시작하고, 158개는 문장 안 어딘가에 "마음(이) 가는 사람"이 있다. 시작만 고치면 57줄(유료 원본 7개 파일)을 고쳐야 하고, 머리말을 "마음 가는 사람"으로 줄여도 여전히 겹친다.
+- 머리말을 같은 말이 없는 다른 말로 바꾸면 1줄로 끝나고, 본문 169줄은 그대로(17-1 "기존 문장은 그대로"와도 맞음). 문장 안에 그 말이 아예 없는 11줄도 머리말이 장면을 먼저 열어 준다.
+- 유료 원본 heartLine은 고치지 않음 → apply-17·Edit 불필요.
+
+| 키 | 전 | 후 |
+|---|---|---|
+| book.heartLabel | 마음 가는 사람 앞에서 | 한 사람에게 기울 때 (11자, 12자 이하) |
+
+**오검 bridges 해요체 (참고 2, 결정 115)**
+| 키 | 전 | 후 |
+|---|---|---|
+| bridges.ogham | …어떤 결일지, 별에게 물어보시겠습니까? | …어떤 결일지, 별에게 물어볼까요? (38자, 45자 이하) |
+- data.js의 다른 오검 화면 문구(ogham.intro·input·errors·ritual·result·card, guides.ogham, evidenceType)에는 하십시오체가 남은 것이 없다. data-ogham.js 결과 본문 2줄(350·351, "…기대게 됩니다", "…기다리게 됩니다.")에 "-ㅂ니다"가 섞여 있으나 안내자 대사가 아닌 결과 본문이고 이번 범위(data.js) 밖이라 고치지 않음 → 운영자 판단.
+- 고친 줄: data.js 2줄. index.html은 sync-text로만 반영.
+
 ## 광고 영상 1·2안 (copywriter, 2026-10-17) — 「일곱 문」 15초 · 「만신」 9초 한국판 자막과 게시 문구
 
 기준: specs/proposal-strange-oracle-ads.md(2-3 정책, 3-2 한국 각도, 4장 1안·2안, 8장 운영자 답), marketing/strange-oracle/storyboard.md(자막 규격), specs/selling-strange-oracle.md. 최종 문구와 근거는 `marketing/strange-oracle/script.md`, 게시 문구는 `marketing/strange-oracle/sns.md`.
