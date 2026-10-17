@@ -53,3 +53,19 @@ yeon-pull → yeon-mirror → yeon-meet → yeon-twist → yeon-scene → yeon-t
 ## 다 끝나면
 `node tools/strange-oracle/make-volume.js`(불일치 0) → `node tools/build-dist.js`(유료 지문 누출 0, book-yeon 포함)
 → `node --test "tools/strange-oracle/*.test.js"`
+
+## 18단계 새 장 「겹치는 곳, 갈리는 곳」 (`--stage 18`, spec 18-10)
+같은 두 도구에 `--stage 18`만 붙인다. 진행 폴더는 `tools/strange-oracle/copy-18/`(items.json·out/), 원본은 `api/_paid/book/book-cross.js`다.
+1. `node tools/strange-oracle/check-17.js --stage 18` → 다음 묶음 id·항목 id·글자 범위·**쓸 수 있는 자리 값**이 찍힌다.
+2. `tools/strange-oracle/copy-18/out/<묶음 id>.json` 하나를 Write로 쓴다(모양은 17단계와 같음).
+3. `node tools/strange-oracle/apply-17.js --stage 18 <묶음 id>` → book-cross.js에 넣고 written, 묶음 파일 지움.
+4. `node tools/strange-oracle/check-17.js --stage 18` → 통과하면 checked.
+
+- 순서: cross-lens → cross-shape-one·two·trunk·many → cross-common-act·talk·heart·order·free → cross-split → cross-pair-1~7 → cross-even → cross-same → cross-close (21묶음, 164항목).
+- id: `cross.lens.<방>` · `cross.shape.<one|two|trunk|many>.<주 원형>` · `cross.common.<축>.<주 원형>` · `cross.split.<축>` · `cross.pair.<주 원형>-<홀로 다른 방 원형>` · `cross.even.<주 원형>` · `cross.same.<주 원형>` · `cross.close.<주 원형>`.
+  - 모양: one 한 목소리 · two 두 갈래 · trunk 굵은 줄기 · many 여러 갈래. 축: act 발걸음 · talk 대화 · heart 마음 · order 약속 · free 새로움.
+- 자리 값은 `{arch}`(주)·`{sub}`(보조)·`{other}`(홀로 다른 방 원형)·`{axis}`(2쪽 공통 축, 3쪽 차이 축, 그 밖 칸은 공통 축)·`{room}`(홀로 다른 방)·`{high}`·`{low}`(3쪽 방 이름들)·`{n}`(마친 방 수)만. 칸마다 쓸 수 있는 것은 items.json `vars`(check가 찍음).
+  - `{arch}`·`{sub}`·`{other}`·`{axis}` 바로 뒤에는 `의`·띄어쓰기·`. , ! ? ·`·`」`만. 「」로 감쌌으면 `」` 뒤는 띄어쓰기 + 명사 또는 문장부호. (`{room}`·`{high}`·`{low}`는 방 이름이 "방"으로 끝나 조사를 붙여도 된다.)
+  - 1·2·6쪽은 방 2~7개에 같은 항목을 쓴다. 방 수는 `{n}`으로만.
+- 검사: 17-4 목록 + 결정 116 건강어 + 18-4 목록(정확도 과장·오류 틀·원형 깎기) + 자리 값 + 축 이름 대조(data.js `book.cross.axis` = data-map.js `axis`).
+- 방 2~7개 모든 조합(약 240만)에서 164 열쇠가 모두 나온다(cross.test.js). 뺀 열쇠는 없다.

@@ -13,7 +13,7 @@ const OUT = path.join(__dirname, "out");
 const out = [];
 const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${name}${extra !== "" ? "  — " + extra : ""}`; out.push(l); console.log(l); };
 const ORDER = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]; // (14단계) 새 순서
-const BOOK_ROOMS = ORDER; // (F4-B2) Ⅰ 만신 장 포함 → 책 12장, (17단계) 인연의 장 → 13장
+const BOOK_ROOMS = ORDER; // (F4-B2) Ⅰ 만신 장 포함 → 책 12장, (17단계) 인연의 장 → 13장, (18단계) 새 장 cross → 14장 (tests.md 「18단계 · 바뀐 기대값」)
 // (14-6) 방 문구 파일은 지연 불러오기라 페이지에 전역이 없을 수 있다 → 시험 방문 기록은 node에서 만든다
 const DATA = (() => { const w = {}; for (const f of ["data-saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"]) require("vm").runInNewContext(require("fs").readFileSync(require("path").resolve(__dirname, "..", "..", "products", "strange-oracle", f), "utf8"), { window: w }); return w; })();
 const SajuLib = require("../../products/strange-oracle/saju.js");
@@ -126,19 +126,19 @@ const STUB_ADS = `(function () {
   check("입구 책 카드: 0/6 상태 none·state0 문구·목차 보기 버튼", await ev("(() => { const c = document.querySelector('[data-js=hub-book]'); return c.dataset.state === 'none' && document.querySelector('[data-js=hub-book-hint]').textContent === TEXT.hub.book.state0 && document.querySelector('[data-js=hub-book-go]').offsetHeight > 0; })()"));
 
   // 2. 0/7 목차
-  check("F4-B2: 목차에 Ⅰ 만신 장 있음(오검 앞), (17-2) 인연의 장은 시기별 흐름 다음 · 13장", await ev("(() => { const ids = [...document.querySelectorAll('[data-js=book-chapter]')].map(li => li.dataset.chapter); return ids.indexOf('saju') === ids.indexOf('ogham') - 1 && ids.length === 13 && ids.indexOf('yeon') === ids.indexOf('flow') + 1; })()"));
+  check("F4-B2: 목차에 Ⅰ 만신 장 있음(오검 앞), (17-2) 인연의 장은 시기별 흐름 다음, (18-2) 새 장은 제2부 맨 앞(Ⅶ 시빌라 다음) · 14장", await ev("(() => { const ids = [...document.querySelectorAll('[data-js=book-chapter]')].map(li => li.dataset.chapter); return ids.indexOf('saju') === ids.indexOf('ogham') - 1 && ids.length === 14 && ids.indexOf('yeon') === ids.indexOf('flow') + 1 && ids.indexOf('cross') === ids.indexOf('sibyl') + 1 && ids.indexOf('flow') === ids.indexOf('cross') + 1; })()"));
   await click("[data-js=hub-book-go]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   const r0 = await rows();
-  check("13-7.2 0/7: 모든 장 '지나면 열려요'(need-room), 광고 버튼 0 (13장)", Object.values(r0).every((s) => s === "need-room") && Object.keys(r0).length === 13 && (await ev("[...document.querySelectorAll('[data-js=book-chapter-state]')].every(e => /열려요|\\[초안\\]/.test(e.textContent))")), JSON.stringify(r0));
+  check("13-7.2 0/7: 모든 장 '지나면 열려요'(need-room), 광고 버튼 0 (14장)", Object.values(r0).every((s) => s === "need-room") && Object.keys(r0).length === 14 && (await ev("[...document.querySelectorAll('[data-js=book-chapter-state]')].every(e => /열려요|\\[초안\\]/.test(e.textContent))")), JSON.stringify(r0));
   await row("match");
   check("0/6: 잠긴 행을 누르면 안내만(목차 그대로)", (await view()) === "toc");
 
   // 2/7 (만신·오검)
   await fresh(["saju", "ogham"]);
   const r1 = await rows();
-  check("14-4 2/7 결제함: 여는 글·만신·오검·흐름·궁합·심층 열림·나머지 방·닫는 글 '지나면 열려요'(59번)",
-    r1.open === "opened" && ["saju", "ogham", "flow", "yeon", "match", "deep"].every((k) => r1[k] === "opened") && ["star", "decan", "tzolkin", "rune", "sibyl", "close"].every((k) => r1[k] === "need-room"), JSON.stringify(r1));
+  check("14-4 2/7 결제함: 여는 글·만신·오검·(18-2 방 2개) 새 장·흐름·궁합·심층 열림·나머지 방·닫는 글 '지나면 열려요'(59번)",
+    r1.open === "opened" && ["saju", "ogham", "cross", "flow", "yeon", "match", "deep"].every((k) => r1[k] === "opened") && ["star", "decan", "tzolkin", "rune", "sibyl", "close"].every((k) => r1[k] === "need-room"), JSON.stringify(r1));
   check("목차: 원형 이름·안내 줄({n}=2)·배너 자리 없음(14-2)", await ev("(() => { const a = document.querySelector('[data-js=book-home-arch]'); return !a.hidden && a.textContent === TEXT.archetypes[StrangeOracle.currentArchetype()].name && document.querySelector('[data-js=book-home-lede]').textContent === TEXT.book.toc.lede.replace('{n}', 2) && !document.querySelector('#screen-report [data-ad]'); })()"));
   check("목차: 유료 장 문장 0 (함수 book 요청 아직 0건)", !b.log.requests.some((r) => /\/api\/book/.test(r)));
 
@@ -228,7 +228,7 @@ const STUB_ADS = `(function () {
   await waitFor("!!window.BOOK_SAJU", 4000);
   const bookBodies = b.log.bodies.filter((x) => /\/api\/book$/.test(x.url));
   check("14-7.13 함수 book 요청: 주소에 query 없음·본문은 pass·file 두 칸뿐·file은 장 이름", bookBodies.length > 0 && bookBodies.every((x) => { try { const o = JSON.parse(x.body); return Object.keys(o).sort().join() === "file,pass" && /^[a-z]+$/.test(o.file); } catch (e) { return false; } }), `${bookBodies.length}건`);
-  check("공개 책 파일은 data-book-free.js 하나뿐", b.log.requests.filter((r) => /data-book-/.test(r)).every((r) => /\/data-book-free\.js$/.test(r)));
+  check("공개 책 파일은 data-book-free.js·(18-6) data-book-sample.js 둘뿐", b.log.requests.filter((r) => /data-book-/.test(r)).every((r) => /\/data-book-(free|sample)\.js$/.test(r)));
   check("숨은 장 제목(결정 65 공개)·결과 이름·분량 표지에 보임", await ev("(() => { const c = document.querySelector('[data-js=chapter-cover]'); return !c.querySelector('[data-js=chapter-cover-hidden-row]').hidden && c.querySelector('[data-js=chapter-cover-result]').textContent.length > 0 && /\\d/.test(c.querySelector('[data-js=chapter-cover-volume]').textContent); })()"));
   await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 5000);
   await click("[data-js=book-chapter-open]");
@@ -305,7 +305,7 @@ const STUB_ADS = `(function () {
   await click("[data-js=story-book-link]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   const r6 = await rows();
-  check("7/7 결제함: 13장 모두 열림(만신 포함)", Object.keys(r6).length === 13 && Object.values(r6).every((s) => s === "opened"), JSON.stringify(r6));
+  check("7/7 결제함: 14장 모두 열림(만신·새 장 포함)", Object.keys(r6).length === 14 && Object.values(r6).every((s) => s === "opened"), JSON.stringify(r6));
   // 룬·시빌라·데칸 장 열기 (큰 파일)
   for (const id of ["saju", "rune", "sibyl", "decan"]) {
     await click("[data-js=book-toc-open]").catch(() => {});
@@ -321,6 +321,224 @@ const STUB_ADS = `(function () {
       check("Ⅰ 만신 장: Ⅰ장 나머지·숨은 장(묶음 제목 = data-saju.js hiddenTitle)·빈칸 0", sj.rest && sj.hidden && sj.title && !sj.bad, JSON.stringify(sj));
     }
   }
+
+  // ═══ (18단계 J2) 새 장 · 미리보기 · 잠긴 장 길 · 상태표 · 관심사 · 이벤트 값 (spec 18-12의 4~8·11) ═══
+  // 시험 GA ID를 페이지에 끼운다(구글 주소는 위 가로채기로 가짜 응답). dataLayer는 같은 페이지 안에서 읽는다
+  await send("Page.addScriptToEvaluateOnNewDocument", { source: `(function () { var v; Object.defineProperty(window, "TEXT", { configurable: true, get: function () { return v; }, set: function (x) { if (x && x.analytics) x.analytics.ga4 = "G-TEST12345"; v = x; } }); })();` });
+  const dlNow = () => ev("JSON.stringify((window.dataLayer || []).map((a) => [...a]).filter((a) => a[0] === 'event'))").then(JSON.parse);
+  const evSeen = (list, name, props) => list.some((a) => a[1] === name && Object.entries(props).every(([k, v]) => a[2] && a[2][k] === v));
+  const toastText = () => ev("document.querySelector('[data-js=toast]').textContent");
+  const targetIs = (sel) => ev(`!!document.querySelector(${JSON.stringify(sel)} + '.is-target')`);
+  const nApi0 = () => b.log.requests.filter((r) => /\/api\/book/.test(r)).length;
+  const sdkReq = () => b.log.requests.filter((r) => /payapp/i.test(r)).length;
+
+  // 18-a 결제함 7/7(같은 탭): 새 장 6쪽 · 대조표 · 요청 본문 { pass, file: "cross" }
+  await fresh(ORDER, "#report");
+  await row("cross");
+  await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 6000);
+  check("18-9 새 장 표지: 분량 숫자", await ev("/\\d/.test(document.querySelector('[data-js=chapter-cover-volume]').textContent)"));
+  await click("[data-js=book-chapter-open]");
+  check("18-12의 5 결제함: 새 장 첫 쪽", await toPages());
+  const cx = JSON.parse(await ev(`JSON.stringify((() => { const src = document.querySelector('[data-js=report-cross]'); const ps = [...document.querySelectorAll('[data-js=book-page][data-part=cross]')]; const t = ps.map(p => p.textContent).join(' '); return { secs: [...src.querySelectorAll('section.cross-sec')].map(s => s.dataset.page), variant: src.dataset.variant, rows: src.querySelectorAll('[data-js=cross-row]').length, pending: src.querySelectorAll('.cross-table__row.is-pending').length, main: src.querySelectorAll('.cross-table__row.is-main').length, th: src.querySelectorAll('table th[scope]').length, caption: !!src.querySelector('table caption'), nums: [...src.querySelectorAll('.axis-meter__num')].every(n => /^[0-4]$/.test(n.textContent)), pages: ps.length, bad: /undefined|null|\\{(arch|sub|other|axis|room|high|low|n)\\}/.test(t), note: !!src.querySelector('[data-js=cross-note]'), tableUnit: ps.filter(p => p.querySelector('table.cross-table')).length, over: ps.filter(p => { const bd = p.querySelector('.book-page__body'); return bd.scrollHeight > bd.clientHeight + 1; }).length }; })())`));
+  check("18-12의 5 새 장: 6쪽 또는 대체 경로 쪽 · 대조표 7줄(아직 0)·table·th·caption·막대 숫자 0~4 · 자리 값 남음 0 · 7방이라 끝 안내 없음 · 표는 한 쪽에 통째로 · 넘침 0", cx.secs.length >= 5 && cx.secs[0] === "shape" && cx.secs[cx.secs.length - 1] === "close" && cx.rows === 7 && cx.pending === 0 && cx.main >= 1 && cx.th >= 11 && cx.caption && cx.nums && !cx.bad && !cx.note && cx.tableUnit === 1 && cx.over === 0 && cx.pages >= cx.secs.length + 1, JSON.stringify(cx));
+  const cb = b.log.bodies.filter((x) => /\/api\/book$/.test(x.url)).map((x) => x.body).filter((x) => /cross/.test(x));
+  check("18-12의 4 새 장 요청 본문 = { pass, file: \"cross\" } 두 칸뿐(원형·축·방 목록·관심사 0)", cb.length > 0 && cb.every((x) => { const o = JSON.parse(x); return Object.keys(o).sort().join() === "file,pass" && o.file === "cross"; }), `${cb.length}건`);
+  // 관심사(시드: 시빌라 love · 룬 me) → 제2부 = 새 장 → 인연의 장 → 원형 심층 → 궁합 → 시기별 흐름, 장 끝 "다음 장"도 같은 순서
+  const ord = await ev("[...document.querySelectorAll('[data-js=book-chapter]')].map(li => li.dataset.chapter).slice(8).join()");
+  await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))");
+  await sleep(150);
+  const nx = await ev("(() => { const n = document.querySelector('[data-js=book-page].is-current [data-js=chapter-end-next]'); return n ? n.dataset.next : null; })()");
+  check("18-12의 11 관심사(시빌라 사랑 + 룬 나): 목차 제2부 = cross·yeon·deep·match·flow · 새 장 끝 다음 장 = 인연의 장", ord === "cross,yeon,deep,match,flow,close" && nx === "yeon", `${ord} / next ${nx}`);
+  await click("[data-js=book-toc-open]");
+  await sleep(200);
+  check("18-8 관심사 줄: 목차 위 한 줄 = book.interest.sibyl.love, 주제 이름 '돈' 0", await ev("(() => { const el = document.querySelector('[data-js=book-interest]'); return !!el && !el.hidden && el.textContent.trim() === TEXT.book.interest.sibyl.love && !/돈/.test(el.textContent); })()"));
+  check("18-5 결제 뒤: 맨 위 띠·작은 글자 버튼 숨김, 입구 카드 owned·내 책 다시 펴기", await ev("document.querySelector('[data-js=book-preview-band]').hidden && document.querySelector('[data-js=book-buy-row]').hidden"));
+  // 시기별 흐름 영역 순서(사랑 → 관계 먼저)
+  await row("flow");
+  await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 6000);
+  await click("[data-js=book-chapter-open]");
+  await toPages();
+  check("18-8 시기별 흐름 영역 순서(사랑): 관계 → 일 → 배움 → 이동", (await ev("[...document.querySelector('[data-js=report-timeline] .timeline__areas').children].map(d => d.querySelector('dd').dataset.js.replace('timeline-', '')).join()")) === "relation,work,learn,move");
+  await b.goto(BASE + "#hub");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  check("18-5 결제 뒤 입구 카드: data-state owned · 버튼 hub.book.goReopen", await ev("document.querySelector('[data-js=hub-book]').dataset.state === 'owned' && document.querySelector('[data-js=hub-book-go]').textContent === TEXT.hub.book.goReopen"));
+  await b.goto(BASE + "#preview");
+  await sleep(400);
+  check("18-5 #preview 직접(결제한 탭) → 목차", (await active()) === "screen-report");
+  await b.goto(BASE + "#story");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-story'");
+  check("18-5 결제 뒤 나의 이야기: 미리보기 카드 숨김 · 책 버튼 = story.bookLinkPaid · 공유가 주 버튼", await ev("document.querySelector('[data-js=story-preview]').hidden && !document.querySelector('[data-js=story-book]').classList.contains('is-hidden') && document.querySelector('[data-js=story-book-link]').textContent.trim() === TEXT.story.bookLinkPaid && document.querySelector('[data-js=story-share]').classList.contains('btn--primary')"));
+
+  // 18-b 결제 전 1/7: 새 장 need-room · 작은 글자 버튼 · 입구 카드 · #deeper "받는 것" 새 장 줄 = 평균 + 상태 글자
+  await fresh(["saju"], "#report", PROFILE, false);
+  const rb = await rows();
+  check("18-2 방 1개: 새 장 need-room · 상태 한 줄 = book.toc.needCross · 누르면 안내만", rb.cross === "need-room" && (await ev("document.querySelector('[data-js=book-chapter][data-chapter=cross] [data-js=book-chapter-state]').textContent === TEXT.book.toc.needCross")), JSON.stringify(rb));
+  check("18-5 1/7 결제 전: 맨 위 띠 숨김 · 맨 아래 작은 글자 버튼 하나(btn--text, {price} 채움)", await ev("document.querySelector('[data-js=book-preview-band]').hidden && !document.querySelector('[data-js=book-buy-row]').hidden && document.querySelectorAll('[data-js=book-buy]').length === 1 && document.querySelector('[data-js=book-buy]').classList.contains('btn--text') && !/\\{price\\}/.test(document.querySelector('[data-js=book-buy]').textContent) && /3,900/.test(document.querySelector('[data-js=book-buy]').textContent)"));
+  await b.goto(BASE + "#hub");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  const hubPrice = await ev("/3,900|\\d+원/.test(document.querySelector('[data-js=hub-book]').textContent)");
+  check("18-5 1/7 입구 카드: some · 버튼 '목차 보기'", await ev("document.querySelector('[data-js=hub-book]').dataset.state === 'some' && document.querySelector('[data-js=hub-book-go]').textContent === TEXT.hub.book.goToc"));
+  out.push(`INFO  18-12의 8 입구 카드 가격 0: ${hubPrice ? "아직 가격 있음(hub.book.desc — copywriter J3가 가격을 뺌)" : "가격 0"}`);
+  console.log(out[out.length - 1]);
+  const cwText = async () => ev("(() => { const li = [...document.querySelectorAll('[data-js=pay-chapters] li')].find(li => li.firstElementChild.firstChild.textContent === TEXT.book.parts.cross); return li ? { state: (li.querySelector('.pay-list__state') || {}).textContent || '', vol: li.querySelector('.pay-list__vol').textContent, nw: !!li.querySelector('.pay-list__new') } : null; })()");
+  const avgVol = await ev("TEXT.pay.what.item.replace('{n}', (Math.round(BOOK_VOLUME.avg.cross / 100) * 100).toLocaleString('ko-KR'))");
+  await b.goto(BASE + "#deeper");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  await sleep(300);
+  const cw1 = await cwText();
+  check("18-9 #deeper 1/7: 새 장 줄 = 평균 분량 + '방 2개를 지나면 열려요' + 새로 더해진 장 알약", !!cw1 && cw1.state === (await ev("TEXT.pay.what.crossWait")) && cw1.vol === avgVol && cw1.nw, JSON.stringify(cw1));
+  // (검수 2차 권장 1) 0/7에 #deeper로 바로: 방 1개와 같은 줄
+  await b.goto(BASE);
+  await ev("sessionStorage.clear()");
+  await b.goto(BASE + "#deeper");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  await sleep(300);
+  const cw0 = await cwText();
+  check("18-9 #deeper 0/7(검수 2차 권장 1): 새 장 줄 = 방 1개와 같음(평균 + 상태 글자)", !!cw0 && cw0.state === cw1.state && cw0.vol === cw1.vol, JSON.stringify(cw0));
+  const pv0 = await dlNow();
+  check("18-11 #deeper로 바로 들어옴 → so_pay view from other", evSeen(pv0, "so_pay", { step: "view", from: "other" }), JSON.stringify(pv0.filter((a) => a[1] === "so_pay")));
+  await b.goto(BASE + "#preview");
+  await sleep(400);
+  check("18-5 #preview 직접 0/7 → 입구", (await active()) === "screen-hub");
+
+  // 18-c 결제 전 3/7: 잠긴 장으로 가는 네 길 — 어느 것도 결제 전 화면을 열지 않고 목차 그 장 줄 + 토스트
+  const lockedToast = await ev("TEXT.book.toc.lockedToast");
+  await fresh(["saju", "ogham", "star"], "#report", PROFILE, false);
+  const api3 = nApi0(), sdk3 = sdkReq();
+  await row("star");
+  await sleep(300);
+  const road1 = { scr: await active(), view: await view(), target: await targetIs("[data-js=book-chapter][data-chapter=star]"), toast: (await toastText()) === lockedToast };
+  await b.goto(BASE + "#star-result");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-star-result'");
+  await click("#screen-star-result [data-js=result-book-link]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  await sleep(400);
+  const road2 = { scr: await active(), view: await view(), target: await targetIs("[data-js=book-chapter][data-chapter=star]"), toast: (await toastText()) === lockedToast };
+  await row("open");
+  await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 5000);
+  await click("[data-js=book-chapter-open]");
+  await toPages();
+  await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))");
+  await sleep(150);
+  const nx3 = await ev("document.querySelector('[data-js=book-page].is-current [data-js=chapter-end-next]').dataset.next");
+  await click("[data-js=book-page].is-current [data-js=chapter-end-next]");
+  await sleep(400);
+  const road3 = { next: nx3, scr: await active(), view: await view(), target: await targetIs(`[data-js=book-chapter][data-chapter=${nx3}]`), toast: (await toastText()) === lockedToast };
+  await ev("sessionStorage.setItem('strange-oracle-bookmark', 'ogham:2')");
+  await b.goto(BASE + "#report");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  await click("[data-js=book-resume]");
+  await sleep(400);
+  const road4 = { scr: await active(), view: await view(), target: await targetIs("[data-js=book-chapter][data-chapter=ogham]"), toast: (await toastText()) === lockedToast };
+  const roads = [road1, road2, road3, road4];
+  check("18-12의 8 1~6/7 결제 전 네 길(목차 잠긴 장·방 결과 책 한 줄·장 끝 다음 장·이어 읽기): 결제 전 화면 0 · 목차 그 장 줄 .is-target · 토스트", roads.every((r) => r.scr === "screen-report" && r.view === "toc" && r.target && r.toast) && road3.next === "saju" && nApi0() === api3 && sdkReq() === sdk3, JSON.stringify(roads));
+  await click("[data-js=book-buy]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  const pv3 = await dlNow();
+  check("18-11 목차 작은 글자 버튼 → 결제 전 화면 · so_pay view from toc · 미리보기로 돌아가기 숨김", evSeen(pv3, "so_pay", { step: "view", from: "toc" }) && (await ev("document.querySelector('[data-js=pay-back-preview]').hidden")), JSON.stringify(pv3.filter((a) => a[1] === "so_pay")));
+  await b.goto(BASE + "#preview");
+  await sleep(400);
+  check("18-5 #preview 직접 3/7 → 목차", (await active()) === "screen-report");
+
+  // 18-d 결제 전 7/7: 나의 이야기 카드 → 미리보기 (18-5 순서 1~8) · 유료 지문 0 · /api/book·SDK 0
+  await fresh(ORDER, "#story", PROFILE, false);
+  check("18-5 7/7 결제 전 나의 이야기: 미리보기 카드 = 주 버튼, 책 한 줄 숨김, 공유는 보조로(위쪽 공유 그대로)", await ev("(() => { const c = document.querySelector('[data-js=story-preview]'); return !!c && !c.hidden && c.querySelector('[data-js=story-preview-go]').classList.contains('btn--primary') && document.querySelector('[data-js=story-book]').classList.contains('is-hidden') && document.querySelector('[data-js=story-share]').classList.contains('btn--secondary') && !document.querySelector('[data-js=story-share]').classList.contains('btn--primary') && [...document.querySelectorAll('#screen-story .btn--primary')].filter(e => e.offsetHeight > 0 && !e.closest('[data-js^=map-]')).length === 1; })()")); // 지도 카드(16단계, test에서만)의 주 버튼은 따로 센다
+  const api7 = nApi0(), sdk7 = sdkReq();
+  await click("[data-js=story-preview-go]");
+  await waitFor("document.querySelector('#screen-preview')?.dataset.state === 'ready' && document.querySelector('.screen.is-active')?.id === 'screen-preview'", 8000);
+  const pv = JSON.parse(await ev(`JSON.stringify((() => { const s = document.querySelector('#screen-preview'); const y = (el) => el ? el.getBoundingClientRect().top + scrollY : -1; const seq = [s.querySelector('.pv-head'), s.querySelector('.pv-toc'), s.querySelector('.pv-sample'), s.querySelector('.pv-diff'), s.querySelector('.pv-once'), s.querySelector('[data-js=preview-go]'), s.querySelector('.pv-links'), s.querySelector('[data-js=disclaimer-slot]')].map(y);
+    return { seq: seq.every((v, i) => v >= 0 && (i === 0 || v > seq[i - 1])), title: s.querySelector('[data-js=preview-title]').textContent, toc: [...s.querySelectorAll('[data-js=preview-chapter]')].map(li => li.dataset.chapter + ':' + li.dataset.kind).join(), free: [...s.querySelectorAll('[data-js=preview-chapter][data-kind=free] [data-js=preview-chapter-tag]')].every(e => e.textContent === TEXT.book.preview.tagFree),
+      open: s.querySelector('[data-js=preview-open]').children.length, drop: s.querySelector('[data-js=preview-open] p').classList.contains('has-dropcap'), firsts: [...s.querySelectorAll('[data-js=preview-first-text]')].filter(e => e.textContent.length > 10).length, cross: s.querySelectorAll('[data-js=preview-cross] [data-js=cross-row]').length, crossText: s.querySelector('[data-js=preview-cross]').querySelectorAll('.prose').length,
+      closeHidden: s.querySelector('[data-js=preview-close]').hidden, closeHas: s.querySelector('[data-js=preview-close]').children.length > 0, disc: s.querySelector('[data-js=disclaimer-slot]').textContent.length > 10, ads: s.querySelectorAll('[data-ad], .ad-slot').length, band: !s.querySelector('[data-js=preview-test-band]').classList.contains('is-hidden'),
+      prim: s.querySelectorAll('.btn--primary').length, price: s.querySelector('[data-js=preview-go-label]').textContent, h: [...s.querySelectorAll('h1,h2,h3')].map(h => h.tagName).join(''), interest: !s.querySelector('[data-js=preview-interest]').hidden && s.querySelector('[data-js=preview-interest-text]').textContent === TEXT.book.interest.sibyl.love,
+      bad: /undefined|\\{(who|n|price|arch|sub)\\}/.test(s.textContent), wide: document.documentElement.scrollWidth <= innerWidth }; })())`));
+  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~8 · 14장 목차(무료 2 글자 표지) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 14 && pv.toc.startsWith("open:free,saju:paid") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /3,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
+  // 유료 문장 지문(build-dist와 같은 규칙: 30자 이상 문자열의 가운데 60자, 공개 data*.js와 같은 문자열은 뺌)이 미리보기 화면 HTML에 0
+  const prints = (() => {
+    const vm = require("vm");
+    const PRODD = path.resolve(__dirname, "..", "..", "products", "strange-oracle");
+    const freeSet = new Set();
+    for (const f of fs.readdirSync(PRODD).filter((n) => /^data[^/]*\.js$/.test(n))) { const w = {}; try { vm.runInNewContext(fs.readFileSync(path.join(PRODD, f), "utf8"), { window: w }); } catch (e) { continue; } (function g(v) { if (typeof v === "string") freeSet.add(v); else if (v && typeof v === "object") Object.values(v).forEach(g); })(w); }
+    const out2 = new Set();
+    const dir = path.join(PRODD, "api", "_paid", "book");
+    for (const f of fs.readdirSync(dir).filter((n) => /\.js$/.test(n))) {
+      const w = {};
+      vm.runInNewContext(fs.readFileSync(path.join(dir, f), "utf8"), { window: w });
+      (function c(v, k) { if (typeof v === "string") { if (k === "code" || v.length < 30 || freeSet.has(v)) return; const L2 = Math.min(60, v.length); const m = Math.floor((v.length - L2) / 2); const x = v.slice(m, m + L2); if (!/["'\\\n\r{}<>]/.test(x)) out2.add(x); } else if (Array.isArray(v)) v.forEach((x) => c(x, k)); else if (v && typeof v === "object") Object.entries(v).forEach(([kk, x]) => c(x, kk)); })(w, "");
+    }
+    return [...out2];
+  })();
+  const pvHtml = await ev("document.querySelector('#screen-preview').outerHTML");
+  const leak = prints.filter((x) => pvHtml.includes(x));
+  check("18-12의 7 미리보기 DOM에 유료 문장 지문 0 · 미리보기에서 /api/book 요청 0 · 결제 SDK 요청 0", prints.length > 1000 && leak.length === 0 && nApi0() === api7 && sdkReq() === sdk7, `지문 ${prints.length}개 · 걸림 ${leak.length} · api ${nApi0() - api7} · sdk ${sdkReq() - sdk7}`);
+  const pvEv = await dlNow();
+  check("18-11 미리보기 도착 → so_book step preview", evSeen(pvEv, "so_book", { step: "preview" }), JSON.stringify(pvEv.filter((a) => a[1] === "so_book").slice(-2)));
+  await click("[data-js=preview-close-toggle]");
+  check("18-5 닫는 글 펼치기 한 번 → 본문 보임 · 버튼 사라짐(접기 없음)", await ev("!document.querySelector('[data-js=preview-close]').hidden && document.querySelector('[data-js=preview-close-toggle]').hidden && document.querySelector('[data-js=preview-close-toggle]').getAttribute('aria-expanded') === 'true'"));
+  const rests = await ev("Object.fromEntries([...document.querySelectorAll('[data-js=preview-first]')].map(li => [li.dataset.room, (li.querySelector('[data-js=preview-first-rest]').textContent.match(/[\\d,]+/) || [''])[0]]))");
+  await click("[data-js=preview-go]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  const pay7 = await ev("Object.fromEntries([...document.querySelectorAll('[data-js=pay-chapters] li')].map(li => [li.firstElementChild.firstChild.textContent, (li.querySelector('.pay-list__vol').textContent.match(/[\\d,]+/) || [''])[0]]))");
+  const roomName = await ev("Object.fromEntries(" + JSON.stringify(ORDER) + ".map((r) => [r, TEXT.rooms[r].name]))");
+  const payOf = (r) => { const k = Object.keys(pay7).find((x) => x.endsWith(" " + roomName[r])); return k ? pay7[k] : null; };
+  const sameN = ORDER.every((r) => rests[r] && rests[r] === payOf(r));
+  check("18-12의 7 '이 장의 나머지 약 {n}자' = 결제 전 화면 '받는 것'의 그 장 분량 (7장 모두)", sameN, JSON.stringify({ rests, pay7 }));
+  const pvp = await dlNow();
+  check("18-5·18-11 미리보기 주 버튼 → 결제 전 화면(결제하지 않음, SDK 0) · so_pay from preview · 미리보기로 돌아가기 보임", evSeen(pvp, "so_pay", { step: "view", from: "preview" }) && !(await ev("document.querySelector('[data-js=pay-back-preview]').hidden")) && sdkReq() === sdk7, JSON.stringify(pvp.filter((a) => a[1] === "so_pay")));
+  await click("[data-js=pay-back-preview]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-preview'");
+  check("18-5 미리보기로 돌아가기 → 미리보기", (await active()) === "screen-preview");
+  // 7/7 결제 전 네 길 → 미리보기의 그 장 샘플 자리
+  await b.goto(BASE + "#report");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  check("18-5 7/7 결제 전 목차: 맨 위 띠 보임 · 작은 글자 버튼 그대로", await ev("!document.querySelector('[data-js=book-preview-band]').hidden && !document.querySelector('[data-js=book-buy-row]').hidden"));
+  const toPv = () => waitFor("document.querySelector('.screen.is-active')?.id === 'screen-preview' && document.querySelector('#screen-preview').dataset.state === 'ready'", 8000);
+  await row("star");
+  const p1 = (await toPv()) && (await targetIs("[data-js=preview-first][data-chapter=star]"));
+  await b.goto(BASE + "#star-result");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-star-result'");
+  await click("#screen-star-result [data-js=result-book-link]");
+  const p2 = (await toPv()) && (await targetIs("[data-js=preview-first][data-chapter=star]"));
+  await b.goto(BASE + "#report");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  await row("open");
+  await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 5000);
+  await click("[data-js=book-chapter-open]");
+  await toPages();
+  await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))");
+  await sleep(150);
+  await click("[data-js=book-page].is-current [data-js=chapter-end-next]");
+  const p3 = (await toPv()) && (await targetIs("[data-js=preview-first][data-chapter=saju]"));
+  await ev("sessionStorage.setItem('strange-oracle-bookmark', 'ogham:2')");
+  await b.goto(BASE + "#report");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  await click("[data-js=book-resume]");
+  const p4 = (await toPv()) && (await targetIs("[data-js=preview-first][data-chapter=ogham]"));
+  await b.goto(BASE + "#report");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  await row("flow");
+  const p5 = (await toPv()) && (await targetIs("[data-js=preview-chapter][data-chapter=flow]"));
+  await b.goto(BASE + "#report");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  await row("cross");
+  const p6 = (await toPv()) && (await targetIs("[data-js=preview-cross]"));
+  check("18-12의 8 7/7 결제 전 네 길 → 미리보기 그 장 샘플 자리(방 장 = 첫 줄 · 제2부 = 미리보기 목차 줄 · 새 장 = 대조표)", p1 && p2 && p3 && p4 && p5 && p6, JSON.stringify({ p1, p2, p3, p4, p5, p6 }));
+  await b.goto(BASE + "#hub");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  check("18-5 7/7 결제 전 입구 카드: all · 버튼 hub.book.goPreview → 미리보기", (await ev("document.querySelector('[data-js=hub-book]').dataset.state === 'all' && document.querySelector('[data-js=hub-book-go]').textContent === TEXT.hub.book.goPreview")) && (await click("[data-js=hub-book-go]")) && (await toPv()));
+  await b.goto(BASE + "#preview");
+  check("18-5 #preview 직접 7/7 결제 전 → 미리보기", await toPv());
+  await click("[data-js=preview-to-toc]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  const tocOk = (await active()) === "screen-report";
+  await b.goto(BASE + "#preview");
+  await toPv();
+  await click("[data-js=preview-to-story]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-story'");
+  check("18-5 미리보기 보조 링크: 목차로 · 나의 이야기로 (막다른 곳 0)", tocOk && (await active()) === "screen-story");
+  const pvAll = await dlNow();
+  const evBad = JSON.stringify(pvAll).match(/love|"me"|money|work|relation|warrior|sage|lover|rebel|caregiver|explorer|creator|ruler|act|talk|heart|order|free"/g);
+  check("18-11 분석 이벤트에 관심사·주제·모양·축·원형 조합 0 (so_book·so_pay 값)", !pvAll.filter((a) => /so_book|so_pay/.test(a[1])).some((a) => /love|"me"|money|relation|shape|axis/.test(JSON.stringify(a[2] || {}))), (evBad || []).slice(0, 5).join(","));
 
   // ═══ B·C. (14-2) 광고 은퇴: 보상형 광고·배너·lockAlways 시험은 뺐다(e2e-ads.js도 은퇴). GA4만 남는다 ═══
   const evs = b.log.console.filter((l) => l.startsWith("debug: __DL ")).map((l) => JSON.parse(l.slice(12))).filter((a) => a[0] === "event");

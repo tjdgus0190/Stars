@@ -1,7 +1,8 @@
 // 낯선 점술관 — 한 권의 책 조립 (13단계 spec 13-5). 문구 없음, 로직만.
 // 13단계 휴면 서버 core.js(F4-B2에서 지움)의 hiddenEntry·fullRoom·pairCode·timelineStages·buildReport 순서 규칙을 옮긴 것이다.
-// (14단계 F4-B2) 문구 원본: 여는 글·닫는 글 = 공개 data-book-free.js(BOOK_FREE), 유료 11장(17단계 인연의 장 포함, 책 13장) = api/_paid/book/book-*.js를
-//   함수 book이 열람 코드 확인 뒤 JSON으로 주면 app.js가 같은 전역 이름(BOOK_SAJU…BOOK_ARCH·BOOK_YEON)에 넣는다.
+// (14단계 F4-B2) 문구 원본: 여는 글·닫는 글 = 공개 data-book-free.js(BOOK_FREE), 유료 12장(17단계 인연의 장, 18단계 새 장 포함, 책 14장) = api/_paid/book/book-*.js를
+//   함수 book이 열람 코드 확인 뒤 JSON으로 주면 app.js가 같은 전역 이름(BOOK_SAJU…BOOK_ARCH·BOOK_YEON·BOOK_CROSS)에 넣는다.
+//   (18-6, 결정 117) 방 장 첫 줄 = 공개 data-book-sample.js(BOOK_SAMPLE, 결제 전 맛보기)
 // 입력은 결과 코드·원형·나이 구간(+ 궁합은 관계 유형·방 코드)뿐이다. 이름·생년월일 원문은 받지 않는다(6장).
 // 문구 C = 전역(BOOK_FREE·BOOK_SAJU…BOOK_ARCH)을 contentFrom(window)로 묶은 것.
 //   C = { open, deep, close, timeline, match, matchRooms, bond, full: {방: […]}, hidden: {방: […]} } — 아직 안 받은 칸은 비어 있다.
@@ -28,6 +29,8 @@
     if (w.BOOK_FREE) [C.open, C.close] = [w.BOOK_FREE.open, w.BOOK_FREE.close];
     if (w.BOOK_ARCH) C.deep = w.BOOK_ARCH.deep;
     if (w.BOOK_YEON) C.yeon = w.BOOK_YEON;
+    if (w.BOOK_CROSS) C.cross = w.BOOK_CROSS; // (18단계) 새 장
+    if (w.BOOK_SAMPLE) C.sample = w.BOOK_SAMPLE; // (18-6, 결정 117) 방 장 첫 줄 = 공개 맛보기 data-book-sample.js
     return C;
   }
   const byCode = (list) => Object.fromEntries((list || []).map((e) => [e.code, e]));
@@ -44,6 +47,13 @@
     if (room === "tzolkin") return list[codes.tzolkin.sign];
     return list[codes[room]];
   }
+  // (18-6) 첫 줄: 공개 data-book-sample.js(BOOK_SAMPLE[방][i], full과 같은 순서·code). 아직 안 받았으면 빈칸(그리지 않음)
+  const firstOf = (C, room, i) => {
+    const e = C.sample && C.sample[room] && C.sample[room][i];
+    return (e && e.firstLine) || "";
+  };
+  // 미리보기 「일곱 장의 첫 줄」: 방 결과 코드 → 그 장 첫 줄(공개 맛보기). 룬은 "지금" 자리 결과
+  const firstLineOf = (C, room, codes) => firstOf(C, room, room === "rune" ? codes.rune[1] : room === "tzolkin" ? codes.tzolkin.sign : room === "saju" ? sajuStem(codes.saju) : codes[room]);
   function fullRoom(C, room, codes) {
     const list = C.full[room];
     const h = hiddenEntry(C, room, codes);
@@ -58,11 +68,12 @@
         ch4: [next.advice.lede, ...next.advice.body],
         topics: Object.assign({}, next.advice.topics),
         hidden,
-        firstLine: now.firstLine || "", // (17-3) 여러 결과를 엮는 장(룬뿐) = "지금" 자리 결과 하나의 firstLine·heartLine
+        firstLine: firstOf(C, room, codes.rune[1]), // (17-3) 여러 결과를 엮는 장(룬뿐) = "지금" 자리 결과 하나의 firstLine·heartLine
         heartLine: now.heartLine || "",
       };
     }
-    const e = list[room === "tzolkin" ? codes.tzolkin.sign : room === "saju" ? sajuStem(codes.saju) : codes[room]];
+    const ei = room === "tzolkin" ? codes.tzolkin.sign : room === "saju" ? sajuStem(codes.saju) : codes[room];
+    const e = list[ei];
     const eb = e.event.body;
     const ch2 = insertAt(eb, Math.min(2, eb.length), e.event.quote);
     const out = {
@@ -72,7 +83,7 @@
       ch3: [e.shadow.lede, ...insertAt(e.shadow.body, 1, e.shadow.quote), e.advice.hook],
       ch4: [e.advice.lede, ...e.advice.body],
       hidden,
-      firstLine: e.firstLine || "", // (17-3) 장 첫 쪽 맨 앞 한 문장. 빈칸이면 그리지 않는다
+      firstLine: firstOf(C, room, ei), // (17-3) 장 첫 쪽 맨 앞 한 문장. 빈칸이면 그리지 않는다 (18-6부터 공개 맛보기 파일에서)
       heartLine: e.heartLine || "", // (17-3) 장 가운데 한 장면 = identity 뒤·shadow 앞(Ⅰ장 끝, 룬은 "지금" 묶음 끝. app.js가 aside.book-heart로 그림)
     };
     if (room === "sibyl") out.topics = Object.assign({}, e.topics);
@@ -154,6 +165,104 @@
   }
   const yeonChars = (ch) => ch.pages.reduce((n, p) => n + textLen(p.text) + (p.bands || []).reduce((s, x) => s + textLen(x.text), 0), 0);
 
+  // ═════════ (18단계 18-2) 새 장 「겹치는 곳, 갈리는 곳」 — 고르기는 모두 이 브라우저 안에서. 서버로는 { file: "cross", pass }만 간다 ═════════
+  // 입력 list = 마친 방만, 장 순서대로 [{ room, arch }] (방별 원형 state.visits[room].archetype 하나만. 세부 번호·나이·성별·생년월일은 쓰지 않는다)
+  // core = arch-core.js(ARCH·AXES·PROFILE). 브라우저는 app.js가 arch-core.js를 받은 뒤에만 부른다(첫 화면 요청 0)
+  const coreOf = () => (typeof module === "object" && module.exports ? require("./arch-core.js") : typeof window !== "undefined" ? window.ArchCore : null);
+  const CROSS_SHAPES = ["one", "two", "trunk", "many"]; // 한 목소리 · 두 갈래 · 굵은 줄기 · 여러 갈래 (18-2 모양 표 순서)
+  // 돌려주는 값: { n, main(M), sub(S), k, k2, shape, common(C 축), split(D 축|null), high:[방], low:[방], odd(O 방|null), other(X 원형|null) }
+  function crossPick(list, core) {
+    const K = core || coreOf();
+    const R = (list || []).filter((x) => x && K.ARCH.includes(x.arch));
+    const n = R.length;
+    if (n < 2) return null; // 열림 조건: 마친 방 2개 이상(확인 119)
+    const tally = {};
+    R.forEach((x, i) => {
+      const t = (tally[x.arch] = tally[x.arch] || { count: 0, first: i });
+      t.count += 1;
+    });
+    const ranked = Object.entries(tally).sort((x, y) => y[1].count - x[1].count || x[1].first - y[1].first); // 횟수 순, 동점이면 앞선 장 (archPair와 같음)
+    const M = ranked[0][0], S = ranked[1] ? ranked[1][0] : M;
+    const k = ranked[0][1].count, k2 = ranked[1] ? ranked[1][1].count : 0;
+    const shape = k >= 4 || k === n ? "one" : k === k2 && k2 >= 2 ? "two" : k >= 3 || (k === 2 && n <= 4) ? "trunk" : "many";
+    const P = K.PROFILE;
+    const vals = K.AXES.map((_, a) => R.map((x) => P[x.arch][a]));
+    const sum = vals.map((v) => v.reduce((s, x) => s + x, 0)); // 평균 비교 = 합 비교 (같은 n)
+    const span = vals.map((v) => Math.max(...v) - Math.min(...v));
+    // C: 평균 최대 → 폭 작은 축 → AXES 순서
+    let C = 0;
+    for (let a = 1; a < K.AXES.length; a++) if (sum[a] > sum[C] || (sum[a] === sum[C] && span[a] < span[C])) C = a;
+    // D: C를 뺀 축 가운데 폭 최대(2 이상만) → AXES 순서
+    let D = -1;
+    for (let a = 0; a < K.AXES.length; a++) if (a !== C && span[a] >= 2 && (D < 0 || span[a] > span[D])) D = a;
+    const hi = D < 0 ? 0 : Math.max(...vals[D]), lo = D < 0 ? 0 : Math.min(...vals[D]);
+    const high = D < 0 ? [] : R.filter((x, i) => vals[D][i] === hi).map((x) => x.room); // D가 가장 높은 방들 {high}
+    const low = D < 0 ? [] : R.filter((x, i) => vals[D][i] === lo).map((x) => x.room); // 가장 낮은 방들 {low}
+    // O: 원형이 M이 아닌 방 가운데 프로필이 M과 가장 먼 방(다섯 축 차의 절댓값 합), 동점이면 앞선 장
+    let odd = null, best = -1;
+    R.forEach((x) => {
+      if (x.arch === M) return;
+      const d = P[x.arch].reduce((s, v, a) => s + Math.abs(v - P[M][a]), 0);
+      if (d > best) [best, odd] = [d, x];
+    });
+    return { n, main: M, sub: S, k, k2, shape, common: K.AXES[C], split: D < 0 ? null : K.AXES[D], high, low, odd: odd ? odd.room : null, other: odd ? odd.arch : null };
+  }
+  // 쪽 목록 (18-2 쪽 구성 표·18-3 빠진 경우 표). key = 쪽 칸 이름(data.js book.cross.pages 키와 같음), text = 원본 항목 하나 통째로(자리 값은 app.js가 채움)
+  //   vars = 이 쪽 자리 값에 넣을 코드: arch(M)·sub(S)·other(X)·axis(2쪽 C / 3쪽 D)·room(O)·high·low(방 목록)·n
+  //   note "more" = 방 2~6개일 때 장 끝 한 줄(UI 문구)
+  function crossChapter(C, pick) {
+    const X = C.cross;
+    const p = pick;
+    const vars = { arch: p.main, sub: p.sub, other: p.other, room: p.odd, high: p.high, low: p.low, n: p.n };
+    const pages = [
+      { key: "shape", text: X.shape[p.shape][p.main], vars: Object.assign({}, vars, { axis: p.common }) },
+      { key: "common", text: X.common[p.common][p.main], vars: Object.assign({}, vars, { axis: p.common }) },
+      p.split ? { key: "split", text: X.split[p.split], vars: Object.assign({}, vars, { axis: p.split }) } : { key: "even", text: X.even[p.main], vars: Object.assign({}, vars, { axis: p.common }) },
+    ];
+    if (p.odd) pages.push({ key: "lens", text: X.lens[p.odd], vars: Object.assign({}, vars, { axis: p.common }) }, { key: "pair", text: X.pair[`${p.main}-${p.other}`], vars: Object.assign({}, vars, { axis: p.common }) });
+    else pages.push({ key: "same", text: X.same[p.main], vars: Object.assign({}, vars, { axis: p.common }) });
+    pages.push({ key: "close", text: X.close[p.main], vars: Object.assign({}, vars, { axis: p.common }), note: p.n < 7 ? "more" : null });
+    return { id: "cross", variant: (p.split ? "split" : "even") + "-" + (p.odd ? "odd" : "same"), shape: p.shape, pages };
+  }
+  // 분량: crossTable(BOOK_CROSS) = 칸마다 글자 수(make-volume → data-volume.js의 cross), crossVolume(표, pick) = 그 사람이 받는 판의 글자 수
+  //   (원본 글자 그대로 센다 — 자리 값은 원본에 적힌 꼴 그대로. crossChars(crossChapter 결과)와 같아야 한다, make-volume·cross.test.js 대조)
+  function crossTable(X) {
+    const m = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, textLen(v)]));
+    const m2 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, m(v)]));
+    return { shape: m2(X.shape), common: m2(X.common), split: m(X.split), even: m(X.even), lens: m(X.lens), pair: m(X.pair), same: m(X.same), close: m(X.close) };
+  }
+  function crossVolume(V, p) {
+    if (!V || !p) return 0;
+    return V.shape[p.shape][p.main] + V.common[p.common][p.main] + (p.split ? V.split[p.split] : V.even[p.main]) + (p.odd ? V.lens[p.odd] + V.pair[`${p.main}-${p.other}`] : V.same[p.main]) + V.close[p.main];
+  }
+  const crossChars = (ch) => ch.pages.reduce((n, pg) => n + textLen(pg.text), 0);
+
+  // ═════════ (18단계 18-8, 확인 124) 관심사 순서 — 입력은 이미 있는 주제 값 둘뿐(시빌라 visits.sibyl.topic, 룬 visits.rune.topic). 브라우저 안에서만 ═════════
+  // 관심사 4개: love 사랑 · relation 관계 · work 일 · self 나 (룬 money는 "일", 재물을 앞세우지 않는다)
+  const INTEREST_OF = {
+    sibyl: { love: "love", relation: "relation", work: "work", exam: "work", self: "self" },
+    rune: { love: "love", work: "work", money: "work", me: "self" },
+  };
+  const PART2_DEFAULT = ["flow", "yeon", "match", "deep"]; // 새 장(cross) 뒤 제2부 지금 순서
+  const PART2_BY = { love: ["yeon", "match", "flow", "deep"], relation: ["match", "yeon", "flow", "deep"], work: ["flow", "deep", "yeon", "match"], self: ["deep", "flow", "yeon", "match"] };
+  const FLOW_AREAS = { none: ["work", "relation", "learn", "move"], love: ["relation", "work", "learn", "move"], relation: ["relation", "work", "learn", "move"], work: ["work", "learn", "relation", "move"], self: ["work", "relation", "learn", "move"] };
+  // topics = { sibyl: 주제|null, rune: 주제|null } → { first: {room, interest}|null, second, part2: [제2부 4장, 새 장 뒤], areas: 시기별 흐름 영역 순서, changed: 지금 순서와 다른가 }
+  //   우선순위: 시빌라(마지막 방의 오늘의 질문) → 룬. 둘째 관심사 줄의 맨 앞 장이 첫째 줄 앞 두 칸 안에 없으면 그 장을 둘째 칸으로
+  function interestOrder(topics) {
+    const t = topics || {};
+    const got = ["sibyl", "rune"].map((room) => ({ room, interest: (INTEREST_OF[room] || {})[t[room]] || null })).filter((x) => x.interest);
+    const first = got[0] || null;
+    const second = got[1] || null;
+    let part2 = first ? PART2_BY[first.interest].slice() : PART2_DEFAULT.slice();
+    if (first && second && second.interest !== first.interest) {
+      const lead = PART2_BY[second.interest][0];
+      if (part2.indexOf(lead) > 1) part2 = [part2[0], lead, ...part2.slice(1).filter((x) => x !== lead)];
+    }
+    return { first, second, part2, areas: FLOW_AREAS[first ? first.interest : "none"].slice(), changed: part2.join() !== PART2_DEFAULT.join() };
+  }
+  // 책 전체 장 순서(목차·미리보기 목차·"받는 것"·장 끝 "다음 장"이 같이 쓴다): 여는 글 → 방 7장(고정) → 새 장(제2부 맨 앞, 고정) → 관심사 순서 4장 → 닫는 글
+  const bookOrder = (rooms, topics) => ["open", ...rooms, "cross", ...interestOrder(topics).part2, "close"];
+
   // ── 장 하나씩 (브라우저는 연 장만 조립한다) ──
   const openChapter = (C, me) => ({ id: "open", paragraphs: paras(idx(C, "open")[me].body) });
   const deepChapter = (C, me) => {
@@ -225,5 +334,5 @@
     return { chapters, card, codes };
   }
 
-  return { archPair, ageOf, bandOf, ELEMENT_OF_STEM, yeonChapter, yeonTable, yeonVolume, yeonChars, sajuStem, sajuGroup, contentFrom, hiddenEntry, fullRoom, pairCode, timelineStages, openChapter, deepChapter, closeChapter, timelineChapter, mapChapter, matchChapter, buildReport, ARCH };
+  return { archPair, ageOf, bandOf, ELEMENT_OF_STEM, yeonChapter, yeonTable, yeonVolume, yeonChars, CROSS_SHAPES, crossPick, crossChapter, crossTable, crossVolume, crossChars, INTEREST_OF, interestOrder, bookOrder, firstLineOf, sajuStem, sajuGroup, contentFrom, hiddenEntry, fullRoom, pairCode, timelineStages, openChapter, deepChapter, closeChapter, timelineChapter, mapChapter, matchChapter, buildReport, ARCH };
 });

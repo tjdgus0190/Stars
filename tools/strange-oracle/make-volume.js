@@ -4,6 +4,10 @@
 // 세는 방식은 app.js renderReport(책)와 같다: 여는 글 + 방마다(Ⅰ장 공개 핵심 풀이 + ch1Rest + Ⅱ~Ⅳ + 숨은 장 본문) + 시기별 흐름·궁합·원형 심층 + 닫는 글.
 // 룬·시빌라 "고른 주제" 단락은 빼고 센다(구매 직후와 재열람이 같은 값, spec 11-6 F3). 숨은 장 제목·구간 표지·관계 이름표도 세지 않는다(app.js SKIP_KEYS).
 // (17단계) 방 장에 firstLine·heartLine을 함께 센다. 인연의 장은 V.yeon(칸마다 글자 수, book.js yeonTable)이고, 그 사람이 받는 판의 값은 book.js yeonVolume이 고른다.
+// (18단계 18-6, 결정 117) 방 장 첫 줄(firstLine)은 공개 맛보기(data-book-sample.js)로 옮겼으므로 "받는 것" 분량에서 뺀다 — 이 도구는 data-book-sample.js를 읽지 않는다.
+//   미리보기 "이 장의 나머지 약 {n}자"와 결제 전 화면 "받는 것"은 같은 V.room 값(첫 줄을 뺀 값)을 쓴다.
+// (18단계 18-9) 새 장 「겹치는 곳, 갈리는 곳」은 V.cross(칸마다 글자 수, book.js crossTable)이고, 그 사람이 받는 판의 값은 book.js crossVolume이 고른다.
+//   V.avg.cross = 기본 경로(1·2·3·4·5·6쪽) 칸마다 평균의 합 — 마친 방이 1개일 때 "받는 것"에 쓴다.
 // 생성 뒤 무작위 코드 조합으로 "표 합계 = book.js buildReport 실제 글자 수"를 대조한다(불일치면 exit 1). (14단계) 원본 = data-book-free.js + api/_paid/book/
 "use strict";
 const fs = require("fs");
@@ -73,7 +77,7 @@ function roomOnly(room, val) {
   const fr = rep.chapters.find((x) => x.id === "rooms").rooms[0];
   return bookCh1Len(room, c, fr.ch1Rest) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs, fr.firstLine, fr.heartLine]);
 }
-const V = { room: {}, rune: {}, open: {}, close: {}, deep: {}, timeline: {}, map: {}, pair: {}, rel: {}, avg: {}, yeon: Book.yeonTable(BW.BOOK_YEON) };
+const V = { room: {}, rune: {}, open: {}, close: {}, deep: {}, timeline: {}, map: {}, pair: {}, rel: {}, avg: {}, yeon: Book.yeonTable(BW.BOOK_YEON), cross: Book.crossTable(BW.BOOK_CROSS) };
 // 만신: 일간 10 × 우세 묶음 5 = 50칸, 칸 번호 = 일간*5 + 묶음 (app.js chapterChars와 같은 식). 대표 코드 = 그 일간·묶음의 첫 코드
 const sajuCode = (s, g) => s * 500 + g * 2 + 1;
 V.room.saju = [];
@@ -125,6 +129,11 @@ V.avg.close = mean(Object.values(V.close));
 V.avg.deep = mean(Object.values(V.deep));
 V.avg.map = mean(Object.values(V.map));
 V.avg.timeline = mean([].concat(...Object.values(V.timeline)));
+{
+  const X = V.cross;
+  const all2 = (o) => [].concat(...Object.values(o).map((x) => Object.values(x)));
+  V.avg.cross = mean(all2(X.shape)) + mean(all2(X.common)) + mean(Object.values(X.split)) + mean(Object.values(X.lens)) + mean(Object.values(X.pair)) + mean(Object.values(X.close));
+}
 
 // ── 표로 계산 (app.js bookVolume과 같은 식)
 function fromTable(c) {
@@ -166,6 +175,18 @@ for (let t = 0; t < 3000; t++) {
   if (Book.yeonVolume(V.yeon, ctx) !== Book.yeonChars(Book.yeonChapter(CONTENT, ctx))) yeonBad++;
 }
 bad += yeonBad;
+// (18단계) 새 장: 방 2~7개 무작위 조합(대체 경로 포함)마다 표 값 = 실제 조립 글자 수
+const AK = require(path.join(SRC, "arch-core.js"));
+let crossBad = 0;
+for (let t = 0; t < 3000; t++) {
+  const n = 2 + rnd(6);
+  const same = t % 7 === 0 ? ARCH[rnd(8)] : null; // 가끔 모두 같은 원형(한결같은 목소리·고른 결 경로)
+  const list = ROOMS.slice(0, n).map((room) => ({ room, arch: same || ARCH[rnd(8)] }));
+  const pick = Book.crossPick(list, AK);
+  checked++;
+  if (Book.crossVolume(V.cross, pick) !== Book.crossChars(Book.crossChapter(CONTENT, pick))) crossBad++;
+}
+bad += crossBad;
 const out = `// 책 분량 표 — 숫자(글자 수, 공백 포함)만. 문구·로직 없음. 손으로 고치지 않는다.
 // 자동 생성: node tools/strange-oracle/make-volume.js (유료 문구를 고친 뒤 다시 실행). spec 11-6 F3 "원본 하나".
 // 룬·시빌라 "고른 주제" 단락은 빼고 센 값이다. app.js bookVolume()만 이 표를 읽는다.

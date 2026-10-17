@@ -5425,9 +5425,9 @@
  {
   "id": "firstLine.saju.gap",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "gap",
    "firstLine"
   ],
@@ -5444,9 +5444,9 @@
  {
   "id": "firstLine.saju.eul",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "eul",
    "firstLine"
   ],
@@ -5463,9 +5463,9 @@
  {
   "id": "firstLine.saju.byeong",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "byeong",
    "firstLine"
   ],
@@ -5482,9 +5482,9 @@
  {
   "id": "firstLine.saju.jeong",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "jeong",
    "firstLine"
   ],
@@ -5501,9 +5501,9 @@
  {
   "id": "firstLine.saju.mu",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "mu",
    "firstLine"
   ],
@@ -5520,9 +5520,9 @@
  {
   "id": "firstLine.saju.gi",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "gi",
    "firstLine"
   ],
@@ -5539,9 +5539,9 @@
  {
   "id": "firstLine.saju.gyeong",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "gyeong",
    "firstLine"
   ],
@@ -5558,9 +5558,9 @@
  {
   "id": "firstLine.saju.sin",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "sin",
    "firstLine"
   ],
@@ -5577,9 +5577,9 @@
  {
   "id": "firstLine.saju.im",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "im",
    "firstLine"
   ],
@@ -5596,9 +5596,9 @@
  {
   "id": "firstLine.saju.gye",
   "batch": "first-saju-1",
-  "file": "api/_paid/book/book-saju.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "saju",
    "gye",
    "firstLine"
   ],
@@ -5615,9 +5615,9 @@
  {
   "id": "firstLine.ogham.beith",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "beith",
    "firstLine"
   ],
@@ -5634,9 +5634,9 @@
  {
   "id": "firstLine.ogham.luis",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "luis",
    "firstLine"
   ],
@@ -5653,9 +5653,9 @@
  {
   "id": "firstLine.ogham.fearn",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "fearn",
    "firstLine"
   ],
@@ -5672,9 +5672,9 @@
  {
   "id": "firstLine.ogham.sail",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "sail",
    "firstLine"
   ],
@@ -5691,9 +5691,9 @@
  {
   "id": "firstLine.ogham.nion",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "nion",
    "firstLine"
   ],
@@ -5710,9 +5710,9 @@
  {
   "id": "firstLine.ogham.uath",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "uath",
    "firstLine"
   ],
@@ -5729,9 +5729,9 @@
  {
   "id": "firstLine.ogham.dair",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "dair",
    "firstLine"
   ],
@@ -5748,9 +5748,9 @@
  {
   "id": "firstLine.ogham.tinne",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "tinne",
    "firstLine"
   ],
@@ -5767,9 +5767,9 @@
  {
   "id": "firstLine.ogham.coll",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "coll",
    "firstLine"
   ],
@@ -5786,9 +5786,9 @@
  {
   "id": "firstLine.ogham.ceirt",
   "batch": "first-ogham-1",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "ceirt",
    "firstLine"
   ],
@@ -5805,9 +5805,9 @@
  {
   "id": "firstLine.ogham.muin",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "muin",
    "firstLine"
   ],
@@ -5824,9 +5824,9 @@
  {
   "id": "firstLine.ogham.gort",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "gort",
    "firstLine"
   ],
@@ -5843,9 +5843,9 @@
  {
   "id": "firstLine.ogham.ngetal",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "ngetal",
    "firstLine"
   ],
@@ -5862,9 +5862,9 @@
  {
   "id": "firstLine.ogham.straif",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "straif",
    "firstLine"
   ],
@@ -5881,9 +5881,9 @@
  {
   "id": "firstLine.ogham.ruis",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "ruis",
    "firstLine"
   ],
@@ -5900,9 +5900,9 @@
  {
   "id": "firstLine.ogham.ailm",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "ailm",
    "firstLine"
   ],
@@ -5919,9 +5919,9 @@
  {
   "id": "firstLine.ogham.onn",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "onn",
    "firstLine"
   ],
@@ -5938,9 +5938,9 @@
  {
   "id": "firstLine.ogham.ur",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "ur",
    "firstLine"
   ],
@@ -5957,9 +5957,9 @@
  {
   "id": "firstLine.ogham.edad",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "edad",
    "firstLine"
   ],
@@ -5976,9 +5976,9 @@
  {
   "id": "firstLine.ogham.idad",
   "batch": "first-ogham-2",
-  "file": "api/_paid/book/book-ogham.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "ogham",
    "idad",
    "firstLine"
   ],
@@ -5995,9 +5995,9 @@
  {
   "id": "firstLine.star.ashwini",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "ashwini",
    "firstLine"
   ],
@@ -6014,9 +6014,9 @@
  {
   "id": "firstLine.star.bharani",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "bharani",
    "firstLine"
   ],
@@ -6033,9 +6033,9 @@
  {
   "id": "firstLine.star.krittika",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "krittika",
    "firstLine"
   ],
@@ -6052,9 +6052,9 @@
  {
   "id": "firstLine.star.rohini",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "rohini",
    "firstLine"
   ],
@@ -6071,9 +6071,9 @@
  {
   "id": "firstLine.star.mrigashira",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "mrigashira",
    "firstLine"
   ],
@@ -6090,9 +6090,9 @@
  {
   "id": "firstLine.star.ardra",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "ardra",
    "firstLine"
   ],
@@ -6109,9 +6109,9 @@
  {
   "id": "firstLine.star.punarvasu",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "punarvasu",
    "firstLine"
   ],
@@ -6128,9 +6128,9 @@
  {
   "id": "firstLine.star.pushya",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "pushya",
    "firstLine"
   ],
@@ -6147,9 +6147,9 @@
  {
   "id": "firstLine.star.ashlesha",
   "batch": "first-star-1",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "ashlesha",
    "firstLine"
   ],
@@ -6166,9 +6166,9 @@
  {
   "id": "firstLine.star.magha",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "magha",
    "firstLine"
   ],
@@ -6185,9 +6185,9 @@
  {
   "id": "firstLine.star.purva-phalguni",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "purva-phalguni",
    "firstLine"
   ],
@@ -6204,9 +6204,9 @@
  {
   "id": "firstLine.star.uttara-phalguni",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "uttara-phalguni",
    "firstLine"
   ],
@@ -6223,9 +6223,9 @@
  {
   "id": "firstLine.star.hasta",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "hasta",
    "firstLine"
   ],
@@ -6242,9 +6242,9 @@
  {
   "id": "firstLine.star.chitra",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "chitra",
    "firstLine"
   ],
@@ -6261,9 +6261,9 @@
  {
   "id": "firstLine.star.swati",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "swati",
    "firstLine"
   ],
@@ -6280,9 +6280,9 @@
  {
   "id": "firstLine.star.vishakha",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "vishakha",
    "firstLine"
   ],
@@ -6299,9 +6299,9 @@
  {
   "id": "firstLine.star.anuradha",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "anuradha",
    "firstLine"
   ],
@@ -6318,9 +6318,9 @@
  {
   "id": "firstLine.star.jyeshtha",
   "batch": "first-star-2",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "jyeshtha",
    "firstLine"
   ],
@@ -6337,9 +6337,9 @@
  {
   "id": "firstLine.star.mula",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "mula",
    "firstLine"
   ],
@@ -6356,9 +6356,9 @@
  {
   "id": "firstLine.star.purva-ashadha",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "purva-ashadha",
    "firstLine"
   ],
@@ -6375,9 +6375,9 @@
  {
   "id": "firstLine.star.uttara-ashadha",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "uttara-ashadha",
    "firstLine"
   ],
@@ -6394,9 +6394,9 @@
  {
   "id": "firstLine.star.shravana",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "shravana",
    "firstLine"
   ],
@@ -6413,9 +6413,9 @@
  {
   "id": "firstLine.star.dhanishta",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "dhanishta",
    "firstLine"
   ],
@@ -6432,9 +6432,9 @@
  {
   "id": "firstLine.star.shatabhisha",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "shatabhisha",
    "firstLine"
   ],
@@ -6451,9 +6451,9 @@
  {
   "id": "firstLine.star.purva-bhadrapada",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "purva-bhadrapada",
    "firstLine"
   ],
@@ -6470,9 +6470,9 @@
  {
   "id": "firstLine.star.uttara-bhadrapada",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "uttara-bhadrapada",
    "firstLine"
   ],
@@ -6489,9 +6489,9 @@
  {
   "id": "firstLine.star.revati",
   "batch": "first-star-3",
-  "file": "api/_paid/book/book-star.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "star",
    "revati",
    "firstLine"
   ],
@@ -6508,9 +6508,9 @@
  {
   "id": "firstLine.decan.decan-1",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-1",
    "firstLine"
   ],
@@ -6527,9 +6527,9 @@
  {
   "id": "firstLine.decan.decan-2",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-2",
    "firstLine"
   ],
@@ -6546,9 +6546,9 @@
  {
   "id": "firstLine.decan.decan-3",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-3",
    "firstLine"
   ],
@@ -6565,9 +6565,9 @@
  {
   "id": "firstLine.decan.decan-4",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-4",
    "firstLine"
   ],
@@ -6584,9 +6584,9 @@
  {
   "id": "firstLine.decan.decan-5",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-5",
    "firstLine"
   ],
@@ -6603,9 +6603,9 @@
  {
   "id": "firstLine.decan.decan-6",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-6",
    "firstLine"
   ],
@@ -6622,9 +6622,9 @@
  {
   "id": "firstLine.decan.decan-7",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-7",
    "firstLine"
   ],
@@ -6641,9 +6641,9 @@
  {
   "id": "firstLine.decan.decan-8",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-8",
    "firstLine"
   ],
@@ -6660,9 +6660,9 @@
  {
   "id": "firstLine.decan.decan-9",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-9",
    "firstLine"
   ],
@@ -6679,9 +6679,9 @@
  {
   "id": "firstLine.decan.decan-10",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-10",
    "firstLine"
   ],
@@ -6698,9 +6698,9 @@
  {
   "id": "firstLine.decan.decan-11",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-11",
    "firstLine"
   ],
@@ -6717,9 +6717,9 @@
  {
   "id": "firstLine.decan.decan-12",
   "batch": "first-decan-1",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-12",
    "firstLine"
   ],
@@ -6736,9 +6736,9 @@
  {
   "id": "firstLine.decan.decan-13",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-13",
    "firstLine"
   ],
@@ -6755,9 +6755,9 @@
  {
   "id": "firstLine.decan.decan-14",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-14",
    "firstLine"
   ],
@@ -6774,9 +6774,9 @@
  {
   "id": "firstLine.decan.decan-15",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-15",
    "firstLine"
   ],
@@ -6793,9 +6793,9 @@
  {
   "id": "firstLine.decan.decan-16",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-16",
    "firstLine"
   ],
@@ -6812,9 +6812,9 @@
  {
   "id": "firstLine.decan.decan-17",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-17",
    "firstLine"
   ],
@@ -6831,9 +6831,9 @@
  {
   "id": "firstLine.decan.decan-18",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-18",
    "firstLine"
   ],
@@ -6850,9 +6850,9 @@
  {
   "id": "firstLine.decan.decan-19",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-19",
    "firstLine"
   ],
@@ -6869,9 +6869,9 @@
  {
   "id": "firstLine.decan.decan-20",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-20",
    "firstLine"
   ],
@@ -6888,9 +6888,9 @@
  {
   "id": "firstLine.decan.decan-21",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-21",
    "firstLine"
   ],
@@ -6907,9 +6907,9 @@
  {
   "id": "firstLine.decan.decan-22",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-22",
    "firstLine"
   ],
@@ -6926,9 +6926,9 @@
  {
   "id": "firstLine.decan.decan-23",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-23",
    "firstLine"
   ],
@@ -6945,9 +6945,9 @@
  {
   "id": "firstLine.decan.decan-24",
   "batch": "first-decan-2",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-24",
    "firstLine"
   ],
@@ -6964,9 +6964,9 @@
  {
   "id": "firstLine.decan.decan-25",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-25",
    "firstLine"
   ],
@@ -6983,9 +6983,9 @@
  {
   "id": "firstLine.decan.decan-26",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-26",
    "firstLine"
   ],
@@ -7002,9 +7002,9 @@
  {
   "id": "firstLine.decan.decan-27",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-27",
    "firstLine"
   ],
@@ -7021,9 +7021,9 @@
  {
   "id": "firstLine.decan.decan-28",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-28",
    "firstLine"
   ],
@@ -7040,9 +7040,9 @@
  {
   "id": "firstLine.decan.decan-29",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-29",
    "firstLine"
   ],
@@ -7059,9 +7059,9 @@
  {
   "id": "firstLine.decan.decan-30",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-30",
    "firstLine"
   ],
@@ -7078,9 +7078,9 @@
  {
   "id": "firstLine.decan.decan-31",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-31",
    "firstLine"
   ],
@@ -7097,9 +7097,9 @@
  {
   "id": "firstLine.decan.decan-32",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-32",
    "firstLine"
   ],
@@ -7116,9 +7116,9 @@
  {
   "id": "firstLine.decan.decan-33",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-33",
    "firstLine"
   ],
@@ -7135,9 +7135,9 @@
  {
   "id": "firstLine.decan.decan-34",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-34",
    "firstLine"
   ],
@@ -7154,9 +7154,9 @@
  {
   "id": "firstLine.decan.decan-35",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-35",
    "firstLine"
   ],
@@ -7173,9 +7173,9 @@
  {
   "id": "firstLine.decan.decan-36",
   "batch": "first-decan-3",
-  "file": "api/_paid/book/book-decan.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "decan",
    "decan-36",
    "firstLine"
   ],
@@ -7192,9 +7192,9 @@
  {
   "id": "firstLine.tzolkin.imix",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "imix",
    "firstLine"
   ],
@@ -7211,9 +7211,9 @@
  {
   "id": "firstLine.tzolkin.ik",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "ik",
    "firstLine"
   ],
@@ -7230,9 +7230,9 @@
  {
   "id": "firstLine.tzolkin.akbal",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "akbal",
    "firstLine"
   ],
@@ -7249,9 +7249,9 @@
  {
   "id": "firstLine.tzolkin.kan",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "kan",
    "firstLine"
   ],
@@ -7268,9 +7268,9 @@
  {
   "id": "firstLine.tzolkin.chikchan",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "chikchan",
    "firstLine"
   ],
@@ -7287,9 +7287,9 @@
  {
   "id": "firstLine.tzolkin.kimi",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "kimi",
    "firstLine"
   ],
@@ -7306,9 +7306,9 @@
  {
   "id": "firstLine.tzolkin.manik",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "manik",
    "firstLine"
   ],
@@ -7325,9 +7325,9 @@
  {
   "id": "firstLine.tzolkin.lamat",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "lamat",
    "firstLine"
   ],
@@ -7344,9 +7344,9 @@
  {
   "id": "firstLine.tzolkin.muluk",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "muluk",
    "firstLine"
   ],
@@ -7363,9 +7363,9 @@
  {
   "id": "firstLine.tzolkin.ok",
   "batch": "first-tzolkin-1",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "ok",
    "firstLine"
   ],
@@ -7382,9 +7382,9 @@
  {
   "id": "firstLine.tzolkin.chuwen",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "chuwen",
    "firstLine"
   ],
@@ -7401,9 +7401,9 @@
  {
   "id": "firstLine.tzolkin.eb",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "eb",
    "firstLine"
   ],
@@ -7420,9 +7420,9 @@
  {
   "id": "firstLine.tzolkin.ben",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "ben",
    "firstLine"
   ],
@@ -7439,9 +7439,9 @@
  {
   "id": "firstLine.tzolkin.ix",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "ix",
    "firstLine"
   ],
@@ -7458,9 +7458,9 @@
  {
   "id": "firstLine.tzolkin.men",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "men",
    "firstLine"
   ],
@@ -7477,9 +7477,9 @@
  {
   "id": "firstLine.tzolkin.kib",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "kib",
    "firstLine"
   ],
@@ -7496,9 +7496,9 @@
  {
   "id": "firstLine.tzolkin.kaban",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "kaban",
    "firstLine"
   ],
@@ -7515,9 +7515,9 @@
  {
   "id": "firstLine.tzolkin.etznab",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "etznab",
    "firstLine"
   ],
@@ -7534,9 +7534,9 @@
  {
   "id": "firstLine.tzolkin.kawak",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "kawak",
    "firstLine"
   ],
@@ -7553,9 +7553,9 @@
  {
   "id": "firstLine.tzolkin.ajaw",
   "batch": "first-tzolkin-2",
-  "file": "api/_paid/book/book-tzolkin.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "tzolkin",
    "ajaw",
    "firstLine"
   ],
@@ -7572,9 +7572,9 @@
  {
   "id": "firstLine.rune.fehu",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "fehu",
    "firstLine"
   ],
@@ -7591,9 +7591,9 @@
  {
   "id": "firstLine.rune.uruz",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "uruz",
    "firstLine"
   ],
@@ -7610,9 +7610,9 @@
  {
   "id": "firstLine.rune.thurisaz",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "thurisaz",
    "firstLine"
   ],
@@ -7629,9 +7629,9 @@
  {
   "id": "firstLine.rune.ansuz",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "ansuz",
    "firstLine"
   ],
@@ -7648,9 +7648,9 @@
  {
   "id": "firstLine.rune.raidho",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "raidho",
    "firstLine"
   ],
@@ -7667,9 +7667,9 @@
  {
   "id": "firstLine.rune.kenaz",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "kenaz",
    "firstLine"
   ],
@@ -7686,9 +7686,9 @@
  {
   "id": "firstLine.rune.gebo",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "gebo",
    "firstLine"
   ],
@@ -7705,9 +7705,9 @@
  {
   "id": "firstLine.rune.wunjo",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "wunjo",
    "firstLine"
   ],
@@ -7724,9 +7724,9 @@
  {
   "id": "firstLine.rune.hagalaz",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "hagalaz",
    "firstLine"
   ],
@@ -7743,9 +7743,9 @@
  {
   "id": "firstLine.rune.nauthiz",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "nauthiz",
    "firstLine"
   ],
@@ -7762,9 +7762,9 @@
  {
   "id": "firstLine.rune.isa",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "isa",
    "firstLine"
   ],
@@ -7781,9 +7781,9 @@
  {
   "id": "firstLine.rune.jera",
   "batch": "first-rune-1",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "jera",
    "firstLine"
   ],
@@ -7800,9 +7800,9 @@
  {
   "id": "firstLine.rune.eihwaz",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "eihwaz",
    "firstLine"
   ],
@@ -7819,9 +7819,9 @@
  {
   "id": "firstLine.rune.perthro",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "perthro",
    "firstLine"
   ],
@@ -7838,9 +7838,9 @@
  {
   "id": "firstLine.rune.algiz",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "algiz",
    "firstLine"
   ],
@@ -7857,9 +7857,9 @@
  {
   "id": "firstLine.rune.sowilo",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "sowilo",
    "firstLine"
   ],
@@ -7876,9 +7876,9 @@
  {
   "id": "firstLine.rune.tiwaz",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "tiwaz",
    "firstLine"
   ],
@@ -7895,9 +7895,9 @@
  {
   "id": "firstLine.rune.berkano",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "berkano",
    "firstLine"
   ],
@@ -7914,9 +7914,9 @@
  {
   "id": "firstLine.rune.ehwaz",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "ehwaz",
    "firstLine"
   ],
@@ -7933,9 +7933,9 @@
  {
   "id": "firstLine.rune.mannaz",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "mannaz",
    "firstLine"
   ],
@@ -7952,9 +7952,9 @@
  {
   "id": "firstLine.rune.laguz",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "laguz",
    "firstLine"
   ],
@@ -7971,9 +7971,9 @@
  {
   "id": "firstLine.rune.ingwaz",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "ingwaz",
    "firstLine"
   ],
@@ -7990,9 +7990,9 @@
  {
   "id": "firstLine.rune.dagaz",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "dagaz",
    "firstLine"
   ],
@@ -8009,9 +8009,9 @@
  {
   "id": "firstLine.rune.othala",
   "batch": "first-rune-2",
-  "file": "api/_paid/book/book-rune.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "rune",
    "othala",
    "firstLine"
   ],
@@ -8028,9 +8028,9 @@
  {
   "id": "firstLine.sibyl.sors-1",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-1",
    "firstLine"
   ],
@@ -8047,9 +8047,9 @@
  {
   "id": "firstLine.sibyl.sors-2",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-2",
    "firstLine"
   ],
@@ -8066,9 +8066,9 @@
  {
   "id": "firstLine.sibyl.sors-3",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-3",
    "firstLine"
   ],
@@ -8085,9 +8085,9 @@
  {
   "id": "firstLine.sibyl.sors-4",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-4",
    "firstLine"
   ],
@@ -8104,9 +8104,9 @@
  {
   "id": "firstLine.sibyl.sors-5",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-5",
    "firstLine"
   ],
@@ -8123,9 +8123,9 @@
  {
   "id": "firstLine.sibyl.sors-6",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-6",
    "firstLine"
   ],
@@ -8142,9 +8142,9 @@
  {
   "id": "firstLine.sibyl.sors-7",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-7",
    "firstLine"
   ],
@@ -8161,9 +8161,9 @@
  {
   "id": "firstLine.sibyl.sors-8",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-8",
    "firstLine"
   ],
@@ -8180,9 +8180,9 @@
  {
   "id": "firstLine.sibyl.sors-9",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-9",
    "firstLine"
   ],
@@ -8199,9 +8199,9 @@
  {
   "id": "firstLine.sibyl.sors-10",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-10",
    "firstLine"
   ],
@@ -8218,9 +8218,9 @@
  {
   "id": "firstLine.sibyl.sors-11",
   "batch": "first-sibyl-1",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-11",
    "firstLine"
   ],
@@ -8237,9 +8237,9 @@
  {
   "id": "firstLine.sibyl.sors-12",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-12",
    "firstLine"
   ],
@@ -8256,9 +8256,9 @@
  {
   "id": "firstLine.sibyl.sors-13",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-13",
    "firstLine"
   ],
@@ -8275,9 +8275,9 @@
  {
   "id": "firstLine.sibyl.sors-14",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-14",
    "firstLine"
   ],
@@ -8294,9 +8294,9 @@
  {
   "id": "firstLine.sibyl.sors-15",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-15",
    "firstLine"
   ],
@@ -8313,9 +8313,9 @@
  {
   "id": "firstLine.sibyl.sors-16",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-16",
    "firstLine"
   ],
@@ -8332,9 +8332,9 @@
  {
   "id": "firstLine.sibyl.sors-17",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-17",
    "firstLine"
   ],
@@ -8351,9 +8351,9 @@
  {
   "id": "firstLine.sibyl.sors-18",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-18",
    "firstLine"
   ],
@@ -8370,9 +8370,9 @@
  {
   "id": "firstLine.sibyl.sors-19",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-19",
    "firstLine"
   ],
@@ -8389,9 +8389,9 @@
  {
   "id": "firstLine.sibyl.sors-20",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-20",
    "firstLine"
   ],
@@ -8408,9 +8408,9 @@
  {
   "id": "firstLine.sibyl.sors-21",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-21",
    "firstLine"
   ],
@@ -8427,9 +8427,9 @@
  {
   "id": "firstLine.sibyl.sors-22",
   "batch": "first-sibyl-2",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-22",
    "firstLine"
   ],
@@ -8446,9 +8446,9 @@
  {
   "id": "firstLine.sibyl.sors-23",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-23",
    "firstLine"
   ],
@@ -8465,9 +8465,9 @@
  {
   "id": "firstLine.sibyl.sors-24",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-24",
    "firstLine"
   ],
@@ -8484,9 +8484,9 @@
  {
   "id": "firstLine.sibyl.sors-25",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-25",
    "firstLine"
   ],
@@ -8503,9 +8503,9 @@
  {
   "id": "firstLine.sibyl.sors-26",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-26",
    "firstLine"
   ],
@@ -8522,9 +8522,9 @@
  {
   "id": "firstLine.sibyl.sors-27",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-27",
    "firstLine"
   ],
@@ -8541,9 +8541,9 @@
  {
   "id": "firstLine.sibyl.sors-28",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-28",
    "firstLine"
   ],
@@ -8560,9 +8560,9 @@
  {
   "id": "firstLine.sibyl.sors-29",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-29",
    "firstLine"
   ],
@@ -8579,9 +8579,9 @@
  {
   "id": "firstLine.sibyl.sors-30",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-30",
    "firstLine"
   ],
@@ -8598,9 +8598,9 @@
  {
   "id": "firstLine.sibyl.sors-31",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-31",
    "firstLine"
   ],
@@ -8617,9 +8617,9 @@
  {
   "id": "firstLine.sibyl.sors-32",
   "batch": "first-sibyl-3",
-  "file": "api/_paid/book/book-sibyl.js",
+  "file": "data-book-sample.js",
   "path": [
-   "full",
+   "sibyl",
    "sors-32",
    "firstLine"
   ],

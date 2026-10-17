@@ -987,3 +987,84 @@
 | `e2e-pay.js` | 68 통과 (받는 것 인연의 장 줄·새 장 알약 1개 더함) |
 | `e2e-map.js` | 80 통과 (권장 1·2 검사 3개 더함) |
 | `e2e-flow.js reduced` / `motion` | 127 / 128 통과 |
+
+## 18단계 · 상품성·전환 개선 (J2, 2026-10-18, developer)
+시작 커밋(18단계 시작 직전 코드): `3dface52597118607426d21457fec5f94baa935a` (tools/strange-oracle/PROGRESS-18.md).
+
+### 새 장 「겹치는 곳, 갈리는 곳」 (18-2·18-3) — 브라우저 고르기
+- 입력은 마친 방의 원형 `state.visits[방].archetype`뿐(장 순서). 세부 번호·나이·성별·생년월일은 쓰지 않는다. 서버로는 `{ file: "cross", pass }` 두 칸뿐(함수 허용 목록 12개).
+- 고르기 = `book.js crossPick`(M·S·k·k2·모양·C·D·{high}·{low}·O·X), 쪽 = `crossChapter`(1 shape · 2 common · 3 split|even · 4·5 lens+pair|same · 6 close, 방 2~6개면 6쪽 끝 note more). 원형 상수 = `arch-core.js`(map.js와 공용, 숫자 그대로).
+- `{axis}`는 2쪽 = 공통 축 C, 3쪽 = 차이 축 D, 그 밖 칸 = C. 분량(`crossTable`·`crossVolume`)은 원본 글자 그대로(자리 값 꼴 포함) 센다.
+- **방 2~7개 모든 조합 2,396,736개**(강제 순서: 앞에서부터 이어진 방)를 `cross.test.js`가 돈다: 문장이 없는 열쇠 0 · 나오지 않는 열쇠 0 → **뺀 열쇠 0, 164항목 그대로**.
+- n=7 가중 비율(방별 원형 배정 수 가중): 한 목소리 5.0% · 두 갈래 43.2% · 굵은 줄기 29.7% · 여러 갈래 22.2% (planner 추정과 같음).
+- 단위 시험(cross.test.js): 모양 경계(n=2·3·4·7, 2·2·3, 3·3·1, 모두 다름·모두 같음, k=2·n>4), C 동점(합 → 폭 → 축 순서), D(폭 2 이상·축 순서), O(가장 먼 방·앞선 장), 고른 결·한결같은 목소리 경로, 보조 원형 = map.js·book.js archPair(3000건), 성별·생년월일을 넣어도 같은 장, 이어가기 탭(restored) 같은 장.
+- `arch-core.js`는 off 빌드에도 넣는다(넣어도 off 화면에서는 부르지 않음 — off-diff-18 요청 0). 책·지도를 열 때만 받는다.
+
+### 첫 줄 옮기기 (18-6, 결정 117)
+- `firstLine` 169개(만신 10·오검 20·별 27·데칸 36·촐킨 20·룬 24·시빌라 32)를 유료 원본에서 공개 `data-book-sample.js`로 글자 그대로 옮기고, 유료 원본의 firstLine 줄 169개를 지웠다(다른 값 불변을 옮기는 도구가 다시 읽어 확인). 옮긴 도구 `tools/strange-oracle/move-first.js`는 한 번 쓰고 지웠다.
+- 대조: `cross.test.js`가 시작 커밋의 유료 원본(`git show 3dface5:…`)과 code 순서·글자를 하나씩 대조 → 169개 같음, 유료 원본 firstLine 키 0.
+- 책 장 첫 쪽은 `book.js fullRoom`이 `BOOK_SAMPLE`에서 읽는다(이어 읽기처럼 목차를 거치지 않는 길도 `fetchChapter`가 방 장이면 맛보기 파일을 함께 받음).
+- make-volume은 맛보기 파일을 읽지 않으므로 방 장 분량에서 첫 줄이 빠진다. 미리보기 "나머지 약 {n}자" = 결제 전 "받는 것"의 그 장 분량(같은 `chapterChars`). e2e-book이 7장 모두 같은 숫자인지 본다.
+- check-17(17단계) firstLine 항목 경로 = `data-book-sample.js`(items.json `file`·`path`), apply-17의 first 묶음도 이 파일에 넣는다.
+- build-dist ①: `data-book-(?!(free|sample)\.js$)` — 가짜 `data-book-fake.js`를 두면 실패, 지우면 통과(2026-10-18 확인).
+
+### 관심사 순서 (18-8)
+- `book.js interestOrder`: 시빌라 주제 우선, 룬 money → 일, 둘째 관심사 줄의 맨 앞 장이 첫째 줄 앞 두 칸 밖이면 둘째 칸으로. 목차·미리보기 목차·"받는 것"·장 끝 "다음 장"이 같은 `bookOrder`를 쓴다. 시기별 흐름 영역 순서도 같은 함수.
+- 단위: 4 관심사 × 둘째(5×5 모든 짝에서 네 장 한 번씩·새 장 늘 제2부 맨 앞), 기획서 예(사랑 + 일 → 인연의 장 → 시기별 흐름 → 궁합 → 원형 심층), 영역 순서, 안내 줄에 '돈' 0·60자 이하.
+- 주제 값은 sessionStorage에만 있고 서버·분석으로 보내지 않는다(e2e-book: so_book·so_pay 값에 관심사·모양·축 0).
+
+### 결제 지점 (18-5) · 이벤트 (18-11)
+- 잠긴 장으로 가는 네 길은 `openCover`의 결제 전 분기 하나(`lockedRoad`)를 지난다. 1~6/7: 목차의 그 장 줄 `.is-target` + 토스트, 7/7: 미리보기의 그 장 샘플 자리(방 장 = 첫 줄, 새 장 = 대조표, 그 밖 제2부 = 미리보기 목차 줄).
+- `#preview` 직접: 결제한 탭 → 목차, 1~6/7 → 목차, 0/7 → 입구 (`gateBook`). 결제 뒤에는 미리보기로 가지 않는다.
+- **검수 2차 권장 1:** 0/7에 `#deeper`로 바로 들어와도 "받는 것"의 새 장 줄은 방 1개와 같다(평균 `avg.cross` + "방 2개를 지나면 열려요" + 새로 더해진 장 알약). e2e-book이 1/7·0/7 두 경우를 대조한다.
+- so_book `step: preview`·`chapter: cross`, so_pay `step: view`의 `from` = preview(미리보기 주 버튼)·toc(목차 작은 글자 버튼)·other(그 밖 — 주소 `#deeper`로 바로 들어온 첫 화면도 분석이 켜진 뒤 other로 보냄).
+
+### 18단계 · 바뀐 기대값 (18-9 「시험·문서의 기대값」, 의도한 변경)
+| 곳 | 17단계 기대값 | 18단계 기대값 |
+|---|---|---|
+| tools/strange-oracle/book.test.js:246 | 허용 목록 정확히 11개 | 12개(`cross`) |
+| e2e-book.js 0/7 목차(옛 129행) | 13장 · 인연의 장은 시기별 흐름 다음 | 14장 · 새 장은 Ⅶ 시빌라 다음(제2부 맨 앞) · 인연의 장은 시기별 흐름 다음(관심사 없음) |
+| e2e-book.js 0/7 need-room(옛 133행) | 13장 | 14장 |
+| e2e-book.js 2/7 결제함(옛 140행) | 흐름·인연·궁합·심층 열림 | + 새 장 열림(방 2개) |
+| e2e-book.js 공개 책 파일(옛 233행) | data-book-free.js 하나 | data-book-free.js·data-book-sample.js 둘 |
+| e2e-book.js 7/7 결제함(옛 308행) | 13장 모두 열림 | 14장 모두 열림 |
+| e2e-pay.js:29 | 유료 장 11개 | 12개(`cross`) |
+| e2e-pay.js A1(옛 110행) | 잠긴 장을 누르면 결제 전 화면 | 1~6/7: 결제 전 화면 아님 · 목차 그 장 줄 `.is-target` · 토스트 → A1b 목차 작은 글자 버튼(`btn--text`)으로 결제 전 화면 |
+| e2e-pay.js A2·「17-5 받는 것」(옛 125·126행) | 11장 · 새로 더해진 장 알약 = 인연의 장 | 12장 · 알약 = 새 장(방 장 7줄 바로 뒤), 인연의 장은 시기별 흐름 다음 |
+| e2e-pay.js B8·B11(옛 196·209행) | 11장 열림 | 12장 열림 |
+| e2e-pay.js J2·J7 | off DOM 0 목록 | + `#screen-preview`·나의 이야기 카드·목차 조각·새 장 칸, template 이름 4개 |
+| e2e-flow.js 6/6 나의 이야기(463행) | 책 목차 버튼 1개 보임 | (test 7/7 결제 전, 확인 122) 미리보기 카드 버튼 1개 · 책 목차 버튼 숨김 |
+| HANDOFF.md 5장 | 유료 원본 목록 | + book-yeon·book-cross, firstLine은 data-book-sample.js |
+
+### 18단계 · off 대조 (18-7 합격, 18-12의 10, `node tools/strange-oracle/off-diff-18.js`)
+- 옛 = 시작 커밋을 작업 폴더 밖에 풀어 build-dist(off), 새 = 지금 build-dist(off). 둘 다 모의 서버 `--mode off`(8793·8794), 360×800, 움직임 줄이기.
+- 입구·일곱 방(시작·결과)·나의 이야기를 0/7·1/7·3/7·7/7로 연 **20개 화면 모두 보이는 글자 같음·DOM 같음**(마크업 주석은 화면 노드가 아니라 뺌). 새 off 화면의 data-book-sample.js·arch-core.js·/api/book 요청 **0**.
+- 결과 파일: tools/strange-oracle/out/off-diff-18-off.txt
+
+### 18단계 · 성능 (18-12의 14)
+- **주 기준 — 첫 화면 파일 목록:** off·test 모두 옛 48개(test 49개)와 같은 목록, 새 파일(data-book-sample.js·book-cross·arch-core.js) 첫 화면 요청 **0** → 통과.
+- **첫 화면 전송 바이트(압축 후, 같은 출처):** off 옛 324,889 → 새 343,845 (**+18,956B, +5.8%**), test 옛 343,498 → 새 371,193 (+27,695B, +8.1%). 늘어난 곳: app.js +8.0KB(미리보기·새 장·잠긴 장 길·관심사 코드) · book.js +3.2KB(새 장 고르기·관심사 순서) · data.js +2.3KB(새 UI 문구 키) · data-volume.js +0.4KB · style.css +4.9KB · index.html(test) +9.1KB(designer template, off는 +0.4KB). 바뀌지 않은 파일도 응답 머리로 몇십 바이트씩 흔들린다.
+  - 기획서 문장 "전송 바이트가 시작 직전 코드와 같다(줄어드는 것은 괜찮다)"는 새 UI 문구가 첫 화면 파일(data.js)에 있어야 하고 style.css·index.html도 늘어나서 글자 그대로는 맞출 수 없다. **운영자·QA 판단 필요**(PROGRESS-18·보고서에 적음).
+- 결과 파일: tools/strange-oracle/out/off-diff-18-off.txt · off-diff-18-test.txt
+- **보조(보고만) — perf.js --first, 같은 날·같은 조건, 옛(8795 test)·새(8788 test) 번갈아 5회씩 두 바퀴:**
+
+| 바퀴 | 옛 ①+② 중앙값 | 새 ①+② 중앙값 | 옛 ①만 | 새 ①만 | ①까지 전송량 옛 / 새 |
+|---|---|---|---|---|---|
+| 1 | 3.38초 | 3.65초 | 3.18초 | 3.26초 | 391KB / 403KB |
+| 2 | 3.38초 | 3.40초 | 3.25초 | 3.24초 | 329KB / 387KB |
+  - 중앙값 차: ①+② +0.02~+0.27초, ①만 −0.01~+0.08초. 같은 코드에서도 2.7~5.0초로 흔들려 시간으로 합격을 가르지 않는다(18-12의 14). 3초 기준 미달은 옛 코드도 같다(17-10·확인 92, 보고만).
+
+### 시험 (2026-10-18, 모의 서버 8788 `--mode test`, 새 장 본문은 copywriter J3-1이 채운 상태)
+| 시험 | 결과 |
+|---|---|
+| 단위 `node --test "tools/strange-oracle/*.test.js"` | 168 통과 / 0 실패 (cross.test.js 13 더함, 240만 조합 시험 30~60초) |
+| check-17 / `check-17 --stage 18` | 실패 0 / 실패 0 (164항목 checked, 확인 목록 note 있음) |
+| make-volume | 대조 9000건 불일치 0 (새 장 3000건 포함), data-volume.js 다시 만듦 |
+| build-dist | 통과, 유료 지문 5,032개(cross 148 포함) 누출 0, [초안] 남음 data.js(copywriter J3 몫) |
+| `e2e-saju.js` | 41 통과 |
+| `e2e-book.js` | 96 통과 (18단계 검사 36개 더함 — 새 장·미리보기·네 길·상태표·#preview·관심사·이벤트 값, INFO 1: 입구 카드 설명 가격은 J3가 뺌) |
+| `e2e-pay.js` | 69 통과 (A1 기대값 변경 + A1b, 받는 것 새 장 줄) |
+| `e2e-map.js` | 80 통과 (arch-core.js를 map.js보다 먼저 받음) |
+| `e2e-utm.js` | 29 통과 |
+| `e2e-flow.js reduced` / `motion` | 127 / 128 통과 |
+| off-diff-18 (off) | 화면 20개 차이 0 · 새 파일 요청 0 |

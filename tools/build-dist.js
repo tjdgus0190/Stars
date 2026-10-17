@@ -6,7 +6,8 @@
 //   본 페이지 = dist/public + 함수 하나(book).
 // 내부 문서(specs, reports, design, agents, CLAUDE.md)와 제품 폴더의 meta.json·tests.md·api/는 넣지 않는다.
 // 하나라도 어기면 빌드 실패(exit 1) → Netlify 배포도 멈춘다:
-//   ① dist/public에 api/·_paid·__dev·옛 data-book-*.js(data-book-free.js 말고)·legal/refund.html·_로 시작하는 폴더 없음
+//   ① dist/public에 api/·_paid·__dev·옛 data-book-*.js(data-book-free.js·data-book-sample.js 말고)·legal/refund.html·_로 시작하는 폴더 없음
+//      (18-7) data-book-sample.js = 방 장 첫 줄 공개 맛보기(결정 117). 허용은 이 이름 하나만 더한다 — 다른 data-book-*.js는 지금처럼 막는다
 //   ② 유료 문장 지문 누출 0: api/_paid/book/의 유료 파일마다 지문(문장 조각)을 뽑아 dist/public 전체에서 찾는다
 //   ③ 배포판 pay.mode = "off" (결정 94)
 //   ④ 첫 화면(index.html이 정적으로 부르는 파일)이 data-book-*.js를 부르지 않음
@@ -203,7 +204,7 @@ const publicTexts = [];
       walk(p);
     } else {
       if (/(^|\/)legal\/refund\.html$/.test(rel) && !Object.values(MODES).includes("live")) fails.push(`① public/${rel} 있음 (live에서만 넣는다)`);
-      if (/(^|\/)data-book-(?!free\.js$)[^/]*\.js$/.test(rel) || /(^|\/)book-[a-z]+\.js$/.test(rel)) fails.push(`① 옛 책 파일·유료 파일 public/${rel}`);
+      if (/(^|\/)data-book-(?!(free|sample)\.js$)[^/]*\.js$/.test(rel) || /(^|\/)book-[a-z]+\.js$/.test(rel)) fails.push(`① 옛 책 파일·유료 파일 public/${rel}`);
       if (/__dev/.test(rel)) fails.push(`① public/${rel}`);
       if (/(^|\/)ads\.js$/.test(rel)) fails.push(`① 광고 부품 public/${rel} (14-7의 7)`);
       if (/(^|\/)friend-map\//.test(rel)) fails.push(`⑫ 지도 서버 원본 public/${rel}`);

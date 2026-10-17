@@ -51,6 +51,8 @@
       });
     return scriptLoads[src];
   }
+  // (18-2) 원형 계산 상수(ARCH·AXES·PROFILE). 지도(map.js)와 책의 새 장이 함께 읽는다. 첫 화면에서는 받지 않는다(18-12의 14)
+  const CORE_FILE = "arch-core.js";
   const roomLoads = {};
   let onRoomLoaded = null; // main()의 bindData (방 문구 전역을 다시 묶는다)
   const roomReady = {};
@@ -127,6 +129,9 @@
   const PAY = T.pay || {};
   const PAY_MODE = PAY.mode === "test" || PAY.mode === "live" ? PAY.mode : "off";
   const BOOK_ON = PAY_MODE !== "off";
+  // (18단계 18-5) 책 구획이 채우는 고리: #preview 문지기, 나의 이야기 7/7 미리보기 카드 (off에서는 null 그대로)
+  let gateBook = null;
+  let storyBookHook = null;
   const PASS_KEY = "strange-oracle-pass"; // 확인된 열람 코드(탭을 닫으면 사라짐). 이어가기 코드에는 넣지 않는다
   // (15단계 15-2) 결제 확인용 무작위 값 R(128비트, 소문자 16진수 32자). 결제할 때마다 새로, 최근 3개까지 새것부터. 입력값에 준해 다룬다(console·분석·URL·localStorage 금지)
   const PAYREQ_KEY = "strange-oracle-payreq";
@@ -390,6 +395,7 @@
 
   // (7단계) 방 화면으로 가는 모든 길의 문지기: 잠긴 방 → 입구(현재 진행 지점), 룬을 마쳤으면 다시 던지기 대신 결과 다시보기
   function gate(name) {
+    if (gateBook) name = gateBook(name);
     const room = roomOfScreen(name);
     if (!CHAPTER_ORDER.includes(room)) return name;
     if (isDone(room)) {
@@ -2536,6 +2542,7 @@
     shareBtn.classList.toggle("btn--secondary", half);
     // (13단계) 결말 뒤 "책 목차 열기" 한 줄 버튼. 마친 방이 없으면 숨김
     show(js("story-book", storyScr), n > 0);
+    if (storyBookHook) storyBookHook(n, shareBtn); // (18-5) 7/7 결제 전: 미리보기 카드가 주 버튼, 공유는 보조
 
     // 등뼈: 1~6장 고정 순서
     resetReveal(storyScr);
@@ -2789,18 +2796,30 @@
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   const OLD_RECEIPT_KEY = "strange-oracle-receipt"; // 12단계까지 영수증 코드 칸. 남아 있으면 지우고 목차로 보낸다(13-4)
-  // (14단계 F4-B2 → 17단계) 책 13장 = 여는 글 + 방 7장(Ⅰ 만신 포함) + 시기별 흐름·인연의 장·궁합·원형 심층 + 닫는 글. 유료는 여는 글·닫는 글을 뺀 11장.
+  // (14단계 F4-B2 → 17단계 → 18단계) 책 14장 = 여는 글 + 방 7장(Ⅰ 만신 포함) + 새 장(제2부 맨 앞)·시기별 흐름·인연의 장·궁합·원형 심층 + 닫는 글. 유료는 여는 글·닫는 글을 뺀 12장.
+  //  - (18-8) 제2부 새 장 뒤 4장의 순서는 관심사(시빌라·룬 주제)를 따른다: BookCore.bookOrder. 목차·미리보기 목차·"받는 것"·장 끝 "다음 장"이 같은 순서
+  //  - (18-6, 결정 117) 방 장 첫 줄 = 공개 맛보기 data-book-sample.js (미리보기·목차·장을 열 때만 받음)
   //  - 여는 글·닫는 글: 공개 정적 파일 data-book-free.js (무료 맛보기)
-  //  - 유료 11장: 함수 book(POST /api/book, 본문 { pass, file } 두 칸뿐)이 열람 코드를 확인한 뒤 JSON으로 준다. 받은 값은 같은 전역(BOOK_SAJU…)에 둔다.
-  //    결과 코드·입력값은 보내지 않는다(6장). file 이름은 장 단위 고정 문자열(허용 목록 11개, 17단계 yeon).
+  //  - 유료 12장: 함수 book(POST /api/book, 본문 { pass, file } 두 칸뿐)이 열람 코드를 확인한 뒤 JSON으로 준다. 받은 값은 같은 전역(BOOK_SAJU…)에 둔다.
+  //    결과 코드·입력값은 보내지 않는다(6장). file 이름은 장 단위 고정 문자열(허용 목록 12개, 17단계 yeon, 18단계 cross).
+  //    새 장(18-2)은 book-cross 전체를 받아 방별 원형(state.visits[방].archetype)만으로 이 브라우저가 고른다(BookCore.crossPick, arch-core.js). 원형·축·방 목록은 보내지 않는다.
   //    인연의 장(17-2)은 book-yeon 전체를 받아 원형·보조 원형·오행·나이 구간을 이 브라우저가 고른다(19세 미만도 b1 — 결정 114)(yeonCtx, 보내지 않고 저장하지 않음).
   const BOOK_ROOMS = CHAPTER_ORDER;
-  const BOOK_IDS = ["open", ...BOOK_ROOMS, "flow", "yeon", "match", "deep", "close"];
+  const BOOK_IDS = ["open", ...BOOK_ROOMS, "cross", "flow", "yeon", "match", "deep", "close"];
   const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
-  const PAID_IDS = new Set([...BOOK_ROOMS, "flow", "yeon", "match", "deep"]);
-  const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { flow: "flow", yeon: "yeon", match: "match", deep: "arch" });
-  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { flow: "BOOK_FLOW", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
+  const PAID_IDS = new Set([...BOOK_ROOMS, "cross", "flow", "yeon", "match", "deep"]);
+  const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { cross: "cross", flow: "flow", yeon: "yeon", match: "match", deep: "arch" });
+  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { cross: "BOOK_CROSS", flow: "BOOK_FLOW", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
   const FREE_FILE = "data-book-free.js";
+  const SAMPLE_FILE = "data-book-sample.js"; // (18-6) 방 장 첫 줄 맛보기 (공개)
+  // (18-8) 관심사: 이미 있는 주제 값 둘뿐. 이 브라우저 안에서만 쓰고 보내거나 분석에 넣지 않는다
+  const topicsNow = () => ({ sibyl: state.visits.sibyl ? state.visits.sibyl.topic : null, rune: state.visits.rune ? state.visits.rune.topic : null });
+  const interestNow = () => BookCore.interestOrder(topicsNow());
+  const bookOrder = () => BookCore.bookOrder(BOOK_ROOMS, topicsNow());
+  // (18-2) 새 장 고르기: 마친 방만, 장 순서대로 방별 원형 하나씩. arch-core.js(첫 화면 밖)를 받은 뒤에만 고른다
+  const crossList = () => CHAPTER_ORDER.filter((r) => state.visits[r] && state.visits[r].archetype).map((room) => ({ room, arch: state.visits[room].archetype }));
+  const crossPickNow = () => (window.ArchCore ? BookCore.crossPick(crossList(), window.ArchCore) : null);
+  const ensureCore = () => loadScript(CORE_FILE);
   const BOOK_API = "/api/book";
   let memPass = "";
   const readPass = () => {
@@ -2894,8 +2913,21 @@
       flowRow.after(row);
     }
   }
+  // (18-2, design 「18단계 (J1)」 3절) 새 장: index.html <template data-js="cross-tpl">(pay:on 안 → off 배포판에는 없음).
+  //   ① 목차 줄 li[data-chapter=cross]를 제2부 목록 맨 앞에 넣는다 ② 장을 그릴 때 article을 복제해 원본 칸 report-cross(book-source 안, 숨김)에 넣는다
+  const crossTplEl = js("cross-tpl");
+  const crossTpl = crossTplEl ? crossTplEl.content : null;
+  const crossBox = document.createElement("div");
+  crossBox.dataset.js = "report-cross";
+  crossBox.hidden = true;
+  js("book-source").append(crossBox);
+  if (BOOK_ON && crossTpl && !$('[data-js="book-chapter"][data-chapter="cross"]')) {
+    const flowRow = $('[data-js="book-chapter"][data-chapter="flow"]');
+    const row = crossTpl.querySelector('[data-js="book-chapter"][data-chapter="cross"]');
+    if (flowRow && row) flowRow.parentElement.prepend(row.cloneNode(true));
+  }
   function clearSource() {
-    ["report-timeline", "report-match-rooms", "report-yeon", "report-open", "report-close", "report-match", "report-match-end", "report-deep-strength", "report-deep-shadow", "report-deep-growth", "report-evidence"]
+    ["report-timeline", "report-match-rooms", "report-yeon", "report-cross", "report-open", "report-close", "report-match", "report-match-end", "report-deep-strength", "report-deep-shadow", "report-deep-growth", "report-evidence"]
       .forEach((n) => (js(n).textContent = ""));
     [...js("report-match-pair").children].forEach((s, i) => i !== 1 && (s.textContent = ""));
     jsAll("book-room").forEach((el) => {
@@ -2993,6 +3025,8 @@
     syncOpenBtn();
     // (14-6) 궁합·시기별 흐름은 상대·나의 오검·데칸·촐킨을 계산하므로 그 방 파일(데칸은 astronomy-engine)도 받는다
     const needs = id === "match" || id === "flow" ? [ensureRooms(["ogham", "decan", "tzolkin"])] : [];
+    if (CHAPTER_ORDER.includes(id)) needs.push(loadFile(SAMPLE_FILE)); // (18-6) 장 첫 쪽 맨 앞 첫 줄 (이어 읽기처럼 목차를 거치지 않는 길도 여기서)
+    if (id === "cross") needs.push(ensureCore(), ensureRooms(filledRooms())); // (18-2) 원형 상수 + 대조표의 결과 이름(공개 방 문구)
     const get = PART0.has(id) ? loadFile(FREE_FILE) : loadPaid(PAID_FILE[id]);
     return Promise.all([get].concat(needs)).then(() => true, () => false).then((ok) => {
       loadState[id] = ok ? "ok" : "fail";
@@ -3003,15 +3037,16 @@
 
   // ── 장 상태 (13-2)
   const roomsDone = () => filledRooms().length;
-  const available = (id) => (CHAPTER_ORDER.includes(id) ? isDone(id) : id === "close" ? roomsDone() === CHAPTER_ORDER.length : roomsDone() > 0);
-  // (14-4) 유료 11장은 열람 코드가 확인된 탭에서만 열린다. 7/7 전에 사도 되고, 지나지 않은 방의 장은 그 방을 지나면 열린다(59번)
+  // (18-2, 확인 119) 새 장은 마친 방 2개 이상(비교할 방이 둘은 있어야 함)
+  const available = (id) => (CHAPTER_ORDER.includes(id) ? isDone(id) : id === "close" ? roomsDone() === CHAPTER_ORDER.length : id === "cross" ? roomsDone() >= 2 : roomsDone() > 0);
+  // (14-4) 유료 12장(18단계)은 열람 코드가 확인된 탭에서만 열린다. 7/7 전에 사도 되고, 지나지 않은 방의 장은 그 방을 지나면 열린다(59번)
   const isOpen = (id) => !PAID_IDS.has(id) || Boolean(passNow());
   const readSet = new Set(); // 이 화면에서 끝까지 읽은 장 (메모리만)
   const chapterState = (id) => (!available(id) ? "need-room" : !isOpen(id) ? "can-open" : readSet.has(id) ? "read" : "opened");
   const chapterName = (id) =>
     CHAPTER_ORDER.includes(id) ? fill(T.topbar.room, { num: ROMAN[chapterOf(id) - 1], name: T.rooms[id].name })
       : id === "open" ? T.book.toc.open : id === "close" ? T.book.toc.close : T.book.parts[id === "flow" ? "timeline" : id];
-  const needLine = (id) => (id === "close" ? T.book.toc.needAll : fill(T.book.toc.needRoom, { room: chapterName(CHAPTER_ORDER.includes(id) ? id : CHAPTER_ORDER[0]) }));
+  const needLine = (id) => (id === "close" ? T.book.toc.needAll : id === "cross" ? T.book.toc.needCross : fill(T.book.toc.needRoom, { room: chapterName(CHAPTER_ORDER.includes(id) ? id : CHAPTER_ORDER[0]) }));
   function myCodes() {
     const b = state.profile.birth;
     return Object.assign(myRoomCodes(), { arch: currentArchetype(), band: b ? ageBand(b) : null });
@@ -3028,6 +3063,11 @@
     }
     if (id === "flow") return a && c.band != null ? BV.timeline[a][c.band] : BV.avg.timeline;
     if (id === "yeon") return BookCore.yeonVolume(BV.yeon, yeonCtx()); // (검수 2차 권장 5) 그 사람이 받는 판(기본·한결같은 결·나이 모름)의 값
+    if (id === "cross") {
+      // (18-9) 그 사람이 실제로 받을 경로(대체 쪽 포함)의 값. 마친 방 1개(아직 안 열림)·0개·원형 상수를 아직 안 받음 → 평균
+      const p = roomsDone() >= 2 ? crossPickNow() : null;
+      return p && BV.cross ? BookCore.crossVolume(BV.cross, p) : BV.avg.cross || 0;
+    }
     if (id === "match") return a ? BV.map[a] : BV.avg.map;
     return a ? BV[id][a] : BV.avg[id];
   }
@@ -3054,17 +3094,26 @@
   };
 
   // ── 입구 책 카드 · 방 결과 책 한 줄 · 나의 이야기 버튼 (가격 0, 13-1)
+  const allDone = () => roomsDone() === CHAPTER_ORDER.length;
+  // (18-5) 7/7 결제 전 = 미리보기가 주 결제 지점 (test·live에서만 미리보기 화면이 있다)
+  const previewOn = () => Boolean(screens.preview) && allDone() && !passNow();
   function renderBookCard() {
     if (!BOOK_ON) return;
     const n = roomsDone();
     const card = js("hub-book");
-    card.dataset.state = n === 0 ? "none" : n === CHAPTER_ORDER.length ? "all" : "some";
+    // (18-5 상태표) 버튼: 0~6/7 목차 보기 · 7/7 결제 전 내 책 미리 보기 · 결제 뒤 내 책 다시 펴기. 가격은 어느 상태에도 없다
+    card.dataset.state = passNow() ? "owned" : n === 0 ? "none" : n === CHAPTER_ORDER.length ? "all" : "some";
+    const goBtn = js("hub-book-go");
+    goBtn.removeAttribute("data-t");
+    goBtn.textContent = passNow() ? T.hub.book.goReopen || T.hub.book.goToc : previewOn() ? T.hub.book.goPreview || T.hub.book.goToc : T.hub.book.goToc;
     $$("i", js("hub-book-lock")).forEach((pip, i) => pip.classList.toggle("is-on", i < n));
     js("hub-book-hint").textContent = n === 0 ? T.hub.book.state0 : n === CHAPTER_ORDER.length ? T.hub.book.stateAll : fill(T.hub.book.stateSome, { n: BOOK_IDS.filter(available).length });
   }
   let coverNext = null; // 책 화면에 들어가자마자 열 장 표지 (방 결과 링크)
   const goBook = (id) => {
     if (!BOOK_ON) return;
+    // (18-5) 7/7 결제 전: 입구 카드 → 미리보기, 방 결과 책 한 줄(잠긴 방 장) → 미리보기의 그 장 샘플 자리
+    if (previewOn() && (!id || (available(id) && !isOpen(id)))) return openPreview(id || null);
     coverNext = id || null;
     go("report");
   };
@@ -3085,7 +3134,36 @@
     if (v !== "pages") js("read-label").textContent = "";
     body.classList.toggle("is-reading", currentName === "report" && v === "pages");
   }
+  // (18단계 J1 toc18-tpl, design 「18단계 (J1)」 4절) 목차 조각 셋: 맨 위 띠(7/7 결제 전) · 관심사 줄(순서가 바뀐 때) · 맨 아래 작은 글자 버튼(결제 전)
+  const tocKit = (() => {
+    const t = js("toc18-tpl");
+    if (!BOOK_ON || !t) return null;
+    const frag = t.content.cloneNode(true);
+    const band = $('[data-js="book-preview-band"]', frag), interest = $('[data-js="book-interest"]', frag), buy = $('[data-js="book-buy-row"]', frag);
+    const nav = js("book-chapters");
+    const head = $(".book-home__head", js("book-home"));
+    if (head && band) head.after(band);
+    if (nav && interest) nav.before(interest);
+    if (nav && buy) nav.after(buy);
+    t.remove();
+    [band, interest, buy].forEach((el) => el && applyText(el));
+    if (band) band.addEventListener("click", () => openPreview(null));
+    if (buy) js("book-buy", buy).addEventListener("click", () => goPay("toc"));
+    return { band, interest, buy };
+  })();
+  // 관심사 안내 한 줄: 순서가 바뀐 경우에만, 첫째 관심사를 물은 방 × 관심사 이름 (주제 이름 "돈"은 쓰지 않는다)
+  const interestLine = (io) => (io.changed && io.first ? ((T.book.interest || {})[io.first.room] || {})[io.first.interest] || "" : "");
+  // 제2부 줄 차례: 새 장 → 관심사 순서 4장 (줄 자체는 그대로, 차례만)
+  function orderRows(list, rowOf) {
+    const io = interestNow();
+    ["cross", ...io.part2].forEach((id) => {
+      const li = rowOf(id);
+      if (li) list.append(li);
+    });
+    return io;
+  }
   function renderToc() {
+    if (!window.ArchCore) ensureCore().then(() => currentName === "report" && reader.dataset.view === "toc" && renderToc(), () => {}); // (18-2) 새 장 분량은 원형 상수를 받은 뒤
     const n = roomsDone();
     const a = currentArchetype();
     const c = myCodes();
@@ -3101,6 +3179,22 @@
       js("book-chapter-state", li).textContent = st === "need-room" ? needLine(id) : st === "can-open" ? PAY.tocLocked || "" : st === "read" ? T.book.toc.reread : T.book.toc.opened;
       js("book-chapter-time", li).textContent = fill(T.book.time, { n: minutes(chapterChars(id)) });
     });
+    // (18-8) 제2부 순서 + 관심사 줄 · (18-5) 7/7 결제 전 맨 위 띠 · 결제 전 맨 아래 작은 글자 버튼 하나
+    const flowRow = $('[data-js="book-chapter"][data-chapter="flow"]', reportScr);
+    const io = flowRow ? orderRows(flowRow.parentElement, (id) => $(`[data-js="book-chapter"][data-chapter="${id}"]`, reportScr)) : interestNow();
+    if (tocKit) {
+      const line = interestLine(io);
+      if (tocKit.interest) {
+        js("book-interest-text", tocKit.interest).textContent = line;
+        tocKit.interest.hidden = !line;
+      }
+      if (tocKit.band) tocKit.band.hidden = !previewOn();
+      if (tocKit.buy) {
+        tocKit.buy.hidden = Boolean(passNow()) || n === 0;
+        const lab = $('[data-t="book.toc.buyNow"]', tocKit.buy) || js("book-buy", tocKit.buy);
+        lab.textContent = fill(T.book.toc.buyNow || "", { price: comma(PAY.amount) });
+      }
+    }
     const bm = readBookmark();
     const ok = Boolean(bm && available(bm.id));
     show(js("book-resume"), ok);
@@ -3132,8 +3226,7 @@
     btn.addEventListener("click", () => {
       const li = btn.closest("[data-js=book-chapter]");
       if (li.dataset.state === "need-room") return toast(js("book-chapter-state", li).textContent); // 안내만 (강제 순서 그대로)
-      if (li.dataset.state === "can-open") return goPay(); // (14-4) 결제 전 → 결제 전 화면
-      openCover(li.dataset.chapter);
+      openCover(li.dataset.chapter); // (18-5) 결제 전 잠긴 장도 openCover의 한 분기(lockedRoad)로 간다 — 결제 전 화면으로 곧장 가지 않는다
     })
   );
   js("book-resume").addEventListener("click", () => resume());
@@ -3176,9 +3269,28 @@
     else b.removeAttribute("aria-busy");
   }
   const needsFlowDate = (id) => id === "flow" && !state.profile.birth;
+  // (18-5 「잠긴 장으로 가는 길 — 한 규칙」) 결제 전에 유료 장에 닿는 네 길(목차 잠긴 장·방 결과 책 한 줄·장 끝 "다음 장"·이어 읽기)이
+  //   모두 openCover의 이 분기 하나를 지난다. 1~6/7: 목차의 그 장 줄로 스크롤·강조 + 토스트(결제 전 화면으로 가지 않음) · 7/7: 미리보기의 그 장 샘플 자리
+  let targetTimer = 0;
+  function lockedRoad(id) {
+    if (previewOn()) return openPreview(id);
+    if (currentName !== "report") {
+      coverNext = null;
+      go("report");
+    } else showToc();
+    const li = $(`[data-js="book-chapter"][data-chapter="${id}"]`, reportScr);
+    if (li) {
+      li.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+      $$(".chapter-row.is-target", reportScr).forEach((x) => x.classList.remove("is-target"));
+      li.classList.add("is-target");
+      clearTimeout(targetTimer);
+      targetTimer = setTimeout(() => li.classList.remove("is-target"), 2000);
+    }
+    toast(T.book.toc.lockedToast || "");
+  }
   function openCover(id, keep) {
     if (!available(id)) return showToc();
-    if (!isOpen(id)) return goPay();
+    if (!isOpen(id)) return lockedRoad(id);
     if (!keep || coverId !== id) {
       clearForms();
       matchInput = null;
@@ -3369,6 +3481,115 @@
     { room: T.rooms.decan.name, name: strip(DECANS[p.decan].title), key: strip(DECANS[p.decan].key) },
     { room: T.rooms.tzolkin.name, name: strip(TZ_SIGNS[p.tzSign].name), key: strip(TZ_SIGNS[p.tzSign].key) },
   ];
+  // ── (18-2) 새 장 도우미: 자리 값 채우기 · 대조표(무료 값만) · 축 표지 · 방 표지. 미리보기 대조표도 같은 함수(유료 문장 0)
+  const archName = (a) => (a && T.archetypes[a] ? T.archetypes[a].name : "");
+  const axisName = (k) => ((T.book.cross || {}).axis || {})[k] || "";
+  const roomList = (rs) => (rs || []).map((r) => T.rooms[r].name).join((T.book.cross || {}).join || "·");
+  function crossFill(t, v) {
+    const val = { arch: archName(v.arch), sub: archName(v.sub), other: archName(v.other), axis: axisName(v.axis), room: v.room ? T.rooms[v.room].name : "", high: roomList(v.high), low: roomList(v.low), n: String(v.n) };
+    return String(t).replace(/\{(arch|sub|other|axis|room|high|low|n)\}/g, (m, k) => val[k]);
+  }
+  const axisIdx = (k) => window.ArchCore.AXES.indexOf(k);
+  const meter = (cell, v) => {
+    const m = $(".axis-meter", cell);
+    if (m) m.style.setProperty("--v", String(v));
+    const num = $(".axis-meter__num", cell);
+    if (num) num.textContent = String(v);
+  };
+  // 대조표: 방마다 한 줄(번호·이름·결과 이름·원형), C·D 두 축만 막대(0~4) + 숫자. 주 원형 줄기 = .is-main + ◆ 표지 + 화면낭독기 글자(색만으로 구별하지 않음)
+  function crossTable(box, pick) {
+    const X = T.book.cross || {};
+    const P = window.ArchCore.PROFILE;
+    const ci = axisIdx(pick.common), di = pick.split ? axisIdx(pick.split) : -1;
+    const table = js("cross-table", box);
+    if (!table) return;
+    table.dataset.split = pick.split ? "yes" : "none";
+    const cap = js("cross-caption", box);
+    if (cap) cap.textContent = fill(X.caption || "", { n: pick.n });
+    js("cross-c-name", box).textContent = axisName(pick.common);
+    js("cross-d-name", box).textContent = pick.split ? axisName(pick.split) : "";
+    jsAll("cross-row", table).forEach((tr) => {
+      const room = tr.dataset.room;
+      const v = state.visits[room];
+      const th = $("th", tr);
+      if (!v || !v.archetype) {
+        // 아직 지나지 않은 방: 방 이름 칸 + "아직 지나지 않은 방" 한 칸
+        tr.className = "cross-table__row is-pending";
+        const res = js("cross-result", th);
+        if (res) res.remove();
+        [...tr.querySelectorAll("td")].forEach((td) => td.remove());
+        const td = document.createElement("td");
+        td.className = "cross-table__wait";
+        td.colSpan = 3;
+        td.textContent = (X.table || {}).pending || "";
+        tr.append(td);
+        return;
+      }
+      const main = v.archetype === pick.main;
+      const sub = !main && pick.shape === "two" && v.archetype === pick.sub; // 두 갈래: 보조 원형 줄기 ◇ (design 「18단계 (J1)」 3절)
+      tr.className = "cross-table__row" + (main ? " is-main" : sub ? " is-sub" : "");
+      let res = js("cross-result", th);
+      if (!res) {
+        res = document.createElement("span");
+        res.className = "cross-table__result";
+        res.dataset.js = "cross-result";
+        th.append(res);
+      }
+      res.textContent = strip(visitType(room));
+      const archTd = $(".cross-table__arch", tr);
+      if (archTd) {
+        js("cross-arch", archTd).textContent = archName(v.archetype);
+        const mark = js("cross-mark", archTd);
+        if (mark) mark.textContent = main ? "◆" : sub ? "◇" : "";
+        let sr = js("cross-mark-sr", archTd);
+        if ((main || sub) && !sr) {
+          sr = document.createElement("span");
+          sr.className = "visually-hidden";
+          sr.dataset.js = "cross-mark-sr";
+          archTd.append(sr);
+        }
+        if (sr) main || sub ? (sr.textContent = (main ? X.markMain : X.markSub) || "") : sr.remove();
+      }
+      const c = js("cross-c", tr), d = js("cross-d", tr);
+      if (c) meter(c, P[v.archetype][ci]);
+      if (d) meter(d, di < 0 ? 0 : P[v.archetype][di]);
+    });
+    const lm = js("cross-legend-main", box), ls = js("cross-legend-sub", box), lsr = js("cross-legend-sub-row", box);
+    if (lm) lm.textContent = fill(X.legendMain || "", { arch: archName(pick.main) });
+    if (ls) ls.textContent = fill(X.legendSub || "", { sub: archName(pick.sub) });
+    if (lsr) lsr.hidden = pick.shape !== "two" || pick.sub === pick.main; // ◇ 표지는 두 갈래에서만 줄에 붙는다
+  }
+  function crossAxisCommon(sec, pick) {
+    const P = window.ArchCore.PROFILE;
+    const ci = axisIdx(pick.common);
+    const vals = crossList().map((x) => P[x.arch][ci]);
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    js("cross-axis-common-name", sec).textContent = axisName(pick.common);
+    const m = $(".axis-meter", js("cross-axis-common", sec));
+    if (m) m.style.setProperty("--v", avg.toFixed(1));
+    js("cross-axis-common-avg", sec).textContent = fill((T.book.cross || {}).avg || "", { v: avg.toFixed(1) });
+  }
+  function crossSplit(sec, pick) {
+    js("cross-axis-split-name", sec).textContent = axisName(pick.split);
+    js("cross-high", sec).textContent = roomList(pick.high);
+    js("cross-low", sec).textContent = roomList(pick.low);
+  }
+  function crossLens(sec, pick) {
+    const r = pick.odd;
+    sec.dataset.room = r;
+    const box = js("cross-room", sec);
+    const use = $("use", box);
+    if (use) use.setAttribute("href", r === "rune" ? "#rune-raidho" : `#icon-${r}`);
+    const svg = $("svg", box);
+    if (svg) {
+      svg.setAttribute("viewBox", r === "rune" ? "0 0 40 60" : "0 0 40 40");
+      svg.classList.toggle("sig--rune", r === "rune");
+    }
+    const num = $(".cross-room__num", box);
+    if (num) num.textContent = ROMAN[chapterOf(r) - 1];
+    js("cross-room-name", box).textContent = T.rooms[r].name;
+    js("cross-room-arch", box).textContent = archName(pick.other);
+  }
   function renderChapter(id, pre) {
     clearSource();
     const C = BookCore.contentFrom(window);
@@ -3384,12 +3605,19 @@
       js("report-evidence").innerHTML = evidenceFromCodes(c);
     } else if (id === "flow") {
       const tl = js("report-timeline");
+      const areas = interestNow().areas;
       BookCore.timelineChapter(C, me, c.band).stages.forEach((s) => {
         const el = tpl.stage.cloneNode(true);
         textIn(el);
         el.classList.toggle("is-now", s.now);
         js("timeline-age", el).textContent = fill(s.now ? R.stageNow : s.past ? R.stagePast : R.stageNext, { label: s.label });
         ["work", "relation", "learn", "move"].forEach((k) => (js(`timeline-${k}`, el).textContent = s[k]));
+        // (18-8) 영역 순서만 관심사대로 (문장은 그대로)
+        const dl = $(".timeline__areas", el);
+        if (dl) areas.forEach((k) => {
+          const dd = js(`timeline-${k}`, el);
+          if (dd && dd.parentElement.parentElement === dl) dl.append(dd.parentElement);
+        });
         tl.append(el);
       });
     } else if (id === "yeon") {
@@ -3450,6 +3678,36 @@
         });
       });
       yeonBox.append(art);
+    } else if (id === "cross") {
+      // (18-2·18-3, design 「18단계 (J1)」 3절) 새 장: cross-tpl의 article을 복제해 쪽(section.cross-sec)마다 문장(유료 원본 항목 하나 통째로, 자리 값만 채움).
+      //   그 사람에게 없는 쪽(대체 경로)은 section을 지운다
+      const pick = crossPickNow();
+      const ch = BookCore.crossChapter(C, pick);
+      const art = crossTpl ? crossTpl.querySelector("article").cloneNode(true) : document.createElement("article");
+      textIn(art);
+      crossBox.dataset.variant = ch.variant;
+      crossBox.dataset.shape = ch.shape;
+      const SEC = { shape: "voices", common: "common", split: "split", even: "even", lens: "lens", pair: "pair", same: "same", close: "close" };
+      const bySec = Object.fromEntries(ch.pages.map((pg) => [SEC[pg.key], pg]));
+      // 쪽 번호는 견본 숫자 그대로 둔다(고른 결 = 3, 한결같은 목소리 = 4 — design 「18단계 (J1)」 4절)
+      $$("[data-js=cross-sec]", art).forEach((sec) => {
+        const pg = bySec[sec.dataset.sec];
+        if (!pg) return sec.remove();
+        sec.hidden = false;
+        sec.dataset.page = pg.key;
+        const body = $(".prose", sec);
+        if (body) paras(body, [].concat(pg.text || []).filter(Boolean).map((t) => crossFill(t, pg.vars)));
+        if (sec.dataset.sec === "voices") crossTable(sec, pick);
+        if (sec.dataset.sec === "common") crossAxisCommon(sec, pick);
+        if (sec.dataset.sec === "split") crossSplit(sec, pick);
+        if (sec.dataset.sec === "lens") crossLens(sec, pick);
+        if (sec.dataset.sec === "pair") {
+          js("cross-pair-main", sec).textContent = T.archetypes[pick.main].name;
+          js("cross-pair-other", sec).textContent = T.archetypes[pick.other].name;
+        }
+        $$("[data-js=cross-note]", sec).forEach((n) => (pg.note ? (n.hidden = false) : n.remove()));
+      });
+      crossBox.append(art);
     } else if (id === "match") {
       const pair = js("report-match-pair").children;
       pair[0].textContent = T.archetypes[me].name;
@@ -3499,7 +3757,8 @@
       paras(js("book-hidden", el), [id === "saju" ? sajuHiddenTitle(c) : fr.hidden.title].concat(fr.hidden.paragraphs));
     }
     // 장 끝 쪽: 다음 장(열 수 있는 다음 장, 잠겼으면 그 장 표지) + 목차로
-    const next = BOOK_IDS.slice(BOOK_IDS.indexOf(id) + 1).find(available) || null;
+    const ord = bookOrder(); // (18-8) 목차와 같은 순서
+    const next = ord.slice(ord.indexOf(id) + 1).find(available) || null;
     js("chapter-end-name").textContent = chapterName(id);
     const nb = js("chapter-end-next");
     nb.dataset.next = next || "";
@@ -3596,6 +3855,18 @@
           else if (!n.hidden && n.textContent.trim()) blocks.push({ kind: "unit", node: wrapUnit(sec, n) });
         });
         C.push({ key: `yeon-${i}`, part: id, label: name, run: [B.part2.num, name], start: true, blocks: i === 0 ? [openBlk(chOpening(name)), ...blocks] : blocks });
+      });
+    } else if (id === "cross") {
+      // (18-2) 새 장: 장 머리 뒤 쪽(section.cross-sec)마다 새 쪽에서 시작. 쪽 머리·대조표·표지 설명·축 표지·방 표지·짝·안내 = 한 덩어리(unit), 본문 단락 = 나눌 수 있는 p
+      const art = $("article", js("report-cross", src));
+      const secs = art ? [...art.querySelectorAll("section.cross-sec")] : [];
+      secs.forEach((sec, i) => {
+        const blocks = [];
+        [...sec.children].forEach((n) => {
+          if (n.classList.contains("prose")) [...n.children].filter((p) => p.textContent.trim()).forEach((p) => blocks.push({ kind: "p", node: stripHooks(p.cloneNode(true)) }));
+          else if (!n.hidden && n.textContent.trim()) blocks.push({ kind: "unit", node: wrapUnit(sec, n) });
+        });
+        C.push({ key: `cross-${i}`, part: id, label: name, run: [B.part2.num, name], start: true, blocks: i === 0 ? [openBlk(chOpening(name)), ...blocks] : blocks });
       });
     } else if (id === "match") {
       one("match", B.parts.match, [{ kind: "unit", node: stripHooks(js("report-match-pair", src).cloneNode(true)) }, ...parasOf(js("report-match", src)), ...unitsOf(js("report-match-rooms", src)), ...parasOf(matchEnd)], { run: [B.part2.num, B.parts.match] });
@@ -4246,7 +4517,8 @@
   // (14-4 off, 결정 94) 본 페이지: 결제 화면·열람 코드 칸·책(목차·장·여는/닫는 글)·방 결과의 책 한 줄·입구 책 카드·나의 이야기 책 버튼·FAQ 책 문답을
   // DOM에서 걷어 낸다(숨김이 아니라 제거 → DOM 0개). pay-tpl template은 꺼내지 않고 지운다. "준비 중" 같은 문구도 없다
   function offStrip() {
-    const gone = [reportScr, js("pay-tpl"), js("pay-toc-tpl"), js("clear-warn-pay"), js("hub-book"), js("story-book"), js("book-toc-open"), ...jsAll("result-book-line")]; // 상단 막대의 목차 버튼도 책 요소 (F6 지적)
+    // (18-7) 미리보기·목차 조각·새 장·나의 이야기 미리보기 카드 template도 함께 (off 배포판에서는 build-dist가 pay:on 구획째 걷어 내 원래 0개)
+    const gone = [reportScr, js("pay-tpl"), js("pay-toc-tpl"), js("preview-tpl"), js("toc18-tpl"), js("cross-tpl"), js("story-preview-tpl"), js("clear-warn-pay"), js("hub-book"), js("story-book"), js("book-toc-open"), ...jsAll("result-book-line")]; // 상단 막대의 목차 버튼도 책 요소 (F6 지적)
     const faq = $('[data-t="hub.faq.items.4.q"]');
     if (faq) gone.push(faq.closest(".faq__item"));
     gone.forEach((el) => el && el.remove());
@@ -4261,8 +4533,172 @@
   //  함수 status로는 { r } 한 칸만, 팝업의 postMessage에는 { type }만 보낸다. 분석 이벤트는 단계 이름뿐.
   let payScr = null;
   let payReturn = null; // #paid 복귀 처리(시작 때 부름). off면 null
-  function goPay() {
-    if (payScr) go("deeper");
+  // (18-11) 결제 전 화면에 들어온 길: preview(미리보기 주 버튼) · toc(목차 작은 글자 버튼) · other(열람 코드 넣기·주소 #deeper·결제 확인 화면 복귀 등 그 밖)
+  let payFrom = "other";
+  function goPay(from) {
+    if (!payScr) return;
+    payFrom = from === "preview" || from === "toc" ? from : "other";
+    go("deeper");
+  }
+
+  // ═════════ (18단계 18-5) 내 책 미리 보기 #screen-preview — test·live에서만 template에서 꺼냄. 7/7 결제 전의 주 결제 지점 ═════════
+  // 유료 문장 0: 여는 글·닫는 글(data-book-free.js)·첫 줄(data-book-sample.js, 결정 117)·대조표(방별 결과 이름·원형·축 값 = 무료 값)만.
+  // 이 화면에서는 함수 book(/api/book)도 결제 SDK도 부르지 않는다. [책 전체 열기]는 결제하지 않고 결제 전 화면(#deeper, from preview)으로 간다.
+  let previewScr = null;
+  let previewTarget = null; // 잠긴 장으로 가는 길의 끝(그 장 샘플 자리)
+  let previewTimer = 0;
+  if (BOOK_ON) {
+    const t = js("preview-tpl");
+    if (t) {
+      t.after(t.content.cloneNode(true));
+      t.remove();
+      previewScr = js("screen-preview");
+      screens.preview = previewScr;
+      applyText(previewScr);
+    }
+    // (18-5) 주소 #preview로 직접: 결제한 탭 → 목차, 1~6/7 → 목차, 0/7 → 입구. 결제 뒤에는 미리보기로 가지 않는다
+    gateBook = (name) => {
+      if (name !== "preview") return name;
+      if (!previewScr || passNow()) return "report";
+      return allDone() ? "preview" : roomsDone() ? "report" : "hub";
+    };
+  }
+  function openPreview(target) {
+    if (!previewScr) return;
+    previewTarget = target || null;
+    if (currentName === "preview") enter.preview();
+    else go("preview");
+  }
+  const PV = () => T.book.preview || {};
+  const round100 = (n) => comma(Math.round(n / 100) * 100);
+  function renderPreview() {
+    const scr = previewScr;
+    const c = myCodes();
+    const a = c.arch;
+    const C = BookCore.contentFrom(window);
+    show(js("preview-test-band", scr), PAY_MODE === "test");
+    // 1 머리
+    js("preview-title", scr).textContent = fill(PV().title || "", { who: whoOf(state.profile.name || "") });
+    js("preview-arch", scr).textContent = archName(a);
+    // 2 나에게 맞춘 전체 목차 (14장, 관심사 순서)
+    const io = orderRows(js("preview-chapters-part2", scr), (id) => $(`[data-js="preview-chapter"][data-chapter="${id}"]`, scr));
+    jsAll("preview-chapter", scr).forEach((li) => {
+      const id = li.dataset.chapter;
+      const free = !PAID_IDS.has(id);
+      li.dataset.kind = free ? "free" : "paid";
+      li.classList.remove("is-target");
+      js("preview-chapter-tag", li).textContent = free ? PV().tagFree || "" : PV().tagPaid || "";
+      const n = chapterChars(id);
+      js("preview-chapter-vol", li).textContent = fill(PV().vol || "", { n: round100(n), m: minutes(n) });
+      const sub = js("preview-chapter-sub", li);
+      if (sub) sub.textContent = CHAPTER_ORDER.includes(id) ? (isDone(id) ? headOf(id, c).title : "") : id === "cross" ? T.book.chapter.blurbs.cross || "" : "";
+    });
+    const line = interestLine(io);
+    js("preview-interest-text", scr).textContent = line;
+    js("preview-interest", scr).hidden = !line;
+    // 3 맛보기: 여는 글 전문 → 일곱 장의 첫 줄 → 대조표 미리 보기 → 닫는 글(접힘)
+    const openEl = js("preview-open", scr);
+    paras(openEl, BookCore.openChapter(C, a).paragraphs);
+    if (openEl.firstElementChild) openEl.firstElementChild.className = "has-dropcap";
+    jsAll("preview-first", scr).forEach((li) => {
+      const room = li.dataset.room;
+      li.classList.remove("is-target");
+      js("preview-first-result", li).textContent = isDone(room) ? headOf(room, c).title : "";
+      js("preview-first-text", li).textContent = isDone(room) ? BookCore.firstLineOf(C, room, c) : "";
+      js("preview-first-rest", li).textContent = fill(PV().firstRest || "", { n: round100(chapterChars(room)) }); // 결제 전 화면 "받는 것"의 그 장 분량과 같은 값
+    });
+    const pc = js("preview-cross", scr);
+    const pick = crossPickNow();
+    if (pc && pick) crossTable(pc, pick);
+    if (pc) pc.classList.remove("is-target");
+    paras(js("preview-close", scr), BookCore.closeChapter(C, a).paragraphs);
+    js("preview-close", scr).hidden = true;
+    const fold = js("preview-close-toggle", scr);
+    fold.hidden = false;
+    fold.setAttribute("aria-expanded", "false");
+    // 4 무료와 책의 차이 (무료 UI 문구)
+    const D = PV().diff || {};
+    const freeUl = js("preview-diff-free", scr), bookUl = js("preview-diff-book", scr);
+    freeUl.textContent = "";
+    (D.free || []).forEach((t) => {
+      const li = document.createElement("li");
+      li.textContent = t;
+      freeUl.append(li);
+    });
+    bookUl.textContent = "";
+    (D.book || []).forEach((x) => {
+      const li = document.createElement("li");
+      const b = document.createElement("b");
+      b.textContent = x.name || "";
+      const sp = document.createElement("span");
+      sp.textContent = x.line || "";
+      li.append(b, sp);
+      bookUl.append(li);
+    });
+    // 5 한 번 결제 · 6 주 버튼 (가격은 이 자리에 한 번만)
+    js("preview-once-price", scr).textContent = fill(PV().once || "", { price: comma(PAY.amount) });
+    js("preview-go-label", scr).textContent = fill(PV().go || "", { price: comma(PAY.amount) });
+    // 8 면책 (책 화면과 같은 방식)
+    Disclaimer.mount(js("disclaimer-slot", scr));
+  }
+  // 길 끝: 방 장 = 「일곱 장의 첫 줄」의 그 방 줄 · 새 장 = 대조표 미리 보기 · 그 밖 제2부 장 = 미리보기 목차의 그 장 줄
+  function previewScrollTo(id) {
+    const scr = previewScr;
+    const el = !id ? null : CHAPTER_ORDER.includes(id) ? $(`[data-js="preview-first"][data-chapter="${id}"]`, scr) : id === "cross" ? js("preview-cross", scr) : $(`[data-js="preview-chapter"][data-chapter="${id}"]`, scr);
+    if (!el) return;
+    el.classList.add("is-target");
+    el.scrollIntoView({ block: "center", behavior: "auto" });
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(() => el.classList.remove("is-target"), 2000);
+  }
+  if (previewScr) {
+    enter.preview = () => {
+      const target = previewTarget;
+      previewTarget = null;
+      previewScr.dataset.state = "loading";
+      Promise.all([loadFile(FREE_FILE), loadFile(SAMPLE_FILE), ensureCore(), ensureRooms(filledRooms())]).then(() => {
+        if (currentName !== "preview") return;
+        renderPreview();
+        previewScr.dataset.state = "ready";
+        if (target) previewScrollTo(target);
+        else window.scrollTo(0, 0);
+        track("so_book", { step: "preview" });
+      }, () => toast(T.toast.loadFail || ""));
+    };
+    js("preview-close-toggle", previewScr).addEventListener("click", (e) => {
+      const btn = e.currentTarget;
+      const bodyEl = js("preview-close", previewScr);
+      btn.setAttribute("aria-expanded", "true");
+      bodyEl.hidden = false;
+      btn.hidden = true; // 한 번에 펼침(접기 없음) — 눌러도 아무 일 없는 버튼을 남기지 않는다
+      bodyEl.tabIndex = -1;
+      bodyEl.focus({ preventScroll: true });
+    });
+    js("preview-go", previewScr).addEventListener("click", () => goPay("preview"));
+  }
+  // (18-5, 확인 122) 나의 이야기 7/7 결제 전: 미리보기 카드가 주 버튼, 공유는 보조(위쪽 공유 버튼은 그대로). 결제 뒤 "내 책 펴기"
+  if (BOOK_ON) {
+    const t = js("story-preview-tpl");
+    const card = t && t.content.firstElementChild ? t.content.firstElementChild.cloneNode(true) : null;
+    const slot = js("story-book");
+    if (t) t.remove();
+    if (card && slot) {
+      slot.after(card); // design 「18단계 (J1)」 8절: story-book 바로 뒤
+      applyText(card);
+      card.hidden = true;
+      js("story-preview-go", card).addEventListener("click", () => openPreview(null));
+    }
+    storyBookHook = (n, shareBtn) => {
+      const on = previewOn();
+      if (card) card.hidden = !on;
+      if (on) {
+        show(slot, false);
+        shareBtn.classList.remove("btn--primary");
+        shareBtn.classList.add("btn--secondary");
+      }
+      const lab = $("[data-t='story.bookLink']", slot) || $("span", js("story-book-link"));
+      if (lab) lab.textContent = passNow() ? T.story.bookLinkPaid || T.story.bookLink : T.story.bookLink;
+    };
   }
   if (BOOK_ON) {
     const tplEl = js("pay-tpl");
@@ -4298,11 +4734,12 @@
     js("paycheck-contact-value", checkScr).textContent = PAY.contact || "";
     ["paycheck-contact", "paycheck-contact-late", "paycheck-contact-noreq"].forEach((n) => show(js(n, checkScr), Boolean(PAY.contact)));
 
-    enter.deeper = () => {
+    function payList() {
       const list = js("pay-chapters", payScr);
       list.textContent = "";
       let sum = 0;
-      [...PAID_IDS].forEach((id) => {
+      bookOrder().filter((id) => PAID_IDS.has(id)).forEach((id) => {
+        // (18-8) 목차와 같은 순서 · (18-9) 첫 줄은 맛보기라 방 장 분량에서 빠진 값(make-volume)
         const n = chapterChars(id);
         sum += n;
         const li = document.createElement("li");
@@ -4310,13 +4747,20 @@
         const a = document.createElement("span");
         a.className = "pay-list__name";
         a.textContent = chapterName(id);
-        if (id === "yeon") {
-          // (17-5, design 「17단계」 6절) 새로 더해진 장 표시: li .pay-list__item--new + 이름 뒤 알약 .pay-list__new
+        if (id === "cross") {
+          // (18-9, design 「18단계 (J1)」) 새로 더해진 장 알약은 인연의 장 → 새 장으로. 마친 방 1개 이하(아직 안 열림)면 평균 분량 + 상태 글자
           li.classList.add("pay-list__item--new");
           const nb = document.createElement("span");
           nb.className = "pay-list__new";
           nb.textContent = PAY.what.newBadge || "";
           if (nb.textContent) a.append(nb);
+          if (!available("cross")) {
+            const st = document.createElement("span");
+            st.className = "pay-list__state";
+            st.dataset.js = "pay-cross-state";
+            st.textContent = PAY.what.crossWait || "";
+            a.append(st);
+          }
         }
         const b = document.createElement("span");
         b.className = "pay-list__vol";
@@ -4325,6 +4769,10 @@
         list.append(li);
       });
       js("pay-total", payScr).textContent = fill(PAY.what.total || "", { n: (Math.round(sum / 1000) / 10).toLocaleString("ko-KR") });
+    }
+    enter.deeper = () => {
+      payList();
+      if (!window.ArchCore) ensureCore().then(() => currentName === "deeper" && payList(), () => {}); // (18-9) 새 장 분량은 원형 상수를 받은 뒤 그 사람 경로 값으로
       js("pay-price", payScr).textContent = fill(PAY.price.text || "", { price: comma(PAY.amount) });
       show(js("pay-refund-link", payScr), false); // legal/refund.html은 지금 배포 폴더에서 빠진다(build-dist) → 본문 링크 숨김. 결제 문단은 G4
       act.classList.toggle("is-opened", Boolean(passNow())); // (검수 권장 4) 이 탭에서 책이 이미 열려 있으면 결제 버튼 대신 안내
@@ -4332,8 +4780,12 @@
       syncBuy();
       passMsg("");
       show(pass.status, false);
+      const from = payFrom;
+      payFrom = "other";
+      const backPv = js("pay-back-preview", payScr);
+      if (backPv) backPv.hidden = !(from === "preview" && previewOn()); // (18-5) 미리보기에서 왔을 때만 "미리보기로 돌아가기"
       window.scrollTo(0, 0);
-      track("so_pay", { step: "view" });
+      track("so_pay", { step: "view", from }); // (18-11) 들어온 길
     };
     leave.deeper = () => {
       pass.input.value = "";
@@ -4715,8 +5167,9 @@
     so_story: { step: ["3of6", "6of6"] },
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
     so_resume: { step: ["made", "used", "failed"] },
-    so_book: { step: ["toc", "cover", "read", "done"], chapter: BOOK_IDS }, // (13단계 13-8) 옛 preview·pay_click은 뺌
-    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
+    so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8) 옛 preview·pay_click은 뺌. (18-11) preview = 새 미리보기 화면 도착, chapter에 cross
+
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "other"] }, // (18-11) from = view 때 들어온 길만 // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
@@ -4738,7 +5191,10 @@
   function startExternal() {
     if (!booted || externalOn || location.search) return;
     externalOn = true;
-    if (Analytics.init({ ga4: T.analytics.ga4, title: T.meta.title, events: EVENTS, utm: { search: bootSearch, allow: CAMPAIGN.allow, ignore: CAMPAIGN.ignore } })) track("so_visit");
+    if (Analytics.init({ ga4: T.analytics.ga4, title: T.meta.title, events: EVENTS, utm: { search: bootSearch, allow: CAMPAIGN.allow, ignore: CAMPAIGN.ignore } })) {
+      track("so_visit");
+      if (currentName === "deeper") track("so_pay", { step: "view", from: "other" }); // (18-11) 주소 #deeper로 바로 들어온 첫 화면은 분석 시작 전에 열렸다
+    }
   }
   function track(name, props) {
     if (externalOn) Analytics.track(name, props);
@@ -4851,7 +5307,7 @@
   function ensureMap() {
     if (!MAP_ON) return Promise.reject(new Error("map off"));
     if (!mapLoad)
-      mapLoad = Promise.all([loadScript("data-map.js"), loadScript("map.js")]).then(() => {
+      mapLoad = Promise.all([loadScript("data-map.js"), loadScript(CORE_FILE), loadScript("map.js")]) /* (18-2) arch-core.js가 map.js보다 먼저(async=false 순서) */.then(() => {
         const TM = window.TEXT_MAP || {};
         Object.keys(TM).forEach((k) => {
           if (!(k in T.map)) T.map[k] = TM[k]; // data.js 값(mode·api·down·hubLink·clear)이 우선
@@ -4962,7 +5418,7 @@
     const pr = payReturn();
     first = pr.first;
     payAfter = pr.after || null;
-  } else if (BOOK_ON && (["report", "deeper", "unseal"].includes(hash) || oldReceipt)) first = hash === "deeper" ? "deeper" : "report";
+  } else if (BOOK_ON && (["report", "deeper", "unseal", "preview"].includes(hash) || oldReceipt)) first = hash === "deeper" ? "deeper" : hash === "preview" ? "preview" : "report"; // (18-5) #preview는 문지기(gateBook)가 상태대로 보냄
   else if (filledRooms().length && hash) {
     if (hash === "story") first = "story";
     else if (CHAPTER_ORDER.includes(hash)) first = roomTarget(hash);

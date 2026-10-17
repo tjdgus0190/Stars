@@ -85,14 +85,16 @@ node tools/build-dist.js                       # dist/public 생성 + 점검(pay
 node --test "tools/strange-oracle/*.test.js"    # 단위 시험 (glob을 따옴표로 감쌀 것. 폴더만 주면 Node 24에서 실패)
 node tools/strange-oracle/mock-server.js --port 8788 --mode test  # 시험 페이지 = e2e가 쓰는 서버 (백그라운드). off는 배포판과 같음
 node tools/strange-oracle/e2e-saju.js
-node tools/strange-oracle/e2e-book.js           # 결제한 탭으로 책 13장(인연의 장 포함)
+node tools/strange-oracle/e2e-book.js           # 결제한 탭으로 책 14장(인연의 장·새 장 포함) + (18단계) 미리보기·잠긴 장 네 길·상태표·#preview·관심사·이벤트 값
 node tools/strange-oracle/e2e-flow.js reduced   # motion도 있음
 node tools/strange-oracle/e2e-map.js            # 16단계 친구 지도(브라우저 둘 = 주인·친구, 약 2분) + off 배포판 DOM 0 (off 서버 8792를 스스로 띄우고 끔)
 node tools/strange-oracle/e2e-pay.js            # 15단계 결제 흐름(test, 이동·팝업, 약 4~5분) + off 배포판 DOM 0 (off 서버 8791을 스스로 띄우고 끔)
 node tools/strange-oracle/perf.js               # 14-6·17-10 성능 (몇 분 걸림, 첫 화면 5회+CLS). --first면 첫 화면만
+node tools/strange-oracle/off-diff-18.js        # (18단계) 시작 커밋과 지금 코드의 첫 화면 파일·바이트, off 화면 글자·DOM 대조 (준비는 파일 머리 설명)
 node tools/strange-oracle/make-pass.js 1        # 운영자용: 열람 코드·해시를 터미널에만 찍음 (저장소·문서에 적지 말 것)
 ```
-- 마지막으로 확인한 수치(2026-10-17 17단계 I2): 단위 151, e2e-saju 41, e2e-book 59, e2e-pay 68, e2e-map 80, e2e-flow reduced 127·motion 128, make-volume 불일치 0, build-dist 통과, 모두 실패 0. (e2e-map 화면 합계가 예전에 1 많게(78) 찍히던 식을 고침 — 파일 합계 77이 맞았다.) e2e-pay·e2e-map은 따로따로 돌리고, 끊으면 `/__dev/map-switch?down=0&limits=reset`.
+- 마지막으로 확인한 수치(2026-10-18 18단계 J2): 단위 168(cross.test.js 13 포함, 240만 조합 시험이 30~60초), e2e-saju 41, e2e-book 96, e2e-pay 69, e2e-map 80, e2e-utm 29, e2e-flow reduced 127·motion 128, make-volume 불일치 0, build-dist 통과, off-diff-18 off 화면 20개 차이 0, 모두 실패 0.
+- 그 전 수치(2026-10-17 17단계 I2): 단위 151, e2e-saju 41, e2e-book 59, e2e-pay 68, e2e-map 80, e2e-flow reduced 127·motion 128, make-volume 불일치 0, build-dist 통과, 모두 실패 0. (e2e-map 화면 합계가 예전에 1 많게(78) 찍히던 식을 고침 — 파일 합계 77이 맞았다.) e2e-pay·e2e-map은 따로따로 돌리고, 끊으면 `/__dev/map-switch?down=0&limits=reset`.
 - 그 전 수치(2026-10-17 16단계 H3): 단위 140(map-score 11 포함), e2e-map 78, e2e-saju 41, e2e-book 54·e2e-pay 67(둘 다 지도 `down=1` 상태로), e2e-flow reduced 127, motion 128, 모두 실패 0.
 - **친구 지도 시험(16단계, 모의 서버 test에만):** 지도 요청 `POST /__dev/map/<create|join|peek|view|erase>`, 스위치 `/__dev/map-switch?down=1|0&slow=<ms>&clock=+91d|0&cap=<n>|default&limits=reset`, 저장소 보기 `/__dev/map-store`(`?clear=1`), 지름길 `/__dev/skip?rooms=7&join=<22자>&birth=YYYY-MM-DD`. e2e는 **127.0.0.1**로 연다(localhost면 403). 모의 서버는 map.js·data-map.js를 원본에서 읽으므로 그 두 파일은 고쳐도 재시작이 필요 없지만, app.js·data.js는 build-dist 뒤 재시작해야 한다.
 - 그 전 수치(2026-10-16 15단계 G3): 단위 89, e2e-saju 41, e2e-book 54, e2e-flow reduced 127, motion 128, e2e-pay 62, 모두 실패 0. e2e-ads는 은퇴(광고 제거). 성능은 tests.md 「14단계 · 성능」(첫 화면 등 미달 항목 있음).
@@ -102,7 +104,9 @@ node tools/strange-oracle/make-pass.js 1        # 운영자용: 열람 코드·�
 - **모의 서버 재시작:** 문구·코드를 고친 뒤에는 build-dist를 다시 하고 서버를 재시작한다(test 모드는 data.js의 pay.mode를 응답할 때만 test로 바꾸고 파일은 고치지 않는다). 포트 8787은 쓰지 않는다.
 
 ## 5. 문구를 고칠 때 지켜야 할 순서
-- **책 유료 문장의 유일한 원본은 `products/strange-oracle/api/_paid/book/book-*.js`다(14-4).** 방별 장 7개(`book-saju`…`book-sibyl`), `book-flow`(시기별 흐름), `book-match`(궁합 + 궁합 다양화 `bond`, 관계 유형 4개: lover·friend·work·family), `book-arch`(원형 심층).
+- **책 유료 문장의 유일한 원본은 `products/strange-oracle/api/_paid/book/book-*.js`다(14-4).** 방별 장 7개(`book-saju`…`book-sibyl`), `book-flow`(시기별 흐름), `book-match`(궁합 + 궁합 다양화 `bond`, 관계 유형 4개: lover·friend·work·family), `book-arch`(원형 심층), `book-yeon`(17단계 인연의 장), `book-cross`(18단계 새 장 「겹치는 곳, 갈리는 곳」, 164항목). 함수 book 허용 목록 12개.
+  - (18단계 18-6, 결정 117) **방 장 첫 줄(firstLine) 169개는 공개 맛보기 `products/strange-oracle/data-book-sample.js`로 옮겼다.** 유료 원본에는 firstLine 키가 없다(원본 한 벌). 첫 줄을 고칠 때는 이 파일에서 고친다(`apply-17.js`의 `first-<방>-<n>` 묶음도 이 파일에 넣는다). 미리보기와 책 장 첫 쪽이 같은 값을 쓴다.
+  - (18단계) 새 장 문구는 `node tools/strange-oracle/apply-17.js --stage 18 <묶음>` → `node tools/strange-oracle/check-17.js --stage 18`(진행 폴더 `tools/strange-oracle/copy-18/`, 사용법 copy-17/README.md 「18단계」 절). 고르기 규칙(18-2)은 브라우저 `book.js crossPick`, 원형 상수는 `arch-core.js`(지도와 공용, 첫 화면 밖).
   - 고치는 순서: 원본 수정 → `node tools/strange-oracle/make-volume.js`(분량 표 data-volume.js, 불일치 0) → `node tools/build-dist.js`(유료 문장 누출 0이어야 함).
   - 여는 글·닫는 글(무료 맛보기)은 공개 `products/strange-oracle/data-book-free.js`에서 고친다.
   - 유료 문장을 제품 폴더의 다른 파일(data.js 등)에 옮겨 적지 않는다(CLAUDE.md 7장). build-dist 지문 검사가 막는다.

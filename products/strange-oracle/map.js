@@ -15,19 +15,10 @@
   "use strict";
 
   // ═════════ 1. 순수 계산 (Node 시험 map-score.test.js도 이 부분을 그대로 쓴다) ═════════
-  const ARCH = ["warrior", "sage", "lover", "rebel", "caregiver", "explorer", "creator", "ruler"];
-  const AXES = ["act", "talk", "heart", "order", "free"];
-  // 16-4의 1 원형 프로필 표 (축마다 0~4). 문구가 아니라 계산 상수다. 고칠 때는 tests.md 「16단계 · 점수 분포」에 적는다
-  const PROFILE = {
-    warrior: [4, 1, 1, 2, 2],
-    sage: [1, 4, 1, 3, 1],
-    lover: [1, 2, 4, 1, 2],
-    rebel: [3, 2, 1, 0, 4],
-    caregiver: [1, 1, 4, 3, 0],
-    explorer: [2, 3, 1, 0, 4],
-    creator: [2, 3, 2, 2, 2],
-    ruler: [3, 1, 1, 4, 0],
-  };
+  // (18단계 18-2) ARCH·AXES·PROFILE(16-4의 1 원형 프로필 표, 계산 상수)은 arch-core.js로 옮겼다. 숫자는 그대로다.
+  //   브라우저: app.js가 arch-core.js를 map.js보다 먼저 받는다. Node 시험: require로 읽는다
+  const AC = typeof module === "object" && module.exports ? require("./arch-core.js") : root.ArchCore;
+  const { ARCH, AXES, PROFILE } = AC;
   const isArch = (a) => ARCH.includes(a);
   // 64개 코드: 주·보조(다름) 56 + 보조 = 주 8
   const CODES = [];

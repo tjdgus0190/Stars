@@ -243,8 +243,8 @@ test("다양성 실측 → out/book-variety.txt", () => {
     return { r, P, ph };
   };
 
-  test("함수 book: 허용 목록은 정확히 11개(17단계 yeon), 유료 원본 파일과 1:1", () => {
-    assert.deepStrictEqual([...Fn.ALLOW].sort(), ["arch", "decan", "flow", "match", "ogham", "rune", "saju", "sibyl", "star", "tzolkin", "yeon"]);
+  test("함수 book: 허용 목록은 정확히 12개(17단계 yeon, 18단계 cross), 유료 원본 파일과 1:1", () => {
+    assert.deepStrictEqual([...Fn.ALLOW].sort(), ["arch", "cross", "decan", "flow", "match", "ogham", "rune", "saju", "sibyl", "star", "tzolkin", "yeon"]);
     assert.deepStrictEqual(fs.readdirSync(PAIDDIR).filter((f) => f.endsWith(".js")).map((f) => f.replace(/^book-|\.js$/g, "")).sort(), [...Fn.ALLOW].sort());
   });
   test("함수 book: 수동 코드(BOOK_PASS_HASHES) + 허용 file → 200, no-store, 저장소를 읽지 않음", async () => {

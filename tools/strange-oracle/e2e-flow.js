@@ -458,9 +458,10 @@ function paidSentences() {
   await seed(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
   await b.goto(BASE + "#story");
   await waitScreen("screen-story", 3000);
-  const six = await ev("(() => { const vis = (e) => e && e.offsetHeight > 0; return { paid: vis(document.querySelector('[data-js=story-paid]')), note: vis(document.querySelector('[data-js=story-book]')), half: vis(document.querySelector('[data-js=story-half]')), noteBtn: document.querySelector('[data-js=story-book]').querySelectorAll('button:not([disabled])').length === 1 }; })()");
+  // (18단계 18-5, 확인 122 — 기대값 변경, tests.md 「18단계 · 바뀐 기대값」) test 7/7 결제 전: 책 목차 버튼 자리에 미리보기 카드(주 버튼 하나), 책 목차 버튼은 숨김
+  const six = await ev("(() => { const vis = (e) => e && e.offsetHeight > 0; const pv = document.querySelector('[data-js=story-preview]'); return { paid: vis(document.querySelector('[data-js=story-paid]')), note: vis(pv) && !vis(document.querySelector('[data-js=story-book]')), half: vis(document.querySelector('[data-js=story-half]')), noteBtn: !!pv && pv.querySelectorAll('button:not([disabled])').length === 1 }; })()");
   const sixDead = await deadScan("#screen-story");
-  check("13단계 6/6 나의 이야기: 결제 카드 없음 · 책 목차 열기 버튼 1개 · 가격·'곧'·죽은 버튼 0 · H5 없음", !six.paid && six.note && six.noteBtn && !six.half && !sixDead.price && !sixDead.soon && sixDead.dead === 0, JSON.stringify(six) + JSON.stringify(sixDead));
+  check("13단계 6/6 나의 이야기: 결제 카드 없음 · (18-5) 미리보기 카드 버튼 1개(책 목차 버튼 숨김) · 가격·'곧'·죽은 버튼 0 · H5 없음", !six.paid && six.note && six.noteBtn && !six.half && !sixDead.price && !sixDead.soon && sixDead.dead === 0, JSON.stringify(six) + JSON.stringify(sixDead));
   const sixRes = [];
   for (const room of ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]) {
     await ev("StrangeOracle.go('story')");

@@ -5,7 +5,7 @@
 // 보는 것
 //  A. 결제 전 화면: 1~6이 버튼 위·판매자 정보 줄은 아래·동의 전 비활성·userid 빈칸이면 비활성 + 판매 준비 중·이미 열린 탭이면 "이미 열려 있어요"·SDK 요청 0
 //     열람 코드 칸(SO1·SOG·모양 → 요청 0, 틀림 fail, 닿지 않음 offline, 맞음 → 목차)
-//  B. 이동 방식: [결제하기] → SDK 1건 → 가짜 결제창(넘긴 값은 15-2 표뿐) → [결제 완료] → #paid → 책 11장 + 코드 카드(SOP·복사) → 새 탭에서 코드로 열림
+//  B. 이동 방식: [결제하기] → SDK 1건 → 가짜 결제창(넘긴 값은 15-2 표뿐) → [결제 완료] → #paid → 책 12장(18단계) + 코드 카드(SOP·복사) → 새 탭에서 코드로 열림
 //  C. 팝업 방식: 진짜 마우스 클릭 → 팝업이 막히지 않음 → 팝업에 "원래 창에서 열려요" → 원래 탭에서 책·코드 카드
 //  D. 실패·늦음: [결제 실패] → 30초 넘음(late)·[다시 확인]·[목차로], 회차 3번 되풀이 429 없음·회차당 17회 이하(겹침 없음), [완료, 통보 늦게] → late → [다시 확인]으로 열림
 //  E. 429: 화면 busy + Retry-After 동안 [다시 확인] 비활성(가로챈 응답으로 3초 뒤 활성 확인, 머리 없으면 60초)
@@ -26,7 +26,7 @@ const P = "/products/strange-oracle/index.html";
 const CDP_PORT = 9621;
 const out = [];
 const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${name}${extra !== "" ? "  — " + extra : ""}`; out.push(l); console.log(l); };
-const PAID = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl", "flow", "yeon", "match", "deep"]; // (17단계) 유료 11장;
+const PAID = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl", "cross", "flow", "yeon", "match", "deep"]; // (17단계) 유료 11장 → (18단계) 새 장 cross 더해 12장(방 2개 이상에서 열림)
 const PassCode = require("../../products/strange-oracle/paycode.js").Pass;
 const sw = (q) => fetch(`${TEST}/__dev/pay-switch?${q}`).then((r) => r.json());
 const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
@@ -107,7 +107,11 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("A0 지름길 rooms=2&to=book(결제 전) → 목차", await skip(TEST, "rooms=2&to=book", "screen-report"));
   const sdk0 = sdkN();
   await click("[data-js=book-chapter][data-chapter=saju] [data-js=book-chapter-btn]");
-  check("A1 잠긴 장을 누르면 결제 전 화면", await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'"));
+  // (18단계 18-5, 기대값 변경 — tests.md 「18단계 · 바뀐 기대값」) 1~6/7 결제 전: 잠긴 장을 눌러도 결제 전 화면으로 가지 않고 목차의 그 장 줄 강조 + 토스트
+  await sleep(400);
+  const a1 = await ev("({ scr: document.querySelector('.screen.is-active')?.id, target: !!document.querySelector('[data-js=book-chapter][data-chapter=saju].is-target'), toast: (document.querySelector('[data-js=toast]') || {}).textContent || '' })");
+  check("A1 (18-5) 1~6/7 결제 전 잠긴 장 → 결제 전 화면 아님 · 목차 그 장 줄 .is-target · 토스트", a1.scr === "screen-report" && a1.target && a1.toast === (await ev("TEXT.book.toc.lockedToast")), JSON.stringify(a1));
+  check("A1b (18-5) 목차 맨 아래 작은 글자 버튼 하나(btn--text, 주 버튼 모양 아님) → 결제 전 화면", (await ev("(() => { const b = document.querySelector('[data-js=book-buy]'); const row = document.querySelector('[data-js=book-buy-row]'); return !!b && !row.hidden && b.classList.contains('btn--text') && !b.classList.contains('btn--primary'); })()")) && (await click("[data-js=book-buy]")) && (await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'")));
   const lay = await ev(`(() => {
     const s = document.querySelector('#screen-deeper');
     const y = (el) => el.getBoundingClientRect().top + scrollY;
@@ -122,8 +126,10 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       old: !!s.querySelector('[data-js=pay-price-unit], [data-js=pay-store-name]'),
       names: [...s.querySelectorAll('[data-js=pay-chapters] li')].map((li) => li.firstElementChild.firstChild.textContent), news: [...s.querySelectorAll('[data-js=pay-chapters] li.pay-list__item--new')].map((li) => li.firstElementChild.firstChild.textContent + '|' + (li.querySelector('.pay-list__new') || {}).textContent) };
   })()`);
-  check("A2 1 받는 것(11장)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 11, JSON.stringify(lay));
-  check("17-5 받는 것: 인연의 장 줄은 시기별 흐름 다음·궁합 앞, 그 줄 하나만 .pay-list__item--new + 알약(.pay-list__new 문구 있음)", lay.names.indexOf(await ev("TEXT.book.parts.yeon")) === lay.names.indexOf(await ev("TEXT.book.parts.timeline")) + 1 && lay.names.indexOf(await ev("TEXT.book.parts.match")) === lay.names.indexOf(await ev("TEXT.book.parts.yeon")) + 1 && lay.news.length === 1 && lay.news[0].split("|")[0] === (await ev("TEXT.book.parts.yeon")) && lay.news[0].split("|")[1].length > 0, JSON.stringify(lay.news));
+  check("A2 1 받는 것(12장)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 12, JSON.stringify(lay));
+  // (18-9, 기대값 변경) 새로 더해진 장 알약은 인연의 장 → 새 장. 새 장 줄은 방 장 7줄 바로 뒤(제2부 맨 앞), 인연의 장은 그대로 시기별 흐름 다음(관심사 없음)
+  const cxName = await ev("TEXT.book.parts.cross"), rmLast = await ev("TEXT.topbar.room.replace('{num}', 'Ⅶ').replace('{name}', TEXT.rooms.sibyl.name)");
+  check("18-9 받는 것: 새 장 줄은 방 장 바로 뒤·시기별 흐름 앞, 그 줄 하나만 .pay-list__item--new + 알약 · 인연의 장은 시기별 흐름 다음", lay.names.indexOf(cxName) === 7 && lay.names.indexOf(await ev("TEXT.book.parts.timeline")) === 8 && lay.names.indexOf(await ev("TEXT.book.parts.yeon")) === lay.names.indexOf(await ev("TEXT.book.parts.timeline")) + 1 && lay.news.length === 1 && lay.news[0].split("|")[0] === cxName && lay.news[0].split("|")[1].length > 0, JSON.stringify({ names: lay.names, news: lay.news, rmLast }));
   check("A3 판매자 정보 줄 5칸(신고 줄은 값이 없어 숨김)·legal 3종 링크·결제 버튼은 <button>(href 없음)·옛 칸 2개 없음", lay.seller === 5 && lay.legal === 3 && lay.tag === "BUTTON" && !lay.href && !lay.old);
   check("A4 동의 전 비활성·시험 띠·userid(모의 값) 있으면 '판매 준비 중' 숨김·가로 넘침 0", lay.buyOff && lay.band && !lay.empty && lay.wide);
   // K. (15단계 QA 1차 필수 1) test: 판매자 정보 줄 legal 링크 3개가 200이고 결제 문단이 주석 밖에 보인다
@@ -193,7 +199,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("B7 [복사] 누르면 복사됨 표시 또는 복사 실패 안내 한 줄(헤드리스 클립보드 권한 미확인)", await ev("!document.querySelector('[data-js=code-status]').classList.contains('is-hidden') && document.querySelector('[data-js=code-status]').textContent.length > 0"));
   await click("[data-js=code-close]");
   const rB = await rows();
-  check("B8 책 목차: 유료 11장 모두 열림", (await active()) === "screen-report" && PAID.every((id) => rB[id] === "opened"), JSON.stringify(rB));
+  check("B8 책 목차: 유료 12장 모두 열림", (await active()) === "screen-report" && PAID.every((id) => rB[id] === "opened"), JSON.stringify(rB));
   check("B9 목차 '내 열람 코드 보기' 줄 보임 → 누르면 코드 카드", (await visible("[data-js=book-code-row]")) && (await click("[data-js=book-show-code]")) && (await dlgOpen()));
   await click("[data-js=code-close]");
   await ev("StrangeOracle.go('deeper')");
@@ -206,7 +212,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   await click("[data-js=pass-go]");
   const nb = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'", 6000);
   const rN = await rows();
-  check("B11 새 탭(저장소 비움)에서 그 코드를 넣으면 11장 열림", nb && PAID.every((id) => rN[id] === "opened"), JSON.stringify(rN));
+  check("B11 새 탭(저장소 비움)에서 그 코드를 넣으면 12장 열림", nb && PAID.every((id) => rN[id] === "opened"), JSON.stringify(rN));
 
   // ═══ C. 팝업 방식 ═══
   await sw("win=popup");
@@ -415,7 +421,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   await sleep(900);
   try {
     const nOff = b.log.requests.length;
-    const DOM0 = "#screen-report, #screen-deeper, #screen-paycheck, #screen-paypopup, template, [data-js=pay-tpl], [data-js=pay-toc-tpl], [data-js=pay-code-dialog], [data-js=clear-warn-pay], [data-js=book-code-row], [data-js=hub-book], [data-js=result-book-line], [data-js=story-book], [data-js=story-book-link], [data-js=pass-enter], [data-js=book-chapter], [data-t='hub.faq.items.4.q'], [data-js=book-toc-open]";
+    const DOM0 = "#screen-report, #screen-deeper, #screen-paycheck, #screen-paypopup, template, [data-js=pay-tpl], [data-js=pay-toc-tpl], [data-js=pay-code-dialog], [data-js=clear-warn-pay], [data-js=book-code-row], [data-js=hub-book], [data-js=result-book-line], [data-js=story-book], [data-js=story-book-link], [data-js=pass-enter], [data-js=book-chapter], [data-t='hub.faq.items.4.q'], [data-js=book-toc-open], #screen-preview, [data-js=story-preview], [data-js=book-preview-band], [data-js=book-interest], [data-js=book-buy-row], [data-js=report-cross]"; // (18-7) 미리보기·나의 이야기 카드·목차 조각·새 장 원본 칸도 0
     const counts = {};
     check("J1 off: 지름길 rooms=7(결제 표시 없음) → 나의 이야기", await skip(OFF, "rooms=7&paid=1", "screen-story"));
     counts.story = await ev(`document.querySelectorAll(${JSON.stringify(DOM0)}).length`);
@@ -443,7 +449,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
     check("J6 off: privacy·terms 200, 결제 문단(제4조의3·제2조의2·페이앱·목차 줄)·표지 0, '결제 없음' 문장 있음, refund.html 404",
       oPriv.s === 200 && oTerms.s === 200 && oRefund.s === 404 && !/s4-3|s2-2|페이앱|3,900|pay:(on|off)/.test(oPriv.t + oTerms.t) && /결제를 받지 않으므로/.test(oPriv.t) && /판매하는 상품이나 결제가 없습니다/.test(oTerms.t),
       `privacy ${oPriv.s} · terms ${oTerms.s} · refund ${oRefund.s}`);
-    check("J7 off: index.html 원본(소스 보기)에 pay-tpl·pay-toc-tpl template·'판매자 ◯◯'·표지 0", oIndex.s === 200 && !/pay-tpl|pay-toc-tpl|판매자 ◯◯|pay:(on|off)\s*-->/.test(oIndex.t));
+    check("J7 off: index.html 원본(소스 보기)에 pay-tpl·pay-toc-tpl·(18-7) preview-tpl·toc18-tpl·cross-tpl·story-preview-tpl template·'판매자 ◯◯'·표지 0", oIndex.s === 200 && !/pay-tpl|pay-toc-tpl|preview-tpl|toc18-tpl|cross-tpl|story-preview-tpl|판매자 ◯◯|pay:(on|off)\s*-->/.test(oIndex.t));
   } finally {
     srv.kill();
   }
