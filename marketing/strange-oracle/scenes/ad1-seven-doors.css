@@ -207,10 +207,9 @@
   border: 2px solid oklch(0.66 0.075 75 / 0.45); border-bottom: 0;
   background: radial-gradient(ellipse 70% 50% at 50% 40%, var(--gold-soft), transparent 70%);
   -webkit-mask: linear-gradient(#000 60%, transparent); mask: linear-gradient(#000 60%, transparent); }
-.end__eyebrow { position: absolute; left: var(--text-left); width: var(--text-width); top: 646px; font-size: 28px; }
-.end__logo { position: absolute; left: var(--text-left); width: var(--text-width); top: 694px; font-size: 128px;
+.end__logo { position: absolute; left: var(--text-left); width: var(--text-width); top: 670px; font-size: 128px;
   animation: logo-shimmer 1.6s var(--ease-in-out) 13.1s both, end-knock 0.3s ease-out 14.5s both; }
 @keyframes end-knock { 0% { scale: 1; } 40% { scale: 1.015; } 100% { scale: 1; } }
-.end__marks { position: absolute; left: var(--text-left); width: var(--text-width); top: 870px; display: flex; justify-content: center; gap: 10px; --m0: 13.45s; --mstep: 0.07s; }
-.end__cta { top: 960px; }
+.end__marks { position: absolute; left: var(--text-left); width: var(--text-width); top: 846px; display: flex; justify-content: center; gap: 10px; --m0: 13.45s; --mstep: 0.07s; }
+.end__cta { top: 936px; }
 .end__note { top: 1140px; }
