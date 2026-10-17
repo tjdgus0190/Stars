@@ -2,8 +2,10 @@
 // index.html의 data-t(자식 태그 없는 요소)와 head meta를 data.js·data-saju.js 현재 문구로 맞춘다
 const fs=require("fs"),path=require("path"),vm=require("vm");
 const dir=process.argv[2];const sb={window:{},console};sb.window.window=sb.window;vm.createContext(sb);
-for(const f of ["data.js","data-saju.js"])vm.runInContext(fs.readFileSync(path.join(dir,f),"utf8").replace(/^\s*(const|let)\s+/gm,"var "),sb);
-const T=sb.window.TEXT,SAJU=sb.window.SAJU;const app=fs.readFileSync(path.join(dir,"app.js"),"utf8");
+for (const f of ["data.js", "data-saju.js", "data-map.js"].filter((f) => fs.existsSync(path.join(dir, f))))vm.runInContext(fs.readFileSync(path.join(dir,f),"utf8").replace(/^\s*(const|let)\s+/gm,"var "),sb);
+const T=sb.window.TEXT,SAJU=sb.window.SAJU;
+{ const TM = (typeof W !== "undefined" ? W : sb.window).TEXT_MAP || {}; if (T.map) Object.keys(TM).forEach((k) => { if (!(k in T.map)) T.map[k] = TM[k]; }); } // app.js ensureMap과 같은 병합
+const app=fs.readFileSync(path.join(dir,"app.js"),"utf8");
 const s=app.indexOf("function mergeSajuText()");let i=app.indexOf("{",s),d=0;for(;i<app.length;i++){if(app[i]==="{")d++;else if(app[i]==="}"&&--d===0)break;}
 new Function("T","SAJU",app.slice(s,i+1)+";mergeSajuText();")(T,SAJU);
 const get=p=>p.split(".").reduce((o,k)=>o==null?o:o[k],T);const esc=x=>String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");const escA=x=>esc(x).replace(/"/g,"&quot;");

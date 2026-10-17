@@ -443,8 +443,11 @@ const cardState = (b, where = "story") => b.ev(`document.querySelector(${JSON.st
     const bodies = all.map((r) => r.body).join("\n");
     const hitIn = (t) => INPUTS.filter((w) => t.includes(w));
     check("6장 입력값·코드·방 세부가 요청 URL·본문에 0", hitIn(urls).length === 0 && hitIn(bodies).length === 0, hitIn(urls + bodies).join(","));
-    const st = JSON.stringify(await store());
-    check("6장 /__dev/map-store에 입력값·키·코드 원문 0", hitIn(st).length === 0 && !/SOM-|SOD-/.test(st));
+    const stRaw = await store();
+    // 무작위 ID·해시·시각 칸은 우연히 "1995"·"1437" 같은 숫자를 품을 수 있어 입력값 검색에서 뺀다(사람이 넣은 칸 nick·icon·main·sub만 본다). SOM-·SOD- 원문 검사는 전체에
+    const st = JSON.stringify(stRaw, (k, v) => (/^(id|invite|rid|map_id|created|active|joined)$|_hash$|^hour_/.test(k) ? "" : v));
+    const stAll = JSON.stringify(stRaw);
+    check("6장 /__dev/map-store에 입력값·키·코드 원문 0", hitIn(st).length === 0 && !/SOM-|SOD-/.test(stAll), hitIn(st).join(","));
     check("6장 요청 URL에 열람 키·삭제 코드·초대 ID 0", !/SOM-|SOD-/.test(urls) && !urls.split("\n").some((u) => u.includes(invite) || u.includes(invite2)));
     const dlLines = A.log.console.filter((l) => /^debug: DL /.test(l)).map((l) => l.replace(/^debug: DL /, ""));
     const dl = dlLines.join("\n");

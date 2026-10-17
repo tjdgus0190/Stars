@@ -8,9 +8,10 @@ const dry = process.argv.includes("--dry");
 const sandbox = { window: {}, console };
 sandbox.window.window = sandbox.window;
 vm.createContext(sandbox);
-for (const f of ["data.js", "data-saju.js"]) vm.runInContext(fs.readFileSync(path.join(dir, f), "utf8").replace(/^\s*(const|let)\s+/gm, "var "), sandbox);
+for (const f of ["data.js", "data-saju.js", "data-map.js"].filter((f) => fs.existsSync(path.join(dir, f)))) vm.runInContext(fs.readFileSync(path.join(dir, f), "utf8").replace(/^\s*(const|let)\s+/gm, "var "), sandbox);
 const W = sandbox.window;
 const T = W.TEXT;
+{ const TM = (typeof W !== "undefined" ? W : sb.window).TEXT_MAP || {}; if (T.map) Object.keys(TM).forEach((k) => { if (!(k in T.map)) T.map[k] = TM[k]; }); } // app.js ensureMap과 같은 병합
 const SAJU = W.SAJU;
 // app.js의 mergeSajuText를 그대로 꺼내 실행
 const app = fs.readFileSync(path.join(dir, "app.js"), "utf8");

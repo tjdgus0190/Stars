@@ -477,9 +477,9 @@
           <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">일곱 방의 장 전체와 숨은 장, 시기별 흐름·궁합·원형 심층까지 유료 10장을 엮은 책이에요. 페이앱 결제창에서 3,900원을 결제하면 바로 열리고, 열람 코드로 다른 기기에서도 다시 열 수 있어요. 여는 글·닫는 글과 목차는 무료예요.</dd>
           </div>
           <!-- map:on -->
-          <!-- (16단계) 지도 문답 2개 (답 150자 이내). copywriter(H4)가 data.js에 넣고 [초안]을 정리한다 -->
-          <div class="faq__item"><dt data-t="hub.faq.map.0.q">[초안] 친구 지도는 무엇을 보내나요?</dt><dd data-t="hub.faq.map.0.a">[초안] 지도를 만들거나 참여할 때만 별명·아이콘·원형 두 개를 보내요. 이름·생년월일·태어난 시각·성별·방별 결과는 보내지 않아요. 보내지 않아도 모든 결과를 볼 수 있어요.</dd></div>
-          <div class="faq__item"><dt data-t="hub.faq.map.1.q">[초안] 지도 기록은 어떻게 지우나요?</dt><dd data-t="hub.faq.map.1.a">[초안] 지도 주인은 지도 화면에서 친구 한 명이나 지도 전체를 지워요. 친구는 받은 삭제 코드로 자기 기록을 지워요. 마지막으로 연 날부터 90일이 지나면 저절로 지워져요.</dd></div>
+          <!-- (16단계) 지도 문답 2개 (답 150자 이내). copywriter(H4)가 data.js에 넣고 견본을 정리한다 -->
+          <div class="faq__item"><dt data-t="hub.faq.map.0.q">친구 지도는 무엇을 보내나요?</dt><dd data-t="hub.faq.map.0.a">지도를 만들거나 참여하며 [보내기]를 누를 때만 별명·아이콘·원형 두 개를 보내요. 이름·생년월일·태어난 시각·성별·방별 결과는 보내지 않고, 보내지 않아도 모든 결과를 그대로 볼 수 있어요.</dd></div>
+          <div class="faq__item"><dt data-t="hub.faq.map.1.q">지도 기록은 어떻게 지우나요?</dt><dd data-t="hub.faq.map.1.a">지도 주인은 지도 화면에서 친구 한 명이나 지도 전체를 바로 지워요. 친구는 참여할 때 받은 삭제 코드로 자기 기록을 지워요. 주인이 마지막으로 연 날부터 90일이 지나면 저절로 지워져요.</dd></div>
           <!-- /map:on -->
         </dl>
       </section>
@@ -3289,7 +3289,7 @@
            ⑤ #screen-map-consent  ⑥ #screen-map  ⑦ #screen-map-friend  ⑧ dialog map-key-dialog  ⑨ dialog map-pop-dialog
            ⑩ dialog map-pick-dialog  ⑪ dialog map-confirm-dialog
          상태는 data-state 하나로 바뀐다. 각 블록의 data-when(공백으로 여러 값)에 지금 상태가 있으면 CSS가 보인다(결제 확인 화면과 같은 방식).
-         문구는 모두 data-map.js(map.*). [초안]은 copywriter(H4)가 정리한다. 명세: design/strange-oracle.md 「16단계」 -->
+         문구는 모두 data-map.js(map.*). 견본은 copywriter(H4)가 정리한다. 명세: design/strange-oracle.md 「16단계」 -->
     <template data-js="map-tpl">
 
     <!-- ① 아이콘 24개 (i01~i24, designer 직접 제작, 24×24 선 그림). 이름(읽기 프로그램용)은 data-map.js map.icons.iNN -->
@@ -3329,75 +3329,75 @@
         <svg viewBox="-60 -60 120 120" focusable="false"><path class="map-card__pent" pathLength="1" d="M0-52L49.5-16.1L30.6 42.1H-30.6L-49.5-16.1Z"/><path class="map-card__pent map-card__pent--in" d="M0-30L28.5-9.3L17.6 24.3H-17.6L-28.5-9.3Z"/><circle class="map-card__dot" cx="0" cy="0" r="4"/><circle class="map-card__dot map-card__dot--f" cx="18" cy="-20" r="3"/><circle class="map-card__dot map-card__dot--f" cx="-22" cy="6" r="3"/><circle class="map-card__dot map-card__dot--f" cx="8" cy="26" r="3"/></svg>
       </div>
       <p class="eyebrow map-card__eyebrow" lang="en" data-t="map.card.eyebrow">FRIEND MAP</p>
-      <h2 class="map-card__title" id="map-card-title" data-t="map.card.title">[초안] 내 친구 지도</h2>
+      <h2 class="map-card__title" id="map-card-title" data-t="map.card.title">내 친구 지도</h2>
 
       <!-- 잠금(주인) -->
-      <p class="map-card__text" data-when="locked" data-js="map-card-locked">[초안] 일곱 방을 모두 마치면 지도를 만들 수 있어요 (<b data-js="map-card-count">3</b>/7)</p>
+      <p class="map-card__text" data-when="locked" data-js="map-card-locked"><b data-js="map-card-count">3</b>/7)</p>
       <!-- 잠금(초대받은 친구). ○○ = 주인 별명 -->
-      <p class="map-card__text" data-when="locked-join" data-js="map-card-locked-join">[초안] <b data-js="map-card-count">3</b>/7 · 일곱 방을 마치면 <b data-js="map-owner-name">별빛토끼</b>님 지도에 참여할 수 있어요</p>
-      <button class="btn btn--secondary btn--block" type="button" data-when="locked locked-join" data-js="map-card-next" data-t="map.card.next">[초안] 다음 방으로</button>
+      <p class="map-card__text" data-when="locked-join" data-js="map-card-locked-join"><b data-js="map-card-count">3</b>/7 · 일곱 방을 마치면 <b data-js="map-owner-name">별빛토끼</b>님 지도에 참여할 수 있어요</p>
+      <button class="btn btn--secondary btn--block" type="button" data-when="locked locked-join" data-js="map-card-next" data-t="map.card.next">다음 방으로</button>
 
       <!-- 만들기 -->
-      <p class="map-card__text" data-when="create" data-t="map.card.lead">[초안] 친구를 초대하면 원형 궁합이 오각형 지도 위에 모여요. 가까울수록 결이 닮았어요.</p>
-      <button class="btn btn--primary btn--block" type="button" data-when="create" data-js="map-create" data-t="map.card.create">[초안] 내 친구 지도 만들기</button>
+      <p class="map-card__text" data-when="create" data-t="map.card.lead">친구를 초대하면 원형 궁합이 오각형 지도 위에 모여요. 가까울수록 결이 닮았어요.</p>
+      <button class="btn btn--primary btn--block" type="button" data-when="create" data-js="map-create" data-t="map.card.create">내 친구 지도 만들기</button>
 
       <!-- 보기 -->
-      <p class="map-card__text" data-when="view" data-t="map.card.viewLead">[초안] 이 기기에 내 친구 지도가 있어요.</p>
-      <button class="btn btn--primary btn--block" type="button" data-when="view" data-js="map-view" data-t="map.card.view">[초안] 내 친구 지도 보기</button>
+      <p class="map-card__text" data-when="view" data-t="map.card.viewLead">이 기기에 내 친구 지도가 있어요.</p>
+      <button class="btn btn--primary btn--block" type="button" data-when="view" data-js="map-view" data-t="map.card.view">내 친구 지도 보기</button>
 
       <!-- 참여(친구, 7/7) -->
       <div class="map-card__host" data-when="join joined">
         <span class="map-ico map-ico--md" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#map-i03"/></svg></span>
-        <p class="map-card__text"><span data-when="join" data-js="map-card-join-text">[초안] <b data-js="map-owner-name">별빛토끼</b>님의 친구 지도예요. 참여하면 둘의 궁합 점수를 바로 볼 수 있어요.</span><span data-when="joined" data-t="map.card.joined">[초안] 이미 참여했어요.</span></p>
+        <p class="map-card__text"><span data-when="join" data-js="map-card-join-text"><b data-js="map-owner-name">별빛토끼</b>님의 친구 지도예요. 참여하면 둘의 궁합 점수를 바로 볼 수 있어요.</span><span data-when="joined" data-t="map.card.joined">이미 참여했어요.</span></p>
       </div>
-      <button class="btn btn--primary btn--block" type="button" data-when="join" data-js="map-join" data-t="map.card.join">[초안] 궁합 보러 참여하기</button>
-      <button class="btn btn--primary btn--block" type="button" data-when="joined" data-js="map-my-result" data-t="map.card.myResult">[초안] 내 결과 보기</button>
+      <button class="btn btn--primary btn--block" type="button" data-when="join" data-js="map-join" data-t="map.card.join">궁합 보러 참여하기</button>
+      <button class="btn btn--primary btn--block" type="button" data-when="joined" data-js="map-my-result" data-t="map.card.myResult">내 결과 보기</button>
 
       <!-- 생년월일 한 번 묻기(이어가기 코드로 돌아와 이 탭에 생년월일이 없을 때). 값은 메모리에만 -->
       <div class="map-birth" data-when="birth">
-        <label class="map-card__text" for="map-birth-input" data-t="map.age.ask">[초안] 만 14세 이상인지 확인할게요. 생년월일을 한 번만 넣어 주세요. 어디에도 보내거나 저장하지 않아요.</label>
+        <label class="map-card__text" for="map-birth-input" data-t="map.age.ask">친구 지도는 만 14세 이상만 쓸 수 있어요. 생년월일을 한 번 넣어 주세요. 확인에만 쓰고 보내거나 저장하지 않아요.</label>
         <div class="receipt-open__row">
           <input class="input map-birth__input" id="map-birth-input" data-js="map-birth-input" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="1995.03.21" aria-describedby="map-birth-error" />
-          <button class="btn btn--secondary" type="button" data-js="map-birth-go" data-t="map.age.go">[초안] 확인</button>
+          <button class="btn btn--secondary" type="button" data-js="map-birth-go" data-t="map.age.go">확인</button>
         </div>
-        <p class="field__error is-hidden" id="map-birth-error" data-js="map-birth-error" role="alert">[초안] 날짜 형식을 확인해 주세요 (예: 1995.03.21)</p>
+        <p class="field__error is-hidden" id="map-birth-error" data-js="map-birth-error" role="alert"></p>
       </div>
 
       <!-- 만 14세 미만 -->
       <div class="map-block" data-when="young" role="note">
-        <p class="map-block__text" data-t="map.age.blocked">[초안] 친구 지도는 만 14세 이상만 만들거나 참여할 수 있어요. 일곱 방과 나의 이야기는 그대로 볼 수 있어요.</p>
-        <button class="btn btn--secondary btn--block" type="button" data-js="map-age-back" data-go="story" data-t="map.age.back">[초안] 나의 이야기로</button>
+        <p class="map-block__text" data-t="map.age.blocked">친구 지도는 만 14세부터 만들거나 참여할 수 있어요. 일곱 방과 나의 이야기는 그대로 즐길 수 있어요.</p>
+        <button class="btn btn--secondary btn--block" type="button" data-js="map-age-back" data-go="story" data-t="map.age.back">나의 이야기로</button>
       </div>
 
       <!-- 지도 쉼(이 카드 안만) -->
       <div class="map-down" data-when="down" role="status">
-        <p class="map-down__text" data-t="map.down">[초안] 지도가 잠시 쉬고 있어요. 다른 결과는 그대로 볼 수 있어요.</p>
-        <button class="btn btn--secondary btn--small" type="button" data-js="map-retry" data-t="map.retry">[초안] 다시 시도</button>
+        <p class="map-down__text" data-t="map.down">지도가 잠시 쉬고 있어요. 다른 결과는 그대로 볼 수 있어요.</p>
+        <button class="btn btn--secondary btn--small" type="button" data-js="map-retry" data-t="map.retry">다시 시도</button>
       </div>
 
       <div class="map-card__loading" data-when="loading" aria-hidden="true"><span></span></div>
 
       <!-- 접힌 칸 1: 다른 기기에서 만든 지도 열기 (SOM-… / SOP·SOG 오입력 안내는 열람 코드 칸과 같게) -->
       <div class="map-fold" data-when="locked create view">
-        <button class="text-link map-fold__toggle" type="button" data-js="map-key-toggle" aria-expanded="false" aria-controls="map-key-panel"><span id="map-key-link" data-t="map.keyEnter.link">[초안] 다른 기기에서 만든 지도 열기 · 열람 키 넣기</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
+        <button class="text-link map-fold__toggle" type="button" data-js="map-key-toggle" aria-expanded="false" aria-controls="map-key-panel"><span id="map-key-link" data-t="map.keyEnter.link">다른 기기의 지도 열기 · 열람 키 넣기</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
         <div class="map-fold__panel is-hidden" id="map-key-panel" data-js="map-key-panel" role="group" aria-labelledby="map-key-link">
           <div class="receipt-open__row">
             <input class="input receipt-open__input" data-js="map-key-input" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="44" enterkeyhint="done" aria-labelledby="map-key-link" />
-            <button class="btn btn--secondary receipt-open__go" type="button" data-js="map-key-go" data-t="map.keyEnter.go">[초안] 열기</button>
+            <button class="btn btn--secondary receipt-open__go" type="button" data-js="map-key-go" data-t="map.keyEnter.go">열기</button>
           </div>
-          <p class="receipt-open__how" data-t="map.keyEnter.help">[초안] 지도를 만들 때 받은 SOM으로 시작하는 열람 키를 붙여 넣어 주세요</p>
+          <p class="receipt-open__how" data-t="map.keyEnter.help">지도를 만들 때 받은 SOM으로 시작하는 열람 키를 붙여 넣어 주세요</p>
           <p class="field__error is-hidden" data-js="map-key-error" role="alert"></p>
         </div>
       </div>
       <!-- 접힌 칸 2: 친구가 다른 탭·기기에서 자기 기록 지우기 (SOD-…) -->
       <div class="map-fold" data-when="locked create view">
-        <button class="text-link map-fold__toggle" type="button" data-js="map-del-toggle" aria-expanded="false" aria-controls="map-del-panel"><span id="map-del-link" data-t="map.delEnter.link">[초안] 지도에 보낸 내 기록 지우기 · 삭제 코드 넣기</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
+        <button class="text-link map-fold__toggle" type="button" data-js="map-del-toggle" aria-expanded="false" aria-controls="map-del-panel"><span id="map-del-link" data-t="map.delEnter.link">보낸 내 기록 지우기 · 삭제 코드 넣기</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></button>
         <div class="map-fold__panel is-hidden" id="map-del-panel" data-js="map-del-panel" role="group" aria-labelledby="map-del-link">
           <div class="receipt-open__row">
             <input class="input receipt-open__input" data-js="map-del-input" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="44" enterkeyhint="done" aria-labelledby="map-del-link" />
-            <button class="btn btn--secondary receipt-open__go" type="button" data-js="map-del-go" data-t="map.delEnter.go">[초안] 지우기</button>
+            <button class="btn btn--secondary receipt-open__go" type="button" data-js="map-del-go" data-t="map.delEnter.go">지우기</button>
           </div>
-          <p class="receipt-open__how" data-t="map.delEnter.help">[초안] 참여할 때 받은 SOD로 시작하는 삭제 코드를 붙여 넣어 주세요</p>
+          <p class="receipt-open__how" data-t="map.delEnter.help">참여할 때 받은 SOD로 시작하는 삭제 코드를 붙여 넣어 주세요</p>
           <p class="field__error is-hidden" data-js="map-del-error" role="alert"></p>
           <p class="share-status is-hidden" data-js="map-del-status" role="status"></p>
         </div>
@@ -3409,18 +3409,18 @@
     <aside class="map-invite" data-js="map-invite" data-room="hall" data-state="invited" role="note">
       <span class="map-ico map-ico--sm map-invite__ico" aria-hidden="true" data-when="invited mine joined"><svg viewBox="0 0 24 24"><use href="#map-i03" data-js="map-invite-icon"/></svg></span>
       <p class="map-invite__text">
-        <span data-when="invited">[초안] <b data-js="map-owner-name">별빛토끼</b>님이 친구 지도에 초대했어요 · 일곱 방을 마치면 궁합이 보여요</span>
-        <span data-when="mine" data-t="map.invite.mine">[초안] 내 지도 초대 링크예요</span>
-        <span data-when="joined" data-t="map.invite.joined">[초안] 이 지도에 이미 참여했어요</span>
-        <span data-when="closed" data-t="map.invite.closed">[초안] 지금은 이 지도에 참여할 수 없어요</span>
-        <span data-when="down" data-t="map.invite.down">[초안] 지도가 잠시 쉬고 있어요 · 방은 그대로 돌 수 있어요</span>
+        <span data-when="invited"><b data-js="map-owner-name">별빛토끼</b>님이 친구 지도에 초대했어요 · 일곱 방을 마치면 궁합이 보여요</span>
+        <span data-when="mine" data-t="map.invite.mine">내 지도의 초대 링크예요</span>
+        <span data-when="joined" data-t="map.invite.joined">이 지도에 이미 참여했어요</span>
+        <span data-when="closed" data-t="map.invite.closed">지금은 이 지도에 참여할 수 없어요</span>
+        <span data-when="down" data-t="map.invite.down">지도가 잠시 쉬고 있어요 · 방은 그대로 돌 수 있어요</span>
       </p>
-      <button class="text-link map-invite__go" type="button" data-when="mine" data-js="map-invite-view" data-t="map.card.view">[초안] 내 친구 지도 보기</button>
-      <button class="text-link map-invite__go" type="button" data-when="joined" data-js="map-invite-result" data-t="map.card.myResult">[초안] 내 결과 보기</button>
+      <button class="text-link map-invite__go" type="button" data-when="mine" data-js="map-invite-view" data-t="map.card.view">내 친구 지도 보기</button>
+      <button class="text-link map-invite__go" type="button" data-when="joined" data-js="map-invite-result" data-t="map.card.myResult">내 결과 보기</button>
     </aside>
 
     <!-- ④ 입구 작은 링크 — 이 기기에 열람 키가 있을 때만(map-slot-hub) -->
-    <button class="map-hub-link" type="button" data-js="map-hub-link"><svg viewBox="-60 -60 120 120" aria-hidden="true" focusable="false"><path d="M0-52L49.5-16.1L30.6 42.1H-30.6L-49.5-16.1Z"/></svg><span data-t="map.hubLink">[초안] 내 친구 지도</span><span aria-hidden="true">→</span></button>
+    <button class="map-hub-link" type="button" data-js="map-hub-link"><svg viewBox="-60 -60 120 120" aria-hidden="true" focusable="false"><path d="M0-52L49.5-16.1L30.6 42.1H-30.6L-49.5-16.1Z"/></svg><span data-t="map.hubLink">내 친구 지도</span><span aria-hidden="true">→</span></button>
 
     <!-- ⑤ 동의 화면 — 주인·친구 같은 틀. data-role = owner | friend (문구만 다름)
          data-state = form | sending | unsure(응답 없음 8초) | down
@@ -3428,97 +3428,97 @@
     <section class="screen map-consent" id="screen-map-consent" data-js="screen-map-consent" data-room="hall" data-role="owner" data-state="form" data-preview="16-C. 친구 지도 — 보내기 전 동의">
       <header class="room-head room-head--compact">
         <p class="eyebrow" lang="en" data-t="map.consent.eyebrow">BEFORE YOU SEND</p>
-        <h1 class="room-head__title"><span data-role-when="owner" data-t="map.consent.titleOwner">[초안] 지도를 만들기 전에</span><span data-role-when="friend" data-t="map.consent.titleFriend">[초안] 지도에 참여하기 전에</span></h1>
+        <h1 class="room-head__title"><span data-role-when="owner" data-t="map.consent.titleOwner">지도를 만들기 전에</span><span data-role-when="friend" data-t="map.consent.titleFriend">지도에 참여하기 전에</span></h1>
       </header>
 
       <div class="map-down" data-when="down" role="status">
-        <p class="map-down__text" data-t="map.down">[초안] 지도가 잠시 쉬고 있어요. 다른 결과는 그대로 볼 수 있어요.</p>
-        <button class="btn btn--secondary btn--small" type="button" data-js="map-retry" data-t="map.retry">[초안] 다시 시도</button>
+        <p class="map-down__text" data-t="map.down">지도가 잠시 쉬고 있어요. 다른 결과는 그대로 볼 수 있어요.</p>
+        <button class="btn btn--secondary btn--small" type="button" data-js="map-retry" data-t="map.retry">다시 시도</button>
       </div>
 
       <!-- 별명: 1~8자(NFC 뒤 글자 수). 실명·생일·전화번호·주소 모양이면 JS가 aria-invalid=true + map-nick-error 문구 + [보내기] disabled -->
       <div class="map-field">
-        <label class="map-field__label" for="map-nick" data-t="map.consent.nickLabel">[초안] 별명</label>
+        <label class="map-field__label" for="map-nick" data-t="map.consent.nickLabel">별명</label>
         <div class="map-nick">
           <input class="input map-nick__input" id="map-nick" data-js="map-nick" type="text" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="16" enterkeyhint="done" aria-describedby="map-nick-help map-nick-error" />
           <span class="map-nick__count" data-js="map-nick-count" aria-hidden="true">0/8</span>
         </div>
-        <p class="map-field__help" id="map-nick-help" data-t="map.consent.nickHelp">[초안] 친구가 알아볼 별명을 적어 주세요(실명 말고, 1~8자)</p>
+        <p class="map-field__help" id="map-nick-help" data-t="map.consent.nickHelp">친구가 알아볼 별명을 적어 주세요 (실명 말고, 1~8자)</p>
         <!-- 막힘 문구 키: map.nickErr.name(실명) · birth(생일 숫자) · phone · link · char · length -->
-        <p class="field__error map-nick__error is-hidden" id="map-nick-error" data-js="map-nick-error" role="alert">[초안] 실명 대신 별명을 적어 주세요</p>
+        <p class="field__error map-nick__error is-hidden" id="map-nick-error" data-js="map-nick-error" role="alert"></p>
       </div>
 
       <!-- 아이콘 24개 중 하나(라디오, 기본 선택 없음). 4열 × 6줄(360) / 6열 × 4줄(480) -->
       <fieldset class="map-field map-icons">
-        <legend class="map-field__label" data-t="map.consent.iconLabel">[초안] 아이콘</legend>
+        <legend class="map-field__label" data-t="map.consent.iconLabel">아이콘</legend>
         <div class="map-icons__grid" data-js="map-icons">
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i01" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i01"/></svg></span><span class="visually-hidden" data-t="map.icons.i01">[초안] 초승달</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i02" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i02"/></svg></span><span class="visually-hidden" data-t="map.icons.i02">[초안] 해</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i03" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i03"/></svg></span><span class="visually-hidden" data-t="map.icons.i03">[초안] 별</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i04" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i04"/></svg></span><span class="visually-hidden" data-t="map.icons.i04">[초안] 불꽃</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i05" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i05"/></svg></span><span class="visually-hidden" data-t="map.icons.i05">[초안] 잎</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i06" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i06"/></svg></span><span class="visually-hidden" data-t="map.icons.i06">[초안] 물결</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i07" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i07"/></svg></span><span class="visually-hidden" data-t="map.icons.i07">[초안] 산</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i08" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i08"/></svg></span><span class="visually-hidden" data-t="map.icons.i08">[초안] 열쇠</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i09" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i09"/></svg></span><span class="visually-hidden" data-t="map.icons.i09">[초안] 깃털</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i10" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i10"/></svg></span><span class="visually-hidden" data-t="map.icons.i10">[초안] 물고기</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i11" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i11"/></svg></span><span class="visually-hidden" data-t="map.icons.i11">[초안] 고양이</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i12" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i12"/></svg></span><span class="visually-hidden" data-t="map.icons.i12">[초안] 구름</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i13" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i13"/></svg></span><span class="visually-hidden" data-t="map.icons.i13">[초안] 번개</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i14" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i14"/></svg></span><span class="visually-hidden" data-t="map.icons.i14">[초안] 꽃</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i15" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i15"/></svg></span><span class="visually-hidden" data-t="map.icons.i15">[초안] 나무</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i16" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i16"/></svg></span><span class="visually-hidden" data-t="map.icons.i16">[초안] 소용돌이</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i17" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i17"/></svg></span><span class="visually-hidden" data-t="map.icons.i17">[초안] 닻</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i18" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i18"/></svg></span><span class="visually-hidden" data-t="map.icons.i18">[초안] 나침반</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i19" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i19"/></svg></span><span class="visually-hidden" data-t="map.icons.i19">[초안] 종</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i20" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i20"/></svg></span><span class="visually-hidden" data-t="map.icons.i20">[초안] 등불</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i21" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i21"/></svg></span><span class="visually-hidden" data-t="map.icons.i21">[초안] 모래시계</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i22" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i22"/></svg></span><span class="visually-hidden" data-t="map.icons.i22">[초안] 수정</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i23" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i23"/></svg></span><span class="visually-hidden" data-t="map.icons.i23">[초안] 나비</span></label>
-          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i24" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i24"/></svg></span><span class="visually-hidden" data-t="map.icons.i24">[초안] 물방울</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i01" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i01"/></svg></span><span class="visually-hidden" data-t="map.icons.i01">초승달</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i02" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i02"/></svg></span><span class="visually-hidden" data-t="map.icons.i02">해</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i03" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i03"/></svg></span><span class="visually-hidden" data-t="map.icons.i03">별</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i04" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i04"/></svg></span><span class="visually-hidden" data-t="map.icons.i04">불꽃</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i05" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i05"/></svg></span><span class="visually-hidden" data-t="map.icons.i05">잎</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i06" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i06"/></svg></span><span class="visually-hidden" data-t="map.icons.i06">물결</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i07" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i07"/></svg></span><span class="visually-hidden" data-t="map.icons.i07">산</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i08" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i08"/></svg></span><span class="visually-hidden" data-t="map.icons.i08">열쇠</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i09" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i09"/></svg></span><span class="visually-hidden" data-t="map.icons.i09">깃털</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i10" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i10"/></svg></span><span class="visually-hidden" data-t="map.icons.i10">물고기</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i11" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i11"/></svg></span><span class="visually-hidden" data-t="map.icons.i11">고양이</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i12" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i12"/></svg></span><span class="visually-hidden" data-t="map.icons.i12">구름</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i13" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i13"/></svg></span><span class="visually-hidden" data-t="map.icons.i13">번개</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i14" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i14"/></svg></span><span class="visually-hidden" data-t="map.icons.i14">꽃</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i15" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i15"/></svg></span><span class="visually-hidden" data-t="map.icons.i15">나무</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i16" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i16"/></svg></span><span class="visually-hidden" data-t="map.icons.i16">소용돌이</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i17" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i17"/></svg></span><span class="visually-hidden" data-t="map.icons.i17">닻</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i18" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i18"/></svg></span><span class="visually-hidden" data-t="map.icons.i18">나침반</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i19" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i19"/></svg></span><span class="visually-hidden" data-t="map.icons.i19">종</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i20" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i20"/></svg></span><span class="visually-hidden" data-t="map.icons.i20">등불</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i21" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i21"/></svg></span><span class="visually-hidden" data-t="map.icons.i21">모래시계</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i22" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i22"/></svg></span><span class="visually-hidden" data-t="map.icons.i22">수정</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i23" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i23"/></svg></span><span class="visually-hidden" data-t="map.icons.i23">나비</span></label>
+          <label class="map-icons__opt"><input type="radio" name="map-icon" value="i24" /><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i24"/></svg></span><span class="visually-hidden" data-t="map.icons.i24">물방울</span></label>
         </div>
       </fieldset>
 
       <!-- 6장 예외 2 고지: 보내는 것 · 보내지 않는 것 · 누가 보나 · 어디에 · 얼마나 · 지우는 법 · 선택 사항. 모두 버튼 위 -->
       <dl class="map-notice">
         <div class="map-notice__row map-notice__row--send">
-          <dt data-t="map.consent.sendLabel">[초안] 보내는 것</dt>
-          <dd><span data-t="map.consent.send">[초안] 별명, 아이콘, 원형 두 개</span> <b class="map-notice__arch" data-js="map-send-arch">[초안] (주 원형 전사 · 보조 원형 현자)</b></dd>
+          <dt data-t="map.consent.sendLabel">보내는 것</dt>
+          <dd><span data-t="map.consent.send">별명, 아이콘, 원형 두 개</span> <b class="map-notice__arch" data-js="map-send-arch"></b></dd>
         </div>
         <div class="map-notice__row">
-          <dt data-t="map.consent.notSendLabel">[초안] 보내지 않는 것</dt>
-          <dd data-t="map.consent.notSend">[초안] 이름·생년월일·태어난 시각·성별·방별 결과·질문·코드</dd>
+          <dt data-t="map.consent.notSendLabel">보내지 않음</dt>
+          <dd data-t="map.consent.notSend">이름·생년월일·나이·태어난 시각·성별·방별 결과·질문·코드</dd>
         </div>
         <div class="map-notice__row">
-          <dt data-t="map.consent.whoLabel">[초안] 누가 보나요</dt>
-          <dd><span data-role-when="owner" data-t="map.consent.whoOwner">[초안] 친구가 참여하면 친구 별명·아이콘·원형이 내 지도에 보여요. 초대 링크를 가진 사람은 내 별명·아이콘·원형을 볼 수 있어요.</span><span data-role-when="friend" data-js="map-consent-who-friend">[초안] 지도 주인(<b data-js="map-owner-name">별빛토끼</b>)이 내 별명·아이콘·원형과 궁합 점수를 봐요.</span></dd>
+          <dt data-t="map.consent.whoLabel">보는 사람</dt>
+          <dd><span data-role-when="owner" data-t="map.consent.whoOwner">친구가 참여하면 친구의 별명·아이콘·원형이 내 지도에 보여요. 초대 링크를 가진 사람은 내 별명·아이콘·원형을 볼 수 있어요.</span><span data-role-when="friend" data-js="map-consent-who-friend"><b data-js="map-owner-name">별빛토끼</b>)이 내 별명·아이콘·원형과 궁합 점수를 봐요.</span></dd>
         </div>
         <div class="map-notice__row">
-          <dt data-t="map.consent.whereLabel">[초안] 어디에</dt>
-          <dd data-t="map.consent.where">[초안] ◯◯에 있는 Cloudflare, Inc.의 서버에 저장해요</dd>
+          <dt data-t="map.consent.whereLabel">저장 위치</dt>
+          <dd data-t="map.consent.where">Cloudflare, Inc.가 운영하는 ◯◯의 서버에 저장해요</dd>
         </div>
         <div class="map-notice__row">
-          <dt data-t="map.consent.keepLabel">[초안] 얼마나</dt>
-          <dd data-t="map.consent.keep">[초안] 지도 주인이 마지막으로 연 날부터 90일, 만든 날부터 최대 1년 뒤 저절로 지워져요. 보낸 때의 원형이 지도에 남아요.</dd>
+          <dt data-t="map.consent.keepLabel">보관 기간</dt>
+          <dd data-t="map.consent.keep">주인이 마지막으로 연 날부터 90일, 만든 날부터 최대 1년이 지나면 저절로 지워져요. 원형은 보낸 때 그대로 남아요.</dd>
         </div>
         <div class="map-notice__row">
-          <dt data-t="map.consent.eraseLabel">[초안] 지우는 법</dt>
-          <dd data-t="map.consent.erase">[초안] 주인은 지도 화면에서, 친구는 참여할 때 받는 삭제 코드로 언제든 지울 수 있어요.</dd>
+          <dt data-t="map.consent.eraseLabel">지우는 법</dt>
+          <dd data-t="map.consent.erase">주인은 지도 화면에서, 친구는 참여할 때 받는 삭제 코드로 언제든 바로 지울 수 있어요.</dd>
         </div>
       </dl>
-      <p class="map-optional" data-t="map.consent.optional">[초안] 선택 사항이에요. 보내지 않아도 모든 결과를 그대로 볼 수 있어요.</p>
+      <p class="map-optional" data-t="map.consent.optional">보내기는 선택이에요. 보내지 않아도 모든 결과를 그대로 볼 수 있어요.</p>
 
-      <label class="check map-agree"><input type="checkbox" data-js="map-agree" /><span data-t="map.consent.agree">[초안] 위 내용을 확인했고 별명·아이콘·원형 두 개를 보내는 데 동의해요</span></label>
+      <label class="check map-agree"><input type="checkbox" data-js="map-agree" /><span data-t="map.consent.agree">위 내용을 확인했고, 별명·아이콘·원형 두 개를 보내는 데 동의해요</span></label>
 
       <!-- 응답 없음(8초): 자동 재전송 없음 -->
       <div class="map-block map-block--warn" data-when="unsure" role="status">
-        <p class="map-block__text" data-t="map.consent.unsure">[초안] 보냈는지 확인하지 못했어요. 지도 주인에게 확인해 보세요 · 겹쳐 들어갔다면 주인이 지울 수 있어요</p>
+        <p class="map-block__text" data-t="map.consent.unsure">보내졌는지 확인하지 못했어요. 지도 주인에게 물어봐 주세요 · 두 번 들어갔다면 주인이 지울 수 있어요</p>
       </div>
 
       <div class="map-consent__act">
         <!-- sending이면 JS가 disabled + aria-busy, 글자 그대로. unsure면 글자를 map.consent.resend로 -->
-        <button class="btn btn--primary btn--block map-send" type="button" data-js="map-send" disabled data-t="map.consent.sendBtn">[초안] 보내기</button>
-        <button class="btn btn--ghost btn--block" type="button" data-js="map-consent-cancel" data-t="map.consent.cancel">[초안] 보내지 않기</button>
+        <button class="btn btn--primary btn--block map-send" type="button" data-js="map-send" disabled data-t="map.consent.sendBtn">보내기</button>
+        <button class="btn btn--ghost btn--block" type="button" data-js="map-consent-cancel" data-t="map.consent.cancel">보내지 않기</button>
       </div>
     </section>
 
@@ -3528,19 +3528,19 @@
     <section class="screen map-screen" id="screen-map" data-js="screen-map" data-room="hall" data-state="ready" data-preview="16-M. 친구 지도 — 오각형 지도와 순위">
       <header class="room-head room-head--compact map-screen__head">
         <p class="eyebrow" lang="en" data-t="map.view.eyebrow">FRIEND MAP</p>
-        <h1 class="room-head__title" data-js="map-title">[초안] 별빛토끼의 친구 지도</h1>
-        <p class="map-screen__count" data-when="ready empty"><span data-js="map-count">12</span><span data-js="map-count-max">/30</span> <span data-t="map.view.people">[초안] 명</span></p>
+        <h1 class="room-head__title" data-js="map-title"></h1>
+        <p class="map-screen__count" data-when="ready empty"><span data-js="map-count">12</span><span data-js="map-count-max">/30</span> <span data-t="map.view.people">명</span></p>
       </header>
 
       <div class="map-down" data-when="down" role="status">
-        <p class="map-down__text" data-t="map.down">[초안] 지도가 잠시 쉬고 있어요. 다른 결과는 그대로 볼 수 있어요.</p>
-        <button class="btn btn--secondary btn--small" type="button" data-js="map-retry" data-t="map.retry">[초안] 다시 시도</button>
+        <p class="map-down__text" data-t="map.down">지도가 잠시 쉬고 있어요. 다른 결과는 그대로 볼 수 있어요.</p>
+        <button class="btn btn--secondary btn--small" type="button" data-js="map-retry" data-t="map.retry">다시 시도</button>
       </div>
 
       <div class="map-block" data-when="notfound" role="status">
-        <p class="map-block__text" data-t="map.view.notFound">[초안] 이 키로 지도를 찾지 못했어요 · 지워졌거나 보관 기간이 지났을 수 있어요</p>
-        <button class="btn btn--primary btn--block" type="button" data-js="map-new" data-t="map.view.new">[초안] 새로 만들기</button>
-        <button class="btn btn--ghost btn--block" type="button" data-js="map-forget" data-t="map.manage.forget">[초안] 이 기기에서 지도 잊기</button>
+        <p class="map-block__text" data-t="map.view.notFound">이 키로 지도를 찾지 못했어요 · 지워졌거나 보관 기간이 지났을 수 있어요</p>
+        <button class="btn btn--primary btn--block" type="button" data-js="map-new" data-t="map.view.new">새로 만들기</button>
+        <button class="btn btn--ghost btn--block" type="button" data-js="map-forget" data-t="map.manage.forget">이 기기에서 지도 잊기</button>
       </div>
 
       <!-- 오각형 무대. 처음 그릴 때 JS가 .is-drawn을 붙이면 선이 그려지고 아이콘이 순위 차례로 떠오른다(움직임 줄이기면 바로) -->
@@ -3558,11 +3558,11 @@
           </g>
         </svg>
         <!-- 꼭짓점 이름 5개 (축 0 위, 시계 방향). 6자 이내, 늘 보임 -->
-        <p class="map-axis map-axis--top" data-axis="0" style="--x:0;--y:-106;--k:0" data-t="map.axis.act">[초안] 함께 움직이기</p>
-        <p class="map-axis map-axis--top" data-axis="1" style="--x:101;--y:-37;--k:1" data-t="map.axis.talk">[초안] 대화</p>
-        <p class="map-axis map-axis--bottom" data-axis="2" style="--x:59;--y:87;--k:2" data-t="map.axis.heart">[초안] 마음</p>
-        <p class="map-axis map-axis--bottom" data-axis="3" style="--x:-59;--y:87;--k:3" data-t="map.axis.order">[초안] 약속</p>
-        <p class="map-axis map-axis--top" data-axis="4" style="--x:-101;--y:-37;--k:4" data-t="map.axis.free">[초안] 새로움</p>
+        <p class="map-axis map-axis--top" data-axis="0" style="--x:0;--y:-106;--k:0" data-t="map.axis.act">발걸음</p>
+        <p class="map-axis map-axis--top" data-axis="1" style="--x:101;--y:-37;--k:1" data-t="map.axis.talk">대화</p>
+        <p class="map-axis map-axis--bottom" data-axis="2" style="--x:59;--y:87;--k:2" data-t="map.axis.heart">마음</p>
+        <p class="map-axis map-axis--bottom" data-axis="3" style="--x:-59;--y:87;--k:3" data-t="map.axis.order">약속</p>
+        <p class="map-axis map-axis--top" data-axis="4" style="--x:-101;--y:-37;--k:4" data-t="map.axis.free">새로움</p>
 
         <!-- 가운데 주인(아이콘만, 별명은 제목에). 지름 16 -->
         <span class="map-node map-node--owner" style="--x:0;--y:0" aria-hidden="true"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i03" data-js="map-owner-icon"/></svg></span></span>
@@ -3570,58 +3570,58 @@
         <!-- 친구 아이콘: JS가 아래 견본(map-node)을 순위 순서대로 복제해 --x·--y·--i(순번)·data-band(0~3)를 넣는다.
              이름표가 겹치면 .is-label-hidden(16-3의 2, 판정 규칙은 design 「16단계」 5절). 누르면 근처 아이콘을 모아 1개면 팝업, 여럿이면 선택 목록 -->
         <div class="map-nodes" data-js="map-nodes">
-          <button class="map-node" type="button" data-js="map-node" data-id="" data-band="0" style="--x:6;--y:-20;--i:0"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i11"/></svg></span><span class="map-node__name">[초안] 고양이달</span></button>
-          <button class="map-node" type="button" data-js="map-node" data-id="" data-band="1" style="--x:-34;--y:-26;--i:1"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i05"/></svg></span><span class="map-node__name">[초안] 여름잎</span></button>
-          <button class="map-node" type="button" data-js="map-node" data-id="" data-band="2" style="--x:40;--y:30;--i:2"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i18"/></svg></span><span class="map-node__name">[초안] 길잡이여덟자</span></button>
-          <button class="map-node is-label-hidden" type="button" data-js="map-node" data-id="" data-band="3" style="--x:-50;--y:44;--i:3"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i24"/></svg></span><span class="map-node__name">[초안] 이슬</span></button>
+          <button class="map-node" type="button" data-js="map-node" data-id="" data-band="0" style="--x:6;--y:-20;--i:0"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i11"/></svg></span><span class="map-node__name"></span></button>
+          <button class="map-node" type="button" data-js="map-node" data-id="" data-band="1" style="--x:-34;--y:-26;--i:1"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i05"/></svg></span><span class="map-node__name"></span></button>
+          <button class="map-node" type="button" data-js="map-node" data-id="" data-band="2" style="--x:40;--y:30;--i:2"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i18"/></svg></span><span class="map-node__name"></span></button>
+          <button class="map-node is-label-hidden" type="button" data-js="map-node" data-id="" data-band="3" style="--x:-50;--y:44;--i:3"><span class="map-ico"><svg viewBox="0 0 24 24"><use href="#map-i24"/></svg></span><span class="map-node__name"></span></button>
         </div>
       </div>
 
-      <p class="map-hint" data-when="ready" data-t="map.view.hint">[초안] 아이콘이나 아래 이름을 누르면 궁합을 자세히 볼 수 있어요. 가운데에 가까울수록 결이 닮았어요.</p>
+      <p class="map-hint" data-when="ready" data-t="map.view.hint">아이콘이나 아래 이름을 누르면 궁합을 자세히 볼 수 있어요. 가운데에 가까울수록 결이 닮았어요.</p>
 
       <!-- 친구 0명 -->
       <div class="map-empty" data-when="empty">
-        <p class="map-empty__text" data-t="map.view.empty">[초안] 초대 링크를 보내면 친구가 여기 모여요</p>
+        <p class="map-empty__text" data-t="map.view.empty">초대 링크를 보내면 친구가 여기 모여요</p>
       </div>
 
       <!-- 초대 링크(ready·empty). 초대가 닫혔으면 JS가 map-invite-box에 .is-closed → 버튼 숨고 닫힘 한 줄 -->
       <div class="map-share" data-js="map-invite-box" data-when="ready empty">
-        <button class="btn btn--primary btn--block" type="button" data-js="map-link-copy" data-t="map.invite.copy">[초안] 초대 링크 복사</button>
-        <span class="share-links share-links--solo"><button class="text-link" type="button" data-js="map-link-share" data-t="map.invite.share">[초안] 다른 앱으로 공유</button><span class="share-kakao-slot" data-js="map-kakao-slot"></span></span>
-        <p class="map-share__closed" data-t="map.invite.closedOwner">[초안] 초대를 닫았어요. 새 친구를 받으려면 관리에서 초대 링크를 바꿔 주세요.</p>
+        <button class="btn btn--primary btn--block" type="button" data-js="map-link-copy" data-t="map.invite.copy">초대 링크 복사</button>
+        <span class="share-links share-links--solo"><button class="text-link" type="button" data-js="map-link-share" data-t="map.invite.share">다른 앱으로 공유</button><span class="share-kakao-slot" data-js="map-kakao-slot"></span></span>
+        <p class="map-share__closed" data-t="map.invite.closedOwner">초대를 닫았어요 · 새 친구는 초대 링크를 바꾸면 받아요</p>
         <p class="share-status is-hidden" data-js="map-link-status" role="status"></p>
       </div>
 
       <!-- 순위 "가까운 순": JS가 견본 li를 복제. 누르면 팝업. "꼴찌"·"최악" 같은 말 없음 -->
       <section class="map-rank" data-when="ready" aria-labelledby="map-rank-title">
-        <h2 class="map-rank__title" id="map-rank-title" data-t="map.view.rankTitle">[초안] 가까운 순</h2>
+        <h2 class="map-rank__title" id="map-rank-title" data-t="map.view.rankTitle">가까운 순</h2>
         <ol class="map-rank__list" data-js="map-rank">
-          <li><button class="map-rank__row" type="button" data-js="map-rank-row" data-id="" data-band="0"><span class="map-rank__num">1</span><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i11"/></svg></span><span class="map-rank__name">[초안] 고양이달</span><span class="map-rank__band">[초안] 닮은 결</span><b class="map-rank__score">96</b></button></li>
-          <li><button class="map-rank__row" type="button" data-js="map-rank-row" data-id="" data-band="1"><span class="map-rank__num">2</span><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i05"/></svg></span><span class="map-rank__name">[초안] 여름잎</span><span class="map-rank__band">[초안] 가까운 결</span><b class="map-rank__score">82</b></button></li>
-          <li><button class="map-rank__row" type="button" data-js="map-rank-row" data-id="" data-band="2"><span class="map-rank__num">3</span><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i18"/></svg></span><span class="map-rank__name">[초안] 길잡이여덟자</span><span class="map-rank__band">[초안] 서로 배우는 결</span><b class="map-rank__score">67</b></button></li>
-          <li><button class="map-rank__row" type="button" data-js="map-rank-row" data-id="" data-band="3"><span class="map-rank__num">4</span><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i24"/></svg></span><span class="map-rank__name">[초안] 이슬</span><span class="map-rank__band">[초안] 다른 결</span><b class="map-rank__score">48</b></button></li>
+          <li><button class="map-rank__row" type="button" data-js="map-rank-row" data-id="" data-band="0"><span class="map-rank__num">1</span><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i11"/></svg></span><span class="map-rank__name"></span><span class="map-rank__band"></span><b class="map-rank__score">96</b></button></li>
+          <li><button class="map-rank__row" type="button" data-js="map-rank-row" data-id="" data-band="1"><span class="map-rank__num">2</span><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i05"/></svg></span><span class="map-rank__name"></span><span class="map-rank__band"></span><b class="map-rank__score">82</b></button></li>
+          <li><button class="map-rank__row" type="button" data-js="map-rank-row" data-id="" data-band="2"><span class="map-rank__num">3</span><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i18"/></svg></span><span class="map-rank__name"></span><span class="map-rank__band"></span><b class="map-rank__score">67</b></button></li>
+          <li><button class="map-rank__row" type="button" data-js="map-rank-row" data-id="" data-band="3"><span class="map-rank__num">4</span><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i24"/></svg></span><span class="map-rank__name"></span><span class="map-rank__band"></span><b class="map-rank__score">48</b></button></li>
         </ol>
       </section>
 
       <!-- 보관 기간 한 줄 -->
-      <p class="map-keep" data-js="map-keep" data-when="ready empty">[초안] 1월 15일까지 보관돼요 · 내가 열 때마다 90일 늘어나요(만든 날로부터 최대 1년, 2027년 10월 17일)</p>
+      <p class="map-keep" data-js="map-keep" data-when="ready empty"></p>
 
       <!-- 관리 메뉴(접힘). 위험한 동작은 모두 map-confirm-dialog로 한 번 확인 -->
       <details class="map-manage" data-when="ready empty">
-        <summary class="map-manage__sum"><span data-t="map.manage.title">[초안] 지도 관리</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></summary>
+        <summary class="map-manage__sum"><span data-t="map.manage.title">지도 관리</span> <span class="receipt-toggle__caret" aria-hidden="true">▾</span></summary>
         <div class="map-manage__list">
-          <button class="map-manage__item" type="button" data-js="map-key-show" data-t="map.manage.showKey">[초안] 열람 키 다시 보기</button>
-          <button class="map-manage__item" type="button" data-js="map-invite-close" data-t="map.manage.closeInvite">[초안] 초대 닫기</button>
-          <button class="map-manage__item" type="button" data-js="map-invite-rotate" data-t="map.manage.rotateInvite">[초안] 초대 링크 바꾸기</button>
-          <button class="map-manage__item" type="button" data-js="map-key-rotate" data-t="map.manage.rotateKey">[초안] 열람 키 바꾸기</button>
-          <button class="map-manage__item" type="button" data-js="map-forget" data-t="map.manage.forget">[초안] 이 기기에서 지도 잊기</button>
-          <button class="map-manage__item map-manage__item--danger" type="button" data-js="map-erase-all" data-t="map.manage.eraseAll">[초안] 지도 전체 지우기</button>
+          <button class="map-manage__item" type="button" data-js="map-key-show" data-t="map.manage.showKey">열람 키 다시 보기</button>
+          <button class="map-manage__item" type="button" data-js="map-invite-close" data-t="map.manage.closeInvite">초대 닫기</button>
+          <button class="map-manage__item" type="button" data-js="map-invite-rotate" data-t="map.manage.rotateInvite">초대 링크 바꾸기</button>
+          <button class="map-manage__item" type="button" data-js="map-key-rotate" data-t="map.manage.rotateKey">열람 키 바꾸기</button>
+          <button class="map-manage__item" type="button" data-js="map-forget" data-t="map.manage.forget">이 기기에서 지도 잊기</button>
+          <button class="map-manage__item map-manage__item--danger" type="button" data-js="map-erase-all" data-t="map.manage.eraseAll">지도 전체 지우기</button>
         </div>
       </details>
 
       <!-- 면책 문구(disclaimer.js가 채움) -->
       <div class="map-disclaimer" data-js="map-disclaimer"></div>
-      <button class="text-link map-back" type="button" data-go="story" data-js="map-back"><span aria-hidden="true">←</span> <span data-t="map.back">[초안] 나의 이야기로</span></button>
+      <button class="text-link map-back" type="button" data-go="story" data-js="map-back"><span aria-hidden="true">←</span> <span data-t="map.back">나의 이야기로</span></button>
     </section>
 
     <!-- ⑦ 친구 결과 (친구 쪽). 지도 전체는 보지 못하고 주인과 나 둘의 카드 하나 + 삭제 코드 카드.
@@ -3629,12 +3629,12 @@
     <section class="screen map-friend" id="screen-map-friend" data-js="screen-map-friend" data-room="hall" data-state="ready" data-preview="16-F. 친구 지도 — 친구 결과 카드">
       <header class="room-head room-head--compact">
         <p class="eyebrow" lang="en" data-t="map.friend.eyebrow">OUR MATCH</p>
-        <h1 class="room-head__title" data-js="map-friend-title">[초안] 별빛토끼님과 나</h1>
+        <h1 class="room-head__title" data-js="map-friend-title"></h1>
       </header>
 
       <div class="map-down" data-when="down" role="status">
-        <p class="map-down__text" data-t="map.down">[초안] 지도가 잠시 쉬고 있어요. 다른 결과는 그대로 볼 수 있어요.</p>
-        <button class="btn btn--secondary btn--small" type="button" data-js="map-retry" data-t="map.retry">[초안] 다시 시도</button>
+        <p class="map-down__text" data-t="map.down">지도가 잠시 쉬고 있어요. 다른 결과는 그대로 볼 수 있어요.</p>
+        <button class="btn btn--secondary btn--small" type="button" data-js="map-retry" data-t="map.retry">다시 시도</button>
       </div>
 
       <article class="map-match map-match--card" data-js="map-match" data-band="0">
@@ -3644,43 +3644,43 @@
           <span class="map-ico map-ico--lg"><svg viewBox="0 0 24 24"><use href="#map-i11" data-js="map-match-icon-b"/></svg></span>
         </div>
         <!-- 팝업에서만 쓰는 이름 줄(친구 카드에서는 제목이 대신) -->
-        <h2 class="map-match__name" data-js="map-match-name">[초안] 고양이달</h2>
-        <p class="map-match__arch" data-js="map-match-arch">[초안] 주 원형 연인 · 보조 원형 창조자</p>
-        <p class="map-match__score"><b data-js="map-match-score">96</b><span class="map-match__band" data-js="map-match-band">[초안] 닮은 결</span></p>
+        <h2 class="map-match__name" data-js="map-match-name"></h2>
+        <p class="map-match__arch" data-js="map-match-arch"></p>
+        <p class="map-match__score"><b data-js="map-match-score">96</b><span class="map-match__band" data-js="map-match-band"></span></p>
         <!-- 다섯 축 막대: --v(0~100). 이름은 map.axis.* -->
         <ul class="map-bars" data-js="map-bars">
-          <li class="map-bars__row" data-axis="0" style="--k:0;--v:88"><span class="map-bars__name" data-t="map.axis.act">[초안] 함께 움직이기</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">88</b></li>
-          <li class="map-bars__row" data-axis="1" style="--k:1;--v:72"><span class="map-bars__name" data-t="map.axis.talk">[초안] 대화</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">72</b></li>
-          <li class="map-bars__row is-top" data-axis="2" style="--k:2;--v:100"><span class="map-bars__name" data-t="map.axis.heart">[초안] 마음</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">100</b></li>
-          <li class="map-bars__row is-low" data-axis="3" style="--k:3;--v:45"><span class="map-bars__name" data-t="map.axis.order">[초안] 약속</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">45</b></li>
-          <li class="map-bars__row" data-axis="4" style="--k:4;--v:63"><span class="map-bars__name" data-t="map.axis.free">[초안] 새로움</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">63</b></li>
+          <li class="map-bars__row" data-axis="0" style="--k:0;--v:88"><span class="map-bars__name" data-t="map.axis.act">발걸음</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">88</b></li>
+          <li class="map-bars__row" data-axis="1" style="--k:1;--v:72"><span class="map-bars__name" data-t="map.axis.talk">대화</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">72</b></li>
+          <li class="map-bars__row is-top" data-axis="2" style="--k:2;--v:100"><span class="map-bars__name" data-t="map.axis.heart">마음</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">100</b></li>
+          <li class="map-bars__row is-low" data-axis="3" style="--k:3;--v:45"><span class="map-bars__name" data-t="map.axis.order">약속</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">45</b></li>
+          <li class="map-bars__row" data-axis="4" style="--k:4;--v:63"><span class="map-bars__name" data-t="map.axis.free">새로움</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">63</b></li>
         </ul>
-        <p class="map-match__pairline" data-js="map-match-pairline">[초안] 서로의 마음을 먼저 읽어 주면, 함께 만드는 일이 오래 즐거워지는 사이예요</p>
+        <p class="map-match__pairline" data-js="map-match-pairline"></p>
         <dl class="map-match__lines">
-          <div><dt data-t="map.match.strongLabel">[초안] 잘 맞는 결</dt><dd data-js="map-match-strong">[초안] 감정을 알아채는 속도가 비슷한 사이</dd></div>
-          <div><dt data-t="map.match.tipLabel">[초안] 이렇게 해 보세요</dt><dd data-js="map-match-tip">[초안] 약속은 작게 정하고 하나씩 지켜 보세요. 작은 약속이 쌓이면 서로 더 편해져요</dd></div>
+          <div><dt data-t="map.match.strongLabel">잘 맞는 결</dt><dd data-js="map-match-strong"></dd></div>
+          <div><dt data-t="map.match.tipLabel">이렇게 해 보세요</dt><dd data-js="map-match-tip"></dd></div>
         </dl>
         <!-- 상세 궁합 줄(16-3의 3): pay off면 둘 다 is-hidden 그대로. 결제함 → deep-paid, 결제 전 → deep-free(가격 없음) -->
-        <button class="text-link map-match__deep is-hidden" type="button" data-js="map-deep-paid" data-t="map.match.deepPaid">[초안] 책의 궁합 장에서 자세히 보기 →</button>
-        <button class="text-link map-match__deep is-hidden" type="button" data-js="map-deep-free" data-t="map.match.deepFree">[초안] 전체 리포트의 궁합 장에서 더 깊이 볼 수 있어요 →</button>
+        <button class="text-link map-match__deep is-hidden" type="button" data-js="map-deep-paid" data-t="map.match.deepPaid">책의 궁합 장에서 자세히 보기 →</button>
+        <button class="text-link map-match__deep is-hidden" type="button" data-js="map-deep-free" data-t="map.match.deepFree">전체 리포트의 궁합 장에서 더 깊이 볼 수 있어요 →</button>
       </article>
 
       <!-- 삭제 코드 카드 -->
       <section class="map-del" aria-labelledby="map-del-title">
         <p class="eyebrow" lang="en" data-t="map.del.eyebrow">DELETE CODE</p>
-        <h2 class="map-del__title" id="map-del-title" data-t="map.del.title">[초안] 내 기록 삭제 코드</h2>
+        <h2 class="map-del__title" id="map-del-title" data-t="map.del.title">내 기록 삭제 코드</h2>
         <div class="code-card__item">
           <code class="code-card__code" data-js="map-del-value">SOD-7Q4M-2XD9-FHAT-K3PW-9RNE-B6</code>
-          <button class="btn btn--secondary btn--small code-card__copy" type="button" data-js="map-del-copy" data-t="map.copy">[초안] 복사</button>
+          <button class="btn btn--secondary btn--small code-card__copy" type="button" data-js="map-del-copy" data-t="map.copy">복사</button>
         </div>
-        <p class="map-del__text" data-t="map.del.body">[초안] 이 코드로 언제든 내 기록을 지울 수 있어요. 잃으면 지도 주인에게 지워 달라고 하거나 문의처로 알려 주세요.</p>
+        <p class="map-del__text" data-t="map.del.body">이 코드로 언제든 내 기록을 지울 수 있어요. 잃으면 지도 주인에게 지워 달라고 하거나 문의처로 알려 주세요.</p>
         <p class="share-status is-hidden" data-js="map-del-copy-status" role="status"></p>
-        <button class="btn btn--ghost btn--block map-del__erase" type="button" data-js="map-leave" data-t="map.del.erase">[초안] 내 기록 지우기</button>
+        <button class="btn btn--ghost btn--block map-del__erase" type="button" data-js="map-leave" data-t="map.del.erase">내 기록 지우기</button>
       </section>
 
-      <button class="btn btn--secondary btn--block" type="button" data-js="map-friend-make" data-t="map.friend.make">[초안] 나도 친구 지도 만들기</button>
+      <button class="btn btn--secondary btn--block" type="button" data-js="map-friend-make" data-t="map.friend.make">나도 친구 지도 만들기</button>
       <div class="map-disclaimer" data-js="map-friend-disclaimer"></div>
-      <button class="text-link map-back" type="button" data-go="story" data-js="map-friend-back"><span aria-hidden="true">←</span> <span data-t="map.back">[초안] 나의 이야기로</span></button>
+      <button class="text-link map-back" type="button" data-go="story" data-js="map-friend-back"><span aria-hidden="true">←</span> <span data-t="map.back">나의 이야기로</span></button>
     </section>
 
     <!-- ⑧ 열람 키 카드 (create 성공 직후 · 관리 "열람 키 다시 보기" · 키 바꾸기 뒤).
@@ -3688,29 +3688,29 @@
     <dialog class="dialog code-card map-key" data-js="map-key-dialog" aria-labelledby="map-key-title" aria-describedby="map-key-facts">
       <div class="dialog__body code-card__body">
         <p class="eyebrow code-card__eyebrow" lang="en" data-t="map.key.eyebrow">YOUR MAP KEY</p>
-        <h2 class="dialog__title code-card__title" id="map-key-title" data-t="map.key.title">[초안] 내 지도 열람 키</h2>
+        <h2 class="dialog__title code-card__title" id="map-key-title" data-t="map.key.title">내 지도 열람 키</h2>
         <div class="code-card__item">
           <code class="code-card__code map-key__code" data-js="map-key-value">SOM-7Q4M-2XD9-FHAT-K3PW-9RNE-B6</code>
-          <button class="btn btn--secondary btn--small code-card__copy" type="button" data-js="map-key-copy" data-t="map.copy">[초안] 복사</button>
+          <button class="btn btn--secondary btn--small code-card__copy" type="button" data-js="map-key-copy" data-t="map.copy">복사</button>
         </div>
         <ul class="map-key__facts" id="map-key-facts">
-          <li data-t="map.key.use">[초안] 이 키가 있어야 지도를 보고, 친구를 지우고, 지도 전체를 지울 수 있어요. 메모 앱 등에 복사해 두세요.</li>
-          <li class="map-key__warn" data-t="map.key.lost">[초안] 키를 잃으면 누구도 되찾아 줄 수 없어요. 운영자도 주인인지 확인할 방법이 없어요.</li>
-          <li class="map-key__warn" data-t="map.key.expire">[초안] 키를 잃으면 지도는 마지막으로 연 날부터 90일 뒤 저절로 지워져요. 친구가 들어와도 이 기간은 늘지 않아요.</li>
+          <li data-t="map.key.use">이 키로 지도를 보고, 친구를 지우고, 지도 전체를 지울 수 있어요. 메모 앱 등에 꼭 복사해 두세요.</li>
+          <li class="map-key__warn" data-t="map.key.lost">키를 잃으면 되찾을 수 없어요. 운영자도 주인인지 확인할 방법이 없어 다시 드릴 수 없어요.</li>
+          <li class="map-key__warn" data-t="map.key.expire">키를 잃은 지도는 마지막으로 연 날부터 90일 뒤 저절로 지워져요. 친구가 들어와도 기간은 늘지 않아요.</li>
         </ul>
         <!-- 초대 링크(키 바꾸기 뒤 다시 열 때는 JS가 이 묶음을 숨겨도 된다) -->
         <div class="map-key__invite" data-js="map-key-invite">
-          <p class="map-field__label" data-t="map.invite.label">[초안] 초대 링크</p>
+          <p class="map-field__label" data-t="map.invite.label">초대 링크</p>
           <p class="map-key__url" data-js="map-invite-url">https://example.invalid/products/strange-oracle/#join=AbCdEfGhIjKlMnOpQrStUv</p>
           <div class="map-key__share">
-            <button class="btn btn--secondary btn--small" type="button" data-js="map-key-link-copy" data-t="map.invite.copyShort">[초안] 링크 복사</button>
-            <button class="btn btn--secondary btn--small" type="button" data-js="map-key-link-share" data-t="map.invite.shareShort">[초안] 공유</button>
+            <button class="btn btn--secondary btn--small" type="button" data-js="map-key-link-copy" data-t="map.invite.copyShort">링크 복사</button>
+            <button class="btn btn--secondary btn--small" type="button" data-js="map-key-link-share" data-t="map.invite.shareShort">공유</button>
           </div>
         </div>
         <p class="share-status is-hidden" data-js="map-key-status" role="status"></p>
-        <label class="check map-key__ack"><input type="checkbox" data-js="map-key-ack" /><span data-t="map.key.ack">[초안] 키를 복사했거나 적어 두었어요</span></label>
+        <label class="check map-key__ack"><input type="checkbox" data-js="map-key-ack" /><span data-t="map.key.ack">키를 복사했거나 적어 두었어요</span></label>
         <div class="dialog__actions">
-          <button class="btn btn--primary btn--block" type="button" data-js="map-key-close" disabled data-t="map.key.close">[초안] 지도 보러 가기</button>
+          <button class="btn btn--primary btn--block" type="button" data-js="map-key-close" disabled data-t="map.key.close">지도 보러 가기</button>
         </div>
       </div>
     </dialog>
@@ -3722,27 +3722,27 @@
           <div class="map-match__pair" aria-hidden="true">
             <span class="map-ico map-ico--lg"><svg viewBox="0 0 24 24"><use href="#map-i18" data-js="map-match-icon-b"/></svg></span>
           </div>
-          <h2 class="map-match__name" id="map-pop-name" data-js="map-match-name">[초안] 길잡이여덟자</h2>
-          <p class="map-match__arch" data-js="map-match-arch">[초안] 주 원형 탐험가 · 보조 원형 반항아</p>
-          <p class="map-match__score"><b data-js="map-match-score">67</b><span class="map-match__band" data-js="map-match-band">[초안] 서로 배우는 결</span></p>
+          <h2 class="map-match__name" id="map-pop-name" data-js="map-match-name"></h2>
+          <p class="map-match__arch" data-js="map-match-arch"></p>
+          <p class="map-match__score"><b data-js="map-match-score">67</b><span class="map-match__band" data-js="map-match-band"></span></p>
           <ul class="map-bars" data-js="map-bars">
-            <li class="map-bars__row" data-axis="0" style="--k:0;--v:70"><span class="map-bars__name" data-t="map.axis.act">[초안] 함께 움직이기</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">70</b></li>
-            <li class="map-bars__row is-top" data-axis="1" style="--k:1;--v:85"><span class="map-bars__name" data-t="map.axis.talk">[초안] 대화</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">85</b></li>
-            <li class="map-bars__row" data-axis="2" style="--k:2;--v:52"><span class="map-bars__name" data-t="map.axis.heart">[초안] 마음</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">52</b></li>
-            <li class="map-bars__row is-low" data-axis="3" style="--k:3;--v:40"><span class="map-bars__name" data-t="map.axis.order">[초안] 약속</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">40</b></li>
-            <li class="map-bars__row" data-axis="4" style="--k:4;--v:78"><span class="map-bars__name" data-t="map.axis.free">[초안] 새로움</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">78</b></li>
+            <li class="map-bars__row" data-axis="0" style="--k:0;--v:70"><span class="map-bars__name" data-t="map.axis.act">발걸음</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">70</b></li>
+            <li class="map-bars__row is-top" data-axis="1" style="--k:1;--v:85"><span class="map-bars__name" data-t="map.axis.talk">대화</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">85</b></li>
+            <li class="map-bars__row" data-axis="2" style="--k:2;--v:52"><span class="map-bars__name" data-t="map.axis.heart">마음</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">52</b></li>
+            <li class="map-bars__row is-low" data-axis="3" style="--k:3;--v:40"><span class="map-bars__name" data-t="map.axis.order">약속</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">40</b></li>
+            <li class="map-bars__row" data-axis="4" style="--k:4;--v:78"><span class="map-bars__name" data-t="map.axis.free">새로움</span><span class="map-bars__track"><span class="map-bars__fill"></span></span><b class="map-bars__val" data-js="map-bar-val">78</b></li>
           </ul>
-          <p class="map-match__pairline" data-js="map-match-pairline">[초안] 서로 낯선 길을 권해 주면, 대화가 늘 새 문으로 이어지는 사이예요</p>
+          <p class="map-match__pairline" data-js="map-match-pairline"></p>
           <dl class="map-match__lines">
-            <div><dt data-t="map.match.strongLabel">[초안] 잘 맞는 결</dt><dd data-js="map-match-strong">[초안] 생각을 주고받는 결이 잘 통하는 사이</dd></div>
-            <div><dt data-t="map.match.tipLabel">[초안] 이렇게 해 보세요</dt><dd data-js="map-match-tip">[초안] 만날 날을 미리 하나 정해 두세요. 작은 약속 하나가 둘의 리듬을 맞춰 줘요</dd></div>
+            <div><dt data-t="map.match.strongLabel">잘 맞는 결</dt><dd data-js="map-match-strong"></dd></div>
+            <div><dt data-t="map.match.tipLabel">이렇게 해 보세요</dt><dd data-js="map-match-tip"></dd></div>
           </dl>
-          <button class="text-link map-match__deep is-hidden" type="button" data-js="map-deep-paid" data-t="map.match.deepPaid">[초안] 책의 궁합 장에서 자세히 보기 →</button>
-          <button class="text-link map-match__deep is-hidden" type="button" data-js="map-deep-free" data-t="map.match.deepFree">[초안] 전체 리포트의 궁합 장에서 더 깊이 볼 수 있어요 →</button>
+          <button class="text-link map-match__deep is-hidden" type="button" data-js="map-deep-paid" data-t="map.match.deepPaid">책의 궁합 장에서 자세히 보기 →</button>
+          <button class="text-link map-match__deep is-hidden" type="button" data-js="map-deep-free" data-t="map.match.deepFree">전체 리포트의 궁합 장에서 더 깊이 볼 수 있어요 →</button>
         </article>
         <div class="dialog__actions">
-          <button class="btn btn--secondary btn--block" type="button" data-js="map-pop-close" data-t="map.close">[초안] 닫기</button>
-          <button class="btn btn--ghost btn--block map-pop__erase" type="button" data-js="map-pop-erase" data-t="map.manage.eraseFriend">[초안] 이 친구 지우기</button>
+          <button class="btn btn--secondary btn--block" type="button" data-js="map-pop-close" data-t="map.close">닫기</button>
+          <button class="btn btn--ghost btn--block map-pop__erase" type="button" data-js="map-pop-erase" data-t="map.manage.eraseFriend">이 친구 지우기</button>
         </div>
       </div>
     </dialog>
@@ -3750,13 +3750,13 @@
     <!-- ⑩ 겹친 아이콘 선택 목록 (한 번 눌러 여러 아이콘이 걸릴 때). JS가 견본 li를 복제 -->
     <dialog class="dialog map-pick" data-js="map-pick-dialog" aria-labelledby="map-pick-title">
       <div class="dialog__body">
-        <h2 class="dialog__title" id="map-pick-title" data-t="map.pick.title">[초안] 여기 모인 친구</h2>
+        <h2 class="dialog__title" id="map-pick-title" data-t="map.pick.title">여기 모인 친구</h2>
         <ul class="map-pick__list" data-js="map-pick-list">
-          <li><button class="map-rank__row" type="button" data-js="map-pick-row" data-id="" data-band="1"><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i05"/></svg></span><span class="map-rank__name">[초안] 여름잎</span><b class="map-rank__score">82</b></button></li>
-          <li><button class="map-rank__row" type="button" data-js="map-pick-row" data-id="" data-band="1"><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i14"/></svg></span><span class="map-rank__name">[초안] 꽃비</span><b class="map-rank__score">81</b></button></li>
+          <li><button class="map-rank__row" type="button" data-js="map-pick-row" data-id="" data-band="1"><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i05"/></svg></span><span class="map-rank__name"></span><b class="map-rank__score">82</b></button></li>
+          <li><button class="map-rank__row" type="button" data-js="map-pick-row" data-id="" data-band="1"><span class="map-ico map-ico--sm"><svg viewBox="0 0 24 24"><use href="#map-i14"/></svg></span><span class="map-rank__name"></span><b class="map-rank__score">81</b></button></li>
         </ul>
         <div class="dialog__actions">
-          <button class="btn btn--ghost btn--block" type="button" data-js="map-pick-close" data-t="map.close">[초안] 닫기</button>
+          <button class="btn btn--ghost btn--block" type="button" data-js="map-pick-close" data-t="map.close">닫기</button>
         </div>
       </div>
     </dialog>
@@ -3765,11 +3765,11 @@
          동작: eraseFriend · eraseMap · closeInvite · rotateInvite · rotateKey · forget · leave. 확인 버튼은 지우기·잊기면 btn--danger(기본), 바꾸기·닫기면 JS가 btn--primary로 -->
     <dialog class="dialog" data-js="map-confirm-dialog" aria-labelledby="map-confirm-title" aria-describedby="map-confirm-text">
       <div class="dialog__body">
-        <h2 class="dialog__title" id="map-confirm-title" data-js="map-confirm-title">[초안] 지도 전체를 지울까요?</h2>
-        <p class="dialog__text" id="map-confirm-text" data-js="map-confirm-text">[초안] 친구 기록까지 모두 바로 지워지고, 되돌릴 수 없어요. 초대 링크와 열람 키도 더는 쓸 수 없어요.</p>
+        <h2 class="dialog__title" id="map-confirm-title" data-js="map-confirm-title"></h2>
+        <p class="dialog__text" id="map-confirm-text" data-js="map-confirm-text"></p>
         <div class="dialog__actions">
-          <button class="btn btn--danger btn--block" type="button" data-js="map-confirm-ok">[초안] 모두 지우기</button>
-          <button class="btn btn--ghost btn--block" type="button" data-js="map-confirm-cancel" data-t="map.cancel">[초안] 그대로 두기</button>
+          <button class="btn btn--danger btn--block" type="button" data-js="map-confirm-ok"></button>
+          <button class="btn btn--ghost btn--block" type="button" data-js="map-confirm-cancel" data-t="map.cancel">그대로 두기</button>
         </div>
       </div>
     </dialog>
@@ -3786,8 +3786,8 @@
       <!-- map:on -->
       <!-- (16단계 16-2의 8) 선택 칸 둘, 처음 꺼짐. 삭제 코드가 이 탭에 있을 때만 clear-map-leave, 열람 키가 이 기기에 있을 때만 clear-map-forget의 .is-hidden 해제 -->
       <div class="clear-map">
-        <label class="check clear-map__opt is-hidden" data-js="clear-map-leave"><input type="checkbox" data-js="clear-map-leave-check" /><span data-t="map.clear.leave">[초안] 친구 지도에 보낸 내 기록도 지우기</span></label>
-        <label class="check clear-map__opt is-hidden" data-js="clear-map-forget"><input type="checkbox" data-js="clear-map-forget-check" /><span data-t="map.clear.forget">[초안] 이 기기에서 내 친구 지도 잊기 (열람 키를 적어 두지 않았다면 다시 열 수 없어요)</span></label>
+        <label class="check clear-map__opt is-hidden" data-js="clear-map-leave"><input type="checkbox" data-js="clear-map-leave-check" /><span data-t="map.clear.leave">친구 지도에 보낸 내 기록도 지우기</span></label>
+        <label class="check clear-map__opt is-hidden" data-js="clear-map-forget"><input type="checkbox" data-js="clear-map-forget-check" /><span data-t="map.clear.forget">이 기기에서 내 친구 지도 잊기 (열람 키를 적어 두지 않았다면 다시 열 수 없어요)</span></label>
       </div>
       <!-- /map:on -->
       <div class="dialog__actions">
