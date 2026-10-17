@@ -1,0 +1,216 @@
+/* 광고 1안 「일곱 문」 15초 · 한국판 (designer, 2026-10-17)
+   타임라인 (초): A 0~1.5 첫 문 / B 1.5~6.5 일곱 문 차례로 / C 6.5~10 책 한 권 / D 10~13 결과 화면 / E 13~15 끝 화면
+   문 실루엣·무늬는 제품 17단계 일곱 문(design/strange-oracle.md 17단계 2절)을 영상 크기(문 170x250)로 다시 그린 것.
+   과장 효과 없음: 흔들림 1도 안쪽, 빛은 단색 그라데이션, blur·filter 0. */
+
+.stage { --bg-h: 285; }
+
+/* 첫 문 빛이 방 전체로 아주 옅게 번짐 (A) */
+.spill { position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse 46% 30% at 540px 900px, oklch(0.84 0.1 70 / 0.32), transparent 70%);
+  animation: spill 1.9s ease-in-out 0.3s both; }
+@keyframes spill { 0% { opacity: 0; } 45% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ───────── 문 자리 ───────── */
+.doors { z-index: 2; }
+.slot { position: absolute; left: calc(var(--x) - 85px); top: calc(var(--y) - 125px); width: 170px; height: 250px;
+  animation: slot-gather 0.85s var(--ease-in-out) calc(6.5s + var(--k) * 0.04s) forwards; }
+.slot:not(:first-child) { opacity: 0;
+  animation: slot-appear 0.4s var(--ease-out) calc(1.45s + var(--k) * 0.05s) both,
+             slot-gather 0.85s var(--ease-in-out) calc(6.5s + var(--k) * 0.04s) forwards; }
+@keyframes slot-appear { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+/* 문이 작아지며 책 표지의 장 표시(.mark) 자리로 날아가 그 표시가 된다 */
+@keyframes slot-gather { 0% { translate: 0 0; scale: 1; opacity: 1; } 75% { opacity: 1; } 100% { translate: var(--gx) var(--gy); scale: 0.2; opacity: 0; } }
+
+/* ───────── 문 하나 ───────── */
+.vdoor { position: absolute; inset: 0; --lit0: 0;
+  animation: door-light 0.7s linear calc(1.6s + var(--k, 0) * 0.7s) both; }
+.slot:nth-child(2) .vdoor { --k: 1; } .slot:nth-child(3) .vdoor { --k: 2; } .slot:nth-child(4) .vdoor { --k: 3; }
+.slot:nth-child(5) .vdoor { --k: 4; } .slot:nth-child(6) .vdoor { --k: 5; } .slot:nth-child(7) .vdoor { --k: 6; }
+/* 0.7초 동안 빛나고, 다녀간 문처럼 옅게 빛이 남는다 */
+@keyframes door-light { 0% { --lit: var(--lit0); } 25% { --lit: 1; } 70% { --lit: 1; } 100% { --lit: 0.4; } }
+
+/* Ⅰ 문: 처음엔 화면 가운데 크게 → 노크(1도 안쪽) → 빛 틈 → 제자리로 */
+.vdoor--first { --lit0: 0.8;
+  animation:
+    door-zoom 1.75s var(--ease-in-out) 0s both,
+    door-knock 0.36s ease-out 0.12s both,
+    door-open 0.9s var(--ease-out) 0.35s both,
+    door-light 0.7s linear 1.6s forwards; }
+@keyframes door-zoom { 0%, 74% { translate: 300px 215px; scale: 2; } 100% { translate: 0 0; scale: 1; } }
+@keyframes door-knock { 0% { rotate: 0deg; } 30% { rotate: -0.8deg; } 60% { rotate: 0.6deg; } 100% { rotate: 0deg; } }
+@keyframes door-open { from { --lit: 0; } to { --lit: 0.8; } }
+
+.vdoor__halo { position: absolute; inset: -70px -60px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, oklch(0.84 calc(0.1 * var(--cs)) var(--h) / 0.5), transparent);
+  opacity: var(--lit); }
+.vdoor__body { position: absolute; inset: 0; overflow: hidden;
+  border: 3px solid color-mix(in oklch, var(--bronze), var(--acc) calc(var(--lit) * 70%));
+  border-radius: var(--shape, 6px);
+  /* 문 안쪽 빛 (문짝이 벌어지면 가운데 틈으로 보인다) */
+  background: linear-gradient(180deg, oklch(0.95 0.05 85), oklch(0.82 calc(0.12 * var(--cs)) var(--h))); }
+.vdoor__leaf { position: absolute; top: 0; bottom: 0; width: 50%;
+  background: linear-gradient(180deg, oklch(0.28 0.045 var(--rh)), oklch(0.16 0.03 var(--rh)));
+  scale: calc(1 - 0.17 * var(--lit)) 1; }
+.vdoor__leaf--l { left: 0; transform-origin: left center; box-shadow: inset -1px 0 0 var(--bronze-dark); }
+.vdoor__leaf--r { right: 0; transform-origin: right center; box-shadow: inset 1px 0 0 var(--bronze-dark); }
+.vdoor__motif { position: absolute; inset: 0; pointer-events: none; background: var(--motif, none); }
+.vdoor__num { position: absolute; left: 0; right: 0; bottom: 24px; text-align: center;
+  font-family: var(--font-latin); font-weight: 700; font-size: 30px; letter-spacing: 0.08em;
+  color: color-mix(in oklch, var(--acc-dim), var(--acc) calc(var(--lit) * 100%));
+  text-shadow: 0 1px 3px oklch(0 0 0 / 0.8); }
+
+/* 무늬 선 색 (제품 --bronze-hi를 반투명으로) */
+.vdoor { --line: oklch(0.84 0.07 85 / 0.55); }
+
+/* Ⅰ 만신: 한옥 대문. 기와 지붕 + 단청 띠 + 띠살 문짝(창호지에 불빛) */
+.vdoor[data-room="saju"] { --shape: 2px; }
+.vdoor[data-room="saju"] .vdoor__body { border-color: color-mix(in oklch, var(--wood-hi), var(--acc) calc(var(--lit) * 60%)); border-width: 6px 8px 0; }
+.vdoor[data-room="saju"] .vdoor__leaf {
+  background:
+    repeating-linear-gradient(90deg, var(--wood-dark) 0 2px, transparent 2px 10px) 50% 12% / 70% 46% no-repeat,
+    linear-gradient(var(--hanji-lit), var(--hanji-lit)) 50% 12% / 70% 46% no-repeat,
+    linear-gradient(180deg, var(--wood), var(--wood-dark)); }
+.vdoor__roof { position: absolute; left: -15%; width: 130%; top: -46px; height: auto; overflow: visible; z-index: 2; }
+.roof-tiles { fill: var(--roof); stroke: oklch(0.45 0.02 250); stroke-width: 1.5; }
+.roof-ridge { fill: none; stroke: oklch(0.52 0.02 250); stroke-width: 4; stroke-linecap: round; }
+.roof-band { fill: var(--dancheong-green); stroke: var(--dancheong-red); stroke-width: 2; }
+
+/* Ⅱ 오검: 자작나무 껍질 문. 위 띠 = 흰 껍질과 껍질눈, 왼쪽 문설주 = 줄기선과 오검 획 */
+.vdoor[data-room="ogham"] { --shape: 16px 16px 6px 6px; --motif:
+  repeating-linear-gradient(90deg, transparent 0 9px, oklch(0.26 0.02 60) 9px 16px, transparent 16px 25px, oklch(0.26 0.02 60) 25px 28px, transparent 28px 40px) 0 9px / 100% 3px no-repeat,
+  linear-gradient(oklch(0.86 0.02 90 / 0.8), oklch(0.86 0.02 90 / 0.8)) 0 0 / 100% 22px no-repeat,
+  linear-gradient(var(--line), var(--line)) 18px 22px / 2px 100% no-repeat,
+  repeating-linear-gradient(180deg, var(--line) 0 2px, transparent 2px 11px) 9px 50px / 9px 46% no-repeat,
+  repeating-linear-gradient(180deg, transparent 0 6px, var(--line) 6px 8px, transparent 8px 19px) 20px 64px / 9px 34% no-repeat; }
+
+/* Ⅲ 별: 반원 아치. 안쪽 테 = 하나씩 센 별(점선) */
+.vdoor[data-room="star"] { --shape: 85px 85px 6px 6px; }
+.vdoor[data-room="star"] .vdoor__motif { inset: 10px; border: 3px dotted oklch(0.9 0.05 var(--h) / 0.6); border-radius: 75px 75px 4px 4px; }
+
+/* Ⅳ 데칸: 별시계 문. 두꺼운 상인방 + 위쪽 반원 눈금 + 그림자 바늘(빛날 때 -38° → -12°) */
+.vdoor[data-room="decan"] { --shape: 4px; }
+.vdoor[data-room="decan"] .vdoor__body { border-top-width: 9px; }
+.vdoor[data-room="decan"] .vdoor__motif { inset: 0 12% auto; height: 70px;
+  background: repeating-conic-gradient(from 90deg at 50% 0, var(--line) 0 1.2deg, transparent 1.2deg 15deg);
+  -webkit-mask: radial-gradient(circle at 50% 0, transparent 0 76%, #000 77% 100%); mask: radial-gradient(circle at 50% 0, transparent 0 76%, #000 77% 100%); }
+.vdoor__needle { position: absolute; z-index: 2; left: 50%; top: 2px; width: 3px; height: 40%;
+  background: linear-gradient(180deg, var(--bronze-hi), transparent); transform-origin: 50% 0;
+  rotate: calc(-38deg + 26deg * var(--lit)); }
+
+/* Ⅴ 촐킨: 계단식 돌 아치(3단) + 문설주에 점·막대 숫자 */
+.vdoor[data-room="tzolkin"] { --shape: 3px; --st: oklch(0.34 0.02 70); --motif:
+  linear-gradient(var(--st), var(--st)) 0 0 / 36% 13px no-repeat,
+  linear-gradient(var(--st), var(--st)) 100% 0 / 36% 13px no-repeat,
+  linear-gradient(var(--st), var(--st)) 0 13px / 24% 13px no-repeat,
+  linear-gradient(var(--st), var(--st)) 100% 13px / 24% 13px no-repeat,
+  linear-gradient(var(--st), var(--st)) 0 26px / 12% 13px no-repeat,
+  linear-gradient(var(--st), var(--st)) 100% 26px / 12% 13px no-repeat,
+  linear-gradient(var(--line), var(--line)) 8px 64px / 3px 34px no-repeat,
+  radial-gradient(circle, var(--line) 0 3px, transparent 3.6px) 14px 64px / 10px 10px no-repeat,
+  radial-gradient(circle, var(--line) 0 3px, transparent 3.6px) 14px 77px / 10px 10px no-repeat,
+  linear-gradient(var(--line), var(--line)) calc(100% - 8px) 64px / 3px 34px no-repeat,
+  radial-gradient(circle, var(--line) 0 3px, transparent 3.6px) calc(100% - 14px) 70px / 10px 10px no-repeat,
+  repeating-linear-gradient(0deg, transparent 0 18px, oklch(0.84 0.07 85 / 0.18) 18px 19px); }
+
+/* Ⅵ 룬: 바닷가의 돌 — 좌우가 다른 둥근 돌머리 + 윗부분 비늘 물결 */
+.vdoor[data-room="rune"] { --shape: 58% 24% 6px 6px / 30% 13% 6px 6px; }
+.vdoor[data-room="rune"] .vdoor__motif { inset: 12% 10% auto; height: 46px;
+  background: radial-gradient(circle at 50% 0, transparent 0 10px, var(--line) 10px 12.5px, transparent 13px) 0 0 / 28px 18px; }
+
+/* Ⅶ 시빌라: 낮고 넓은 동굴 입 + 가운데로 번지는 파문 */
+.vdoor[data-room="sibyl"] { --shape: 50% 50% 6px 6px / 17% 21% 6px 6px; }
+.vdoor[data-room="sibyl"] .vdoor__motif { inset: 0 0 46%;
+  background: repeating-radial-gradient(circle at 50% 72%, transparent 0 14px, var(--line) 14px 16px);
+  -webkit-mask: radial-gradient(circle at 50% 72%, #000 30%, transparent 70%); mask: radial-gradient(circle at 50% 72%, #000 30%, transparent 70%); }
+
+/* ───────── B: 방 이름 (문 아래, 0.7초씩) ───────── */
+.room-name { position: absolute; left: var(--text-left); width: var(--text-width); top: 1134px;
+  text-align: center; font-size: 76px; font-weight: 700; line-height: 1.2; color: var(--acc);
+  text-shadow: 0 2px 6px oklch(0 0 0 / 0.7); opacity: 0;
+  animation: room-win 0.7s linear calc(1.6s + var(--k) * 0.7s) both; }
+.room-name b { font-family: var(--font-latin); font-size: 44px; margin-right: 22px; color: var(--acc-dim); vertical-align: 6px; }
+@keyframes room-win { 0% { opacity: 0; translate: 0 10px; } 18% { opacity: 1; translate: 0 0; } 84% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ───────── C: 책 한 권 ───────── */
+.book-layer { animation: win-out 0.3s ease-in 9.85s forwards; }
+.book { position: absolute; left: 350px; top: 590px; width: 380px; height: 500px; opacity: 0;
+  animation: book-in 0.55s var(--ease-out) 6.75s both; }
+@keyframes book-in { from { opacity: 0; scale: 0.94; } to { opacity: 1; scale: 1; } }
+.book__halo { position: absolute; inset: -120px -140px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, var(--gold-soft), transparent);
+  animation: book-glow 0.9s var(--ease-out) 9.1s both; }
+@keyframes book-glow { 0% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0.7; } }
+.book__pages { position: absolute; top: 10px; bottom: 10px; left: 30px; right: -12px; border-radius: 4px 10px 10px 4px;
+  background: repeating-linear-gradient(90deg, var(--paper) 0 2px, oklch(0.78 0.03 80) 2px 3px); }
+.book__cover { position: absolute; inset: 0; border-radius: 6px 14px 14px 6px;
+  border: 3px solid var(--bronze);
+  background: linear-gradient(160deg, oklch(0.28 0.05 30), oklch(0.18 0.04 285));
+  box-shadow: inset 0 0 0 9px oklch(0.2 0.03 285), inset 0 0 0 11px var(--bronze-dark); }
+.book__spine { position: absolute; left: 0; top: 0; bottom: 0; width: 34px;
+  background:
+    linear-gradient(var(--bronze-dark), var(--bronze-dark)) 0 60px / 100% 3px no-repeat,
+    linear-gradient(var(--bronze-dark), var(--bronze-dark)) 0 calc(100% - 60px) / 100% 3px no-repeat,
+    linear-gradient(90deg, oklch(0.16 0.03 30), oklch(0.24 0.045 30)); }
+.book__eyebrow { position: absolute; left: 0; right: 0; top: 74px; font-size: 24px; }
+.book__title { position: absolute; left: 0; right: 0; top: 112px; text-align: center; font-size: 58px; font-weight: 700; color: var(--gold); letter-spacing: 0.04em; }
+.book__title::after { content: ""; display: block; width: 120px; height: 2px; margin: 22px auto 0; background: linear-gradient(90deg, transparent, var(--bronze), transparent); }
+.book__marks { position: absolute; left: 0; right: 0; top: 347px; display: flex; justify-content: center; gap: 10px; --m0: 7.6s; --mstep: 0.25s; }
+.book__count { position: absolute; left: 0; right: 0; top: 418px; height: 50px; }
+.book__count span { position: absolute; inset: 0; text-align: center; font-family: var(--font-latin); font-weight: 700; font-size: 40px; letter-spacing: 0.1em; color: var(--c-text-strong); opacity: 0;
+  animation: count-on 0.001s linear calc(7.35s + var(--k) * 0.25s) both, count-off 0.001s linear calc(7.6s + var(--k) * 0.25s) forwards; }
+.book__count span:first-child { opacity: 1; animation: count-off 0.001s linear 7.6s forwards; }
+.book__count span.is-last { color: var(--gold); animation: count-on 0.001s linear 9.1s both; }
+@keyframes count-on { from { opacity: 0; } to { opacity: 1; } }
+@keyframes count-off { from { opacity: 1; } to { opacity: 0; } }
+
+/* 장 표시 (제품 .arch-mark 결): 아치 테두리 + 채워지는 방 색 */
+.mark { position: relative; display: block; width: 34px; height: 46px; border: 2px solid var(--acc-dim); border-radius: 17px 17px 3px 3px; }
+.mark::before { content: ""; position: absolute; inset: 3px; border-radius: 13px 13px 1px 1px; background: var(--acc); opacity: 0;
+  animation: mark-fill 0.3s var(--ease-out) calc(var(--m0) + var(--k) * var(--mstep)) both; }
+@keyframes mark-fill { from { opacity: 0; scale: 0.5; } to { opacity: 1; scale: 1; } }
+
+/* ───────── D: 결과 화면 견본 ───────── */
+.result-layer { opacity: 0; animation: win-in 0.35s var(--ease-out) 9.95s both, win-out 0.3s ease-in 12.85s forwards; }
+.result { position: absolute; left: 190px; top: 560px; width: 700px; height: 660px; overflow: hidden;
+  border-radius: 36px; border: 2px solid oklch(0.4 0.04 25);
+  background: linear-gradient(180deg, oklch(0.2 0.04 25), oklch(0.15 0.03 285)); }
+.result__scroll { padding: 56px 52px 0; text-align: center;
+  animation: scroll-1 0.8s var(--ease-in-out) 10.5s both, scroll-2 0.8s var(--ease-in-out) 11.7s forwards; }
+@keyframes scroll-1 { from { translate: 0 0; } to { translate: 0 -210px; } }
+@keyframes scroll-2 { from { translate: 0 -210px; } to { translate: 0 -420px; } }
+.result__eyebrow { font-size: 26px; color: var(--c-text-muted); letter-spacing: 0.04em; }
+.result__who { margin-top: 18px; font-size: 34px; color: var(--c-text); }
+.result__title { margin-top: 10px; font-size: 68px; font-weight: 700; line-height: 1.25; color: var(--acc); }
+.result__wonguk { display: flex; justify-content: center; gap: 14px; margin: 30px 0 0; padding: 0; list-style: none; }
+.result__wonguk li { width: 92px; padding: 10px 0; border-radius: 10px; background: var(--paper); color: var(--hanji-ink);
+  font-family: var(--font-hanja); font-weight: 700; font-size: 42px; line-height: 1.2; }
+.result__wonguk li.is-day { box-shadow: 0 0 0 3px var(--acc); }
+.result__chapter { margin-top: 44px; font-size: 38px; font-weight: 700; color: var(--c-text-strong); }
+.result__chapter b { font-family: var(--font-latin); color: var(--acc-dim); margin-right: 16px; }
+.result__lines { display: block; height: 260px; margin-top: 26px;
+  background: repeating-linear-gradient(180deg, oklch(0.91 0.015 90 / 0.2) 0 18px, transparent 18px 52px);
+  -webkit-mask: linear-gradient(90deg, #000 0 100%) 0 0 / 100% 208px no-repeat, linear-gradient(90deg, #000 0 64%, transparent 64%) 0 208px / 100% 52px no-repeat;
+  mask: linear-gradient(90deg, #000 0 100%) 0 0 / 100% 208px no-repeat, linear-gradient(90deg, #000 0 64%, transparent 64%) 0 208px / 100% 52px no-repeat; }
+.result__lines--long { height: 400px; -webkit-mask: none; mask: none; }
+.result__quote { margin: 26px 0 0; padding: 18px 20px; border-left: 4px solid var(--acc); text-align: left; font-size: 38px; line-height: 1.5; color: var(--c-text-strong); background: oklch(0.84 0.08 18 / 0.08); }
+.result__fade { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(transparent, oklch(0.15 0.03 285)); }
+/* 손가락 대신 터치 표시 원 (실사 손 없음) */
+.touch { position: absolute; left: 700px; top: 1050px; width: 92px; height: 92px; border-radius: 50%;
+  border: 3px solid oklch(0.97 0.01 90 / 0.7); background: oklch(0.97 0.01 90 / 0.18); opacity: 0;
+  animation: swipe 1.2s var(--ease-in-out) 10.4s 2 both; }
+@keyframes swipe { 0% { opacity: 0; translate: 0 0; } 10% { opacity: 0.9; translate: 0 0; } 70% { opacity: 0.9; translate: 0 -300px; } 82%, 100% { opacity: 0; translate: 0 -320px; } }
+
+/* ───────── E: 끝 화면 ───────── */
+.end-layer { opacity: 0; animation: win-in 0.4s var(--ease-out) 12.95s both; }
+.end__arch { position: absolute; left: 290px; top: 560px; width: 500px; height: 660px; border-radius: 250px 250px 0 0;
+  border: 2px solid oklch(0.66 0.075 75 / 0.45); border-bottom: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 40%, var(--gold-soft), transparent 70%);
+  -webkit-mask: linear-gradient(#000 60%, transparent); mask: linear-gradient(#000 60%, transparent); }
+.end__eyebrow { position: absolute; left: var(--text-left); width: var(--text-width); top: 646px; font-size: 28px; }
+.end__logo { position: absolute; left: var(--text-left); width: var(--text-width); top: 694px; font-size: 128px;
+  animation: logo-shimmer 1.6s var(--ease-in-out) 13.1s both, end-knock 0.3s ease-out 14.5s both; }
+@keyframes end-knock { 0% { scale: 1; } 40% { scale: 1.015; } 100% { scale: 1; } }
+.end__marks { position: absolute; left: var(--text-left); width: var(--text-width); top: 870px; display: flex; justify-content: center; gap: 10px; --m0: 13.45s; --mstep: 0.07s; }
+.end__cta { top: 960px; }
+.end__note { top: 1140px; }

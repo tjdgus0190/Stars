@@ -1,0 +1,130 @@
+/* 낯선 점술관 광고 영상 장면 공통 (designer, 2026-10-17)
+   - 1080x1920 고정 무대 하나에 전체 타임라인. 모든 움직임은 CSS 애니메이션이며 페이지 로드 시 바로 시작한다.
+   - JS 타이머·requestAnimationFrame·무작위값 없음. 렌더는 document.getAnimations()의 currentTime 고정(README 참고).
+   - 색·글꼴은 제품(products/strange-oracle/style.css) 밤 테마 토큰과 같은 값. 과장된 효과(번쩍임·큰 흔들림·blur) 없음. */
+
+/* 움직이는 사용자 정의 속성: 문 빛(--lit), 장 채움(--fill) */
+@property --lit { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+:root {
+  /* 제품과 같은 글꼴 스택 */
+  --font-serif: "Gowun Batang", "Noto Serif KR", "AppleMyungjo", serif;
+  --font-latin: "Cinzel", "Gowun Batang", serif;
+  --font-hanja: "Gowun Batang", "Noto Serif KR", "Noto Serif CJK KR", "Batang", "AppleMyungjo", serif;
+
+  /* 제품 밤 테마 (common/base.css 어두운 판 + strange-oracle 토큰) */
+  --hue-neutral: 285;
+  --c-bg: oklch(0.17 0.04 285);
+  --c-bg-deep: oklch(0.14 0.035 285);
+  --c-surface-1: oklch(0.215 0.04 285);
+  --c-line: oklch(0.4 0.04 285);
+  --c-text-strong: oklch(0.96 0.012 90);
+  --c-text: oklch(0.91 0.015 90);
+  --c-text-muted: oklch(0.79 0.03 285);
+  --gold: oklch(0.84 0.1 85);
+  --gold-dim: oklch(0.7 0.1 85);
+  --gold-soft: oklch(0.84 0.1 85 / 0.22);
+  --bronze: oklch(0.66 0.075 75);
+  --bronze-dark: oklch(0.36 0.045 65);
+  --bronze-hi: oklch(0.84 0.07 85);
+  /* 만신의 방 (한옥·한지) */
+  --wood: oklch(0.34 0.05 40);
+  --wood-hi: oklch(0.46 0.06 45);
+  --wood-dark: oklch(0.2 0.035 40);
+  --hanji-lit: oklch(0.8 0.06 75);
+  --hanji-ink: oklch(0.24 0.025 50);
+  --paper: oklch(0.91 0.03 82);
+  --roof: oklch(0.3 0.015 250);
+  --dancheong-green: oklch(0.55 0.07 175);
+  --dancheong-red: oklch(0.5 0.12 28);
+  --el-wood: oklch(0.56 0.08 165);
+  --el-fire: oklch(0.56 0.11 28);
+  --el-earth: oklch(0.56 0.09 80);
+  --el-metal: oklch(0.56 0.015 85);
+  --el-water: oklch(0.56 0.07 265);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* 안전 영역 (제안서 2-1 공통 안전 박스) */
+  --safe-top: 270px; --safe-bottom: 672px; --safe-left: 65px; --safe-right: 140px;
+  /* 글자 기준 칸: 화면 가운데(540px) 기준 좌우 대칭 800px = x 140~940. 안전 박스(65~940) 안에 든다 */
+  --text-left: 140px; --text-width: 800px;
+}
+
+/* 방 색 (제품 [data-room] 값과 같음): --h 강조 색조, --cs 채도 배율, --rh 바탕 색조 */
+[data-room="saju"]    { --h: 18;  --cs: 0.9;  --rh: 25; }
+[data-room="ogham"]   { --h: 150; --cs: 0.85; --rh: 160; }
+[data-room="star"]    { --h: 295; --cs: 0.8;  --rh: 295; }
+[data-room="decan"]   { --h: 65;  --cs: 1.1;  --rh: 55; }
+[data-room="tzolkin"] { --h: 190; --cs: 0.9;  --rh: 185; }
+[data-room="rune"]    { --h: 230; --cs: 0.8;  --rh: 240; }
+[data-room="sibyl"]   { --h: 35;  --cs: 0.8;  --rh: 340; }
+[data-room] { --acc: oklch(0.84 calc(0.1 * var(--cs)) var(--h)); --acc-dim: oklch(0.7 calc(0.1 * var(--cs)) var(--h)); }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--c-bg-deep); }
+body { font-family: var(--font-serif); color: var(--c-text); -webkit-font-smoothing: antialiased; }
+p { margin: 0; }
+
+/* 렌더 도구가 붙이는 정지 스위치 (선택). 붙이면 모든 움직임이 멈추고, currentTime으로 프레임을 고른다 */
+html.is-paused *, html.is-paused *::before, html.is-paused *::after { animation-play-state: paused !important; }
+
+.stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate;
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 38%, oklch(0.24 0.05 var(--bg-h, 285) / 0.9), transparent 70%),
+    linear-gradient(180deg, var(--c-bg-deep), var(--c-bg) 45%, var(--c-bg-deep)); }
+.layer { position: absolute; inset: 0; }
+
+/* 별 배경: 고정 위치 점(무작위 아님). 두 겹이 엇갈려 아주 천천히 깜빡인다 */
+.sky, .sky::after { position: absolute; inset: 0; pointer-events: none; }
+.sky {
+  background:
+    radial-gradient(circle, oklch(0.95 0.02 90 / 0.8) 0 1.6px, transparent 2.4px) 37px 61px / 173px 151px,
+    radial-gradient(circle, oklch(0.95 0.02 90 / 0.55) 0 1.2px, transparent 2px) 101px 13px / 211px 197px,
+    radial-gradient(circle, oklch(0.9 0.04 295 / 0.5) 0 1px, transparent 1.8px) 7px 97px / 127px 113px;
+  opacity: 0.7;
+}
+.sky::after { content: "";
+  background: radial-gradient(circle, oklch(0.97 0.03 85 / 0.9) 0 2px, transparent 3px) 151px 211px / 263px 241px;
+  animation: twinkle 4s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: 0.25; } }
+
+/* 자막 (data-cap). 글자 기준 칸 위쪽에 둔다. 60px · 최대 2줄 · 한 줄 약 13자 */
+.cap {
+  position: absolute; left: var(--text-left); width: var(--text-width); top: 300px;
+  font-size: 60px; font-weight: 700; line-height: 1.38; letter-spacing: -0.01em;
+  text-align: center; color: var(--c-text-strong);
+  word-break: keep-all; text-wrap: balance;
+  text-shadow: 0 2px 4px oklch(0 0 0 / 0.75), 0 0 18px oklch(0.14 0.035 285 / 0.9);
+}
+.cap--cta { font-size: 56px; color: var(--gold); }
+.cap--note { font-size: 32px; font-weight: 400; line-height: 1.4; color: var(--c-text-muted); text-shadow: none; }
+
+/* 시간 창: --in(나타남 시작)·--out(사라짐 끝). 둘 다 초 단위.
+   .win = 나타났다 사라짐, .win-in = 나타난 뒤 끝까지 남음 */
+.win, .win-in { opacity: 0; }
+.win { animation: win-in 0.25s var(--ease-out) var(--in) both, win-out 0.25s ease-in calc(var(--out) - 0.25s) forwards; }
+.win-in { animation: win-in 0.25s var(--ease-out) var(--in) both; }
+.win--rise { --rise: 18px; }
+@keyframes win-in { from { opacity: 0; translate: 0 var(--rise, 0px); } to { opacity: 1; translate: 0 0; } }
+@keyframes win-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* 로고 (제품 .logo와 같은 금빛 그라데이션, 한 번만 스치는 빛) */
+.logo { margin: 0; font-weight: 700; letter-spacing: 0.06em; line-height: 1.2; text-align: center;
+  background: linear-gradient(100deg, var(--gold-dim) 0%, oklch(0.97 0.04 90) 35%, var(--gold) 50%, oklch(0.97 0.04 90) 65%, var(--gold-dim) 100%);
+  background-size: 250% 100%; background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.eyebrow { font-family: var(--font-latin); font-weight: 500; letter-spacing: 0.3em; color: var(--gold-dim); text-align: center; }
+@keyframes logo-shimmer { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+
+/* 안전 영역 확인: 주소 끝에 #safe 를 붙이거나 safe-overlay.css 를 붙인다 (JS 없음) */
+.safe-guide { display: none; position: absolute; inset: 0; z-index: 99; pointer-events: none; }
+.safe-guide:target { display: block; }
+.safe-guide::before { content: ""; position: absolute; top: var(--safe-top); bottom: var(--safe-bottom); left: var(--safe-left); right: var(--safe-right); outline: 4px solid oklch(0.75 0.2 145); background: oklch(0.75 0.2 145 / 0.06); }
+.safe-guide::after { content: ""; position: absolute; top: var(--safe-top); bottom: var(--safe-bottom); left: var(--text-left); width: var(--text-width); outline: 3px dashed oklch(0.8 0.17 60); }
+.safe-guide i { position: absolute; left: 0; right: 0; background: oklch(0.6 0.22 25 / 0.28); }
+.safe-guide i:nth-child(1) { top: 0; height: var(--safe-top); }
+.safe-guide i:nth-child(2) { bottom: 0; height: var(--safe-bottom); }
+.safe-guide i:nth-child(3) { top: 0; bottom: 0; left: auto; width: var(--safe-right); right: 0; background: oklch(0.6 0.22 25 / 0.18); }
+.safe-guide i:nth-child(4) { top: 0; bottom: 0; right: auto; width: var(--safe-left); left: 0; background: oklch(0.6 0.22 25 / 0.18); }

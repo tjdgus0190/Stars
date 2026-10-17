@@ -1,0 +1,101 @@
+/* 광고 2안 「만신이 쌀 위에 여덟 글자를」 9초 · 한국판 (designer, 2026-10-17)
+   타임라인 (초): A 0~1 소반·쌀, 방울 한 번 / B 1~4 여덟 글자가 한 자씩 / C 4~6.5 열 가지 일간 카드 / D 6.5~9 끝 화면
+   소반·쌀·방울·글자 쓰기는 제품 만신의 방 의식(style.css 3-K)을 영상 크기로 다시 그린 것. 사람 모습·실사 없음. */
+
+.stage { --bg-h: 25; }
+[data-el="wood"]  { --el: var(--el-wood); }
+[data-el="fire"]  { --el: var(--el-fire); }
+[data-el="earth"] { --el: var(--el-earth); }
+[data-el="metal"] { --el: var(--el-metal); }
+[data-el="water"] { --el: var(--el-water); }
+
+/* 촛불빛 (제품 만신의 방 바탕처럼 따뜻한 위쪽 빛, 아주 느린 숨) */
+.candle { position: absolute; left: 0; right: 0; top: 280px; height: 1000px; pointer-events: none;
+  background: radial-gradient(ellipse 55% 45% at 50% 55%, oklch(0.6 0.1 50 / 0.22), transparent 70%);
+  animation: candle 3s ease-in-out infinite; }
+@keyframes candle { 50% { opacity: 0.8; } }
+
+/* ───────── A·B: 소반 ───────── */
+.soban-layer { animation: soban-dim 0.35s ease-out 4s forwards, soban-out 0.3s ease-in 6.4s forwards; }
+@keyframes soban-out { from { opacity: 0.22; } to { opacity: 0; } }
+@keyframes soban-dim { to { opacity: 0.22; } }
+.soban { position: absolute; left: 160px; top: 600px; width: 760px; height: 506px;
+  animation: push-out 4s var(--ease-out) 0s both; }
+@keyframes push-out { from { scale: 1.07; } to { scale: 1; } }
+.soban__top { position: absolute; inset: 0 0 18%; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, var(--wood-hi), var(--wood) 60%, var(--wood-dark));
+  box-shadow: inset 0 0 0 10px var(--wood-dark), inset 0 0 0 15px oklch(0.5 0.06 45 / 0.6), 0 40px 70px oklch(0 0 0 / 0.5); }
+/* 흰 쌀: 낟알 점 두 겹 + 둥근 그늘 (그림 파일 없음) */
+.soban__rice { position: absolute; inset: 9% 7% 26%; border-radius: 50%;
+  background:
+    radial-gradient(ellipse 5px 3px at 30% 40%, oklch(0.99 0.005 90) 60%, transparent 70%) 0 0 / 22px 17px,
+    radial-gradient(ellipse 4px 2.5px at 60% 60%, oklch(0.8 0.02 80) 60%, transparent 70%) 10px 7px / 27px 20px,
+    radial-gradient(closest-side, oklch(0.95 0.012 90), oklch(0.86 0.025 80));
+  box-shadow: inset 0 8px 20px oklch(0 0 0 / 0.25); }
+.soban__legs { position: absolute; left: 22%; right: 22%; bottom: 0; height: 26%;
+  background: linear-gradient(90deg, var(--wood-dark) 0 9%, transparent 9% 91%, var(--wood-dark) 91%);
+  clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%); }
+
+/* 여덟 글자: 붓글씨처럼 한 자씩 위에서 아래로 (년 → 월 → 일 → 시, 0.34초 간격, 1.0초 시작 → 3.94초 끝) */
+.wonguk { position: absolute; left: 17%; right: 17%; top: 16%; height: 50%; margin: 0; padding: 0; list-style: none;
+  display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 8px; }
+.wonguk li { position: relative; display: grid; grid-template-rows: 1fr 1fr; justify-items: center; align-items: center; }
+.wonguk b { position: relative; font-family: var(--font-hanja); font-weight: 700; font-size: 96px; line-height: 1; color: var(--hanji-ink);
+  text-shadow: 0 2px 0 oklch(1 0 0 / 0.5); opacity: 0;
+  animation: brush-in 0.56s var(--ease-out) calc(1s + var(--n) * 0.34s) both; }
+/* 오행 색 점 (제품 .wonguk__char::before 결) */
+.wonguk b::before { content: ""; position: absolute; top: 2px; right: -12px; width: 14px; height: 14px; border-radius: 50%; background: var(--el); }
+@keyframes brush-in {
+  from { opacity: 0; clip-path: inset(0 0 100% 0); translate: 0 -6px; scale: 1.06; }
+  55% { opacity: 1; }
+  to { opacity: 1; clip-path: inset(0 0 0 0); translate: 0 0; scale: 1; } }
+/* 일간(甲) 자리에 은은한 테 (3.5초) */
+.wonguk li.is-day::before { content: ""; position: absolute; inset: -6px -4px 50% -4px; border-radius: 16px;
+  border: 3px solid oklch(0.62 0.12 18); background: oklch(0.84 0.09 18 / 0.18); opacity: 0;
+  animation: win-in 0.4s var(--ease-out) 3.5s both; }
+
+/* 방울: 한 번 흔들리고(0.15초) 울림 고리 두 번 */
+.bell { position: absolute; left: 770px; top: 478px; width: 150px; height: 150px; color: var(--gold); }
+.bell__icon { width: 150px; height: 150px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  transform-origin: 50% 8%; animation: bell-shake 0.7s var(--ease-out) 0.15s both; }
+@keyframes bell-shake { 0% { rotate: 0deg; } 20% { rotate: -9deg; } 45% { rotate: 7deg; } 70% { rotate: -3deg; } 100% { rotate: 0deg; } }
+.bell__ring { position: absolute; left: 25px; top: 35px; width: 100px; height: 100px; border-radius: 50%; border: 2px solid oklch(0.84 0.1 85 / 0.6); opacity: 0;
+  animation: bell-ring 1.2s var(--ease-out) 0.15s both; }
+.bell__ring--2 { animation-delay: 0.45s; }
+@keyframes bell-ring { 0% { opacity: 0.8; scale: 0.8; } 100% { opacity: 0; scale: 2; } }
+
+/* ───────── C: 열 가지 일간 카드 (한지 판, 0.22초씩 넘어감) ───────── */
+.cards-layer { opacity: 0; animation: win-in 0.25s var(--ease-out) 4s both, win-out 0.3s ease-in 6.45s forwards; }
+.card { position: absolute; left: 270px; top: 590px; width: 540px; height: 620px; border-radius: 18px;
+  background: radial-gradient(ellipse at 50% 30%, oklch(0.94 0.02 85), var(--paper));
+  border: 4px solid var(--wood-hi);
+  box-shadow: inset 0 0 0 10px var(--paper), inset 0 0 0 12px oklch(0.7 0.04 60 / 0.6), 0 30px 60px oklch(0 0 0 / 0.45); }
+.face { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0;
+  animation: face 0.22s linear calc(4.1s + var(--k) * 0.22s) none; }
+/* 카드는 끊어 넘김(빈 프레임 없음): 창 안에서만 보이고, 들어올 때 12px 살짝 떠오름 */
+@keyframes face { 0% { opacity: 1; translate: 0 12px; } 30%, 100% { opacity: 1; translate: 0 0; } }
+.face b { font-family: var(--font-hanja); font-weight: 700; font-size: 230px; line-height: 1.05; color: var(--el); }
+.face span { font-size: 64px; font-weight: 700; color: var(--hanji-ink); }
+.face em { font-style: normal; font-size: 44px; color: var(--hanji-ink); }
+.face--ask { animation: win-in 0.15s var(--ease-out) 6.3s both; }
+.face--ask b { font-family: var(--font-serif); color: oklch(0.5 0.12 18); }
+
+/* ───────── D: 끝 화면 ───────── */
+.end-layer { opacity: 0; animation: win-in 0.4s var(--ease-out) 6.5s both; }
+.six { position: absolute; left: var(--text-left); width: var(--text-width); top: 580px; display: flex; justify-content: center; gap: 20px; }
+.six i { display: block; width: 100px; height: 150px; border: 2px solid var(--acc-dim); border-radius: var(--shape);
+  background: linear-gradient(180deg, oklch(0.3 0.05 var(--rh)), oklch(0.17 0.03 var(--rh)));
+  opacity: 0.3; animation: glim 0.6s var(--ease-out) calc(6.75s + var(--k) * 0.12s) both; }
+@keyframes glim { 0% { opacity: 0.3; } 40% { opacity: 0.85; } 100% { opacity: 0.45; } }
+.six [data-room="ogham"]   { --shape: 12px 12px 4px 4px; }
+.six [data-room="star"]    { --shape: 50px 50px 4px 4px; }
+.six [data-room="decan"]   { --shape: 3px; border-top-width: 6px; }
+.six [data-room="tzolkin"] { --shape: 2px; }
+.six [data-room="rune"]    { --shape: 58% 24% 4px 4px / 30% 13% 4px 4px; }
+.six [data-room="sibyl"]   { --shape: 50% 50% 4px 4px / 17% 21% 4px 4px; }
+.end__bell { position: absolute; left: 500px; top: 752px; width: 80px; height: 80px; fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  transform-origin: 50% 8%; animation: bell-shake 0.7s var(--ease-out) 8.3s both; }
+.end__logo { position: absolute; left: var(--text-left); width: var(--text-width); top: 846px; font-size: 120px;
+  animation: logo-shimmer 1.6s var(--ease-in-out) 6.7s both; }
+.end__cta { top: 1010px; }
+.end__note { top: 1140px; }
