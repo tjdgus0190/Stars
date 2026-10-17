@@ -31,7 +31,7 @@ node --experimental-websocket marketing/strange-oracle/render/render.js all --ch
 공통: H.264 High, 1080x1920, yuv420p, 30fps, bt709, 무음(오디오 스트림 없음). 플랫폼에서 음악을 붙일 때 소리 없는 영상으로 올려도 된다.
 
 ## 주의
-- 글꼴은 jsdelivr에서 받는다(네트워크 필요). 한자는 이 PC의 바탕체 계열로 대신 그려진다 — 다른 PC에서 렌더하면 한자 모양이 달라질 수 있다(scenes/README 3번).
+- 글꼴은 jsdelivr에서 받는다(네트워크 필요). 한자는 Noto Serif KR 700(@fontsource 5.3.1, OFL)으로 그려져 PC에 따라 달라지지 않는다(scenes/README 3번).
 - 자막·장면을 바꾸면 다시 `all`과 `--check`를 돌린다.
 
 ## 광고 링크의 utm (GA4 캠페인 구분)

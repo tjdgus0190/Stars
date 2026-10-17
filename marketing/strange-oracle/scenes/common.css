@@ -10,7 +10,8 @@
   /* 제품과 같은 글꼴 스택 */
   --font-serif: "Gowun Batang", "Noto Serif KR", "AppleMyungjo", serif;
   --font-latin: "Cinzel", "Gowun Batang", serif;
-  --font-hanja: "Gowun Batang", "Noto Serif KR", "Noto Serif CJK KR", "Batang", "AppleMyungjo", serif;
+  /* 한자: Gowun Batang에 없는 글자는 Noto Serif KR(fontsource 5.3.1, OFL)로. 시스템 글꼴(바탕체 등)은 영상에 굽지 않도록 목록에서 뺐다 */
+  --font-hanja: "Gowun Batang", "Noto Serif KR", serif;
 
   /* 제품 밤 테마 (common/base.css 어두운 판 + strange-oracle 토큰) */
   --hue-neutral: 285;
