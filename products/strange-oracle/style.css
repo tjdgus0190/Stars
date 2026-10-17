@@ -5186,3 +5186,180 @@ body.is-reading .map-node--owner::after, body.is-reading .map-card__dot--f { ani
   .map-icons__opt .map-ico { transition: none; }
   .map-icons__opt input:checked + .map-ico { transform: none; }
 }
+
+/* ═════════ (17단계 I1) 일곱 문: 방마다 다른 문 (결정 87, specs 17-8) ═════════
+   한 방의 문은 세 자리에서 같은 결로 보인다: ① 입구 작은 문(.door) ② 입구 고대 문(.hub-gate, 다음 방) ③ 결과 뒤 다음 문(.next-door)
+   + 문 열림(.sigil-rise) 막에 같은 무늬. 모두 [data-room]만으로 고른다(JS 변경 없음).
+   가볍게: 방마다 단색 그라데이션 몇 겹 + 테두리 모양만. filter·큰 그림자·blur 새로 0. 무늬는 문 윗부분·문틀에만(글자 자리 비움) */
+:root { --door-stone: oklch(0.34 0.02 70); --door-bark: oklch(0.86 0.02 90); --door-bark-mark: oklch(0.26 0.02 60); }
+.door__frame::after, .next-door__leaves::after, .hub-gate__door::after { content: none; position: absolute; pointer-events: none; }
+.door[data-room]:not(.door--gate) .door__relief { opacity: 0.34; }
+.door.is-locked[data-room] .door__relief { opacity: 0.16; }
+
+/* ── 실루엣: 문 위쪽 모양 (작은 문 · 다음 문 · 고대 문이 같은 결) ── */
+.door[data-room="ogham"]   { --door-r: 9px; }
+.door[data-room="star"]    { --door-r: var(--arch); }
+.door[data-room="decan"]   { --door-r: 3px; border-top-width: 3px; }
+.door[data-room="tzolkin"] { --door-r: 2px; }
+.door[data-room]:is([data-room="ogham"], [data-room="star"], [data-room="decan"], [data-room="tzolkin"]) { border-radius: var(--door-r) var(--door-r) var(--radius-lg) var(--radius-lg); }
+.hub .door[data-room]:is([data-room="ogham"], [data-room="star"], [data-room="decan"], [data-room="tzolkin"])::before { border-radius: max(0px, calc(var(--door-r) - 4px)) max(0px, calc(var(--door-r) - 4px)) calc(var(--radius-lg) - 4px) calc(var(--radius-lg) - 4px); }
+/* Ⅵ 룬: 바닷가에 선 돌 — 좌우가 다른 둥근 돌머리 / Ⅶ 시빌라: 낮고 넓은 동굴 입 — 바위처럼 비대칭 */
+.door[data-room="rune"], .hub .door[data-room="rune"]::before { border-radius: 58% 24% var(--radius-lg) var(--radius-lg) / 30% 13% var(--radius-lg) var(--radius-lg); }
+.door[data-room="sibyl"], .hub .door[data-room="sibyl"]::before { border-radius: 50% 50% var(--radius-lg) var(--radius-lg) / 17% 21% var(--radius-lg) var(--radius-lg); }
+
+/* ── Ⅱ 오검: 자작나무 껍질 문. 위 띠 = 흰 껍질과 가로 껍질눈, 왼쪽 문설주 = 줄기선과 오검 획 ── */
+.door[data-room="ogham"] { --motif:
+  linear-gradient(var(--bronze-hi), var(--bronze-hi)) 10px 0 / 1.5px 100% no-repeat,
+  repeating-linear-gradient(180deg, var(--bronze-hi) 0 1.5px, transparent 1.5px 7px) 4px 14px / 6px 52% no-repeat,
+  repeating-linear-gradient(180deg, transparent 0 4px, var(--bronze-hi) 4px 5.5px, transparent 5.5px 13px) 11.5px 22px / 6px 40% no-repeat; }
+.door[data-room="ogham"] .door__frame::after,
+.next-door[data-room="ogham"] .next-door__leaves::after,
+.hub-gate[data-room="ogham"] .hub-gate__door::after {
+  content: ""; inset: 0 0 auto; height: 10px;
+  background: repeating-linear-gradient(90deg, transparent 0 6px, var(--door-bark-mark) 6px 11px, transparent 11px 17px, var(--door-bark-mark) 17px 19px, transparent 19px 27px) 0 3px / 100% 2px no-repeat, var(--door-bark);
+  opacity: 0.55;
+}
+.next-door[data-room="ogham"] .next-door__leaves::after, .hub-gate[data-room="ogham"] .hub-gate__door::after { z-index: 2; height: 16px; background-position: 0 6px, 0 0; }
+.door.is-locked[data-room="ogham"] .door__frame::after { opacity: 0.25; }
+
+/* ── Ⅲ 별: 달의 집을 세는 밤하늘 아치. 안쪽 테 = 하나씩 센 별(점선) ── */
+.door[data-room="star"]::before { border: 2px dotted oklch(0.9 0.05 var(--accent-h) / 0.42); }
+.door.is-locked[data-room="star"]::before { border-color: oklch(0.9 0.03 var(--accent-h) / 0.2); }
+.next-door[data-room="star"] .next-door__leaves::after,
+.hub-gate[data-room="star"] .hub-gate__door::after { content: ""; z-index: 2; inset: 7px; border: 2px dotted oklch(0.92 0.05 var(--accent-h) / 0.55); border-radius: inherit; }
+
+/* ── Ⅳ 데칸: 별시계 문. 두꺼운 상인방 + 위쪽 반원 눈금(부조) + 눈금을 짚는 그림자 바늘 ── */
+.door[data-room="decan"] .door__frame::after,
+.next-door[data-room="decan"] .next-door__leaves::after,
+.hub-gate[data-room="decan"] .hub-gate__door::after {
+  content: ""; z-index: 2; left: 50%; top: 4px; width: 1.5px; height: 34%;
+  background: linear-gradient(180deg, var(--bronze-hi), transparent);
+  transform-origin: 50% 0; rotate: -38deg; transition: rotate 900ms var(--ease-in-out);
+}
+.next-door[data-room="decan"] .next-door__leaves::after, .hub-gate[data-room="decan"] .hub-gate__door::after {
+  width: 2px; height: 40%;
+  box-shadow: none;
+}
+.next-door[data-room="decan"] .next-door__leaves, .hub-gate[data-room="decan"] .hub-gate__door { border-top-width: 6px; }
+.next-door[data-room="decan"] .next-door__leaves::before, .hub-gate[data-room="decan"] .hub-gate__door::before {
+  content: ""; position: absolute; z-index: 2; left: 50%; top: 0; width: 76%; aspect-ratio: 2 / 1; translate: -50% 0; pointer-events: none;
+  border-radius: 0 0 999px 999px; opacity: 0.5;
+  background: repeating-conic-gradient(from 90deg at 50% 0, var(--bronze-hi) 0 1deg, transparent 1deg 15deg);
+  -webkit-mask: radial-gradient(circle at 50% 0, transparent 0 78%, #000 79% 100%); mask: radial-gradient(circle at 50% 0, transparent 0 78%, #000 79% 100%);
+}
+.door[data-room="decan"].is-next .door__frame::after,
+.next-door[data-room="decan"]:is(:hover, :focus-visible, .is-opening) .next-door__leaves::after,
+.hub-gate[data-room="decan"]:is(:hover, :focus-visible, .is-entering) .hub-gate__door::after { rotate: -12deg; }
+.door.is-locked[data-room="decan"] .door__frame::after { opacity: 0.3; }
+
+/* ── Ⅴ 촐킨: 말하는 석판. 계단식 돌 아치(코벨) + 문설주에 점·막대 숫자(사람 모양 없음, 9-1) ── */
+.door[data-room="tzolkin"] { --motif:
+  repeating-linear-gradient(0deg, transparent 0 10px, var(--bronze-hi) 10px 11px),
+  linear-gradient(var(--bronze-hi), var(--bronze-hi)) 5px 34px / 2px 20px no-repeat,
+  radial-gradient(circle, var(--bronze-hi) 0 1.6px, transparent 2.1px) 9px 34px / 6px 6px no-repeat,
+  radial-gradient(circle, var(--bronze-hi) 0 1.6px, transparent 2.1px) 9px 41px / 6px 6px no-repeat,
+  linear-gradient(var(--bronze-hi), var(--bronze-hi)) calc(100% - 5px) 34px / 2px 20px no-repeat,
+  radial-gradient(circle, var(--bronze-hi) 0 1.6px, transparent 2.1px) calc(100% - 9px) 37px / 6px 6px no-repeat; }
+.door[data-room="tzolkin"] .door__frame::after,
+.next-door[data-room="tzolkin"] .next-door__leaves::after,
+.hub-gate[data-room="tzolkin"] .hub-gate__door::after {
+  --st: var(--door-stone); --sh: 7px;
+  content: ""; z-index: 2; inset: 0 0 auto; height: calc(var(--sh) * 3);
+  background:
+    linear-gradient(var(--st), var(--st)) 0 0 / 36% var(--sh) no-repeat,
+    linear-gradient(var(--st), var(--st)) 100% 0 / 36% var(--sh) no-repeat,
+    linear-gradient(var(--st), var(--st)) 0 var(--sh) / 24% var(--sh) no-repeat,
+    linear-gradient(var(--st), var(--st)) 100% var(--sh) / 24% var(--sh) no-repeat,
+    linear-gradient(var(--st), var(--st)) 0 calc(var(--sh) * 2) / 12% var(--sh) no-repeat,
+    linear-gradient(var(--st), var(--st)) 100% calc(var(--sh) * 2) / 12% var(--sh) no-repeat;
+}
+.next-door[data-room="tzolkin"] .next-door__leaves::after, .hub-gate[data-room="tzolkin"] .hub-gate__door::after { --sh: 12px; }
+.door.is-locked[data-room="tzolkin"] .door__frame::after { --st: oklch(0.24 0.012 70); }
+
+/* ── Ⅵ 룬: 북쪽 바닷가의 돌 문. 문 윗부분에 비늘 물결 ── */
+.door[data-room="rune"] { --motif: radial-gradient(circle at 50% 0, transparent 0 5px, var(--bronze-hi) 5px 6.2px, transparent 6.8px) 0 0 / 14px 9px; }
+.next-door[data-room="rune"] .next-door__leaves::after,
+.hub-gate[data-room="rune"] .hub-gate__door::after {
+  content: ""; z-index: 2; inset: 12% 12% auto; height: 26px; opacity: 0.6;
+  background: radial-gradient(circle at 50% 0, transparent 0 7px, var(--bronze-hi) 7px 8.5px, transparent 9px) 0 0 / 20px 13px;
+}
+
+/* ── Ⅶ 시빌라: 동굴 입구. 상징을 가운데로 번지는 울림의 파문 ── */
+.door[data-room="sibyl"] { --motif: repeating-radial-gradient(circle at 50% 62%, transparent 0 7px, var(--bronze-hi) 7px 8px); }
+.next-door[data-room="sibyl"] .next-door__leaves::after,
+.hub-gate[data-room="sibyl"] .hub-gate__door::after {
+  content: ""; z-index: 2; inset: 0 0 48%; opacity: 0.45;
+  background: repeating-radial-gradient(circle at 50% 70%, transparent 0 10px, var(--bronze-hi) 10px 11.5px);
+  -webkit-mask: radial-gradient(circle at 50% 70%, #000 30%, transparent 70%); mask: radial-gradient(circle at 50% 70%, #000 30%, transparent 70%);
+}
+
+/* ── 다음 문·고대 문의 실루엣 (작은 문과 같은 모양) ── */
+.next-door[data-room="ogham"] .next-door__leaves { border-radius: 14px 14px 8px 8px; }
+.next-door[data-room="decan"] .next-door__leaves { border-radius: 4px 4px 8px 8px; }
+.next-door[data-room="tzolkin"] .next-door__leaves { border-radius: 3px 3px 8px 8px; }
+.next-door[data-room="rune"] .next-door__leaves { border-radius: 58% 24% 8px 8px / 32% 14% 8px 8px; }
+.next-door[data-room="sibyl"] .next-door__leaves { border-radius: 50% 50% 8px 8px / 18% 22% 8px 8px; }
+.next-door[data-room]:is([data-room="ogham"], [data-room="decan"], [data-room="tzolkin"]):focus-visible { border-radius: 10px; }
+.hub-gate[data-room="ogham"] .hub-gate__door { border-radius: 12px 12px 4px 4px; }
+.hub-gate[data-room="decan"] .hub-gate__door { border-radius: 4px; }
+.hub-gate[data-room="tzolkin"] .hub-gate__door { border-radius: 3px 3px 4px 4px; }
+.hub-gate[data-room="rune"] .hub-gate__door { border-radius: 58% 24% 4px 4px / 32% 14% 4px 4px; }
+.hub-gate[data-room="sibyl"] .hub-gate__door { border-radius: 50% 50% 4px 4px / 18% 22% 4px 4px; }
+/* 아치 몰딩 선은 둥근 아치 문(Ⅲ 별)에서만. 다른 모양에서는 선이 문 밖으로 삐져 보이므로 숨긴다 */
+.hub-gate[data-room]:is([data-room="ogham"], [data-room="decan"], [data-room="tzolkin"], [data-room="rune"], [data-room="sibyl"]) .hub-gate__arch { display: none; }
+
+/* ── 문 열림 막(8-3): 방의 무늬가 막에 한 번 비친다 (막의 투명도 애니메이션을 그대로 탄다 = 끝나면 사라짐) ── */
+.sigil-rise__veil::after { content: ""; position: absolute; inset: 0; opacity: 0.16; pointer-events: none; }
+.sigil-rise[data-room="ogham"] .sigil-rise__veil::after { background: linear-gradient(var(--bronze-hi), var(--bronze-hi)) 50% 0 / 2px 100% no-repeat, repeating-linear-gradient(180deg, var(--bronze-hi) 0 2px, transparent 2px 26px) calc(50% - 7px) 0 / 14px 100% no-repeat; }
+.sigil-rise[data-room="star"] .sigil-rise__veil::after { background: radial-gradient(circle, var(--bronze-hi) 0 1.5px, transparent 2px) 0 0 / 34px 34px, radial-gradient(circle, var(--bronze-hi) 0 1px, transparent 1.5px) 17px 11px / 46px 46px; }
+.sigil-rise[data-room="decan"] .sigil-rise__veil::after { background: repeating-conic-gradient(from 0deg at 50% 42%, var(--bronze-hi) 0 0.8deg, transparent 0.8deg 15deg); }
+.sigil-rise[data-room="tzolkin"] .sigil-rise__veil::after { background: repeating-linear-gradient(0deg, transparent 0 22px, var(--bronze-hi) 22px 23px), repeating-linear-gradient(90deg, transparent 0 36px, var(--bronze-hi) 36px 37px); }
+.sigil-rise[data-room="rune"] .sigil-rise__veil::after { background: radial-gradient(circle at 50% 0, transparent 0 11px, var(--bronze-hi) 11px 12.5px, transparent 13px) 0 0 / 30px 18px; }
+.sigil-rise[data-room="sibyl"] .sigil-rise__veil::after { background: repeating-radial-gradient(circle at 50% 42%, transparent 0 22px, var(--bronze-hi) 22px 23.5px); }
+
+/* ═════════ (17단계 I1) 17-9 넘어온 항목 ═════════ */
+/* F6 3차-1: 480px 이상 넓은 화면의 채비 화면 — 버튼 띠를 고지 바로 아래에 붙인다(띠가 화면 맨 아래로 떨어져 생기던 약 260px 빈칸 제거). 내용이 길면 sticky는 그대로 */
+@media (min-width: 480px) { .room-input--saju .cta-dock { margin-top: var(--space-6); } }
+/* F6 3차-3: 소제목(굵은 글 한 줄만 든 단락) 뒤에서는 소제목이 아니라 그다음 본문 첫 글자를 머리글자로 */
+.book-page__body > p.has-dropcap:has(> b:only-child)::first-letter { float: none; margin: 0; font-size: inherit; line-height: inherit; font-weight: inherit; color: inherit; }
+.book-page__body > p.has-dropcap:has(> b:only-child) + p { text-indent: 0; }
+.book-page__body > p.has-dropcap:has(> b:only-child) + p::first-letter {
+  float: left; margin: 3px var(--space-2) 0 0;
+  font-size: calc(var(--book-line) * 2 - 6px); line-height: calc(var(--book-line) * 2 - 6px); font-weight: 700; color: var(--ink-rubric);
+}
+/* F6 3차-4: 촛불빛 원이 방 밖으로 나가지 않게 (overflow: clip + paint 격리) */
+.shrine-bg { overflow: clip; contain: paint; }
+/* H5: 지도 이름표 사이 최소 간격 — 이름표 상자에 좌우 3px·위아래 1px 투명 여백. 겹침 검사(map.js가 상자 크기로 잼)가 이웃 이름표 사이 6px·2px를 지킨다. 글자 폭(4.6em)은 그대로 */
+.map-node__name { box-sizing: content-box; padding: 1px 3px; }
+
+/* ═════════ (17단계 I1) 인연의 장 · 첫 줄 · 마음 한 줄 (책 쪽 모양, design 「17단계」 5절) ═════════ */
+/* 첫 줄(firstLine): 장 첫 쪽, 장 머리 바로 아래. 들여쓰기 없음, 한 단계 큰 글, 위에 붉은 잉크 짧은 선 하나(장식은 글 바깥 위쪽에만) */
+.book-page__body > p.book-first-line { text-indent: 0; padding-top: var(--space-1); font-size: var(--fs-lg); line-height: 1.7; color: var(--ink-strong); text-wrap: pretty; }
+.book-page__body > p.book-first-line::before { content: ""; display: block; width: 28px; height: 2px; margin: 0 auto var(--space-3); background: var(--ink-rubric); opacity: 0.7; }
+/* 첫 줄이 있으면 머리글자는 첫 줄 뒤 본문에 그대로 둔다(첫 줄 자체에는 머리글자 없음) */
+.book-page__body > p.book-first-line.has-dropcap::first-letter { float: none; margin: 0; font-size: inherit; line-height: inherit; font-weight: inherit; color: inherit; }
+/* 마음 한 줄(heartLine): 장 가운데의 한 장면. 왼쪽 붉은 선 + 작은 머리말, 본문과 같은 크기(오래 읽는 글 크기를 줄이지 않는다) */
+.book-heart { margin-block: calc(var(--book-line) / 2); padding: 2px 0 2px var(--space-4); border-left: 2px solid oklch(0.43 0.13 32 / 0.55); text-indent: 0; }
+.book-heart__label { display: block; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); letter-spacing: 0.02em; color: var(--ink-soft); }
+.book-heart__text { display: block; margin: 2px 0 0; font-size: var(--fs-read); line-height: var(--book-line); color: var(--ink); }
+/* 인연의 장 쪽 머리: 쪽 번호(1~7) + 쪽 이름 */
+.yeon-sec__head { display: flex; align-items: baseline; gap: var(--space-2); margin: 0 0 var(--space-2); font-size: var(--fs-md); line-height: var(--lh-tight); font-weight: 700; color: var(--ink-strong); text-indent: 0; }
+.yeon-sec__num { font-family: var(--font-latin); font-size: var(--fs-sm); color: var(--ink-rubric); }
+.yeon-sec__note { font-family: var(--font-sans); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--ink-soft); text-indent: 0; }
+/* 6쪽 인연의 시기: 지금 구간 · 다음 구간 두 칸 (시기별 흐름의 점 줄과 같은 결, 잉크 색) */
+.yeon-when { display: grid; gap: var(--space-3); margin: 0; padding: 0 0 0 var(--space-5); list-style: none; border-left: 1px dashed var(--ink-line); }
+.yeon-when__item { position: relative; }
+.yeon-when__item::before { content: ""; position: absolute; left: calc(var(--space-5) * -1 - 4px); top: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-soft); }
+.yeon-when__item.is-now::before { background: var(--ink-rubric); }
+.yeon-when__age { font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; line-height: var(--lh-ui); color: var(--ink-rubric); }
+.yeon-when__text { margin: 2px 0 0; font-size: var(--fs-read); line-height: var(--book-line); color: var(--ink); }
+/* 7쪽 인연의 계절: 오행 계절 이름 앞 색 점 하나(배경 무늬 없음) */
+.yeon-season__name { display: inline-flex; align-items: center; gap: var(--space-2); font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--ink-strong); }
+.yeon-season__name::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--el, var(--ink-rubric)); }
+/* 결제 전 "받는 것": 새로 더해진 장(인연의 장) 줄. JS가 li에 .pay-list__item--new를 붙이고 이름 뒤에 .pay-list__new(문구 data.js)를 넣는다 */
+.pay-list__new { margin-left: var(--space-2); padding: 0 6px; border: 1px solid var(--accent-line); border-radius: 999px; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text); white-space: nowrap; }
+
+/* ═════════ (17단계 I1) 대비 맞춤 (design 「17단계」 1절, 다섯 점 측정에서 4.5:1 아래였던 것) ═════════ */
+.capture__eyebrow { color: color-mix(in oklch, var(--accent-dim) 82%, white); }   /* 4.42~4.49 → 4.5 이상 */
+.hub-summary { color: var(--c-text-strong); }                                       /* 360px에서 문 뒤 안개빛과 겹쳐 3.76 */
+.door__glyph.runic { color: oklch(0.97 0.025 var(--accent-h)); }                    /* 룬 문의 글자 상징: 다른 문의 SVG 상징과 같은 밝기 */
