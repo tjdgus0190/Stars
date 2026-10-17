@@ -808,3 +808,10 @@ QA(reports/qa-strange-oracle.md "11단계 묶음 1 검수") 필수 지적: 유�
 - 수정: marketing/strange-oracle/scenes/ad1-seven-doors.html, ad2-manshin.html(data-cap 글만), reports/copy-strange-oracle.md
 - 새로 만듦: marketing/strange-oracle/script.md, marketing/strange-oracle/sns.md
 - 지운 파일: 없음
+
+### 5. 렌더 확인 뒤 수정 (2026-10-17)
+| 자리 | 전 | 후 | 이유 |
+|---|---|---|---|
+| 2안 S2 | 열 개의 하늘 글자 중, 내 글자는? | 열 개의 하늘 글자, 내 글자는 어느 쪽? | 확인 컷에서 "열 개의 하늘 글자 / 중, 내 글자는?"으로 끊김(줄 균형). 쉼표 앞뒤 10자씩으로 맞춤. 질문형 유지, 금지 항목 0 |
+| legal/privacy.html 제4조의2 | 방문 통계 항목 끝 "주소의 ? 와 # 뒤 내용은 보내지 않습니다." | 끝에 "(아래 광고 링크의 캠페인 값만 예외)" + 새 항목 "광고 링크로 들어온 경우: 미리 정해 둔 캠페인 값(어느 플랫폼의 어느 광고에서 왔는지)만 함께 기록합니다. 정해 둔 값이 아니면 기록하지 않고 버리며, 플랫폼이 붙이는 클릭 식별값과 이용자의 입력값은 기록하지 않습니다." | GA4 utm 허용 목록 구현(제안서 8장 4번). 기존 문장 "? 뒤 내용은 보내지 않습니다"와 어긋나지 않게 예외를 밝힘 |
+- 파일: marketing/strange-oracle/scenes/ad2-manshin.html(data-cap S2만), marketing/strange-oracle/script.md, products/strange-oracle/legal/privacy.html. 렌더 재확인은 미확인(메인이 다시 돌림).
