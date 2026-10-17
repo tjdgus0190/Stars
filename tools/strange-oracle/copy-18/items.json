@@ -1,0 +1,4390 @@
+[
+ {
+  "id": "cross.lens.saju",
+  "batch": "cross-lens",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "lens",
+   "saju"
+  ],
+  "room": null,
+  "code": "saju",
+  "kind": "cross.lens",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "홀로 다른 방",
+  "hint": "4쪽 방 렌즈: 그 방 소개 무료 문구와 사실 대조"
+ },
+ {
+  "id": "cross.lens.ogham",
+  "batch": "cross-lens",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "lens",
+   "ogham"
+  ],
+  "room": null,
+  "code": "ogham",
+  "kind": "cross.lens",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "홀로 다른 방",
+  "hint": "4쪽 방 렌즈: 그 방 소개 무료 문구와 사실 대조"
+ },
+ {
+  "id": "cross.lens.star",
+  "batch": "cross-lens",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "lens",
+   "star"
+  ],
+  "room": null,
+  "code": "star",
+  "kind": "cross.lens",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "스물일곱 = 나크샤트라 27개(달의 집 수), 나이 아님",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "홀로 다른 방",
+  "hint": "4쪽 방 렌즈: 그 방 소개 무료 문구와 사실 대조"
+ },
+ {
+  "id": "cross.lens.decan",
+  "batch": "cross-lens",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "lens",
+   "decan"
+  ],
+  "room": null,
+  "code": "decan",
+  "kind": "cross.lens",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "서른여섯 = 데칸 36개(별 무리 수), 나이 아님",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "홀로 다른 방",
+  "hint": "4쪽 방 렌즈: 그 방 소개 무료 문구와 사실 대조"
+ },
+ {
+  "id": "cross.lens.tzolkin",
+  "batch": "cross-lens",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "lens",
+   "tzolkin"
+  ],
+  "room": null,
+  "code": "tzolkin",
+  "kind": "cross.lens",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "홀로 다른 방",
+  "hint": "4쪽 방 렌즈: 그 방 소개 무료 문구와 사실 대조"
+ },
+ {
+  "id": "cross.lens.rune",
+  "batch": "cross-lens",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "lens",
+   "rune"
+  ],
+  "room": null,
+  "code": "rune",
+  "kind": "cross.lens",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "홀로 다른 방",
+  "hint": "4쪽 방 렌즈: 그 방 소개 무료 문구와 사실 대조"
+ },
+ {
+  "id": "cross.lens.sibyl",
+  "batch": "cross-lens",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "lens",
+   "sibyl"
+  ],
+  "room": null,
+  "code": "sibyl",
+  "kind": "cross.lens",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "홀로 다른 방",
+  "hint": "4쪽 방 렌즈: 그 방 소개 무료 문구와 사실 대조"
+ },
+ {
+  "id": "cross.shape.one.warrior",
+  "batch": "cross-shape-one",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "one",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.one.sage",
+  "batch": "cross-shape-one",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "one",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.one.lover",
+  "batch": "cross-shape-one",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "one",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.one.rebel",
+  "batch": "cross-shape-one",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "one",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.one.caregiver",
+  "batch": "cross-shape-one",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "one",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.one.explorer",
+  "batch": "cross-shape-one",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "one",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.one.creator",
+  "batch": "cross-shape-one",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "one",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.one.ruler",
+  "batch": "cross-shape-one",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "one",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.two.warrior",
+  "batch": "cross-shape-two",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "two",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.two.sage",
+  "batch": "cross-shape-two",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "two",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.two.lover",
+  "batch": "cross-shape-two",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "two",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.two.rebel",
+  "batch": "cross-shape-two",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "two",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.two.caregiver",
+  "batch": "cross-shape-two",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "two",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.two.explorer",
+  "batch": "cross-shape-two",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "two",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "떠나고 싶을 때 = 낯선 길로 나서고 싶을 때(관계 이별 아님)",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.two.creator",
+  "batch": "cross-shape-two",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "two",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.two.ruler",
+  "batch": "cross-shape-two",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "two",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.trunk.warrior",
+  "batch": "cross-shape-trunk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "trunk",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.trunk.sage",
+  "batch": "cross-shape-trunk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "trunk",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.trunk.lover",
+  "batch": "cross-shape-trunk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "trunk",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.trunk.rebel",
+  "batch": "cross-shape-trunk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "trunk",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.trunk.caregiver",
+  "batch": "cross-shape-trunk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "trunk",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.trunk.explorer",
+  "batch": "cross-shape-trunk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "trunk",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.trunk.creator",
+  "batch": "cross-shape-trunk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "trunk",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.trunk.ruler",
+  "batch": "cross-shape-trunk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "trunk",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ]
+ },
+ {
+  "id": "cross.shape.many.warrior",
+  "batch": "cross-shape-many",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "many",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.many.sage",
+  "batch": "cross-shape-many",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "many",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.many.lover",
+  "batch": "cross-shape-many",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "many",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.many.rebel",
+  "batch": "cross-shape-many",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "many",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.many.caregiver",
+  "batch": "cross-shape-many",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "many",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.many.explorer",
+  "batch": "cross-shape-many",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "many",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.many.creator",
+  "batch": "cross-shape-many",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "many",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.shape.many.ruler",
+  "batch": "cross-shape-many",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "shape",
+   "many",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.shape",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.common.act.warrior",
+  "batch": "cross-common-act",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "act",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "끝나 = 할 일의 첫 단계가 끝남(관계 끝 아님)",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.act.sage",
+  "batch": "cross-common-act",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "act",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.act.lover",
+  "batch": "cross-common-act",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "act",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.act.rebel",
+  "batch": "cross-common-act",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "act",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.act.caregiver",
+  "batch": "cross-common-act",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "act",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.act.explorer",
+  "batch": "cross-common-act",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "act",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.act.creator",
+  "batch": "cross-common-act",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "act",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.act.ruler",
+  "batch": "cross-common-act",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "act",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.talk.warrior",
+  "batch": "cross-common-talk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "talk",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.talk.sage",
+  "batch": "cross-common-talk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "talk",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.talk.lover",
+  "batch": "cross-common-talk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "talk",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.talk.rebel",
+  "batch": "cross-common-talk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "talk",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.talk.caregiver",
+  "batch": "cross-common-talk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "talk",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.talk.explorer",
+  "batch": "cross-common-talk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "talk",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.talk.creator",
+  "batch": "cross-common-talk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "talk",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.talk.ruler",
+  "batch": "cross-common-talk",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "talk",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.heart.warrior",
+  "batch": "cross-common-heart",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "heart",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.heart.sage",
+  "batch": "cross-common-heart",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "heart",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.heart.lover",
+  "batch": "cross-common-heart",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "heart",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.heart.rebel",
+  "batch": "cross-common-heart",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "heart",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.heart.caregiver",
+  "batch": "cross-common-heart",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "heart",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.heart.explorer",
+  "batch": "cross-common-heart",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "heart",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.heart.creator",
+  "batch": "cross-common-heart",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "heart",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.heart.ruler",
+  "batch": "cross-common-heart",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "heart",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.order.warrior",
+  "batch": "cross-common-order",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "order",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.order.sage",
+  "batch": "cross-common-order",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "order",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.order.lover",
+  "batch": "cross-common-order",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "order",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.order.rebel",
+  "batch": "cross-common-order",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "order",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.order.caregiver",
+  "batch": "cross-common-order",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "order",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.order.explorer",
+  "batch": "cross-common-order",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "order",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.order.creator",
+  "batch": "cross-common-order",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "order",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.order.ruler",
+  "batch": "cross-common-order",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "order",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.free.warrior",
+  "batch": "cross-common-free",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "free",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.free.sage",
+  "batch": "cross-common-free",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "free",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "연하 = '당연하게'의 일부(나이 차 아님)",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.free.lover",
+  "batch": "cross-common-free",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "free",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.free.rebel",
+  "batch": "cross-common-free",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "free",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.free.caregiver",
+  "batch": "cross-common-free",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "free",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.free.explorer",
+  "batch": "cross-common-free",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "free",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.free.creator",
+  "batch": "cross-common-free",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "free",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.common.free.ruler",
+  "batch": "cross-common-free",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "common",
+   "free",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.common",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "by": "공통 축 × 주 원형"
+ },
+ {
+  "id": "cross.split.act",
+  "batch": "cross-split",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "split",
+   "act"
+  ],
+  "room": null,
+  "code": "act",
+  "kind": "cross.split",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 608,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "high",
+   "low"
+  ],
+  "review": "all",
+  "by": "차이 축",
+  "hint": "{high}·{low} 자리 값 몫 max +90"
+ },
+ {
+  "id": "cross.split.talk",
+  "batch": "cross-split",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "split",
+   "talk"
+  ],
+  "room": null,
+  "code": "talk",
+  "kind": "cross.split",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 608,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "high",
+   "low"
+  ],
+  "review": "all",
+  "by": "차이 축",
+  "hint": "{high}·{low} 자리 값 몫 max +90"
+ },
+ {
+  "id": "cross.split.heart",
+  "batch": "cross-split",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "split",
+   "heart"
+  ],
+  "room": null,
+  "code": "heart",
+  "kind": "cross.split",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 608,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "high",
+   "low"
+  ],
+  "review": "all",
+  "by": "차이 축",
+  "hint": "{high}·{low} 자리 값 몫 max +90"
+ },
+ {
+  "id": "cross.split.order",
+  "batch": "cross-split",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "split",
+   "order"
+  ],
+  "room": null,
+  "code": "order",
+  "kind": "cross.split",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 608,
+  "status": "checked",
+  "note": "연하 = '유연하게'의 일부(나이 차 아님)",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "high",
+   "low"
+  ],
+  "review": "all",
+  "by": "차이 축",
+  "hint": "{high}·{low} 자리 값 몫 max +90"
+ },
+ {
+  "id": "cross.split.free",
+  "batch": "cross-split",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "split",
+   "free"
+  ],
+  "room": null,
+  "code": "free",
+  "kind": "cross.split",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 608,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "high",
+   "low"
+  ],
+  "review": "all",
+  "by": "차이 축",
+  "hint": "{high}·{low} 자리 값 몫 max +90"
+ },
+ {
+  "id": "cross.pair.warrior-sage",
+  "batch": "cross-pair-1",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "warrior-sage"
+  ],
+  "room": null,
+  "code": "warrior-sage",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.warrior-lover",
+  "batch": "cross-pair-1",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "warrior-lover"
+  ],
+  "room": null,
+  "code": "warrior-lover",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.warrior-rebel",
+  "batch": "cross-pair-1",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "warrior-rebel"
+  ],
+  "room": null,
+  "code": "warrior-rebel",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.warrior-caregiver",
+  "batch": "cross-pair-1",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "warrior-caregiver"
+  ],
+  "room": null,
+  "code": "warrior-caregiver",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.warrior-explorer",
+  "batch": "cross-pair-1",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "warrior-explorer"
+  ],
+  "room": null,
+  "code": "warrior-explorer",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.warrior-creator",
+  "batch": "cross-pair-1",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "warrior-creator"
+  ],
+  "room": null,
+  "code": "warrior-creator",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.warrior-ruler",
+  "batch": "cross-pair-1",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "warrior-ruler"
+  ],
+  "room": null,
+  "code": "warrior-ruler",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.sage-warrior",
+  "batch": "cross-pair-1",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "sage-warrior"
+  ],
+  "room": null,
+  "code": "sage-warrior",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.sage-lover",
+  "batch": "cross-pair-2",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "sage-lover"
+  ],
+  "room": null,
+  "code": "sage-lover",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "문제 = 풀어야 할 일(원형 깎기 아님)",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.sage-rebel",
+  "batch": "cross-pair-2",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "sage-rebel"
+  ],
+  "room": null,
+  "code": "sage-rebel",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.sage-caregiver",
+  "batch": "cross-pair-2",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "sage-caregiver"
+  ],
+  "room": null,
+  "code": "sage-caregiver",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.sage-explorer",
+  "batch": "cross-pair-2",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "sage-explorer"
+  ],
+  "room": null,
+  "code": "sage-explorer",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "문제 = 풀어야 할 일(원형 깎기 아님)",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.sage-creator",
+  "batch": "cross-pair-2",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "sage-creator"
+  ],
+  "room": null,
+  "code": "sage-creator",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.sage-ruler",
+  "batch": "cross-pair-2",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "sage-ruler"
+  ],
+  "room": null,
+  "code": "sage-ruler",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.lover-warrior",
+  "batch": "cross-pair-2",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "lover-warrior"
+  ],
+  "room": null,
+  "code": "lover-warrior",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.lover-sage",
+  "batch": "cross-pair-2",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "lover-sage"
+  ],
+  "room": null,
+  "code": "lover-sage",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.lover-rebel",
+  "batch": "cross-pair-3",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "lover-rebel"
+  ],
+  "room": null,
+  "code": "lover-rebel",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.lover-caregiver",
+  "batch": "cross-pair-3",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "lover-caregiver"
+  ],
+  "room": null,
+  "code": "lover-caregiver",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.lover-explorer",
+  "batch": "cross-pair-3",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "lover-explorer"
+  ],
+  "room": null,
+  "code": "lover-explorer",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.lover-creator",
+  "batch": "cross-pair-3",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "lover-creator"
+  ],
+  "room": null,
+  "code": "lover-creator",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.lover-ruler",
+  "batch": "cross-pair-3",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "lover-ruler"
+  ],
+  "room": null,
+  "code": "lover-ruler",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.rebel-warrior",
+  "batch": "cross-pair-3",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "rebel-warrior"
+  ],
+  "room": null,
+  "code": "rebel-warrior",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.rebel-sage",
+  "batch": "cross-pair-3",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "rebel-sage"
+  ],
+  "room": null,
+  "code": "rebel-sage",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.rebel-lover",
+  "batch": "cross-pair-3",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "rebel-lover"
+  ],
+  "room": null,
+  "code": "rebel-lover",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.rebel-caregiver",
+  "batch": "cross-pair-4",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "rebel-caregiver"
+  ],
+  "room": null,
+  "code": "rebel-caregiver",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.rebel-explorer",
+  "batch": "cross-pair-4",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "rebel-explorer"
+  ],
+  "room": null,
+  "code": "rebel-explorer",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.rebel-creator",
+  "batch": "cross-pair-4",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "rebel-creator"
+  ],
+  "room": null,
+  "code": "rebel-creator",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.rebel-ruler",
+  "batch": "cross-pair-4",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "rebel-ruler"
+  ],
+  "room": null,
+  "code": "rebel-ruler",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.caregiver-warrior",
+  "batch": "cross-pair-4",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "caregiver-warrior"
+  ],
+  "room": null,
+  "code": "caregiver-warrior",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.caregiver-sage",
+  "batch": "cross-pair-4",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "caregiver-sage"
+  ],
+  "room": null,
+  "code": "caregiver-sage",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.caregiver-lover",
+  "batch": "cross-pair-4",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "caregiver-lover"
+  ],
+  "room": null,
+  "code": "caregiver-lover",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.caregiver-rebel",
+  "batch": "cross-pair-4",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "caregiver-rebel"
+  ],
+  "room": null,
+  "code": "caregiver-rebel",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.caregiver-explorer",
+  "batch": "cross-pair-5",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "caregiver-explorer"
+  ],
+  "room": null,
+  "code": "caregiver-explorer",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.caregiver-creator",
+  "batch": "cross-pair-5",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "caregiver-creator"
+  ],
+  "room": null,
+  "code": "caregiver-creator",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.caregiver-ruler",
+  "batch": "cross-pair-5",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "caregiver-ruler"
+  ],
+  "room": null,
+  "code": "caregiver-ruler",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.explorer-warrior",
+  "batch": "cross-pair-5",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "explorer-warrior"
+  ],
+  "room": null,
+  "code": "explorer-warrior",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.explorer-sage",
+  "batch": "cross-pair-5",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "explorer-sage"
+  ],
+  "room": null,
+  "code": "explorer-sage",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.explorer-lover",
+  "batch": "cross-pair-5",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "explorer-lover"
+  ],
+  "room": null,
+  "code": "explorer-lover",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.explorer-rebel",
+  "batch": "cross-pair-5",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "explorer-rebel"
+  ],
+  "room": null,
+  "code": "explorer-rebel",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.explorer-caregiver",
+  "batch": "cross-pair-5",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "explorer-caregiver"
+  ],
+  "room": null,
+  "code": "explorer-caregiver",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.explorer-creator",
+  "batch": "cross-pair-6",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "explorer-creator"
+  ],
+  "room": null,
+  "code": "explorer-creator",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.explorer-ruler",
+  "batch": "cross-pair-6",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "explorer-ruler"
+  ],
+  "room": null,
+  "code": "explorer-ruler",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.creator-warrior",
+  "batch": "cross-pair-6",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "creator-warrior"
+  ],
+  "room": null,
+  "code": "creator-warrior",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.creator-sage",
+  "batch": "cross-pair-6",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "creator-sage"
+  ],
+  "room": null,
+  "code": "creator-sage",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.creator-lover",
+  "batch": "cross-pair-6",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "creator-lover"
+  ],
+  "room": null,
+  "code": "creator-lover",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.creator-rebel",
+  "batch": "cross-pair-6",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "creator-rebel"
+  ],
+  "room": null,
+  "code": "creator-rebel",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.creator-caregiver",
+  "batch": "cross-pair-6",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "creator-caregiver"
+  ],
+  "room": null,
+  "code": "creator-caregiver",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.creator-explorer",
+  "batch": "cross-pair-6",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "creator-explorer"
+  ],
+  "room": null,
+  "code": "creator-explorer",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.creator-ruler",
+  "batch": "cross-pair-7",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "creator-ruler"
+  ],
+  "room": null,
+  "code": "creator-ruler",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.ruler-warrior",
+  "batch": "cross-pair-7",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "ruler-warrior"
+  ],
+  "room": null,
+  "code": "ruler-warrior",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.ruler-sage",
+  "batch": "cross-pair-7",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "ruler-sage"
+  ],
+  "room": null,
+  "code": "ruler-sage",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.ruler-lover",
+  "batch": "cross-pair-7",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "ruler-lover"
+  ],
+  "room": null,
+  "code": "ruler-lover",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.ruler-rebel",
+  "batch": "cross-pair-7",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "ruler-rebel"
+  ],
+  "room": null,
+  "code": "ruler-rebel",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.ruler-caregiver",
+  "batch": "cross-pair-7",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "ruler-caregiver"
+  ],
+  "room": null,
+  "code": "ruler-caregiver",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.ruler-explorer",
+  "batch": "cross-pair-7",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "ruler-explorer"
+  ],
+  "room": null,
+  "code": "ruler-explorer",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.pair.ruler-creator",
+  "batch": "cross-pair-7",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "pair",
+   "ruler-creator"
+  ],
+  "room": null,
+  "code": "ruler-creator",
+  "kind": "cross.pair",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis",
+   "other",
+   "room"
+  ],
+  "review": "all",
+  "by": "(주 원형, 홀로 다른 방 원형)"
+ },
+ {
+  "id": "cross.even.warrior",
+  "batch": "cross-even",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "even",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.even",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (차이 축 없음)"
+ },
+ {
+  "id": "cross.even.sage",
+  "batch": "cross-even",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "even",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.even",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (차이 축 없음)"
+ },
+ {
+  "id": "cross.even.lover",
+  "batch": "cross-even",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "even",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.even",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (차이 축 없음)"
+ },
+ {
+  "id": "cross.even.rebel",
+  "batch": "cross-even",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "even",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.even",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (차이 축 없음)"
+ },
+ {
+  "id": "cross.even.caregiver",
+  "batch": "cross-even",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "even",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.even",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (차이 축 없음)"
+ },
+ {
+  "id": "cross.even.explorer",
+  "batch": "cross-even",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "even",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.even",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (차이 축 없음)"
+ },
+ {
+  "id": "cross.even.creator",
+  "batch": "cross-even",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "even",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.even",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (차이 축 없음)"
+ },
+ {
+  "id": "cross.even.ruler",
+  "batch": "cross-even",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "even",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.even",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (차이 축 없음)"
+ },
+ {
+  "id": "cross.same.warrior",
+  "batch": "cross-same",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "same",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.same",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (홀로 다른 방 없음)"
+ },
+ {
+  "id": "cross.same.sage",
+  "batch": "cross-same",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "same",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.same",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (홀로 다른 방 없음)"
+ },
+ {
+  "id": "cross.same.lover",
+  "batch": "cross-same",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "same",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.same",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (홀로 다른 방 없음)"
+ },
+ {
+  "id": "cross.same.rebel",
+  "batch": "cross-same",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "same",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.same",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (홀로 다른 방 없음)"
+ },
+ {
+  "id": "cross.same.caregiver",
+  "batch": "cross-same",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "same",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.same",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (홀로 다른 방 없음)"
+ },
+ {
+  "id": "cross.same.explorer",
+  "batch": "cross-same",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "same",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.same",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (홀로 다른 방 없음)"
+ },
+ {
+  "id": "cross.same.creator",
+  "batch": "cross-same",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "same",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.same",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (홀로 다른 방 없음)"
+ },
+ {
+  "id": "cross.same.ruler",
+  "batch": "cross-same",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "same",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.same",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all",
+  "by": "주 원형 (홀로 다른 방 없음)"
+ },
+ {
+  "id": "cross.close.warrior",
+  "batch": "cross-close",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "close",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "cross.close",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.close.sage",
+  "batch": "cross-close",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "close",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "cross.close",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.close.lover",
+  "batch": "cross-close",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "close",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "cross.close",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.close.rebel",
+  "batch": "cross-close",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "close",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "cross.close",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.close.caregiver",
+  "batch": "cross-close",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "close",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "cross.close",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.close.explorer",
+  "batch": "cross-close",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "close",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "cross.close",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.close.creator",
+  "batch": "cross-close",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "close",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "cross.close",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ },
+ {
+  "id": "cross.close.ruler",
+  "batch": "cross-close",
+  "file": "api/_paid/book/book-cross.js",
+  "path": [
+   "close",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "cross.close",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "checked",
+  "note": "",
+  "vars": [
+   "arch",
+   "sub",
+   "n",
+   "axis"
+  ],
+  "review": "all"
+ }
+]
