@@ -419,7 +419,7 @@
   "min": 510,
   "max": 690,
   "status": "checked",
-  "note": ""
+  "note": "QA17 I5 권장: 손을 잡아끌기도는 신체 접촉으로 읽힐 수 있어 바깥으로 이끌어 내기도로 바꿈"
  },
  {
   "id": "yeon.meet.ruler",
@@ -2627,7 +2627,7 @@
   "min": 128,
   "max": 173,
   "status": "checked",
-  "note": ""
+  "note": "QA17 I5 권장: 기대어 보세요는 의지하라는 뜻이나 몸으로 읽히지 않게 마음을 기대어 보세요로 바꿈"
  },
  {
   "id": "heartLine.ogham.ngetal",
@@ -4109,7 +4109,7 @@
   "min": 128,
   "max": 173,
   "status": "checked",
-  "note": ""
+  "note": "QA17 I5 필수: 끝 권유 내민 손을 잡아 → 건네는 도움을 고맙게 받아(신체 접촉 0). 손을 내밀어·손은 받을 때도는 마닉(손) 상징의 도움 비유라 둠"
  },
  {
   "id": "heartLine.tzolkin.lamat",
