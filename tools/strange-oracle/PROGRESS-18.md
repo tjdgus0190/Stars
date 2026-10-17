@@ -66,3 +66,22 @@
 - reports/copy 18단계 절, specs/selling 18단계 한 줄
 - clean-draft(index.html [초안] 0) → sync-text(changed 4, meta 4) → make-volume(불일치 0, avg.cross 1,919) → build-dist(유료 지문 0, cross 148 포함, 통과) → 단위 시험 10개 전부 fail 0 (cross 13·book 17·pay 25·map 40 등). e2e는 서버를 건드리지 않아 미실행
 - **J3 끝** (2026-10-18)
+
+## J5 qa-reviewer — 2026-10-18
+
+- 지킬 것: 보고서·이 칸·meta.json만. 8788 test만(8787 금지). 커밋 안 함.
+- [ ] 0. 기준 문서 읽기
+- [x] 0. 기준 읽기 · [x] 1a. 단위 168/0 · check-17 0 · --stage 18 0
+- [x] 1b. make-volume 0 · build-dist 통과(지문 5032·누출 0) · 8788 test 재시작
+- [x] 1c. e2e saju 41 · book 96 · pay 69 (실패 0)
+- [x] 1d. e2e map 80 (끝나고 map-switch reset) · utm 29 · flow reduced 127 · motion 128 (실패 0)
+- [x] 1e. off-diff-18(qa-off·qa-test): 20화면 차이 0·새 파일 요청 0·파일 목록 같음. 바이트 off +19,819B(6.1%), test +26,425B(7.7%). 코드·CSS ~16.5KB, data.js +2.4KB, data-volume +0.7KB. 판단은 보고서에
+- [x] 2a. 사람 눈: split 5·lens 7·pair 1~29 읽음(문제 없음)
+- [x] 2b. pair 56 전부 읽음(비하 0·끝 조언)
+- [x] 2c. even 8·same 8·close 8 읽음
+- [x] 2d. shape two·many 16 읽음 → 전부 읽기 108 끝
+- [x] 2e. 무작위 40(시드 20261018) 읽음 → 사람 눈 끝. 남은 의문: even '다섯 결 어디에서도' vs C 폭
+- [x] 2f. even 경계: lover·creator 조합 15건(4방 이하)에서 C 폭 2인데 '다섯 결 어디에서도 고르게' → 권장
+- [x] 3. 7장: legal 3종·data.js 고지 확인, 유료 누출 0(build-dist 지문 0, 24자 조각: 옛 41 = 방 무료 문구 겹침, 새 +1 = 시빌라 첫 줄 문장이 유료 heartLine과 공유 — 첫 줄 공개 몫), tocCta 미사용 키 / 4. 6장: fetch 본문 {pass,file}뿐·이벤트 허용 목록
+- [x] 5a. 자리 값 정규식(검수 2차 조건 1) 독립 재검사 0·금지어 0·{n} 확인. 판정 방향: 성능 14만 수정 필요(코드·CSS 16.5KB는 문구 규칙상 불가피 아님) — 보고서 작성 중
+- [x] 5b. reports/qa-strange-oracle.md 「18단계 (J5) QA 1차」 씀 — 판정 수정 필요(성능 14), meta 그대로(검수통과)
