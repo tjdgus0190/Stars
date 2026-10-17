@@ -1390,7 +1390,7 @@
         <!-- (9단계) 안내자 한마디: greet -->
         <div class="say say--greet" data-js="guide-greet">
           <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></p>
-          <p class="say__line" data-t="guides.ogham.greet">어서 오십시오, 자작나무 숲의 필경사, 오검입니다. 당신의 이름 한 자 한 자를, 나무의 결을 따라 정성껏 새겨 드리겠습니다.</p>
+          <p class="say__line" data-t="guides.ogham.greet">어서 와요, 자작나무 숲의 필경사 오검이에요. 당신의 이름 한 자 한 자를, 나무의 결을 따라 정성껏 새겨 드릴게요.</p>
         </div>
       </header>
 
@@ -1454,7 +1454,7 @@
       <div class="say say--ritual" data-js="guide-ritual">
         <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></p>
-        <p class="say__line ritual__guide" data-js="ogham-ritual-guide" data-t="guides.ogham.ritual" aria-live="polite">숨을 한 번 고르고, 나무의 결을 따라 천천히 새기고 있습니다.</p>
+        <p class="say__line ritual__guide" data-js="ogham-ritual-guide" data-t="guides.ogham.ritual" aria-live="polite">숨을 한 번 고르고, 나무의 결을 따라 천천히 새기고 있어요.</p>
       </div>
 
       <div class="bark-stage">
@@ -1490,7 +1490,7 @@
       <div class="say say--open" data-js="guide-open">
         <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></p>
-        <p class="say__line" data-t="guides.ogham.open">오검이 나무의 결을 따라 {who}의 이름을 한 획씩 새겨 보았습니다.</p>
+        <p class="say__line" data-t="guides.ogham.open">오검이 나무의 결을 따라 {who}의 이름을 한 획씩 새겨 보았어요.</p>
       </div>
 
       <div class="capture capture--ogham" data-js="result-capture">
@@ -1573,7 +1573,7 @@
       <div class="say say--close" data-js="guide-close">
         <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></p>
-        <p class="say__line" data-t="guides.ogham.close">새긴 결은 이 숲이 오래도록 기억합니다, 오늘의 결을 소중히 간직하십시오.</p>
+        <p class="say__line" data-t="guides.ogham.close">새긴 결은 이 숲이 오래도록 기억해요, 오늘의 결을 소중히 간직해 두세요.</p>
       </div>
 
       <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
@@ -2711,6 +2711,18 @@
                     <span class="chapter-row__state" data-js="book-chapter-state"></span>
                   </span>
                   <span class="chapter-row__time" data-js="book-chapter-time">약 6분</span>
+                </button>
+              </li>
+              <!-- (17단계 I4) 인연의 장 줄: 시기별 흐름 다음·궁합 앞(책 차례). app.js는 이 줄이 있으면 흐름 줄을 복제하지 않고 이 줄을 쓴다. off는 목차째 걷어 냄 -->
+              <li class="chapter-row" data-js="book-chapter" data-chapter="yeon" data-state="can-open">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true"></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="book.parts.yeon">인연의 장</span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub" data-t="book.chapter.blurbs.yeon">마음이 가는 사람, 만나야 할 사람, 그리고 그 무렵</span>
+                    <span class="chapter-row__state" data-js="book-chapter-state"></span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 7분</span>
                 </button>
               </li>
               <li class="chapter-row" data-js="book-chapter" data-chapter="match" data-state="opened">

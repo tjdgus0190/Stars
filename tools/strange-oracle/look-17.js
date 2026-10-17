@@ -8,7 +8,8 @@ const fs = require("fs");
 const path = require("path");
 const { launch, sleep } = require("./cdp.js");
 const ORIGIN = "http://127.0.0.1:8788";
-const OUT = path.join(__dirname, "out", "i1");
+const I4 = process.argv.includes("--i4"); // (I4) 결제·지도·책 쪽 상태를 더 잰다 → out/i4
+const OUT = path.join(__dirname, "out", I4 ? "i4" : "i1");
 fs.mkdirSync(OUT, { recursive: true });
 const ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
 
@@ -22,6 +23,56 @@ const STATES = [
   { name: "book-toc", url: "/__dev/skip?rooms=7&paid=1&to=book" },
   { name: "saju-input", url: "/__dev/skip?rooms=0&to=saju-input" },
 ];
+
+// (I4) 결제·지도·책 쪽 상태. act = 화면까지 가기, show = 잴 쪽을 is-current로, probe = 따로 살필 값, fixed = 책처럼 화면 높이 고정, clip = 확대 캡처
+const until = async (b, expr, ms = 9000) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await b.evaluate(expr)) return true; await sleep(60); } throw new Error("시간 넘김: " + expr.slice(0, 60)); };
+const openCh = (id, prep) => async (b) => {
+  if (prep) { await until(b, "!!document.querySelector('.screen.is-active')"); await b.evaluate(prep); await b.evaluate("location.reload()"); await sleep(800); }
+  await until(b, "document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  await b.evaluate(`document.querySelector('[data-js=book-chapter][data-chapter=${id}] [data-js=book-chapter-btn]').click()`);
+  await until(b, "!document.querySelector('[data-js=book-chapter-open]').disabled");
+  await b.evaluate("document.querySelector('[data-js=book-chapter-open]').click()");
+  await until(b, "document.querySelector('[data-js=book-reader]').dataset.view === 'pages'");
+  await sleep(500);
+};
+const showPage = (sel) => `(() => { const P = [...document.querySelectorAll('[data-js=book-page]')]; const t = P.find((p) => p.querySelector(${JSON.stringify(sel)})) || P[0]; P.forEach((p) => p.classList.toggle('is-current', p === t)); return P.indexOf(t); })()`;
+// 책 쪽 전부: 세로 넘침(본문 scrollHeight) · 가로 넘침(본문 밖으로 나간 요소) · 쪽 수 · 새 요소 수
+const PAGES = `(() => { const P = [...document.querySelectorAll('[data-js=book-page]')]; let over = 0; const hov = [];
+  P.forEach((p) => { const bd = p.querySelector('.book-page__body'); if (bd.scrollHeight > bd.clientHeight + 1) over++; const was = p.classList.contains('is-current'); });
+  const x = (s) => document.querySelectorAll('[data-js=book-page] ' + s).length;
+  const lines = (s) => Math.max(0, ...[...document.querySelectorAll('[data-js=book-page] ' + s)].map((h) => { const rg = document.createRange(); rg.selectNodeContents(h); return [...rg.getClientRects()].map((r) => Math.round(r.top)).filter((v, i, a) => a.indexOf(v) === i).length; }));
+  P.forEach((p) => { const bd = p.querySelector('.book-page__body'); const R = bd.getBoundingClientRect(); if (!R.width) return; bd.querySelectorAll('*').forEach((e) => { const r = e.getBoundingClientRect(); if (r.width && (r.right > R.right + 0.5 || r.left < R.left - 0.5)) hov.push(String(e.className || e.tagName)); }); });
+  return { pages: P.length, over, hov: hov.slice(0, 4), nhov: hov.length, heads: x('.yeon-sec__head'), headLines: lines('.yeon-sec__head'), when: x('.yeon-when__item'), ageLines: lines('.yeon-when__age'), season: x('.yeon-season__name'), notes: [...document.querySelectorAll('[data-js=book-page] .yeon-sec__note')].filter((n) => !n.hidden).length, first: x('p.book-first-line'), heart: x('aside.book-heart'), labelLines: lines('.book-heart__label') }; })()`;
+const BK = "/__dev/skip?rooms=7&paid=1&to=book";
+const NOBIRTH = "(() => { const s = JSON.parse(sessionStorage.getItem('strange-oracle')); delete s.profile.birth; sessionStorage.setItem('strange-oracle', JSON.stringify(s)); return true; })()";
+const toCreate = async (b) => {
+  await b.evaluate("localStorage.removeItem('strange-oracle-mapkey')");
+  await until(b, "document.querySelector('[data-js=map-slot-story] [data-js=map-card]')?.dataset.state === 'create'");
+  await b.evaluate("document.querySelector('[data-js=map-slot-story] [data-js=map-card] [data-js=map-create]').click()");
+  await until(b, "document.querySelector('.screen.is-active')?.id === 'screen-map-consent'");
+  await sleep(300);
+};
+const I4_STATES = [
+  { name: "hub-7", url: "/__dev/skip?rooms=7&to=hub", clip: ".so-far .hub-progress", probe: "(() => { const e = document.querySelector('[data-js=hub-progress-count]'); const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return { text: e.textContent, color: cs.color, fs: cs.fontSize, x: Math.round(r.left), w: Math.round(r.width), h: Math.round(r.height) }; })()" },
+  { name: "pay", url: "/__dev/skip?rooms=7&to=book", act: async (b) => { await until(b, "document.querySelector('.screen.is-active')?.id === 'screen-report'"); await b.evaluate("StrangeOracle.go('deeper')"); await until(b, "document.querySelector('.screen.is-active')?.id === 'screen-deeper'"); await sleep(300); },
+    clip: ".pay-list__item--new", probe: "(() => { const li = document.querySelector('.pay-list__item--new'); const p = li && li.querySelector('.pay-list__new'); if (!p) return { li: !!li }; const top = (e) => Math.round(e.getBoundingClientRect().top); const vol = li.querySelector('.pay-list__vol'); return { pillRects: p.getClientRects().length, pillH: Math.round(p.getBoundingClientRect().height), liH: Math.round(li.getBoundingClientRect().height), sameLine: Math.abs(top(p) - top(li.querySelector('.pay-list__name'))) < 6 && Math.abs(p.getBoundingClientRect().bottom - vol.getBoundingClientRect().bottom) < 8, text: li.textContent.replace(/\\s+/g, ' ').trim() }; })()" },
+  { name: "map-consent", url: "/__dev/skip?rooms=7", act: toCreate },
+  { name: "map-empty", url: "/__dev/skip?rooms=7", act: async (b) => { await toCreate(b);
+    await b.evaluate("(() => { const n = document.querySelector('#screen-map-consent [data-js=map-nick]'); n.value = '별빛토끼여덟자'; n.dispatchEvent(new Event('input', { bubbles: true })); document.querySelector('input[name=map-icon][value=i05]').click(); document.querySelector('[data-js=map-agree]').click(); document.querySelector('[data-js=map-send]').click(); return true; })()");
+    await until(b, "document.querySelector('[data-js=map-key-dialog]')?.open"); await b.evaluate("(() => { document.querySelector('[data-js=map-key-ack]').click(); document.querySelector('[data-js=map-key-close]').click(); return true; })()"); await until(b, "document.querySelector('.screen.is-active')?.id === 'screen-map'"); await sleep(500); } },
+  { name: "book-toc", url: BK, act: (b) => until(b, "document.querySelector('.screen.is-active')?.id === 'screen-report'"), clip: "[data-js=book-chapter][data-chapter=yeon]", probe: "(() => { const r = document.querySelectorAll('[data-js=book-chapter][data-chapter=yeon]'); const f = r[0]; return { rows: r.length, name: f && f.querySelector('.chapter-row__name').textContent, sub: f && f.querySelector('.chapter-row__sub').textContent, time: f && f.querySelector('[data-js=book-chapter-time]').textContent, state: f && f.dataset.state, order: [...document.querySelectorAll('[data-js=book-chapter]')].map((x) => x.dataset.chapter).join(',') }; })()" },
+  { name: "yeon-p1", url: BK, fixed: true, act: openCh("yeon"), probe: PAGES, show: showPage(".yeon-sec__head") },
+  { name: "yeon-when", url: BK, fixed: true, act: openCh("yeon"), show: showPage(".yeon-when"), clip: "[data-js=book-page].is-current .yeon-when" },
+  { name: "yeon-season", url: BK, fixed: true, act: openCh("yeon"), show: showPage(".yeon-season__name"), clip: "[data-js=book-page].is-current .yeon-season__name" },
+  { name: "yeon-noage", url: BK, fixed: true, act: openCh("yeon", NOBIRTH), probe: PAGES, show: showPage(".yeon-sec__note:not([hidden])") },
+  { name: "yeon-nosaju", url: "/__dev/skip?legacy=1&paid=1&to=book", fixed: true, act: openCh("yeon"), probe: PAGES, show: showPage(".yeon-sec__note:not([hidden])") },
+  { name: "ogham-first", url: BK, fixed: true, act: openCh("ogham"), probe: PAGES, show: showPage("p.book-first-line") },
+  { name: "ogham-heart", url: BK, fixed: true, act: openCh("ogham"), show: showPage("aside.book-heart"), clip: "[data-js=book-page].is-current aside.book-heart" },
+  { name: "saju-heart", url: BK, fixed: true, act: openCh("saju"), probe: PAGES, show: showPage("aside.book-heart") },
+  { name: "rune-heart", url: BK, fixed: true, act: openCh("rune"), probe: PAGES, show: showPage("aside.book-heart") },
+  { name: "sibyl-first", url: BK, fixed: true, act: openCh("sibyl"), probe: PAGES, show: showPage("p.book-first-line") },
+];
+if (I4) STATES.splice(0, STATES.length, ...I4_STATES);
 
 // 페이지 안: 보이는 글자 요소 목록(글자색 sRGB 포함)
 const COLLECT = `(() => {
@@ -71,11 +122,15 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
       try {
         await b.goto(ORIGIN + st.url);
         await sleep(500);
+        if (st.act) await st.act(b);
         const ov = await b.evaluate(overflowJS);
+        const probe = st.probe ? await b.evaluate(st.probe) : null;
         // 글자 상자 좌표는 전체 높이로 바꾼 뒤에 잰다(100dvh 자리가 바뀌므로)
-        const H = await b.evaluate("Math.min(document.documentElement.scrollHeight, 9000)");
+        const H = st.fixed ? 800 : await b.evaluate("Math.min(document.documentElement.scrollHeight, 9000)");
         await b.send("Emulation.setDeviceMetricsOverride", { width, height: H, deviceScaleFactor: 1, mobile: true });
         await sleep(400);
+        if (st.show) { await b.evaluate(st.show); await sleep(150); }
+        if (st.clip) { const r = await b.evaluate(`(() => { const q = document.querySelector(${JSON.stringify(st.clip)}).getBoundingClientRect(); return { x: Math.max(0, q.left - 12), y: Math.max(0, q.top + scrollY - 12), width: Math.min(${width}, q.width + 24), height: q.height + 24, scale: 4 }; })()`); const c = await b.send("Page.captureScreenshot", { format: "png", clip: r }); fs.writeFileSync(path.join(OUT, `${width}-${st.name}-clip.png`), Buffer.from(c.data, "base64")); }
         const items = await b.evaluate(COLLECT);
         const shot = await b.send("Page.captureScreenshot", { format: "png" });
         fs.writeFileSync(path.join(OUT, `${width}-${st.name}.png`), Buffer.from(shot.data, "base64"));
@@ -100,14 +155,15 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
         });
         const small = rows.filter((r) => r.fs < 11);
         const fails = rows.filter((r) => !r.pass && !r.excluded);
-        W.states[st.name] = { overflow: ov, texts: rows.length, small: small.length, fails };
+        W.states[st.name] = { overflow: ov, texts: rows.length, small: small.length, fails, probe };
+        if (probe) console.log(`    살핌 ${JSON.stringify(probe)}`);
         W.worst.push(...rows.filter((r) => !r.excluded).map((r) => ({ ...r, state: st.name })));
         console.log(`${width} ${st.name}: 넘침 ${ov.scroll}px·${ov.n}개, 글자 ${rows.length}, 11px 미만 ${small.length}, 대비 미달 ${fails.length}`);
         fails.slice(0, 6).forEach((f) => console.log(`    미달 ${f.ratio}<${f.need} ${f.fs}px ${f.sel} "${f.text}"`));
       } catch (e) { console.log(`${width} ${st.name}: 오류 ${e.message}`); W.states[st.name] = { error: e.message }; }
     }
     // 일곱 문 캡처표: 다음 방을 바꿔 가며 입구 고대 문 · 작은 문 칸 · 다음 문 견본
-    try {
+    if (!I4) try {
       await b.goto(ORIGIN + "/__dev/skip?rooms=0&to=hub");
       await b.evaluate(`(() => {
         const box = document.createElement("div"); box.id = "so-doors"; box.style.cssText = "display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:16px 0;";

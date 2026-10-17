@@ -5363,3 +5363,8 @@ body.is-reading .map-node--owner::after, body.is-reading .map-card__dot--f { ani
 .capture__eyebrow { color: color-mix(in oklch, var(--accent-dim) 82%, white); }   /* 4.42~4.49 → 4.5 이상 */
 .hub-summary { color: var(--c-text-strong); }                                       /* 360px에서 문 뒤 안개빛과 겹쳐 3.76 */
 .door__glyph.runic { color: oklch(0.97 0.025 var(--accent-h)); }                    /* 룬 문의 글자 상징: 다른 문의 SVG 상징과 같은 밝기 */
+
+/* ═════════ (17단계 I4) UI 점검에서 고친 것 (design 「17단계 UI 점검」) ═════════ */
+.yeon-when { margin-left: 4px; }                         /* 시기 칸 점(7px)이 본문 왼쪽 끝에서 반쯤 잘리던 것 */
+.yeon-sec__note { margin-top: var(--space-3); }           /* 안내 한 줄이 위 본문·시기 칸에 붙어 보이던 것 */
+.hub-progress__count { text-shadow: 0 0 3px oklch(0.12 0.03 280 / 0.9), 0 0 1px oklch(0.12 0.03 280); } /* "7/7"이 배경 별 점과 겹칠 때도 글자 테두리가 남게 */
