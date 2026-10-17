@@ -447,7 +447,8 @@
 
       <!-- (13·14단계) 한 권의 책 카드. data-state (JS) = none(0/7) | some(1~6/7) | all(7/7). 배포판(pay.mode off)에는 책 요소가 없다.
            desc = hub.book.desc · hint = hub.book.state0 / stateSome({n}) / stateAll.
-           가격·결제 문구 없음. 버튼 = 목차로 (hub.book.goToc) -->
+           가격·결제 문구 없음(18단계: desc에서도 가격을 뺀다). 버튼 = 1~6/7 목차로 (hub.book.goToc) · 7/7 결제 전 미리보기 (hub.book.goPreview, data-state="all") · 결제 뒤 목차 (hub.book.goReopen, data-state="owned")
+           (18단계 J1) 상태 모양은 design 「18단계 (J1)」 6절 -->
       <aside class="book-card" data-js="hub-book" data-state="some" aria-labelledby="book-card-title">
         <span class="book-card__cover" aria-hidden="true">
           <svg viewBox="0 0 48 60"><path d="M6 4h32a4 4 0 0 1 4 4v48H10a4 4 0 0 1-4-4Z" /><path d="M10 48h32M14 4v44" /></svg>
@@ -2542,6 +2543,22 @@
         <button class="btn btn--secondary btn--block story-book__go" type="button" data-js="story-book-link"><svg class="story-book__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3 4.5h5.5A2.5 2.5 0 0 1 11 7v9a2 2 0 0 0-2-2H3ZM17 4.5h-5.5A2.5 2.5 0 0 0 9 7v9a2 2 0 0 1 2-2h6Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg><span data-t="story.bookLink">책 목차 보기</span></button>
       </div>
 
+      <!-- pay:on -->
+      <!-- (18단계 J1) 7/7 결제 전: 미리보기 카드(주 버튼). JS가 꺼내 story-book 자리에 두고 story-book을 숨긴다.
+           이때 공유 버튼(story-share)은 btn--primary → btn--secondary로 내린다(한 화면 주 버튼 1개). 결제 뒤·off는 지금처럼 -->
+      <template data-js="story-preview-tpl">
+      <aside class="story-preview" data-js="story-preview" aria-labelledby="story-preview-title">
+        <span class="story-preview__cover" aria-hidden="true"><svg viewBox="0 0 48 60"><path d="M6 4h32a4 4 0 0 1 4 4v48H10a4 4 0 0 1-4-4Z" /><path d="M10 48h32M14 4v44" /></svg><svg class="wax-seal story-preview__seal"><use href="#i-seal"/></svg></span>
+        <div class="story-preview__text">
+          <p class="story-preview__eyebrow" data-t="story.preview.eyebrow">[초안] 일곱 문을 모두 지났어요</p>
+          <h2 class="story-preview__title" id="story-preview-title" data-t="story.preview.title">[초안] 당신의 한 권의 책</h2>
+          <p class="story-preview__desc" data-t="story.preview.desc">[초안] 일곱 방의 이야기를 한 권으로 엮었어요. 목차와 첫 줄을 먼저 펼쳐 보세요</p>
+        </div>
+        <button class="btn btn--primary btn--block story-preview__go" type="button" data-js="story-preview-go" data-t="story.preview.go">[초안] 내 책 미리 보기</button>
+      </aside>
+      </template>
+      <!-- /pay:on -->
+
       <div class="result-actions">
         <button class="btn btn--primary btn--block" type="button" data-js="story-share" data-t="story.share">이야기 카드 저장·공유</button>
         <!-- (10단계 10-2) 링크 복사 + 카카오톡 자리 -->
@@ -2763,6 +2780,20 @@
             </ol>
           </nav>
 
+          <!-- pay:on -->
+          <!-- (18단계 J1) 목차 조각 — template 안(off DOM 0). JS가 test·live에서 꺼내 자식 셋을 각 자리로 옮긴다(design 「18단계 (J1)」 4절):
+               ① book-preview-band → book-home__head 바로 뒤 (7/7 결제 전만 hidden 해제) ② book-interest → 장 목록(nav.chapters) 바로 위 (순서가 바뀐 때만)
+               ③ book-buy-row → 장 목록 바로 뒤, "내 열람 코드 보기"보다 위 (1~7/7 결제 전만). 결제 뒤에는 ①③ 모두 hidden -->
+          <template data-js="toc18-tpl">
+          <button class="toc-band" type="button" data-js="book-preview-band" hidden>
+            <svg class="toc-band__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3 4.5C5.5 3.8 8 4 10 5.5c2-1.5 4.5-1.7 7-1v11c-2.5-.7-5-.5-7 1-2-1.5-4.5-1.7-7-1Z M10 5.5v11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <span class="toc-band__text"><b data-t="book.toc.previewBand">[초안] 내 책 미리 보기</b><span data-t="book.toc.previewBandSub">[초안] 일곱 방을 모두 지났어요. 엮인 책을 먼저 훑어보세요</span></span>
+            <span class="toc-band__arrow" aria-hidden="true">→</span>
+          </button>
+          <p class="interest-line" data-js="book-interest" hidden><svg class="interest-line__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 6h12M4 10h8M4 14h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M14 11.5l2.5 2.5-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-js="book-interest-text">[초안] 룬에게 「일」을 물었던 당신을 위해 시기별 흐름을 앞에 두었어요</span></p>
+          <p class="toc-buy" data-js="book-buy-row" hidden><button class="btn btn--text toc-buy__btn" type="button" data-js="book-buy"><span data-t="book.toc.buyNow">[초안] 지금 책 전체 열기 · 3,900원</span></button></p>
+          </template>
+          <!-- /pay:on -->
           <!-- pay:on -->
           <!-- (15단계 15-5) 목차의 "내 열람 코드 보기" — 결제 요소라 template 안에 둔다(off DOM 0). JS가 test·live에서만 이 자리에 꺼내 붙이고,
                이 탭에 strange-oracle-pass가 있을 때만 .is-hidden 해제. 누르면 pay-code-dialog(코드 카드)를 연다. off면 template째 지운다 -->
@@ -3054,6 +3085,132 @@
           </ol>
         </article>
 
+        <!-- (18단계 J1) 새 장 「겹치는 곳, 갈리는 곳」(가칭): 제2부 맨 앞 (specs 18-2·18-3, design 「18단계 (J1)」 3절). 화면 DOM에 넣지 않는 견본(template).
+             ① 목차 줄 li[data-chapter=cross] → JS가 제2부 목록 맨 앞에 넣는다(인연의 장 줄과 같은 방식). 방 1개면 need-room
+             ② article#book-cross → book 그리기에 연결. 쪽 = section.cross-sec 6개(+대체 2개). 고르는 규칙은 18-2(브라우저), 문장은 유료 원본 book-cross.js에서만.
+                3쪽: D 없음 → data-sec="split" 대신 "even"(고른 결) / 4·5쪽: O 없음 → "lens"·"pair" 대신 "same"(한결같은 목소리). 쓰지 않는 쪽은 JS가 지운다.
+                방 2~6개: 대조표 남은 줄 is-pending + 6쪽 끝 cross-note hidden 해제. D 없음: 대조표 data-split="none"(D 열 숨김)
+             아래 문장은 길이 견본이다(목표 글자 ±10%) -->
+        <!-- pay:on -->
+        <template data-js="cross-tpl">
+          <li class="chapter-row" data-js="book-chapter" data-chapter="cross" data-state="can-open">
+            <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+              <span class="chapter-row__num" aria-hidden="true"></span>
+              <span class="chapter-row__text">
+                <span class="chapter-row__name" data-t="book.parts.cross">[초안] 겹치는 곳, 갈리는 곳</span>
+                <span class="chapter-row__sub" data-js="book-chapter-sub" data-t="book.chapter.blurbs.cross">[초안] 일곱 방을 나란히 놓고, 겹친 목소리와 갈린 목소리를 읽어요</span>
+                <span class="chapter-row__state" data-js="book-chapter-state"></span>
+              </span>
+              <span class="chapter-row__time" data-js="book-chapter-time">약 5분</span>
+            </button>
+          </li>
+          <article class="report-part book-part" data-part="cross" id="book-cross">
+            <header class="report-part__head"><span class="report-part__seal" aria-hidden="true"><svg class="wax-seal"><use href="#i-seal"/></svg></span><p class="report-part__label" data-t="book.parts.cross">[초안] 겹치는 곳, 갈리는 곳</p></header>
+            <!-- 1 겹치는 목소리: 대조표 + 쪽 문장 (모양 × 주 원형) -->
+            <section class="cross-sec" data-js="cross-sec" data-sec="voices">
+              <h3 class="cross-sec__head"><span class="cross-sec__num" aria-hidden="true">1</span><span data-t="book.cross.secs.voices">[초안] 겹치는 목소리</span></h3>
+              <table class="cross-table" data-js="cross-table" data-split="yes" aria-describedby="book-cross-legend">
+                <caption class="cross-table__caption" data-js="cross-caption">[초안] 일곱 방이 나를 부른 이름</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" class="cross-table__h-room" data-t="book.cross.table.room">[초안] 방</th>
+                    <th scope="col" class="cross-table__h-arch" data-t="book.cross.table.arch">[초안] 원형</th>
+                    <th scope="col" class="cross-table__val cross-table__c"><span class="cross-table__kind" data-t="book.cross.table.common">[초안] 겹침</span><span class="cross-table__axis" data-js="cross-c-name">대화</span></th>
+                    <th scope="col" class="cross-table__val cross-table__d"><span class="cross-table__kind" data-t="book.cross.table.split">[초안] 갈림</span><span class="cross-table__axis" data-js="cross-d-name">새로움</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="cross-table__row is-main" data-js="cross-row" data-room="saju">
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">I</span><span class="cross-table__name" data-t="rooms.saju.name">만신의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 불을 품은 큰 나무</span></th>
+                    <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◆</span><span data-js="cross-arch">전사</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 주 원형</span></td>
+                    <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                    <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:1" aria-hidden="true"></span><span class="axis-meter__num">1</span></td>
+                  </tr>
+                  <tr class="cross-table__row is-main" data-js="cross-row" data-room="ogham">
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">II</span><span class="cross-table__name" data-t="rooms.ogham.name">오검의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 자작나무, 새 출발</span></th>
+                    <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◆</span><span data-js="cross-arch">전사</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 주 원형</span></td>
+                    <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                    <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
+                  </tr>
+                  <tr class="cross-table__row" data-js="cross-row" data-room="star">
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">III</span><span class="cross-table__name" data-t="rooms.star.name">별의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 로히니, 붉은 달의 집</span></th>
+                    <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true"></span><span data-js="cross-arch">연인</span></td>
+                    <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:4" aria-hidden="true"></span><span class="axis-meter__num">4</span></td>
+                    <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:0" aria-hidden="true"></span><span class="axis-meter__num">0</span></td>
+                  </tr>
+                  <tr class="cross-table__row is-main" data-js="cross-row" data-room="decan">
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">IV</span><span class="cross-table__name" data-t="rooms.decan.name">데칸의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 사자자리 둘째 데칸</span></th>
+                    <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◆</span><span data-js="cross-arch">전사</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 주 원형</span></td>
+                    <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
+                    <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                  </tr>
+                  <tr class="cross-table__row" data-js="cross-row" data-room="tzolkin">
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">V</span><span class="cross-table__name" data-t="rooms.tzolkin.name">촐킨의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 7 하늘을 걷는 자</span></th>
+                    <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true"></span><span data-js="cross-arch">탐험가</span></td>
+                    <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
+                    <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:4" aria-hidden="true"></span><span class="axis-meter__num">4</span></td>
+                  </tr>
+                  <tr class="cross-table__row is-main" data-js="cross-row" data-room="rune">
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">VI</span><span class="cross-table__name" data-t="rooms.rune.name">룬의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 라이도, 길 위의 돌</span></th>
+                    <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◆</span><span data-js="cross-arch">전사</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 주 원형</span></td>
+                    <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                    <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                  </tr>
+                  <tr class="cross-table__row is-pending" data-js="cross-row" data-room="sibyl">
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">VII</span><span class="cross-table__name" data-t="rooms.sibyl.name">시빌라 신탁의 방</span></th>
+                    <td class="cross-table__wait" colspan="3" data-t="book.cross.table.pending">[초안] 아직 지나지 않은 방</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="cross-legend" id="book-cross-legend" data-js="cross-legend"><span class="cross-legend__item"><span aria-hidden="true">◆</span> <span data-js="cross-legend-main">[초안] 주 원형 「전사」</span></span><span class="cross-legend__item" data-js="cross-legend-sub-row"><span aria-hidden="true">◇</span> <span data-js="cross-legend-sub">[초안] 보조 원형 「현자」</span></span><span class="cross-legend__item"><span data-t="book.cross.table.scale">[초안] 숫자는 0~4, 클수록 그 결이 짙어요</span></span></p>
+              <div class="prose" data-js="cross-voices"><p>[초안] 일곱 방 가운데 네 곳이 당신을 「전사」라고 불렀어요. 만신은 타고난 불길에서, 오검은 이름의 첫 획에서, 룬은 그날 던진 돌에서 같은 이름을 꺼냈어요. 서로 다른 자리에서 본 눈이 같은 말을 했다는 것, 그것이 이 장의 출발점이에요. 다만 겹친 이름은 당신의 전부가 아니라, 여러 방에서 자주 들린 목소리일 뿐이에요.</p></div>
+            </section>
+            <!-- 2 함께 가리키는 결: 축 표지(C) + 쪽 문장 (공통 축 × 주 원형) -->
+            <section class="cross-sec" data-js="cross-sec" data-sec="common">
+              <h3 class="cross-sec__head"><span class="cross-sec__num" aria-hidden="true">2</span><span data-t="book.cross.secs.common">[초안] 함께 가리키는 결</span></h3>
+              <p class="cross-axis" data-js="cross-axis-common"><span class="cross-axis__kind" data-t="book.cross.table.common">[초안] 겹침</span><b class="cross-axis__name" data-js="cross-axis-common-name">대화</b><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="cross-axis__avg" data-js="cross-axis-common-avg">[초안] 평균 3.1</span></p>
+              <div class="prose" data-js="cross-common"><p>[초안] 여러 방이 함께 가리킨 결은 「대화」예요. 당신은 말로 길을 열고, 말로 사람을 모아요. 이번 주에 미뤄 둔 대화 하나를 골라 먼저 꺼내 보세요.</p></div>
+            </section>
+            <!-- 3 갈리는 결: 축 표지(D) + 높게 본 방 / 낮게 본 방 + 쪽 문장. D 없음이면 이 쪽 대신 아래 even -->
+            <section class="cross-sec" data-js="cross-sec" data-sec="split">
+              <h3 class="cross-sec__head"><span class="cross-sec__num" aria-hidden="true">3</span><span data-t="book.cross.secs.split">[초안] 갈리는 결</span></h3>
+              <p class="cross-axis cross-axis--split" data-js="cross-axis-split"><span class="cross-axis__kind" data-t="book.cross.table.split">[초안] 갈림</span><b class="cross-axis__name" data-js="cross-axis-split-name">새로움</b></p>
+              <dl class="cross-ends" data-js="cross-ends">
+                <div class="cross-ends__row"><dt data-t="book.cross.high">[초안] 짙게 본 방</dt><dd data-js="cross-high">[초안] 데칸의 방·촐킨의 방·룬의 방·시빌라 신탁의 방·오검의 방</dd></div>
+                <div class="cross-ends__row"><dt data-t="book.cross.low">[초안] 옅게 본 방</dt><dd data-js="cross-low">[초안] 별의 방</dd></div>
+              </dl>
+              <div class="prose" data-js="cross-split"><p>[초안] 「새로움」에서는 방들의 말이 갈렸어요. 데칸의 방·촐킨의 방·룬의 방은 낯선 길에 먼저 발을 딛는 당신을 보았고, 별의 방은 익숙한 자리를 오래 지키는 당신을 보았어요. 어느 쪽이 틀린 것이 아니라, 보는 자리가 달랐을 뿐이에요. 새 일을 시작할 때는 앞의 면을, 오래 지켜야 할 일 앞에서는 뒤의 면을 꺼내 쓰세요.</p></div>
+            </section>
+            <section class="cross-sec" data-js="cross-sec" data-sec="even" hidden>
+              <h3 class="cross-sec__head"><span class="cross-sec__num" aria-hidden="true">3</span><span data-t="book.cross.secs.even">[초안] 고른 결</span></h3>
+              <div class="prose" data-js="cross-even"><p>[초안] 다섯 결 어디에서도 방들의 말이 크게 갈리지 않았어요. 당신의 결은 고르게 퍼져 있어요.</p></div>
+            </section>
+            <!-- 4 홀로 다른 방: 방 표지(문양·번호·이름·원형) + 쪽 문장 (방 7). O 없음이면 4·5쪽 대신 same -->
+            <section class="cross-sec" data-js="cross-sec" data-sec="lens" data-room="tzolkin">
+              <h3 class="cross-sec__head"><span class="cross-sec__num" aria-hidden="true">4</span><span data-t="book.cross.secs.lens">[초안] 홀로 다른 방</span></h3>
+              <p class="cross-room" data-js="cross-room"><span class="cross-room__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span><span class="cross-room__num" aria-hidden="true">V</span><span class="cross-room__name" data-js="cross-room-name">촐킨의 방</span><span class="cross-room__arch" data-js="cross-room-arch">탐험가</span></p>
+              <div class="prose" data-js="cross-lens"><p>[초안] 촐킨의 방은 태어난 날이 260일의 순환 가운데 어디에 놓였는지를 봐요. 성향보다 날의 흐름을 읽는 눈이라, 다른 방과 다른 이름을 꺼낼 수 있어요.</p></div>
+            </section>
+            <!-- 5 두 얼굴을 함께 쓰는 법: M × X 짝 (궁합 장 match-pair와 같은 모양) + 쪽 문장 ((M, X) 56쌍) -->
+            <section class="cross-sec" data-js="cross-sec" data-sec="pair">
+              <h3 class="cross-sec__head"><span class="cross-sec__num" aria-hidden="true">5</span><span data-t="book.cross.secs.pair">[초안] 두 얼굴을 함께 쓰는 법</span></h3>
+              <p class="match-pair cross-pair" data-js="cross-pair"><span class="match-pair__me" data-js="cross-pair-main">전사</span><span class="match-pair__x" aria-hidden="true">×</span><span class="match-pair__you" data-js="cross-pair-other">탐험가</span></p>
+              <div class="prose" data-js="cross-pair-text"><p>[초안] 「전사」는 정한 길을 끝까지 가고, 「탐험가」는 아직 없는 길을 찾아요. 마감이 있는 일에는 앞의 얼굴로, 막힌 일 앞에서는 뒤의 얼굴로 한 걸음 옆을 둘러보세요.</p></div>
+            </section>
+            <section class="cross-sec" data-js="cross-sec" data-sec="same" hidden>
+              <h3 class="cross-sec__head"><span class="cross-sec__num" aria-hidden="true">4</span><span data-t="book.cross.secs.same">[초안] 한결같은 목소리</span></h3>
+              <div class="prose" data-js="cross-same"><p>[초안] 지나온 방이 모두 같은 이름으로 당신을 불렀어요. 한결같다는 것은 고집이 아니라 기댈 수 있는 중심이라는 뜻이에요.</p></div>
+            </section>
+            <!-- 6 겹친 곳에 서고, 갈린 곳에서 고르기 (주 원형 8) + 방 2~6개일 때 끝 한 줄 -->
+            <section class="cross-sec" data-js="cross-sec" data-sec="close">
+              <h3 class="cross-sec__head"><span class="cross-sec__num" aria-hidden="true">6</span><span data-t="book.cross.secs.close">[초안] 겹친 곳에 서고, 갈린 곳에서 고르기</span></h3>
+              <div class="prose" data-js="cross-close"><p>[초안] 겹친 목소리는 서 있을 자리를, 갈린 목소리는 고를 수 있는 길을 알려 줘요. 오늘 할 일 하나를 겹친 결로 시작하고, 갈린 결 가운데 하나를 골라 시험해 보세요.</p></div>
+              <p class="cross-sec__note" data-js="cross-note" data-t="book.cross.notes.more" hidden>[초안] 방을 더 지나면 대조표가 길어지고 결과가 바뀔 수 있어요</p>
+            </section>
+          </article>
+        </template>
+        <!-- /pay:on -->
+
         <!-- (17단계 I1) 인연의 장: 시기별 흐름 다음, 궁합 앞 (specs 17-2). 화면 DOM에 넣지 않는 견본(template). developer(I2)가 book 그리기에 연결한다.
              쪽 = 책의 한 단원(section.yeon-sec) 7개. 장 머리는 다른 장과 같은 book-opening(app.js가 만듦). 빠진 경우(17-2 표)는 JS가 단원을 숨기거나 문장을 바꾼다:
              4쪽 보조=주 → "한결같은 결" 문장 + (일곱 방 전) yeon-sec__note 한 줄 / 6쪽 나이 없음 → 나이와 관계없는 문장 + note / 7쪽 만신 안 지남 → 본문 대신 note만 / 만 19세 미만 → 1~3쪽 자리에 미성년판 3단원, 4·6쪽 숨김
@@ -3145,6 +3302,280 @@
     </section>
 
     <!-- pay:on -->
+    <!-- ═════════ 18-V. (18단계 J1) 내 책 미리 보기 #screen-preview — test·live, 7/7 결제 전만 (specs 18-5 순서 1~8, design 「18단계 (J1)」 1절) ═════════
+         template 안: off(배포판)에서는 DOM 0(offStrip이 template째 지움). JS가 test·live에서만 꺼내 붙이고 applyText를 돌린다.
+         유료 문장 0: 여는 글·닫는 글(data-book-free.js)·첫 줄(data-book-sample.js)·대조표(무료 값)만. /api/book·결제 SDK 요청 0.
+         제목 단계: h1(머리) → h2(목차·맛보기·차이·한 번 결제) → h3(맛보기 네 쪽). 광고 슬롯 없음 -->
+    <template data-js="preview-tpl">
+    <section class="screen preview" id="screen-preview" data-js="screen-preview" data-room="hall" data-preview="18-V. 내 책 미리 보기 (test·live, 7/7 결제 전)">
+      <!-- test에서만: 결제 전 화면과 같은 시험 띠. live면 JS가 hidden -->
+      <p class="pay-band" data-js="preview-test-band" role="note"><span class="pay-band__dot" aria-hidden="true"></span><span data-t="pay.testBand">시험 중 — 아직 판매하지 않아요</span></p>
+
+      <!-- 1 머리: {who}의 한 권의 책(나의 이야기 제목과 같은 이름 자리 값) · 주 원형 · 한 줄 -->
+      <header class="pv-head">
+        <svg class="pv-head__fleuron" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#i-fleuron" /></svg>
+        <h1 class="pv-head__title" data-js="preview-title">[초안] 별빛을 따라온 사람의 한 권의 책</h1>
+        <p class="pv-head__arch" data-js="preview-arch">[초안] 길을 여는 전사</p>
+        <p class="pv-head__lede" data-t="book.preview.lede">[초안] 일곱 방을 모두 지나 엮은 책이에요</p>
+      </header>
+
+      <!-- 2 나에게 맞춘 전체 목차: 14장. 관심사 순서(18-8)는 JS가 제2부 줄 차례만 바꾼다. 장 번호·부 번호는 그대로.
+           li[data-kind] = free(무료로 읽기) | paid(책에서 열림) — 글자 표지(pv-toc__tag)로 구별, 색만으로 구별하지 않음. .is-target = 길 끝 강조(5절) -->
+      <section class="pv-sec pv-toc" aria-labelledby="preview-toc-title">
+        <h2 class="pv-sec__title" id="preview-toc-title" data-t="book.preview.tocTitle">[초안] 나에게 맞춘 목차</h2>
+        <p class="interest-line" data-js="preview-interest" hidden><svg class="interest-line__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 6h12M4 10h8M4 14h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M14 11.5l2.5 2.5-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-js="preview-interest-text">[초안] 시빌라에게 「사랑」을 물었던 당신을 위해 인연의 장을 앞에 두었어요</span></p>
+        <ol class="pv-toc__list" data-js="preview-chapters-open">
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="open" data-kind="free">
+            <span class="pv-toc__num" aria-hidden="true">✦</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.toc.open">여는 글</span></span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 무료로 읽기</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 900자 · 2분</span></span>
+          </li>
+        </ol>
+        <p class="pv-toc__part"><span data-t="book.part1.num">제1부</span> <span data-t="book.part1.title">일곱 방의 온전한 이야기</span></p>
+        <ol class="pv-toc__list" data-js="preview-chapters-rooms">
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="saju" data-kind="paid" data-room="saju">
+            <span class="pv-toc__num" aria-hidden="true">I</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.saju.name">만신의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub">[초안] 불을 품은 큰 나무</span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,400자 · 7분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="ogham" data-kind="paid" data-room="ogham">
+            <span class="pv-toc__num" aria-hidden="true">II</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.ogham.name">오검의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub">[초안] 자작나무, 새 출발</span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,400자 · 7분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="star" data-kind="paid" data-room="star">
+            <span class="pv-toc__num" aria-hidden="true">III</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.star.name">별의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub">[초안] 로히니, 붉은 달의 집</span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,400자 · 7분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="decan" data-kind="paid" data-room="decan">
+            <span class="pv-toc__num" aria-hidden="true">IV</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.decan.name">데칸의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub">[초안] 사자자리 둘째 데칸</span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,400자 · 7분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="tzolkin" data-kind="paid" data-room="tzolkin">
+            <span class="pv-toc__num" aria-hidden="true">V</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.tzolkin.name">촐킨의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub">[초안] 7 하늘을 걷는 자</span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,400자 · 7분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="rune" data-kind="paid" data-room="rune">
+            <span class="pv-toc__num" aria-hidden="true">VI</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.rune.name">룬의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub">[초안] 라이도, 길 위의 돌</span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,400자 · 7분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="sibyl" data-kind="paid" data-room="sibyl">
+            <span class="pv-toc__num" aria-hidden="true">VII</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.sibyl.name">시빌라 신탁의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub">[초안] 신탁 열아홉, 불의 문</span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,400자 · 7분</span></span>
+          </li>
+        </ol>
+        <p class="pv-toc__part"><span data-t="book.part2.num">제2부</span> <span data-t="book.part2.title">나의 흐름</span></p>
+        <!-- 제2부: 새 장은 늘 맨 앞. 나머지 넷은 관심사 순서 (JS가 li 차례만 바꿈) -->
+        <ol class="pv-toc__list" data-js="preview-chapters-part2">
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="cross" data-kind="paid">
+            <span class="pv-toc__num" aria-hidden="true"></span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.parts.cross">[초안] 겹치는 곳, 갈리는 곳</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub">[초안] 일곱 방을 나란히 놓고 읽는 장</span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 2,100자 · 5분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="yeon" data-kind="paid">
+            <span class="pv-toc__num" aria-hidden="true"></span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.parts.yeon">인연의 장</span></span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,000자 · 6분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="match" data-kind="paid">
+            <span class="pv-toc__num" aria-hidden="true"></span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.parts.match">궁합</span></span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 2,600자 · 6분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="flow" data-kind="paid">
+            <span class="pv-toc__num" aria-hidden="true"></span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.parts.timeline">시기별 흐름</span></span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 2,800자 · 6분</span></span>
+          </li>
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="deep" data-kind="paid">
+            <span class="pv-toc__num" aria-hidden="true"></span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.parts.deep">원형, 더 깊이</span></span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 책에서 열림</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 2,300자 · 5분</span></span>
+          </li>
+        </ol>
+        <ol class="pv-toc__list pv-toc__list--close" data-js="preview-chapters-close">
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="close" data-kind="free">
+            <span class="pv-toc__num" aria-hidden="true">✦</span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.toc.close">닫는 글</span></span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag">[초안] 무료로 읽기</span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 800자 · 2분</span></span>
+          </li>
+        </ol>
+      </section>
+
+      <!-- 3 맛보기: 낡은 책 판(종이·잉크). 네 쪽 = 여는 글 전문 → 일곱 장의 첫 줄 → 대조표 미리 보기 → 닫는 글(접힘) -->
+      <section class="pv-sec pv-sample" aria-labelledby="preview-sample-title">
+        <h2 class="pv-sec__title" id="preview-sample-title"><span data-t="book.preview.sampleTitle">[초안] 내 책 맛보기</span> <span class="pv-sample__tag" data-t="book.preview.sampleTag">[초안] 맛보기</span></h2>
+        <div class="pv-paper">
+          <!-- 3-1 여는 글 전문 (주 원형, data-book-free.js). 첫 단락 머리글자 -->
+          <article class="pv-leaf" data-js="preview-open-leaf" aria-labelledby="preview-open-title">
+            <h3 class="pv-leaf__title" id="preview-open-title"><span class="pv-leaf__orn" aria-hidden="true">✦</span><span data-t="book.toc.open">여는 글</span></h3>
+            <div class="pv-leaf__prose" data-js="preview-open"><p class="has-dropcap">[초안] 일곱 개의 문을 지나는 동안, 당신은 여러 번 같은 이름으로 불렸어요. 처음에는 우연 같았지만 문을 하나 더 열 때마다 그 이름은 조금씩 또렷해졌어요.</p><p>[초안] 이 책은 그 이름을 따라 쓴 기록이에요. 방마다 다른 눈으로 본 당신을 한 줄로 꿰어, 지금의 당신이 어디에 서 있는지 차분히 보여 드려요.</p></div>
+          </article>
+
+          <!-- 3-2 일곱 장의 첫 줄: 방마다 방 이름·결과 이름·firstLine 한 문장 + "나머지 약 {n}자" (n = 결제 전 "받는 것"과 같은 make-volume 값).
+               li[data-chapter] = 7/7 결제 전 잠긴 방 장으로 가는 길의 끝(그 줄로 스크롤 + .is-target) -->
+          <section class="pv-leaf" aria-labelledby="preview-first-title">
+            <h3 class="pv-leaf__title" id="preview-first-title"><span class="pv-leaf__orn" aria-hidden="true">✦</span><span data-t="book.preview.firstTitle">[초안] 일곱 장의 첫 줄</span></h3>
+            <ol class="first-lines" data-js="preview-first-lines">
+              <li class="first-lines__item" data-js="preview-first" data-chapter="saju" data-room="saju">
+                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">I</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-saju" /></svg></span><span class="first-lines__room" data-t="rooms.saju.name">만신의 방</span><span class="first-lines__result" data-js="preview-first-result">[초안] 불을 품은 큰 나무</span></p>
+                <p class="first-lines__text" data-js="preview-first-text">[초안] 당신은 먼저 움직이고 나중에 이름을 붙이는 사람이에요.</p>
+                <p class="first-lines__rest" data-js="preview-first-rest">[초안] 이 장의 나머지 약 3,400자는 책에서 열려요</p>
+              </li>
+              <li class="first-lines__item" data-js="preview-first" data-chapter="ogham" data-room="ogham">
+                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">II</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-ogham" /></svg></span><span class="first-lines__room" data-t="rooms.ogham.name">오검의 방</span><span class="first-lines__result" data-js="preview-first-result">[초안] 자작나무, 새 출발</span></p>
+                <p class="first-lines__text" data-js="preview-first-text">[초안] 당신은 먼저 움직이고 나중에 이름을 붙이는 사람이에요.</p>
+                <p class="first-lines__rest" data-js="preview-first-rest">[초안] 이 장의 나머지 약 3,400자는 책에서 열려요</p>
+              </li>
+              <li class="first-lines__item" data-js="preview-first" data-chapter="star" data-room="star">
+                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">III</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span><span class="first-lines__room" data-t="rooms.star.name">별의 방</span><span class="first-lines__result" data-js="preview-first-result">[초안] 로히니, 붉은 달의 집</span></p>
+                <p class="first-lines__text" data-js="preview-first-text">[초안] 당신은 먼저 움직이고 나중에 이름을 붙이는 사람이에요.</p>
+                <p class="first-lines__rest" data-js="preview-first-rest">[초안] 이 장의 나머지 약 3,400자는 책에서 열려요</p>
+              </li>
+              <li class="first-lines__item" data-js="preview-first" data-chapter="decan" data-room="decan">
+                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">IV</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></span><span class="first-lines__room" data-t="rooms.decan.name">데칸의 방</span><span class="first-lines__result" data-js="preview-first-result">[초안] 사자자리 둘째 데칸</span></p>
+                <p class="first-lines__text" data-js="preview-first-text">[초안] 당신은 먼저 움직이고 나중에 이름을 붙이는 사람이에요.</p>
+                <p class="first-lines__rest" data-js="preview-first-rest">[초안] 이 장의 나머지 약 3,400자는 책에서 열려요</p>
+              </li>
+              <li class="first-lines__item" data-js="preview-first" data-chapter="tzolkin" data-room="tzolkin">
+                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">V</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></span><span class="first-lines__room" data-t="rooms.tzolkin.name">촐킨의 방</span><span class="first-lines__result" data-js="preview-first-result">[초안] 7 하늘을 걷는 자</span></p>
+                <p class="first-lines__text" data-js="preview-first-text">[초안] 당신은 먼저 움직이고 나중에 이름을 붙이는 사람이에요.</p>
+                <p class="first-lines__rest" data-js="preview-first-rest">[초안] 이 장의 나머지 약 3,400자는 책에서 열려요</p>
+              </li>
+              <li class="first-lines__item" data-js="preview-first" data-chapter="rune" data-room="rune">
+                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">VI</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig sig--rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></span><span class="first-lines__room" data-t="rooms.rune.name">룬의 방</span><span class="first-lines__result" data-js="preview-first-result">[초안] 라이도, 길 위의 돌</span></p>
+                <p class="first-lines__text" data-js="preview-first-text">[초안] 당신은 먼저 움직이고 나중에 이름을 붙이는 사람이에요.</p>
+                <p class="first-lines__rest" data-js="preview-first-rest">[초안] 이 장의 나머지 약 3,400자는 책에서 열려요</p>
+              </li>
+              <li class="first-lines__item" data-js="preview-first" data-chapter="sibyl" data-room="sibyl">
+                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">VII</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></span><span class="first-lines__room" data-t="rooms.sibyl.name">시빌라 신탁의 방</span><span class="first-lines__result" data-js="preview-first-result">[초안] 신탁 열아홉, 불의 문</span></p>
+                <p class="first-lines__text" data-js="preview-first-text">[초안] 신탁은 오늘 당신이 가장 오래 망설인 물음 앞에서, 한 걸음만 먼저 내딛어도 된다고 말해요. 나머지는 걸으면서 정해도 늦지 않다고요.</p>
+                <p class="first-lines__rest" data-js="preview-first-rest">[초안] 이 장의 나머지 약 3,400자는 책에서 열려요</p>
+              </li>
+            </ol>
+          </section>
+
+          <!-- 3-3 겹치는 곳, 갈리는 곳 미리 보기 (확인 121): 대조표 + C·D 축 이름만. 쪽 문장(유료) 0 -->
+          <section class="pv-leaf" data-js="preview-cross" data-chapter="cross" aria-labelledby="preview-cross-title">
+            <h3 class="pv-leaf__title" id="preview-cross-title"><span class="pv-leaf__orn" aria-hidden="true">✦</span><span data-t="book.parts.cross">[초안] 겹치는 곳, 갈리는 곳</span></h3>
+            <table class="cross-table" data-js="cross-table" data-split="yes" aria-describedby="preview-cross-legend">
+              <caption class="cross-table__caption" data-js="cross-caption">[초안] 일곱 방이 나를 부른 이름</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="cross-table__h-room" data-t="book.cross.table.room">[초안] 방</th>
+                  <th scope="col" class="cross-table__h-arch" data-t="book.cross.table.arch">[초안] 원형</th>
+                  <th scope="col" class="cross-table__val cross-table__c"><span class="cross-table__kind" data-t="book.cross.table.common">[초안] 겹침</span><span class="cross-table__axis" data-js="cross-c-name">대화</span></th>
+                  <th scope="col" class="cross-table__val cross-table__d"><span class="cross-table__kind" data-t="book.cross.table.split">[초안] 갈림</span><span class="cross-table__axis" data-js="cross-d-name">새로움</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="cross-table__row is-main" data-js="cross-row" data-room="saju">
+                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">I</span><span class="cross-table__name" data-t="rooms.saju.name">만신의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 불을 품은 큰 나무</span></th>
+                  <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◆</span><span data-js="cross-arch">전사</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 주 원형</span></td>
+                  <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                  <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:1" aria-hidden="true"></span><span class="axis-meter__num">1</span></td>
+                </tr>
+                <tr class="cross-table__row is-main" data-js="cross-row" data-room="ogham">
+                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">II</span><span class="cross-table__name" data-t="rooms.ogham.name">오검의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 자작나무, 새 출발</span></th>
+                  <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◆</span><span data-js="cross-arch">전사</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 주 원형</span></td>
+                  <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                  <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
+                </tr>
+                <tr class="cross-table__row" data-js="cross-row" data-room="star">
+                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">III</span><span class="cross-table__name" data-t="rooms.star.name">별의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 로히니, 붉은 달의 집</span></th>
+                  <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true"></span><span data-js="cross-arch">연인</span></td>
+                  <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:4" aria-hidden="true"></span><span class="axis-meter__num">4</span></td>
+                  <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:0" aria-hidden="true"></span><span class="axis-meter__num">0</span></td>
+                </tr>
+                <tr class="cross-table__row is-main" data-js="cross-row" data-room="decan">
+                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">IV</span><span class="cross-table__name" data-t="rooms.decan.name">데칸의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 사자자리 둘째 데칸</span></th>
+                  <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◆</span><span data-js="cross-arch">전사</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 주 원형</span></td>
+                  <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
+                  <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                </tr>
+                <tr class="cross-table__row" data-js="cross-row" data-room="tzolkin">
+                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">V</span><span class="cross-table__name" data-t="rooms.tzolkin.name">촐킨의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 7 하늘을 걷는 자</span></th>
+                  <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true"></span><span data-js="cross-arch">탐험가</span></td>
+                  <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
+                  <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:4" aria-hidden="true"></span><span class="axis-meter__num">4</span></td>
+                </tr>
+                <tr class="cross-table__row is-main" data-js="cross-row" data-room="rune">
+                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">VI</span><span class="cross-table__name" data-t="rooms.rune.name">룬의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 라이도, 길 위의 돌</span></th>
+                  <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◆</span><span data-js="cross-arch">전사</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 주 원형</span></td>
+                  <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                  <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
+                </tr>
+                <tr class="cross-table__row is-sub" data-js="cross-row" data-room="sibyl">
+                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">VII</span><span class="cross-table__name" data-t="rooms.sibyl.name">시빌라 신탁의 방</span><span class="cross-table__result" data-js="cross-result">[초안] 신탁 열아홉, 불의 문</span></th>
+                  <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true">◇</span><span data-js="cross-arch">현자</span><span class="visually-hidden" data-js="cross-mark-sr">[초안] 보조 원형</span></td>
+                  <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:4" aria-hidden="true"></span><span class="axis-meter__num">4</span></td>
+                  <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:1" aria-hidden="true"></span><span class="axis-meter__num">1</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="cross-legend" id="preview-cross-legend" data-js="cross-legend"><span class="cross-legend__item"><span aria-hidden="true">◆</span> <span data-js="cross-legend-main">[초안] 주 원형 「전사」</span></span><span class="cross-legend__item" data-js="cross-legend-sub-row"><span aria-hidden="true">◇</span> <span data-js="cross-legend-sub">[초안] 보조 원형 「현자」</span></span><span class="cross-legend__item"><span data-t="book.cross.table.scale">[초안] 숫자는 0~4, 클수록 그 결이 짙어요</span></span></p>
+            <p class="pv-leaf__rest" data-t="book.preview.crossRest">[초안] 이 표를 읽는 여섯 쪽은 책에서 열려요</p>
+          </section>
+
+          <!-- 3-4 닫는 글: 접어 둔다. 한 번 누르면 펼침(aria-expanded true + 본문 hidden 해제, 접기 없음). 7/7이므로 무료 -->
+          <section class="pv-leaf pv-leaf--fold" data-js="preview-close-leaf" aria-labelledby="preview-close-title">
+            <h3 class="pv-leaf__title" id="preview-close-title"><span class="pv-leaf__orn" aria-hidden="true">✦</span><span data-t="book.toc.close">닫는 글</span></h3>
+            <button class="pv-fold" type="button" data-js="preview-close-toggle" aria-expanded="false" aria-controls="preview-close-body"><span data-t="book.preview.closeOpen">[초안] 닫는 글 펼치기</span> <span class="pv-fold__caret" aria-hidden="true">▾</span></button>
+            <div class="pv-leaf__prose" id="preview-close-body" data-js="preview-close" hidden><p>[초안] 문은 닫혀도 길은 남아요. 일곱 방에서 들은 말 가운데 오늘 하나만 골라, 내일 아침 첫 일로 옮겨 보세요.</p></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- 4 무료와 책의 차이 (두 열 표). 문장은 무료 UI 문구로 새로 쓴다(유료 문장을 옮기지 않음) -->
+      <section class="pv-sec pv-diff" aria-labelledby="preview-diff-title">
+        <h2 class="pv-sec__title" id="preview-diff-title" data-t="book.preview.diffTitle">[초안] 이미 본 것과 책에서 받는 것</h2>
+        <table class="diff-table">
+          <thead><tr><th scope="col" data-t="book.preview.diff.freeHead">[초안] 이미 무료로 본 것</th><th scope="col" data-t="book.preview.diff.bookHead">[초안] 책에서 더 받는 것</th></tr></thead>
+          <tbody><tr>
+            <td class="diff-table__free"><ul class="diff-list" data-js="preview-diff-free">
+              <li>[초안] 일곱 방의 결과</li>
+              <li>[초안] 나의 이야기</li>
+              <li>[초안] 지금의 원형</li>
+              <li>[초안] 공유 카드</li>
+            </ul></td>
+            <td class="diff-table__book"><ul class="diff-list" data-js="preview-diff-book">
+              <li><b>[초안] 일곱 방의 장</b><span>[초안] 방마다 네 장과 숨은 장</span></li>
+              <li><b>[초안] 겹치는 곳, 갈리는 곳</b><span>[초안] 일곱 방을 나란히 읽는 여섯 쪽</span></li>
+              <li><b>[초안] 시기별 흐름</b><span>[초안] 일·관계·배움·이동의 세 구간</span></li>
+              <li><b>[초안] 인연의 장</b><span>[초안] 끌림의 결과 인연의 시기</span></li>
+              <li><b>[초안] 궁합</b><span>[초안] 한 사람과 두 원형 겹쳐 보기</span></li>
+              <li><b>[초안] 원형, 더 깊이</b><span>[초안] 강점·그림자·자라는 방향</span></li>
+            </ul></td>
+          </tr></tbody>
+        </table>
+      </section>
+
+      <!-- 5 한 번 결제 + 6 주 버튼: 가격은 이 자리에 한 번만. 이 버튼은 결제하지 않는다 → 결제 전 화면(#screen-deeper, from: preview) -->
+      <section class="pv-sec pv-once" aria-labelledby="preview-once-title">
+        <h2 class="visually-hidden" id="preview-once-title" data-t="book.preview.onceTitle">[초안] 한 번 결제</h2>
+        <p class="pv-once__price" data-js="preview-once-price">[초안] 3,900원 한 번이에요. 구독이나 자동 결제는 없어요.</p>
+        <p class="pv-once__code" data-t="book.preview.onceCode">[초안] 열람 코드로 다른 기기에서도 다시 열 수 있어요.</p>
+        <button class="btn btn--primary btn--block pv-go" type="button" data-js="preview-go"><span data-js="preview-go-label">[초안] 책 전체 열기 · 3,900원</span></button>
+      </section>
+
+      <!-- 7 보조 글자 링크 (막다른 곳 0) -->
+      <nav class="pv-links" data-aria="book.preview.linksAria" aria-label="[초안] 다른 곳으로">
+        <button class="text-link" type="button" data-go="report" data-js="preview-to-toc"><span aria-hidden="true">‹</span> <span data-t="book.preview.toToc">[초안] 목차로</span></button>
+        <button class="text-link" type="button" data-go="story" data-js="preview-to-story"><span data-t="book.preview.toStory">[초안] 나의 이야기로</span> <span aria-hidden="true">›</span></button>
+      </nav>
+
+      <!-- 8 면책 (disclaimer.js, Disclaimer.mount — 책 화면과 같은 방식) -->
+      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
+    </section>
+    </template>
+    <!-- /pay:on -->
+
+    <!-- pay:on -->
     <!-- ═════════ 6-P. (14·15단계) 결제 — pay.mode가 test·live일 때만 (결정 94, 15단계 페이앱) ═════════
          template 안에 둔다: off(배포판)에서는 DOM에 결제 요소가 0개여야 한다(14-7의 8, 15-8의 1). JS가 test·live에서만 template 내용 전부를
          (최상위 요소 4개: #screen-deeper · #screen-paycheck · #screen-paypopup · dialog pay-code-dialog) 꺼내 붙이고 applyText를 돌린다. off면 template째 지운다.
@@ -3168,8 +3599,10 @@
           <li class="pay-list__item"><span class="pay-list__name"></span><span class="pay-list__vol"></span></li>
           <li class="pay-list__item"><span class="pay-list__name"></span><span class="pay-list__vol"></span></li>
           <li class="pay-list__item"><span class="pay-list__name"></span><span class="pay-list__vol"></span></li>
-          <!-- (17단계 I1) 인연의 장 줄: 시기별 흐름 다음·궁합 앞 차례. JS가 id "yeon" 줄에 .pay-list__item--new와 .pay-list__new(pay.what.newBadge)를 붙인다 -->
-          <li class="pay-list__item pay-list__item--new"><span class="pay-list__name"><span data-t="book.parts.yeon">인연의 장</span><span class="pay-list__new" data-t="pay.what.newBadge">새로 더해진 장</span></span><span class="pay-list__vol"></span></li>
+          <!-- (18단계 J1) 새로 더해진 장 알약은 인연의 장 → 새 장(cross)으로 옮긴다(18-9). 새 장 줄은 제2부 맨 앞(방 장 7줄 바로 뒤).
+               마친 방 1개(새 장이 아직 안 열림)면 분량은 평균값(avg.cross)이고, 이름 칸 아래에 상태 글자 .pay-list__state(pay.what.crossWait)를 붙인다 -->
+          <li class="pay-list__item pay-list__item--new"><span class="pay-list__name"><span data-t="book.parts.cross">[초안] 겹치는 곳, 갈리는 곳</span><span class="pay-list__new" data-t="pay.what.newBadge">새로 더해진 장</span><span class="pay-list__state" data-js="pay-cross-state">[초안] 방 2개를 지나면 열려요</span></span><span class="pay-list__vol">[초안] 약 2,100자</span></li>
+          <li class="pay-list__item"><span class="pay-list__name"><span data-t="book.parts.yeon">인연의 장</span></span><span class="pay-list__vol"></span></li>
         </ol>
         <p class="pay-total"><span data-t="pay.what.totalLabel">합계</span> <b data-js="pay-total"></b></p>
         <p class="pay-note" data-t="pay.what.free">여는 글·닫는 글과 목차는 결제 없이 먼저 읽을 수 있어요. 아직 지나지 않은 방의 장은 그 방을 지나면 열려요.</p>
@@ -3252,6 +3685,8 @@
       </footer>
 
       <button class="text-link pay-back" type="button" data-go="report" data-js="pay-back"><span aria-hidden="true">←</span> <span data-t="pay.back">목차로 돌아가기</span></button>
+      <!-- (18단계 J1) 미리보기에서 왔을 때만 hidden 해제 (from: preview). 목차로 돌아가기 바로 아래, 같은 글자 링크 -->
+      <button class="text-link pay-back pay-back--preview" type="button" data-go="preview" data-js="pay-back-preview" hidden><span aria-hidden="true">←</span> <span data-t="pay.backPreview">[초안] 미리보기로 돌아가기</span></button>
     </section>
 
     <!-- ═════════ 6-Q. (15단계) 결제 확인 — 결제창을 연 원래 탭 / #paid 복귀 (15-2 상태별 화면) ═════════

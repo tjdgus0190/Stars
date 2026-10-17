@@ -3462,3 +3462,156 @@ JS·data*.js는 고치지 않았다. 아래 7절(광고)에서 "지금 지운 �
 ### 시험 (수정 뒤: sync-text → build-dist → 8788 재시작)
 - sync-text: 바뀐 곳 4(오검 해요체) + meta 4. build-dist: [초안] 없음, 유료 지문 0, 배포 점검 통과.
 - e2e-book 59/0 · e2e-pay 68/0 · e2e-flow reduced 127/0.
+
+
+## 18단계 (J1): 상품성·전환 개선 (디자인 · 2026-10-18)
+
+기준: specs/strange-oracle.md 「18단계」 18-2·18-3·18-5·18-8·18-9·18-12의 13, 운영자 결정 117~119.
+반영 위치: index.html 견본(template) 5곳 + pay-tpl 2곳, style.css 맨 끝 「(18단계 J1)」 블록. app.js·data*.js·book.js는 고치지 않았다.
+**새 요소는 모두 `<!-- pay:on -->` 구획의 template 안**이라 off 배포판에는 마크업 0, 화면 변화 0이다(build-dist 뒤 dist index.html에서 새 template 이름·[초안] 0건 확인).
+
+### 0. 디자인 방향
+- 미리보기는 "결제 화면"이 아니라 **책을 미리 펼쳐 보는 화면**이다. 밤 바탕 위에 머리·목차·차이 표를 두고, 맛보기 네 쪽만 책 쪽과 같은 종이·잉크 판에 담는다.
+- 가격은 화면 아래쪽 한 칸(한 번 결제 + 주 버튼)에만 한 번 나온다. 그 위에는 가격·결제 말이 없다.
+- 결제 쪽으로 이끄는 모양은 조르지 않는다(6-3). 목차의 작은 글자 버튼은 `btn--text` 밑줄 글자, 맨 위 띠는 청동 테두리 띠이고 주 버튼 모양이 아니다.
+- 새 효과는 단색 그라데이션·테두리·한 번 퍼지는 강조 고리뿐이다. filter·blur·큰 그림자 0.
+
+### 1. 미리보기 화면 `#screen-preview` (template `preview-tpl`, 18-5 순서 1~8)
+
+| 순서 | 요소 | 모양 |
+|---|---|---|
+| (test) | 시험 띠 `preview-test-band` | 결제 전 화면과 같은 `pay-band`, 문구 `pay.testBand`. live면 hidden |
+| 1 머리 | 장식선 · h1 `preview-title`({who}의 한 권의 책) · 주 원형 `preview-arch` · 한 줄 `book.preview.lede` | 가운데 정렬. 제목 22px, 원형 19px 강조색, 한 줄 14px |
+| 2 목차 | h2 + 관심사 줄 `preview-interest`(순서가 바뀐 때만) + 14장 | 줄 = 글(버튼 아님). 번호 \| 장 이름·(방 장) 결과 이름 \| 표지 + 분량. 부 번호 줄은 책 목차와 같은 청동 글자 |
+| 3 맛보기 | h2 "내 책 맛보기" + 「맛보기」 알약 + 종이 판 한 장 | 네 쪽(h3)을 잉크 선으로 나눈다: 여는 글 전문(머리글자) → 일곱 장의 첫 줄 → 대조표 미리 보기 → 닫는 글(접힘) |
+| 4 차이 표 | h2 + 두 열 `table` | 왼쪽 "이미 무료로 본 것"(점 목록, 조용히) / 오른쪽 "책에서 더 받는 것"(테두리 상자, 장 이름 굵게 + 한 줄) |
+| 5 한 번 결제 | `pv-once` 칸(h2는 visually-hidden) | "3,900원 한 번이에요. 구독이나 자동 결제는 없어요." + 열람 코드 한 줄 |
+| 6 주 버튼 | `preview-go` "책 전체 열기 · 3,900원" | `btn--primary` 한 화면에 이것 하나. 결제하지 않고 결제 전 화면으로(from: preview) |
+| 7 보조 링크 | `preview-to-toc`(data-go="report") · `preview-to-story`(data-go="story") | 글자 링크 두 개, 가운데 |
+| 8 면책 | `disclaimer-slot` | `Disclaimer.mount`, 맨 아래 |
+
+- 광고 슬롯 0. 제목 단계: h1 → h2(목차·맛보기) → h3 4개 → h2(차이·한 번 결제). 건너뜀 없음(측정: `H1H2H2H3H3H3H3H2H2`).
+- **360×640 첫 화면**(상단 막대 52px 포함, 시험 띠 있음, [초안] 견본 글로 잼): 시험 띠 → 머리(제목 2줄·원형·한 줄) → "나에게 맞춘 목차" → 여는 글 줄 → 제1부 줄 → Ⅰ 만신·Ⅱ 오검·Ⅲ 별 줄까지 보이고 Ⅳ 데칸이 걸쳐 잘린다. 480px도 같은 차례로 Ⅴ 촐킨까지. 실제 문구는 [초안] 표시가 빠져 조금 더 짧다. 캡처는 designer 작업 폴더에만 두었다(아래 9절).
+- 목차 표지: 무료 장 = 강조색 테두리 알약 + 펼친 책 아이콘 + "무료로 읽기", 책 장 = 자물쇠 아이콘 + "책에서 열림"(테두리 없음). 글자와 아이콘이 함께 있어 색 없이도 구별된다.
+- 목차 줄 `li[data-chapter]`은 18-8 순서를 따른다. JS는 `preview-chapters-part2` 안의 li 차례만 바꾸고, 새 장(cross) 줄은 늘 맨 앞이다. 방 장 줄의 결과 이름 = `preview-chapter-sub`, 표지 = `preview-chapter-tag`, 분량 = `preview-chapter-vol`(`chapterChars` 실측값, 결제 전 화면과 같은 값).
+
+### 2. 샘플 쪽 모양 (맛보기 종이 판 `pv-paper`)
+- 종이·잉크 토큰은 책 쪽(`.book-reader`)과 같은 값을 `.preview`에 다시 둔다. 판은 좌우 8px만 밤 바탕이 보이게 넓힌다(책 화면과 같은 폭).
+- **여는 글** `preview-open`: 본문 17px / 30px, 들여쓰기 1em, 첫 단락에 `has-dropcap`(두 줄 높이 붉은 잉크 머리글자). 책 쪽과 같은 결.
+- **일곱 장의 첫 줄** `preview-first-lines`: 방마다 li 하나 —
+  - 머리 한 줄(13px): 번호(붉은 잉크) · 방 문양 14px · 방 이름(굵게) │ 결과 이름. 문양은 목차와 같은 symbol.
+  - 첫 줄 19px / 1.7, `--ink-strong`(책 장 첫 줄 `book-first-line`과 같은 크기).
+  - 그 아래 "이 장의 나머지 약 {n}자는 책에서 열려요" 13px `--ink-soft`.
+- **대조표 미리 보기** `preview-cross`: 3절의 대조표와 같은 컴포넌트, 그 아래 "이 표를 읽는 여섯 쪽은 책에서 열려요" 한 줄. 쪽 문장 0.
+- **닫는 글** `preview-close-leaf`: 제목 + 잉크 테두리 알약 버튼 "닫는 글 펼치기 ▾"(`aria-expanded`/`aria-controls`). 한 번 누르면 버튼은 사라지고(`[aria-expanded=true]` → 숨김) 본문 `preview-close`의 `hidden`이 풀린다. 다시 접기는 없다.
+- **면책 자리**: 맛보기 판 안이 아니라 화면 맨 아래(8). 맛보기 판 안에는 면책을 두지 않는다(책 쪽에서 면책이 뒷면지에 있는 것과 같은 자리 감각).
+
+### 3. 대조표와 C·D 막대 (미리보기 · 새 장 1쪽 공용, `cross-table`)
+- 진짜 `<table>`: `caption`(예: "일곱 방이 나를 부른 이름") + `thead`(th scope=col: 방 · 원형 · C · D) + 방마다 `tr`(th scope=row).
+- 열 너비(table-layout: fixed): 방 49% · 원형 19% · C·D 각 16%. 방 칸 = 번호 + 방 이름(굵게) + 그 아래 결과 이름(13px). C·D 머리 칸 = 작은 글 "겹침"/"갈림" + 축 이름(굵게).
+- **막대**: 네 칸(칸 6px, 사이 1px, 높이 6px). 값 0~4만큼 칸이 찬다(`style="--v:N"`). C는 붉은 잉크, D는 짙은 잉크. **바로 옆에 숫자**(`axis-meter__num`)가 있어 막대 값이 글자로도 읽힌다. 막대 자체는 aria-hidden.
+- **주 원형 줄기**: 줄 `is-main` → 원형 칸 앞 "◆" + 굵게 + 왼쪽 붉은 잉크 선 2px + 옅은 바탕. 두 갈래면 보조 원형 줄 `is-sub` → "◇" + 왼쪽 잉크 선. 줄마다 visually-hidden "주 원형"/"보조 원형" 글자. 표 아래 범례 `cross-legend`: "◆ 주 원형 「전사」 · ◇ 보조 원형 「현자」 · 숫자는 0~4…". 보조가 없으면 `cross-legend-sub-row` hidden. 색만으로 구별하지 않는다(기호 + 글자 + 굵기).
+- **아직 지나지 않은 방**(방 2~6개): 줄 `is-pending`, 방 칸 다음에 한 칸(colspan 3) "아직 지나지 않은 방", 모두 `--ink-soft`.
+- **D 없음**: `table[data-split="none"]` → D 열(머리·칸) 숨김. 3쪽은 「고른 결」.
+- 높이(360px, [초안] 표시를 뺀 견본 글): 표 390px(7줄, 결과 이름이 두 줄이 되는 방 포함). 480px도 390px. 책 쪽 본문 높이(360×640 약 440px)에 범례까지 겨우 들어가므로 **쪽 나눔에서 표는 한 덩어리(unit)로, 쪽 머리 "1 겹치는 목소리" 바로 뒤 새 쪽에** 둔다. 들어가지 않는 낮은 화면이면 범례를 다음 쪽 첫머리로 넘긴다(표 줄은 쪼개지 않음). 실제 측정은 J4.
+
+### 4. 새 장 「겹치는 곳, 갈리는 곳」 6쪽 쪽 모양 (template `cross-tpl`의 article `#book-cross`)
+- 장 머리는 다른 제2부 장과 같은 `book-opening`(app.js가 만듦). 쪽 = `section.cross-sec[data-sec]`, 쪽 머리 = 번호(붉은 잉크 Cinzel) + 이름(16px 굵게) — 인연의 장 쪽 머리와 같은 결.
+
+| 쪽 | data-sec | 쪽 위 표지 | 본문 칸 |
+|---|---|---|---|
+| 1 겹치는 목소리 | voices | 대조표(3절) | `cross-voices` |
+| 2 함께 가리키는 결 | common | 축 표지: [겹침] 알약 + 축 이름 19px + C 막대 + 평균 글자(`cross-axis-common-avg`, 선택) | `cross-common` |
+| 3 갈리는 결 | split | 축 표지: [갈림] 알약 + 축 이름 + 짙게 본 방 / 옅게 본 방 두 줄(`dl.cross-ends`, 방 이름 다섯 개면 줄바꿈) | `cross-split` |
+| 3 대신 고른 결 | even (hidden) | 없음 | `cross-even` |
+| 4 홀로 다른 방 | lens | 방 표지: 문양 원 28px + 번호 + 방 이름 │ 원형 | `cross-lens` |
+| 5 두 얼굴을 함께 쓰는 법 | pair | 궁합 장의 `match-pair` 그대로(19px): M × X | `cross-pair-text` |
+| 4·5 대신 한결같은 목소리 | same (hidden) | 없음 | `cross-same` |
+| 6 겹친 곳에 서고, 갈린 곳에서 고르기 | close | 없음. 방 2~6개면 끝에 `cross-note`(14px 안내) hidden 해제 | `cross-close` |
+
+- 대체 쪽을 쓰면 쪽 번호 숫자는 그대로 둔다(고른 결 = 3, 한결같은 목소리 = 4). 쓰지 않는 쪽은 JS가 지운다.
+- 쪽 표지 `p`들은 `.book-page__body > p`의 들여쓰기·여백 규칙을 덮어쓰도록 `.book-page__body .cross-axis` 등으로 적었다.
+- 360·480에서 6쪽을 한 장으로 펼친 견본(쪽 나눔 없이) 가로 넘침 0, 11px 미만 0, 대비 미달 0. 기본 경로와 대체 경로(고른 결·한결같은 목소리·D 없음·끝 안내) 둘 다 잼.
+
+### 5. 목차 조각 (template `toc18-tpl` — 자식 셋을 JS가 각 자리로) · 잠긴 장 줄 강조
+| 요소 | 자리 | 상태 | 모양 |
+|---|---|---|---|
+| ① 맨 위 띠 `book-preview-band` (button) | `book-home__head` 바로 뒤(이어 읽기보다 위) | 7/7 결제 전만 | 청동 테두리 띠: 책 아이콘 + "내 책 미리 보기"(16px 굵게) + 한 줄(13px) + → . 주 버튼 모양 아님 |
+| ② 관심사 안내 줄 `book-interest` | 장 목록(`nav.chapters`) 바로 위 | 순서가 바뀐 때만 | 왼쪽 강조색 선 2px + 차례 아이콘 + 14px 한 줄(60자면 360px 3줄) |
+| ③ 작은 글자 버튼 `book-buy-row` > `book-buy` | 장 목록 바로 뒤, "내 열람 코드 보기"보다 위 | 1~7/7 결제 전 | `btn--text` 14px 흐린 글자 + 밑줄, 가운데 정렬. 테두리·바탕 없음 |
+
+- **새 장 목차 줄**: `cross-tpl` 안의 `li.chapter-row[data-chapter=cross]` → 제2부 목록 맨 앞. 상태 모양은 다른 줄과 같다(방 1개 = `need-room` 점선 + 자물쇠 + "방을 하나 더 지나면 열려요").
+- **잠긴 장 줄 강조** (1~6/7 결제 전, 네 길의 끝): 목차를 열고 그 줄로 스크롤(`scroll-margin-top` = 상단 막대 + 32px) → li에 `.is-target`. 테두리가 실선 강조색으로, 바깥 고리가 1.2초 한 번 퍼지고 멈춘다. 토스트(기존 `toast`)와 함께. JS는 약 2초 뒤 `.is-target`을 뗀다(떼지 않아도 정지 모양은 테두리뿐이라 괜찮음).
+- 7/7 결제 전 길의 끝(미리보기): 방 장 → `preview-first[data-chapter]` li, 새 장 → `preview-cross`, 그 밖 제2부 장 → `preview-chapter[data-chapter]` li에 같은 `.is-target`(종이 위는 붉은 잉크 고리, 목차 줄은 강조색 바탕 + 왼쪽 선). 움직임 없음.
+- 움직임 줄이기: 강조 고리 애니메이션 0(정지 모양만).
+
+### 6. 입구 카드 · 나의 이야기 7/7 카드 상태
+- **입구 책 카드** `hub-book[data-state]`: 마크업은 그대로, 상태별 모양만.
+  - `none`·`some`(0~6/7): 지금 모양. 설명에서 가격을 뺀다(문구, copywriter). 버튼 "목차 보기".
+  - `all`(7/7 결제 전): 청동 테두리 + 은은한 빛(새 규칙). 버튼 글자만 "내 책 미리 보기"(`hub.book.goPreview`), 모양은 보조 버튼 그대로(입구 주 버튼은 고대 문).
+  - `owned`(결제 뒤, **새로 붙일 값**): 잠금 줄·인장 숨김(기존 규칙). 버튼 "내 책 다시 펴기"(`hub.book.goReopen`) → 목차.
+- **나의 이야기 7/7 결제 전** (template `story-preview-tpl`): `story-book` 자리에 미리보기 카드 `story-preview` — 책 표지 그림 + 인장 · 작은 윗줄 · 제목(19px) · 한 줄 소개 · 주 버튼 "내 책 미리 보기"(가격 없음). 이때 `story-book`은 숨기고, 공유 버튼 `story-share`는 `btn--primary` → `btn--secondary`로 바꾼다(주 버튼 1개). 위쪽 공유(`story-share-top`)는 그대로. 결제 뒤 = 지금 보조 버튼(글자 "내 책 펴기"), off = 지금 그대로.
+
+### 7. 결제 전 화면 "받는 것" 새 줄 · 상태 글자 · 돌아가기 (pay-tpl)
+- 새 장 줄은 방 장 7줄 바로 뒤(제2부 맨 앞, 관심사 순서에서도 맨 앞). `pay-list__item--new` + "새로 더해진 장" 알약은 인연의 장 줄에서 **새 장 줄로 옮긴다**.
+- 마친 방 1개면 이름 칸 안 알약 다음 줄에 상태 글자 `.pay-list__state`(13px 흐린 글, "방 2개를 지나면 열려요")를 붙인다. 분량 칸은 평균값. 360px: 이름 한 줄 + 알약(줄바꿈 가능) + 상태 한 줄, 분량은 오른쪽 맨 아래 기준선 — 줄 높이 약 80px, 480px 약 60px, 넘침 0.
+- 맨 아래 "목차로 돌아가기" 바로 밑에 같은 글자 링크 "미리보기로 돌아가기"(`pay-back-preview`, data-go="preview"). 미리보기에서 왔을 때만 hidden 해제. 고지 1~6이 [결제하기]보다 위인 순서는 그대로.
+
+### 8. developer 요청 (J2-d·h, JS)
+1. **template 꺼내기 (test·live만, off는 offStrip에 template째 더함)**
+   - `preview-tpl` → pay-tpl처럼 꺼내 `screens.preview`, `applyText`. 시험 띠 `preview-test-band`는 test에서만.
+   - `toc18-tpl` → 자식 셋을 5절 표의 자리로 옮김. 결제 뒤 ①③ hidden.
+   - `cross-tpl` → li는 제2부 목록 맨 앞(인연의 장 줄과 같은 방식), article은 book 그리기에 연결.
+   - `story-preview-tpl` → `story-book` 바로 뒤, 7/7 결제 전만 보이고 그때 `story-book` 숨김 + `story-share` 클래스 바꿈.
+   - offStrip 목록: `preview-tpl`·`toc18-tpl`·`cross-tpl`·`story-preview-tpl`(모두 pay:on 안이라 build-dist off에서는 이미 없음. 원본을 그대로 여는 경우 대비).
+2. **미리보기 채우기**: `preview-title`(나의 이야기 제목과 같은 {who}), `preview-arch`, 목차 li의 sub·tag·vol·차례, `preview-interest`(+`-text`), `preview-open`(여는 글 단락들, 첫 단락에 `has-dropcap`), `preview-first`마다 `preview-first-result`·`-text`·`-rest`, 대조표, `preview-close`(펼칠 때), `preview-once-price`({price}), `preview-go-label`, `disclaimer-slot`. 닫는 글 접기: `preview-close-toggle` 클릭 → `aria-expanded="true"` + `preview-close.hidden=false`.
+3. **대조표 채우기** (`cross-table`, 두 곳 같은 함수): 줄마다 `cross-result`·`cross-arch`·`cross-mark`(◆/◇/빈칸)·`cross-mark-sr`(필요한 줄만)·`cross-c`/`cross-d`의 `--v`와 숫자, 줄 class `is-main`/`is-sub`/`is-pending`(pending이면 칸을 `cross-table__wait` 한 칸으로), `cross-c-name`·`cross-d-name`, `data-split`, `cross-caption`, 범례 셋.
+4. **새 장 쪽**: 5절 표의 data-js 칸을 채우고, 대체 쪽은 hidden 해제·안 쓰는 쪽 제거. `cross-sec[data-sec=lens]`에 `data-room`과 문양 symbol(목차 줄 문양 복제), `cross-high`/`cross-low`. 쪽 나눔에서 대조표는 한 unit(3절).
+5. **상태 클래스·값**: 입구 카드 결제 뒤 `data-state="owned"`(지금은 all로 남음), 잠긴 장 길 끝 `.is-target`(약 2초 뒤 떼기), 받는 것 새 장 줄 `.pay-list__item--new` + `.pay-list__new` + (방 1개) `.pay-list__state`, `pay-back-preview` hidden 해제(from: preview).
+6. **data.js 키 (copywriter 문구, 그 뒤 index.html [초안] 정리)** — 18-10 표의 묶음별:
+   - 새 장 UI `book.cross.*`: `book.parts.cross`, `book.chapter.blurbs.cross`, `book.cross.secs.{voices,common,split,even,lens,pair,same,close}`, `book.cross.table.{room,arch,common,split,pending,scale,caption}`, `book.cross.legend.{main,sub}`({arch} 자리 값), `book.cross.high`, `book.cross.low`, `book.cross.avg`({n}, 선택), `book.cross.mark.{main,sub}`(visually-hidden), `book.cross.notes.more`, `book.cross.axis.{act,talk,heart,order,free}`(지도 말과 같게).
+   - 미리보기 `book.preview.*`: `title`({who}), `lede`, `tocTitle`, `tagFree`, `tagBook`, `sampleTitle`, `sampleTag`, `firstTitle`, `firstRest`({n}), `crossRest`, `closeOpen`, `diffTitle`, `diff.freeHead`, `diff.bookHead`, `diff.free`(배열 4), `diff.book`(배열 {name, line}), `onceTitle`, `once`({price}), `onceCode`, `go`({price}), `toToc`, `toStory`, `linksAria`.
+   - 관심사 `book.interest.*`: 관심사 4 × 물은 방 2(예 `book.interest.sibyl.love` … `book.interest.rune.self`), 60자 이내.
+   - 카드·목차·토스트·받는 것: `hub.book.goPreview`, `hub.book.goReopen`, `book.toc.previewBand`, `book.toc.previewBandSub`, `book.toc.buyNow`({price}), `book.toc.lockedToast`(1~6/7 토스트), `story.preview.{eyebrow,title,desc,go}`, `story.bookOpen`(결제 뒤 "내 책 펴기"), `pay.what.crossWait`, `pay.backPreview`.
+   - 키 이름은 developer가 확정해도 된다. 바꾸면 index.html의 `data-t`도 같이 바꾼다.
+
+### 9. 텍스트 길이 제한 (copywriter용, 360px)
+| 요소 | 최대 | 넘으면 |
+|---|---|---|
+| 미리보기 제목 `book.preview.title` (이름 포함) | 22자 | 3줄 → 목차 첫 줄이 첫 화면 아래로 밀림 |
+| 미리보기 한 줄 `lede` | 24자 | 2줄 |
+| 목차 표지 `tagFree`·`tagBook` | 6자 | 장 이름 칸이 좁아짐(줄바꿈 없음) |
+| 맛보기 "나머지 약 {n}자" `firstRest` | 26자 | 2줄 |
+| 차이 표 머리 각 | 10자 | 2줄 |
+| 차이 표 오른쪽 한 줄 `diff.book[].line` | 18자 | 2줄(허용) |
+| 한 번 결제 `once` | 34자 | 3줄 |
+| 주 버튼 `go` | 16자 | 2줄 |
+| 맨 위 띠 `previewBand` / `previewBandSub` | 10자 / 30자 | 2줄 / 3줄 |
+| 작은 글자 버튼 `buyNow` | 18자 | 2줄 |
+| 관심사 줄 | 60자 (기획) | 360px 3줄 |
+| 나의 이야기 카드 제목 / 소개 / 버튼 | 12자 / 40자 / 10자 | 2줄 / 3줄 / 2줄 |
+| 대조표 머리 "겹침"·"갈림" | 3자 | 열 머리 2줄 |
+| 대조표 아직 줄 `pending` | 12자 | 2줄 |
+| 쪽 이름 `book.cross.secs.*` | 16자(6쪽 이름이 가장 김) | 2줄(허용) |
+| 받는 것 상태 글자 `crossWait` | 14자 | 2줄 |
+
+### 10. 합격 기준 대조 (18-12의 13, 견본)
+- 측정: designer 작업 폴더의 일회용 스크립트(look-17.js의 다섯 점 대비 코드를 그대로 읽어 씀)로 template을 화면에 꺼내 360·480에서 잼. 상태 8개: 미리보기(기본·닫는 글 펼침·관심사 줄·강조), 목차 조각(3/7, 띠·관심사 줄·작은 버튼·새 장 줄 need-room·강조), 새 장 6쪽(기본·대체 경로), 나의 이야기 7/7 카드, 입구 7/7 카드, 결제 전 새 장 줄(방 1개).
+- **결과**:
+  - 넘침: 360·480 모두 가로 넘침 0, 11px 미만 0.
+  - 새 요소의 대비 미달 0. 가장 낮은 값: `.pv-toc__sub` 4.84(360), `.first-lines__rest` 5.62, `.cross-table__result` 5.7.
+  - 미달로 나온 것은 모두 기존 요소의 별 점 걸림이다. 17단계 I4에서 판단한 것과 같다: `.hub-summary` 4.39, `.hub-progress__count` 1.99, `.pay-list__vol` 480 2.14, 결제 목록 "V 촐킨의 방" 480 4.14.
+  - 룬 문 글리프 ᚱ는 제외 대상이다.
+- 대조표 `table`·`th`(scope col·row)·`caption` 있음. 막대 값 숫자 글자 있음.
+- 움직임 줄이기: 새 움직임은 `.is-target` 고리 하나이고, 움직임 줄이기에서 0이다.
+- 미리보기 제목 단계는 건너뜀이 없다.
+- 실제 앱 연결 뒤의 측정(유료 문장 지문·/api/book 0·SDK 0·상태표)은 J2·J4·J5에서 한다.
+
+### 11. 시험 (J1 수정 뒤, build-dist → 8788 test 재시작)
+- build-dist 통과([초안] 없음, 유료 지문 0, 배포 점검 통과). off dist index.html에 새 template·[초안] 0건.
+- e2e-book 60/0 · e2e-pay 68/0 · e2e-flow reduced 127/0.
+- 시험 때 작업 사본에는 developer J2 진행분(app.js·book.js·map.js 등)이 함께 있었다.
+
+### 12. 운영자가 화면으로 확인할 것 (J4 뒤)
+- 미리보기 첫 화면에서 "결제 화면"이 아니라 "책 미리 보기"로 읽히는지.
+- 목차의 작은 글자 버튼이 너무 숨어 보이지 않는지(조르지 않기와 찾기 쉬움 사이).
