@@ -3600,6 +3600,11 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
   animation: gate-breathe 4.8s ease-in-out infinite;
 }
 @keyframes gate-breathe { 50% { opacity: 0.95; transform: scale(1.04); } }
+/* (16단계 H5) 입구 위에 지도 띠·링크가 붙으면 낮은 화면(360×640 등)에서 문이 밀려 잘린다 → 그때만 문을 줄이고 머리 위 여백을 덜어 시작 버튼을 첫 화면 안에 둔다 */
+@media (max-height: 760px) {
+  .hub:has(> .map-slot--hub:not([hidden])) .hub-head { padding-top: 0; }
+  .hub:has(> .map-slot--hub:not([hidden])) .hub-cta.hub-gate { --gw: 144px; }
+}
 .hub-gate__door {
   position: relative; display: block; overflow: hidden;
   width: var(--gw); height: calc(var(--gw) * 1.4);
