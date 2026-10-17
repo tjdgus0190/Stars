@@ -74,3 +74,6 @@
 | q4 | 장 수 11장(legal 3·data.js·index.html)·환불 "새로 더해진 장" 확인, 10장 0. teen 잔여: index.html 3059 + app.js 2796 주석(새로 찾음, 권장). book 요청 {pass,file}. [초안] 0. utm 코드·privacy 4조의2 대조 일치, analytics.js 쓰는 제품 strange-oracle뿐 | done |
 | q5 | 광고 영상: ffprobe 2개 규격 맞음, --check 다시 26컷(3줄 자막 0), 대표 컷 6장 눈으로 안전 박스 안, 원국 丙寅·甲戌·辛巳·庚午 = saju.js, 외부 주소 jsdelivr @fontsource 5개뿐 | done |
 | q6 | flow motion 128/0. reports/qa 「17단계 (I5) QA 1차」 판정 수정 필요(필수 1: heartLine.tzolkin.manik → copywriter). meta.json 그대로 | done |
+
+| r0 | QA 2차 시작 (747309c 뒤) | done |
+| r1 | 2차: 바뀐 37문장 읽음, 단위 155·check-17 0·make-volume 0·build-dist 통과·누출 0, book 60·pay 68·flow reduced 127 → 배포 가능, meta 그대로 | done |
