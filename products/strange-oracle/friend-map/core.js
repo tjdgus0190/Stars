@@ -266,7 +266,7 @@
       },
     };
 
-    // req: { method, path, origin, body(문자열), tooBig } → { status, headers, body }
+    // req: { method, path, origin, body(문자열), tooBig, readError } → { status, headers, body }
     async function handle(req) {
       const env = opts.env || {};
       const allowed = String(env.ALLOWED_ORIGIN || "");
@@ -279,6 +279,7 @@
       const op = /^\/(create|join|peek|view|erase)$/.test(req.path || "") ? req.path.slice(1) : null;
       if (!op) return out(404, NOT_FOUND, cors);
       if (req.method !== "POST") return out(400, { error: "method" }, cors);
+      if (req.readError) return out(503, { error: "db" }, cors); // (17-9 QA16 권장5) 본문 스트림 읽기 오류: 기본 500 대신 화면이 아는 503 db
       const body = typeof req.body === "string" ? req.body : "";
       if (req.tooBig || new TextEncoder().encode(body).length > LIMITS.body) return out(413, { error: "too_big" }, cors);
       if (limiter && op !== "peek" && op !== "view" && !(await limiter(op))) return out(429, { error: "rate" }, cors, { "Retry-After": "60" });

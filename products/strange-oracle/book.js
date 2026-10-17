@@ -73,7 +73,7 @@
       ch4: [e.advice.lede, ...e.advice.body],
       hidden,
       firstLine: e.firstLine || "", // (17-3) 장 첫 쪽 맨 앞 한 문장. 빈칸이면 그리지 않는다
-      heartLine: e.heartLine || "", // (17-3) 장 가운데(Ⅱ장 끝 떡밥 줄 바로 앞 = identity 뒤·shadow 앞) 한 장면
+      heartLine: e.heartLine || "", // (17-3) 장 가운데 한 장면 = identity 뒤·shadow 앞(Ⅰ장 끝, 룬은 "지금" 묶음 끝. app.js가 aside.book-heart로 그림)
     };
     if (room === "sibyl") out.topics = Object.assign({}, e.topics);
     return out;
@@ -117,7 +117,7 @@
   const ELEMENT_OF_STEM = ["wood", "wood", "fire", "fire", "earth", "earth", "metal", "metal", "water", "water"]; // saju.js STEM_EL·ELEMENTS와 같음(갑을=목 … 임계=수)
   // ctx = { arch: 주 원형, sub: 보조 원형, allDone: 일곱 방 다 마침, band: 0~6|null(나이 모름), teen: true|false, stem: 만신 일간 0~9|null(만신 미방문) }
   // 돌려주는 모양: { id, variant: base|teen, pages: [{ key, text, note, bands }] } — key·note는 data.js book.yeon 키 이름(화면 틀 문구는 data.js)
-  //   빠진 경우(17-2 표): 보조 = 주 → same(+ 일곱 방 전이면 note sameMore) · 나이 모름 → notime + note noAge(b1 문장을 쓰지 않음)
+  //   빠진 경우(17-2 표): 보조 = 주 → same(+ 일곱 방 전이면 note more) · 나이 모름 → notime + note noAge(b1 문장을 쓰지 않음)
   //   만신 미방문 → 계절 쪽 text 없이 note noSaju · 만 19세 미만 → teenKnow·teenFriend·teenPlace + 미성년 계절(4·6쪽 숨김)
   function yeonChapter(C, ctx) {
     const Y = C.yeon;
@@ -140,7 +140,7 @@
       { key: "pull", text: Y.pull[a], note: null },
       { key: "mirror", text: Y.mirror[a], note: null },
       { key: "meet", text: Y.meet[a], note: null },
-      same ? { key: "same", text: Y.alt.same[a], note: ctx.allDone ? null : "sameMore" } : { key: "twist", text: Y.twist[ctx.sub], note: null },
+      same ? { key: "same", text: Y.alt.same[a], note: ctx.allDone ? null : "more" } : { key: "twist", text: Y.twist[ctx.sub], note: null },
       { key: "scene", text: Y.scene[a], note: null },
       time,
       season(Y.season),

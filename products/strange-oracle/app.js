@@ -840,7 +840,7 @@
     const visits = r.codes ? visitsFromCodes(r.codes) : null;
     if (!visits) {
       track("so_resume", { step: "failed" });
-      resumeError(T.resume.errors[r.error || "shape"]);
+      resumeError(T.resume.errors[{ receipt: "notResume" }[r.error] || r.error || "shape"]); // paycode 오류 receipt(옛 영수증 코드) → data.js 키 notResume
       return resumeEl.input.focus();
     }
     state = { profile: {}, visits, restored: true };
@@ -2773,15 +2773,15 @@
     if (filledRooms().length) shareCard(e.currentTarget, buildStoryCard);
   }));
 
-  // ═════════ (13단계) 광고로 여는 책: 목차 · 장 표지 · 장 안 (spec 13-1~13-8, design 「13단계」) ═════════
-  // 결정 75: 책은 팔지 않는다. 가격·결제창·영수증 코드·토스 로더는 화면에서 은퇴했다. 휴면 서버(api/)는 부르지 않는다.
+  // ═════════ (13단계 → 15·17단계) 한 권의 책: 목차 · 장 표지 · 장 안 (spec 13-1~13-8·14-4·17-2, design 「13단계」·「17단계」) ═════════
+  // (13단계 결정 75 → 15단계) 옛 토스 결제·영수증 코드(SO1)·광고로 여는 책은 은퇴했다. 지금은 열람 코드(SOP)로 여는 페이앱 결제(아래 「결제」 묶음, test·live에서만).
   // paycode.js는 이어가기 코드(PayCode.Resume)와 원형·방 순서 표 때문에 그대로 쓴다.
   // 개인정보 (CLAUDE.md 6장, spec 13-4·13-8):
   //  - 책은 이 브라우저에서 결과 코드·원형·나이 구간만으로 조립한다(book.js). 장 문구 파일(data-book-*.js)은 방·주제 단위 이름으로만,
   //    같은 출처 정적 <script>로 받는다(결과 번호·query 없음). 잠긴 장의 문장은 DOM에 넣지 않는다.
   //  - 궁합 상대의 이름·생년월일·관계 유형은 궁합 표지 입력칸과 이 함수들의 지역 값에만 둔다(sessionStorage에도 넣지 않음).
   //    다른 장·목차로 가면 입력칸을 비운다. 분석 이벤트에는 장 id·단계만.
-  //  - sessionStorage: 광고로 연 장 표시 "book-<장 id>":1 (strange-oracle-unlock 칸), 이어 읽기 "<장 id>:<쪽>" (strange-oracle-bookmark). 문장·입력값 없음.
+  //  - sessionStorage: 이어 읽기 "<장 id>:<쪽>" (strange-oracle-bookmark), 열람 코드 pass·결제 확인 payreq(아래 「결제」). 문장·입력값 없음. 옛 광고 잠금 칸(strange-oracle-unlock)은 은퇴, 남아 있으면 지운다.
   //  - 시기별 흐름 표지의 생년월일은 6장 예외대로 profile에 넣는다(기존 고지·내 정보 지우기를 따름).
   const reportScr = screens.report;
   const BookCore = window.BookCore;
@@ -2873,12 +2873,15 @@
   matchEnd.className = "report-part__body prose";
   matchEnd.dataset.js = "report-match-end";
   js("report-match-rooms").after(matchEnd);
-  // (17-2) 인연의 장 원본 칸: 쪽마다 <section data-page data-title> 하나. 마크업 자리가 없어 여기서 만든다(designer I1 자리가 생기면 옮김)
+  // (17-2·17-3, design 「17단계」 5절) 인연의 장·첫 줄·마음 한 줄 모양 견본: index.html <template data-js="yeon-tpl">(pay:on 안 → off 배포판에는 없음).
+  //   template 안이라 첫 화면 DOM·스타일 계산에 들어가지 않는다. 장을 그릴 때 article을 복제해 원본 칸 report-yeon(book-source 안, 숨김)에 넣는다
+  const yeonTplEl = js("yeon-tpl");
+  const yeonTpl = yeonTplEl ? yeonTplEl.content : null;
   const yeonBox = document.createElement("div");
   yeonBox.dataset.js = "report-yeon";
   yeonBox.hidden = true;
   js("book-source").append(yeonBox);
-  // (17-2) 목차 「인연의 장」 줄: index.html에 줄이 없으면 시기별 흐름 줄을 복제해 그 뒤에 둔다(designer I1 마크업이 들어오면 그 줄을 그대로 쓴다)
+  // (17-2) 목차 「인연의 장」 줄: index.html 목차에 줄 마크업이 없어 시기별 흐름 줄을 복제해 그 뒤에 둔다(designer가 줄을 넣으면 그 줄을 그대로 쓴다)
   if (BOOK_ON && !$('[data-js="book-chapter"][data-chapter="yeon"]')) {
     const flowRow = $('[data-js="book-chapter"][data-chapter="flow"]');
     if (flowRow) {
@@ -3331,11 +3334,27 @@
     const e = room === "star" ? NAKS[c.star] : room === "ogham" ? OGHAM[c.ogham] : room === "decan" ? DECANS[c.decan] : room === "tzolkin" ? TZ_SIGNS[c.tzolkin.sign] : ORACLES[c.sibyl];
     return [e.identity.lede, ...e.identity.body, ...(rest || [])].map((t) => ({ text: strip(t) }));
   }
+  // (17-3) yeon-tpl 견본 복제: 첫 줄 p.book-first-line · 마음 한 줄 aside.book-heart (견본이 없으면 같은 class로 만든다)
+  const tplClone = (name) => {
+    const n = yeonTpl && yeonTpl.querySelector(`[data-js="${name}"]`);
+    return n ? n.cloneNode(true) : null;
+  };
+  const firstLineNode = (t) => {
+    const p = tplClone("book-first-line") || mk("p", "book-first-line", "");
+    p.textContent = t;
+    return p;
+  };
+  const heartNode = (t) => {
+    const a = tplClone("book-heart") || mk("aside", "book-heart", '<span class="book-heart__label" data-t="book.heartLabel"></span><span class="book-heart__text" data-js="book-heart-text"></span>');
+    textIn(a);
+    js("book-heart-text", a).textContent = t;
+    return a;
+  };
   const rich = (el, list) => {
     el.textContent = "";
     list.forEach((x) => {
+      if (x.node) return el.append(x.node); // (17-3) 첫 줄·마음 한 줄 견본 복제
       const p = document.createElement("p");
-      if (x.cls) p.className = x.cls; // (17-3) firstLine
       if (x.sub) {
         const b = document.createElement("b");
         b.textContent = x.text;
@@ -3374,29 +3393,63 @@
         tl.append(el);
       });
     } else if (id === "yeon") {
-      // (17-2) 인연의 장: 쪽(section)마다 제목(data.js book.yeon.pages)·본문·안내 한 줄(book.yeon.notes). 문장 고르기는 BookCore.yeonChapter
+      // (17-2, design 「17단계」 5절) 인연의 장: yeon-tpl의 article을 복제해 쪽(section.yeon-sec)마다 이름(data.js book.yeon.secs)·본문·안내 한 줄(book.yeon.notes).
+      //   문장 고르기는 BookCore.yeonChapter. 그 사람에게 없는 쪽(미성년판의 4·5·6쪽 등)은 section을 지우고, 남은 쪽 번호를 1부터 다시 매긴다
       const Y = T.book.yeon;
-      const y = BookCore.yeonChapter(C, yeonCtx());
+      const cx = yeonCtx();
+      const y = BookCore.yeonChapter(C, cx);
+      const stemEl = cx.stem == null ? null : BookCore.ELEMENT_OF_STEM[cx.stem];
       yeonBox.dataset.variant = y.variant;
-      y.pages.forEach((pg) => {
-        const sec = document.createElement("section");
+      const art = yeonTpl ? yeonTpl.querySelector("article").cloneNode(true) : document.createElement("article"); // 견본이 없으면(옛 마크업) 빈 장
+      textIn(art);
+      const SLOT = { pull: "pull", mirror: "habit", meet: "meet", twist: "pulse", same: "pulse", scene: "scene", time: "when", season: "season", teenKnow: "pull", teenFriend: "habit", teenPlace: "meet" };
+      const NAME = { mirror: "habit", twist: "pulse", time: "when" }; // 쪽 이름 키(secs)가 문장 칸 이름과 다른 것
+      const bySlot = Object.fromEntries(y.pages.map((pg) => [SLOT[pg.key], pg]));
+      let num = 0;
+      $$("[data-js=yeon-sec]", art).forEach((sec) => {
+        const pg = bySlot[sec.dataset.sec];
+        if (!pg) return sec.remove();
         sec.dataset.page = pg.key;
-        sec.dataset.title = Y.pages[pg.key] || "";
-        const add = (text, cls) =>
-          [].concat(text || []).filter((t) => t).forEach((t) => {
-            const p = document.createElement("p");
-            if (cls) p.className = cls;
-            p.textContent = t;
-            sec.append(p);
+        $(".yeon-sec__num", sec).textContent = String(++num);
+        const name = $(".yeon-sec__head [data-t]", sec);
+        name.removeAttribute("data-t");
+        name.textContent = Y.secs[NAME[pg.key] || pg.key] || "";
+        const body = js(`yeon-${sec.dataset.sec}`, sec);
+        if (body && body.classList.contains("prose")) paras(body, [].concat(pg.text || []).filter(Boolean)); // 시기 쪽(yeon-when)은 아래에서 칸으로
+        if (sec.dataset.sec === "when") {
+          const ol = js("yeon-when", sec);
+          const li0 = ol.firstElementChild.cloneNode(true);
+          ol.textContent = "";
+          const rows = pg.bands ? pg.bands.map((x) => ({ age: fill(x.now ? Y.bandNow : Y.bandNext, { label: Y.bands[x.band] || "" }), text: x.text, now: x.now })) : [{ age: "", text: pg.text, now: true }];
+          rows.forEach((x) => {
+            const li = li0.cloneNode(true);
+            li.classList.toggle("is-now", x.now);
+            const age = js("yeon-when-age", li);
+            age.textContent = x.age;
+            if (!x.age) age.remove(); // 나이 모름: 구간 이름 없이 한 칸 + 안내(17-2)
+            js("yeon-when-text", li).textContent = [].concat(x.text || []).join(" ");
+            ol.append(li);
           });
-        if (pg.bands) pg.bands.forEach((x) => {
-          add(fill(x.now ? Y.bandNow : Y.bandNext, { label: Y.bands[x.band] || "" }), "book-yeon-band");
-          add(x.text);
+        }
+        if (sec.dataset.sec === "season") {
+          const nm = js("yeon-season-name", sec);
+          const el = stemEl;
+          nm.removeAttribute("style");
+          if (el) {
+            nm.dataset.el = el; // style.css [data-el] → --el 오행 색
+            nm.textContent = Y.seasons[el] || "";
+          } else {
+            nm.remove();
+            js("yeon-season", sec).remove(); // 만신 안 지남: 본문 대신 안내만
+          }
+        }
+        $$("[data-js=yeon-note]", sec).forEach((n) => {
+          const on = pg.note && n.dataset.t === `book.yeon.notes.${pg.note}`;
+          if (on) n.hidden = false;
+          else n.remove();
         });
-        else add(pg.text);
-        if (pg.note) add(Y.notes[pg.note], "book-yeon-note");
-        yeonBox.append(sec);
       });
+      yeonBox.append(art);
     } else if (id === "match") {
       const pair = js("report-match-pair").children;
       pair[0].textContent = T.archetypes[me].name;
@@ -3429,16 +3482,17 @@
       const h = headOf(id, c);
       js("book-room-result", el).textContent = h.title;
       js("book-room-key", el).textContent = h.key;
-      rich(js("book-ch1", el), (fr.firstLine ? [{ text: fr.firstLine, cls: "book-first-line" }] : []).concat(bookCh1(id, c, fr.ch1Rest)));
-      paras(js("book-ch2", el), fr.ch2);
+      // (17-3, design 「17단계」 5절) 첫 줄 = Ⅰ장 첫 단락(p.book-first-line). 마음 한 줄 = aside.book-heart(한 덩어리), identity 뒤·shadow 앞 = Ⅰ장 끝.
+      //   룬은 세 돌 가운데 "지금" 자리 묶음 끝(셋째 소제목 "다음" 앞). 빈칸이면 그리지 않는다
+      const ch1 = (fr.firstLine ? [{ node: firstLineNode(fr.firstLine) }] : []).concat(bookCh1(id, c, fr.ch1Rest));
       if (fr.heartLine) {
-        // (17-3) 마음 한 줄: Ⅱ장 마지막 줄(그림자 장으로 넘기는 떡밥) 바로 앞. 모양은 designer(I1) 상자 class를 붙일 자리
-        const hp = document.createElement("p");
-        hp.className = "book-heart-line";
-        hp.textContent = fr.heartLine;
-        const ch2 = js("book-ch2", el);
-        ch2.insertBefore(hp, ch2.lastElementChild);
+        const heart = { node: heartNode(fr.heartLine) };
+        const subs = ch1.map((x, i) => (x.sub ? i : -1)).filter((i) => i >= 0);
+        if (id === "rune" && subs.length > 2) ch1.splice(subs[2], 0, heart);
+        else ch1.push(heart);
       }
+      rich(js("book-ch1", el), ch1);
+      paras(js("book-ch2", el), fr.ch2);
       paras(js("book-ch3", el), fr.ch3);
       const tail = topicTail(fr, c);
       paras(js("book-ch4", el), tail ? fr.ch4.concat(tail) : fr.ch4);
@@ -3505,7 +3559,8 @@
   const chOpening = (title, numeral) =>
     opening("ch", (numeral ? `<p class="book-opening__numeral" aria-hidden="true">${esc(numeral)}</p>` : "") + `<h3 class="book-opening__title">${esc(title)}</h3>`);
   const visible = (n) => n && !n.classList.contains("is-hidden");
-  const parasOf = (box) => (visible(box) ? [...box.children].filter((p) => p.textContent.trim()).map((p) => ({ kind: "p", node: stripHooks(p.cloneNode(true)) })) : []);
+  // 단락 목록. p가 아닌 것(17-3 마음 한 줄 aside.book-heart)은 쪽 끝에서 쪼개지 않는 한 덩어리(unit)
+  const parasOf = (box) => (visible(box) ? [...box.children].filter((p) => p.textContent.trim()).map((p) => ({ kind: p.tagName === "P" ? "p" : "unit", node: stripHooks(p.cloneNode(true)) })) : []);
   const wrapUnit = (parent, child) => {
     const w = parent.cloneNode(false);
     w.append(child.cloneNode(true));
@@ -3529,11 +3584,18 @@
       const stages = unitsOf(js("report-timeline", src)).map((u) => Object.assign(u, { kind: "stage" }));
       one("flow", B.parts.timeline, stages, { stages: true, run: [B.part2.num, B.parts.timeline] });
     } else if (id === "yeon") {
-      // (17-2) 인연의 장: 쪽마다 새 쪽에서 시작(방별 장의 Ⅰ~Ⅳ장과 같은 방식)
-      [...js("report-yeon", src).children].forEach((sec, i) => {
-        const title = sec.dataset.title;
-        const blocks = [...sec.children].map((p) => ({ kind: "p", node: stripHooks(p.cloneNode(true)) }));
-        C.push({ key: `yeon-${i}`, part: id, label: name, run: [B.part2.num, name], start: true, blocks: [openBlk(i === 0 ? chOpening(name) : chOpening(title)), ...(i === 0 && title ? [{ kind: "p", node: mk("p", "book-yeon-title", esc(title)) }] : []), ...blocks] });
+      // (17-2, design 「17단계」 5절) 인연의 장: 장 머리(다른 장과 같은 book-opening) 뒤 쪽(section)마다 새 쪽에서 시작.
+      //   쪽 머리(번호+이름 h3)·계절 이름·시기 칸(li)·안내 한 줄은 한 덩어리(unit, section 모양을 감싼 채), 본문 단락은 쪽 끝에서 나눌 수 있는 p
+      const art = $("article", js("report-yeon", src));
+      const secs = art ? [...art.querySelectorAll("section.yeon-sec")] : [];
+      secs.forEach((sec, i) => {
+        const blocks = [];
+        [...sec.children].forEach((n) => {
+          if (n.classList.contains("prose")) [...n.children].filter((p) => p.textContent.trim()).forEach((p) => blocks.push({ kind: "p", node: stripHooks(p.cloneNode(true)) }));
+          else if (n.tagName === "OL") [...n.children].forEach((li) => blocks.push({ kind: "unit", node: wrapUnit(n, li) }));
+          else if (!n.hidden && n.textContent.trim()) blocks.push({ kind: "unit", node: wrapUnit(sec, n) });
+        });
+        C.push({ key: `yeon-${i}`, part: id, label: name, run: [B.part2.num, name], start: true, blocks: i === 0 ? [openBlk(chOpening(name)), ...blocks] : blocks });
       });
     } else if (id === "match") {
       one("match", B.parts.match, [{ kind: "unit", node: stripHooks(js("report-match-pair", src).cloneNode(true)) }, ...parasOf(js("report-match", src)), ...unitsOf(js("report-match-rooms", src)), ...parasOf(matchEnd)], { run: [B.part2.num, B.parts.match] });
@@ -4240,6 +4302,14 @@
         const a = document.createElement("span");
         a.className = "pay-list__name";
         a.textContent = chapterName(id);
+        if (id === "yeon") {
+          // (17-5, design 「17단계」 6절) 새로 더해진 장 표시: li .pay-list__item--new + 이름 뒤 알약 .pay-list__new
+          li.classList.add("pay-list__item--new");
+          const nb = document.createElement("span");
+          nb.className = "pay-list__new";
+          nb.textContent = PAY.what.newBadge || "";
+          if (nb.textContent) a.append(nb);
+        }
         const b = document.createElement("span");
         b.className = "pay-list__vol";
         b.textContent = fill(PAY.what.item || "", { n: comma(Math.round(n / 100) * 100) });

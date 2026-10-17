@@ -130,8 +130,15 @@ function coreFor(request, env) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const { body, tooBig } = request.method === "POST" ? await readBody(request) : { body: "", tooBig: false };
-    const r = await coreFor(request, env).handle({ method: request.method, path: url.pathname, origin: request.headers.get("Origin") || "", body, tooBig });
+    // (17-9 QA16 권장5) 본문 읽기가 실패하면(스트림 끊김 등) core가 Origin 확인 뒤 503 {error:"db"}로 답한다. 오류 내용은 찍지 않는다
+    let read;
+    try {
+      read = request.method === "POST" ? await readBody(request) : { body: "", tooBig: false };
+    } catch (e) {
+      read = { body: "", tooBig: false, readError: true };
+    }
+    const { body, tooBig, readError } = read;
+    const r = await coreFor(request, env).handle({ method: request.method, path: url.pathname, origin: request.headers.get("Origin") || "", body, tooBig, readError: Boolean(readError) });
     return new Response(r.status === 204 ? null : r.body, { status: r.status, headers: r.headers });
   },
   // Cron Trigger (wrangler.toml crons). MAP_MODE와 상관없이 만료 기록은 지운다

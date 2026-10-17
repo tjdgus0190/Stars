@@ -119,9 +119,11 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       empty: !s.querySelector('[data-js=pay-store-empty]').classList.contains('is-hidden'), wide: document.documentElement.scrollWidth <= 360,
       seller: s.querySelectorAll('.pay-seller__row:not(.is-hidden)').length, legal: s.querySelectorAll('.pay-seller__legal a').length,
       tag: s.querySelector('[data-js=pay-buy]').tagName, href: s.querySelector('[data-js=pay-buy]').hasAttribute('href'),
-      old: !!s.querySelector('[data-js=pay-price-unit], [data-js=pay-store-name]') };
+      old: !!s.querySelector('[data-js=pay-price-unit], [data-js=pay-store-name]'),
+      names: [...s.querySelectorAll('[data-js=pay-chapters] li')].map((li) => li.firstElementChild.firstChild.textContent), news: [...s.querySelectorAll('[data-js=pay-chapters] li.pay-list__item--new')].map((li) => li.firstElementChild.firstChild.textContent + '|' + (li.querySelector('.pay-list__new') || {}).textContent) };
   })()`);
   check("A2 1 받는 것(11장)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 11, JSON.stringify(lay));
+  check("17-5 받는 것: 인연의 장 줄은 시기별 흐름 다음·궁합 앞, 그 줄 하나만 .pay-list__item--new + 알약(.pay-list__new 문구 있음)", lay.names.indexOf(await ev("TEXT.book.parts.yeon")) === lay.names.indexOf(await ev("TEXT.book.parts.timeline")) + 1 && lay.names.indexOf(await ev("TEXT.book.parts.match")) === lay.names.indexOf(await ev("TEXT.book.parts.yeon")) + 1 && lay.news.length === 1 && lay.news[0].split("|")[0] === (await ev("TEXT.book.parts.yeon")) && lay.news[0].split("|")[1].length > 0, JSON.stringify(lay.news));
   check("A3 판매자 정보 줄 5칸(신고 줄은 값이 없어 숨김)·legal 3종 링크·결제 버튼은 <button>(href 없음)·옛 칸 2개 없음", lay.seller === 5 && lay.legal === 3 && lay.tag === "BUTTON" && !lay.href && !lay.old);
   check("A4 동의 전 비활성·시험 띠·userid(모의 값) 있으면 '판매 준비 중' 숨김·가로 넘침 0", lay.buyOff && lay.band && !lay.empty && lay.wide);
   // K. (15단계 QA 1차 필수 1) test: 판매자 정보 줄 legal 링크 3개가 200이고 결제 문단이 주석 밖에 보인다

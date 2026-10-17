@@ -550,10 +550,11 @@
     js("map-invite-result", invite).addEventListener("click", () => openFriend());
 
     // 초대 ID로 주인 별명·아이콘 받기 (#join으로 들어왔거나, 참여 단계에서 다시 물을 때)
-    async function peekJoin() {
+    //   fresh = 참여 카드를 눌렀을 때(17-9 QA16 권장2): 앞서 받은 결과를 쓰지 않고 한 번 더 물어, 서버 쉼을 동의 화면 전에 카드에서 알린다
+    async function peekJoin(fresh) {
       const s = ses();
       if (!s.join) return "none";
-      if (mem.peek === "ok" && mem.ownerOf === s.join) return "ok";
+      if (!fresh && mem.peek === "ok" && mem.ownerOf === s.join) return "ok";
       const r = await req("peek", { invite: s.join });
       if (r.ok) {
         const d = r.data || {};
@@ -603,7 +604,7 @@
       if (ctx.filled() < ctx.total) return setCards("");
       if (role === "friend") {
         setCards("loading");
-        const p = await peekJoin();
+        const p = await peekJoin(true);
         if (p === "down") return setCards("down", () => startFlow("friend"));
         if (p !== "ok") return setCards("");
       } else if (keyGet()) return openView();

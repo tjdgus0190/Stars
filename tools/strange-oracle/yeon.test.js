@@ -56,7 +56,7 @@ test("빠진 경우 표 다섯 줄 (17-2)", () => {
   let ch = Book.yeonChapter(C, { ...base, sub: "sage", allDone: false });
   assert.strictEqual(ch.pages[3].key, "same");
   assert.ok(tags(ch).includes("alt.same.sage") && !tags(ch).some((t) => t.startsWith("twist.")));
-  assert.strictEqual(ch.pages[3].note, "sameMore");
+  assert.strictEqual(ch.pages[3].note, "more");
   assert.strictEqual(Book.yeonChapter(C, { ...base, sub: "sage", allDone: true }).pages[3].note, null);
   // ② 나이 구간 없음: b1 문장(어느 구간 문장도) 안 나감, 나이와 관계없는 문장 + 안내
   ch = Book.yeonChapter(C, { ...base, band: null });

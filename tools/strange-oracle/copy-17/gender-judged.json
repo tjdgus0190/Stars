@@ -1,0 +1,5 @@
+[
+  { "file": "data-oracles.js", "path": "ORACLES.3.fact", "word": "여성", "note": "copywriter I3: 쿠마이 시빌라를 소개하는 역사 설명(전승 속 인물의 호칭). 독자나 상대를 가리키지 않음 → 고치지 않음" },
+  { "file": "data-oracles.js", "path": "ORACLES.6.fact", "word": "여성", "note": "copywriter I3: 신화 속 예언자 무리를 부르는 이름의 유래 설명. 독자·상대 지칭 아님 → 고치지 않음" },
+  { "file": "data-stars.js", "path": "NAKSHATRAS.1.symbol", "word": "여성", "note": "copywriter I3: 바라니 나크샤트라 전통 상징(요니)의 뜻풀이. 독자·상대 지칭 아님, 신체 묘사 아님 → 고치지 않음" }
+]

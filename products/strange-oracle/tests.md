@@ -926,3 +926,64 @@
 | `e2e-flow.js reduced` / `motion` | 127 / 128 통과 |
 - e2e-map이 보는 것: 16-7 e2e 1~9(만들기·동의 체크 전 꺼짐·키 카드 Esc 막힘·localStorage 키 하나 / `#join` 띠·3/7 막힘·7/7 참여·별명 막기 5종·결과·삭제 코드 / 지도·순위·팝업·점수 같음·새로고침 두 번 좌표 같음 / 친구 지우기·주인 지우기·초대 닫기·초대 바꾸기·키 바꾸기·잊기·지워진 지도 삭제 코드 / +91일 만료·31번째 409·11번째 429 / down·slow 9초 unsure·지도 파일 못 받음 / 만 13세·생년월일 다시 묻기 / off 배포판 DOM·요청 0), 6장 검사(본문 칸 = 16-5의 1 표 120건, 입력값·코드 0, 저장소 원문 0, 분석은 `map_*` 이름만·별명·아이콘·초대 ID·키 0, console·쿠키·주소 0).
 - 미확인: 실제 Worker(교차 출처 CORS·`Retry-After` 머리 노출 — 지금은 같은 출처 모의만), 실제 휴대폰 화면, 카카오 공유(32번 결정 전이라 자리만).
+
+## 17단계 · 인연의 장·첫 줄·마음 한 줄·성능·작은 일 (I2, 2026-10-17, developer)
+
+### 인연의 장 (17-2) — 브라우저 고르기
+- 고르는 값은 모두 이 브라우저 안에서만 쓴다(book.js `yeonChapter`, app.js `yeonCtx`): 주·보조 원형(`archPair`, 지도와 같은 규칙), 만 나이 → 구간 b1~b7(`ageOf`·`bandOf`), 만 19세 미만(`isTeen`), 만신 일간 → 오행 계절(`sajuStem`·`ELEMENT_OF_STEM`). 서버로 가는 것은 `{ pass, file: "yeon" }` 두 칸뿐(e2e-book 17-13의 3).
+- 빠진 경우(17-2 표): 보조 = 주 → 4쪽 「한결같은 결」 + 일곱 방 전이면 안내 `notes.more` / 생년월일 없음 → 6쪽 notime 한 칸 + `notes.noAge`(b1 문장 안 씀) / 만신 안 지남 → 7쪽 계절 이름·본문 대신 `notes.noSaju` / 만 19세 미만 → 1~3쪽 자리에 미성년판 3쪽 + 계절, 4·5·6쪽은 지우고 번호를 1부터 다시 매김.
+- 단위 시험 `yeon.test.js`(구간 b1·b4·b7·경계, 만 19세 전날·당일, 빠진 경우, 보조 원형 = 지도 규칙, 일간 시각 모름·23시 30분, 성별만 바꿔도 같음, 옛 이어가기 코드, "받는 것" 글자 수 = 받는 판).
+
+### 화면 연결 (design 「17단계」 5·6·7절)
+- 인연의 장: index.html `<template data-js="yeon-tpl">`의 article을 장을 열 때 복제해 원본 칸 `[data-js=report-yeon]`(book-source 안, 숨김)에 넣고 채운다. 쪽 이름 `book.yeon.secs.*`, 시기 칸 `li.yeon-when__item`(지금 `.is-now`, 나이 칸 `book.yeon.bandNow/bandNext` + `bands`), 계절 이름 `book.yeon.seasons.*` + `data-el`(오행 색), 안내 `yeon-note`는 그 사람에게 해당할 때만 `hidden`을 푼다(아니면 지움).
+- 책 쪽 나눔: 장 머리(book-opening) 뒤 쪽(section)마다 새 쪽. 쪽 머리(번호+이름)·계절 이름·시기 칸·안내 = 한 덩어리(unit), 본문 = 나눌 수 있는 단락.
+- 첫 줄 = 방 장 첫 쪽 장 머리 바로 뒤 `p.book-first-line`(견본 복제). 마음 한 줄 = `aside.book-heart`(머리말 `book.heartLabel`) 한 덩어리, Ⅰ장 끝(identity 뒤·shadow 앞). 룬은 셋째 소제목("다음") 앞 = "지금" 묶음 끝. 문구가 빈칸이면 그리지 않는다.
+- 결제 전 "받는 것": 인연의 장 줄(시기별 흐름 다음·궁합 앞)에만 `li.pay-list__item--new` + 이름 뒤 `span.pay-list__new`(`pay.what.newBadge`).
+- 목차 「인연의 장」 줄: index.html 목차에 줄 마크업이 없어 지금도 시기별 흐름 줄을 복제한다(designer가 줄을 넣으면 그대로 씀).
+
+### 17-9 작은 일 (developer 줄)
+| 항목 | 처리 |
+|---|---|
+| F6 3차-2 중간 맺음 다음 문 | designer가 마크업 순서를 옮김. data-js 그대로라 JS 변경 없음. e2e-flow reduced·motion 통과로 확인 |
+| F6 3차-3 큰 첫 글자 | designer CSS(`:has(> b:only-child)`)로 처리. JS 변경 없음. 첫 줄(p.book-first-line)에 붙는 머리글자도 CSS가 끔 |
+| F6 참고1 off 상단 "목차" 버튼 | 이미 offStrip에서 지움(`book-toc-open`). e2e-pay off 배포판 DOM 0 검사에 들어 있음 → 통과 |
+| F6 참고2 공유 카드 오행 막대 | **하지 않음** — 17-14 "줄일 1순위". 운영자 판단 |
+| F6 참고3·4 | 아래 「성능」 |
+| QA16 권장1 | e2e-map: 친구 B 브라우저도 GA 시험값, dataLayer(두 브라우저, "js" 날짜 항목 뺌)·localStorage(만든 뒤·참여 뒤·끝)에서 INPUTS 검색, B의 map_join·map_leave 확인 |
+| QA16 권장2 | map.js `peekJoin(fresh)`: 참여 카드를 누르면 peek를 다시 물어 쉼이면 카드에 down(동의 화면 전, join 요청 0). e2e-map 검사 1줄 |
+| QA16 권장5 | worker.js 본문 읽기 오류 → core `readError` → Origin 확인 뒤 503 `{error:"db"}`(CORS 머리 포함). map.test.js에 깨진 스트림 Request로 503·다른 출처 403 |
+| HANDOFF 3-8 옛 결제 주석 | index.html 책 한 줄 주석(방 6곳) "유일한 유료 신호·owned" → 지금 동작, app.js 책 머리 주석의 광고·토스 표현 정리 |
+| HANDOFF 3-8 오류 키 `receipt` | data.js `resume.errors.receipt` → `notResume`(문구 그대로), app.js가 paycode 오류 `receipt`를 이 키로 바꿈, e2e-flow 기대값 |
+
+- e2e-map 수 77 vs 78: 파일(out/e2e-map.txt) 합계가 맞는 수(77)였고, 화면 console 합계 식이 바로 위에서 넣은 합계 줄까지 세어 1 많게(78) 찍혔다. 식을 고쳤다. 이번에 검사 3개를 더해 80.
+
+### 17단계 · 성능 (17-10, `node tools/strange-oracle/perf.js`, 5회 중앙값 + CLS로 고침, 2026-10-17)
+조건은 14단계와 같다(360×640, 1.6Mbps·150ms, CPU 4배, 캐시 비움, 모의 서버 test gzip, 헤드리스 Edge, 글꼴은 실제 jsdelivr).
+
+| 회 | ①+② 중앙값 (5회) | ①만 | ①까지 전송량 | CLS 중앙값 | 판정 |
+|---|---|---|---|---|---|
+| 1 (I2 시작 전 코드) | **3.26초** (3.08/3.69/2.96/3.38/3.26) | 3.15초 | 340KB | 0.001 | 미달 |
+| 2 (I2 끝, 같은 날) | **3.23초** (3.38/3.09/3.23/3.33/3.05) | 3.12초 | 374KB | 0.002 | 미달 |
+- 기준 3.0초를 두 번 다 넘었다(0.2초대). 14단계(4.88·4.77초)보다는 줄었다. CLS는 기준 0.1보다 훨씬 작다. 17-10대로 배포는 막지 않는다(92번).
+- 같은 날 2회차의 나머지: 방 전환 미리 받음(만신) **372ms**(315~392, 기준 300ms 넘음, 14단계 273·338ms) · 처음 받음(오검) 735ms 통과 · 쪽 넘김 움직임 줄이기 4ms · 애니메이션 433ms(긴 작업 0, 57fps) 통과. 의식 연출 긴 작업은 여전히 미측정.
+
+| 시도 (17-10 순서) | 한 것 | 결과 | 남김 |
+|---|---|---|---|
+| 1 글꼴 | dist 사본에서 jsdelivr 글꼴 링크 6줄을 모두 뺀 상한 시험 | 3.45초(줄지 않음). 글꼴 파일은 style.css·app.js가 다 온 뒤(약 2.1초~)에 받기 시작해 ① 경로 밖 | 바꾸지 않음(글꼴 저장소 보관·시스템 글꼴 전환은 하지 않음, 92번) |
+| 2·3 style.css 나누기·그림자 | dist 사본에서 style.css를 통째로 비운 상한 시험(모양 없음) | 2.92초. 나눠도 최선 약 0.3초이고, 층 순서를 지키는 실제 나눔으로는 두 번 맞추기 어렵다고 판단 | 하지 않음(designer 파일) |
+| 4 템플릿 | 추적: 첫 스타일 계산(UpdateLayoutTree) 131ms가 상한 | 효과 작음 | 하지 않음 |
+| 5 자리 추정 | CLS 이미 0.001~0.002 | 고칠 것 없음 | — |
+- 추적으로 본 남은 원인: index.html(압축 80KB)·style.css(75KB)·app.js(73KB)가 1.6Mbps를 나눠 약 2.0초에 도착 → **첫 Layout 한 번이 890ms**(객체 342개, CPU 4배) → app.js 실행 약 0.2초. 로드 뒤 같은 화면을 다시 배치하면 0.4~1.8ms라, 첫 배치만 비싸다(글꼴 대체·글자 모양 캐시의 첫 계산으로 추정, 미확인).
+- 다음에 해 볼 만한 것(이번에 안 함): 입구 위쪽 첫 배치를 실제 휴대폰에서 재기, index.html의 방 화면 마크업을 별도 파일로 빼 첫 전송량 줄이기(designer와 함께).
+
+### 시험 (2026-10-17, 모의 서버 8788 `--mode test`, 문구는 copywriter I3가 채우는 중인 상태)
+| 시험 | 결과 |
+|---|---|
+| 단위 `node --test "tools/strange-oracle/*.test.js"` | 151 통과 / 0 실패 |
+| make-volume | 대조 6000건 불일치 0 (인연의 장 문구가 채워져 data-volume.js 다시 만듦) |
+| build-dist | 통과, 유료 지문 누출 0(yeon 포함), [초안] 남음 data.js 31(copywriter I3 몫) |
+| `e2e-saju.js` | 41 통과 |
+| `e2e-book.js` | 59 통과 (인연의 장 견본 검사 갱신, 첫 줄·마음 한 줄 자리 검사 1개 더함) |
+| `e2e-pay.js` | 68 통과 (받는 것 인연의 장 줄·새 장 알약 1개 더함) |
+| `e2e-map.js` | 80 통과 (권장 1·2 검사 3개 더함) |
+| `e2e-flow.js reduced` / `motion` | 127 / 128 통과 |

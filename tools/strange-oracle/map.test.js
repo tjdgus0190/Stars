@@ -459,6 +459,13 @@ test("worker.js fetch: Request → core → Response (D1 흉내, Origin·본문 
   assert.equal((await W.default.fetch(req("/create", "x".repeat(2000)), env)).status, 413);
   const pre = await W.default.fetch(new Request("https://map.example/join", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(pre.status, 204);
+  // (17-9 QA16 권장5) 본문 스트림 읽기 오류 → 503 {error:"db"} (CORS 머리 포함). Origin이 다르면 여전히 403
+  const broken = (origin) => new Request("https://map.example/view", { method: "POST", headers: { "Content-Type": "application/json", Origin: origin }, body: new ReadableStream({ pull(ctl) { ctl.error(new Error("stream")); } }), duplex: "half" });
+  const rb = await W.default.fetch(broken(ORIGIN), env);
+  assert.equal(rb.status, 503);
+  assert.deepEqual(await rb.json(), { error: "db" });
+  assert.equal(rb.headers.get("access-control-allow-origin"), ORIGIN);
+  assert.equal((await W.default.fetch(broken("https://evil.example"), env)).status, 403);
   // scheduled: 만료 정리
   db.prepare("UPDATE maps SET active = '2020-01-01'").run();
   let p;

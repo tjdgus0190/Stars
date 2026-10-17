@@ -3,7 +3,7 @@
 //       off(배포판) 확인용 서버는 이 시험이 직접 띄우고 끈다: mock-server.js --port 8792 --mode off
 // 실행: node tools/strange-oracle/e2e-map.js   → 결과 tools/strange-oracle/out/e2e-map.txt (약 2분)
 // e2e는 127.0.0.1로 연다(모의 지도 서버 ALLOWED_ORIGIN). 시작할 때 /__dev/map-switch?limits=reset, /__dev/map-store?clear=1
-// A 브라우저는 data.js 응답에서 GA4 ID를 시험값으로 바꾸고 구글 스크립트 요청은 막는다 → dataLayer로 분석 인자를 검사한다(6장).
+// A·B 브라우저 모두(17단계, QA16 권장1) data.js 응답에서 GA4 ID를 시험값으로 바꾸고 구글 스크립트 요청은 막는다 → dataLayer로 분석 인자를 검사한다(6장).
 "use strict";
 const { launch } = require("./cdp.js");
 const fs = require("fs");
@@ -98,11 +98,12 @@ async function browser(port, ga) {
 const card = (where = "story") => `[data-js=map-slot-${where}] [data-js=map-card]`;
 const cardState = (b, where = "story") => b.ev(`document.querySelector(${JSON.stringify(card(where))})?.dataset.state`);
 
+const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStorage 전체를 남겨 6장 검사에서 입력값을 찾는다
 (async () => {
   await sw("limits=reset&down=0&slow=0&clock=0&cap=default");
   await fetch(`${TEST}/__dev/map-store?clear=1`);
   const A = await browser(9641, true);
-  const B = await browser(9642, false);
+  const B = await browser(9642, true); // (17-9 QA16 권장1) 친구 쪽도 GA 시험값 → map_join·map_leave 분석 인자를 검사
   const { sleep } = A;
   const keyOf = () => A.ev("localStorage.getItem('strange-oracle-mapkey')");
   try {
@@ -141,6 +142,7 @@ const cardState = (b, where = "story") => b.ev(`document.querySelector(${JSON.st
     await A.click("[data-js=map-key-ack]");
     await A.click("[data-js=map-key-close]");
     check("1 지도 화면(친구 0명 empty)", await A.waitFor("document.querySelector('#screen-map')?.dataset.state === 'empty' && document.querySelector('.screen.is-active')?.id === 'screen-map'"));
+    lsSnaps.push(await A.ev("JSON.stringify(localStorage)"));
     check("1 localStorage는 strange-oracle-mapkey 하나 = SOM 키", await A.ev(`Object.keys(localStorage).join() === 'strange-oracle-mapkey' && localStorage.getItem('strange-oracle-mapkey') === ${JSON.stringify(ownerKey)}`));
 
     // ── 2·9. 친구: #join= → 초대 띠 → 3/7 참여 불가 → 7/7 → 동의(별명 막기) → 결과·삭제 코드
@@ -172,6 +174,7 @@ const cardState = (b, where = "story") => b.ev(`document.querySelector(${JSON.st
     const friendScore = await B.text("#screen-map-friend [data-js=map-match-score]");
     check("2 삭제 코드 SOD · 점수 40~99", /^SOD(-[0-9A-Z]{1,4}){7}$/.test(delCode) && +friendScore >= 40 && +friendScore <= 99, friendScore);
     check("2 삭제 코드는 sessionStorage del에만, localStorage 0", (await B.ev("JSON.parse(sessionStorage.getItem('strange-oracle-map')||'{}').del")) === delCode && (await B.ev("localStorage.length")) === 0);
+    lsSnaps.push(await B.ev("JSON.stringify(localStorage)"));
     check("2 친구 카드 아래 면책 문구", (await B.text("[data-js=map-friend-disclaimer]")).includes("재미로 보는 콘텐츠"));
 
     // ── 3·4. 주인 지도: 아이콘·순위·팝업, 점수 같음, 새로고침 두 번 좌표 같음
@@ -341,6 +344,16 @@ const cardState = (b, where = "story") => b.ev(`document.querySelector(${JSON.st
     await A.ev("localStorage.clear()");
 
     // ── 6. down·slow: 지도만 쉼, 나머지 정상 / 지도 파일 못 받음
+    // (17-9 QA16 권장2) 초대 띠(invited)를 본 뒤 서버가 쉼 → 참여 카드를 누르면 peek를 다시 물어 카드에서 바로 쉼 안내(동의 화면 전, join 요청 0)
+    const fresh = await B.api("create", { nick: "쉼확인", icon: "i07", main: "sage", sub: "ruler" });
+    await B.skip(`rooms=7&join=${fresh.data.invite}`);
+    const joinReady = await B.waitFor(`document.querySelector(${JSON.stringify(card())})?.dataset.state === 'join'`);
+    const nJoin2 = B.mapReqs().filter((r) => /\/join$/.test(r.url)).length;
+    await sw("down=1");
+    await B.click(`${card()} [data-js=map-join]`);
+    const downCard = await B.waitFor(`document.querySelector(${JSON.stringify(card())})?.dataset.state === 'down'`);
+    check("QA16 권장2 초대 띠 뒤 서버 쉼 → 참여 카드를 누르면 카드에 쉼 안내 · 동의 화면 안 감 · join 요청 0", joinReady && downCard && (await B.active()) !== "screen-map-consent" && B.mapReqs().filter((r) => /\/join$/.test(r.url)).length === nJoin2);
+    await sw("down=0");
     await A.ev(`localStorage.setItem('strange-oracle-mapkey', ${JSON.stringify(same.data.key)})`);
     await sw("down=1");
     await openMap();
@@ -449,12 +462,20 @@ const cardState = (b, where = "story") => b.ev(`document.querySelector(${JSON.st
     const stAll = JSON.stringify(stRaw);
     check("6장 /__dev/map-store에 입력값·키·코드 원문 0", hitIn(st).length === 0 && !/SOM-|SOD-/.test(stAll), hitIn(st).join(","));
     check("6장 요청 URL에 열람 키·삭제 코드·초대 ID 0", !/SOM-|SOD-/.test(urls) && !urls.split("\n").some((u) => u.includes(invite) || u.includes(invite2)));
-    const dlLines = A.log.console.filter((l) => /^debug: DL /.test(l)).map((l) => l.replace(/^debug: DL /, ""));
+    const dlOf = (log) => log.console.filter((l) => /^debug: DL /.test(l)).map((l) => l.replace(/^debug: DL /, ""));
+    const dlLines = dlOf(A.log).concat(dlOf(B.log));
+    const bEv = dlOf(B.log).map((l) => JSON.parse(l)).filter((a) => a[0] === "event").map((a) => a[1]);
     const dl = dlLines.join("\n");
     const events = dlLines.map((l) => JSON.parse(l)).filter((a) => a[0] === "event");
     const mapEv = events.filter((a) => /^map_/.test(a[1]));
     const secrets = ["별빛토끼", "만료곰", "달빛여우", "i05", "i03", invite, invite2, ownerKey, newKey, delCode, "SOM-", "SOD-"];
     check("6장 분석: map_* 행동 이름만(매개변수 없음) · 별명·아이콘·초대 ID·키 0", mapEv.length >= 3 && mapEv.every((a) => !a[2] || Object.keys(a[2]).every((k) => /^(send_to|event_callback|transport_type)$/.test(k))) && !secrets.some((s) => dl.includes(s)), mapEv.map((a) => a[1]).join(","));
+    check("6장 친구 쪽(B) 분석: map_join·map_leave 기록됨(매개변수 검사는 위 줄에 포함)", bEv.includes("map_join") && bEv.includes("map_leave"), [...new Set(bEv.filter((x) => /^map_/.test(x)))].join(","));
+    // 입력값 검색: dataLayer("js" 날짜 항목은 시각 숫자가 우연히 겹칠 수 있어 뺀다)·localStorage 전체(중간 기록 + 끝)
+    const dlIn = dlLines.filter((l) => !/^\["js",/.test(l)).join("\n");
+    lsSnaps.push(await A.ev("JSON.stringify(localStorage)"), await B.ev("JSON.stringify(localStorage)"));
+    const lsAll = lsSnaps.join("\n");
+    check("6장 분석 인자(dataLayer, 두 브라우저)·localStorage에 입력값(INPUTS)·코드 0", hitIn(dlIn).length === 0 && hitIn(lsAll).length === 0 && !/SOD-/.test(lsAll), hitIn(dlIn + lsAll).join(",") || `dl ${dlLines.length}줄 · ls ${lsSnaps.length}회`);
     const cons = A.log.console.concat(B.log.console).filter((l) => !/^debug: DL /.test(l)).join("\n");
     check("6장 console에 키·삭제 코드·별명 0", !/SOM-|SOD-/.test(cons) && !["별빛토끼", "달빛여우", "만료곰"].some((s) => cons.includes(s)));
     check("6장 쿠키 0 · 주소에 키·코드 0", (await A.ev("document.cookie")) === "" && !/SOM|SOD/.test(await A.ev("location.href")));
@@ -469,7 +490,7 @@ const cardState = (b, where = "story") => b.ev(`document.querySelector(${JSON.st
     const fails = out.filter((l) => l.startsWith("FAIL")).length;
     out.push(`\n합계: ${out.length - fails} 통과 / ${fails} 실패`);
     fs.writeFileSync(path.join(OUT, "e2e-map.txt"), out.join("\n") + "\n");
-    console.log(`\n합계: ${out.length - fails - 1 + 1} 통과 / ${fails} 실패`);
+    console.log(`\n합계: ${out.length - 1 - fails} 통과 / ${fails} 실패`); // (17단계) 예전 식은 바로 위에서 넣은 합계 줄까지 세어 화면에 1 많게(78) 찍혔다. 파일 합계(77)가 맞는 수
     process.exit(fails ? 1 : 0);
   }
 })();

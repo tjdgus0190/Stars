@@ -23,3 +23,33 @@
 - 이어가기 코드: SOG2는 saju 칸(1~5000)으로 일간을 되찾음(sajuStem = (code-1)/500). SOG1은 만신 없음 → 계절 쪽 noSaju. 둘 다 생년월일 없음 → notime.
 - items.json 484항목(인연의 장 146 + heartLine 169 + firstLine 169), 묶음 51개. 첫 묶음 yeon-pull.
 - check-17 지금: 성별어 기존 6건 실패(시빌라 여성 예언자 2·별 여성의 자궁 1·오검 언니 1·별 숨은 장 아내 2) → copywriter I3 성별어 단계.
+
+# I2 (c)(d)(e) developer — 2026-10-17
+
+| # | 할 일 | 상태 |
+|---|---|---|
+| e0 | data.js 키: book.yeon.secs.{pull,habit,meet,pulse,same,scene,when,season,teenKnow,teenFriend,teenPlace}·seasons.{wood..water}·notes.{more,noAge,noSaju}·bands·bandNow·bandNext, book.heartLabel, pay.what.newBadge (옛 pages·notes.sameMore는 secs·notes.more로 이름 바꿈, book.js note 값도 more) | done |
+
+**data.js 끝** (developer) — 이 뒤로 developer는 data.js를 고치지 않는다. copywriter는 위 키의 [초안]을 채운다.
+| c0 | (c) 기준 측정 (perf.js 5회+CLS로 고침): ①+② 3.26초 · ① 3.15초 · CLS 0.001 · ①까지 340KB | done |
+
+# I3 copywriter — 2026-10-17
+
+| # | 할 일 | 상태 |
+|---|---|---|
+| i3-1 | 문구 묶음 (copy-17) | 51묶음 484항목 전부 checked |
+| i3-2 | 성별어 6건 · 장 수 9곳 · data.js [초안] · 떡밥 8 · 정리 · 보고 | done (check-17 실패 0, build-dist 통과, 단위 151) |
+| c1 | 시도 1 글꼴: dist 사본에서 jsdelivr 글꼴 6줄을 모두 뺀 상한 시험 → 3.45초(줄지 않음). 글꼴 파일은 style.css·app.js 뒤(2.08초~)에 받기 시작해 ① 경로에 없음 → 바꾸지 않음 | done |
+| c2 | 시도 2·3 style.css: style.css를 통째로 비운 상한 시험(모양 없음) → 2.92초. 나눠도 최선 약 0.3초, 실제 나눔(층 순서 유지)으론 3.0 두 번 못 맞춤 → 하지 않음(designer 파일) | done |
+| c3 | 원인 추적: 첫 Layout 1회 890ms(객체 342개, CPU 4배). 로드 뒤 다시 배치는 0.4~1.8ms → 첫 배치만 비쌈(글꼴 대체·글자 모양 캐시 첫 계산 추정, 미확인). 시도 4 template 상한 = 첫 UpdateLayoutTree 131ms, 시도 5 CLS 이미 0.001 → 하지 않음 | done |
+| d1 | QA16 권장5: worker.js 본문 읽기 오류 → core readError → 503 {error:"db"}(Origin 확인 뒤, CORS 포함) + map.test.js 단위 시험(503·403) | done |
+| d2 | QA16 권장2: map.js peekJoin(fresh) — 참여 카드를 누르면 peek를 다시 물어 쉼이면 카드에 down(동의 전). e2e-map 검사 1줄 | done |
+| d3 | QA16 권장1: e2e-map B 브라우저도 GA 시험값, dataLayer(두 브라우저)·localStorage(중간·끝)에서 INPUTS 검색, B map_join·map_leave 검사 | done |
+| d4 | HANDOFF 3-8 옛 결제 주석: index.html 책 한 줄 주석 6곳×3줄, app.js 책 머리 주석 3줄(광고·토스 표현 정리) | done |
+| d5 | HANDOFF 3-8 data.js 오류 키: resume.errors.receipt → notResume (data.js 한 줄 Edit, app.js 대응표, e2e-flow 기대값) | done |
+| e1 | (e) app.js: yeon-tpl article 복제로 인연의 장 그리기(쪽 번호 다시 매김·미성년판 1~3쪽 자리·4·5·6쪽 지움·시기 칸 li·계절 이름 data-el·안내 hidden 풀기), 책 쪽 나눔(쪽 머리·칸·안내 = unit), 첫 줄·마음 한 줄 = 견본 복제(마음 한 줄 Ⅰ장 끝, 룬은 '지금' 묶음 끝, unit), 결제 전 목록 .pay-list__item--new + .pay-list__new, e2e-book 검사 갱신·추가 → 59/0 | done |
+| e2 | e2e-map 77 vs 78: 파일 합계(out/e2e-map.txt)는 77이 맞고, 화면 console 합계 식(out.length - fails - 1 + 1)이 바로 위에서 넣은 합계 줄까지 세어 1 많게 찍힘 → 식 고침. 이번 검사 3개 더해 80 | done |
+| e3 | e2e-pay 17-5 받는 것 인연의 장 줄·새 장 알약 검사 1개 → 68 | done |
+| e4 | 성능 2회차(I2 끝): ①+② 3.23초 · CLS 0.002 · 방 전환 미리 받음 372ms(경계 넘음) · 쪽 넘김 433ms. tests.md 「17단계」 절, HANDOFF 갱신 | done |
+| 끝 | 시험: 단위 151 · saju 41 · book 59 · pay 68 · map 80 · flow reduced 127 · motion 128 · make-volume 불일치 0 · build-dist 통과. 커밋 안 함 | done |
+| i3-3 | 말투 카드 7장·대조, HANDOFF 3-8 2건(sage-creator 덮어쓰기 1 추가), selling 한 줄 | done (화면 문구 수정 0, 오검 격식 운영자 확인) |

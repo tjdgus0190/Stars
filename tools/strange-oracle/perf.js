@@ -1,6 +1,6 @@
 // 14단계 14-6 성능 측정 (CDP). 조건: 360×640, 내려받기 1.6Mbps·지연 150ms, CPU 4배 느리게, 캐시 비움, 모의 서버(test), 각 3회 중앙값.
 // 준비: node tools/build-dist.js ; node tools/strange-oracle/mock-server.js --port 8788 --mode test
-// 실행: node tools/strange-oracle/perf.js   → out/perf.txt (tests.md 「14단계 · 성능」에 옮긴다)
+// 실행: node tools/strange-oracle/perf.js [--first]  → out/perf.txt (--first면 첫 화면만 → out/perf-first.txt) (tests.md 「14단계 · 성능」에 옮긴다)
 // 재는 것
 //  1 첫 화면: 새 브라우저의 첫 탐색(캐시·저장소 빈 상태) 시작 → ① 입구 제목·첫 문 버튼 보임 + 앱 시작 끝(window.StrangeOracle). 페이지 안 rAF로 잰다(CDP 왕복 지연 없음)
 //     ② 그 뒤 50ms 넘는 긴 작업이 없는 첫 시점(① 뒤 5초 관찰). 한가할 때 미리 받기(performance.mark "so-prefetch") 뒤의 긴 작업은 따로 적는다.
@@ -15,10 +15,13 @@ const path = require("path");
 const BASE = "http://127.0.0.1:8788";
 const P = "/products/strange-oracle/index.html";
 const READY = "!!window.StrangeOracle && (() => { const c = document.querySelector('[data-js=hub-cta]'); const t = document.querySelector('#screen-hub h1'); return c && c.offsetHeight > 0 && t && t.offsetHeight > 0; })()";
-const LT = `(function f() { if (window.__t1 == null && document.body && (${READY})) window.__t1 = performance.now(); else if (window.__t1 == null) requestAnimationFrame(f); })(); window.__lt = []; try { new PerformanceObserver((l) => l.getEntries().forEach((e) => window.__lt.push([e.startTime, e.duration]))).observe({ type: "longtask", buffered: true }); } catch (e) {}`;
+const LT = `(function f() { if (window.__t1 == null && document.body && (${READY})) window.__t1 = performance.now(); else if (window.__t1 == null) requestAnimationFrame(f); })(); window.__lt = []; window.__cls = 0; try { new PerformanceObserver((l) => l.getEntries().forEach((e) => { if (!e.hadRecentInput) window.__cls += e.value; })).observe({ type: "layout-shift", buffered: true }); } catch (e) {} try { new PerformanceObserver((l) => l.getEntries().forEach((e) => window.__lt.push([e.startTime, e.duration]))).observe({ type: "longtask", buffered: true }); } catch (e) {}`;
 const med = (xs) => xs.slice().sort((a, b) => a - b)[Math.floor(xs.length / 2)];
 const lines = [];
 const log = (s) => (lines.push(s), console.log(s));
+// (17-10) 첫 화면은 5회 중앙값 + layout-shift 합(CLS, ① 뒤 5초 관찰까지). --first면 1만 잰다(시도마다 빠르게)
+const ONLY_FIRST = process.argv.includes("--first");
+const RUNS1 = 5;
 
 async function session(reduced, port, noIdle = false) {
   const b = await launch({ port, reduced, width: 360, height: 640 });
@@ -36,15 +39,16 @@ async function session(reduced, port, noIdle = false) {
 
 (async () => {
   // ── 1 첫 화면
-  const first = [], strict = [], kb1 = [], kb = [], only1 = [], ltAfter = [];
-  for (let i = 0; i < 3; i++) {
+  const first = [], strict = [], kb1 = [], kb = [], only1 = [], ltAfter = [], cls = [];
+  for (let i = 0; i < RUNS1; i++) {
     const s = await session(true, 9631 + i);
     await s.b.send("Page.navigate", { url: BASE + P + "#hub" }); // 새 브라우저의 첫 탐색
     await s.waitFor("window.__t1 != null", 30000);
     const t1 = await s.b.evaluate("window.__t1");
     const b1 = s.bytes();
     await s.b.sleep(5000);
-    const r = await s.b.evaluate("({ lt: window.__lt, pf: (performance.getEntriesByName('so-prefetch')[0] || {}).startTime })");
+    const r = await s.b.evaluate("({ lt: window.__lt, cls: window.__cls, pf: (performance.getEntriesByName('so-prefetch')[0] || {}).startTime })");
+    cls.push(r.cls || 0);
     const pf = r.pf == null ? Infinity : r.pf;
     const endOf = (xs) => xs.reduce((m, [st, d]) => Math.max(m, st + d), 0);
     first.push(Math.max(t1, endOf(r.lt.filter(([st]) => st < pf)))); // 앱이 스스로 하는 일
@@ -55,7 +59,8 @@ async function session(reduced, port, noIdle = false) {
     kb.push(s.bytes() / 1024);
     await s.b.close();
   }
-  log(`1 첫 화면(①+②): ${first.map((x) => (x / 1000).toFixed(2)).join(" / ")}초 → 중앙값 ${(med(first) / 1000).toFixed(2)}초 (기준 3.0초 이하) · ①만 ${only1.map((x) => (x / 1000).toFixed(2)).join(" / ")} → ${(med(only1) / 1000).toFixed(2)}초 · 미리 받기 실행 긴 작업까지 넣으면 ${(med(strict) / 1000).toFixed(2)}초 · ① 뒤 긴 작업(시작ms+길이) ${ltAfter.join(" | ")} · 전송량(압축 후) ①까지 ${med(kb1).toFixed(0)}KB / 5초 관찰 끝(만신 미리 받기 포함) ${med(kb).toFixed(0)}KB`);
+  log(`1 첫 화면(①+②): ${first.map((x) => (x / 1000).toFixed(2)).join(" / ")}초 → 중앙값 ${(med(first) / 1000).toFixed(2)}초 (기준 3.0초 이하) · ①만 ${only1.map((x) => (x / 1000).toFixed(2)).join(" / ")} → ${(med(only1) / 1000).toFixed(2)}초 · 미리 받기 실행 긴 작업까지 넣으면 ${(med(strict) / 1000).toFixed(2)}초 · ① 뒤 긴 작업(시작ms+길이) ${ltAfter.join(" | ")} · 전송량(압축 후) ①까지 ${med(kb1).toFixed(0)}KB / 5초 관찰 끝(만신 미리 받기 포함) ${med(kb).toFixed(0)}KB · CLS ${cls.map((x) => x.toFixed(3)).join(" / ")} → 중앙값 ${med(cls).toFixed(3)} (기준 0.1 이하)`);
+  if (ONLY_FIRST) { fs.mkdirSync(path.join(__dirname, "out"), { recursive: true }); fs.writeFileSync(path.join(__dirname, "out", "perf-first.txt"), lines.join("\n") + "\n"); return; }
 
   // ── 2 방 전환
   const pre = [], cold = [], show = [];

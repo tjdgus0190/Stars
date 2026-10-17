@@ -274,7 +274,7 @@ function paidSentences() {
   await enterCode("SOG1-0000-0000-000");
   check("10-1: 틀린 코드 → 모양 오류 한 줄, 복원 안 됨", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.shape")) && (await store()) === "" && (await ev("document.querySelector('[data-js=resume-input]').getAttribute('aria-invalid')")) === "true");
   await enterCode("SO1A-B2C3-D4E5-F6G7-H8J9-K0MN-PQRS-TV", "enter");
-  check("10-1: 영수증 코드(SO1…)를 넣음 → '이 칸이 아니에요' 오류", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.receipt")) && (await store()) === "");
+  check("10-1: 영수증 코드(SO1…)를 넣음 → '이 칸이 아니에요' 오류", (await txt("[data-js=resume-error]")) === (await ev("TEXT.resume.errors.notResume")) && (await store()) === "");
   // (14단계) 만신 없음 + Ⅱ 오검 + Ⅳ 데칸(별 빠짐) SOG2 코드(순서 어긋남): 시험용으로 직접 짠다
   const badOrder = await ev(`(() => { const R = PayCode.Resume, A = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; let n = 0n; const d = { ogham: 3, decan: 11 };
     for (const [k, r] of R.FIELDS) n = n * BigInt(r) + BigInt(d[k] || 0); let pl = ""; for (let i = 0; i < 12; i++) { pl = A[Number(n % 32n)] + pl; n /= 32n; }
