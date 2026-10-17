@@ -2793,7 +2793,7 @@
   //  - 여는 글·닫는 글: 공개 정적 파일 data-book-free.js (무료 맛보기)
   //  - 유료 11장: 함수 book(POST /api/book, 본문 { pass, file } 두 칸뿐)이 열람 코드를 확인한 뒤 JSON으로 준다. 받은 값은 같은 전역(BOOK_SAJU…)에 둔다.
   //    결과 코드·입력값은 보내지 않는다(6장). file 이름은 장 단위 고정 문자열(허용 목록 11개, 17단계 yeon).
-  //    인연의 장(17-2)은 book-yeon 전체를 받아 원형·보조 원형·오행·나이 구간·만 19세 미만 여부를 이 브라우저가 고른다(yeonCtx, 보내지 않고 저장하지 않음).
+  //    인연의 장(17-2)은 book-yeon 전체를 받아 원형·보조 원형·오행·나이 구간을 이 브라우저가 고른다(19세 미만도 b1 — 결정 114)(yeonCtx, 보내지 않고 저장하지 않음).
   const BOOK_ROOMS = CHAPTER_ORDER;
   const BOOK_IDS = ["open", ...BOOK_ROOMS, "flow", "yeon", "match", "deep", "close"];
   const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
