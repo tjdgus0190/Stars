@@ -7,6 +7,8 @@ window.BOOK_OGHAM = {
   "full": [
     {
       "code": "beith",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -50,6 +52,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "luis",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -95,6 +99,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "fearn",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -139,6 +145,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "sail",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -180,6 +188,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "nion",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -221,6 +231,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "uath",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -262,6 +274,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "dair",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -303,6 +317,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "tinne",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -344,6 +360,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "coll",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -388,6 +406,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "ceirt",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -432,6 +452,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "muin",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -477,6 +499,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "gort",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -523,6 +547,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "ngetal",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -568,6 +594,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "straif",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -613,6 +641,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "ruis",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그 뒤로 당신은 붉어지는 얼굴을 감추는 대신, 그 열기를 창작의 연료로 쓰는 법을 익혀 갔어요. 부끄러움이 밀려올 때마다 오히려 한 문장이라도 더 써 보는 사람이 되어 갔죠. 몸이 뜨거워지는 순간이야말로, 당신이 가장 살아 있는 순간이었던 거예요."
@@ -659,6 +689,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "ailm",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -703,6 +735,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "onn",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -747,6 +781,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "ur",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -791,6 +827,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "edad",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -835,6 +873,8 @@ window.BOOK_OGHAM = {
     },
     {
       "code": "idad",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },

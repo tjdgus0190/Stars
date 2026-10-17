@@ -2789,16 +2789,17 @@
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   const OLD_RECEIPT_KEY = "strange-oracle-receipt"; // 12단계까지 영수증 코드 칸. 남아 있으면 지우고 목차로 보낸다(13-4)
-  // (14단계 F4-B2) 책 12장 = 여는 글 + 방 7장(Ⅰ 만신 포함) + 시기별 흐름·궁합·원형 심층 + 닫는 글. 유료는 여는 글·닫는 글을 뺀 10장.
+  // (14단계 F4-B2 → 17단계) 책 13장 = 여는 글 + 방 7장(Ⅰ 만신 포함) + 시기별 흐름·인연의 장·궁합·원형 심층 + 닫는 글. 유료는 여는 글·닫는 글을 뺀 11장.
   //  - 여는 글·닫는 글: 공개 정적 파일 data-book-free.js (무료 맛보기)
-  //  - 유료 10장: 함수 book(POST /api/book, 본문 { pass, file } 두 칸뿐)이 열람 코드를 확인한 뒤 JSON으로 준다. 받은 값은 같은 전역(BOOK_SAJU…)에 둔다.
-  //    결과 코드·입력값은 보내지 않는다(6장). file 이름은 장 단위 고정 문자열(허용 목록 10개).
+  //  - 유료 11장: 함수 book(POST /api/book, 본문 { pass, file } 두 칸뿐)이 열람 코드를 확인한 뒤 JSON으로 준다. 받은 값은 같은 전역(BOOK_SAJU…)에 둔다.
+  //    결과 코드·입력값은 보내지 않는다(6장). file 이름은 장 단위 고정 문자열(허용 목록 11개, 17단계 yeon).
+  //    인연의 장(17-2)은 book-yeon 전체를 받아 원형·보조 원형·오행·나이 구간·만 19세 미만 여부를 이 브라우저가 고른다(yeonCtx, 보내지 않고 저장하지 않음).
   const BOOK_ROOMS = CHAPTER_ORDER;
-  const BOOK_IDS = ["open", ...BOOK_ROOMS, "flow", "match", "deep", "close"];
+  const BOOK_IDS = ["open", ...BOOK_ROOMS, "flow", "yeon", "match", "deep", "close"];
   const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
-  const PAID_IDS = new Set([...BOOK_ROOMS, "flow", "match", "deep"]);
-  const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { flow: "flow", match: "match", deep: "arch" });
-  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { flow: "BOOK_FLOW", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
+  const PAID_IDS = new Set([...BOOK_ROOMS, "flow", "yeon", "match", "deep"]);
+  const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { flow: "flow", yeon: "yeon", match: "match", deep: "arch" });
+  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { flow: "BOOK_FLOW", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
   const FREE_FILE = "data-book-free.js";
   const BOOK_API = "/api/book";
   let memPass = "";
@@ -2872,8 +2873,26 @@
   matchEnd.className = "report-part__body prose";
   matchEnd.dataset.js = "report-match-end";
   js("report-match-rooms").after(matchEnd);
+  // (17-2) 인연의 장 원본 칸: 쪽마다 <section data-page data-title> 하나. 마크업 자리가 없어 여기서 만든다(designer I1 자리가 생기면 옮김)
+  const yeonBox = document.createElement("div");
+  yeonBox.dataset.js = "report-yeon";
+  yeonBox.hidden = true;
+  js("book-source").append(yeonBox);
+  // (17-2) 목차 「인연의 장」 줄: index.html에 줄이 없으면 시기별 흐름 줄을 복제해 그 뒤에 둔다(designer I1 마크업이 들어오면 그 줄을 그대로 쓴다)
+  if (BOOK_ON && !$('[data-js="book-chapter"][data-chapter="yeon"]')) {
+    const flowRow = $('[data-js="book-chapter"][data-chapter="flow"]');
+    if (flowRow) {
+      const row = flowRow.cloneNode(true);
+      row.dataset.chapter = "yeon";
+      $$("[data-t]", row).forEach((x) => {
+        x.dataset.t = x.dataset.t.replace("book.parts.timeline", "book.parts.yeon").replace("book.chapter.blurbs.flow", "book.chapter.blurbs.yeon");
+        x.textContent = get(x.dataset.t) ?? "";
+      });
+      flowRow.after(row);
+    }
+  }
   function clearSource() {
-    ["report-timeline", "report-match-rooms", "report-open", "report-close", "report-match", "report-match-end", "report-deep-strength", "report-deep-shadow", "report-deep-growth", "report-evidence"]
+    ["report-timeline", "report-match-rooms", "report-yeon", "report-open", "report-close", "report-match", "report-match-end", "report-deep-strength", "report-deep-shadow", "report-deep-growth", "report-evidence"]
       .forEach((n) => (js(n).textContent = ""));
     [...js("report-match-pair").children].forEach((s, i) => i !== 1 && (s.textContent = ""));
     jsAll("book-room").forEach((el) => {
@@ -2884,11 +2903,17 @@
 
   // ── 브라우저 쪽 계산: 나이 구간·상대 원형·관계 등급 (spec 6-2, 13-4)
   // 오늘 기준 만 나이 → b1(24세 이하) b2(25~29) … b7(50세 이상) = 0~6
-  function ageBand(b) {
-    const now = new Date();
-    let age = now.getFullYear() - b.y;
-    if (now.getMonth() + 1 < b.m || (now.getMonth() + 1 === b.m && now.getDate() < b.d)) age--;
-    return age <= 24 ? 0 : Math.min(6, Math.floor((age - 25) / 5) + 1);
+  //   (17단계) 계산은 book.js BookCore.ageOf·bandOf 한 곳(인연의 장과 같은 함수)
+  const ageBand = (b) => BookCore.bandOf(BookCore.ageOf(b, new Date()));
+  // (17-2) 인연의 장 고르기 값. 모두 이 브라우저 안에서만 쓰고 보내거나 저장하지 않는다(6장). 분석 이벤트에도 넣지 않는다
+  //   주·보조 원형 = 지도와 같은 규칙(BookCore.archPair) · 나이 구간·만 19세 미만 = 이 탭 profile의 생년월일(없으면 나이 모름)
+  //   일간 = 만신 결과 코드(이어가기 코드 SOG2로 돌아온 탭도 코드가 있어 되찾는다. SOG1·옛 상태는 만신 없음)
+  function yeonCtx() {
+    const b = state.profile.birth;
+    const age = b ? BookCore.ageOf(b, new Date()) : null;
+    const pair = BookCore.archPair(CHAPTER_ORDER.map((r) => (state.visits[r] ? state.visits[r].archetype : null)));
+    const s = state.visits.saju;
+    return { arch: pair ? pair.main : null, sub: pair ? pair.sub : null, allDone: roomsDone() === CHAPTER_ORDER.length, band: age == null ? null : BookCore.bandOf(age), teen: BookCore.isTeen(age), stem: s && s.code ? BookCore.sajuStem(s.code) : null };
   }
   // 원형 합산(무료 방과 같은 규칙): 가장 많이 나온 원형, 동점이면 앞선 장
   function tallyArchetype(tags) {
@@ -2976,7 +3001,7 @@
   // ── 장 상태 (13-2)
   const roomsDone = () => filledRooms().length;
   const available = (id) => (CHAPTER_ORDER.includes(id) ? isDone(id) : id === "close" ? roomsDone() === CHAPTER_ORDER.length : roomsDone() > 0);
-  // (14-4) 유료 10장은 열람 코드가 확인된 탭에서만 열린다. 7/7 전에 사도 되고, 지나지 않은 방의 장은 그 방을 지나면 열린다(59번)
+  // (14-4) 유료 11장은 열람 코드가 확인된 탭에서만 열린다. 7/7 전에 사도 되고, 지나지 않은 방의 장은 그 방을 지나면 열린다(59번)
   const isOpen = (id) => !PAID_IDS.has(id) || Boolean(passNow());
   const readSet = new Set(); // 이 화면에서 끝까지 읽은 장 (메모리만)
   const chapterState = (id) => (!available(id) ? "need-room" : !isOpen(id) ? "can-open" : readSet.has(id) ? "read" : "opened");
@@ -2999,6 +3024,7 @@
       return id === "rune" ? BV.rune.base + BV.rune.past[x[0]] + BV.rune.now[x[1]] + BV.rune.next[x[2]] : id === "tzolkin" ? BV.room.tzolkin[x.sign] : BV.room[id][x];
     }
     if (id === "flow") return a && c.band != null ? BV.timeline[a][c.band] : BV.avg.timeline;
+    if (id === "yeon") return BookCore.yeonVolume(BV.yeon, yeonCtx()); // (검수 2차 권장 5) 그 사람이 받는 판(기본·한결같은 결·나이 모름·미성년)의 값
     if (id === "match") return a ? BV.map[a] : BV.avg.map;
     return a ? BV[id][a] : BV.avg[id];
   }
@@ -3309,6 +3335,7 @@
     el.textContent = "";
     list.forEach((x) => {
       const p = document.createElement("p");
+      if (x.cls) p.className = x.cls; // (17-3) firstLine
       if (x.sub) {
         const b = document.createElement("b");
         b.textContent = x.text;
@@ -3346,6 +3373,30 @@
         ["work", "relation", "learn", "move"].forEach((k) => (js(`timeline-${k}`, el).textContent = s[k]));
         tl.append(el);
       });
+    } else if (id === "yeon") {
+      // (17-2) 인연의 장: 쪽(section)마다 제목(data.js book.yeon.pages)·본문·안내 한 줄(book.yeon.notes). 문장 고르기는 BookCore.yeonChapter
+      const Y = T.book.yeon;
+      const y = BookCore.yeonChapter(C, yeonCtx());
+      yeonBox.dataset.variant = y.variant;
+      y.pages.forEach((pg) => {
+        const sec = document.createElement("section");
+        sec.dataset.page = pg.key;
+        sec.dataset.title = Y.pages[pg.key] || "";
+        const add = (text, cls) =>
+          [].concat(text || []).filter((t) => t).forEach((t) => {
+            const p = document.createElement("p");
+            if (cls) p.className = cls;
+            p.textContent = t;
+            sec.append(p);
+          });
+        if (pg.bands) pg.bands.forEach((x) => {
+          add(fill(x.now ? Y.bandNow : Y.bandNext, { label: Y.bands[x.band] || "" }), "book-yeon-band");
+          add(x.text);
+        });
+        else add(pg.text);
+        if (pg.note) add(Y.notes[pg.note], "book-yeon-note");
+        yeonBox.append(sec);
+      });
     } else if (id === "match") {
       const pair = js("report-match-pair").children;
       pair[0].textContent = T.archetypes[me].name;
@@ -3378,8 +3429,16 @@
       const h = headOf(id, c);
       js("book-room-result", el).textContent = h.title;
       js("book-room-key", el).textContent = h.key;
-      rich(js("book-ch1", el), bookCh1(id, c, fr.ch1Rest));
+      rich(js("book-ch1", el), (fr.firstLine ? [{ text: fr.firstLine, cls: "book-first-line" }] : []).concat(bookCh1(id, c, fr.ch1Rest)));
       paras(js("book-ch2", el), fr.ch2);
+      if (fr.heartLine) {
+        // (17-3) 마음 한 줄: Ⅱ장 마지막 줄(그림자 장으로 넘기는 떡밥) 바로 앞. 모양은 designer(I1) 상자 class를 붙일 자리
+        const hp = document.createElement("p");
+        hp.className = "book-heart-line";
+        hp.textContent = fr.heartLine;
+        const ch2 = js("book-ch2", el);
+        ch2.insertBefore(hp, ch2.lastElementChild);
+      }
       paras(js("book-ch3", el), fr.ch3);
       const tail = topicTail(fr, c);
       paras(js("book-ch4", el), tail ? fr.ch4.concat(tail) : fr.ch4);
@@ -3469,6 +3528,13 @@
     else if (id === "flow") {
       const stages = unitsOf(js("report-timeline", src)).map((u) => Object.assign(u, { kind: "stage" }));
       one("flow", B.parts.timeline, stages, { stages: true, run: [B.part2.num, B.parts.timeline] });
+    } else if (id === "yeon") {
+      // (17-2) 인연의 장: 쪽마다 새 쪽에서 시작(방별 장의 Ⅰ~Ⅳ장과 같은 방식)
+      [...js("report-yeon", src).children].forEach((sec, i) => {
+        const title = sec.dataset.title;
+        const blocks = [...sec.children].map((p) => ({ kind: "p", node: stripHooks(p.cloneNode(true)) }));
+        C.push({ key: `yeon-${i}`, part: id, label: name, run: [B.part2.num, name], start: true, blocks: [openBlk(i === 0 ? chOpening(name) : chOpening(title)), ...(i === 0 && title ? [{ kind: "p", node: mk("p", "book-yeon-title", esc(title)) }] : []), ...blocks] });
+      });
     } else if (id === "match") {
       one("match", B.parts.match, [{ kind: "unit", node: stripHooks(js("report-match-pair", src).cloneNode(true)) }, ...parasOf(js("report-match", src)), ...unitsOf(js("report-match-rooms", src)), ...parasOf(matchEnd)], { run: [B.part2.num, B.parts.match] });
     } else if (id === "deep") {

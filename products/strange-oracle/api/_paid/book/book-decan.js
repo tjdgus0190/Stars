@@ -7,6 +7,8 @@ window.BOOK_DECAN = {
   "full": [
     {
       "code": "decan-1",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그래서 이 칸의 사람 곁에서는 갈등이 오래 끌지 않는다고 전해져요. 눈치 보며 시간을 끄는 것보다, 문제를 바로 꺼내놓고 부딪혀 해결하는 쪽이 결국 모두를 편하게 만든다는 걸 몸으로 알고 있으니까요."
@@ -53,6 +55,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-2",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -98,6 +102,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-3",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -144,6 +150,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-4",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -188,6 +196,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-5",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -230,6 +240,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-6",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -271,6 +283,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-7",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -309,6 +323,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-8",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -350,6 +366,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-9",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "가끔은 아무도 궁금해하지 않는 이야기까지 신나게 늘어놓다가 스스로 머쓱해질 때도 있어요. 그래도 그 순간의 반짝임만큼은 누구도 대신할 수 없는 당신만의 색깔이에요."
@@ -396,6 +414,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-10",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -440,6 +460,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-11",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -484,6 +506,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-12",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -528,6 +552,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-13",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -566,6 +592,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-14",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -604,6 +632,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-15",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -642,6 +672,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-16",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -680,6 +712,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-17",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -718,6 +752,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-18",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -756,6 +792,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-19",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -800,6 +838,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-20",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -846,6 +886,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-21",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -892,6 +934,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-22",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -938,6 +982,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-23",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -985,6 +1031,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-24",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1031,6 +1079,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-25",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그래서 당신 곁에는 이상하게 이야기가 모여요. 뭘 하나 알게 되면 그냥 담아두질 못하고 누군가에게 풀어놔야 직성이 풀리거든요. 지혜를 혼자 쌓아두지 않고 나누는 사람, 그게 이 자리가 품은 현자의 모습이에요. 덕분에 당신과 이야기를 나눈 사람은 몰랐던 세계를 하나 얻어가는 기분이 든다고 말하곤 해요. 그 이야기 덕분에 모임에서 당신 자리는 늘 사람들로 붐비곤 해요."
@@ -1071,6 +1121,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-26",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1109,6 +1161,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-27",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1147,6 +1201,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-28",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1185,6 +1241,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-29",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1223,6 +1281,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-30",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1261,6 +1321,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-31",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "명절이나 생일에 선물을 고를 때도, 당신은 다들 고르는 무난한 것 대신 그 사람만을 위한 것처럼 보이는 물건을 찾아 헤매는 편이에요. 평범한 선택지 앞에서 오래 망설이다가, 결국 아무도 예상 못 한 걸 골라서 상대를 놀라게 만들곤 하죠. 그 선물이 상대의 취향에 정확히 맞아떨어질 때, 다름을 알아주는 눈이 곧 다정함이라는 걸 다시 한번 확인하게 돼요."
@@ -1303,6 +1365,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-32",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "가족 중 누군가 새로 산 기계나 서비스의 설명서를 이해하지 못해 쩔쩔맬 때도, 당신이 나서서 두어 문장으로 요점만 짚어준 적이 많을 거예요. 어려운 말을 그대로 옮기지 않고 그 사람 눈높이에 맞는 말로 바꿔주는 게 자연스러운 편이라, 가족 모임에서도 은근히 그런 역할을 맡곤 하죠. 그렇게 설명해 준 다음 상대의 표정이 환해지는 순간, 당신도 모르게 뿌듯해지는 걸 느꼈을 거예요."
@@ -1345,6 +1409,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-33",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1386,6 +1452,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-34",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1427,6 +1495,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-35",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1468,6 +1538,8 @@ window.BOOK_DECAN = {
     },
     {
       "code": "decan-36",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },

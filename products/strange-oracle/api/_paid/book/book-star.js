@@ -7,6 +7,8 @@ window.BOOK_STAR = {
   "full": [
     {
       "code": "ashwini",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "다만 이 집의 진짜 힘은 속도 자체보다, 그 속도를 쓰는 방향에 있다고 전해져요. 아슈윈 쌍둥이가 빨랐던 건 그저 달리기 위해서가 아니라 누군가를 살리기 위해서였죠. 당신이 빠르게 움직일 때도, 그 밑바탕엔 대개 지키고 싶은 무언가가 있을 거예요.",
@@ -56,6 +58,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "bharani",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그래서 바라니의 사람 곁에는 늘 '결국 저 사람이 정리해 줄 거야'라는 무언의 믿음이 쌓인다고 해요. 무거운 역할을 자처하는 게 아니라, 누군가는 반드시 해야 할 일을 자연스럽게 알아채는 감각을 타고난 거죠."
@@ -105,6 +109,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "krittika",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "다만 그 뜨거움이 언제나 겉으로 드러나는 건 아니에요. 크리티카의 불은 활활 타오르기보다, 조용히 오래 벼리는 쪽에 가깝다고 전해져요. 당신의 헌신은 소리 없이 오래가는 편일 거예요.",
@@ -156,6 +162,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "rohini",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그래서 로히니의 사람 곁에는 자연스럽게 사람이 모인다고 해요. 화려하게 나서지 않아도, 편안하고 안정적인 분위기 자체가 사람을 끌어당기는 거죠. 본인은 잘 모르지만, 은근히 인기가 많다는 말을 자주 듣는 이유예요.",
@@ -207,6 +215,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "mrigashira",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "다만 그 호기심은 방향 없이 흩어지는 게 아니라, 결국 자신에게 맞는 것을 찾아가는 여정이라고 전해져요. 사슴이 아무렇게나 뛰어다니는 것 같아도 결국 샘을 찾아내듯, 므리가시라의 탐색도 늘 어딘가로 향하고 있어요."
@@ -257,6 +267,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "ardra",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그래서 아르드라는 '부서지는 집'이 아니라 '다시 갠 하늘의 집'으로도 읽혀요. 폭풍이 지나간 뒤에는 반드시 맑은 하늘이 온다는 걸, 이 집은 오래전부터 알고 있었으니까요."
@@ -303,6 +315,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "punarvasu",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그래서 푸나르바수는 '잃지 않는 집'이 아니라 '다시 채우는 집'으로 불려요. 한 번 잃었다고 영영 없어지는 게 아니라, 시간이 지나면 어떤 형태로든 다시 돌아온다는 걸 이 집은 오래전부터 말해 왔어요."
@@ -350,6 +364,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "pushya",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "이 결은 시대나 지역에 따라 다르게 불렸어도 핵심은 같았다고 해요 — 곁에 있는 존재를 배부르게 하는 사람. 화려하지 않아도 가장 필요한 순간에 있어 주는 역할이 이 자리에는 자연스럽게 따라온다고 전해져요.",
@@ -400,6 +416,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "ashlesha",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "신뢰를 어렵게 쌓는 만큼, 한번 마음을 준 사람에게는 유독 깊이 곁을 내줘요. 겉으로 드러나는 다정함은 적어도, 그 안에 있는 애정의 밀도는 누구보다 짙다고 전해져요."
@@ -448,6 +466,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "magha",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "왕좌는 혼자 앉아 있는 자리가 아니라, 신하와 백성이 있어야 완성되는 자리로 전해져요. 그래서 이 결을 지닌 사람은 혼자만 빛나기보다, 주변 사람이 함께 잘되는 모습에서 더 큰 만족을 느껴요."
@@ -496,6 +516,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "purva-phalguni",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "바가가 나눠 준다는 몫은 재물만이 아니라 즐거움 그 자체로도 전해져요. 그래서 이 자리를 가진 사람은 좋은 걸 발견하면 혼자 간직하기보다, 주변에 먼저 나누고 싶어 해요. 맛있는 걸 먹으면 사진부터 찍어 친구들에게 보내는 것도 같은 마음이에요."
@@ -544,6 +566,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "uttara-phalguni",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -590,6 +614,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "hasta",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -636,6 +662,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "chitra",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -682,6 +710,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "swati",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "말투에서도 이 결이 묻어나요. 단정적으로 말하기보다 '아마도', '그럴 수도 있죠'처럼 여지를 남기는 화법을 자주 쓰는데, 이건 우유부단해서가 아니라 세상에 정답이 하나뿐이라고 믿지 않기 때문이에요. 바람이 한 방향으로만 불지 않듯, 스와티의 생각도 여러 갈래로 열려 있는 채로 움직여요.",
@@ -728,6 +758,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "vishakha",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "이 집은 도공의 물레라는 상징도 함께 갖고 있어요. 물레가 같은 자리를 돌고 또 돌아야 그릇 하나가 완성되듯, 비샤카에 태어난 사람도 반복을 지루해하지 않고 결과가 나올 때까지 계속 다듬는 힘을 지녔다고 전해요.",
@@ -774,6 +806,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "anuradha",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "미트라는 계약의 신이면서 동시에 태양이 뜨고 지는 하늘의 질서를 지키는 신이라고도 전해요. 그래서인지 아누라다에 태어난 사람은 관계에서도 뜨고 지는 흐름, 즉 가까워지고 멀어지는 자연스러운 리듬을 잘 받아들이는 편이에요."
@@ -819,6 +853,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "jyeshtha",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "인드라가 번개를 다루는 신이라는 점도 이 집과 이어져요. 평소엔 조용하다가도 누군가를 지켜야 할 순간이 오면 번개처럼 빠르고 단호하게 나서는 편이라고 전해요. 그 단호함이 평소의 차분함과 대비돼 더 믿음직하게 느껴지죠."
@@ -864,6 +900,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "mula",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "니르리티는 종종 '누구도 반기지 않는 진실을 말하는 여신'으로도 그려진다고 전해요. 물라에 태어난 사람도 다들 외면하고 싶어 하는 불편한 사실을 굳이 꺼내는 역할을 맡곤 하는데, 그건 미움받고 싶어서가 아니라 진실을 덮어 둔 채로는 앞으로 나아갈 수 없다고 믿기 때문이에요."
@@ -903,6 +941,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "purva-ashadha",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -940,6 +980,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "uttara-ashadha",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -977,6 +1019,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "shravana",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그래서 이 집은 '작은 귀, 큰 이해'라는 별명으로도 불려요. 가만히 앉아 듣기만 하는 것 같아도, 그 시간 동안 당신은 이미 많은 것을 배우고 정리하고 있는 거예요.",
@@ -1030,6 +1074,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "dhanishta",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "리듬과 재물, 언뜻 안 어울려 보이는 두 재능이 한 집에 같이 있는 이유는 단순해요. 둘 다 '흐름을 읽는 감각'에서 나오거든요. 음악의 박자를 읽는 눈과 돈의 흐름을 읽는 눈은, 사실 같은 눈이에요.",
@@ -1080,6 +1126,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "shatabhisha",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "빈 원이라는 상징도 그래서예요. 아직 채워지지 않은 원은 실패가 아니라, 당신만이 채울 수 있는 자리라는 뜻이에요.",
@@ -1130,6 +1178,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "purva-bhadrapada",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "둘 중 어느 쪽도 거짓이 아니에요. 오히려 두 얼굴을 다 가진 사람만이, 평소엔 둥글게 지내면서도 필요할 때 확실히 목소리를 낼 수 있어요.",
@@ -1180,6 +1230,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "uttara-bhadrapada",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "침대의 뒷다리라는 상징도 비슷한 뜻을 담고 있어요. 눈에 띄지 않는 자리에서 가장 무거운 것을 떠받치는 역할, 그게 바로 이 집이 오랫동안 맡아 온 자리예요.",
@@ -1231,6 +1283,8 @@ window.BOOK_STAR = {
     },
     {
       "code": "revati",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "물고기라는 상징도 그래서예요. 물살에 몸을 맡기면서도 결국 자기가 가야 할 방향을 잃지 않는 존재, 그게 이 집이 그리는 사람의 모습이에요.",

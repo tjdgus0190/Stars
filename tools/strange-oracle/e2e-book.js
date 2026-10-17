@@ -13,7 +13,7 @@ const OUT = path.join(__dirname, "out");
 const out = [];
 const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${name}${extra !== "" ? "  — " + extra : ""}`; out.push(l); console.log(l); };
 const ORDER = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]; // (14단계) 새 순서
-const BOOK_ROOMS = ORDER; // (F4-B2) Ⅰ 만신 장 포함 → 책 12장
+const BOOK_ROOMS = ORDER; // (F4-B2) Ⅰ 만신 장 포함 → 책 12장, (17단계) 인연의 장 → 13장
 // (14-6) 방 문구 파일은 지연 불러오기라 페이지에 전역이 없을 수 있다 → 시험 방문 기록은 node에서 만든다
 const DATA = (() => { const w = {}; for (const f of ["data-saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"]) require("vm").runInNewContext(require("fs").readFileSync(require("path").resolve(__dirname, "..", "..", "products", "strange-oracle", f), "utf8"), { window: w }); return w; })();
 const SajuLib = require("../../products/strange-oracle/saju.js");
@@ -126,11 +126,11 @@ const STUB_ADS = `(function () {
   check("입구 책 카드: 0/6 상태 none·state0 문구·목차 보기 버튼", await ev("(() => { const c = document.querySelector('[data-js=hub-book]'); return c.dataset.state === 'none' && document.querySelector('[data-js=hub-book-hint]').textContent === TEXT.hub.book.state0 && document.querySelector('[data-js=hub-book-go]').offsetHeight > 0; })()"));
 
   // 2. 0/7 목차
-  check("F4-B2: 목차에 Ⅰ 만신 장 있음(오검 앞)", await ev("(() => { const ids = [...document.querySelectorAll('[data-js=book-chapter]')].map(li => li.dataset.chapter); return ids.indexOf('saju') === ids.indexOf('ogham') - 1 && ids.length === 12; })()"));
+  check("F4-B2: 목차에 Ⅰ 만신 장 있음(오검 앞), (17-2) 인연의 장은 시기별 흐름 다음 · 13장", await ev("(() => { const ids = [...document.querySelectorAll('[data-js=book-chapter]')].map(li => li.dataset.chapter); return ids.indexOf('saju') === ids.indexOf('ogham') - 1 && ids.length === 13 && ids.indexOf('yeon') === ids.indexOf('flow') + 1; })()"));
   await click("[data-js=hub-book-go]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   const r0 = await rows();
-  check("13-7.2 0/7: 모든 장 '지나면 열려요'(need-room), 광고 버튼 0 (12장)", Object.values(r0).every((s) => s === "need-room") && Object.keys(r0).length === 12 && (await ev("[...document.querySelectorAll('[data-js=book-chapter-state]')].every(e => /열려요|\\[초안\\]/.test(e.textContent))")), JSON.stringify(r0));
+  check("13-7.2 0/7: 모든 장 '지나면 열려요'(need-room), 광고 버튼 0 (13장)", Object.values(r0).every((s) => s === "need-room") && Object.keys(r0).length === 13 && (await ev("[...document.querySelectorAll('[data-js=book-chapter-state]')].every(e => /열려요|\\[초안\\]/.test(e.textContent))")), JSON.stringify(r0));
   await row("match");
   check("0/6: 잠긴 행을 누르면 안내만(목차 그대로)", (await view()) === "toc");
 
@@ -138,7 +138,7 @@ const STUB_ADS = `(function () {
   await fresh(["saju", "ogham"]);
   const r1 = await rows();
   check("14-4 2/7 결제함: 여는 글·만신·오검·흐름·궁합·심층 열림·나머지 방·닫는 글 '지나면 열려요'(59번)",
-    r1.open === "opened" && ["saju", "ogham", "flow", "match", "deep"].every((k) => r1[k] === "opened") && ["star", "decan", "tzolkin", "rune", "sibyl", "close"].every((k) => r1[k] === "need-room"), JSON.stringify(r1));
+    r1.open === "opened" && ["saju", "ogham", "flow", "yeon", "match", "deep"].every((k) => r1[k] === "opened") && ["star", "decan", "tzolkin", "rune", "sibyl", "close"].every((k) => r1[k] === "need-room"), JSON.stringify(r1));
   check("목차: 원형 이름·안내 줄({n}=2)·배너 자리 없음(14-2)", await ev("(() => { const a = document.querySelector('[data-js=book-home-arch]'); return !a.hidden && a.textContent === TEXT.archetypes[StrangeOracle.currentArchetype()].name && document.querySelector('[data-js=book-home-lede]').textContent === TEXT.book.toc.lede.replace('{n}', 2) && !document.querySelector('#screen-report [data-ad]'); })()"));
   check("목차: 유료 장 문장 0 (함수 book 요청 아직 0건)", !b.log.requests.some((r) => /\/api\/book/.test(r)));
 
@@ -253,6 +253,19 @@ const STUB_ADS = `(function () {
   check("흐름 장 첫 쪽", await toPages());
   check("흐름: 생년월일을 profile에 저장(6장 예외)", (await ev("JSON.parse(sessionStorage.getItem('strange-oracle')).profile.birth.y")) === 1995);
 
+  // (17-2) 인연의 장: 같은 탭(생년월일 있음, 만신·오검 지남) → 기본판 7쪽 + 장 끝. 요청 본문은 { pass, file: "yeon" } 두 칸
+  await click("[data-js=book-toc-open]");
+  await sleep(150);
+  await row("yeon");
+  await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 5000);
+  check("17-2 인연의 장 표지: 분량 표지에 숫자", await ev("/\\d/.test(document.querySelector('[data-js=chapter-cover-volume]').textContent)"));
+  await click("[data-js=book-chapter-open]");
+  check("17-2 인연의 장 첫 쪽", await toPages());
+  const yeon = JSON.parse(await ev("JSON.stringify((() => { const ps = [...document.querySelectorAll('[data-js=book-page][data-part=yeon]')]; const src = document.querySelector('[data-js=report-yeon]'); return { pages: ps.length, secs: [...src.children].map(s => s.dataset.page), variant: src.dataset.variant, band: src.querySelectorAll('.book-yeon-band').length }; })())"));
+  check("17-2 인연의 장: 기본판 7쪽(끌림·거울·만날 사람·4쪽·장면·시기·계절) + 장 끝, 시기 쪽 구간 머리 2개(지금·다음)", yeon.variant === "base" && yeon.secs.length === 7 && yeon.secs[0] === "pull" && yeon.secs[5] === "time" && yeon.band === 2 && yeon.pages >= 8, JSON.stringify(yeon));
+  const yb = b.log.bodies.filter((x) => /\/api\/book$/.test(x.url)).map((x) => x.body).filter((s) => /yeon/.test(s));
+  check("17-13의 3: 인연의 장 요청 본문 = { pass, file: \"yeon\" } 두 칸뿐", yb.length > 0 && yb.every((s) => { const o = JSON.parse(s); return Object.keys(o).sort().join() === "file,pass" && o.file === "yeon"; }), `${yb.length}건`);
+
   // #deeper = 결제 전 화면(test), 옛 영수증 칸 → 목차
   await b.goto(BASE + "#deeper");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
@@ -278,7 +291,7 @@ const STUB_ADS = `(function () {
   await click("[data-js=story-book-link]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   const r6 = await rows();
-  check("7/7 결제함: 12장 모두 열림(만신 포함)", Object.keys(r6).length === 12 && Object.values(r6).every((s) => s === "opened"), JSON.stringify(r6));
+  check("7/7 결제함: 13장 모두 열림(만신 포함)", Object.keys(r6).length === 13 && Object.values(r6).every((s) => s === "opened"), JSON.stringify(r6));
   // 룬·시빌라·데칸 장 열기 (큰 파일)
   for (const id of ["saju", "rune", "sibyl", "decan"]) {
     await click("[data-js=book-toc-open]").catch(() => {});

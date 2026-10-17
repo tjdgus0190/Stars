@@ -7,6 +7,8 @@ window.BOOK_TZOLKIN = {
   "full": [
     {
       "code": "imix",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": [
           "그래서 이믹스는 '가장 먼저 나서는 사람'보다 '가장 먼저 자리를 내어주는 사람'으로 불리는 걸 더 편하게 여긴다고 전해져요. 누군가 설 자리를 마련해 주는 일이야말로, 이 집이 태초의 물에서부터 물려받은 가장 오래된 재능이니까요."
@@ -53,6 +55,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "ik",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -97,6 +101,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "akbal",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -141,6 +147,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "kan",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -185,6 +193,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "chikchan",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -229,6 +239,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "kimi",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -267,6 +279,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "manik",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -305,6 +319,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "lamat",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -343,6 +359,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "muluk",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -381,6 +399,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "ok",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -419,6 +439,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "chuwen",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -459,6 +481,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "eb",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -499,6 +523,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "ben",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -539,6 +565,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "ix",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -579,6 +607,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "men",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -620,6 +650,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "kib",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -661,6 +693,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "kaban",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -703,6 +737,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "etznab",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -745,6 +781,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "kawak",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -787,6 +825,8 @@ window.BOOK_TZOLKIN = {
     },
     {
       "code": "ajaw",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },

@@ -72,7 +72,8 @@ test("12장 조립: 표본 전부(만신 포함) 빈 칸·undefined 0, 결정적
   const S = samples();
   for (const c of S) {
     const r = Book.buildReport(PUB, c);
-    const t = allText(r.chapters);
+    // (17단계) 방 장의 firstLine·heartLine은 copywriter가 채우기 전 빈칸("")이 허용된다(그리지 않음). 채움은 check-17이 본다
+    const t = allText(JSON.parse(JSON.stringify(r.chapters, (k, v) => ((k === "firstLine" || k === "heartLine") && v === "" ? undefined : v))));
     assert.ok(t.every((x) => typeof x === "string" && x.trim() && !/undefined|\{\w+\}/.test(x)), JSON.stringify(c));
     assert.deepStrictEqual(Book.buildReport(PUB, c), r);
   }
@@ -242,8 +243,8 @@ test("다양성 실측 → out/book-variety.txt", () => {
     return { r, P, ph };
   };
 
-  test("함수 book: 허용 목록은 정확히 10개, 유료 원본 파일과 1:1", () => {
-    assert.deepStrictEqual([...Fn.ALLOW].sort(), ["arch", "decan", "flow", "match", "ogham", "rune", "saju", "sibyl", "star", "tzolkin"]);
+  test("함수 book: 허용 목록은 정확히 11개(17단계 yeon), 유료 원본 파일과 1:1", () => {
+    assert.deepStrictEqual([...Fn.ALLOW].sort(), ["arch", "decan", "flow", "match", "ogham", "rune", "saju", "sibyl", "star", "tzolkin", "yeon"]);
     assert.deepStrictEqual(fs.readdirSync(PAIDDIR).filter((f) => f.endsWith(".js")).map((f) => f.replace(/^book-|\.js$/g, "")).sort(), [...Fn.ALLOW].sort());
   });
   test("함수 book: 수동 코드(BOOK_PASS_HASHES) + 허용 file → 200, no-store, 저장소를 읽지 않음", async () => {

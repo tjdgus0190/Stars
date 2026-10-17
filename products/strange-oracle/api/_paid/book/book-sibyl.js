@@ -7,6 +7,8 @@ window.BOOK_SIBYL = {
   "full": [
     {
       "code": "sors-1",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -51,6 +53,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-2",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -96,6 +100,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-3",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -141,6 +147,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-4",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -183,6 +191,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-5",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -225,6 +235,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-6",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -267,6 +279,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-7",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -309,6 +323,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-8",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -352,6 +368,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-9",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -396,6 +414,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-10",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -440,6 +460,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-11",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -484,6 +506,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-12",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -528,6 +552,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-13",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -570,6 +596,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-14",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -612,6 +640,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-15",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -654,6 +684,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-16",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -696,6 +728,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-17",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -738,6 +772,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-18",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -780,6 +816,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-19",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -822,6 +860,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-20",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -864,6 +904,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-21",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -906,6 +948,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-22",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -948,6 +992,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-23",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -990,6 +1036,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-24",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1032,6 +1080,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-25",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1074,6 +1124,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-26",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1116,6 +1168,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-27",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1158,6 +1212,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-28",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1200,6 +1256,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-29",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1242,6 +1300,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-30",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1284,6 +1344,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-31",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },
@@ -1326,6 +1388,8 @@ window.BOOK_SIBYL = {
     },
     {
       "code": "sors-32",
+      "firstLine": "",
+      "heartLine": "",
       "identity": {
         "rest": []
       },

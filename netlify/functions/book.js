@@ -1,6 +1,6 @@
 // 낯선 점술관 — 서버리스 함수 book (spec 14-4, 결정 85·93). 하는 일은 하나: 열람 코드 확인 → 유료 장 파일 하나를 JSON으로 준다.
 // 받는 것: POST 본문 { pass, file } 두 칸뿐. 이름·생년월일·시각·성별·결과 코드는 받지 않는다(CLAUDE.md 6장, 3장 서버리스 예외보다 좁다).
-//   file은 허용 목록 10개 중 하나(정확히 같은 문자열). 목록 밖 값(경로 문자 포함)은 파일을 읽지 않고 거부한다.
+//   file은 허용 목록 11개 중 하나(정확히 같은 문자열, 17단계에 yeon = 인연의 장을 더함). 목록 밖 값(경로 문자 포함)은 파일을 읽지 않고 거부한다.
 //   파일 이름은 허용 목록의 고정 문자열로만 만든다(입력값을 경로에 붙이지 않음).
 // 코드 확인(spec 15-3 "함수 book 수정"): ① 코드를 정규화(대문자, 공백·하이픈 제거)한 뒤 SHA-256(hex)이 환경 변수 BOOK_PASS_HASHES(쉼표로 나눈 목록)에 있으면 통과.
 //   ② 아니면 Netlify Blobs pass/<ph>(ph = HMAC(PASS_SECRET, "hash:"+코드), 함수 pay가 씀)가 paid이고 cancel/<그 mul_no>가 없으면 통과(마지막 방어선).
@@ -22,6 +22,7 @@ const Pay = require("./pay.js");
 const FILES = Object.freeze({
   saju: "BOOK_SAJU", ogham: "BOOK_OGHAM", star: "BOOK_STAR", decan: "BOOK_DECAN", tzolkin: "BOOK_TZOLKIN",
   rune: "BOOK_RUNE", sibyl: "BOOK_SIBYL", flow: "BOOK_FLOW", match: "BOOK_MATCH", arch: "BOOK_ARCH",
+  yeon: "BOOK_YEON", // (17-2) 인연의 장. 본문 칸은 그대로 { file, pass } 두 칸
 });
 const ALLOW = Object.freeze(Object.keys(FILES));
 const WINDOW_MS = 10 * 60 * 1000;

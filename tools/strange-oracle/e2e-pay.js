@@ -5,7 +5,7 @@
 // 보는 것
 //  A. 결제 전 화면: 1~6이 버튼 위·판매자 정보 줄은 아래·동의 전 비활성·userid 빈칸이면 비활성 + 판매 준비 중·이미 열린 탭이면 "이미 열려 있어요"·SDK 요청 0
 //     열람 코드 칸(SO1·SOG·모양 → 요청 0, 틀림 fail, 닿지 않음 offline, 맞음 → 목차)
-//  B. 이동 방식: [결제하기] → SDK 1건 → 가짜 결제창(넘긴 값은 15-2 표뿐) → [결제 완료] → #paid → 책 10장 + 코드 카드(SOP·복사) → 새 탭에서 코드로 열림
+//  B. 이동 방식: [결제하기] → SDK 1건 → 가짜 결제창(넘긴 값은 15-2 표뿐) → [결제 완료] → #paid → 책 11장 + 코드 카드(SOP·복사) → 새 탭에서 코드로 열림
 //  C. 팝업 방식: 진짜 마우스 클릭 → 팝업이 막히지 않음 → 팝업에 "원래 창에서 열려요" → 원래 탭에서 책·코드 카드
 //  D. 실패·늦음: [결제 실패] → 30초 넘음(late)·[다시 확인]·[목차로], 회차 3번 되풀이 429 없음·회차당 17회 이하(겹침 없음), [완료, 통보 늦게] → late → [다시 확인]으로 열림
 //  E. 429: 화면 busy + Retry-After 동안 [다시 확인] 비활성(가로챈 응답으로 3초 뒤 활성 확인, 머리 없으면 60초)
@@ -26,7 +26,7 @@ const P = "/products/strange-oracle/index.html";
 const CDP_PORT = 9621;
 const out = [];
 const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${name}${extra !== "" ? "  — " + extra : ""}`; out.push(l); console.log(l); };
-const PAID = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl", "flow", "match", "deep"];
+const PAID = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl", "flow", "yeon", "match", "deep"]; // (17단계) 유료 11장;
 const PassCode = require("../../products/strange-oracle/paycode.js").Pass;
 const sw = (q) => fetch(`${TEST}/__dev/pay-switch?${q}`).then((r) => r.json());
 const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
@@ -121,7 +121,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       tag: s.querySelector('[data-js=pay-buy]').tagName, href: s.querySelector('[data-js=pay-buy]').hasAttribute('href'),
       old: !!s.querySelector('[data-js=pay-price-unit], [data-js=pay-store-name]') };
   })()`);
-  check("A2 1 받는 것(10장)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 10, JSON.stringify(lay));
+  check("A2 1 받는 것(11장)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 11, JSON.stringify(lay));
   check("A3 판매자 정보 줄 5칸(신고 줄은 값이 없어 숨김)·legal 3종 링크·결제 버튼은 <button>(href 없음)·옛 칸 2개 없음", lay.seller === 5 && lay.legal === 3 && lay.tag === "BUTTON" && !lay.href && !lay.old);
   check("A4 동의 전 비활성·시험 띠·userid(모의 값) 있으면 '판매 준비 중' 숨김·가로 넘침 0", lay.buyOff && lay.band && !lay.empty && lay.wide);
   // K. (15단계 QA 1차 필수 1) test: 판매자 정보 줄 legal 링크 3개가 200이고 결제 문단이 주석 밖에 보인다
@@ -191,7 +191,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("B7 [복사] 누르면 복사됨 표시 또는 복사 실패 안내 한 줄(헤드리스 클립보드 권한 미확인)", await ev("!document.querySelector('[data-js=code-status]').classList.contains('is-hidden') && document.querySelector('[data-js=code-status]').textContent.length > 0"));
   await click("[data-js=code-close]");
   const rB = await rows();
-  check("B8 책 목차: 유료 10장 모두 열림", (await active()) === "screen-report" && PAID.every((id) => rB[id] === "opened"), JSON.stringify(rB));
+  check("B8 책 목차: 유료 11장 모두 열림", (await active()) === "screen-report" && PAID.every((id) => rB[id] === "opened"), JSON.stringify(rB));
   check("B9 목차 '내 열람 코드 보기' 줄 보임 → 누르면 코드 카드", (await visible("[data-js=book-code-row]")) && (await click("[data-js=book-show-code]")) && (await dlgOpen()));
   await click("[data-js=code-close]");
   await ev("StrangeOracle.go('deeper')");
@@ -204,7 +204,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   await click("[data-js=pass-go]");
   const nb = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'", 6000);
   const rN = await rows();
-  check("B11 새 탭(저장소 비움)에서 그 코드를 넣으면 10장 열림", nb && PAID.every((id) => rN[id] === "opened"), JSON.stringify(rN));
+  check("B11 새 탭(저장소 비움)에서 그 코드를 넣으면 11장 열림", nb && PAID.every((id) => rN[id] === "opened"), JSON.stringify(rN));
 
   // ═══ C. 팝업 방식 ═══
   await sw("win=popup");

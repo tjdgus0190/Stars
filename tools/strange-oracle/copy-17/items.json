@@ -1,0 +1,9250 @@
+[
+ {
+  "id": "yeon.pull.warrior",
+  "batch": "yeon-pull",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "pull",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.pull",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.pull.sage",
+  "batch": "yeon-pull",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "pull",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.pull",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.pull.lover",
+  "batch": "yeon-pull",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "pull",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.pull",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.pull.rebel",
+  "batch": "yeon-pull",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "pull",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.pull",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.pull.caregiver",
+  "batch": "yeon-pull",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "pull",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.pull",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.pull.explorer",
+  "batch": "yeon-pull",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "pull",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.pull",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.pull.creator",
+  "batch": "yeon-pull",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "pull",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.pull",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.pull.ruler",
+  "batch": "yeon-pull",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "pull",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.pull",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.mirror.warrior",
+  "batch": "yeon-mirror",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "mirror",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.mirror",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.mirror.sage",
+  "batch": "yeon-mirror",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "mirror",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.mirror",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.mirror.lover",
+  "batch": "yeon-mirror",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "mirror",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.mirror",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.mirror.rebel",
+  "batch": "yeon-mirror",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "mirror",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.mirror",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.mirror.caregiver",
+  "batch": "yeon-mirror",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "mirror",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.mirror",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.mirror.explorer",
+  "batch": "yeon-mirror",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "mirror",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.mirror",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.mirror.creator",
+  "batch": "yeon-mirror",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "mirror",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.mirror",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.mirror.ruler",
+  "batch": "yeon-mirror",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "mirror",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.mirror",
+  "voice": "book",
+  "target": 450,
+  "min": 383,
+  "max": 518,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.meet.warrior",
+  "batch": "yeon-meet",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "meet",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.meet",
+  "voice": "book",
+  "target": 600,
+  "min": 510,
+  "max": 690,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.meet.sage",
+  "batch": "yeon-meet",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "meet",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.meet",
+  "voice": "book",
+  "target": 600,
+  "min": 510,
+  "max": 690,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.meet.lover",
+  "batch": "yeon-meet",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "meet",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.meet",
+  "voice": "book",
+  "target": 600,
+  "min": 510,
+  "max": 690,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.meet.rebel",
+  "batch": "yeon-meet",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "meet",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.meet",
+  "voice": "book",
+  "target": 600,
+  "min": 510,
+  "max": 690,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.meet.caregiver",
+  "batch": "yeon-meet",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "meet",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.meet",
+  "voice": "book",
+  "target": 600,
+  "min": 510,
+  "max": 690,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.meet.explorer",
+  "batch": "yeon-meet",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "meet",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.meet",
+  "voice": "book",
+  "target": 600,
+  "min": 510,
+  "max": 690,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.meet.creator",
+  "batch": "yeon-meet",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "meet",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.meet",
+  "voice": "book",
+  "target": 600,
+  "min": 510,
+  "max": 690,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.meet.ruler",
+  "batch": "yeon-meet",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "meet",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.meet",
+  "voice": "book",
+  "target": 600,
+  "min": 510,
+  "max": 690,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.twist.warrior",
+  "batch": "yeon-twist",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "twist",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.twist",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "보조 원형"
+ },
+ {
+  "id": "yeon.twist.sage",
+  "batch": "yeon-twist",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "twist",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.twist",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "보조 원형"
+ },
+ {
+  "id": "yeon.twist.lover",
+  "batch": "yeon-twist",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "twist",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.twist",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "보조 원형"
+ },
+ {
+  "id": "yeon.twist.rebel",
+  "batch": "yeon-twist",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "twist",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.twist",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "보조 원형"
+ },
+ {
+  "id": "yeon.twist.caregiver",
+  "batch": "yeon-twist",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "twist",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.twist",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "보조 원형"
+ },
+ {
+  "id": "yeon.twist.explorer",
+  "batch": "yeon-twist",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "twist",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.twist",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "보조 원형"
+ },
+ {
+  "id": "yeon.twist.creator",
+  "batch": "yeon-twist",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "twist",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.twist",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "보조 원형"
+ },
+ {
+  "id": "yeon.twist.ruler",
+  "batch": "yeon-twist",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "twist",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.twist",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "보조 원형"
+ },
+ {
+  "id": "yeon.scene.warrior",
+  "batch": "yeon-scene",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "scene",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.scene",
+  "voice": "book",
+  "target": 400,
+  "min": 340,
+  "max": 460,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.scene.sage",
+  "batch": "yeon-scene",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "scene",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.scene",
+  "voice": "book",
+  "target": 400,
+  "min": 340,
+  "max": 460,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.scene.lover",
+  "batch": "yeon-scene",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "scene",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.scene",
+  "voice": "book",
+  "target": 400,
+  "min": 340,
+  "max": 460,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.scene.rebel",
+  "batch": "yeon-scene",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "scene",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.scene",
+  "voice": "book",
+  "target": 400,
+  "min": 340,
+  "max": 460,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.scene.caregiver",
+  "batch": "yeon-scene",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "scene",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.scene",
+  "voice": "book",
+  "target": 400,
+  "min": 340,
+  "max": 460,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.scene.explorer",
+  "batch": "yeon-scene",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "scene",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.scene",
+  "voice": "book",
+  "target": 400,
+  "min": 340,
+  "max": 460,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.scene.creator",
+  "batch": "yeon-scene",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "scene",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.scene",
+  "voice": "book",
+  "target": 400,
+  "min": 340,
+  "max": 460,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.scene.ruler",
+  "batch": "yeon-scene",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "scene",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.scene",
+  "voice": "book",
+  "target": 400,
+  "min": 340,
+  "max": 460,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.time.warrior-b1",
+  "batch": "yeon-time-b1",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "warrior-b1"
+  ],
+  "room": null,
+  "code": "warrior-b1",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.sage-b1",
+  "batch": "yeon-time-b1",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "sage-b1"
+  ],
+  "room": null,
+  "code": "sage-b1",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.lover-b1",
+  "batch": "yeon-time-b1",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "lover-b1"
+  ],
+  "room": null,
+  "code": "lover-b1",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.rebel-b1",
+  "batch": "yeon-time-b1",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "rebel-b1"
+  ],
+  "room": null,
+  "code": "rebel-b1",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.caregiver-b1",
+  "batch": "yeon-time-b1",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "caregiver-b1"
+  ],
+  "room": null,
+  "code": "caregiver-b1",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.explorer-b1",
+  "batch": "yeon-time-b1",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "explorer-b1"
+  ],
+  "room": null,
+  "code": "explorer-b1",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.creator-b1",
+  "batch": "yeon-time-b1",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "creator-b1"
+  ],
+  "room": null,
+  "code": "creator-b1",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.ruler-b1",
+  "batch": "yeon-time-b1",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "ruler-b1"
+  ],
+  "room": null,
+  "code": "ruler-b1",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.warrior-b2",
+  "batch": "yeon-time-b2",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "warrior-b2"
+  ],
+  "room": null,
+  "code": "warrior-b2",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.sage-b2",
+  "batch": "yeon-time-b2",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "sage-b2"
+  ],
+  "room": null,
+  "code": "sage-b2",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.lover-b2",
+  "batch": "yeon-time-b2",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "lover-b2"
+  ],
+  "room": null,
+  "code": "lover-b2",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.rebel-b2",
+  "batch": "yeon-time-b2",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "rebel-b2"
+  ],
+  "room": null,
+  "code": "rebel-b2",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.caregiver-b2",
+  "batch": "yeon-time-b2",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "caregiver-b2"
+  ],
+  "room": null,
+  "code": "caregiver-b2",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.explorer-b2",
+  "batch": "yeon-time-b2",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "explorer-b2"
+  ],
+  "room": null,
+  "code": "explorer-b2",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.creator-b2",
+  "batch": "yeon-time-b2",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "creator-b2"
+  ],
+  "room": null,
+  "code": "creator-b2",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.ruler-b2",
+  "batch": "yeon-time-b2",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "ruler-b2"
+  ],
+  "room": null,
+  "code": "ruler-b2",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.warrior-b3",
+  "batch": "yeon-time-b3",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "warrior-b3"
+  ],
+  "room": null,
+  "code": "warrior-b3",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.sage-b3",
+  "batch": "yeon-time-b3",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "sage-b3"
+  ],
+  "room": null,
+  "code": "sage-b3",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.lover-b3",
+  "batch": "yeon-time-b3",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "lover-b3"
+  ],
+  "room": null,
+  "code": "lover-b3",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.rebel-b3",
+  "batch": "yeon-time-b3",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "rebel-b3"
+  ],
+  "room": null,
+  "code": "rebel-b3",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.caregiver-b3",
+  "batch": "yeon-time-b3",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "caregiver-b3"
+  ],
+  "room": null,
+  "code": "caregiver-b3",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.explorer-b3",
+  "batch": "yeon-time-b3",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "explorer-b3"
+  ],
+  "room": null,
+  "code": "explorer-b3",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.creator-b3",
+  "batch": "yeon-time-b3",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "creator-b3"
+  ],
+  "room": null,
+  "code": "creator-b3",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.ruler-b3",
+  "batch": "yeon-time-b3",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "ruler-b3"
+  ],
+  "room": null,
+  "code": "ruler-b3",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.warrior-b4",
+  "batch": "yeon-time-b4",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "warrior-b4"
+  ],
+  "room": null,
+  "code": "warrior-b4",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.sage-b4",
+  "batch": "yeon-time-b4",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "sage-b4"
+  ],
+  "room": null,
+  "code": "sage-b4",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.lover-b4",
+  "batch": "yeon-time-b4",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "lover-b4"
+  ],
+  "room": null,
+  "code": "lover-b4",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.rebel-b4",
+  "batch": "yeon-time-b4",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "rebel-b4"
+  ],
+  "room": null,
+  "code": "rebel-b4",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.caregiver-b4",
+  "batch": "yeon-time-b4",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "caregiver-b4"
+  ],
+  "room": null,
+  "code": "caregiver-b4",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.explorer-b4",
+  "batch": "yeon-time-b4",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "explorer-b4"
+  ],
+  "room": null,
+  "code": "explorer-b4",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.creator-b4",
+  "batch": "yeon-time-b4",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "creator-b4"
+  ],
+  "room": null,
+  "code": "creator-b4",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.ruler-b4",
+  "batch": "yeon-time-b4",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "ruler-b4"
+  ],
+  "room": null,
+  "code": "ruler-b4",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.warrior-b5",
+  "batch": "yeon-time-b5",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "warrior-b5"
+  ],
+  "room": null,
+  "code": "warrior-b5",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.sage-b5",
+  "batch": "yeon-time-b5",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "sage-b5"
+  ],
+  "room": null,
+  "code": "sage-b5",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.lover-b5",
+  "batch": "yeon-time-b5",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "lover-b5"
+  ],
+  "room": null,
+  "code": "lover-b5",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.rebel-b5",
+  "batch": "yeon-time-b5",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "rebel-b5"
+  ],
+  "room": null,
+  "code": "rebel-b5",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.caregiver-b5",
+  "batch": "yeon-time-b5",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "caregiver-b5"
+  ],
+  "room": null,
+  "code": "caregiver-b5",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.explorer-b5",
+  "batch": "yeon-time-b5",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "explorer-b5"
+  ],
+  "room": null,
+  "code": "explorer-b5",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.creator-b5",
+  "batch": "yeon-time-b5",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "creator-b5"
+  ],
+  "room": null,
+  "code": "creator-b5",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.ruler-b5",
+  "batch": "yeon-time-b5",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "ruler-b5"
+  ],
+  "room": null,
+  "code": "ruler-b5",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.warrior-b6",
+  "batch": "yeon-time-b6",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "warrior-b6"
+  ],
+  "room": null,
+  "code": "warrior-b6",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.sage-b6",
+  "batch": "yeon-time-b6",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "sage-b6"
+  ],
+  "room": null,
+  "code": "sage-b6",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.lover-b6",
+  "batch": "yeon-time-b6",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "lover-b6"
+  ],
+  "room": null,
+  "code": "lover-b6",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.rebel-b6",
+  "batch": "yeon-time-b6",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "rebel-b6"
+  ],
+  "room": null,
+  "code": "rebel-b6",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.caregiver-b6",
+  "batch": "yeon-time-b6",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "caregiver-b6"
+  ],
+  "room": null,
+  "code": "caregiver-b6",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.explorer-b6",
+  "batch": "yeon-time-b6",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "explorer-b6"
+  ],
+  "room": null,
+  "code": "explorer-b6",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.creator-b6",
+  "batch": "yeon-time-b6",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "creator-b6"
+  ],
+  "room": null,
+  "code": "creator-b6",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.ruler-b6",
+  "batch": "yeon-time-b6",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "ruler-b6"
+  ],
+  "room": null,
+  "code": "ruler-b6",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.warrior-b7",
+  "batch": "yeon-time-b7",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "warrior-b7"
+  ],
+  "room": null,
+  "code": "warrior-b7",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.sage-b7",
+  "batch": "yeon-time-b7",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "sage-b7"
+  ],
+  "room": null,
+  "code": "sage-b7",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.lover-b7",
+  "batch": "yeon-time-b7",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "lover-b7"
+  ],
+  "room": null,
+  "code": "lover-b7",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.rebel-b7",
+  "batch": "yeon-time-b7",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "rebel-b7"
+  ],
+  "room": null,
+  "code": "rebel-b7",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.caregiver-b7",
+  "batch": "yeon-time-b7",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "caregiver-b7"
+  ],
+  "room": null,
+  "code": "caregiver-b7",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.explorer-b7",
+  "batch": "yeon-time-b7",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "explorer-b7"
+  ],
+  "room": null,
+  "code": "explorer-b7",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.creator-b7",
+  "batch": "yeon-time-b7",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "creator-b7"
+  ],
+  "room": null,
+  "code": "creator-b7",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.time.ruler-b7",
+  "batch": "yeon-time-b7",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "time",
+   "ruler-b7"
+  ],
+  "room": null,
+  "code": "ruler-b7",
+  "kind": "yeon.time",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.season.wood",
+  "batch": "yeon-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "season",
+   "wood"
+  ],
+  "room": null,
+  "code": "wood",
+  "kind": "yeon.season",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.season.fire",
+  "batch": "yeon-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "season",
+   "fire"
+  ],
+  "room": null,
+  "code": "fire",
+  "kind": "yeon.season",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.season.earth",
+  "batch": "yeon-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "season",
+   "earth"
+  ],
+  "room": null,
+  "code": "earth",
+  "kind": "yeon.season",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.season.metal",
+  "batch": "yeon-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "season",
+   "metal"
+  ],
+  "room": null,
+  "code": "metal",
+  "kind": "yeon.season",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.season.water",
+  "batch": "yeon-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "season",
+   "water"
+  ],
+  "room": null,
+  "code": "water",
+  "kind": "yeon.season",
+  "voice": "book",
+  "target": 350,
+  "min": 298,
+  "max": 402,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.alt.same.warrior",
+  "batch": "yeon-alt-same",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "same",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.alt.same",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.same.sage",
+  "batch": "yeon-alt-same",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "same",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.alt.same",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.same.lover",
+  "batch": "yeon-alt-same",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "same",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.alt.same",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.same.rebel",
+  "batch": "yeon-alt-same",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "same",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.alt.same",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.same.caregiver",
+  "batch": "yeon-alt-same",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "same",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.alt.same",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.same.explorer",
+  "batch": "yeon-alt-same",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "same",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.alt.same",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.same.creator",
+  "batch": "yeon-alt-same",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "same",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.alt.same",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.same.ruler",
+  "batch": "yeon-alt-same",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "same",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.alt.same",
+  "voice": "book",
+  "target": 300,
+  "min": 255,
+  "max": 345,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.notime.warrior",
+  "batch": "yeon-alt-notime",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "notime",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.alt.notime",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.notime.sage",
+  "batch": "yeon-alt-notime",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "notime",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.alt.notime",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.notime.lover",
+  "batch": "yeon-alt-notime",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "notime",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.alt.notime",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.notime.rebel",
+  "batch": "yeon-alt-notime",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "notime",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.alt.notime",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.notime.caregiver",
+  "batch": "yeon-alt-notime",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "notime",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.alt.notime",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.notime.explorer",
+  "batch": "yeon-alt-notime",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "notime",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.alt.notime",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.notime.creator",
+  "batch": "yeon-alt-notime",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "notime",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.alt.notime",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.notime.ruler",
+  "batch": "yeon-alt-notime",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "notime",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.alt.notime",
+  "voice": "book",
+  "target": 220,
+  "min": 187,
+  "max": 253,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "yeon.alt.teen.know.warrior",
+  "batch": "yeon-alt-teen-know",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "know",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.know.sage",
+  "batch": "yeon-alt-teen-know",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "know",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.know.lover",
+  "batch": "yeon-alt-teen-know",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "know",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.know.rebel",
+  "batch": "yeon-alt-teen-know",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "know",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.know.caregiver",
+  "batch": "yeon-alt-teen-know",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "know",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.know.explorer",
+  "batch": "yeon-alt-teen-know",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "know",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.know.creator",
+  "batch": "yeon-alt-teen-know",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "know",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.know.ruler",
+  "batch": "yeon-alt-teen-know",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "know",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.friend.warrior",
+  "batch": "yeon-alt-teen-friend",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "friend",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.friend.sage",
+  "batch": "yeon-alt-teen-friend",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "friend",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.friend.lover",
+  "batch": "yeon-alt-teen-friend",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "friend",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.friend.rebel",
+  "batch": "yeon-alt-teen-friend",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "friend",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.friend.caregiver",
+  "batch": "yeon-alt-teen-friend",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "friend",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.friend.explorer",
+  "batch": "yeon-alt-teen-friend",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "friend",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.friend.creator",
+  "batch": "yeon-alt-teen-friend",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "friend",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.friend.ruler",
+  "batch": "yeon-alt-teen-friend",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "friend",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.place.warrior",
+  "batch": "yeon-alt-teen-place",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "place",
+   "warrior"
+  ],
+  "room": null,
+  "code": "warrior",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.place.sage",
+  "batch": "yeon-alt-teen-place",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "place",
+   "sage"
+  ],
+  "room": null,
+  "code": "sage",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.place.lover",
+  "batch": "yeon-alt-teen-place",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "place",
+   "lover"
+  ],
+  "room": null,
+  "code": "lover",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.place.rebel",
+  "batch": "yeon-alt-teen-place",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "place",
+   "rebel"
+  ],
+  "room": null,
+  "code": "rebel",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.place.caregiver",
+  "batch": "yeon-alt-teen-place",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "place",
+   "caregiver"
+  ],
+  "room": null,
+  "code": "caregiver",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.place.explorer",
+  "batch": "yeon-alt-teen-place",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "place",
+   "explorer"
+  ],
+  "room": null,
+  "code": "explorer",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.place.creator",
+  "batch": "yeon-alt-teen-place",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "place",
+   "creator"
+  ],
+  "room": null,
+  "code": "creator",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.place.ruler",
+  "batch": "yeon-alt-teen-place",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "place",
+   "ruler"
+  ],
+  "room": null,
+  "code": "ruler",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 475,
+  "min": 404,
+  "max": 546,
+  "status": "todo",
+  "note": "",
+  "review": "all"
+ },
+ {
+  "id": "yeon.alt.teen.season.wood",
+  "batch": "yeon-alt-teen-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "season",
+   "wood"
+  ],
+  "room": null,
+  "code": "wood",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.alt.teen.season.fire",
+  "batch": "yeon-alt-teen-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "season",
+   "fire"
+  ],
+  "room": null,
+  "code": "fire",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.alt.teen.season.earth",
+  "batch": "yeon-alt-teen-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "season",
+   "earth"
+  ],
+  "room": null,
+  "code": "earth",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.alt.teen.season.metal",
+  "batch": "yeon-alt-teen-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "season",
+   "metal"
+  ],
+  "room": null,
+  "code": "metal",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "yeon.alt.teen.season.water",
+  "batch": "yeon-alt-teen-season",
+  "file": "api/_paid/book/book-yeon.js",
+  "path": [
+   "alt",
+   "teen",
+   "season",
+   "water"
+  ],
+  "room": null,
+  "code": "water",
+  "kind": "yeon.alt.teen",
+  "voice": "book",
+  "target": 250,
+  "min": 213,
+  "max": 288,
+  "status": "todo",
+  "note": "",
+  "review": "all",
+  "by": "만신 일간 오행"
+ },
+ {
+  "id": "heartLine.saju.gap",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "gap",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "gap",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.eul",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "eul",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "eul",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.byeong",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "byeong",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "byeong",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.jeong",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "jeong",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "jeong",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.mu",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "mu",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "mu",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.gi",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "gi",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "gi",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.gyeong",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "gyeong",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "gyeong",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.sin",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "sin",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "sin",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.im",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "im",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "im",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.saju.gye",
+  "batch": "heart-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "gye",
+   "heartLine"
+  ],
+  "room": "saju",
+  "code": "gye",
+  "kind": "heartLine",
+  "voice": "saju",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.beith",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "beith",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "beith",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.luis",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "luis",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "luis",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.fearn",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "fearn",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "fearn",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.sail",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "sail",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "sail",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.nion",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "nion",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "nion",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.uath",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "uath",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "uath",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.dair",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "dair",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "dair",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.tinne",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "tinne",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "tinne",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.coll",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "coll",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "coll",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.ceirt",
+  "batch": "heart-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ceirt",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "ceirt",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.muin",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "muin",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "muin",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.gort",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "gort",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "gort",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.ngetal",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ngetal",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "ngetal",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.straif",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "straif",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "straif",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.ruis",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ruis",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "ruis",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.ailm",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ailm",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "ailm",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.onn",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "onn",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "onn",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.ur",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ur",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "ur",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.edad",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "edad",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "edad",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.ogham.idad",
+  "batch": "heart-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "idad",
+   "heartLine"
+  ],
+  "room": "ogham",
+  "code": "idad",
+  "kind": "heartLine",
+  "voice": "ogham",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.ashwini",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "ashwini",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "ashwini",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.bharani",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "bharani",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "bharani",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.krittika",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "krittika",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "krittika",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.rohini",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "rohini",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "rohini",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.mrigashira",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "mrigashira",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "mrigashira",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.ardra",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "ardra",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "ardra",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.punarvasu",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "punarvasu",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "punarvasu",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.pushya",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "pushya",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "pushya",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.ashlesha",
+  "batch": "heart-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "ashlesha",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "ashlesha",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.magha",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "magha",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "magha",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.purva-phalguni",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "purva-phalguni",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "purva-phalguni",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.uttara-phalguni",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "uttara-phalguni",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "uttara-phalguni",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.hasta",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "hasta",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "hasta",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.chitra",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "chitra",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "chitra",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.swati",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "swati",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "swati",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.vishakha",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "vishakha",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "vishakha",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.anuradha",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "anuradha",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "anuradha",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.jyeshtha",
+  "batch": "heart-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "jyeshtha",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "jyeshtha",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.mula",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "mula",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "mula",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.purva-ashadha",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "purva-ashadha",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "purva-ashadha",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.uttara-ashadha",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "uttara-ashadha",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "uttara-ashadha",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.shravana",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "shravana",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "shravana",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.dhanishta",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "dhanishta",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "dhanishta",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.shatabhisha",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "shatabhisha",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "shatabhisha",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.purva-bhadrapada",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "purva-bhadrapada",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "purva-bhadrapada",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.uttara-bhadrapada",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "uttara-bhadrapada",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "uttara-bhadrapada",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.star.revati",
+  "batch": "heart-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "revati",
+   "heartLine"
+  ],
+  "room": "star",
+  "code": "revati",
+  "kind": "heartLine",
+  "voice": "star",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-1",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-1",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-1",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-2",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-2",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-2",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-3",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-3",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-3",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-4",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-4",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-4",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-5",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-5",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-5",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-6",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-6",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-6",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-7",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-7",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-7",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-8",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-8",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-8",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-9",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-9",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-9",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-10",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-10",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-10",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-11",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-11",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-11",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-12",
+  "batch": "heart-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-12",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-12",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-13",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-13",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-13",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-14",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-14",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-14",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-15",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-15",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-15",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-16",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-16",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-16",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-17",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-17",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-17",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-18",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-18",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-18",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-19",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-19",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-19",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-20",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-20",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-20",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-21",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-21",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-21",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-22",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-22",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-22",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-23",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-23",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-23",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-24",
+  "batch": "heart-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-24",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-24",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-25",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-25",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-25",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-26",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-26",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-26",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-27",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-27",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-27",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-28",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-28",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-28",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-29",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-29",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-29",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-30",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-30",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-30",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-31",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-31",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-31",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-32",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-32",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-32",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-33",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-33",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-33",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-34",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-34",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-34",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-35",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-35",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-35",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.decan.decan-36",
+  "batch": "heart-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-36",
+   "heartLine"
+  ],
+  "room": "decan",
+  "code": "decan-36",
+  "kind": "heartLine",
+  "voice": "decan",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.imix",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "imix",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "imix",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.ik",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ik",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "ik",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.akbal",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "akbal",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "akbal",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.kan",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kan",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "kan",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.chikchan",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "chikchan",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "chikchan",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.kimi",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kimi",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "kimi",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.manik",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "manik",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "manik",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.lamat",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "lamat",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "lamat",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.muluk",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "muluk",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "muluk",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.ok",
+  "batch": "heart-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ok",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "ok",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.chuwen",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "chuwen",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "chuwen",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.eb",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "eb",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "eb",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.ben",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ben",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "ben",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.ix",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ix",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "ix",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.men",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "men",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "men",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.kib",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kib",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "kib",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.kaban",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kaban",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "kaban",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.etznab",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "etznab",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "etznab",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.kawak",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kawak",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "kawak",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.tzolkin.ajaw",
+  "batch": "heart-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ajaw",
+   "heartLine"
+  ],
+  "room": "tzolkin",
+  "code": "ajaw",
+  "kind": "heartLine",
+  "voice": "tzolkin",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.rune.fehu",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "fehu",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "fehu",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.uruz",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "uruz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "uruz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.thurisaz",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "thurisaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "thurisaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.ansuz",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "ansuz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "ansuz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.raidho",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "raidho",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "raidho",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.kenaz",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "kenaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "kenaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.gebo",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "gebo",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "gebo",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.wunjo",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "wunjo",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "wunjo",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.hagalaz",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "hagalaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "hagalaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.nauthiz",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "nauthiz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "nauthiz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.isa",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "isa",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "isa",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.jera",
+  "batch": "heart-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "jera",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "jera",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.eihwaz",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "eihwaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "eihwaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.perthro",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "perthro",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "perthro",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.algiz",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "algiz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "algiz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.sowilo",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "sowilo",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "sowilo",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.tiwaz",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "tiwaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "tiwaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.berkano",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "berkano",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "berkano",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.ehwaz",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "ehwaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "ehwaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.mannaz",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "mannaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "mannaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.laguz",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "laguz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "laguz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.ingwaz",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "ingwaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "ingwaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.dagaz",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "dagaz",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "dagaz",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.rune.othala",
+  "batch": "heart-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "othala",
+   "heartLine"
+  ],
+  "room": "rune",
+  "code": "othala",
+  "kind": "heartLine",
+  "voice": "rune",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "heartLine.sibyl.sors-1",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-1",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-1",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-2",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-2",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-2",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-3",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-3",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-3",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-4",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-4",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-4",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-5",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-5",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-5",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-6",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-6",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-6",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-7",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-7",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-7",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-8",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-8",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-8",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-9",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-9",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-9",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-10",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-10",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-10",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-11",
+  "batch": "heart-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-11",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-11",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-12",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-12",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-12",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-13",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-13",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-13",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-14",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-14",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-14",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-15",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-15",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-15",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-16",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-16",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-16",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-17",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-17",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-17",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-18",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-18",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-18",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-19",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-19",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-19",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-20",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-20",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-20",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-21",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-21",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-21",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-22",
+  "batch": "heart-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-22",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-22",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-23",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-23",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-23",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-24",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-24",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-24",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-25",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-25",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-25",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-26",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-26",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-26",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-27",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-27",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-27",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-28",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-28",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-28",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-29",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-29",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-29",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-30",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-30",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-30",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-31",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-31",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-31",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "heartLine.sibyl.sors-32",
+  "batch": "heart-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-32",
+   "heartLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-32",
+  "kind": "heartLine",
+  "voice": "sibyl",
+  "target": 150,
+  "min": 128,
+  "max": 173,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.gap",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "gap",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "gap",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.eul",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "eul",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "eul",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.byeong",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "byeong",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "byeong",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.jeong",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "jeong",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "jeong",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.mu",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "mu",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "mu",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.gi",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "gi",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "gi",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.gyeong",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "gyeong",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "gyeong",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.sin",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "sin",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "sin",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.im",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "im",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "im",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.saju.gye",
+  "batch": "first-saju-1",
+  "file": "api/_paid/book/book-saju.js",
+  "path": [
+   "full",
+   "gye",
+   "firstLine"
+  ],
+  "room": "saju",
+  "code": "gye",
+  "kind": "firstLine",
+  "voice": "saju",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.beith",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "beith",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "beith",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.luis",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "luis",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "luis",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.fearn",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "fearn",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "fearn",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.sail",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "sail",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "sail",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.nion",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "nion",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "nion",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.uath",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "uath",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "uath",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.dair",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "dair",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "dair",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.tinne",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "tinne",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "tinne",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.coll",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "coll",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "coll",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.ceirt",
+  "batch": "first-ogham-1",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ceirt",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "ceirt",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.muin",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "muin",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "muin",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.gort",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "gort",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "gort",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.ngetal",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ngetal",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "ngetal",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.straif",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "straif",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "straif",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.ruis",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ruis",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "ruis",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.ailm",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ailm",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "ailm",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.onn",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "onn",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "onn",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.ur",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "ur",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "ur",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.edad",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "edad",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "edad",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.ogham.idad",
+  "batch": "first-ogham-2",
+  "file": "api/_paid/book/book-ogham.js",
+  "path": [
+   "full",
+   "idad",
+   "firstLine"
+  ],
+  "room": "ogham",
+  "code": "idad",
+  "kind": "firstLine",
+  "voice": "ogham",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.ashwini",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "ashwini",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "ashwini",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.bharani",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "bharani",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "bharani",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.krittika",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "krittika",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "krittika",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.rohini",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "rohini",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "rohini",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.mrigashira",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "mrigashira",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "mrigashira",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.ardra",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "ardra",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "ardra",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.punarvasu",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "punarvasu",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "punarvasu",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.pushya",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "pushya",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "pushya",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.ashlesha",
+  "batch": "first-star-1",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "ashlesha",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "ashlesha",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.magha",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "magha",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "magha",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.purva-phalguni",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "purva-phalguni",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "purva-phalguni",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.uttara-phalguni",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "uttara-phalguni",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "uttara-phalguni",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.hasta",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "hasta",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "hasta",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.chitra",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "chitra",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "chitra",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.swati",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "swati",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "swati",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.vishakha",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "vishakha",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "vishakha",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.anuradha",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "anuradha",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "anuradha",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.jyeshtha",
+  "batch": "first-star-2",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "jyeshtha",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "jyeshtha",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.mula",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "mula",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "mula",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.purva-ashadha",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "purva-ashadha",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "purva-ashadha",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.uttara-ashadha",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "uttara-ashadha",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "uttara-ashadha",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.shravana",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "shravana",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "shravana",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.dhanishta",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "dhanishta",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "dhanishta",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.shatabhisha",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "shatabhisha",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "shatabhisha",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.purva-bhadrapada",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "purva-bhadrapada",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "purva-bhadrapada",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.uttara-bhadrapada",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "uttara-bhadrapada",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "uttara-bhadrapada",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.star.revati",
+  "batch": "first-star-3",
+  "file": "api/_paid/book/book-star.js",
+  "path": [
+   "full",
+   "revati",
+   "firstLine"
+  ],
+  "room": "star",
+  "code": "revati",
+  "kind": "firstLine",
+  "voice": "star",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-1",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-1",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-1",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-2",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-2",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-2",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-3",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-3",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-3",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-4",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-4",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-4",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-5",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-5",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-5",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-6",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-6",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-6",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-7",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-7",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-7",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-8",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-8",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-8",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-9",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-9",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-9",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-10",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-10",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-10",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-11",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-11",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-11",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-12",
+  "batch": "first-decan-1",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-12",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-12",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-13",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-13",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-13",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-14",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-14",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-14",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-15",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-15",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-15",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-16",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-16",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-16",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-17",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-17",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-17",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-18",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-18",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-18",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-19",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-19",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-19",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-20",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-20",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-20",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-21",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-21",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-21",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-22",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-22",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-22",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-23",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-23",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-23",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-24",
+  "batch": "first-decan-2",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-24",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-24",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-25",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-25",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-25",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-26",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-26",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-26",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-27",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-27",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-27",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-28",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-28",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-28",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-29",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-29",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-29",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-30",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-30",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-30",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-31",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-31",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-31",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-32",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-32",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-32",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-33",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-33",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-33",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-34",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-34",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-34",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-35",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-35",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-35",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.decan.decan-36",
+  "batch": "first-decan-3",
+  "file": "api/_paid/book/book-decan.js",
+  "path": [
+   "full",
+   "decan-36",
+   "firstLine"
+  ],
+  "room": "decan",
+  "code": "decan-36",
+  "kind": "firstLine",
+  "voice": "decan",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.imix",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "imix",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "imix",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.ik",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ik",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "ik",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.akbal",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "akbal",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "akbal",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.kan",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kan",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "kan",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.chikchan",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "chikchan",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "chikchan",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.kimi",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kimi",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "kimi",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.manik",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "manik",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "manik",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.lamat",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "lamat",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "lamat",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.muluk",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "muluk",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "muluk",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.ok",
+  "batch": "first-tzolkin-1",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ok",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "ok",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.chuwen",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "chuwen",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "chuwen",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.eb",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "eb",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "eb",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.ben",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ben",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "ben",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.ix",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ix",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "ix",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.men",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "men",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "men",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.kib",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kib",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "kib",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.kaban",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kaban",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "kaban",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.etznab",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "etznab",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "etznab",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.kawak",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "kawak",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "kawak",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.tzolkin.ajaw",
+  "batch": "first-tzolkin-2",
+  "file": "api/_paid/book/book-tzolkin.js",
+  "path": [
+   "full",
+   "ajaw",
+   "firstLine"
+  ],
+  "room": "tzolkin",
+  "code": "ajaw",
+  "kind": "firstLine",
+  "voice": "tzolkin",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.rune.fehu",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "fehu",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "fehu",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.uruz",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "uruz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "uruz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.thurisaz",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "thurisaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "thurisaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.ansuz",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "ansuz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "ansuz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.raidho",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "raidho",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "raidho",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.kenaz",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "kenaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "kenaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.gebo",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "gebo",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "gebo",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.wunjo",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "wunjo",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "wunjo",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.hagalaz",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "hagalaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "hagalaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.nauthiz",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "nauthiz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "nauthiz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.isa",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "isa",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "isa",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.jera",
+  "batch": "first-rune-1",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "jera",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "jera",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.eihwaz",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "eihwaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "eihwaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.perthro",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "perthro",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "perthro",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.algiz",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "algiz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "algiz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.sowilo",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "sowilo",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "sowilo",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.tiwaz",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "tiwaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "tiwaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.berkano",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "berkano",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "berkano",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.ehwaz",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "ehwaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "ehwaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.mannaz",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "mannaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "mannaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.laguz",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "laguz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "laguz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.ingwaz",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "ingwaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "ingwaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.dagaz",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "dagaz",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "dagaz",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.rune.othala",
+  "batch": "first-rune-2",
+  "file": "api/_paid/book/book-rune.js",
+  "path": [
+   "full",
+   "othala",
+   "firstLine"
+  ],
+  "room": "rune",
+  "code": "othala",
+  "kind": "firstLine",
+  "voice": "rune",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": "룬: 지금 자리에 놓였을 때를 겨냥(17-3)"
+ },
+ {
+  "id": "firstLine.sibyl.sors-1",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-1",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-1",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-2",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-2",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-2",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-3",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-3",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-3",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-4",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-4",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-4",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-5",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-5",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-5",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-6",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-6",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-6",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-7",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-7",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-7",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-8",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-8",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-8",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-9",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-9",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-9",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-10",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-10",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-10",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-11",
+  "batch": "first-sibyl-1",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-11",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-11",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-12",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-12",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-12",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-13",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-13",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-13",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-14",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-14",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-14",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-15",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-15",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-15",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-16",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-16",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-16",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-17",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-17",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-17",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-18",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-18",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-18",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-19",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-19",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-19",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-20",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-20",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-20",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-21",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-21",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-21",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-22",
+  "batch": "first-sibyl-2",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-22",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-22",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-23",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-23",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-23",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-24",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-24",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-24",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-25",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-25",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-25",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-26",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-26",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-26",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-27",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-27",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-27",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-28",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-28",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-28",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-29",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-29",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-29",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-30",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-30",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-30",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-31",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-31",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-31",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ },
+ {
+  "id": "firstLine.sibyl.sors-32",
+  "batch": "first-sibyl-3",
+  "file": "api/_paid/book/book-sibyl.js",
+  "path": [
+   "full",
+   "sors-32",
+   "firstLine"
+  ],
+  "room": "sibyl",
+  "code": "sors-32",
+  "kind": "firstLine",
+  "voice": "sibyl",
+  "target": 80,
+  "min": 68,
+  "max": 92,
+  "status": "todo",
+  "note": ""
+ }
+]

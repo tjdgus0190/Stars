@@ -1,7 +1,7 @@
 // 낯선 점술관 — 한 권의 책 조립 (13단계 spec 13-5). 문구 없음, 로직만.
 // 13단계 휴면 서버 core.js(F4-B2에서 지움)의 hiddenEntry·fullRoom·pairCode·timelineStages·buildReport 순서 규칙을 옮긴 것이다.
-// (14단계 F4-B2) 문구 원본: 여는 글·닫는 글 = 공개 data-book-free.js(BOOK_FREE), 유료 10장 = api/_paid/book/book-*.js를
-//   함수 book이 열람 코드 확인 뒤 JSON으로 주면 app.js가 같은 전역 이름(BOOK_SAJU…BOOK_ARCH)에 넣는다.
+// (14단계 F4-B2) 문구 원본: 여는 글·닫는 글 = 공개 data-book-free.js(BOOK_FREE), 유료 11장(17단계 인연의 장 포함, 책 13장) = api/_paid/book/book-*.js를
+//   함수 book이 열람 코드 확인 뒤 JSON으로 주면 app.js가 같은 전역 이름(BOOK_SAJU…BOOK_ARCH·BOOK_YEON)에 넣는다.
 // 입력은 결과 코드·원형·나이 구간(+ 궁합은 관계 유형·방 코드)뿐이다. 이름·생년월일 원문은 받지 않는다(6장).
 // 문구 C = 전역(BOOK_FREE·BOOK_SAJU…BOOK_ARCH)을 contentFrom(window)로 묶은 것.
 //   C = { open, deep, close, timeline, match, matchRooms, bond, full: {방: […]}, hidden: {방: […]} } — 아직 안 받은 칸은 비어 있다.
@@ -27,6 +27,7 @@
     if (w.BOOK_MATCH) [C.match, C.matchRooms, C.bond] = [w.BOOK_MATCH.pairs, w.BOOK_MATCH.rooms, w.BOOK_MATCH.bond];
     if (w.BOOK_FREE) [C.open, C.close] = [w.BOOK_FREE.open, w.BOOK_FREE.close];
     if (w.BOOK_ARCH) C.deep = w.BOOK_ARCH.deep;
+    if (w.BOOK_YEON) C.yeon = w.BOOK_YEON;
     return C;
   }
   const byCode = (list) => Object.fromEntries((list || []).map((e) => [e.code, e]));
@@ -57,6 +58,8 @@
         ch4: [next.advice.lede, ...next.advice.body],
         topics: Object.assign({}, next.advice.topics),
         hidden,
+        firstLine: now.firstLine || "", // (17-3) 여러 결과를 엮는 장(룬뿐) = "지금" 자리 결과 하나의 firstLine·heartLine
+        heartLine: now.heartLine || "",
       };
     }
     const e = list[room === "tzolkin" ? codes.tzolkin.sign : room === "saju" ? sajuStem(codes.saju) : codes[room]];
@@ -69,6 +72,8 @@
       ch3: [e.shadow.lede, ...insertAt(e.shadow.body, 1, e.shadow.quote), e.advice.hook],
       ch4: [e.advice.lede, ...e.advice.body],
       hidden,
+      firstLine: e.firstLine || "", // (17-3) 장 첫 쪽 맨 앞 한 문장. 빈칸이면 그리지 않는다
+      heartLine: e.heartLine || "", // (17-3) 장 가운데(Ⅱ장 끝 떡밥 줄 바로 앞 = identity 뒤·shadow 앞) 한 장면
     };
     if (room === "sibyl") out.topics = Object.assign({}, e.topics);
     return out;
@@ -84,6 +89,81 @@
       return { band: b, now: b === band, past: b < band, label: e.label, work: e.work, relation: e.relation, learn: e.learn, move: e.move, keyword: e.keyword };
     });
   }
+
+  // ═════════ (17단계 17-2) 인연의 장 — 고르기는 모두 이 브라우저 안에서. 서버로는 { file: "yeon", pass }만 간다 ═════════
+  // 주·보조 원형: 장 순서대로 놓인 원형 목록(빈 칸은 null)에서 횟수 많은 순, 동점이면 앞선 장, 2위가 없으면 보조 = 주.
+  //   지도(map.js Core.archPair, 16-2의 2)와 같은 규칙이다(yeon.test.js가 두 함수 결과를 대조). 주 원형은 app.js currentArchetype과 같다.
+  function archPair(list) {
+    const tally = {};
+    list.forEach((a, i) => {
+      if (!ARCH.includes(a)) return;
+      const t = (tally[a] = tally[a] || { count: 0, first: i });
+      t.count += 1;
+    });
+    const ranked = Object.entries(tally).sort((x, y) => y[1].count - x[1].count || x[1].first - y[1].first).map((e) => e[0]);
+    return ranked.length ? { main: ranked[0], sub: ranked[1] || ranked[0] } : null;
+  }
+  // 만 나이 (today 기준, 생일 당일부터 한 살 더). 생년월일·나이·미성년 여부는 보내지 않고 저장하지 않는다(6장, 17-2)
+  function ageOf(b, today) {
+    const t = today || new Date();
+    let age = t.getFullYear() - b.y;
+    if (t.getMonth() + 1 < b.m || (t.getMonth() + 1 === b.m && t.getDate() < b.d)) age--;
+    return age;
+  }
+  // 나이 구간 b1(24세 이하) b2(25~29) … b7(50세 이상) = 0~6 (6-2, 시기별 흐름과 같은 구간)
+  const bandOf = (age) => (age <= 24 ? 0 : Math.min(6, Math.floor((age - 25) / 5) + 1));
+  const TEEN_UNDER = 19; // (97번 기본값) 만 19세 미만 = 미성년판
+  const isTeen = (age) => age != null && age < TEEN_UNDER;
+  const ELEMENT_OF_STEM = ["wood", "wood", "fire", "fire", "earth", "earth", "metal", "metal", "water", "water"]; // saju.js STEM_EL·ELEMENTS와 같음(갑을=목 … 임계=수)
+  // ctx = { arch: 주 원형, sub: 보조 원형, allDone: 일곱 방 다 마침, band: 0~6|null(나이 모름), teen: true|false, stem: 만신 일간 0~9|null(만신 미방문) }
+  // 돌려주는 모양: { id, variant: base|teen, pages: [{ key, text, note, bands }] } — key·note는 data.js book.yeon 키 이름(화면 틀 문구는 data.js)
+  //   빠진 경우(17-2 표): 보조 = 주 → same(+ 일곱 방 전이면 note sameMore) · 나이 모름 → notime + note noAge(b1 문장을 쓰지 않음)
+  //   만신 미방문 → 계절 쪽 text 없이 note noSaju · 만 19세 미만 → teenKnow·teenFriend·teenPlace + 미성년 계절(4·6쪽 숨김)
+  function yeonChapter(C, ctx) {
+    const Y = C.yeon;
+    const a = ctx.arch;
+    const season = (src) => (ctx.stem == null ? { key: "season", text: null, note: "noSaju" } : { key: "season", text: src[ELEMENT_OF_STEM[ctx.stem]], note: null });
+    if (ctx.teen) {
+      const T = Y.alt.teen;
+      return { id: "yeon", variant: "teen", pages: [
+        { key: "teenKnow", text: T.know[a], note: null },
+        { key: "teenFriend", text: T.friend[a], note: null },
+        { key: "teenPlace", text: T.place[a], note: null },
+        season(T.season),
+      ] };
+    }
+    const same = !ctx.sub || ctx.sub === a;
+    const time = ctx.band == null
+      ? { key: "time", text: Y.alt.notime[a], note: "noAge" }
+      : { key: "time", text: null, note: null, bands: [ctx.band, ctx.band + 1].filter((b) => b <= 6).map((b) => ({ band: b, now: b === ctx.band, text: Y.time[a + "-b" + (b + 1)] })) };
+    return { id: "yeon", variant: "base", pages: [
+      { key: "pull", text: Y.pull[a], note: null },
+      { key: "mirror", text: Y.mirror[a], note: null },
+      { key: "meet", text: Y.meet[a], note: null },
+      same ? { key: "same", text: Y.alt.same[a], note: ctx.allDone ? null : "sameMore" } : { key: "twist", text: Y.twist[ctx.sub], note: null },
+      { key: "scene", text: Y.scene[a], note: null },
+      time,
+      season(Y.season),
+    ] };
+  }
+  // 분량: yeonTable(BOOK_YEON) = 칸마다 글자 수(make-volume → data-volume.js의 yeon), yeonVolume(표, ctx) = 그 사람이 실제로 받는 판의 글자 수
+  //   (17-5 "받는 것", 검수 2차 권장 5). yeonChars(yeonChapter 결과)와 같아야 한다(make-volume·yeon.test.js 대조)
+  const textLen = (v) => [...(Array.isArray(v) ? v.join("") : typeof v === "string" ? v : "")].length;
+  function yeonTable(Y) {
+    const m = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, textLen(v)]));
+    return { pull: m(Y.pull), mirror: m(Y.mirror), meet: m(Y.meet), twist: m(Y.twist), scene: m(Y.scene), time: m(Y.time), season: m(Y.season),
+      same: m(Y.alt.same), notime: m(Y.alt.notime), teenKnow: m(Y.alt.teen.know), teenFriend: m(Y.alt.teen.friend), teenPlace: m(Y.alt.teen.place), teenSeason: m(Y.alt.teen.season) };
+  }
+  function yeonVolume(V, ctx) {
+    const a = ctx.arch;
+    if (!V || !a) return 0;
+    const season = (t) => (ctx.stem == null ? 0 : t[ELEMENT_OF_STEM[ctx.stem]]);
+    if (ctx.teen) return V.teenKnow[a] + V.teenFriend[a] + V.teenPlace[a] + season(V.teenSeason);
+    const same = !ctx.sub || ctx.sub === a;
+    const time = ctx.band == null ? V.notime[a] : [ctx.band, ctx.band + 1].filter((b) => b <= 6).reduce((n, b) => n + V.time[a + "-b" + (b + 1)], 0);
+    return V.pull[a] + V.mirror[a] + V.meet[a] + (same ? V.same[a] : V.twist[ctx.sub]) + V.scene[a] + time + season(V.season);
+  }
+  const yeonChars = (ch) => ch.pages.reduce((n, p) => n + textLen(p.text) + (p.bands || []).reduce((s, x) => s + textLen(x.text), 0), 0);
 
   // ── 장 하나씩 (브라우저는 연 장만 조립한다) ──
   const openChapter = (C, me) => ({ id: "open", paragraphs: paras(idx(C, "open")[me].body) });
@@ -156,5 +236,5 @@
     return { chapters, card, codes };
   }
 
-  return { sajuStem, sajuGroup, contentFrom, hiddenEntry, fullRoom, pairCode, timelineStages, openChapter, deepChapter, closeChapter, timelineChapter, mapChapter, matchChapter, buildReport, ARCH };
+  return { archPair, ageOf, bandOf, isTeen, TEEN_UNDER, ELEMENT_OF_STEM, yeonChapter, yeonTable, yeonVolume, yeonChars, sajuStem, sajuGroup, contentFrom, hiddenEntry, fullRoom, pairCode, timelineStages, openChapter, deepChapter, closeChapter, timelineChapter, mapChapter, matchChapter, buildReport, ARCH };
 });

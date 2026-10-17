@@ -247,7 +247,9 @@ for (const slug of PRODUCTS) {
     const w = {};
     vm.runInNewContext(fs.readFileSync(path.join(paid, f), "utf8"), { window: w });
     const prints = new Set();
+    let texts = 0; // 빈칸이 아닌 문자열 수 (17단계 book-yeon.js는 문구를 넣기 전 키만 있다)
     (function collect(v, k) {
+      if (typeof v === "string" && k !== "code" && v.trim()) texts++;
       if (typeof v === "string") {
         if (k === "code" || v.length < 30) return;
         if (freeSet.has(v)) return void same++;
@@ -258,7 +260,9 @@ for (const slug of PRODUCTS) {
       } else if (Array.isArray(v)) v.forEach((x) => collect(x, k));
       else if (v && typeof v === "object") Object.entries(v).forEach(([kk, x]) => collect(x, kk));
     })(w, "");
-    if (prints.size < 20) fails.push(`② ${slug}/api/_paid/book/${f} 지문 ${prints.size}개(20개 미만)`);
+    // 문구가 하나도 없는 원본(키 구조만, 17단계 book-yeon.js 문구 전)은 새는 것이 없으니 실패로 세지 않고 알린다. 문구가 하나라도 생기면 20개 기준을 그대로 적용
+    if (prints.size < 20 && texts === 0) console.log(`  (알림) ${f}: 문구 전 빈 원본 — 지문 0개, 문구를 넣으면 지문 검사 대상`);
+    else if (prints.size < 20) fails.push(`② ${slug}/api/_paid/book/${f} 지문 ${prints.size}개(20개 미만)`);
     let h = 0;
     for (const s of prints)
       if (big.includes(s)) {
