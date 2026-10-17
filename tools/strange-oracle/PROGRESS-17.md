@@ -62,3 +62,15 @@
 | j2 | I4 요청 1: 원인 = fixShortEnd가 쪽 머리 unit(.yeon-sec__head 감싼 section)을 머리로 안 봐, 마지막 쪽 50자 미만일 때 앞 쪽 단락을 통째로 넘김 → 쪽 머리만 남음. isSecHead·headish 더함(fixShortEnd 멈춤 + 끝 문장만 넘기기 moveTail, splitPara 단락째 넘김 금지, place keep). 오타 /s+/g 2곳 → \s+, moveTail 문장 정규식 \]·\s 빠짐도 고침. e2e-book I4-1(360·480·360) → 60/0 | done |
 | j3 | I4 요청 2(선택) 시기 칸: 360px에서 머리 22 + 칸 324 + 칸 324 = 670px > 쪽 595px → 나눠도 2쪽 그대로(빈칸이 다음 쪽으로 옮겨갈 뿐, 한 칸 글이 두 쪽으로 갈림) → 하지 않음 | done |
 | 끝 | 시험: 단위 151/0 · saju 41 · book 60 · pay 68 · map 80(끝에 map-switch reset) · flow reduced 127 · motion 128 · make-volume 불일치 0 · build-dist 통과 · check-17 실패 0. 커밋 안 함 | done |
+
+# I5 qa-reviewer — 2026-10-17
+
+| # | 할 일 | 상태 |
+|---|---|---|
+| q0 | 문서 읽기 | done |
+| q1 | 모의 서버 8788 test 재시작 · 단위 155/0 · check-17 실패 0 · make-volume 불일치 0 · build-dist 통과 · saju 41 · book 60 · utm 29 | done |
+| q2 | e2e-pay · map · flow (백그라운드) | doing |
+| q3 | 사람 눈: 전부 읽기 77 + 떡밥 8 + 무작위 40(시드 17) 읽음. 필수 후보 heartLine.tzolkin.manik "내민 손을 잡아 보세요"(스킨십, 애매→금지). 건강어 목록 11개뿐, 넓힌 grep 0건 | done |
+| q4 | 장 수 11장(legal 3·data.js·index.html)·환불 "새로 더해진 장" 확인, 10장 0. teen 잔여: index.html 3059 + app.js 2796 주석(새로 찾음, 권장). book 요청 {pass,file}. [초안] 0. utm 코드·privacy 4조의2 대조 일치, analytics.js 쓰는 제품 strange-oracle뿐 | done |
+| q5 | 광고 영상: ffprobe 2개 규격 맞음, --check 다시 26컷(3줄 자막 0), 대표 컷 6장 눈으로 안전 박스 안, 원국 丙寅·甲戌·辛巳·庚午 = saju.js, 외부 주소 jsdelivr @fontsource 5개뿐 | done |
+| q6 | flow motion 128/0. reports/qa 「17단계 (I5) QA 1차」 판정 수정 필요(필수 1: heartLine.tzolkin.manik → copywriter). meta.json 그대로 | done |
