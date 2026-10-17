@@ -5615,3 +5615,20 @@ body.is-reading .map-node--owner::after, body.is-reading .map-card__dot--f { ani
 @media (prefers-reduced-motion: reduce) {
   .chapter-row.is-target .chapter-row__btn { animation: none; }
 }
+
+/* ═══ (18단계 J4) UI 점검에서 고친 것 ═══ */
+/* 나의 이야기 7/7 결제 전(test·live): 미리보기 카드가 주 버튼이므로, 같은 화면 아래 지도 카드의 주 버튼은 보조 모양으로 내린다(한 화면 주 버튼 1개).
+   결말(map-slot-finale)·결제 뒤·off는 그대로. 버튼 크기·글자는 같고 바탕·그림자만 보조 버튼 결 */
+#screen-story:has([data-js="story-preview"]:not([hidden])) .map-slot--story .btn--primary {
+  background: transparent;
+  color: var(--c-text-strong);
+  border: 1px solid var(--c-line-strong);
+  box-shadow: none;
+}
+/* 새 장 대조표: 쪽 나눔에서 표는 한 덩어리. 표 아래 여백은 범례(margin-top)가 맡아 덩어리 높이를 줄인다 */
+.book-page__body .cross-sec .cross-table { margin-bottom: 0; }
+/* 낮은 화면(높이 700px 이하, 예 360×640: 책 쪽 본문 약 435px)에서는 줄 위아래 여백을 줄여 표(7줄)가 한 쪽에 들어가게 한다(J4 측정: 425px → 쪼개짐) */
+@media (max-height: 700px) {
+  .cross-table th, .cross-table td { padding-block: 3px; }
+  .cross-table__caption { padding-bottom: 4px; }
+}

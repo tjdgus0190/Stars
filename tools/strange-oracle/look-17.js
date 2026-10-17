@@ -113,48 +113,54 @@ const overflowJS = `(() => { const W = document.documentElement.clientWidth; con
 const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
 const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
 
-(async () => {
+// (18단계 J4) 한 상태를 재는 부분을 함수로 꺼냄 — look-18.js가 그대로 불러 쓴다. 높이 H0(기본 800)
+async function measure(b, width, st, OUT, H0 = 800) {
+  await b.goto(ORIGIN + st.url);
+  await sleep(500);
+  if (st.act) await st.act(b);
+  const ov = await b.evaluate(overflowJS);
+  const probe = st.probe ? await b.evaluate(st.probe) : null;
+  // 글자 상자 좌표는 전체 높이로 바꾼 뒤에 잰다(100dvh 자리가 바뀌므로)
+  const H = st.fixed ? H0 : await b.evaluate("Math.min(document.documentElement.scrollHeight, 9000)");
+  await b.send("Emulation.setDeviceMetricsOverride", { width, height: H, deviceScaleFactor: 1, mobile: true });
+  await sleep(400);
+  if (st.show) { await b.evaluate(st.show); await sleep(150); }
+  if (st.clip) { const r = await b.evaluate(`(() => { const q = document.querySelector(${JSON.stringify(st.clip)}).getBoundingClientRect(); return { x: Math.max(0, q.left - 12), y: Math.max(0, q.top + scrollY - 12), width: Math.min(${width}, q.width + 24), height: q.height + 24, scale: 4 }; })()`); const c = await b.send("Page.captureScreenshot", { format: "png", clip: r }); fs.writeFileSync(path.join(OUT, `${width}-${st.name}-clip.png`), Buffer.from(c.data, "base64")); }
+  const items = await b.evaluate(COLLECT);
+  const shot = await b.send("Page.captureScreenshot", { format: "png" });
+  fs.writeFileSync(path.join(OUT, `${width}-${st.name}.png`), Buffer.from(shot.data, "base64"));
+  await b.evaluate(`(() => { const s = document.createElement("style"); s.id = "so-hide"; s.textContent = "*, *::before, *::after { color: transparent !important; text-shadow: none !important; -webkit-text-fill-color: transparent !important; caret-color: transparent !important; text-decoration-color: transparent !important; }"; document.head.append(s); })()`);
+  await sleep(200);
+  const bare = await b.send("Page.captureScreenshot", { format: "png" });
+  const px = await b.evaluate(`(async () => {
+    const img = new Image(); img.src = "data:image/png;base64,${bare.data}"; await img.decode();
+    const cv = document.createElement("canvas"); cv.width = img.width; cv.height = img.height; const cx = cv.getContext("2d", { willReadFrequently: true }); cx.drawImage(img, 0, 0);
+    const items = ${JSON.stringify(items.map((i) => [i.x - 0, i.y, i.w, i.h]))};
+    return items.map(([x, y, w, h]) => [[x + 2, y + 2], [x + w - 3, y + 2], [x + 2, y + h - 3], [x + w - 3, y + h - 3], [x + w / 2, y + h / 2]].map(([a, c]) => { const d = cx.getImageData(Math.max(0, Math.min(img.width - 1, Math.round(a))), Math.max(0, Math.min(img.height - 1, Math.round(c))), 1, 1).data; return [d[0], d[1], d[2]]; }));
+  })()`);
+  await b.evaluate(`document.getElementById("so-hide").remove()`);
+  await b.send("Emulation.setDeviceMetricsOverride", { width, height: H0, deviceScaleFactor: 2, mobile: true });
+  const rows = items.map((it, k) => {
+    const bgs = px[k];
+    const a = it.color[3] * it.op;
+    const worst = Math.min(...bgs.map((bg) => ratio(it.color.slice(0, 3).map((c, j) => c * a + bg[j] * (1 - a)), bg)));
+    const big = it.fs >= 24 || (it.fs >= 18.66 && it.bold);
+    const need = it.deco || big ? 3 : 4.5;
+    return { sel: it.sel, text: it.text, fs: it.fs, ratio: +worst.toFixed(2), need, pass: worst >= need, excluded: it.disabled || it.clipText };
+  });
+  const small = rows.filter((r) => r.fs < 11);
+  const fails = rows.filter((r) => !r.pass && !r.excluded);
+  return { ov, probe, rows, small, fails };
+}
+
+if (require.main === module) (async () => {
   const report = { when: new Date().toISOString(), widths: {} };
   for (const width of [360, 480]) {
     const b = await launch({ port: 9420 + width / 120, width, height: 800, reduced: true });
     const W = (report.widths[width] = { states: {}, worst: [] });
     for (const st of STATES) {
       try {
-        await b.goto(ORIGIN + st.url);
-        await sleep(500);
-        if (st.act) await st.act(b);
-        const ov = await b.evaluate(overflowJS);
-        const probe = st.probe ? await b.evaluate(st.probe) : null;
-        // 글자 상자 좌표는 전체 높이로 바꾼 뒤에 잰다(100dvh 자리가 바뀌므로)
-        const H = st.fixed ? 800 : await b.evaluate("Math.min(document.documentElement.scrollHeight, 9000)");
-        await b.send("Emulation.setDeviceMetricsOverride", { width, height: H, deviceScaleFactor: 1, mobile: true });
-        await sleep(400);
-        if (st.show) { await b.evaluate(st.show); await sleep(150); }
-        if (st.clip) { const r = await b.evaluate(`(() => { const q = document.querySelector(${JSON.stringify(st.clip)}).getBoundingClientRect(); return { x: Math.max(0, q.left - 12), y: Math.max(0, q.top + scrollY - 12), width: Math.min(${width}, q.width + 24), height: q.height + 24, scale: 4 }; })()`); const c = await b.send("Page.captureScreenshot", { format: "png", clip: r }); fs.writeFileSync(path.join(OUT, `${width}-${st.name}-clip.png`), Buffer.from(c.data, "base64")); }
-        const items = await b.evaluate(COLLECT);
-        const shot = await b.send("Page.captureScreenshot", { format: "png" });
-        fs.writeFileSync(path.join(OUT, `${width}-${st.name}.png`), Buffer.from(shot.data, "base64"));
-        await b.evaluate(`(() => { const s = document.createElement("style"); s.id = "so-hide"; s.textContent = "*, *::before, *::after { color: transparent !important; text-shadow: none !important; -webkit-text-fill-color: transparent !important; caret-color: transparent !important; text-decoration-color: transparent !important; }"; document.head.append(s); })()`);
-        await sleep(200);
-        const bare = await b.send("Page.captureScreenshot", { format: "png" });
-        const px = await b.evaluate(`(async () => {
-          const img = new Image(); img.src = "data:image/png;base64,${bare.data}"; await img.decode();
-          const cv = document.createElement("canvas"); cv.width = img.width; cv.height = img.height; const cx = cv.getContext("2d", { willReadFrequently: true }); cx.drawImage(img, 0, 0);
-          const items = ${JSON.stringify(items.map((i) => [i.x - 0, i.y, i.w, i.h]))};
-          return items.map(([x, y, w, h]) => [[x + 2, y + 2], [x + w - 3, y + 2], [x + 2, y + h - 3], [x + w - 3, y + h - 3], [x + w / 2, y + h / 2]].map(([a, c]) => { const d = cx.getImageData(Math.max(0, Math.min(img.width - 1, Math.round(a))), Math.max(0, Math.min(img.height - 1, Math.round(c))), 1, 1).data; return [d[0], d[1], d[2]]; }));
-        })()`);
-        await b.evaluate(`document.getElementById("so-hide").remove()`);
-        await b.send("Emulation.setDeviceMetricsOverride", { width, height: 800, deviceScaleFactor: 2, mobile: true });
-        const rows = items.map((it, k) => {
-          const bgs = px[k];
-          const a = it.color[3] * it.op;
-          const worst = Math.min(...bgs.map((bg) => ratio(it.color.slice(0, 3).map((c, j) => c * a + bg[j] * (1 - a)), bg)));
-          const big = it.fs >= 24 || (it.fs >= 18.66 && it.bold);
-          const need = it.deco || big ? 3 : 4.5;
-          return { sel: it.sel, text: it.text, fs: it.fs, ratio: +worst.toFixed(2), need, pass: worst >= need, excluded: it.disabled || it.clipText };
-        });
-        const small = rows.filter((r) => r.fs < 11);
-        const fails = rows.filter((r) => !r.pass && !r.excluded);
+        const { ov, probe, rows, small, fails } = await measure(b, width, st, OUT);
         W.states[st.name] = { overflow: ov, texts: rows.length, small: small.length, fails, probe };
         if (probe) console.log(`    살핌 ${JSON.stringify(probe)}`);
         W.worst.push(...rows.filter((r) => !r.excluded).map((r) => ({ ...r, state: st.name })));
@@ -191,3 +197,4 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
   fs.writeFileSync(path.join(OUT, "look-17.json"), JSON.stringify(report, null, 1));
   for (const [w, W] of Object.entries(report.widths)) console.log(`${w} 가장 낮은 대비: ` + W.worst.slice(0, 5).map((r) => `${r.ratio}/${r.need} ${r.sel}(${r.state})`).join(" · "));
 })();
+module.exports = { measure, until, sleep, launch, ORIGIN };

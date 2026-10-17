@@ -3156,9 +3156,12 @@
                     <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
                     <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:3" aria-hidden="true"></span><span class="axis-meter__num">3</span></td>
                   </tr>
-                  <tr class="cross-table__row is-pending" data-js="cross-row" data-room="sibyl">
-                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">VII</span><span class="cross-table__name" data-t="rooms.sibyl.name">시빌라 신탁의 방</span></th>
-                    <td class="cross-table__wait" colspan="3" data-t="book.cross.table.pending">아직 지나지 않은 방</td>
+                  <!-- (J4) 견본 줄은 모두 마친 방 모양으로 둔다. 아직 지나지 않은 방은 JS가 칸을 지우고 cross-table__wait 한 칸(book.cross.table.pending)으로 바꾼다 -->
+                  <tr class="cross-table__row" data-js="cross-row" data-room="sibyl">
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">VII</span><span class="cross-table__name" data-t="rooms.sibyl.name">시빌라 신탁의 방</span><span class="cross-table__result" data-js="cross-result"></span></th>
+                    <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true"></span><span data-js="cross-arch">현자</span></td>
+                    <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
+                    <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:1" aria-hidden="true"></span><span class="axis-meter__num">1</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -3591,7 +3594,7 @@
         <h1 class="room-head__title" data-t="pay.title">한 권의 책 전체 열기</h1>
       </header>
 
-      <!-- 1 받는 것: 11장(17단계 인연의 장 더함)과 장마다 분량(실측), 합계. li는 JS가 data-volume 실측값으로 만든다 (아래는 견본 4줄) -->
+      <!-- 1 받는 것: 유료 12장(17단계 인연의 장, 18단계 「겹치는 곳, 갈리는 곳」 더함)과 장마다 분량(실측), 합계. li는 JS가 data-volume 실측값으로 만든다 (아래는 견본 4줄) -->
       <section class="pay-sec" aria-labelledby="pay-what-title">
         <h2 class="pay-sec__title" id="pay-what-title"><span class="pay-sec__num" aria-hidden="true">1</span><span data-t="pay.what.title">받는 것</span></h2>
         <ol class="pay-list" data-js="pay-chapters">
