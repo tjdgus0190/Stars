@@ -4,7 +4,7 @@
 - 기준: specs/proposal-strange-oracle-ads.md 2-1(규격·안전 영역), 4장 1안·2안(9초판만), 안전 영역 점검, 5장 방식 A. 운영자 전달(2026-10-17): 한국판만, Clipwave 쓰지 않음, 제품 화면의 색·글꼴·일곱 문 결을 따르고 과장 효과를 줄일 것.
 - 장면 파일: `scenes/ad1-seven-doors.html`·`.css`, `scenes/ad2-manshin.html`·`.css`, 공통 `scenes/common.css`. 렌더 안내는 `scenes/README.md`.
 - 시각 자료: 모두 CSS·인라인 SVG로 직접 그림(그림 파일·AI 생성물·실사·사람 모습 없음). 일곱 문 실루엣·무늬, 소반·쌀·방울·붓 글자 쓰기는 제품(design/strange-oracle.md 17단계 2절, style.css 3-K)을 영상 크기로 다시 그린 것.
-- 소리: 영상 원본에는 넣지 않는다(제안서 5-2). 아래 "소리" 칸은 developer가 효과음을 합성할 때 맞출 시점이다.
+- 소리: 1안은 소리판 따로(운영자 2026-10-18) — 무음 원본 `out/ad1-seven-doors-ko.mp4`는 그대로 두고, 직접 합성한 소리를 붙인 `out/ad1-seven-doors-ko-sound.mp4`를 따로 만든다(`render/sound-ad1.js`). 2안은 무음(제안서 5-2). 아래 "소리" 칸은 developer가 효과음을 합성할 때 맞출 시점이다.
 
 ## 0. 공통 규격
 

@@ -25,10 +25,28 @@ node --experimental-websocket marketing/strange-oracle/render/render.js all --ch
 ## 결과 (`../out/`)
 | 파일 | 길이 | 프레임 | 크기(2026-10-17 렌더) |
 |---|---|---|---|
-| `ad1-seven-doors-ko.mp4` | 15.000초 | 450 | 1,417,275 B (약 1.4MB) |
+| `ad1-seven-doors-ko.mp4` | 15.000초 | 450 | 1,414,675 B (약 1.4MB) |
 | `ad2-manshin-ko.mp4` | 9.000초 | 270 | 1,094,966 B (약 1.1MB) |
 
 공통: H.264 High, 1080x1920, yuv420p, 30fps, bt709, 무음(오디오 스트림 없음). 플랫폼에서 음악을 붙일 때 소리 없는 영상으로 올려도 된다.
+
+| 소리판(2026-10-18) | 길이 | 내용 |
+|---|---|---|
+| `ad1-seven-doors-ko-sound.mp4` | 15.000초 | 영상 스트림은 `ad1-seven-doors-ko.mp4` 그대로 복사(같은 MD5) + AAC LC 192kbps 48kHz 스테레오 |
+| `ad1-seven-doors-ko.wav` | 15.000초 | 같은 소리, PCM 24-bit 48kHz 스테레오 |
+
+## 1안 소리판 만들기 (`sound-ad1.js`)
+저장소 루트에서 (ffmpeg만 필요, 브라우저·서버·설치 없음, 약 5초):
+
+```
+node marketing/strange-oracle/render/sound-ad1.js          # ../out/ad1-seven-doors-ko.wav + ad1-seven-doors-ko-sound.mp4
+node marketing/strange-oracle/render/sound-ad1.js --raw    # 정규화 전 float WAV만(임시 폴더 경로 출력)
+```
+- 소리는 전부 스크립트가 직접 계산한다(사인·삼각파·노이즈·필터·잔향). 외부 음원·샘플·음악 파일 없음. 난수 씨앗이 고정이라 다시 돌려도 같은 소리.
+- 시점은 `../storyboard.md` 1안 "소리 시점" 칸: A 0.12 노크 / B 1.6+0.7k 문 종 7음(A 단조 오음계로 올라감, 방마다 배음 결 다름) / C 6.5 책장 넘김, 7.6+0.25k 장마다 작은 음 / D 10.0~13.0 패드 부풂 / E 14.5 노크·여운. 시점을 바꾸면 스크립트 아래쪽 "이벤트 배치"의 숫자를 고친다.
+- 믹스: 48kHz 스테레오 → 앞보기 리미터(노크 첫머리만 약 2dB 이내)로 피크-라우드니스 차를 12.3dB 이하로 → ffmpeg `loudnorm` 2-pass **linear**(압축 없음, 목표 -14 LUFS / -1.5 dBTP). loudnorm linear가 이 소리에서 약 0.7 LU 크게 나와, 2차 결과를 `ebur128`로 재서 목표 I를 고쳐 한 번 더 돈다(±0.2 LU).
+- mp4는 `-c:v copy`(영상 재인코딩 없음), `-c:a aac -b:a 192k -ar 48000`, `-t 15`. 무음 원본 `ad1-seven-doors-ko.mp4`는 건드리지 않는다. **1안 영상을 다시 렌더하면 이 스크립트도 다시 돌린다.**
+- 확인: `ffprobe`(길이·스트림), `ffmpeg -af ebur128=peak=true`(LUFS·true peak), `astats`(피크), 파형 `showwavespic` → `../out/check/`.
 
 ## 주의
 - 글꼴은 jsdelivr에서 받는다(네트워크 필요). 한자는 Noto Serif KR 700(@fontsource 5.3.1, OFL)으로 그려져 PC에 따라 달라지지 않는다(scenes/README 3번).
