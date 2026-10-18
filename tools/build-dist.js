@@ -25,6 +25,7 @@
 //   ⑬ live 가드(⑩을 풀어도 남음): map.mode live인데 map.api가 https://로 시작하지 않거나, site.url이 비었거나,
 //      legal privacy에 map:on 구획이 없거나, data-map.js·privacy 지도 구획에 ◯◯가 남으면 실패
 //   ② 유료 문장 지문 검사에 data-map.js(원본)도 넣는다
+//   ⑭ (18단계 결정 120) pay.mode off면 책 전용 파일(app-book.js·style-book.css) 없음. ④ 첫 화면은 이 둘과 arch-core.js도 부르지 않음
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -44,6 +45,7 @@ const MapSec = PaySec.map; // (16단계) 지도 표지 map:on/off
 const MODES = {}; // slug → pay.mode
 const MAP_MODES = {}; // slug → map.mode (16단계)
 const MAP_FILES = ["map.js", "data-map.js"]; // 지도 파일: map.mode off면 배포 폴더에 넣지 않는다(⑪)
+const BOOK_FILES = ["app-book.js", "style-book.css"]; // (18단계 결정 120) 책·미리보기·결제 전 화면 전용 코드·스타일: pay.mode off면 배포 폴더에 넣지 않는다(⑭)
 const MAP_WORDS = ["key_hash", "del_hash", "MAP_MODE", "ALLOWED_ORIGIN", "/__dev/map"]; // ⑫ 배포판 텍스트 0건
 const MAP_IDS = ["map-tpl", "screen-map", "map-card", "map-key-dialog", "map-slot-"]; // ⑪ off 배포판 index.html에 0건
 const fails = [];
@@ -155,6 +157,11 @@ for (const slug of PRODUCTS) {
     const idx = fs.readFileSync(path.join(dst, "index.html"), "utf8");
     for (const id of MAP_IDS) if (idx.includes(`data-js="${id}`) || idx.includes(`id="${id}`)) fails.push(`⑪ off: public/products/${slug}/index.html에 지도 요소 ${id} 남음`);
     for (const n of MAP_FILES) if (fs.existsSync(path.join(dst, n))) fails.push(`⑪ off: public/products/${slug}/${n} 있음`);
+  }
+  // ⑭ (결정 120) 결제가 꺼진 판: 책 전용 파일이 배포 폴더에 없다(off는 책 화면이 없어 부르지 않는다)
+  if (mode === "off") {
+    for (const n of BOOK_FILES) fs.rmSync(path.join(dst, n), { force: true });
+    for (const n of BOOK_FILES) if (fs.existsSync(path.join(dst, n))) fails.push(`⑭ off: public/products/${slug}/${n} 있음`);
   }
   if (mode === "off" && /data-js="pay-(toc-)?tpl"/.test(fs.readFileSync(path.join(dst, "index.html"), "utf8"))) fails.push(`⑨ off: public/products/${slug}/index.html에 결제 template이 남음`);
   // ⑦ live 가드 추가: refund.html이 배포 폴더에 있는가 · privacy·terms에 pay:on 구획이 있는가 · 배포판 legal에 ◯◯ 0
@@ -281,7 +288,7 @@ for (const slug of PRODUCTS) {
 for (const slug of PRODUCTS) {
   const html = fs.readFileSync(path.join(PUBLIC, "products", slug, "index.html"), "utf8");
   const refs = [...html.matchAll(/<(?:script|link)\b[^>]*?(?:src|href)="([^"]+)"/g)].map((m) => m[1]);
-  refs.filter((u) => /data-book-|\/api\//.test(u)).forEach((u) => fails.push(`④ index.html이 ${u}를 부름`));
+  refs.filter((u) => /data-book-|\/api\/|app-book\.js|style-book\.css|arch-core\.js/.test(u)).forEach((u) => fails.push(`④ index.html이 ${u}를 부름`));
 }
 
 // ⑫ friend-map 폴더 없음
@@ -290,4 +297,4 @@ for (const slug of PRODUCTS) if (fs.existsSync(path.join(PUBLIC, "products", slu
 if (fails.length) {
   console.error("  실패: 배포 점검 — " + fails.slice(0, 15).join(" | "));
   process.exitCode = 1;
-} else console.log("  배포 점검 통과 (pay.mode off · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
+} else console.log("  배포 점검 통과 (pay.mode off · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");

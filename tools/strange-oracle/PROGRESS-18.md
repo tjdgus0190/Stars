@@ -85,3 +85,22 @@
 - [x] 3. 7장: legal 3종·data.js 고지 확인, 유료 누출 0(build-dist 지문 0, 24자 조각: 옛 41 = 방 무료 문구 겹침, 새 +1 = 시빌라 첫 줄 문장이 유료 heartLine과 공유 — 첫 줄 공개 몫), tocCta 미사용 키 / 4. 6장: fetch 본문 {pass,file}뿐·이벤트 허용 목록
 - [x] 5a. 자리 값 정규식(검수 2차 조건 1) 독립 재검사 0·금지어 0·{n} 확인. 판정 방향: 성능 14만 수정 필요(코드·CSS 16.5KB는 문구 규칙상 불가피 아님) — 보고서 작성 중
 - [x] 5b. reports/qa-strange-oracle.md 「18단계 (J5) QA 1차」 씀 — 판정 수정 필요(성능 14), meta 그대로(검수통과)
+
+## J6-fix designer — 2026-10-18 (QA 1차 필수 1 · 결정 120)
+
+- 지킬 것: style.css·style-book.css·design 문서·이 칸만. index.html·app.js 안 고침. 커밋 안 함. 8788만(8787 금지).
+- [x] 1. style.css 18단계 J1·J4 블록 중 책·미리보기 전용 규칙 → `style-book.css`로 옮김(내용 바꿈 0, 규칙 4,929줄 대조 같음). style.css 371,016B → 348,819B(−22,197B · gzip −4,710B), style-book.css 23,013B
+- [x] 2. 남긴 것: 입구 카드 all · 나의 이야기 7/7 카드·주 버튼 J4 규칙 · 결제 전 화면 받는 것 상태 글자·돌아가기(#deeper는 책 없이 들어올 수 있음). design 「18단계 J6-fix」
+- **style-book 파일 끝** — developer: style.css 뒤에 link, 책·미리보기 화면은 load 뒤에 보이기(design 「18단계 J6-fix」 developer 요청). 연결이 끝나면 developer가 여기에 연결 완료 표시(굵은 글씨)를 적는다
+- [ ] 3. (developer 연결 뒤) build-dist → 8788 재시작 → look-18 넘침·대비 다시 재기
+
+## J6-fix developer — 2026-10-18 (QA 1차 필수 1 · 결정 120)
+
+- 지킬 것: index.html·style.css 안 고침(link는 app.js가 동적으로 붙임). 8788만 PowerShell로 재시작(8787 안 건드림). 커밋 안 함.
+- [x] app-book.js 새로: 새 장(고르기·쪽·대조표)·관심사 순서·firstLineOf·목차 조각·잠긴 장 길·미리보기·"받는 것" 목록·흐름 영역 순서 + 메움용 책 전용 옛 코드(인연의 장 그리기·고르기·분량). book.js는 Node에서 core를 합쳐 내보냄(시험 이름 그대로)
+- [x] app.js go(): report·preview·deeper는 arch-core.js·app-book.js·style-book.css(load, 실패 시 한 번 더) 받은 뒤 mount → 화면. 책 주소 직접은 main 전에 받음. 실패 = 토스트, 나머지 화면 그대로
+- [x] build-dist ⑭(off: app-book.js·style-book.css 배포 폴더에 없음)·④(첫 화면이 이 둘·arch-core.js 부르면 실패), mock-server test는 원본에서 내줌, off-diff-18 요청 검사에 두 파일 더함·data 몫 따로 표시
+- [x] pay.tocCta 지움(data.js). crossTable: 마친 방 줄 칸이 없으면 견본에서 다시 만듦(design J4 선택 권장)
+- [x] make-volume: f3c405b(cross.even 문구) 뒤 낡았던 data-volume.js 다시 만듦(even 8칸 +20자씩, 불일치 0)
+- [x] 시험: 단위 168/0 · check-17 0 · --stage 18 0 · make-volume 0 · build-dist 통과 · e2e book 96 · pay 69 · saju 41 · flow reduced 127 · motion 128 · map 80 · utm 29 · off-diff-18 off 20화면 차이 0·새 파일 요청 0, 같은 출처 +3,508B(data 몫 +3,059, 나머지 +449) — tests.md 「QA 1차 필수 1 고침」
+- **style-book 연결 끝** (developer, 2026-10-18) — designer 3번(look-18 다시 재기) 차례

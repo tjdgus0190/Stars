@@ -3664,3 +3664,35 @@ JS·data*.js는 고치지 않았다. 아래 7절(광고)에서 "지금 지운 �
 - build-dist 통과([초안] 없음, 유료 지문 0). look-18 넘침 0·11px 미만 0·새 요소 대비 미달 0.
 - e2e-book 96/0 · e2e-pay 69/0 · e2e-flow reduced 127/0.
 - off-diff-18(옛 = 시작 커밋 3dface5 build-dist 8793 off, 새 8794 off, 끝난 뒤 둘 다 멈춤): 첫 화면 파일 목록 같음 PASS · off 화면 20개 차이 0 · 새 파일 요청 0 PASS. (새 template·CSS는 pay:on·map 안이거나 off에서 맞는 요소가 없어 off 변화 0)
+
+## 18단계 J6-fix: style.css 18단계 블록 나누기 (QA 1차 필수 1 · 운영자 결정 120 · 2026-10-18)
+### 한 것
+- style.css 끝 「(18단계 J1)」「(18단계 J4)」 블록에서 첫 화면에 쓰이지 않는 규칙을 새 파일 `products/strange-oracle/style-book.css`로 **그대로 옮겼다**(규칙 내용 바꿈 0. 옮기기 전·후 두 파일의 주석 뺀 규칙 줄 4,929줄을 정렬 대조해 같음). index.html에는 `<link>`를 넣지 않았다(developer 몫).
+- 크기: style.css **371,016B → 348,819B (−22,197B, gzip 81,735 → 77,025)**. style-book.css 23,013B(gzip 6,394). 시작 커밋 3dface5 style.css 345,831B(gzip 76,170)보다 남은 증가는 +2,988B(gzip +855) — 아래 「남긴 것」과 안내 주석 두 줄.
+
+### 옮긴 것 (style-book.css)
+| J1·J4 절 | 쓰이는 곳 |
+|---|---|
+| J1 1 미리보기 `.preview`·`pv-*`·`first-lines*`·`diff-*`·`pv-once`·`pv-links` | `#screen-preview` |
+| J1 2 대조표 `.cross-table*`·`.axis-meter*`·`.cross-legend*` | 미리보기 맛보기 · 새 장 1쪽 |
+| J1 3 새 장 6쪽 `.cross-sec*`·`.cross-axis*`·`.cross-ends*`·`.cross-room*`·`.cross-pair` | 책 쪽 `#book-cross` |
+| J1 4 목차 조각 `.toc-band*`·`.interest-line*`·`.toc-buy*`·`.is-target` 강조·`scroll-margin-top`·`@keyframes so-target` | 책 목차 · 미리보기 |
+| J1 끝 `prefers-reduced-motion`(목차 강조 움직임 0) | 책 목차 |
+| J4 `.book-page__body .cross-sec .cross-table`·`@media (max-height: 700px)` 대조표 여백 | 새 장 1쪽 |
+
+### 남긴 것 (style.css)과 이유
+- **J1 5 `.book-card[data-state="all"]`** — 입구(첫 화면) 책 카드. 7/7 결제 전이면 첫 화면에 바로 보인다.
+- **J1 6 `.story-preview*`** — 나의 이야기 화면(책·미리보기를 열기 전 화면) 7/7 결제 전 카드. 이 카드 단추를 눌러야 미리보기를 연다 → 미리보기 파일을 받기 전에 보여야 한다.
+- **J4 `#screen-story:has(...) .map-slot--story .btn--primary`** — 위 카드와 같은 나의 이야기 화면(주 버튼 하나 규칙).
+- **J1 7 `.pay-list__state`·`.pay-back--preview`** — 결제 전 화면(#deeper). 이 화면은 미리보기·목차 말고도 주소 #deeper·열람 코드 넣기·결제 확인 화면 복귀(app.js `payFrom = "other"`)로 책을 열지 않고 들어올 수 있다. 약 0.4KB라 남기는 쪽이 안전하다.
+- 이 남긴 규칙들과 옮긴 규칙들은 같은 요소를 함께 가리키지 않아, style-book.css가 style.css 뒤에 붙으면 적용 순서도 옮기기 전과 같다.
+
+### developer 요청 (깜빡임 없이 연결하기)
+1. `<link rel="stylesheet" href="style-book.css">`를 **style.css 뒤**(head 맨 끝 또는 동적으로 `document.head.append`)에 붙인다. 앞에 끼우면 순서가 바뀐다.
+2. **책 화면(목차 `screens.report`)·미리보기(`#screen-preview`)·새 장을 `is-active`로 보이기 전에 link의 `load`를 기다린다.** `load` 전에는 화면을 바꾸지 않는다(그동안 누른 단추는 한 번만 받기). 첫 요청이 실패(`error`)하면 한 번 다시 시도하고, 그래도 안 되면 지금 화면에 머물며 기존 오류 토스트를 쓴다(스타일 없는 책 화면을 보이지 않는다).
+3. 주소로 바로 들어오는 길(#book·#preview·결제 뒤 목차 복귀 등)도 같은 load 대기 뒤에 화면을 그린다. 한 번 붙인 link는 다시 붙이지 않는다(promise 하나 재사용).
+4. 받는 시점은 미리 받아 두는 것이 좋다: test·live에서 입구 책 카드·나의 이야기 카드가 `all`/`owned`이거나 결제 전 화면에 들어왔을 때 미리 붙여도 된다(off에서는 요청 0 — off 배포판은 붙이지 않는다). 이 파일은 off DOM에 맞는 요소가 없어 off에서 받을 까닭이 없다.
+5. build-dist는 `.css`를 그대로 복사하므로 dist에 들어간다. off-diff-18로 off 첫 화면 요청에 style-book.css가 없는지 확인한다.
+
+### 시험
+- 미확인: developer 연결 전이라 build-dist·8788 재시작·look-18 재측정은 하지 않았다(연결 뒤 designer가 다시 잰다).

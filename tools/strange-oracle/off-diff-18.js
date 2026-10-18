@@ -66,7 +66,7 @@ async function screens(base, port) {
       out[`${n}/7 ${scr}`] = await b.evaluate(`JSON.stringify({ active: document.querySelector('.screen.is-active')?.id, text: document.querySelector('.screen.is-active')?.innerText || '', dom: document.body.outerHTML.replace(/<!--[\\s\\S]*?-->/g, '').replace(/\\s+/g, ' ') })`).then(JSON.parse); // 주석(마크업 설명)은 화면 DOM 노드가 아니라 뺀다
     }
   }
-  const req = b.log.requests.filter((r) => /data-book-sample|arch-core|\/api\/book|data-book-/.test(r));
+  const req = b.log.requests.filter((r) => /data-book-sample|arch-core|app-book|style-book|\/api\/book|data-book-/.test(r)); // (결정 120) 책 전용 파일도
   await b.close();
   return { out, req };
 }
@@ -87,11 +87,15 @@ async function screens(base, port) {
   }
   const onlyNew = keys.filter((k) => fo[k] == null && fn[k] != null);
   log(`  파일 수 옛 ${Object.keys(fo).length} · 새 ${Object.keys(fn).length} · 새에만 있는 파일 ${onlyNew.length}${onlyNew.length ? " (" + onlyNew.join(", ") + ")" : ""} · 합계 옛 ${sumO} · 새 ${sumN} (차 ${sumN - sumO}) · 다른 줄 ${diff}`);
-  const okFirst = onlyNew.length === 0 && !keys.some((k) => /data-book-sample|arch-core|book-cross/.test(k) && fn[k] != null);
+  const okFirst = onlyNew.length === 0 && !keys.some((k) => /data-book-sample|arch-core|book-cross|app-book|style-book/.test(k) && fn[k] != null);
   log(`  주 기준(18-12의 14): 첫 화면 파일 목록 같음·새 파일 요청 0 → ${okFirst ? "PASS" : "FAIL"}`);
   const local = keys.filter((k) => k.startsWith("/"));
   const lo = local.reduce((n, k) => n + (fo[k] || 0), 0), ln = local.reduce((n, k) => n + (fn[k] || 0), 0);
   log(`  같은 출처 파일 전송 바이트: 옛 ${lo} · 새 ${ln} (차 ${ln - lo}, ${(((ln - lo) / lo) * 100).toFixed(1)}%) · 바뀌지 않은 파일도 응답 머리 때문에 몇십 바이트 흔들린다`);
+  // (결정 120) 문구 규칙상 불가피한 몫(data.js·data-volume.js)을 뺀 나머지 차
+  const dataKeys = local.filter((k) => /\/data(-volume)?\.js$/.test(k));
+  const dd = dataKeys.reduce((n, k) => n + ((fn[k] || 0) - (fo[k] || 0)), 0);
+  log(`  그중 data.js·data-volume.js 차 ${dd} · 나머지 같은 출처 파일 차 ${ln - lo - dd}`);
   if (!FIRST_ONLY) {
     const so = await screens(OLD, 9643), sn = await screens(NEW, 9644);
     log("[2 off 화면 대조 360×800] 상태 화면 | 보이는 글자 | DOM");

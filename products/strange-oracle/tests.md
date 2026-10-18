@@ -1054,6 +1054,25 @@
 | 2 | 3.38초 | 3.40초 | 3.25초 | 3.24초 | 329KB / 387KB |
   - 중앙값 차: ①+② +0.02~+0.27초, ①만 −0.01~+0.08초. 같은 코드에서도 2.7~5.0초로 흔들려 시간으로 합격을 가르지 않는다(18-12의 14). 3초 기준 미달은 옛 코드도 같다(17-10·확인 92, 보고만).
 
+#### QA 1차 필수 1 고침 (운영자 결정 120, 2026-10-18) — 책 전용 코드·스타일 나누기
+- **나눈 것:** `app-book.js`(새 파일) = 새 장 고르기·쪽 목록·분량(crossPick 등), 관심사 순서(interestOrder·bookOrder), firstLineOf, 새 장 그리기·대조표, 목차 조각, 잠긴 장 길(lockedRoad), 미리보기 화면 전부, 결제 전 "받는 것" 목록, 시기별 흐름 영역 순서. 줄어든 몫을 메우려고 **책 화면 전용 옛 코드**도 함께 옮김: 인연의 장 그리기(app.js renderChapter yeon 분기)·인연의 장 고르기·분량(book.js yeonChapter·yeonTable·yeonVolume·yeonChars·ELEMENT_OF_STEM) — 내용은 그대로(옮기기 전·후 줄 대조 같음). `style-book.css` = designer가 style.css에서 옮긴 책·미리보기 규칙.
+- **받는 때:** 책 목차(#report)·미리보기(#preview)·결제 전 화면(#deeper)으로 처음 갈 때 `go()`가 arch-core.js·app-book.js·style-book.css를 다 받은 뒤(css는 `load`, 실패하면 한 번 더) mount하고 화면을 보인다. 책 주소로 바로 들어오면 main 전에 함께 받는다. 받는 동안 같은 화면을 또 눌러도 한 번만.
+- **Node 시험:** book.js가 `require("./app-book.js").core`를 합쳐 내보내므로 `Book.crossPick`·`Book.yeonChapter`·`Book.ELEMENT_OF_STEM` 등 이름 그대로(단위 시험·make-volume 고치지 않음).
+- **off:** build-dist가 pay.mode off면 app-book.js·style-book.css를 배포 폴더에 넣지 않고(⑭), ④ 첫 화면이 이 둘·arch-core.js를 부르면 실패. 모의 서버 test는 이 둘을 원본에서 내준다(지도 파일과 같은 방식).
+
+| off 첫 화면(압축 후 전송 바이트, off-diff-18) | 3dface5 | QA 1차 때 | 고친 뒤 |
+|---|---|---|---|
+| app.js | 77,775 | 85,810 | 78,368 (+593) |
+| book.js | 6,276 | 9,432 | 5,375 (−901) |
+| data.js | 28,942 | 31,353 | 31,306 (+2,364) |
+| data-volume.js | 2,573 | 3,263 | 3,268 (+695) |
+| style.css (designer) | 77,758 | 83,061 | 78,291 (+533) |
+| index.html (designer) | 62,095 | 62,488 | 62,488 (+393) |
+| **같은 출처 합계** | 324,889 | 344,708 (+19,819) | **328,397 (+3,508, +1.1%)** — data.js·data-volume.js 몫 +3,059, 나머지 +449 = app.js·book.js −308 + style.css·index.html +926 + 바뀌지 않은 파일 응답 머리 흔들림 −169 |
+- 파일 목록 같음(48 = 48)·새 파일 첫 화면 요청 0 → PASS. off 화면 20개 글자·DOM 차이 0, 책 파일·새 파일 요청 0 → PASS. 결과 파일 out/off-diff-18-fix-off.txt.
+- test 첫 화면(옛 8795 test · 새 8788): 파일 49 = 49, 새 파일 0, 같은 출처 +9,978B(QA 1차 +26,425B). 그중 data 몫 +3,058, index.html +7,000(기획서가 정한 template, 불가피). out/off-diff-18-fix-test.txt.
+- 책 열기 확인(scratchpad 시험): test 입구 책 전용 파일 요청 0 · 목차가 is-active 되는 순간 style-book.css 이미 적용 · app-book.js를 막으면 입구에 머물며 "불러오지 못했어요" 토스트, 방 화면은 그대로.
+
 ### 시험 (2026-10-18, 모의 서버 8788 `--mode test`, 새 장 본문은 copywriter J3-1이 채운 상태)
 | 시험 | 결과 |
 |---|---|

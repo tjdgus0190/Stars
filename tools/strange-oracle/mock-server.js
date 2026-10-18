@@ -164,10 +164,10 @@ location.replace("${P}#${to}");
     send(req, res, TYPES[".html"], Buffer.from(PaySec.map.strip(PaySec.strip(html, MODE), MODE))); // (16단계) 지도 표지도 같은 mode로
     return log(200);
   }
-  // (16단계) test: 지도 파일(map.js·data-map.js)은 off 배포 폴더에 없으므로 원본에서 내준다
-  const mapFile = rel.match(/^\/products\/strange-oracle\/((?:data-)?map\.js)$/);
+  // (16단계) test: 지도 파일(map.js·data-map.js)·(결정 120) 책 전용 파일(app-book.js·style-book.css)은 off 배포 폴더에 없으므로 원본에서 내준다
+  const mapFile = rel.match(/^\/products\/strange-oracle\/((?:data-)?map\.js|app-book\.js|style-book\.css)$/);
   if (mapFile && MODE === "test") {
-    send(req, res, TYPES[".js"], fs.readFileSync(path.join(PRODUCT, mapFile[1])));
+    send(req, res, TYPES[path.extname(mapFile[1])], fs.readFileSync(path.join(PRODUCT, mapFile[1])));
     return log(200);
   }
   let file = path.join(STATIC, rel);
