@@ -104,3 +104,11 @@
 - [x] make-volume: f3c405b(cross.even 문구) 뒤 낡았던 data-volume.js 다시 만듦(even 8칸 +20자씩, 불일치 0)
 - [x] 시험: 단위 168/0 · check-17 0 · --stage 18 0 · make-volume 0 · build-dist 통과 · e2e book 96 · pay 69 · saju 41 · flow reduced 127 · motion 128 · map 80 · utm 29 · off-diff-18 off 20화면 차이 0·새 파일 요청 0, 같은 출처 +3,508B(data 몫 +3,059, 나머지 +449) — tests.md 「QA 1차 필수 1 고침」
 - **style-book 연결 끝** (developer, 2026-10-18) — designer 3번(look-18 다시 재기) 차례
+- [ ] J5 2차 시작 (결정 120 고치기·602e2ec·f3c405b)
+- [x] 2차-1 단위 168/0 · check-17 0·--stage 18 0 · make-volume 0 · build-dist 통과(off: app-book·style-book 없음) · 8788 재시작
+- [x] 2차-2 e2e saju 41 · book 96 · pay 69 · map 80(reset) · utm 29 · flow 127/128
+- [x] 2차-3 off-diff-18: off +3,508B(data 3,059·나머지 449), 20화면 차이 0, 요청 0 / test +10,114B(data 3,058·나머지 7,056)
+- [x] 2차-4 off dist(8794): app-book·style-book 404, #report·#preview·#deeper·#paid·#paycheck → 입구(0/7·7/7), 책 요청 0·오류 0
+- [x] 2차-5 cross.even 8 읽음: '함께 가리킨 결을 빼면' — 15조합(C 폭 2)과 대조표(D 열 none) 맞음, 8장 문제 0
+- [x] 2차-6 입구 먼저 보임: 새 0.5~0.6초(캐시 끔) vs 옛 3dface5 0.6~1.2초 — 원래 있던 동작, 회귀 아님. 임시 서버 내림
+- [x] 2차-7 보고서 「18단계 (J5) QA 2차」 판정 배포 가능, meta 그대로
