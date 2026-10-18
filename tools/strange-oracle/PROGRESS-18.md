@@ -92,7 +92,7 @@
 - [x] 1. style.css 18단계 J1·J4 블록 중 책·미리보기 전용 규칙 → `style-book.css`로 옮김(내용 바꿈 0, 규칙 4,929줄 대조 같음). style.css 371,016B → 348,819B(−22,197B · gzip −4,710B), style-book.css 23,013B
 - [x] 2. 남긴 것: 입구 카드 all · 나의 이야기 7/7 카드·주 버튼 J4 규칙 · 결제 전 화면 받는 것 상태 글자·돌아가기(#deeper는 책 없이 들어올 수 있음). design 「18단계 J6-fix」
 - **style-book 파일 끝** — developer: style.css 뒤에 link, 책·미리보기 화면은 load 뒤에 보이기(design 「18단계 J6-fix」 developer 요청). 연결이 끝나면 developer가 여기에 연결 완료 표시(굵은 글씨)를 적는다
-- [ ] 3. (developer 연결 뒤) build-dist → 8788 재시작 → look-18 넘침·대비 다시 재기
+- [x] 3. (developer 연결 602e2ec 뒤) build-dist 통과 → 8788 test 재시작 → look-18 두 번: 넘침 0·11px 미만 0·새 대비 미달 0·대조표 391/407px 그대로. FOUC 6길×(지연 0·1.5초) 스타일 없는 책 화면 프레임 0. 주소 직접 진입 때 입구가 잠깐 보이는 것만 판단 기록(design 「18단계 J6-fix」)
 
 ## J6-fix developer — 2026-10-18 (QA 1차 필수 1 · 결정 120)
 
