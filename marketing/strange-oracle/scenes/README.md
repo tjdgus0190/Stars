@@ -13,7 +13,7 @@ designer 작성, 2026-10-17. 장면 내용·자막 자리는 `../storyboard.md`.
 
 장면별 길이(초)
 
-| 1안 | A 0~1.5 첫 문 | B 1.5~6.5 일곱 문 | C 6.5~10 책 | D 10~13 결과 견본 | E 13~15 끝 화면 |
+| 1안 | A 0~1.5 첫 문 | B 1.5~6.5 일곱 문 | C 6.5~10 책 | D 10~13 일곱 방 결과 카드 | E 13~15 끝 화면 |
 |---|---|---|---|---|---|
 | 길이 | 1.5 | 5.0 | 3.5 | 3.0 | 2.0 |
 
@@ -27,7 +27,7 @@ designer 작성, 2026-10-17. 장면 내용·자막 자리는 `../storyboard.md`.
 
 1. **화면 크기**: 뷰포트 1080x1920, deviceScaleFactor 1, mobile 아님. 무대(`.stage`)가 정확히 1080x1920이고 스크롤 없음.
 2. **시간 맞추기**: 모든 움직임은 CSS 애니메이션이며 페이지 로드 때 바로 시작한다. JS 타이머·requestAnimationFrame·무작위값 없음. 장면 안에 스크립트가 하나도 없다.
-   - 권장: `await document.fonts.ready` 뒤 `document.documentElement.classList.add('is-paused')`(모든 애니메이션 `animation-play-state: paused`) → 프레임마다 `document.getAnimations().forEach(a => { a.pause(); a.currentTime = n * 1000 / 30; })` → 캡처. 각 애니메이션의 `animation-delay`가 currentTime 안에 포함되므로 같은 값 하나만 넣으면 된다. 가상 요소(::before/::after) 애니메이션도 getAnimations()에 들어온다(1안 81개).
+   - 권장: `await document.fonts.ready` 뒤 `document.documentElement.classList.add('is-paused')`(모든 애니메이션 `animation-play-state: paused`) → 프레임마다 `document.getAnimations().forEach(a => { a.pause(); a.currentTime = n * 1000 / 30; })` → 캡처. 각 애니메이션의 `animation-delay`가 currentTime 안에 포함되므로 같은 값 하나만 넣으면 된다. 가상 요소(::before/::after) 애니메이션도 getAnimations()에 들어온다(1안 95개, 2026-10-18 D 카드 일곱 장 반영).
    - 무한 반복 애니메이션은 별 깜빡임(4초)과 2안 촛불빛(3초) 둘뿐이고, 같은 방식으로 고정된다.
    - CDP 가상 시간(`Emulation.setVirtualTimePolicy`)을 써도 되지만, 글꼴 로딩 전에 시간이 흐르지 않게 주의.
 3. **글꼴**: jsdelivr fontsource 5.3.0(SRI). 첫 캡처 전에 `document.fonts.ready`를 기다릴 것. 네트워크가 막히면 글꼴이 바뀌어 줄바꿈이 달라진다. 한자(원국·일간 카드)는 Gowun Batang에 없는 글자를 Noto Serif KR 700(fontsource 5.3.1, OFL, SRI)으로 그린다. unicode-range 부분 파일 9개(69·77·85·87·88·89·91·93·103번)가 쓰인 14자를 모두 덮는 것을 확인했고, 헤드리스 Edge에서 한자 요소가 웹 글꼴로만 그려지는 것(시스템 글꼴 0)을 CSS.getPlatformFontsForNode로 보았다(2026-10-17). 한자를 새로 넣으면 그 글자가 부분 파일에 드는지 다시 확인한다.
@@ -43,3 +43,8 @@ designer 작성, 2026-10-17. 장면 내용·자막 자리는 `../storyboard.md`.
 - 확인: 헤드리스 Edge(1080x1920을 0.5배로)에서 1안 0.9·4.0·7.0·9.5·11.0·14.9초, 2안 0.5·3.98·5.0·6.4·8.9초 프레임을 currentTime 고정 방식으로 찍어 보았다. 콘솔 오류 0, 글꼴 4종 로드.
 - 안전 영역 겹쳐 보기: 1안 14.9초, 2안 5.0초 — 글자·로고 모두 안.
 - 미확인: 전체 프레임 연속 재생(움직임의 부드러움), mp4 인코딩 뒤 글자 선명도, 한자 글꼴을 바꾼 뒤의 mp4 재렌더(아직 안 함).
+
+## 2026-10-18 바뀐 것 (designer, 운영자 결정 123·127)
+- 1안 D(10.0~13.0): 만신 결과 견본 하나 → **일곱 방 결과 카드가 0.4초(12프레임)씩 끊어 넘어감**(Ⅰ 만신 10.15 → Ⅱ 오검 10.55 → Ⅲ 별 10.95 → Ⅳ 데칸 11.35 → Ⅴ 촐킨 11.75 → Ⅵ 룬 12.15 → Ⅶ 시빌라 12.55~12.95). 터치 원·스크롤 없앰. 스크립트 0 그대로, 새 웹 글꼴 없음(룬·오검은 SVG 선).
+- 1안·2안 끝 화면의 면책 고지 `data-cap="D1"` 요소를 없애고, 1안 끝 화면 묶음을 40px·2안을 24px 내려 간격을 맞췄다.
+- 확인: 헤드리스 Edge(포트 8790) 프레임 297~392 전수(한 프레임에 카드 하나, 각 12프레임 이상), 대표 컷·안전 박스 겹쳐 보기 10.2·11.0·12.6·14.97초, 2안 8.97초. 콘솔 오류 0. **mp4 재렌더와 소리판 재합성은 아직 안 함(developer).**

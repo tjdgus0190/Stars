@@ -82,7 +82,7 @@
 
 /* ───────── D: 끝 화면 ───────── */
 .end-layer { opacity: 0; animation: win-in 0.4s var(--ease-out) 6.5s both; }
-.six { position: absolute; left: var(--text-left); width: var(--text-width); top: 580px; display: flex; justify-content: center; gap: 20px; }
+.six { position: absolute; left: var(--text-left); width: var(--text-width); top: 604px; display: flex; justify-content: center; gap: 20px; }
 .six i { display: block; width: 100px; height: 150px; border: 2px solid var(--acc-dim); border-radius: var(--shape);
   background: linear-gradient(180deg, oklch(0.3 0.05 var(--rh)), oklch(0.17 0.03 var(--rh)));
   opacity: 0.3; animation: glim 0.6s var(--ease-out) calc(6.75s + var(--k) * 0.12s) both; }
@@ -93,9 +93,9 @@
 .six [data-room="tzolkin"] { --shape: 2px; }
 .six [data-room="rune"]    { --shape: 58% 24% 4px 4px / 30% 13% 4px 4px; }
 .six [data-room="sibyl"]   { --shape: 50% 50% 4px 4px / 17% 21% 4px 4px; }
-.end__bell { position: absolute; left: 500px; top: 752px; width: 80px; height: 80px; fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+.end__bell { position: absolute; left: 500px; top: 776px; width: 80px; height: 80px; fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   transform-origin: 50% 8%; animation: bell-shake 0.7s var(--ease-out) 8.3s both; }
-.end__logo { position: absolute; left: var(--text-left); width: var(--text-width); top: 846px; font-size: 120px;
+.end__logo { position: absolute; left: var(--text-left); width: var(--text-width); top: 870px; font-size: 120px;
   animation: logo-shimmer 1.6s var(--ease-in-out) 6.7s both; }
-.end__cta { top: 1010px; }
-.end__note { top: 1140px; }
+/* 면책 고지(D1)는 결정 123으로 없앰 → 끝 화면 묶음을 24px 내려 자막 아래(466)와 안전 박스 아래(1248) 사이 가운데에 맞춤 */
+.end__cta { top: 1034px; }

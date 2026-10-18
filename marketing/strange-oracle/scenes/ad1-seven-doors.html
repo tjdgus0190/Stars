@@ -71,22 +71,113 @@
     </div>
   </div>
 
-  <!-- ── D: 결과 화면 일부 (CSS로 다시 그린 견본, 가상 이름 "하늘"). 본문은 흐린 줄로만 ── -->
+  <!-- ── D: 일곱 방의 결과 카드가 차례로 (제품 결과 화면 캡처 카드의 결을 CSS·인라인 SVG로 다시 그린 견본, 가상 이름 "하늘").
+       카드마다 0.4초(12프레임) 이상 온전히 보인다. 넘어갈 때는 끊어 넘김 + 16px 떠오름(빈 프레임 없음).
+       시각: 각 카드 style의 --on(나타남)·--off(사라짐), 초 ── -->
   <div class="layer result-layer">
-    <div class="result" data-room="saju">
-      <div class="result__scroll">
-        <p class="result__eyebrow" data-label="result-eyebrow">낯선 점술관 · 만신의 방</p>
-        <p class="result__who" data-cap="M1">나의 이야기 1장 · 하늘님</p>
-        <p class="result__title" data-label="result-title">곧게 선 큰 나무</p>
-        <ol class="result__wonguk" aria-hidden="true"><li>丙<br>寅</li><li class="is-day">甲<br>戌</li><li>辛<br>巳</li><li>庚<br>午</li></ol>
-        <p class="result__chapter" data-label="result-chapter"><b>Ⅰ</b>타고난 그릇</p>
-        <i class="result__lines" aria-hidden="true"></i>
-        <p class="result__quote" data-cap="M2">빈자리를 먼저 채우는 앞장섬</p>
-        <i class="result__lines result__lines--long" aria-hidden="true"></i>
+    <i class="deck" aria-hidden="true"></i>
+
+    <!-- Ⅰ 만신: 원국 네 기둥 -->
+    <div class="rcard rcard--first" data-room="saju" style="--off:10.55s">
+      <i class="rcard__seal" aria-hidden="true"></i>
+      <p class="rcard__eyebrow" data-label="rc-saju-eyebrow">낯선 점술관 · 만신의 방</p>
+      <div class="rcard__emblem" aria-hidden="true">
+        <ol class="wonguk"><li>丙<br>寅</li><li class="is-day">甲<br>戌</li><li>辛<br>巳</li><li>庚<br>午</li></ol>
       </div>
-      <i class="result__fade" aria-hidden="true"></i>
+      <p class="rcard__title" data-label="rc-saju-title">곧게 선 큰 나무</p>
+      <p class="rcard__names" data-label="rc-saju-names">甲 · 태어난 날의 하늘 글자</p>
+      <p class="rcard__meta" data-cap="M1">나의 이야기 1장 · 하늘님</p>
     </div>
-    <i class="touch" aria-hidden="true"></i>
+
+    <!-- Ⅱ 오검: 자작나무 껍질 조각에 새긴 한 글자 -->
+    <div class="rcard" data-room="ogham" style="--on:10.55s; --off:10.95s">
+      <i class="rcard__seal" aria-hidden="true"></i>
+      <p class="rcard__eyebrow" data-label="rc-ogham-eyebrow">낯선 점술관 · 오검의 방</p>
+      <div class="rcard__emblem" aria-hidden="true">
+        <span class="bark"><svg viewBox="0 0 40 80"><path d="M20 76V4M20 40H34" /></svg></span>
+        <span class="emblem-label">BEITH</span>
+      </div>
+      <p class="rcard__title" data-label="rc-ogham-title">처음 문을 여는 사람</p>
+      <p class="rcard__names" data-label="rc-ogham-names"><span class="latin">BEITH</span> · 자작나무</p>
+      <p class="rcard__meta" data-label="rc-ogham-meta">나의 이야기 2장 · 하늘님</p>
+    </div>
+
+    <!-- Ⅲ 별: 궤도 + 초승달 + 별 하나, 스물일곱 집 번호 -->
+    <div class="rcard" data-room="star" style="--on:10.95s; --off:11.35s">
+      <i class="rcard__seal" aria-hidden="true"></i>
+      <p class="rcard__eyebrow" data-label="rc-star-eyebrow">낯선 점술관 · 별의 방</p>
+      <div class="rcard__emblem" aria-hidden="true">
+        <svg class="moon" viewBox="0 0 120 120"><circle class="moon__orbit" cx="60" cy="60" r="56" /><path class="moon__moon" d="M74 24a38 38 0 1 0 0 72a30 30 0 1 1 0-72Z" /><circle class="moon__star" cx="60" cy="4" r="3" /></svg>
+        <span class="pill">1 / 27</span>
+      </div>
+      <p class="rcard__title rcard__title--big" data-label="rc-star-title">아슈위니</p>
+      <p class="rcard__names" data-label="rc-star-names"><span class="latin">Ashwini</span> · 치유하는 쌍둥이 기수의 집</p>
+      <p class="rcard__meta" data-label="rc-star-meta">나의 이야기 3장 · 하늘님</p>
+    </div>
+
+    <!-- Ⅳ 데칸: 작은 해시계 (눈금 36칸, 그림자가 가리키는 칸) -->
+    <div class="rcard" data-room="decan" style="--on:11.35s; --off:11.75s">
+      <i class="rcard__seal" aria-hidden="true"></i>
+      <p class="rcard__eyebrow" data-label="rc-decan-eyebrow">낯선 점술관 · 데칸의 방</p>
+      <div class="rcard__emblem" aria-hidden="true">
+        <svg class="dial" viewBox="-60 -60 120 120">
+          <circle class="dial__rim" r="54" />
+          <path class="dial__ticks" d="M0 -40L0 -54M8 -45.3L9.4 -53.2M15.7 -43.2L18.5 -50.7M20 -34.6L27 -46.8M29.6 -35.2L34.7 -41.4M35.2 -29.6L41.4 -34.7M34.6 -20L46.8 -27M43.2 -15.7L50.7 -18.5M45.3 -8L53.2 -9.4M40 0L54 0M45.3 8L53.2 9.4M43.2 15.7L50.7 18.5M34.6 20L46.8 27M35.2 29.6L41.4 34.7M29.6 35.2L34.7 41.4M20 34.6L27 46.8M15.7 43.2L18.5 50.7M8 45.3L9.4 53.2M0 40L0 54M-8 45.3L-9.4 53.2M-15.7 43.2L-18.5 50.7M-20 34.6L-27 46.8M-29.6 35.2L-34.7 41.4M-35.2 29.6L-41.4 34.7M-34.6 20L-46.8 27M-43.2 15.7L-50.7 18.5M-45.3 8L-53.2 9.4M-40 0L-54 0M-45.3 -8L-53.2 -9.4M-43.2 -15.7L-50.7 -18.5M-34.6 -20L-46.8 -27M-35.2 -29.6L-41.4 -34.7M-29.6 -35.2L-34.7 -41.4M-20 -34.6L-27 -46.8M-15.7 -43.2L-18.5 -50.7M-8 -45.3L-9.4 -53.2" />
+          <circle class="dial__ring" r="40" />
+          <g transform="rotate(5)">
+            <path class="dial__home" d="M-4.7 -53.8A54 54 0 0 1 4.7 -53.8L3.5 -39.8A40 40 0 0 0 -3.5 -39.8Z" />
+            <path class="dial__shadow" d="M-4 0L-1.2 -38L1.2 -38L4 0Z" />
+            <circle class="dial__sun" cy="58" r="5" />
+          </g>
+          <circle class="dial__gnomon" r="4.5" />
+        </svg>
+        <span class="pill">DECAN 1 / 36</span>
+      </div>
+      <p class="rcard__title" data-label="rc-decan-title">가장 먼저 부딪히는 사람</p>
+      <p class="rcard__names" data-label="rc-decan-names"><span class="latin">DECAN 1</span> · 양자리 0°~10°</p>
+      <p class="rcard__meta" data-label="rc-decan-meta">나의 이야기 4장 · 하늘님</p>
+    </div>
+
+    <!-- Ⅴ 촐킨: 금빛 점 숫자(4) + 문양 이름이 든 카르투슈 -->
+    <div class="rcard" data-room="tzolkin" style="--on:11.75s; --off:12.15s">
+      <i class="rcard__seal" aria-hidden="true"></i>
+      <p class="rcard__eyebrow" data-label="rc-tzolkin-eyebrow">낯선 점술관 · 촐킨의 방</p>
+      <div class="rcard__emblem" aria-hidden="true">
+        <svg class="maya" viewBox="0 6 24 12"><circle cx="4.8" cy="12" r="1.8" /><circle cx="9.6" cy="12" r="1.8" /><circle cx="14.4" cy="12" r="1.8" /><circle cx="19.2" cy="12" r="1.8" /></svg>
+        <span class="cartouche"><span>IMIX</span></span>
+        <span class="pill pill--flow">121 / 260</span>
+      </div>
+      <p class="rcard__title" data-label="rc-tzolkin-title">4 이믹스</p>
+      <p class="rcard__names" data-label="rc-tzolkin-names"><span class="latin">4 IMIX</span> · 악어와 수련, 태초의 물과 땅</p>
+      <p class="rcard__meta" data-label="rc-tzolkin-meta">나의 이야기 5장 · 하늘님</p>
+    </div>
+
+    <!-- Ⅵ 룬: 세 노른 자리의 돌 세 개 -->
+    <div class="rcard" data-room="rune" style="--on:12.15s; --off:12.55s">
+      <i class="rcard__seal" aria-hidden="true"></i>
+      <p class="rcard__eyebrow" data-label="rc-rune-eyebrow">낯선 점술관 · 룬의 방</p>
+      <div class="rcard__emblem stones" aria-hidden="true">
+        <span class="stone"><svg viewBox="0 0 40 60"><path d="M13 4V56M13 22L30 8M13 34L30 20" /></svg><b>URÐR</b></span>
+        <span class="stone"><svg viewBox="0 0 40 60"><path d="M20 4L32 18L10 52M20 4L8 18L30 52" /></svg><b>VERÐANDI</b></span>
+        <span class="stone"><svg viewBox="0 0 40 60"><path d="M20 56V4M20 22L8 8M20 22L32 8" /></svg><b>SKULD</b></span>
+      </div>
+      <p class="rcard__title" data-label="rc-rune-title">하늘님의 세 개의 룬</p>
+      <p class="rcard__names" data-label="rc-rune-names">페후 · 오탈라 · 알기즈</p>
+      <p class="rcard__meta" data-label="rc-rune-meta">나의 이야기 6장 · 하늘님</p>
+    </div>
+
+    <!-- Ⅶ 시빌라: 월계 잎 고리 + 제비 번호 -->
+    <div class="rcard rcard--last" data-room="sibyl" style="--on:12.55s">
+      <i class="rcard__seal" aria-hidden="true"></i>
+      <p class="rcard__eyebrow" data-label="rc-sibyl-eyebrow">낯선 점술관 · 시빌라 신탁의 방</p>
+      <div class="rcard__emblem" aria-hidden="true">
+        <svg class="wreath" viewBox="-60 -60 120 120"><path class="wreath__stem" d="M-13.2 46.1A48 48 0 0 1 -22.5 -42.4M13.2 46.1A48 48 0 0 0 22.5 -42.4" /><g class="wreath__leaves"><path d="M-6.1 47.9Q-16 43.3 -22.6 52Q-12.7 56.6 -6.1 47.9Z" /><path d="M-6.2 48.4Q-7.2 37.5 -18 36.2Q-17 47 -6.2 48.4Z" /><path d="M-24.1 41.9Q-31.5 33.8 -40.9 39.3Q-33.5 47.4 -24.1 41.9Z" /><path d="M-24.4 42.3Q-21.1 31.9 -30.6 26.4Q-33.9 36.8 -24.4 42.3Z" /><path d="M-38.4 29.4Q-42.1 19.1 -52.9 20.5Q-49.2 30.8 -38.4 29.4Z" /><path d="M-38.8 29.6Q-31.8 21.3 -38.4 12.6Q-45.4 20.9 -38.8 29.6Z" /><path d="M-46.7 12.3Q-46.2 1.4 -56.7 -1.4Q-57.2 9.5 -46.7 12.3Z" /><path d="M-47.2 12.4Q-37.5 7.4 -40.3 -3.2Q-50 1.8 -47.2 12.4Z" /><path d="M-47.9 -6.6Q-43.2 -16.5 -51.8 -23.2Q-56.5 -13.3 -47.9 -6.6Z" /><path d="M-48.3 -6.8Q-37.5 -7.6 -36 -18.5Q-46.8 -17.6 -48.3 -6.8Z" /><path d="M-41.6 -24.6Q-33.5 -31.8 -38.8 -41.3Q-47 -34.1 -41.6 -24.6Z" /><path d="M-42 -24.9Q-31.6 -21.5 -26.1 -30.9Q-36.4 -34.3 -42 -24.9Z" /><path d="M-28.9 -38.7Q-18.6 -42.3 -19.9 -53.1Q-30.2 -49.5 -28.9 -38.7Z" /><path d="M-29.2 -39.1Q-20.9 -32 -12.2 -38.6Q-20.4 -45.7 -29.2 -39.1Z" /><path d="M6.1 47.9Q12.7 56.6 22.6 52Q16 43.3 6.1 47.9Z" /><path d="M6.2 48.4Q17 47 18 36.2Q7.2 37.5 6.2 48.4Z" /><path d="M24.1 41.9Q33.5 47.4 40.9 39.3Q31.5 33.8 24.1 41.9Z" /><path d="M24.4 42.3Q33.9 36.8 30.6 26.4Q21.1 31.9 24.4 42.3Z" /><path d="M38.4 29.4Q49.2 30.8 52.9 20.5Q42.1 19.1 38.4 29.4Z" /><path d="M38.8 29.6Q45.4 20.9 38.4 12.6Q31.8 21.3 38.8 29.6Z" /><path d="M46.7 12.3Q57.2 9.5 56.7 -1.4Q46.2 1.4 46.7 12.3Z" /><path d="M47.2 12.4Q50 1.8 40.3 -3.2Q37.5 7.4 47.2 12.4Z" /><path d="M47.9 -6.6Q56.5 -13.3 51.8 -23.2Q43.2 -16.5 47.9 -6.6Z" /><path d="M48.3 -6.8Q46.8 -17.6 36 -18.5Q37.5 -7.6 48.3 -6.8Z" /><path d="M41.6 -24.6Q47 -34.1 38.8 -41.3Q33.5 -31.8 41.6 -24.6Z" /><path d="M42 -24.9Q36.4 -34.3 26.1 -30.9Q31.6 -21.5 42 -24.9Z" /><path d="M28.9 -38.7Q30.2 -49.5 19.9 -53.1Q18.6 -42.3 28.9 -38.7Z" /><path d="M29.2 -39.1Q20.4 -45.7 12.2 -38.6Q20.9 -32 29.2 -39.1Z" /></g></svg>
+        <span class="wreath__num">I</span>
+      </div>
+      <p class="rcard__title" data-label="rc-sibyl-title">망설임보다 한발 빠른 손</p>
+      <p class="rcard__names" data-label="rc-sibyl-names"><span class="latin">SORS I</span> · 일에 대한 답</p>
+      <p class="rcard__meta" data-label="rc-sibyl-meta">나의 이야기 7장 · 하늘님</p>
+    </div>
   </div>
 
   <!-- ── E: 끝 화면 ── -->
@@ -104,7 +195,6 @@
   <p class="cap win win--rise" data-cap="S3" style="--in:6.6s;  --out:9.95s">방을 지날 때마다, 이야기가 한 장씩</p>
   <p class="cap win win--rise" data-cap="S4" style="--in:10.1s; --out:12.95s">낯선 점술로 읽으면, 내 이야기는?</p>
   <p class="cap cap--cta win-in win--rise end__cta" data-cap="S5" style="--in:13.35s">오늘 밤, 첫 번째 문 열기</p>
-  <p class="cap cap--note win-in end__note" data-cap="D1" style="--in:13.5s">재미로 보는 콘텐츠이며, 중요한 결정의 근거로 삼지 마세요.</p>
 
   <!-- 안전 영역 확인: 주소 끝에 #safe (렌더에는 안 보임) -->
   <div class="safe-guide" id="safe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
