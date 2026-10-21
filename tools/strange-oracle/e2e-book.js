@@ -401,19 +401,21 @@ const STUB_ADS = `(function () {
   await sleep(400);
   check("18-5 #preview 직접 0/7 → 입구", (await active()) === "screen-hub");
 
-  // 18-c 결제 전 3/7: 잠긴 장으로 가는 네 길 — 어느 것도 결제 전 화면을 열지 않고 목차 그 장 줄 + 토스트
-  const lockedToast = await ev("TEXT.book.toc.lockedToast");
+  // 18-c 결제 전 3/7: 잠긴 장으로 가는 길 — (2026-10-21 기대값 변경, 결제 유도 앞당기기) 결제 전 화면으로 간다. SDK·유료 장 요청은 0
+  //   만신의 장은 무료가 되어(로컬 작업 4cc23a1) 여는 글 끝 "다음 장"(saju)은 잠긴 길이 아니라 그 장 표지로 열린다
   await fresh(["saju", "ogham", "star"], "#report", PROFILE, false);
-  const api3 = nApi0(), sdk3 = sdkReq();
+  const sdk3 = sdkReq();
+  const toReport = async () => { await b.goto(BASE + "#report"); await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'"); };
+  const toDeeper = () => waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'", 5000);
   await row("star");
-  await sleep(300);
-  const road1 = { scr: await active(), view: await view(), target: await targetIs("[data-js=book-chapter][data-chapter=star]"), toast: (await toastText()) === lockedToast };
+  await toDeeper();
+  const road1 = { scr: await active() };
   await b.goto(BASE + "#star-result");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-star-result'");
   await click("#screen-star-result [data-js=result-book-link]");
-  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
-  await sleep(400);
-  const road2 = { scr: await active(), view: await view(), target: await targetIs("[data-js=book-chapter][data-chapter=star]"), toast: (await toastText()) === lockedToast };
+  await toDeeper();
+  const road2 = { scr: await active() };
+  await toReport();
   await row("open");
   await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 5000);
   await click("[data-js=book-chapter-open]");
@@ -422,16 +424,16 @@ const STUB_ADS = `(function () {
   await sleep(150);
   const nx3 = await ev("document.querySelector('[data-js=book-page].is-current [data-js=chapter-end-next]').dataset.next");
   await click("[data-js=book-page].is-current [data-js=chapter-end-next]");
-  await sleep(400);
-  const road3 = { next: nx3, scr: await active(), view: await view(), target: await targetIs(`[data-js=book-chapter][data-chapter=${nx3}]`), toast: (await toastText()) === lockedToast };
+  await sleep(600);
+  const road3 = { next: nx3, scr: await active(), view: await view() };
   await ev("sessionStorage.setItem('strange-oracle-bookmark', 'ogham:2')");
-  await b.goto(BASE + "#report");
-  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
+  await toReport();
   await click("[data-js=book-resume]");
-  await sleep(400);
-  const road4 = { scr: await active(), view: await view(), target: await targetIs("[data-js=book-chapter][data-chapter=ogham]"), toast: (await toastText()) === lockedToast };
+  await toDeeper();
+  const road4 = { scr: await active() };
   const roads = [road1, road2, road3, road4];
-  check("18-12의 8 1~6/7 결제 전 네 길(목차 잠긴 장·방 결과 책 한 줄·장 끝 다음 장·이어 읽기): 결제 전 화면 0 · 목차 그 장 줄 .is-target · 토스트", roads.every((r) => r.scr === "screen-report" && r.view === "toc" && r.target && r.toast) && road3.next === "saju" && nApi0() === api3 && sdkReq() === sdk3, JSON.stringify(roads));
+  check("18-12의 8 (2026-10-21) 1~6/7 결제 전 잠긴 길(목차 잠긴 장·방 결과 책 한 줄·이어 읽기) → 결제 전 화면 · 여는 글 다음 장 = 무료 만신의 장 표지 · SDK 0", [road1, road2, road4].every((r) => r.scr === "screen-deeper") && road3.next === "saju" && road3.scr === "screen-report" && road3.view !== "toc" && sdkReq() === sdk3, JSON.stringify(roads));
+  await toReport();
   await click("[data-js=book-buy]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
   const pv3 = await dlNow();
@@ -442,7 +444,7 @@ const STUB_ADS = `(function () {
 
   // 18-d 결제 전 7/7: 나의 이야기 카드 → 미리보기 (18-5 순서 1~8) · 유료 지문 0 · /api/book·SDK 0
   await fresh(ORDER, "#story", PROFILE, false);
-  check("18-5 7/7 결제 전 나의 이야기: 미리보기 카드 = 주 버튼, 책 한 줄 숨김, 공유는 보조로(위쪽 공유 그대로)", await ev("(() => { const c = document.querySelector('[data-js=story-preview]'); return !!c && !c.hidden && c.querySelector('[data-js=story-preview-go]').classList.contains('btn--primary') && document.querySelector('[data-js=story-book]').classList.contains('is-hidden') && document.querySelector('[data-js=story-share]').classList.contains('btn--secondary') && !document.querySelector('[data-js=story-share]').classList.contains('btn--primary') && [...document.querySelectorAll('#screen-story .btn--primary')].filter(e => e.offsetHeight > 0 && !e.closest('[data-js^=map-]')).length === 1; })()")); // 지도 카드(16단계, test에서만)의 주 버튼은 따로 센다
+  check("18-5 7/7 결제 전 나의 이야기: 미리보기 카드 = 주 버튼, 책 한 줄 숨김, 공유는 보조로(위쪽 공유 그대로)", await ev("(() => { const c = document.querySelector('[data-js=story-preview]'); return !!c && !c.hidden && c.querySelector('[data-js=story-preview-go]').classList.contains('btn--primary') && document.querySelector('[data-js=story-book]').classList.contains('is-hidden') && document.querySelector('[data-js=story-share]').classList.contains('btn--secondary') && !document.querySelector('[data-js=story-share]').classList.contains('btn--primary') && [...document.querySelectorAll('#screen-story .btn--primary')].filter(e => e.offsetHeight > 0 && !e.closest('[data-js^=map-]') && !e.matches('[data-js=story-pay-btn]')).length === 1 && document.querySelector('[data-js=story-pay-btn]')?.offsetHeight > 0 && document.querySelector('[data-js=story-share]').offsetHeight > 0; })()")); // 지도 카드(16단계, test에서만)의 주 버튼은 따로 센다. (2026-10-21) 결제 버튼(19단계 K10)은 미리보기 카드 아래 따로, 공유 버튼은 숨기지 않음
   const api7 = nApi0(), sdk7 = sdkReq();
   await click("[data-js=story-preview-go]");
   await waitFor("document.querySelector('#screen-preview')?.dataset.state === 'ready' && document.querySelector('.screen.is-active')?.id === 'screen-preview'", 8000);
@@ -452,7 +454,7 @@ const STUB_ADS = `(function () {
       closeHidden: s.querySelector('[data-js=preview-close]').hidden, closeHas: s.querySelector('[data-js=preview-close]').children.length > 0, disc: !s.querySelector('[data-js=disclaimer-slot]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(s.textContent), ads: s.querySelectorAll('[data-ad], .ad-slot').length, band: !s.querySelector('[data-js=preview-test-band]').classList.contains('is-hidden'),
       prim: s.querySelectorAll('.btn--primary').length, price: s.querySelector('[data-js=preview-go-label]').textContent, h: [...s.querySelectorAll('h1,h2,h3')].map(h => h.tagName).join(''), interest: !s.querySelector('[data-js=preview-interest]').hidden && s.querySelector('[data-js=preview-interest-text]').textContent === TEXT.book.interest.sibyl.love,
       bad: /undefined|\\{(who|n|price|arch|sub)\\}/.test(s.textContent), wide: document.documentElement.scrollWidth <= innerWidth }; })())`));
-  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 14장 목차(무료 2 글자 표지) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 14 && pv.toc.startsWith("open:free,saju:paid") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /5,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
+  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 14장 목차(무료 2 글자 표지) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 14 && pv.toc.startsWith("open:free,saju:free") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /5,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
   // 유료 문장 지문(build-dist와 같은 규칙: 30자 이상 문자열의 가운데 60자, 공개 data*.js와 같은 문자열은 뺌)이 미리보기 화면 HTML에 0
   const prints = (() => {
     const vm = require("vm");
@@ -481,8 +483,8 @@ const STUB_ADS = `(function () {
   const pay7 = await ev("Object.fromEntries([...document.querySelectorAll('[data-js=pay-chapters] li')].map(li => [li.firstElementChild.firstChild.textContent, (li.querySelector('.pay-list__vol').textContent.match(/[\\d,]+/) || [''])[0]]))");
   const roomName = await ev("Object.fromEntries(" + JSON.stringify(ORDER) + ".map((r) => [r, TEXT.rooms[r].name]))");
   const payOf = (r) => { const k = Object.keys(pay7).find((x) => x.endsWith(" " + roomName[r])); return k ? pay7[k] : null; };
-  const sameN = ORDER.every((r) => rests[r] && rests[r] === payOf(r));
-  check("18-12의 7 '이 장의 나머지 약 {n}자' = 결제 전 화면 '받는 것'의 그 장 분량 (7장 모두)", sameN, JSON.stringify({ rests, pay7 }));
+  const sameN = ORDER.filter((r) => r !== "saju").every((r) => rests[r] && rests[r] === payOf(r)) && payOf("saju") === null; // (2026-10-21) 만신의 장은 무료라 '받는 것'에 없음
+  check("18-12의 7 '이 장의 나머지 약 {n}자' = 결제 전 화면 '받는 것'의 그 장 분량 (유료 방 장 6개, 만신의 장은 무료)", sameN, JSON.stringify({ rests, pay7 }));
   const pvp = await dlNow();
   check("18-5·18-11 미리보기 주 버튼 → 결제 전 화면(결제하지 않음, SDK 0) · so_pay from preview · 미리보기로 돌아가기 보임", evSeen(pvp, "so_pay", { step: "view", from: "preview" }) && !(await ev("document.querySelector('[data-js=pay-back-preview]').hidden")) && sdkReq() === sdk7, JSON.stringify(pvp.filter((a) => a[1] === "so_pay")));
   await click("[data-js=pay-back-preview]");
@@ -508,7 +510,8 @@ const STUB_ADS = `(function () {
   await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))");
   await sleep(150);
   await click("[data-js=book-page].is-current [data-js=chapter-end-next]");
-  const p3 = (await toPv()) && (await targetIs("[data-js=preview-first][data-chapter=saju]"));
+  await sleep(600);
+  const p3 = (await active()) === "screen-report" && (await view()) !== "toc"; // (2026-10-21) 여는 글 다음 장 = 무료 만신의 장 → 미리보기가 아니라 그 장이 열린다
   await ev("sessionStorage.setItem('strange-oracle-bookmark', 'ogham:2')");
   await b.goto(BASE + "#report");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");

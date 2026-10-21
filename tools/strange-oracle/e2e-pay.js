@@ -106,11 +106,13 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   // ═══ A. 결제 전 화면 ═══
   check("A0 지름길 rooms=2&to=book(결제 전) → 목차", await skip(TEST, "rooms=2&to=book", "screen-report"));
   const sdk0 = sdkN();
-  await click("[data-js=book-chapter][data-chapter=saju] [data-js=book-chapter-btn]");
-  // (18단계 18-5, 기대값 변경 — tests.md 「18단계 · 바뀐 기대값」) 1~6/7 결제 전: 잠긴 장을 눌러도 결제 전 화면으로 가지 않고 목차의 그 장 줄 강조 + 토스트
+  // (2026-10-21 기대값 변경 — 결제 유도 앞당기기, tests.md) 만신의 장은 무료 → 잠긴 장 표본은 오검. 1~6/7 결제 전에도 잠긴 장을 누르면 결제 전 화면, SDK는 아직 0
+  await click("[data-js=book-chapter][data-chapter=ogham] [data-js=book-chapter-btn]");
   await sleep(400);
-  const a1 = await ev("({ scr: document.querySelector('.screen.is-active')?.id, target: !!document.querySelector('[data-js=book-chapter][data-chapter=saju].is-target'), toast: (document.querySelector('[data-js=toast]') || {}).textContent || '' })");
-  check("A1 (18-5) 1~6/7 결제 전 잠긴 장 → 결제 전 화면 아님 · 목차 그 장 줄 .is-target · 토스트", a1.scr === "screen-report" && a1.target && a1.toast === (await ev("TEXT.book.toc.lockedToast")), JSON.stringify(a1));
+  const a1 = await ev("({ scr: document.querySelector('.screen.is-active')?.id })");
+  check("A1 (2026-10-21) 1~6/7 결제 전 잠긴 장 → 결제 전 화면 · SDK 요청 0", a1.scr === "screen-deeper" && sdkN() === sdk0, JSON.stringify(a1));
+  await ev("StrangeOracle.go('report')");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   check("A1b (18-5) 목차 맨 아래 작은 글자 버튼 하나(btn--text, 주 버튼 모양 아님) → 결제 전 화면", (await ev("(() => { const b = document.querySelector('[data-js=book-buy]'); const row = document.querySelector('[data-js=book-buy-row]'); return !!b && !row.hidden && b.classList.contains('btn--text') && !b.classList.contains('btn--primary'); })()")) && (await click("[data-js=book-buy]")) && (await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'")));
   const lay = await ev(`(() => {
     const s = document.querySelector('#screen-deeper');
@@ -126,10 +128,10 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       old: !!s.querySelector('[data-js=pay-price-unit], [data-js=pay-store-name]'),
       names: [...s.querySelectorAll('[data-js=pay-chapters] li')].map((li) => li.firstElementChild.firstChild.textContent), news: [...s.querySelectorAll('[data-js=pay-chapters] li.pay-list__item--new')].map((li) => li.firstElementChild.firstChild.textContent + '|' + (li.querySelector('.pay-list__new') || {}).textContent) };
   })()`);
-  check("A2 1 받는 것(12장)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 12, JSON.stringify(lay));
+  check("A2 1 받는 것(유료 11장, 만신의 장 무료)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 11, JSON.stringify(lay));
   // (18-9, 기대값 변경) 새로 더해진 장 알약은 인연의 장 → 새 장. 새 장 줄은 방 장 7줄 바로 뒤(제2부 맨 앞), 인연의 장은 그대로 시기별 흐름 다음(관심사 없음)
   const cxName = await ev("TEXT.book.parts.cross"), rmLast = await ev("TEXT.topbar.room.replace('{num}', 'Ⅶ').replace('{name}', TEXT.rooms.sibyl.name)");
-  check("18-9 받는 것: 새 장 줄은 방 장 바로 뒤·시기별 흐름 앞, 그 줄 하나만 .pay-list__item--new + 알약 · 인연의 장은 시기별 흐름 다음", lay.names.indexOf(cxName) === 7 && lay.names.indexOf(await ev("TEXT.book.parts.timeline")) === 8 && lay.names.indexOf(await ev("TEXT.book.parts.yeon")) === lay.names.indexOf(await ev("TEXT.book.parts.timeline")) + 1 && lay.news.length === 1 && lay.news[0].split("|")[0] === cxName && lay.news[0].split("|")[1].length > 0, JSON.stringify({ names: lay.names, news: lay.news, rmLast }));
+  check("18-9 받는 것: 새 장 줄은 방 장 바로 뒤·시기별 흐름 앞, 그 줄 하나만 .pay-list__item--new + 알약 · 인연의 장은 시기별 흐름 다음", lay.names.indexOf(cxName) === 6 && lay.names.indexOf(await ev("TEXT.book.parts.timeline")) === 7 && lay.names.indexOf(await ev("TEXT.book.parts.yeon")) === lay.names.indexOf(await ev("TEXT.book.parts.timeline")) + 1 && lay.news.length === 1 && lay.news[0].split("|")[0] === cxName && lay.news[0].split("|")[1].length > 0, JSON.stringify({ names: lay.names, news: lay.news, rmLast }));
   check("A3 판매자 정보 줄 5칸(신고 줄은 값이 없어 숨김)·legal 3종 링크·결제 버튼은 <button>(href 없음)·옛 칸 2개 없음", lay.seller === 5 && lay.legal === 3 && lay.tag === "BUTTON" && !lay.href && !lay.old);
   check("A4 동의 전 비활성·시험 띠·userid(모의 값) 있으면 '판매 준비 중' 숨김·가로 넘침 0", lay.buyOff && lay.band && !lay.empty && lay.wide);
   // K. (15단계 QA 1차 필수 1) test: 판매자 정보 줄 legal 링크 3개가 200이고 결제 문단이 주석 밖에 보인다
@@ -347,9 +349,9 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   await sw("store=fail-read");
   const bk0 = reqs(/\/api\/book/);
-  await click("[data-js=book-chapter][data-chapter=saju] [data-js=book-chapter-btn]");
+  await click("[data-js=book-chapter][data-chapter=ogham] [data-js=book-chapter-btn]");
   await waitFor(`${bk0} < 0`, 2500);
-  const bkStatus = await ev("fetch('/api/book', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pass: sessionStorage.getItem('strange-oracle-pass'), file: 'saju' }) }).then(r => r.status)");
+  const bkStatus = await ev("fetch('/api/book', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pass: sessionStorage.getItem('strange-oracle-pass'), file: 'ogham' }) }).then(r => r.status)");
   check("F3 store=fail-read에서 book 503 → strange-oracle-pass 지우지 않음", bkStatus === 503 && (await ss("strange-oracle-pass")) === passB, `${bkStatus}`);
   await sw("store=ok");
 

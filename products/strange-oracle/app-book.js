@@ -363,9 +363,12 @@
 
     // ── (18-5 「잠긴 장으로 가는 길 — 한 규칙」) 결제 전에 유료 장에 닿는 네 길(목차 잠긴 장·방 결과 책 한 줄·장 끝 "다음 장"·이어 읽기)이
     //   모두 openCover의 이 분기 하나를 지난다. 1~6/7: 목차의 그 장 줄로 스크롤·강조 + 토스트(결제 전 화면으로 가지 않음) · 7/7: 미리보기의 그 장 샘플 자리
+    // (운영자 지시 2026-10-21 「결제 유도 앞당기기」) 1~6/7에서도 잠긴 장을 누르면 결제 전 화면으로 간다(받는 것·가격·환불을 거기서 먼저 보여 줌).
+    //   목차 강조 + 토스트는 결제 화면이 없을 때(결제 꺼짐)만 남는 대체 길이다
     let targetTimer = 0;
     function lockedRoad(id) {
       if (x.previewOn()) return openPreview(id);
+      if (x.goPay("locked")) return;
       x.toToc();
       const scr = x.reportScr;
       const li = $(`[data-js="book-chapter"][data-chapter="${id}"]`, scr);

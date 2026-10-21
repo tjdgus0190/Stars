@@ -769,30 +769,18 @@
     if (tabBook) tabBook.hidden = n === 0;
     renderBookCard();
 
-    // (19단계 K10) 결제 버튼 표시/비활성화 로직
+    // (19단계 K10 → 2026-10-21 결제 유도 앞당기기) 입구 결제 버튼: 0/7·결제함이면 숨김, 1/7부터 누를 수 있음(결제 전 화면으로)
     const payBtn = js("hub-pay-btn");
     if (payBtn) {
       if (!payBtn.dataset.bound) {
         payBtn.dataset.bound = "1";
-        payBtn.addEventListener("click", () => {
-          if (payBtn.disabled) return;
-          goPay("hub");
-        });
+        payBtn.addEventListener("click", () => goPay("hub"));
       }
-      if (passNow()) {
-        // 결제 완료 시 버튼 숨김
-        payBtn.style.display = "none";
-      } else if (n === CHAPTER_ORDER.length) {
-        // 7/7 완료 but 결제 안됨 - 버튼 활성화
-        payBtn.disabled = false;
-        payBtn.style.display = "block";
-        payBtn.textContent = T.pay.buy || "5,900원 결제하고 상세 내용 보기";
-      } else {
-        // 7/7 미완료 시 버튼 비활성화
-        payBtn.disabled = true;
-        payBtn.style.display = "block";
-        payBtn.textContent = T.pay.buy || "5,900원 결제하고 상세 내용 보기";
-      }
+      const entry = payBtn.closest('[data-js="pay-entry"]') || payBtn;
+      show(entry, n > 0 && !passNow());
+      payBtn.textContent = fill(T.pay.hubBuy || T.pay.buy || "", { price: Number(PAY.amount).toLocaleString("ko-KR") });
+      const note = js("hub-pay-note");
+      if (note) note.textContent = n === CHAPTER_ORDER.length ? T.pay.hubNoteAll || "" : T.pay.hubNote || "";
     }
   }
   enter.hub = renderHub;
@@ -4300,10 +4288,13 @@
   let payReturn = null; // #paid 복귀 처리(시작 때 부름). off면 null
   // (18-11) 결제 전 화면에 들어온 길: preview · toc · other
   let payFrom = "other";
+  // (2026-10-21) hub·story·locked 길을 더함. 결제 전 화면으로 갔으면 true
+  const PAY_FROM = ["preview", "toc", "hub", "story", "locked"];
   function goPay(from) {
-    if (!payScr) return;
-    payFrom = from === "preview" || from === "toc" ? from : "other";
+    if (!payScr) return false;
+    payFrom = PAY_FROM.includes(from) ? from : "other";
     go("deeper");
+    return true;
   }
 
   // (결정 120) 책 화면을 처음 열 때 app-book.js를 받아 mount 한 번
@@ -4336,33 +4327,19 @@
         shareBtn.classList.remove("btn--primary");
         shareBtn.classList.add("btn--secondary");
       }
-      // Show payment CTA when all rooms are done but not paid
-      if (allDone && !passNow()) {
-        // Show payment button in story screen
-        let storyPayBtn = js("story-pay-btn");
-        if (!storyPayBtn) {
-          // Create payment button if it doesn't exist
-          const btn = document.createElement("button");
-          btn.className = "btn btn--primary btn--block story-pay-btn";
-          btn.dataset.js = "story-pay-btn";
-          btn.dataset.t = "story.pay.go";
-          btn.textContent = T.pay.buyDetail || "5,900원 결제하고 상세 내용 보기";
-          btn.onclick = () => goPay("story");
-          // Insert after the preview card (or after story-book if card is missing)
-          if (card) card.after(btn);
-          else slot.after(btn);
-          storyPayBtn = btn;
-        } else {
-          storyPayBtn.style.display = "block";
-        }
-        // Hide share button when showing payment CTA
-        shareBtn.style.display = "none";
-      } else {
-        // Hide payment button if it exists
-        const storyPayBtn = js("story-pay-btn");
-        if (storyPayBtn) storyPayBtn.style.display = "none";
-        // Show share button normally
-        shareBtn.style.display = "inline-block";
+      // (19단계 K10, 2026-10-21 고침) 7/7 결제 전: 미리보기 카드 아래 결제 버튼. 공유 버튼은 숨기지 않는다(공유가 다음 방문자를 데려옴)
+      let storyPayBtn = js("story-pay-btn");
+      if (allDone && !passNow() && !storyPayBtn) {
+        storyPayBtn = document.createElement("button");
+        storyPayBtn.type = "button";
+        storyPayBtn.className = "btn btn--primary btn--block story-pay-btn";
+        storyPayBtn.dataset.js = "story-pay-btn";
+        storyPayBtn.addEventListener("click", () => goPay("story"));
+        (card || slot).after(storyPayBtn);
+      }
+      if (storyPayBtn) {
+        storyPayBtn.textContent = fill(T.pay.buyDetail || T.pay.buy || "", { price: comma(PAY.amount) });
+        show(storyPayBtn, allDone && !passNow());
       }
       const lab = $("[data-t='story.bookLink']", slot) || $("span", js("story-book-link"));
       if (lab) lab.textContent = passNow() ? T.story.bookLinkPaid || T.story.bookLink : T.story.bookLink;
@@ -4797,7 +4774,7 @@
     so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
-    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "hub", "story", "locked", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };

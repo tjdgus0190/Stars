@@ -3324,6 +3324,9 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .book-card__lock { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-3); }
 .book-card__hint { font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
 .book-card__go { grid-column: 1 / -1; }
+.book-card .pay-entry { grid-column: 1 / -1; display: grid; gap: var(--space-2); } /* (2026-10-21) 1/7부터 결제 버튼 + 한 줄 */
+.pay-entry__note { font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); text-align: center; }
+.story-pay-btn { margin-top: var(--space-3); }
 .book-card__pips { display: inline-flex; gap: 4px; flex-shrink: 0; }
 .book-card__pips i { width: 14px; height: 6px; border-radius: var(--radius-pill); background: oklch(0.4 0.04 285 / 0.8); }
 .book-card__pips i.is-on { background: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
