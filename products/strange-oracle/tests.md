@@ -1102,3 +1102,9 @@
   | e2e-flow 6/6 나의 이야기 | 가격 글자 0 | 결제 버튼(story-pay-btn·pay-entry) 안 가격은 뺌 |
 - 결과: 단위 171, e2e-pay 69, e2e-book 96, e2e-flow reduced 127, e2e-saju 41, e2e-map 82, e2e-utm 29, build-dist 통과, 모두 실패 0.
 - e2e-tabs 29/30: 「4 입구 글 칸 초점 → 띠 숨김」 실패. 이번 수정 전(4cc23a1 그대로)에도 같은 실패라 19단계 진행 중 항목으로 남긴다(미확인: 헤드리스 Chromium의 :has·초점 차이일 수 있음).
+
+## 20단계 · 「2027년의 흐름」 (2026-10-21)
+- 새 시험 `tools/strange-oracle/year.test.js` 5개: 판 고르기·쪽 모양·빈칸 0, 분량표 = 원본, 문장 금지어·끝맺음, 함수 book year(코드 없음 401·있음 200), 책 15장·flow 바로 뒤.
+- 바뀐 기대값: book.test.js 허용 목록 13개, cross.test.js 제2부 순서에 year(flow 바로 뒤), e2e-book 14장 → 15장·인연의 장은 2027년의 흐름 다음·미리보기 목차 15줄, e2e-pay 받는 것 12줄(year 9번째). e2e-book에 새 장 열기 시험 1개 더함.
+- 결과: 단위 176, e2e-book 97, e2e-pay 69, e2e-flow reduced 127, e2e-saju 41, e2e-map 82, e2e-utm 29, make-volume 대조 9,011건 불일치 0, build-dist 통과(유료 지문 year 119개 → 공개 폴더 0건). 모두 실패 0.
+- e2e-tabs 29/30(「4 입구 글 칸 초점 → 띠 숨김」)은 20단계 전과 같은 실패, 19단계 몫.

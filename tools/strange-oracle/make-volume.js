@@ -77,7 +77,7 @@ function roomOnly(room, val) {
   const fr = rep.chapters.find((x) => x.id === "rooms").rooms[0];
   return bookCh1Len(room, c, fr.ch1Rest) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs, fr.firstLine, fr.heartLine]);
 }
-const V = { room: {}, rune: {}, open: {}, close: {}, deep: {}, timeline: {}, map: {}, pair: {}, rel: {}, avg: {}, yeon: Book.yeonTable(BW.BOOK_YEON), cross: Book.crossTable(BW.BOOK_CROSS) };
+const V = { room: {}, rune: {}, open: {}, close: {}, deep: {}, timeline: {}, map: {}, pair: {}, rel: {}, avg: {}, yeon: Book.yeonTable(BW.BOOK_YEON), cross: Book.crossTable(BW.BOOK_CROSS), year: Book.yearTable(BW.BOOK_YEAR) }; // (20단계) year = 일간 0~9 + unknown
 // 만신: 일간 10 × 우세 묶음 5 = 50칸, 칸 번호 = 일간*5 + 묶음 (app.js chapterChars와 같은 식). 대표 코드 = 그 일간·묶음의 첫 코드
 const sajuCode = (s, g) => s * 500 + g * 2 + 1;
 V.room.saju = [];
@@ -187,6 +187,13 @@ for (let t = 0; t < 3000; t++) {
   if (Book.crossVolume(V.cross, pick) !== Book.crossChars(Book.crossChapter(CONTENT, pick))) crossBad++;
 }
 bad += crossBad;
+// (20단계) 「2027년의 흐름」: 일간 10판 + 공통판마다 표 값 = 실제 조립 글자 수
+let yearBad = 0;
+for (const stem of [null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+  checked++;
+  if (Book.yearVolume(V.year, { stem }) !== Book.yearChars(Book.yearChapter(CONTENT, { stem }))) yearBad++;
+}
+bad += yearBad;
 const out = `// 책 분량 표 — 숫자(글자 수, 공백 포함)만. 문구·로직 없음. 손으로 고치지 않는다.
 // 자동 생성: node tools/strange-oracle/make-volume.js (유료 문구를 고친 뒤 다시 실행). spec 11-6 F3 "원본 하나".
 // 룬·시빌라 "고른 주제" 단락은 빼고 센 값이다. app.js bookVolume()만 이 표를 읽는다.

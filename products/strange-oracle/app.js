@@ -2837,11 +2837,11 @@
   //    결과 코드·입력값은 보내지 않는다(6장). file 이름은 장 단위 고정 문자열(허용 목록 12개).
   //    인연의 장(17-2)은 book-yeon 전체를 받아 원형·보조 원형·오행·나이 구간을 이 브라우저가 고른다(19세 미만도 b1 — 결정 114)(yeonCtx, 보내지 않고 저장하지 않음).
   const BOOK_ROOMS = CHAPTER_ORDER;
-  const BOOK_IDS = ["open", ...BOOK_ROOMS, "cross", "flow", "yeon", "match", "deep", "close"];
+  const BOOK_IDS = ["open", ...BOOK_ROOMS, "cross", "flow", "year", "yeon", "match", "deep", "close"]; // (20단계) year = 「2027년의 흐름」
   const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
-  const PAID_IDS = new Set([...BOOK_ROOMS.filter(r => r !== "saju"), "cross", "flow", "yeon", "match", "deep"]);
-  const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { cross: "cross", flow: "flow", yeon: "yeon", match: "match", deep: "arch" });
-  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { cross: "BOOK_CROSS", flow: "BOOK_FLOW", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
+  const PAID_IDS = new Set([...BOOK_ROOMS.filter(r => r !== "saju"), "cross", "flow", "year", "yeon", "match", "deep"]);
+  const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { cross: "cross", flow: "flow", year: "year", yeon: "yeon", match: "match", deep: "arch" });
+  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { cross: "BOOK_CROSS", flow: "BOOK_FLOW", year: "BOOK_YEAR", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
   const FREE_FILE = "data-book-free.js";
   const SAMPLE_FILE = "data-book-sample.js";
   // (18-8) 관심사·(18-2) 새 장: app-book.js를 받은 뒤
@@ -2943,6 +2943,11 @@
       flowRow.after(row);
     }
   }
+  // (20단계) 「2027년의 흐름」 원본 칸(쪽 나눔 전, book-source 안 숨김). 마크업 견본 없이 app-book.js renderYear가 article을 만든다
+  const yearBox = document.createElement("div");
+  yearBox.dataset.js = "report-year";
+  yearBox.hidden = true;
+  js("book-source").append(yearBox);
   // (18-2) 새 장 목차 줄(cross-tpl)을 제2부 맨 앞에
   const crossTplEl = js("cross-tpl");
   const crossTpl = crossTplEl ? crossTplEl.content : null;
@@ -2956,7 +2961,7 @@
     if (flowRow && row) flowRow.parentElement.prepend(row.cloneNode(true));
   }
   function clearSource() {
-    ["report-timeline", "report-match-rooms", "report-yeon", "report-cross", "report-open", "report-close", "report-match", "report-match-end", "report-deep-strength", "report-deep-shadow", "report-deep-growth", "report-evidence"]
+    ["report-timeline", "report-match-rooms", "report-yeon", "report-year", "report-cross", "report-open", "report-close", "report-match", "report-match-end", "report-deep-strength", "report-deep-shadow", "report-deep-growth", "report-evidence"]
       .forEach((n) => (js(n).textContent = ""));
     [...js("report-match-pair").children].forEach((s, i) => i !== 1 && (s.textContent = ""));
     jsAll("book-room").forEach((el) => {
@@ -2978,6 +2983,11 @@
     const pair = BookCore.archPair(CHAPTER_ORDER.map((r) => (state.visits[r] ? state.visits[r].archetype : null)));
     const s = state.visits.saju;
     return { arch: pair ? pair.main : null, sub: pair ? pair.sub : null, allDone: roomsDone() === CHAPTER_ORDER.length, band: age == null ? null : BookCore.bandOf(age), stem: s && s.code ? BookCore.sajuStem(s.code) : null };
+  }
+  // (20단계) 「2027년의 흐름」 고르기 값: 만신 일간(0~9) 하나. 브라우저 안에서만 쓰고 보내거나 저장하지 않는다(6장)
+  function yearCtx() {
+    const s = state.visits.saju;
+    return { stem: s && s.code ? BookCore.sajuStem(s.code) : null };
   }
   // 원형 합산(무료 방과 같은 규칙): 가장 많이 나온 원형, 동점이면 앞선 장
   function tallyArchetype(tags) {
@@ -3092,6 +3102,7 @@
     }
     if (id === "flow") return a && c.band != null ? BV.timeline[a][c.band] : BV.avg.timeline;
     if (id === "yeon") return BookCore.yeonVolume(BV.yeon, yeonCtx()); // (검수 2차 권장 5) 그 사람이 받는 판(기본·한결같은 결·나이 모름)의 값
+    if (id === "year") return BookCore.yearVolume(BV.year, yearCtx()); // (20단계) 일간 판, 만신 미방문이면 공통판
     if (id === "cross") {
       // (18-9) 그 사람 경로의 값, 모르면 평균
       const p = roomsDone() >= 2 ? crossPickNow() : null;
@@ -3473,6 +3484,7 @@
         tl.append(el);
       });
     } else if (id === "yeon") BX.renderYeon(C, yeonCtx(), yeonBox, yeonTpl); // (17-2) app-book.js
+    else if (id === "year") BX.renderYear(C, yearCtx(), yearBox); // (20단계) app-book.js
     else if (id === "cross") BX.renderCross(C, crossBox);
     else if (id === "match") {
       const pair = js("report-match-pair").children;
@@ -3608,7 +3620,7 @@
     else if (id === "flow") {
       const stages = unitsOf(js("report-timeline", src)).map((u) => Object.assign(u, { kind: "stage" }));
       one("flow", B.parts.timeline, stages, { stages: true, run: [B.part2.num, B.parts.timeline] });
-    } else if (id === "yeon" || id === "cross") {
+    } else if (id === "yeon" || id === "cross" || id === "year") {
       // (17-2, design 「17단계」 5절) 인연의 장(새 장도): 장 머리(다른 장과 같은 book-opening) 뒤 쪽(section)마다 새 쪽에서 시작.
       //   쪽 머리(번호+이름 h3)·계절 이름·시기 칸(li)·안내 한 줄은 한 덩어리(unit, section 모양을 감싼 채), 본문 단락은 쪽 끝에서 나눌 수 있는 p
       const art = $("article", js(`report-${id}`, src));

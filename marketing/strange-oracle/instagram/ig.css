@@ -41,16 +41,17 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .art--story { width: 1080px; height: 1920px; padding: 260px 120px 0; text-align: center; }
 .art--story .eyebrow { font-size: 30px; }
 .story__title { margin: 18px 0 0; font-size: 104px; line-height: 1.22; color: var(--c-text-strong); }
-.story__book { margin: 44px auto 0; width: 320px; height: 440px; perspective: 1400px; }
+.story__book { margin: 36px auto 0; width: 270px; height: 370px; perspective: 1400px; }
 .story__cover { position: relative; width: 100%; height: 100%; display: grid; place-items: center; border-radius: 10px 22px 22px 10px; rotate: y 18deg;
   background: radial-gradient(90% 70% at 30% 20%, oklch(0.36 0.06 30 / 0.9), transparent 70%), linear-gradient(160deg, oklch(0.3 0.05 30), oklch(0.2 0.04 30));
   border: 3px solid var(--bronze-hi);
   box-shadow: inset 16px 0 0 oklch(0.16 0.03 30), inset 19px 0 0 var(--bronze-dark), 0 30px 80px oklch(0 0 0 / 0.6), 0 0 80px oklch(0.84 0.1 85 / 0.22); }
-.story__cover p { font-size: 54px; font-weight: 700; color: var(--c-text-strong); }
+.story__cover p { font-size: 46px; font-weight: 700; color: var(--c-text-strong); }
 .story__cover i { position: absolute; right: 34px; bottom: 40px; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center;
   background: radial-gradient(circle at 35% 30%, oklch(0.58 0.15 28), oklch(0.42 0.13 25)); }
 .story__cover i svg { width: 52px; height: 52px; fill: oklch(0.9 0.08 85); stroke: none; }
-.story__list { margin: 44px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; font-size: 42px; color: var(--c-text); }
+.story__list { margin: 36px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; font-size: 42px; color: var(--c-text); }
+.story__new { font-family: var(--font-latin); font-size: 26px; letter-spacing: 0.1em; padding: 2px 14px; border-radius: 999px; color: var(--c-bg-deep); background: var(--gold); vertical-align: middle; }
 .story__free { margin-top: 34px; font-size: 48px; color: var(--c-text-strong); }
 .story__free b { color: var(--gold); }
 .story__price { margin-top: 16px; font-size: 38px; color: var(--c-text-muted); }

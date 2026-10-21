@@ -5366,6 +5366,7 @@ body.is-reading .map-node--owner::after, body.is-reading .map-card__dot--f { ani
 /* ═════════ (17단계 I4) UI 점검에서 고친 것 (design 「17단계 UI 점검」) ═════════ */
 .yeon-when { margin-left: 4px; }                         /* 시기 칸 점(7px)이 본문 왼쪽 끝에서 반쯤 잘리던 것 */
 .yeon-sec__note { margin-top: var(--space-3); }           /* 안내 한 줄이 위 본문·시기 칸에 붙어 보이던 것 */
+.year-span { margin-top: var(--space-1); margin-bottom: var(--space-3); } /* (20단계) 「2027년의 흐름」 기간 한 줄: 아래 본문과 띄움 */
 .hub-progress__count { text-shadow: 0 0 3px oklch(0.12 0.03 280 / 0.9), 0 0 1px oklch(0.12 0.03 280); } /* "7/7"이 배경 별 점과 겹칠 때도 글자 테두리가 남게 */
 
 

@@ -29,6 +29,7 @@
     if (w.BOOK_ARCH) C.deep = w.BOOK_ARCH.deep;
     if (w.BOOK_YEON) C.yeon = w.BOOK_YEON;
     if (w.BOOK_CROSS) C.cross = w.BOOK_CROSS;
+    if (w.BOOK_YEAR) C.year = w.BOOK_YEAR; // (20단계) 「2027년의 흐름」
     if (w.BOOK_SAMPLE) C.sample = w.BOOK_SAMPLE;
     return C;
   }

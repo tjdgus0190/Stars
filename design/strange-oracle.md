@@ -3819,3 +3819,10 @@ JS·data*.js는 고치지 않았다. 아래 7절(광고)에서 "지금 지운 �
 - e2e-map 77/3 — 실패 3: "합격9 고지 6항목 보임"(3절, 접힘으로 기대값 변경) · "친구 카드 아래 면책 문구"·"지도 아래 면책 문구"(19-2로 뒤집을 기대값). 동의 → 보내기 흐름(체크·보내기)은 통과.
 - 구글 요청: 두 실행기 모두 "막지 않고 나간 구글 요청 0건".
 - 작업 사본에는 developer K2 진행분(app.js·map.js·data.js·cdp.js·mock-server.js·build-dist.js 등)이 함께 있었다.
+
+## 20단계 UI 점검: 「2027년의 흐름」 (2026-10-21)
+- 방식: 새 template 없이 인연의 장 쪽 모양(`section.yeon-sec`, 머리 `yeon-sec__head`, 칸 `yeon-when`, 머리 줄 `yeon-season__name`)을 app-book.js renderYear가 만든다. 머리 줄 점 색은 정미년 천간 丁 = 불(`data-el="fire"`).
+- 360px 실화면(시험 페이지, 결제한 탭, 일간 을목): 7쪽(쪽 4개 + 넘친 단락 2쪽 + 장 끝). 넘침·잘림·빈 칸 0, 쪽 머리만 남는 쪽 0.
+- 고친 것 1: 첫 쪽 기간 한 줄(`year-span`)이 본문 첫 단락에 붙어 보임 → style.css `.year-span { margin: space-1 0 space-3 }`.
+- 목차·미리보기 목록 줄은 시기별 흐름 줄 마크업을 복제(index.html), 관심사 순서에서도 flow 바로 뒤.
+- 판정: 통과.

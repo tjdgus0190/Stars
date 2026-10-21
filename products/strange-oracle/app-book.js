@@ -51,6 +51,31 @@
   }
   const yeonChars = (ch) => ch.pages.reduce((n, p) => n + textLen(p.text) + (p.bands || []).reduce((s, x) => s + textLen(x.text), 0), 0);
 
+  // ═════════ (20단계 결정 130) 「2027년의 흐름」 — 열쇠는 만신 일간 하나(0~9, 브라우저 안). 만신 미방문(옛 탭)은 공통판 ═════════
+  // ctx = { stem: 0~9|null }. 돌려주는 모양: { id, variant: stem|unknown, stem, pages: [{ key, text, items }] }
+  //   쪽 = theme 한 해의 결(단락 여럿) · areas 네 갈래(items: work·relation·learn·move) · seasons 계절마다(items: spring·summer·autumn·winter) · one 이 해를 위한 한 가지
+  const YEAR_AREAS = ["work", "relation", "learn", "move"];
+  const YEAR_SEASONS = ["spring", "summer", "autumn", "winter"];
+  function yearChapter(C, ctx) {
+    const Y = C.year;
+    const e = ctx.stem == null ? Y.unknown : Y.stems[ctx.stem];
+    return { id: "year", variant: ctx.stem == null ? "unknown" : "stem", stem: ctx.stem == null ? null : ctx.stem, pages: [
+      { key: "theme", text: e.theme },
+      { key: "areas", items: YEAR_AREAS.map((k) => ({ key: k, text: e[k] })) },
+      { key: "seasons", items: YEAR_SEASONS.map((k) => ({ key: k, text: e.seasons[k] })) },
+      { key: "one", text: e.one },
+    ] };
+  }
+  // 분량: yearTable(BOOK_YEAR) = 판마다 글자 수(make-volume → data-volume.js의 year, 0~9 + unknown), yearVolume(표, ctx) = 그 사람이 받는 판
+  const yearEntryLen = (e) => textLen(e.theme) + YEAR_AREAS.reduce((n, k) => n + textLen(e[k]), 0) + YEAR_SEASONS.reduce((n, k) => n + textLen(e.seasons[k]), 0) + textLen(e.one);
+  function yearTable(Y) {
+    const t = { unknown: yearEntryLen(Y.unknown) };
+    Y.stems.forEach((e, i) => (t[i] = yearEntryLen(e)));
+    return t;
+  }
+  const yearVolume = (V, ctx) => (!V ? 0 : ctx.stem == null ? V.unknown : V[ctx.stem]);
+  const yearChars = (ch) => ch.pages.reduce((n, p) => n + textLen(p.text) + (p.items || []).reduce((s, x) => s + textLen(x.text), 0), 0);
+
   // ═════════ (18단계 18-2) 새 장 「겹치는 곳, 갈리는 곳」 — 고르기는 모두 이 브라우저 안에서 ═════════
   // 입력 list = 마친 방만, 장 순서대로 [{ room, arch }] (방별 원형 state.visits[room].archetype 하나만. 세부 번호·나이·성별·생년월일은 쓰지 않는다)
   // core = arch-core.js(ARCH·AXES·PROFILE)
@@ -131,6 +156,7 @@
   };
   const PART2_DEFAULT = ["flow", "yeon", "match", "deep"]; // 새 장(cross) 뒤 제2부 지금 순서
   const PART2_BY = { love: ["yeon", "match", "flow", "deep"], relation: ["match", "yeon", "flow", "deep"], work: ["flow", "deep", "yeon", "match"], self: ["deep", "flow", "yeon", "match"] };
+  const withYear = (list) => list.flatMap((x) => (x === "flow" ? ["flow", "year"] : [x])); // (20단계) 「2027년의 흐름」(year)은 어느 순서에서나 시기별 흐름 바로 뒤
   const FLOW_AREAS = { none: ["work", "relation", "learn", "move"], love: ["relation", "work", "learn", "move"], relation: ["relation", "work", "learn", "move"], work: ["work", "learn", "relation", "move"], self: ["work", "relation", "learn", "move"] };
   // topics = { sibyl: 주제|null, rune: 주제|null } → { first: {room, interest}|null, second, part2: [제2부 4장, 새 장 뒤], areas: 시기별 흐름 영역 순서, changed: 지금 순서와 다른가 }
   //   우선순위: 시빌라(마지막 방의 오늘의 질문) → 룬. 둘째 관심사 줄의 맨 앞 장이 첫째 줄 앞 두 칸 안에 없으면 그 장을 둘째 칸으로
@@ -144,7 +170,7 @@
       const lead = PART2_BY[second.interest][0];
       if (part2.indexOf(lead) > 1) part2 = [part2[0], lead, ...part2.slice(1).filter((x) => x !== lead)];
     }
-    return { first, second, part2, areas: FLOW_AREAS[first ? first.interest : "none"].slice(), changed: part2.join() !== PART2_DEFAULT.join() };
+    return { first, second, part2: withYear(part2), areas: FLOW_AREAS[first ? first.interest : "none"].slice(), changed: part2.join() !== PART2_DEFAULT.join() };
   }
   // 책 전체 장 순서(목차·미리보기 목차·"받는 것"·장 끝 "다음 장"이 같이 쓴다): 여는 글 → 방 7장(고정) → 새 장(제2부 맨 앞, 고정) → 관심사 순서 4장 → 닫는 글
   const bookOrder = (rooms, topics) => ["open", ...rooms, "cross", ...interestOrder(topics).part2, "close"];
@@ -156,7 +182,7 @@
     return (e && e.firstLine) || "";
   }
 
-  const core = { ELEMENT_OF_STEM, yeonChapter, yeonTable, yeonVolume, yeonChars, CROSS_SHAPES, crossPick, crossChapter, crossTable, crossVolume, crossChars, INTEREST_OF, interestOrder, bookOrder, firstLineOf };
+  const core = { ELEMENT_OF_STEM, yeonChapter, yeonTable, yeonVolume, yeonChars, YEAR_AREAS, YEAR_SEASONS, yearChapter, yearTable, yearVolume, yearChars, CROSS_SHAPES, crossPick, crossChapter, crossTable, crossVolume, crossChars, INTEREST_OF, interestOrder, bookOrder, firstLineOf };
 
   // ═════════ 화면 (브라우저만). x = app.js가 넘기는 도우미·상태 (app.js bookCtx 참고) ═════════
   function mount(x) {
@@ -574,6 +600,55 @@
       yeonBox.append(art);
     }
 
+    // ── (20단계) 「2027년의 흐름」: 인연의 장과 같은 쪽 모양(section.yeon-sec)을 JS로 만든다. 쪽 = 한 해의 결 · 네 갈래 · 계절마다 · 이 해를 위한 한 가지
+    //   문장 고르기는 BookCore.yearChapter(일간 판 / 공통판). 화면 틀 문구는 data.js book.year. 네 갈래 순서는 시기별 흐름과 같은 관심사 순서(18-8)
+    function renderYear(C, cx, box) {
+      const Y = T.book.year || {};
+      const y = BookCore.yearChapter(C, cx);
+      box.dataset.variant = y.variant;
+      const el = (tag, cls, text) => {
+        const n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text != null) n.textContent = text;
+        return n;
+      };
+      const art = el("article", "report-part book-part");
+      art.dataset.part = "year";
+      const areaOrder = x.interestNow().areas;
+      y.pages.forEach((pg, i) => {
+        const sec = el("section", "yeon-sec year-sec");
+        sec.dataset.page = pg.key;
+        const h = el("h3", "yeon-sec__head");
+        h.append(el("span", "yeon-sec__num", String(i + 1)), el("span", null, (Y.secs || {})[pg.key] || ""));
+        h.firstChild.setAttribute("aria-hidden", "true");
+        sec.append(h);
+        if (pg.key === "theme") {
+          const head = el("p", "yeon-season__name year-ganji", y.stem == null ? Y.ganji || "" : fill(Y.ganjiStem || "", { stem: (Y.stems || [])[y.stem] || "" }));
+          head.dataset.el = "fire"; // 정미년의 천간 丁 = 불 (style.css [data-el] → --el 색)
+          sec.append(head, el("p", "yeon-sec__note year-span", Y.span || ""));
+        }
+        if (pg.text) {
+          const prose = el("div", "prose");
+          paras(prose, [].concat(pg.text).filter(Boolean));
+          sec.append(prose);
+        }
+        if (pg.items) {
+          const ol = el("ol", "yeon-when year-list");
+          const items = pg.key === "areas" ? areaOrder.map((k) => pg.items.find((it) => it.key === k)).filter(Boolean) : pg.items;
+          items.forEach((it) => {
+            const li = el("li", "yeon-when__item");
+            li.dataset.key = it.key;
+            li.append(el("p", "yeon-when__age", ((pg.key === "areas" ? Y.areas : Y.seasons) || {})[it.key] || ""), el("p", "yeon-when__text", [].concat(it.text || []).join(" ")));
+            ol.append(li);
+          });
+          sec.append(ol);
+        }
+        if (pg.key === "theme" && y.stem == null && (Y.notes || {}).noStem) sec.append(el("p", "yeon-sec__note", Y.notes.noStem));
+        art.append(sec);
+      });
+      box.append(art);
+    }
+
     // ── (18-8) 시기별 흐름: 영역 순서만 관심사대로 (문장은 그대로)
     function areas(el, list) {
       const dl = $(".timeline__areas", el);
@@ -622,7 +697,7 @@
       if (backPv) backPv.hidden = !(from === "preview" && x.previewOn()); // (18-5) 미리보기에서 왔을 때만 "미리보기로 돌아가기"
     }
 
-    return { gate, openPreview, lockedRoad, toc, renderCross, renderYeon, areas, payList };
+    return { gate, openPreview, lockedRoad, toc, renderCross, renderYeon, renderYear, areas, payList };
   }
 
   const BookPlus = { core, mount };

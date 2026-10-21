@@ -24,6 +24,7 @@ const FILES = Object.freeze({
   rune: "BOOK_RUNE", sibyl: "BOOK_SIBYL", flow: "BOOK_FLOW", match: "BOOK_MATCH", arch: "BOOK_ARCH",
   yeon: "BOOK_YEON", // (17-2) 인연의 장. 본문 칸은 그대로 { file, pass } 두 칸
   cross: "BOOK_CROSS", // (18-2) 새 장 「겹치는 곳, 갈리는 곳」. 파일을 통째로 준다(원형·축·방 목록을 받는 칸 없음)
+  year: "BOOK_YEAR", // (20단계) 「2027년의 흐름」. 일간 10판 + 공통판을 통째로 준다(일간은 받지 않고 브라우저가 고른다)
 });
 const ALLOW = Object.freeze(Object.keys(FILES));
 const WINDOW_MS = 10 * 60 * 1000;

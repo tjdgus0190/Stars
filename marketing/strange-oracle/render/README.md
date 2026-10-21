@@ -28,7 +28,7 @@ node --experimental-websocket marketing/strange-oracle/render/render.js all --ch
 |---|---|---|---|
 | `ad1-seven-doors-ko.mp4` | 15.000초 | 450 | 1,414,675 B (약 1.4MB) |
 | `ad2-manshin-ko.mp4` | 9.000초 | 270 | 1,094,966 B (약 1.1MB) |
-| `ad3-book-ko.mp4` (2026-10-21) | 15.000초 | 450 | 1,395,268 B (약 1.4MB) |
+| `ad3-book-ko.mp4` (2026-10-21, 20단계 「열다섯 장」으로 다시 렌더) | 15.000초 | 450 | 1,419,601 B (약 1.4MB) |
 | `ad3-book-ko-sound.mp4` (2026-10-21) | 15.000초 | 450 | 영상은 위 파일 그대로 복사 + AAC 192kbps, `render/sound-ad3.js` |
 
 공통: H.264 High, 1080x1920, yuv420p, 30fps, bt709, 무음(오디오 스트림 없음). 플랫폼에서 음악을 붙일 때 소리 없는 영상으로 올려도 된다.

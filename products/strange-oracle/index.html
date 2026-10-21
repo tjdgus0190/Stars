@@ -479,7 +479,7 @@
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">타고난 그릇에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요. 첫 방에서 넣은 정보는 뒤의 방들이 이어서 써요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름·생년월일·태어난 시각·성별은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
           <!-- (14단계) 책 문답: 무엇이 담기는지 (답 150자). 시험 페이지(test)에서만 구매 문답 -->
-          <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">일곱 방의 장과 숨은 장, 「겹치는 곳, 갈리는 곳」·시기별 흐름·인연의 장·궁합·원형 심층까지 유료 11장을 엮은 책이에요. 페이앱 결제창에서 5,900원을 결제하면 바로 열리고, 코드로 다른 기기에서도 열 수 있어요. 여는 글·닫는 글·목차·만신의 장은 무료예요.</dd>
+          <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">방의 장과 숨은 장, 「겹치는 곳, 갈리는 곳」·시기별 흐름·2027년의 흐름·인연의 장·궁합·원형 심층까지 유료 12장이에요. 페이앱에서 5,900원을 결제하면 바로 열리고, 코드로 다른 기기에서도 열 수 있어요. 여는 글·닫는 글·목차·만신의 장은 무료예요.</dd>
           </div>
           <!-- map:on -->
           <!-- (16단계) 지도 문답 2개 (답 150자 이내). copywriter(H4)가 data.js에 넣고 견본을 정리한다 -->
@@ -2760,6 +2760,18 @@
                   <span class="chapter-row__time" data-js="book-chapter-time">약 6분</span>
                 </button>
               </li>
+              <!-- (20단계) 「2027년의 흐름」: 시기별 흐름 바로 뒤 (관심사 순서에서도 flow 뒤, app-book.js withYear) -->
+              <li class="chapter-row" data-js="book-chapter" data-chapter="year" data-state="can-open">
+                <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
+                  <span class="chapter-row__num" aria-hidden="true"></span>
+                  <span class="chapter-row__text">
+                    <span class="chapter-row__name" data-t="book.parts.year">2027년의 흐름</span>
+                    <span class="chapter-row__sub" data-js="book-chapter-sub" data-t="book.chapter.blurbs.year">정미년 한 해를 나의 일간으로 읽어요</span>
+                    <span class="chapter-row__state" data-js="book-chapter-state"></span>
+                  </span>
+                  <span class="chapter-row__time" data-js="book-chapter-time">약 6분</span>
+                </button>
+              </li>
               <!-- (17단계 I4) 인연의 장 줄: 시기별 흐름 다음·궁합 앞(책 차례). app.js는 이 줄이 있으면 흐름 줄을 복제하지 않고 이 줄을 쓴다. off는 목차째 걷어 냄 -->
               <li class="chapter-row" data-js="book-chapter" data-chapter="yeon" data-state="can-open">
                 <button class="chapter-row__btn" type="button" data-js="book-chapter-btn">
@@ -3422,6 +3434,12 @@
           <li class="pv-toc__item" data-js="preview-chapter" data-chapter="flow" data-kind="paid">
             <span class="pv-toc__num" aria-hidden="true"></span>
             <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.parts.timeline">시기별 흐름</span></span></span>
+            <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag"></span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 2,800자 · 6분</span></span>
+          </li>
+          <!-- (20단계) 「2027년의 흐름」: 시기별 흐름 바로 뒤 (관심사 순서에서도 flow 뒤, app-book.js withYear) -->
+          <li class="pv-toc__item" data-js="preview-chapter" data-chapter="year" data-kind="paid">
+            <span class="pv-toc__num" aria-hidden="true"></span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="book.parts.year">2027년의 흐름</span></span></span>
             <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag"></span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 2,800자 · 6분</span></span>
           </li>
           <li class="pv-toc__item" data-js="preview-chapter" data-chapter="deep" data-kind="paid">

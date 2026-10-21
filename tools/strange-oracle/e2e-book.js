@@ -126,11 +126,11 @@ const STUB_ADS = `(function () {
   check("입구 책 카드: 0/6 상태 none·state0 문구·목차 보기 버튼", await ev("(() => { const c = document.querySelector('[data-js=hub-book]'); return c.dataset.state === 'none' && document.querySelector('[data-js=hub-book-hint]').textContent === TEXT.hub.book.state0 && document.querySelector('[data-js=hub-book-go]').offsetHeight > 0; })()"));
 
   // 2. 0/7 목차
-  check("F4-B2: 목차에 Ⅰ 만신 장 있음(오검 앞), (17-2) 인연의 장은 시기별 흐름 다음, (18-2) 새 장은 제2부 맨 앞(Ⅶ 시빌라 다음) · 14장", await ev("(() => { const ids = [...document.querySelectorAll('[data-js=book-chapter]')].map(li => li.dataset.chapter); return ids.indexOf('saju') === ids.indexOf('ogham') - 1 && ids.length === 14 && ids.indexOf('yeon') === ids.indexOf('flow') + 1 && ids.indexOf('cross') === ids.indexOf('sibyl') + 1 && ids.indexOf('flow') === ids.indexOf('cross') + 1; })()"));
+  check("F4-B2: 목차에 Ⅰ 만신 장 있음(오검 앞), (17-2) 인연의 장은 시기별 흐름 다음, (18-2) 새 장은 제2부 맨 앞(Ⅶ 시빌라 다음), (20단계) 2027년의 흐름은 시기별 흐름 바로 다음·인연의 장 앞 · 15장", await ev("(() => { const ids = [...document.querySelectorAll('[data-js=book-chapter]')].map(li => li.dataset.chapter); return ids.indexOf('saju') === ids.indexOf('ogham') - 1 && ids.length === 15 && ids.indexOf('year') === ids.indexOf('flow') + 1 && ids.indexOf('yeon') === ids.indexOf('year') + 1 && ids.indexOf('cross') === ids.indexOf('sibyl') + 1 && ids.indexOf('flow') === ids.indexOf('cross') + 1; })()"));
   await click("[data-js=hub-book-go]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   const r0 = await rows();
-  check("13-7.2 0/7: 모든 장 '지나면 열려요'(need-room), 광고 버튼 0 (14장)", Object.values(r0).every((s) => s === "need-room") && Object.keys(r0).length === 14 && (await ev("[...document.querySelectorAll('[data-js=book-chapter-state]')].every(e => /열려요|\\[초안\\]/.test(e.textContent))")), JSON.stringify(r0));
+  check("13-7.2 0/7: 모든 장 '지나면 열려요'(need-room), 광고 버튼 0 (15장)", Object.values(r0).every((s) => s === "need-room") && Object.keys(r0).length === 15 && (await ev("[...document.querySelectorAll('[data-js=book-chapter-state]')].every(e => /열려요|\\[초안\\]/.test(e.textContent))")), JSON.stringify(r0));
   await row("match");
   check("0/6: 잠긴 행을 누르면 안내만(목차 그대로)", (await view()) === "toc");
 
@@ -305,7 +305,16 @@ const STUB_ADS = `(function () {
   await click("[data-js=story-book-link]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");
   const r6 = await rows();
-  check("7/7 결제함: 14장 모두 열림(만신·새 장 포함)", Object.keys(r6).length === 14 && Object.values(r6).every((s) => s === "opened"), JSON.stringify(r6));
+  check("7/7 결제함: 15장 모두 열림(만신·새 장·2027년의 흐름 포함)", Object.keys(r6).length === 15 && Object.values(r6).every((s) => s === "opened"), JSON.stringify(r6));
+  // (20단계) 「2027년의 흐름」: 결제한 탭에서 열기 → 쪽 4개(한 해의 결·네 갈래·계절마다·이 해를 위한 한 가지)·머리 줄에 나의 일간·빈 칸 0·유료 요청 file "year"
+  await row("year");
+  await waitFor("!document.querySelector('[data-js=book-chapter-open]').disabled", 5000);
+  await click("[data-js=book-chapter-open]");
+  await toPages();
+  const yr = await ev("(() => { const a = document.querySelector('[data-js=report-year] article'); if (!a) return null; const secs = [...a.querySelectorAll('section.year-sec')]; return { secs: secs.map((x) => x.dataset.page).join(), empty: [...a.querySelectorAll('p, li')].filter((x) => !x.textContent.trim()).length, items: a.querySelectorAll('.year-list li').length, head: (a.querySelector('.year-ganji') || {}).textContent || '', variant: document.querySelector('[data-js=report-year]').dataset.variant }; })()");
+  check("20단계 2027년의 흐름: 쪽 4개 · 칸 8개(네 갈래+계절) · 빈 칸 0 · 머리 줄 '나의 일간' · 일간 판", !!yr && yr.secs === "theme,areas,seasons,one" && yr.items === 8 && yr.empty === 0 && /나의 일간/.test(yr.head) && yr.variant === "stem", JSON.stringify(yr));
+  await click("[data-js=book-toc-open]");
+  await waitFor("document.querySelector('[data-js=book-reader]').dataset.view === 'toc'", 4000);
   // 룬·시빌라·데칸 장 열기 (큰 파일)
   for (const id of ["saju", "rune", "sibyl", "decan"]) {
     await click("[data-js=book-toc-open]").catch(() => {});
@@ -348,7 +357,7 @@ const STUB_ADS = `(function () {
   await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))");
   await sleep(150);
   const nx = await ev("(() => { const n = document.querySelector('[data-js=book-page].is-current [data-js=chapter-end-next]'); return n ? n.dataset.next : null; })()");
-  check("18-12의 11 관심사(시빌라 사랑 + 룬 나): 목차 제2부 = cross·yeon·deep·match·flow · 새 장 끝 다음 장 = 인연의 장", ord === "cross,yeon,deep,match,flow,close" && nx === "yeon", `${ord} / next ${nx}`);
+  check("18-12의 11 관심사(시빌라 사랑 + 룬 나): 목차 제2부 = cross·yeon·deep·match·flow·year(20단계: flow 바로 뒤) · 새 장 끝 다음 장 = 인연의 장", ord === "cross,yeon,deep,match,flow,year,close" && nx === "yeon", `${ord} / next ${nx}`);
   await click("[data-js=book-toc-open]");
   await sleep(200);
   check("18-8 관심사 줄: 목차 위 한 줄 = book.interest.sibyl.love, 주제 이름 '돈' 0", await ev("(() => { const el = document.querySelector('[data-js=book-interest]'); return !!el && !el.hidden && el.textContent.trim() === TEXT.book.interest.sibyl.love && !/돈/.test(el.textContent); })()"));
@@ -454,7 +463,7 @@ const STUB_ADS = `(function () {
       closeHidden: s.querySelector('[data-js=preview-close]').hidden, closeHas: s.querySelector('[data-js=preview-close]').children.length > 0, disc: !s.querySelector('[data-js=disclaimer-slot]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(s.textContent), ads: s.querySelectorAll('[data-ad], .ad-slot').length, band: !s.querySelector('[data-js=preview-test-band]').classList.contains('is-hidden'),
       prim: s.querySelectorAll('.btn--primary').length, price: s.querySelector('[data-js=preview-go-label]').textContent, h: [...s.querySelectorAll('h1,h2,h3')].map(h => h.tagName).join(''), interest: !s.querySelector('[data-js=preview-interest]').hidden && s.querySelector('[data-js=preview-interest-text]').textContent === TEXT.book.interest.sibyl.love,
       bad: /undefined|\\{(who|n|price|arch|sub)\\}/.test(s.textContent), wide: document.documentElement.scrollWidth <= innerWidth }; })())`));
-  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 14장 목차(무료 2 글자 표지) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 14 && pv.toc.startsWith("open:free,saju:free") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /5,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
+  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 15장 목차(무료 3 글자 표지, 20단계 year 포함) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 15 && pv.toc.startsWith("open:free,saju:free") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid,year:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /5,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
   // 유료 문장 지문(build-dist와 같은 규칙: 30자 이상 문자열의 가운데 60자, 공개 data*.js와 같은 문자열은 뺌)이 미리보기 화면 HTML에 0
   const prints = (() => {
     const vm = require("vm");

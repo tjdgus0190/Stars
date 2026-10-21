@@ -174,30 +174,31 @@ test("18-9 분량: 새 장 표 값(crossVolume) = 그 사람 경로의 조립 �
 
 test("18-8 관심사: 표 4 × 둘째 관심사, 주제 없음 → 지금 순서, money → 일, 시빌라 우선, 영역 순서", () => {
   const O = (sibyl, rune) => Book.interestOrder({ sibyl, rune });
-  assert.deepStrictEqual(O(null, null).part2, ["flow", "yeon", "match", "deep"]);
+  assert.deepStrictEqual(O(null, null).part2, ["flow", "year", "yeon", "match", "deep"]);
   assert.strictEqual(O(null, null).changed, false);
-  assert.deepStrictEqual(O("love").part2, ["yeon", "match", "flow", "deep"]);
-  assert.deepStrictEqual(O("relation").part2, ["match", "yeon", "flow", "deep"]);
-  assert.deepStrictEqual(O("work").part2, ["flow", "deep", "yeon", "match"]);
-  assert.deepStrictEqual(O("exam").part2, ["flow", "deep", "yeon", "match"]);
-  assert.deepStrictEqual(O("self").part2, ["deep", "flow", "yeon", "match"]);
+  assert.deepStrictEqual(O("love").part2, ["yeon", "match", "flow", "year", "deep"]);
+  assert.deepStrictEqual(O("relation").part2, ["match", "yeon", "flow", "year", "deep"]);
+  assert.deepStrictEqual(O("work").part2, ["flow", "year", "deep", "yeon", "match"]);
+  assert.deepStrictEqual(O("exam").part2, ["flow", "year", "deep", "yeon", "match"]);
+  assert.deepStrictEqual(O("self").part2, ["deep", "flow", "year", "yeon", "match"]);
   assert.deepStrictEqual(O(null, "money").part2, O(null, "work").part2, "룬 money → 일");
   assert.deepStrictEqual(O(null, "money").first, { room: "rune", interest: "work" });
-  assert.deepStrictEqual(O(null, "me").part2, ["deep", "flow", "yeon", "match"]);
-  assert.deepStrictEqual(O("love", "work").part2, ["yeon", "flow", "match", "deep"], "기획서 예: 사랑 + 일");
-  assert.deepStrictEqual(O("love", "me").part2, ["yeon", "deep", "match", "flow"]);
-  assert.deepStrictEqual(O("love", "love").part2, ["yeon", "match", "flow", "deep"], "둘째가 같으면 그대로");
-  assert.deepStrictEqual(O("relation", "love").part2, ["match", "yeon", "flow", "deep"], "둘째 맨 앞 장이 앞 두 칸 안 → 그대로");
-  assert.deepStrictEqual(O("work", "love").part2, ["flow", "yeon", "deep", "match"]);
-  assert.deepStrictEqual(O("self", "work").part2, ["deep", "flow", "yeon", "match"]);
+  assert.deepStrictEqual(O(null, "me").part2, ["deep", "flow", "year", "yeon", "match"]);
+  assert.deepStrictEqual(O("love", "work").part2, ["yeon", "flow", "year", "match", "deep"], "기획서 예: 사랑 + 일");
+  assert.deepStrictEqual(O("love", "me").part2, ["yeon", "deep", "match", "flow", "year"]);
+  assert.deepStrictEqual(O("love", "love").part2, ["yeon", "match", "flow", "year", "deep"], "둘째가 같으면 그대로");
+  assert.deepStrictEqual(O("relation", "love").part2, ["match", "yeon", "flow", "year", "deep"], "둘째 맨 앞 장이 앞 두 칸 안 → 그대로");
+  assert.deepStrictEqual(O("work", "love").part2, ["flow", "year", "yeon", "deep", "match"]);
+  assert.deepStrictEqual(O("self", "work").part2, ["deep", "flow", "year", "yeon", "match"]);
   assert.strictEqual(O("love", "work").first.room, "sibyl", "시빌라 우선");
-  // 4 × 4 모든 짝: 네 장이 한 번씩, 새 장은 늘 제2부 맨 앞
+  // 4 × 4 모든 짝: 다섯 장(20단계 year 포함)이 한 번씩, 새 장은 늘 제2부 맨 앞
   for (const a of [null, "love", "relation", "work", "self"]) for (const r of [null, "love", "work", "money", "me"]) {
     const o = O(a, r);
-    assert.deepStrictEqual([...o.part2].sort(), ["deep", "flow", "match", "yeon"]);
+    assert.deepStrictEqual([...o.part2].sort(), ["deep", "flow", "match", "year", "yeon"]);
     const full = Book.bookOrder(ROOMS, { sibyl: a, rune: r });
     assert.deepStrictEqual(full.slice(0, 9), ["open", ...ROOMS, "cross"]);
-    assert.strictEqual(full[13], "close");
+    assert.strictEqual(full[14], "close");
+    assert.strictEqual(o.part2[o.part2.indexOf("flow") + 1], "year", "(20단계) 2027년의 흐름은 늘 시기별 흐름 바로 뒤");
   }
   assert.deepStrictEqual(O("love").areas, ["relation", "work", "learn", "move"]);
   assert.deepStrictEqual(O("relation").areas, ["relation", "work", "learn", "move"]);
