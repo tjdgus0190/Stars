@@ -1,0 +1,77 @@
+/* 광고 3안 「한 권의 책」 15초 (2026-10-21). 1·2안과 같은 규칙: CSS 애니메이션만, 무작위·JS 타이머 없음, 번쩍임·큰 흔들림 없음.
+   시간표: A 0~4 문장 고리 / B 4~7.5 책 표지 / C 7.5~11.6 목차 / D 11.6~15 끝 화면 */
+
+.stage { --bg-h: 295; }
+
+/* ───────── A·B 문장 고리 ───────── */
+.ring-layer { animation: ring-out 0.9s var(--ease-in-out) 4s both; }
+@keyframes ring-out { from { opacity: 1; scale: 1; rotate: 0deg; } to { opacity: 0; scale: 0.2; rotate: 50deg; } }
+.ring { position: absolute; left: 540px; top: 860px; width: 0; height: 0; }
+.ring__line { position: absolute; left: -300px; top: -300px; width: 600px; height: 600px; border-radius: 50%;
+  border: 2px solid oklch(0.84 0.1 85 / 0.28); animation: win-in 0.8s var(--ease-out) 0.1s both; }
+.sig {
+  --a: calc(-90deg + var(--k) * 360deg / 7);
+  position: absolute; left: -75px; top: -75px; width: 150px; height: 150px; border-radius: 50%;
+  display: grid; place-items: center;
+  translate: calc(cos(var(--a)) * 300px) calc(sin(var(--a)) * 300px);
+  background: radial-gradient(circle, oklch(0.24 0.05 var(--h) / 0.95), oklch(0.17 0.04 285 / 0.95));
+  border: 2px solid oklch(0.7 calc(0.1 * var(--cs)) var(--h) / calc(0.35 + var(--lit) * 0.65));
+  box-shadow: 0 0 calc(var(--lit) * 46px) oklch(0.84 calc(0.1 * var(--cs)) var(--h) / calc(var(--lit) * 0.6));
+  animation: sig-in 0.5s var(--ease-out) calc(0.15s + var(--k) * 0.1s) both, sig-lit 0.55s var(--ease-out) calc(0.6s + var(--k) * 0.42s) both;
+}
+.sig svg { width: 70px; height: 70px; fill: none; stroke: oklch(0.84 calc(0.1 * var(--cs)) var(--h) / calc(0.45 + var(--lit) * 0.55)); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.sig b { position: absolute; top: 158px; left: 50%; translate: -50% 0; white-space: nowrap; font-size: 34px; font-weight: 700;
+  color: oklch(0.91 0.015 90 / calc(0.35 + var(--lit) * 0.65)); text-shadow: 0 2px 4px oklch(0 0 0 / 0.7); }
+@keyframes sig-in { from { opacity: 0; scale: 0.6; } to { opacity: 1; scale: 1; } }
+@keyframes sig-lit { from { --lit: 0; } to { --lit: 1; } }
+
+/* ───────── B·C 책 ───────── */
+.book-layer { animation: win-in 0.6s var(--ease-out) 4.4s both, win-out 0.4s ease-in 11.3s forwards; }
+.book { position: absolute; left: 540px; top: 860px; width: 0; height: 0; perspective: 1800px; }
+
+.book__cover {
+  position: absolute; left: -250px; top: -350px; width: 500px; height: 700px; border-radius: 10px 22px 22px 10px;
+  display: grid; align-content: center; justify-items: center; gap: 22px; padding: 40px;
+  background:
+    radial-gradient(90% 70% at 30% 20%, oklch(0.36 0.06 30 / 0.9), transparent 70%),
+    linear-gradient(160deg, oklch(0.3 0.05 30), oklch(0.2 0.04 30));
+  border: 3px solid var(--bronze-hi);
+  box-shadow: inset 18px 0 0 oklch(0.16 0.03 30), inset 21px 0 0 var(--bronze-dark), 0 30px 80px oklch(0 0 0 / 0.6), 0 0 70px oklch(0.84 0.1 85 / 0.18);
+  transform-origin: 0 50%;
+  animation: cover-in 0.9s var(--ease-out) 4.5s both, cover-open 0.8s var(--ease-in-out) 7.45s forwards;
+}
+.book__eyebrow { font-size: 26px; }
+.book__title { font-size: 84px; font-weight: 700; color: var(--c-text-strong); letter-spacing: 0.02em; text-shadow: 0 2px 6px oklch(0 0 0 / 0.6); }
+.book__sub { font-size: 34px; color: var(--hanji-lit); }
+.book__seal { position: absolute; right: 44px; bottom: 54px; width: 110px; height: 110px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, oklch(0.58 0.15 28), oklch(0.42 0.13 25)); box-shadow: 0 6px 14px oklch(0 0 0 / 0.5);
+  animation: seal-in 0.45s var(--ease-out) 5.6s both; }
+.book__seal svg { width: 62px; height: 62px; fill: oklch(0.9 0.08 85); }
+@keyframes cover-in { from { opacity: 0; scale: 0.45; translate: 0 60px; } to { opacity: 1; scale: 1; translate: 0 0; } }
+@keyframes cover-open { from { opacity: 1; rotate: y 0deg; } to { opacity: 0; rotate: y -100deg; } }
+@keyframes seal-in { from { opacity: 0; scale: 1.8; } to { opacity: 1; scale: 1; } }
+
+/* 목차 종이 */
+.toc {
+  position: absolute; left: -380px; top: -390px; width: 760px; height: 770px; margin: 0; padding: 30px 54px; list-style: none;
+  display: grid; align-content: space-between; gap: 0;
+  background: linear-gradient(180deg, var(--paper), oklch(0.86 0.035 80));
+  border-radius: 14px; color: var(--hanji-ink);
+  box-shadow: 0 30px 80px oklch(0 0 0 / 0.6), inset 0 0 40px oklch(0.6 0.05 70 / 0.25);
+  animation: toc-in 0.6s var(--ease-out) 7.7s both;
+}
+.toc li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 3px 0; font-size: 33px; line-height: 1.32;
+  border-bottom: 1px dashed oklch(0.55 0.04 60 / 0.45);
+  animation: win-in 0.3s var(--ease-out) calc(8s + var(--n) * 0.17s) both; --rise: 10px; }
+.toc li:last-child { border-bottom: 0; }
+.toc i { display: inline-block; width: 64px; font-style: normal; font-family: var(--font-latin); font-weight: 700; color: oklch(0.45 0.09 30); }
+.toc em { font-style: normal; font-size: 26px; font-weight: 700; padding: 2px 16px; border-radius: 999px; color: oklch(0.97 0.02 90); background: oklch(0.5 0.12 28); }
+@keyframes toc-in { from { opacity: 0; scale: 0.92; translate: 0 40px; } to { opacity: 1; scale: 1; translate: 0 0; } }
+
+/* ───────── D 끝 화면 ───────── */
+.end-layer { opacity: 0; animation: win-in 0.5s var(--ease-out) 11.6s both; }
+.end__logo { position: absolute; left: 0; right: 0; top: 640px; font-size: 128px;
+  animation: logo-shimmer 1.6s var(--ease-in-out) 12s both; }
+.end__price { position: absolute; left: var(--text-left); width: var(--text-width); top: 830px; text-align: center; font-size: 40px;
+  opacity: 0; animation: win-in 0.4s var(--ease-out) 12.8s both; }
+.end__cta { top: 1050px; }

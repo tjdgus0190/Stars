@@ -19,6 +19,7 @@ const H = 1920;
 const ADS = {
   ad1: { scene: "ad1-seven-doors.html", out: "ad1-seven-doors-ko.mp4", frames: 450 },
   ad2: { scene: "ad2-manshin.html", out: "ad2-manshin-ko.mp4", frames: 270 },
+  ad3: { scene: "ad3-book.html", out: "ad3-book-ko.mp4", frames: 450 }, // (2026-10-21) 「한 권의 책」 15초
 };
 
 const args = process.argv.slice(2);
@@ -27,7 +28,7 @@ const checkOnly = args.includes("--check");
 const PORT = Number(args[args.indexOf("--port") + 1]) || 8790;
 if (PORT === 8787 || PORT === 8788) throw new Error("포트 8787·8788은 쓰지 않는다 (8790 권장)");
 const list = which === "all" ? Object.keys(ADS) : [which];
-if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | all)`);
+if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | ad3 | all)`);
 
 async function waitServer() {
   for (let i = 0; i < 50; i++) {

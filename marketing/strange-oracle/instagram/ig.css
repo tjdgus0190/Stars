@@ -1,0 +1,64 @@
+/* 인스타그램 자료 (2026-10-21). 한 번에 한 판만 보인다(:target). render-ig.js가 판마다 뷰포트 크기를 맞춰 찍는다 */
+html, body { width: auto; height: auto; overflow: hidden; }
+.art { display: none; position: relative; overflow: hidden; isolation: isolate; color: var(--c-text);
+  background:
+    radial-gradient(circle, oklch(0.95 0.02 90 / 0.7) 0 1.6px, transparent 2.4px) 37px 61px / 173px 151px,
+    radial-gradient(circle, oklch(0.9 0.04 295 / 0.45) 0 1px, transparent 1.8px) 7px 97px / 127px 113px,
+    radial-gradient(ellipse 80% 55% at 50% 40%, oklch(0.25 0.055 295 / 0.95), transparent 72%),
+    linear-gradient(180deg, var(--c-bg-deep), var(--c-bg) 50%, var(--c-bg-deep)); }
+.art:target { display: block; }
+svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ① 프로필 */
+.art--profile { width: 1080px; height: 1080px; }
+.emblem { position: absolute; left: 540px; top: 540px; }
+.emblem__ring { position: absolute; left: -330px; top: -330px; width: 660px; height: 660px; border-radius: 50%; border: 3px solid oklch(0.84 0.1 85 / 0.45); }
+.emblem__sig { --a: calc(-90deg + var(--k) * 360deg / 7);
+  position: absolute; left: -66px; top: -66px; width: 132px; height: 132px; border-radius: 50%; display: grid; place-items: center;
+  translate: calc(cos(var(--a)) * 330px) calc(sin(var(--a)) * 330px);
+  background: oklch(0.2 0.045 285); border: 3px solid var(--acc-dim); box-shadow: 0 0 30px oklch(0.84 calc(0.1 * var(--cs)) var(--h) / 0.45); color: var(--acc); }
+.emblem__sig svg { width: 72px; height: 72px; stroke-width: 2.2; }
+.emblem__core { position: absolute; left: -170px; top: -170px; width: 340px; height: 340px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 38% 30%, oklch(0.36 0.07 30), oklch(0.2 0.045 30)); border: 5px solid var(--bronze-hi);
+  box-shadow: 0 0 80px oklch(0.84 0.1 85 / 0.35), inset 0 0 40px oklch(0 0 0 / 0.4); color: var(--gold); }
+.emblem__core svg { width: 200px; height: 200px; stroke-width: 1.6; }
+
+/* ② 소개 게시물 */
+.art--intro { width: 1080px; height: 1350px; padding: 70px 110px 0; text-align: center; }
+.art--intro .eyebrow { font-size: 28px; }
+.intro__logo { margin-top: 18px; font-size: 120px; }
+.intro__lead { margin-top: 16px; font-size: 54px; font-weight: 700; line-height: 1.35; color: var(--c-text-strong); }
+.rooms { margin: 38px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; text-align: left; }
+.rooms li { display: grid; grid-template-columns: 76px 1fr auto; align-items: center; gap: 22px; padding: 9px 26px; border-radius: 18px;
+  background: oklch(0.2 0.04 285 / 0.75); border: 1px solid oklch(0.7 calc(0.1 * var(--cs)) var(--h) / 0.45); }
+.rooms svg { width: 60px; height: 60px; color: var(--acc); }
+.rooms b { font-size: 38px; color: var(--c-text-strong); }
+.rooms span { font-size: 30px; color: var(--c-text-muted); }
+.intro__foot { margin-top: 30px; font-size: 36px; color: var(--c-text); }
+.intro__cta { margin-top: 14px; font-size: 42px; font-weight: 700; color: var(--gold); }
+
+/* ③ 스토리 */
+.art--story { width: 1080px; height: 1920px; padding: 260px 120px 0; text-align: center; }
+.art--story .eyebrow { font-size: 30px; }
+.story__title { margin: 18px 0 0; font-size: 104px; line-height: 1.22; color: var(--c-text-strong); }
+.story__book { margin: 44px auto 0; width: 320px; height: 440px; perspective: 1400px; }
+.story__cover { position: relative; width: 100%; height: 100%; display: grid; place-items: center; border-radius: 10px 22px 22px 10px; rotate: y 18deg;
+  background: radial-gradient(90% 70% at 30% 20%, oklch(0.36 0.06 30 / 0.9), transparent 70%), linear-gradient(160deg, oklch(0.3 0.05 30), oklch(0.2 0.04 30));
+  border: 3px solid var(--bronze-hi);
+  box-shadow: inset 16px 0 0 oklch(0.16 0.03 30), inset 19px 0 0 var(--bronze-dark), 0 30px 80px oklch(0 0 0 / 0.6), 0 0 80px oklch(0.84 0.1 85 / 0.22); }
+.story__cover p { font-size: 54px; font-weight: 700; color: var(--c-text-strong); }
+.story__cover i { position: absolute; right: 34px; bottom: 40px; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, oklch(0.58 0.15 28), oklch(0.42 0.13 25)); }
+.story__cover i svg { width: 52px; height: 52px; fill: oklch(0.9 0.08 85); stroke: none; }
+.story__list { margin: 44px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; font-size: 42px; color: var(--c-text); }
+.story__free { margin-top: 34px; font-size: 48px; color: var(--c-text-strong); }
+.story__free b { color: var(--gold); }
+.story__price { margin-top: 16px; font-size: 38px; color: var(--c-text-muted); }
+.story__cta { margin-top: 26px; font-size: 72px; }
+
+/* ④ 하이라이트 커버 */
+.art--hl { width: 1080px; height: 1920px; }
+.hl { position: absolute; left: 540px; top: 960px; width: 560px; height: 560px; translate: -50% -50%; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 38% 30%, oklch(0.3 0.06 295), oklch(0.18 0.04 285)); border: 6px solid var(--bronze-hi); color: var(--gold);
+  box-shadow: 0 0 80px oklch(0.84 0.1 85 / 0.3); }
+.hl svg { width: 300px; height: 300px; stroke-width: 1.6; }

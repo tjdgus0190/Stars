@@ -4785,8 +4785,8 @@
     allow: {
       utm_source: ["instagram", "tiktok"],
       utm_medium: ["paid_social", "organic"],
-      utm_campaign: ["ad1_seven_doors", "ad2_manshin"],
-      utm_content: ["ad1_seven_doors", "ad2_manshin"],
+      utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ig_profile"],
+      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ig_profile", "ig_story_book"],
     },
     ignore: ["fbclid", "ttclid"],
   };

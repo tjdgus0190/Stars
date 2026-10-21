@@ -7,7 +7,8 @@ developer 작성, 2026-10-17. 장면은 `../scenes/`(designer), 내용은 `../st
 
 ```
 node --experimental-websocket marketing/strange-oracle/render/render.js all          # mp4 두 개
-node --experimental-websocket marketing/strange-oracle/render/render.js ad1          # 1안만 (ad2 = 2안만)
+node --experimental-websocket marketing/strange-oracle/render/render.js ad1          # 1안만 (ad2 = 2안, ad3 = 3안 「한 권의 책」)
+node marketing/strange-oracle/render/sound-ad3.js                                  # 3안 소리판 (3안 영상을 다시 렌더하면 다시 돌린다)
 node --experimental-websocket marketing/strange-oracle/render/render.js all --check  # #safe 확인 컷만
 ```
 - 정적 서버: 스크립트가 `tools/serve.js`를 저장소 루트로 **포트 8790**에 띄우고 끝나면 끈다(`--port N`으로 바꿀 수 있음, 8787·8788은 거부).
@@ -27,6 +28,8 @@ node --experimental-websocket marketing/strange-oracle/render/render.js all --ch
 |---|---|---|---|
 | `ad1-seven-doors-ko.mp4` | 15.000초 | 450 | 1,414,675 B (약 1.4MB) |
 | `ad2-manshin-ko.mp4` | 9.000초 | 270 | 1,094,966 B (약 1.1MB) |
+| `ad3-book-ko.mp4` (2026-10-21) | 15.000초 | 450 | 1,395,268 B (약 1.4MB) |
+| `ad3-book-ko-sound.mp4` (2026-10-21) | 15.000초 | 450 | 영상은 위 파일 그대로 복사 + AAC 192kbps, `render/sound-ad3.js` |
 
 공통: H.264 High, 1080x1920, yuv420p, 30fps, bt709, 무음(오디오 스트림 없음). 플랫폼에서 음악을 붙일 때 소리 없는 영상으로 올려도 된다.
 
@@ -59,7 +62,7 @@ node marketing/strange-oracle/render/sound-ad1.js --raw    # 정규화 전 float
 |---|---|
 | utm_source | `instagram` · `tiktok` |
 | utm_medium | `paid_social` · `organic` |
-| utm_campaign | `ad1_seven_doors` · `ad2_manshin` |
-| utm_content | `ad1_seven_doors` · `ad2_manshin` |
+| utm_campaign | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ig_profile` |
+| utm_content | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ig_profile` · `ig_story_book` |
 
 예: `https://<제품 주소>/?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors`
