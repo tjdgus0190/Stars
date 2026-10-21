@@ -24,7 +24,7 @@
 // (15단계, spec 15-6) test 모드에는 모의 페이앱(tools/strange-oracle/mock-pay.js)이 붙는다:
 //   /api/pay/* = 함수 pay.js handle() + 메모리 저장소(Blobs 대신), /api/book = 함수 book.js handle() + 같은 저장소(Blobs pass/ 확인)
 //   /__dev/payapp-lite.js(가짜 SDK, 이동·팝업) · /__dev/payapp/checkout(가짜 결제창) · /__dev/pay-switch · /__dev/pay-store
-//   data.js 응답에서 pay.payapp.sdk(공식 주소) → /__dev/payapp-lite.js, 빈 pay.payapp.userid → 모의 값
+//   data.js 응답에서 pay.payapp.sdk(공식 주소) → /__dev/payapp-lite.js, pay.payapp.userid(어떤 값이든) → 모의 값 · (19-5) 모든 모드에서 analytics.ga4(비어 있지 않으면) → "G-TEST12345"
 // (15단계 QA 1차 필수 1) 제품 HTML(index.html·legal/*.html)의 결제 표지(<!-- pay:on -->·<!-- pay:off -->, tools/pay-sections.js):
 //   --mode test면 원본(products/strange-oracle/)에서 읽어 test 판으로 내준다 → legal 결제 문단이 보이고 legal/refund.html도 열린다(배포 폴더에는 없음).
 //   --src면 원본을 mode대로 처리한다. dist 모드 off는 build-dist가 이미 off 판으로 만든 파일 그대로. 원본 파일은 고치지 않는다.
@@ -72,6 +72,8 @@ const TYPES = {
 };
 const notFound = (res) => res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("없는 파일");
 const PAY_RE = /(\bpay:\s*\{\s*mode:\s*)"off"/;
+const GA4_RE = /(\banalytics:\s*\{\s*ga4:\s*)"[^"]+"/; // 비어 있으면 그대로(분석 스크립트 없음)
+const GA4_TEST = "G-TEST12345";
 // (14-6) 배포처(Netlify)처럼 글자 파일은 압축해서 보낸다 → 성능 측정이 실제 전송량(압축 후)과 맞는다
 function send(req, res, type, data) {
   const head = { "Content-Type": type, "Cache-Control": "no-store", Vary: "Accept-Encoding" };
@@ -183,6 +185,8 @@ location.replace("${P}#${to}");
     }
     // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로)
     if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"'))));
+    // 19-5 (b): 모든 모드에서 data.js 응답의 GA4 측정 ID를 시험 ID로 (실제 ID로 localhost 방문이 나가지 않게, 파일은 그대로)
+    if (/[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(GA4_RE, '$1"' + GA4_TEST + '"'));
     send(req, res, TYPES[path.extname(file)] || "application/octet-stream", data);
   });
 });

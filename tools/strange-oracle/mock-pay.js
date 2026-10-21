@@ -59,9 +59,9 @@ function createPayMock({ port }) {
   };
   const callPay = (route, method, body, ip) => Pay.handle({ method, route, body, ip }, payEnv(), store);
 
-  // test 모드 data.js 응답 변환: SDK 주소 → 가짜 SDK, 빈 userid → 모의 값 (파일은 고치지 않음, pay.mode와 같은 방식)
+  // test 모드 data.js 응답 변환: SDK 주소 → 가짜 SDK, 어떤 userid든 → 모의 값(19-6: 실제 판매자 ID를 모의 결제창에 넘기지 않음) (파일은 고치지 않음, pay.mode와 같은 방식)
   const transformDataJs = (t) =>
-    t.replace(/(\bsdk:\s*)"https:\/\/lite\.payapp\.kr\/public\/api\/v2\/payapp-lite\.js"/, '$1"/__dev/payapp-lite.js"').replace(/(\bpayapp:\s*\{[^}]*?\buserid:\s*)""/, `$1"${MOCK_USERID}"`);
+    t.replace(/(\bsdk:\s*)"https:\/\/lite\.payapp\.kr\/public\/api\/v2\/payapp-lite\.js"/, '$1"/__dev/payapp-lite.js"').replace(/(\bpayapp:\s*\{[^}]*?\buserid:\s*)"[^"]*"/, `$1"${MOCK_USERID}"`);
 
   const sdkScript = () => `// 가짜 페이앱 SDK (모의 서버 전용, 결제창 방식: ${sw.win})
 (function () {

@@ -29,7 +29,6 @@
   <!-- (14-6 성능) 스크립트는 head에서 defer로: HTML을 받는 동안 함께 받고, 실행 순서는 아래 순서 그대로(문서 해석 뒤) -->
   <script defer src="../../common/share-card.js"></script>
   <script defer src="../../common/share-buttons.js"></script>
-  <script defer src="../../common/disclaimer.js"></script>
   <script defer src="../../common/analytics.js"></script>
   <script defer src="data.js"></script>
   <script defer src="data-volume.js"></script>
@@ -194,7 +193,7 @@
     <!-- ═════════ 0. 입구 (8단계: 새 세션의 첫 화면. 인트로 없음) ═════════ -->
     <section class="screen hub is-active" id="screen-hub" data-js="screen-hub" data-room="hall" data-preview="0. 입구 — 첫 화면 (정적 검토: 3/6 진행 중 모습)">
       <!-- map:on -->
-      <!-- (16단계) 지도 자리 · 입구: 초대 띠(map-invite) 또는 작은 링크(map-hub-link)를 map-tpl에서 꺼내 넣는다. 둘 다 없으면 hidden 그대로.
+      <!-- (16단계) 지도 자리 · 입구: 초대 띠(map-invite)를 map-tpl에서 꺼내 넣는다(19단계: 작은 링크 map-hub-link는 바로 가기 띠 지도 칸으로 바뀌어 지움). 둘 다 없으면 hidden 그대로.
            시작 버튼을 가리지 않는다(위에 끼워 넣을 뿐, 고정 위치 아님). 명세: design/strange-oracle.md 「16단계」 2절 -->
       <div class="map-slot map-slot--hub" data-js="map-slot-hub" hidden></div>
       <!-- /map:on -->
@@ -475,7 +474,7 @@
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">타고난 그릇에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요. 첫 방에서 넣은 정보는 뒤의 방들이 이어서 써요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름·생년월일·태어난 시각·성별은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
           <!-- (14단계) 책 문답: 무엇이 담기는지 (답 150자). 시험 페이지(test)에서만 구매 문답 -->
-          <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">일곱 방의 장과 숨은 장, 「겹치는 곳, 갈리는 곳」·시기별 흐름·인연의 장·궁합·원형 심층까지 유료 12장을 엮은 책이에요. 페이앱 결제창에서 3,900원을 결제하면 바로 열리고, 열람 코드로 다른 기기에서도 다시 열 수 있어요. 여는 글·닫는 글과 목차는 무료예요.</dd>
+          <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">일곱 방의 장과 숨은 장, 「겹치는 곳, 갈리는 곳」·시기별 흐름·인연의 장·궁합·원형 심층까지 유료 12장을 엮은 책이에요. 페이앱 결제창에서 5,900원을 결제하면 바로 열리고, 열람 코드로 다른 기기에서도 다시 열 수 있어요. 여는 글·닫는 글과 목차는 무료예요.</dd>
           </div>
           <!-- map:on -->
           <!-- (16단계) 지도 문답 2개 (답 150자 이내). copywriter(H4)가 data.js에 넣고 견본을 정리한다 -->
@@ -488,8 +487,46 @@
       <!-- (12·14단계) 바닥글 줄: 지우기 안내 다음 줄. 쿠키 줄은 분석 ID가 있을 때만 hidden 해제 -->
       <div class="hub-foot">
         <p class="hub-clear-note" data-t="hub.clearNote">입력한 정보는 위쪽 막대의 "내 정보 지우기"로 언제든 지울 수 있어요.</p>
+        <!-- pay:on -->
+        <p class="pay-entry" data-js="pay-entry">
+          <button class="btn btn--primary btn--block" type="button" data-js="hub-pay-btn" data-t="pay.buy">5,900원 결제하고 상세 내용 보기</button>
+        </p>
+        <!-- /pay:on -->
         <p class="hub-cookie" data-js="cookie-line" hidden><span data-t="privacy.cookieLine">방문 통계에 구글 애널리틱스 쿠키를 써요. 입력한 정보는 보내지 않아요.</span> <a class="hub-cookie__link" href="legal/privacy.html" data-t="legal.links.privacy">개인정보처리방침</a></p>
       </div>
+
+      <!-- (19단계 K1, 결정 125) 입구 바로 가기 띠 — 입구 화면에만, 화면 아래 고정(입구가 숨으면 함께 숨는다). DOM 순서는 입구 맨 끝.
+           탭 목록 역할이 아니라 화면을 옮기는 버튼들. 칸 수는 1~4개(off·0/7 = 공유 1칸 … test·map on = 4칸), 칸이 빠지거나 hidden이어도 CSS가 고르게 나눈다.
+           공유 칸 = share-buttons의 share-link-copy 그대로. 완료 줄 share-link-status는 이 nav 안(공유 칸에서 위로 올라가 처음 만나는 것)이라 3/7 줄의 완료 줄과 섞이지 않는다.
+           숨김: 입구 글 칸 초점·문 열리는 연출 중(CSS :has) + JS가 .is-hidden을 붙여도 숨는다. 명세: design/strange-oracle.md 「19단계 (K1)」 1절 -->
+      <nav class="hub-tabs" data-js="hub-tabs" data-aria="hub.tabs.aria" aria-label="[초안] 바로 가기">
+        <p class="share-status hub-tabs__status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
+        <div class="hub-tabs__row">
+          <button class="hub-tab" type="button" data-js="share-link-copy" data-tab="share">
+            <svg class="hub-tab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="17.5" cy="5.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/><path d="M8.7 10.7l6.6-3.9M8.7 13.3l6.6 3.9"/></svg>
+            <span class="hub-tab__label" data-t="hub.tabs.share">[초안] 공유하기</span>
+          </button>
+          <!-- 1/7 이상만 (0/7이면 JS가 hidden) -->
+          <button class="hub-tab" type="button" data-js="hub-tab-story" data-tab="story" data-go="story">
+            <svg class="hub-tab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h8.5l4 4V20.5H6Z"/><path d="M14.5 3.5v4h4"/><path d="M9 12h6.5M9 15.5h4.5"/></svg>
+            <span class="hub-tab__label" data-t="hub.tabs.story">[초안] 나의 이야기</span>
+          </button>
+          <!-- pay:on -->
+          <!-- test·live이고 1/7 이상만. 누르면 hub-book-go와 같은 곳. off 원본을 그대로 열 때는 app.js gone 목록에 hub-tab-book을 더해 지운다 -->
+          <button class="hub-tab" type="button" data-js="hub-tab-book" data-tab="book">
+            <svg class="hub-tab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5.5a2 2 0 0 1 2-2h12v14H7a2 2 0 0 0-2 2Z"/><path d="M5 19.5a2 2 0 0 0 2 2h12v-4"/><circle cx="12.5" cy="10.5" r="2.4"/></svg>
+            <span class="hub-tab__label" data-t="hub.tabs.book">[초안] 한 권의 책</span>
+          </button>
+          <!-- /pay:on -->
+          <!-- map:on -->
+          <!-- map on일 때만. 열람 키 있음 → 지도 보기 · 없음·7/7 → 지도 만들기 자리 · 없음·7/7 전 → 토스트 map.tabLocked -->
+          <button class="hub-tab" type="button" data-js="hub-tab-map" data-tab="map">
+            <svg class="hub-tab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.2l8.4 6.1-3.2 9.9H6.8L3.6 9.3Z"/><circle class="hub-tab__dot" cx="12" cy="11.5" r="1.6"/><circle class="hub-tab__dot" cx="8.6" cy="14.6" r="1.1"/><circle class="hub-tab__dot" cx="15.2" cy="9.4" r="1.1"/></svg>
+            <span class="hub-tab__label" data-t="map.tab">[초안] 친구 지도</span>
+          </button>
+          <!-- /map:on -->
+        </div>
+      </nav>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
@@ -670,7 +707,7 @@
     </section>
 
     <!-- ═════════ 4-K. 만신의 방: 결과 ═════════
-         순서(14-1): 결과 이름·일간 한자 → (공유) → 원국 표 → 오행 막대 → S1~S4 → 원형 한 줄 → S5(만신의 공수) → 떡밥·책 한 줄 → 이 방의 기준 → 면책 → 공유·다음 문(Ⅱ 오검)
+         순서(14-1): 결과 이름·일간 한자 → (공유) → 원국 표 → 오행 막대 → S1~S4 → 원형 한 줄 → S5(만신의 공수) → 떡밥·책 한 줄 → 이 방의 기준 → 공유·다음 문(Ⅱ 오검)
          공유 카드에는 일간 이름·한자·오행 막대·원형만. 원국 8글자와 성별은 넣지 않는다(카드 그리는 코드는 developer, 명세는 design 14단계 9절) -->
     <section class="screen result result--saju" id="screen-saju-result" data-js="screen-saju-result" data-room="saju" data-preview="4. 만신의 방 — 결과">
       <div class="say say--open" data-js="guide-open">
@@ -756,7 +793,6 @@
       <!-- 이 방의 기준 한 줄: 기관 이름(대조처) 금지 (14-1 시각 처리 8) -->
       <p class="saju-basis" data-js="saju-basis" data-t="saju.result.basis">이 방의 기준: 양력·한국 시계 기준, 서울 경도 30분 보정</p>
 
-      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
 
       <div class="result-more">
         <button class="text-link" type="button" data-js="result-share" data-t="result.shareSub">결과 이미지 저장·공유</button>
@@ -999,7 +1035,6 @@
         <p class="say__line" data-t="guides.rune.close">바람은 오늘도 다시 불어와요. 고른 세 개의 돌을 마음에 담아 두세요.</p>
       </div>
 
-      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
 
       <!-- (8단계, U6) 공유는 보조 글자 버튼 (룬은 다시 던지기 없음, 결정 40) -->
       <div class="result-more">
@@ -1341,7 +1376,6 @@
         <p class="say__line" data-t="guides.star.close">달은 다시 이 집으로 돌아와요, 오늘 함께 센 숫자를 기억해 두세요.</p>
       </div>
 
-      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
 
       <!-- (8단계, U6) 공유·다시 보기는 작은 글자 링크 (결과 끝의 주 동작은 다음 방 문 하나) -->
       <div class="result-more">
@@ -1577,7 +1611,6 @@
         <p class="say__line" data-t="guides.ogham.close">새긴 결은 이 숲이 오래도록 기억해요, 오늘의 결을 소중히 간직해 두세요.</p>
       </div>
 
-      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
 
       <!-- (8단계, U6) 공유·다시 보기는 작은 글자 링크 (결과 끝의 주 동작은 다음 방 문 하나) -->
       <div class="result-more">
@@ -1894,7 +1927,6 @@
         <p class="say__line" data-t="guides.decan.close">그림자는 내일도 같은 눈금으로 돌아와요, 오늘 짚은 자리를 기억해요.</p>
       </div>
 
-      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
 
       <!-- (8단계, U6) 공유·다시 보기는 작은 글자 링크 (결과 끝의 주 동작은 다음 방 문 하나) -->
       <div class="result-more">
@@ -2155,7 +2187,6 @@
         <p class="say__line" data-t="guides.tzolkin.close">순환은 늘 다시 돌아와요. 이 돌은 여기서 다음 날을 가만히 기다려요.</p>
       </div>
 
-      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
 
       <!-- (8단계, U6) 공유·다시 보기는 작은 글자 링크 (결과 끝의 주 동작은 다음 방 문 하나) -->
       <div class="result-more">
@@ -2377,7 +2408,6 @@
         <p class="say__line" data-t="guides.sibyl.close">울림은 동굴 안에 오래도록 남아요… 오늘 들은 말을 마음에 품고 가세요.</p>
       </div>
 
-      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
 
       <!-- (8단계, U6) 공유는 보조 글자 버튼. "다른 신탁 받기"는 결정 41대로 버튼 유지 -->
       <div class="result-more">
@@ -2810,7 +2840,6 @@
             <a href="legal/terms.html" data-t="legal.links.terms">이용약관</a>
             <a href="legal/privacy.html" data-t="legal.links.privacy">개인정보처리방침</a>
           </nav>
-          <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
         </div>
 
         <!-- ── 장 표지 (data-view="cover") ── 배너 없음.
@@ -3572,8 +3601,6 @@
         <button class="text-link" type="button" data-go="story" data-js="preview-to-story"><span data-t="book.preview.toStory">나의 이야기로</span> <span aria-hidden="true">›</span></button>
       </nav>
 
-      <!-- 8 면책 (disclaimer.js, Disclaimer.mount — 책 화면과 같은 방식) -->
-      <div class="disclaimer-slot" data-js="disclaimer-slot"></div>
     </section>
     </template>
     <!-- /pay:on -->
@@ -3582,7 +3609,7 @@
     <!-- ═════════ 6-P. (14·15단계) 결제 — pay.mode가 test·live일 때만 (결정 94, 15단계 페이앱) ═════════
          template 안에 둔다: off(배포판)에서는 DOM에 결제 요소가 0개여야 한다(14-7의 8, 15-8의 1). JS가 test·live에서만 template 내용 전부를
          (최상위 요소 4개: #screen-deeper · #screen-paycheck · #screen-paypopup · dialog pay-code-dialog) 꺼내 붙이고 applyText를 돌린다. off면 template째 지운다.
-         순서 고정(15-4): 1 받는 것 → 2 가격 → 3 결제 방법·판매자 → 4 열람 방법 → 5 환불·청약철회 → 6 동의 → 7 3,900원 결제하기 → 8 열람 코드 넣기 → 판매자 정보 줄.
+         순서 고정(15-4): 1 받는 것 → 2 가격 → 3 결제 방법·판매자 → 4 열람 방법 → 5 환불·청약철회 → 6 동의 → 7 5,900원 결제하기 → 8 열람 코드 넣기 → 판매자 정보 줄.
          1~6은 모두 결제 버튼보다 위. 포스타입 구매처(stores)·새 탭 안내(newTab)·가격 단위(price.unit)는 15-7에서 삭제됨. 명세: design/strange-oracle.md 「15단계」 -->
     <template data-js="pay-tpl">
     <section class="screen pay" id="screen-deeper" data-js="screen-deeper" data-room="hall" data-preview="6-P. 결제 전 화면 (test·live에서만)">
@@ -3611,7 +3638,7 @@
         <p class="pay-note" data-t="pay.what.free">여는 글·닫는 글과 목차는 결제 없이 먼저 읽을 수 있고, 일곱 방을 모두 지나면 방 장마다 첫 줄도 미리 볼 수 있어요. 아직 지나지 않은 방의 장은 그 방을 지나면 열려요. 「겹치는 곳, 갈리는 곳」은 방을 둘 이상 지나면 열리고, 방을 더 지나면 내용이 바뀔 수 있어요.</p>
       </section>
 
-      <!-- 2 가격: 3,900원 한 줄 (price.unit 삭제) -->
+      <!-- 2 가격: 5,900원 한 줄 (price.unit 삭제) -->
       <section class="pay-sec pay-sec--row" aria-labelledby="pay-price-title">
         <h2 class="pay-sec__title" id="pay-price-title"><span class="pay-sec__num" aria-hidden="true">2</span><span data-t="pay.price.title">가격</span></h2>
         <p class="pay-price"><b data-js="pay-price"></b></p>
@@ -3643,7 +3670,7 @@
            이 탭에 이미 strange-oracle-pass가 있고 책이 열려 있으면 JS가 .pay-act에 .is-opened → 동의·버튼·안내를 숨기고 pay-opened를 보인다 -->
       <div class="pay-act" data-js="pay-act">
         <label class="check pay-agree"><input type="checkbox" data-js="pay-agree" /><span data-t="pay.agree">위 내용(받는 것·가격·결제 방법·판매자·환불 조건)을 확인했어요</span></label>
-        <button class="btn btn--primary btn--block pay-buy" type="button" data-js="pay-buy" aria-disabled="true"><span data-t="pay.buy">3,900원 결제하기</span></button>
+        <button class="btn btn--primary btn--block pay-buy" type="button" data-js="pay-buy" aria-disabled="true"><span data-t="pay.buy">5,900원 결제하기</span></button>
         <p class="pay-act__note is-hidden" data-js="pay-store-empty" data-t="pay.storeEmpty">판매 준비 중</p>
         <div class="pay-opened" data-js="pay-opened" role="status">
           <svg class="pay-opened__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3 4.5C5.5 3.8 8 4 10 5.5c2-1.5 4.5-1.7 7-1v11c-2.5-.7-5-.5-7 1-2-1.5-4.5-1.7-7-1Z M10 5.5v11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
@@ -3787,7 +3814,7 @@
          off 배포판에서는 build-dist가 map:on 구획째 걷어 낸다(지도 DOM 0, 16-8 ⑪). test·live에서는 map.js가 이 template을 꺼낸다.
          최상위 요소(꺼내는 단위, 모두 data-js로 찾는다):
            ① svg.map-sprite(아이콘 24개 symbol, 먼저 붙여야 <use>가 보임)  ② map-card(지도 카드 — slot finale·story에 하나씩 복제)
-           ③ map-invite(초대 띠 — slot hub)  ④ map-hub-link(입구 작은 링크 — slot hub)
+           ③ map-invite(초대 띠 — slot hub)  ④ (19단계에서 지움: 입구 작은 링크 → 바로 가기 띠 지도 칸)
            ⑤ #screen-map-consent  ⑥ #screen-map  ⑦ #screen-map-friend  ⑧ dialog map-key-dialog  ⑨ dialog map-pop-dialog
            ⑩ dialog map-pick-dialog  ⑪ dialog map-confirm-dialog
          상태는 data-state 하나로 바뀐다. 각 블록의 data-when(공백으로 여러 값)에 지금 상태가 있으면 CSS가 보인다(결제 확인 화면과 같은 방식).
@@ -3921,8 +3948,6 @@
       <button class="text-link map-invite__go" type="button" data-when="joined" data-js="map-invite-result" data-t="map.card.myResult">내 결과 보기</button>
     </aside>
 
-    <!-- ④ 입구 작은 링크 — 이 기기에 열람 키가 있을 때만(map-slot-hub) -->
-    <button class="map-hub-link" type="button" data-js="map-hub-link"><svg viewBox="-60 -60 120 120" aria-hidden="true" focusable="false"><path d="M0-52L49.5-16.1L30.6 42.1H-30.6L-49.5-16.1Z"/></svg><span data-t="map.hubLink">내 친구 지도</span><span aria-hidden="true">→</span></button>
 
     <!-- ⑤ 동의 화면 — 주인·친구 같은 틀. data-role = owner | friend (문구만 다름)
          data-state = form | sending | unsure(응답 없음 8초) | down
@@ -3981,8 +4006,22 @@
         </div>
       </fieldset>
 
-      <!-- 6장 예외 2 고지: 보내는 것 · 보내지 않는 것 · 누가 보나 · 어디에 · 얼마나 · 지우는 법 · 선택 사항. 모두 버튼 위 -->
+      <!-- (19단계 K1, 결정 124 · 6장 예외 2의 2026-10-18 줄) 한 줄 요약 → 동의 체크(처음 꺼짐) → 체크 바로 아래 줄 "자세히 보기"(details).
+           요약 = map.consent.summary, {main}·{sub}는 map-send-arch와 같은 원형 이름(굵게). 보내는 항목과 보관 기간을 담는다.
+           펼친 안: ① 이용 목적(새 줄) ② 보내는 것 ③ 보내지 않음 ④ 보는 사람 ⑤ 저장 위치 ⑥ 보관 기간 ⑦ 지우는 법 ⑧ 선택 사항.
+           접혀 있어도 모두 이 화면 DOM 안에 있다(지우지 않음). 펼침 상태는 저장하지 않는다(화면에 들어올 때마다 접힘). 모두 버튼 위 -->
+      <p class="map-summary"><svg class="map-summary__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.8l5.4 2v4.1c0 3.1-2.3 5.4-5.4 6.3-3.1-.9-5.4-3.2-5.4-6.3V3.8Z"/><path d="M5.6 8.1l1.7 1.7 3.2-3.4"/></svg><span data-js="map-consent-summary">[초안] 별명·아이콘·원형 두 개(<b>현자</b>·<b>탐험가</b>)를 보내고, 마지막 활동 뒤 90일(최대 1년) 보관해요.</span></p>
+
+      <div class="map-consent__agree">
+        <label class="check map-agree"><input type="checkbox" data-js="map-agree" /><span data-t="map.consent.agree">[초안] 요약과 자세히 보기의 내용을 확인했고, 별명·아이콘·원형 두 개를 보내는 데 동의해요</span></label>
+        <details class="map-more" data-js="map-more">
+          <summary class="map-more__toggle"><span class="map-more__open" data-t="map.consent.more">[초안] 자세히 보기</span><span class="map-more__close" data-t="map.consent.less">[초안] 접기</span><svg class="map-more__chev" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 6l4 4 4-4"/></svg></summary>
+          <div class="map-more__body">
       <dl class="map-notice">
+        <div class="map-notice__row map-notice__row--purpose">
+          <dt data-t="map.consent.purposeLabel">[초안] 이용 목적</dt>
+          <dd data-t="map.consent.purpose">[초안] 친구 궁합 지도를 만들고, 초대한 친구와 서로의 원형 궁합을 보여 주려고 써요.</dd>
+        </div>
         <div class="map-notice__row map-notice__row--send">
           <dt data-t="map.consent.sendLabel">보내는 것</dt>
           <dd><span data-t="map.consent.send">별명, 아이콘, 원형 두 개</span> <b class="map-notice__arch" data-js="map-send-arch"></b></dd>
@@ -4009,8 +4048,9 @@
         </div>
       </dl>
       <p class="map-optional" data-t="map.consent.optional">보내기는 선택이에요. 보내지 않아도 모든 결과를 그대로 볼 수 있어요.</p>
-
-      <label class="check map-agree"><input type="checkbox" data-js="map-agree" /><span data-t="map.consent.agree">위 내용을 확인했고, 별명·아이콘·원형 두 개를 보내는 데 동의해요</span></label>
+          </div>
+        </details>
+      </div>
 
       <!-- 응답 없음(8초): 자동 재전송 없음 -->
       <div class="map-block map-block--warn" data-when="unsure" role="status">
@@ -4121,8 +4161,6 @@
         </div>
       </details>
 
-      <!-- 면책 문구(disclaimer.js가 채움) -->
-      <div class="map-disclaimer" data-js="map-disclaimer"></div>
       <button class="text-link map-back" type="button" data-go="story" data-js="map-back"><span aria-hidden="true">←</span> <span data-t="map.back">나의 이야기로</span></button>
     </section>
 
@@ -4181,7 +4219,6 @@
       </section>
 
       <button class="btn btn--secondary btn--block" type="button" data-js="map-friend-make" data-t="map.friend.make">나도 친구 지도 만들기</button>
-      <div class="map-disclaimer" data-js="map-friend-disclaimer"></div>
       <button class="text-link map-back" type="button" data-go="story" data-js="map-friend-back"><span aria-hidden="true">←</span> <span data-t="map.back">나의 이야기로</span></button>
     </section>
 

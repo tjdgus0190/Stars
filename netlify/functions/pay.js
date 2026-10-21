@@ -17,7 +17,7 @@
 const crypto = require("crypto");
 
 const STORE_NAME = "strange-oracle-pay";
-const PRICE = 3900;
+const PRICE = 5900;
 const TAG = "so-book-1";
 const R_RE = /^[0-9a-f]{32}$/;
 const MUL_RE = /^[0-9A-Za-z_-]{1,40}$/; // 키 이름에 들어가므로 모양을 좁힌다

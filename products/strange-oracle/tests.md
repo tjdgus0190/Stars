@@ -754,7 +754,7 @@
 - 이후 문구 수정은 `api/_paid/book/`에서만, 수정 뒤 `node tools/strange-oracle/make-volume.js`(분량 표, 3,000건 대조 불일치 0).
 
 ### 결제 흐름·함수
-- `pay.mode`(data.js): off = 배포판, test = 모의 서버 `--mode test`가 응답할 때만, live = 운영자. `pay.verify` code/none, `pay.amount` 3900, `pay.stores.ko/global`.
+- `pay.mode`(data.js): off = 배포판, test = 모의 서버 `--mode test`가 응답할 때만, live = 운영자. `pay.verify` code/none, `pay.amount` 5900, `pay.stores.ko/global`.
 - 함수 `netlify/functions/book.js`: POST `{pass, file}` 두 칸뿐, file 허용 목록 10개(saju·ogham·star·decan·tzolkin·rune·sibyl·flow·match·arch), 코드 SHA-256이 `BOOK_PASS_HASHES`에 있으면 그 장 JSON, IP별 10분 틀림 10회 넘으면 429(메모리만), 모든 응답 no-store, `PASS_MODE`가 live·test가 아니면 503.
 - 열람 코드 `SOP` + 12자 + 검사 1자(paycode.js `Pass`). 코드·해시는 `node tools/strange-oracle/make-pass.js [개수]`가 터미널에만 찍는다. 모의 서버는 시작할 때마다 새 모의 코드를 만든다.
 - off에서 걷어 내는 DOM: `#screen-report`(책 전체), pay-tpl template, 입구 책 카드, 방 결과 책 한 줄 7개, 나의 이야기 책 버튼, FAQ 책 문답(items.4).

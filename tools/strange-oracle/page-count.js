@@ -48,7 +48,7 @@ if (require.main === module) (async () => {
     const orderId = await ev(`PayCode.encode(${JSON.stringify(s)})`);
     await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 800, deviceScaleFactor: 2, mobile: true });
     await ev("sessionStorage.clear()");
-    await b.goto(`${BASE}?pay=success&paymentKey=mock_pc${i}${Date.now()}&orderId=${orderId}&amount=3900`);
+    await b.goto(`${BASE}?pay=success&paymentKey=mock_pc${i}${Date.now()}&orderId=${orderId}&amount=5900`);
     const t0 = Date.now();
     while (Date.now() - t0 < 10000 && (await ev("document.querySelector('.screen.is-active')?.id")) !== "screen-report") await sleep(150);
     await ev("document.fonts.ready.then(() => true)");

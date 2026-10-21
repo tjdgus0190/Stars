@@ -7,7 +7,7 @@
 |---|---|---|
 | base.css | 있음 (designer, 사용법은 docs/design-system.md) | strange-oracle |
 | share-card.js | 있음 (2026-09-25 옵션 추가, 2026-09-28 그림 블록·소장판 옵션 추가) | strange-oracle |
-| disclaimer.js | 있음 | strange-oracle |
+| disclaimer.js | 있음 | 없음(strange-oracle 19단계에서 뺌, 결정 123 · CLAUDE.md 8장 예외) |
 | share-buttons.js | 있음 (2026-09-30, 링크 복사 + 카카오톡 자리) | strange-oracle |
 | ads.js | 있음 (2026-10-01, 배너 채우기 + 보상형) | strange-oracle |
 | analytics.js | 있음 (2026-10-01, GA4 허용 목록 · 2026-10-17 utm 허용 목록) | strange-oracle |

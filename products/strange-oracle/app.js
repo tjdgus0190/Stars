@@ -762,7 +762,38 @@
     show(js("resume-enter"), n === 0);
     show(js("hub-half"), n === 3);
     show(js("resume-restored"), justRestored && n > 0);
+    // (19-4, 결정 125) 바로 가기 띠: 공유 칸은 늘, 나의 이야기·한 권의 책 칸은 1/7 이상, 지도 칸은 map on이면 늘.
+    // off에서 책 칸은 offStrip이, map off에서 지도 칸은 지도 걷어 내기가 DOM에서 지운다
+    const tabStory = js("hub-tab-story"), tabBook = js("hub-tab-book");
+    if (tabStory) tabStory.hidden = n === 0;
+    if (tabBook) tabBook.hidden = n === 0;
     renderBookCard();
+
+    // (19단계 K10) 결제 버튼 표시/비활성화 로직
+    const payBtn = js("hub-pay-btn");
+    if (payBtn) {
+      if (!payBtn.dataset.bound) {
+        payBtn.dataset.bound = "1";
+        payBtn.addEventListener("click", () => {
+          if (payBtn.disabled) return;
+          goPay("hub");
+        });
+      }
+      if (passNow()) {
+        // 결제 완료 시 버튼 숨김
+        payBtn.style.display = "none";
+      } else if (n === CHAPTER_ORDER.length) {
+        // 7/7 완료 but 결제 안됨 - 버튼 활성화
+        payBtn.disabled = false;
+        payBtn.style.display = "block";
+        payBtn.textContent = T.pay.buy || "5,900원 결제하고 상세 내용 보기";
+      } else {
+        // 7/7 미완료 시 버튼 비활성화
+        payBtn.disabled = true;
+        payBtn.style.display = "block";
+        payBtn.textContent = T.pay.buy || "5,900원 결제하고 상세 내용 보기";
+      }
+    }
   }
   enter.hub = renderHub;
   leave.hub = () => {
@@ -1201,7 +1232,6 @@
 
     const list = [past, now, next].map((r) => fill(R.factItem, { name: r.name, aett: R.aett[Math.floor(r.index / 8)] })).join(", ");
     js("fact-text", scr).innerHTML = fill(R.fact, { list });
-    Disclaimer.mount(js("disclaimer-slot", scr));
     renderArchetypeLine(scr, next.archetype, next.archetypeWhy);
     renderPassage(scr);
   }
@@ -1505,7 +1535,6 @@
     renderBookLine(scr, nak.event.hook);
 
     js("fact-text", scr).innerHTML = nak.fact || R.factFallback;
-    Disclaimer.mount(js("disclaimer-slot", scr));
     renderArchetypeLine(scr, nak.archetype, nak.archetypeWhy);
     renderPassage(scr);
   }
@@ -1536,11 +1565,10 @@
     renderReading(scr, [rLede(e.identity.lede), ...e.identity.body.map(rP), factsUl(facts), rP(interpretNote)], e.identity.close);
     renderBookLine(scr, e.event.hook);
   }
-  // 결과 아래쪽 공통: 상식 카드·고증 한 줄·면책·원형 한 줄·떡밥
+  // 결과 아래쪽 공통: 상식 카드·고증 한 줄·원형 한 줄·떡밥
   function finishResult(scr, room, e, R) {
     js("fact-text", scr).innerHTML = e.fact;
     js("result-source-note", scr).textContent = strip(R.sourceNote);
-    Disclaimer.mount(js("disclaimer-slot", scr));
     renderArchetypeLine(scr, e.archetype, e.archetypeWhy);
     renderPassage(scr);
   }
@@ -2397,7 +2425,6 @@
     renderSway(js("result-archetype-sway", scr));
     js("saju-s5", scr).textContent = strip(st.gongsu); // S5 만신의 공수(안내자 close 자리)
     renderBookLine(scr, st.event && st.event.hook);
-    Disclaimer.mount(js("disclaimer-slot", scr));
     renderPassage(scr);
   }
   const sajuEdit = (focusGender) => {
@@ -2824,7 +2851,7 @@
   const BOOK_ROOMS = CHAPTER_ORDER;
   const BOOK_IDS = ["open", ...BOOK_ROOMS, "cross", "flow", "yeon", "match", "deep", "close"];
   const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
-  const PAID_IDS = new Set([...BOOK_ROOMS, "cross", "flow", "yeon", "match", "deep"]);
+  const PAID_IDS = new Set([...BOOK_ROOMS.filter(r => r !== "saju"), "cross", "flow", "yeon", "match", "deep"]);
   const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { cross: "cross", flow: "flow", yeon: "yeon", match: "match", deep: "arch" });
   const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { cross: "BOOK_CROSS", flow: "BOOK_FLOW", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
   const FREE_FILE = "data-book-free.js";
@@ -3132,6 +3159,7 @@
     go("report");
   };
   js("hub-book-go").addEventListener("click", () => goBook(null));
+  if (js("hub-tab-book")) js("hub-tab-book").addEventListener("click", () => goBook(null)); // (19-4) 18-5 상태표 그대로(7/7 결제 전이면 미리보기)
   js("story-book-link").addEventListener("click", () => goBook(null));
   CHAPTER_ORDER.forEach((room) => js("result-book-link", screens[`${room}-result`]).addEventListener("click", () => goBook(isDone(room) ? room : null)));
 
@@ -3169,7 +3197,6 @@
     const ok = Boolean(bm && available(bm.id));
     show(js("book-resume"), ok);
     if (ok) js("book-resume-text").textContent = fill(T.book.toc.resume, { chapter: chapterName(bm.id), page: bm.page });
-    Disclaimer.mount(js("disclaimer-slot", reportScr));
     show(js("book-code-row"), Boolean(passNow())); // (15-5) 이 탭에 열람 코드가 있을 때만 "내 열람 코드 보기"
   }
   function showToc() {
@@ -4256,7 +4283,7 @@
   // (14-4 off, 결정 94) 본 페이지: 결제 화면·열람 코드 칸·책(목차·장·여는/닫는 글)·방 결과의 책 한 줄·입구 책 카드·나의 이야기 책 버튼·FAQ 책 문답을
   // DOM에서 걷어 낸다(숨김이 아니라 제거 → DOM 0개). pay-tpl template은 꺼내지 않고 지운다. "준비 중" 같은 문구도 없다
   function offStrip() {
-    const gone = [reportScr, js("pay-tpl"), js("pay-toc-tpl"), js("preview-tpl"), js("toc18-tpl"), js("cross-tpl"), js("story-preview-tpl"), js("clear-warn-pay"), js("hub-book"), js("story-book"), js("book-toc-open"), ...jsAll("result-book-line")]; // 상단 막대의 목차 버튼도 책 요소 (F6 지적)
+    const gone = [reportScr, js("pay-tpl"), js("pay-toc-tpl"), js("preview-tpl"), js("toc18-tpl"), js("cross-tpl"), js("story-preview-tpl"), js("clear-warn-pay"), js("hub-book"), js("hub-tab-book"), js("story-book"), js("book-toc-open"), ...jsAll("result-book-line")]; // 상단 막대의 목차 버튼도 책 요소 (F6 지적)
     const faq = $('[data-t="hub.faq.items.4.q"]');
     if (faq) gone.push(faq.closest(".faq__item"));
     gone.forEach((el) => el && el.remove());
@@ -4282,7 +4309,7 @@
   // (결정 120) 책 화면을 처음 열 때 app-book.js를 받아 mount 한 번
   const ensureBook = () => bookFiles().then(() => BX || (BX = window.BookPlus.mount({
     T, PAY, PAY_MODE, state, $, $$, js, jsAll, show, fill, strip, comma, toast, track, applyText, paras, textIn, BookCore, ROMAN, CHAPTER_ORDER, PAID_IDS,
-    crossTpl, reportScr, screens, enter, reduceMotion, Disclaimer, FREE_FILE, SAMPLE_FILE, visitType, chapterOf, crossList, crossPickNow, interestNow, previewOn,
+    crossTpl, reportScr, screens, enter, reduceMotion, FREE_FILE, SAMPLE_FILE, visitType, chapterOf, crossList, crossPickNow, interestNow, previewOn,
     passNow, allDone, roomsDone, filledRooms, myCodes, whoOf, chapterChars, chapterName, available, bookOrder, minutes, isDone, headOf, loadFile, ensureRooms, goPay, go,
     current: () => currentName,
     toToc: () => (currentName !== "report" ? ((coverNext = null), go("report")) : showToc()),
@@ -4302,11 +4329,40 @@
     }
     storyBookHook = (n, shareBtn) => {
       const on = previewOn();
+      const allDone = roomsDone() === CHAPTER_ORDER.length;
       if (card) card.hidden = !on;
       if (on) {
         show(slot, false);
         shareBtn.classList.remove("btn--primary");
         shareBtn.classList.add("btn--secondary");
+      }
+      // Show payment CTA when all rooms are done but not paid
+      if (allDone && !passNow()) {
+        // Show payment button in story screen
+        let storyPayBtn = js("story-pay-btn");
+        if (!storyPayBtn) {
+          // Create payment button if it doesn't exist
+          const btn = document.createElement("button");
+          btn.className = "btn btn--primary btn--block story-pay-btn";
+          btn.dataset.js = "story-pay-btn";
+          btn.dataset.t = "story.pay.go";
+          btn.textContent = T.pay.buyDetail || "5,900원 결제하고 상세 내용 보기";
+          btn.onclick = () => goPay("story");
+          // Insert after the preview card (or after story-book if card is missing)
+          if (card) card.after(btn);
+          else slot.after(btn);
+          storyPayBtn = btn;
+        } else {
+          storyPayBtn.style.display = "block";
+        }
+        // Hide share button when showing payment CTA
+        shareBtn.style.display = "none";
+      } else {
+        // Hide payment button if it exists
+        const storyPayBtn = js("story-pay-btn");
+        if (storyPayBtn) storyPayBtn.style.display = "none";
+        // Show share button normally
+        shareBtn.style.display = "inline-block";
       }
       const lab = $("[data-t='story.bookLink']", slot) || $("span", js("story-book-link"));
       if (lab) lab.textContent = passNow() ? T.story.bookLinkPaid || T.story.bookLink : T.story.bookLink;
@@ -4738,6 +4794,7 @@
     so_result: { room: CHAPTER_ORDER, archetype: ARCHETYPES },
     so_story: { step: ["3of6", "6of6"] },
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
+    so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
     so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
@@ -4799,6 +4856,8 @@
   document.addEventListener("click", (e) => {
     const t = e.target && e.target.closest ? e.target : null;
     if (!t) return;
+    const tab = t.closest('[data-js="hub-tabs"] [data-tab]');
+    if (tab) track("so_tab", { tab: tab.dataset.tab }); // (19-4) 공유 칸은 아래 so_share { method: "link" }도 그대로 보낸다
     if (t.closest('[data-js="share-link-copy"]')) track("so_share", Object.assign(shareRoom(), { method: "link" }));
     else if (t.closest('[data-js="share-kakao-slot"] button')) track("so_share", Object.assign(shareRoom(), { method: "kakao" }));
   });
@@ -4840,24 +4899,34 @@
   if (!MAP_ON) {
     // off(배포판은 build-dist가 map:on 구획째 걷어 냄): 원본을 그대로 열었을 때도 지도 요소를 DOM에서 지운다
     const clearMap = js("clear-map-leave");
-    [js("map-tpl"), js("map-slot-hub"), js("map-slot-finale"), js("map-slot-story"), clearMap && clearMap.parentElement, ...$$('[data-t^="hub.faq.map."]').map((el) => el.closest(".faq__item"))].forEach((el) => el && el.remove());
+    [js("map-tpl"), js("map-slot-hub"), js("map-slot-finale"), js("map-slot-story"), js("hub-tab-map"), clearMap && clearMap.parentElement, ...$$('[data-t^="hub.faq.map."]').map((el) => el.closest(".faq__item"))].forEach((el) => el && el.remove());
   }
-  const hubLinkEl = MAP_ON && js("map-tpl") ? js("map-tpl").content.querySelector('[data-js="map-hub-link"]').cloneNode(true) : null;
+  // (19-4) 입구 작은 링크(map-hub-link)는 바로 가기 띠의 지도 칸과 같은 일이라 지웠다(마크업·JS). 초대 띠 map-invite는 그대로
   let mapLoad = null;
   let mapApi = null;
-  // 입구 작은 링크: 이 기기에 열람 키가 있을 때만(지도 파일 없이 붙인다)
+  // 입구 지도 자리(map-slot-hub, 초대 띠만 들어감): 비면 숨긴다. 이름은 부르는 곳(map.js)과 맞추려고 그대로 둔다
   function refreshHubLink() {
     const slot = js("map-slot-hub");
-    if (!hubLinkEl || !slot) return;
-    if (mapKeyNow()) {
-      if (!hubLinkEl.isConnected) {
-        slot.append(hubLinkEl);
-        applyText(hubLinkEl);
-      }
-    } else hubLinkEl.remove();
-    slot.hidden = !slot.children.length;
+    if (slot) slot.hidden = !slot.children.length;
   }
-  if (hubLinkEl) hubLinkEl.addEventListener("click", () => ensureMap().then((api) => api.openView(), () => {}));
+  // (19-4) 지도 칸: 열람 키 있음 → 지도 보기 · 없음·7/7 → 나의 이야기의 지도 만들기 자리(만 14세 미만 막기는 그 자리의 버튼이 그대로 건다) · 없음·7/7 전 → 토스트
+  const tabMap = MAP_ON ? js("hub-tab-map") : null;
+  if (tabMap)
+    tabMap.addEventListener("click", () => {
+      if (mapKeyNow()) return void ensureMap().then((api) => api.openView(), () => toast(T.map.down));
+      if (!allDone()) return toast(T.map.tabLocked);
+      go("story");
+      const toSlot = (tries) => {
+        // 화면이 바뀐 뒤(reveal의 scrollTo 다음)에 지도 만들기 버튼이 보이면 그리로 옮기고 초점을 준다
+        const slot = js("map-slot-story");
+        const btn = slot && slot.querySelector('[data-js="map-create"]');
+        if (btn && currentName === "story" && screens.story.classList.contains("is-active") && btn.getClientRects().length) {
+          slot.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+          btn.focus({ preventScroll: true });
+        } else if (tries > 0) setTimeout(() => toSlot(tries - 1), 150);
+      };
+      toSlot(20);
+    });
   // 지도 파일을 못 받으면 그 자리에만 한 줄(data.js map.down)
   function mapFail() {
     ["map-slot-finale", "map-slot-story"].forEach((n) => {
@@ -4881,7 +4950,7 @@
       mapLoad = Promise.all([loadScript("data-map.js"), loadScript(CORE_FILE), loadScript("map.js")]).then(() => {
         const TM = window.TEXT_MAP || {};
         Object.keys(TM).forEach((k) => {
-          if (!(k in T.map)) T.map[k] = TM[k]; // data.js 값(mode·api·down·hubLink·clear)이 우선
+          if (!(k in T.map)) T.map[k] = TM[k]; // data.js 값(mode·api·down·tab·tabLocked·clear)이 우선
         });
         mapApi = window.FriendMap.mount({
           T, js, jsAll, $$, show, fill, applyText,
@@ -4906,7 +4975,7 @@
           name: () => state.profile.name || "",
           birth: () => state.profile.birth || null,
           siteUrl: SITE_URL,
-          ShareButtons, Disclaimer,
+          ShareButtons,
           bookOn: () => BOOK_ON,
           paid: () => Boolean(BOOK_ON && passNow()),
           goBook: (id) => goBook(id),

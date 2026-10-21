@@ -31,6 +31,8 @@ http
     }
     fs.readFile(file, (err, data) => {
       if (err) return res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("없는 파일");
+      // 19-5 (b): data.js 응답의 GA4 측정 ID를 시험 ID로 (미리보기에서 실제 ID로 방문이 나가지 않게, 파일은 그대로)
+      if (path.basename(file) === "data.js") data = Buffer.from(String(data).replace(/(\banalytics:\s*\{\s*ga4:\s*)"[^"]+"/, '$1"G-TEST12345"'));
       res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-store" });
       res.end(data);
     });

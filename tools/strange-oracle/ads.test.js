@@ -80,7 +80,7 @@ test("ads: ID 모두 빈 값 → init false, script 0개, 채움 0, 보상형 un
 });
 
 test("ads: 주소에 ?가 있으면 (결제 복귀) 설정이 있어도 아무것도 안 함", async () => {
-  const e = env("?pay=success&paymentKey=PAYKEY_TEST_1&orderId=ORDER_TEST_1&amount=3900");
+  const e = env("?pay=success&paymentKey=PAYKEY_TEST_1&orderId=ORDER_TEST_1&amount=5900");
   assert.strictEqual(e.win.Ads.init(GOOD), false);
   e.addSlot("hub");
   assert.strictEqual(e.win.Ads.fill(e.root), 0);

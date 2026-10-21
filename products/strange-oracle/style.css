@@ -1516,7 +1516,6 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
 .fact-card { margin-top: var(--space-12); padding: var(--space-5); border: 1px dashed var(--accent-line); border-radius: var(--radius-lg); background: oklch(0.17 0.04 var(--room-h) / 0.6); }
 .fact-card .eyebrow { margin-bottom: var(--space-2); }
 .fact-card__text { font-size: var(--fs-md); line-height: 1.75; color: var(--c-text-muted); }
-.disclaimer-slot { margin-top: var(--space-8); }
 .result-actions { display: grid; gap: var(--space-3); margin-top: var(--space-6); }
 
 .archetype-line { display: flex; align-items: flex-start; gap: var(--space-3); margin-top: var(--space-10); padding: var(--space-4); border-left: 3px solid var(--accent); border-radius: var(--radius-md); background: var(--c-surface-1); }
@@ -3976,7 +3975,6 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 /* 특수 쪽: 면지(영수증)·목차·뒷면지(면책·공유·영수증). 원본 노드를 옮겨 와 종이 위 색으로 */
 .book-page--end .book-page__body { display: grid; align-content: center; gap: var(--space-3); text-align: center; } /* (UI 점검 53) space-5 → 3: 끝 표시 ✦가 빈 쪽으로 홀로 밀리지 않게 */
 .book-page--end .book-page__body > * + * { margin-top: 0; }
-.book-page .disclaimer-slot, .book-page .disclaimer { color: var(--ink-soft); }
 .book-page .page-end { padding-top: 0; color: var(--ink-rubric); } /* (UI 점검 53) 위 48px 여백 빼서 뒷면지 쪽에 함께 들어가게 */
 .book-page .result-actions .text-link { color: var(--ink-rubric); }
 
@@ -4304,7 +4302,6 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 /* ── 목차 아래: 공유 → 법적 고지 → 면책 → 배너(book-toc). 배너는 공유 버튼에서 고지 줄·면책·48px만큼 떨어진다 ── */
 .book-home__share { margin-top: var(--space-10); }
 .book-home__legal { justify-content: center; margin-top: var(--space-4); font-family: var(--font-sans); font-size: var(--fs-xs); }
-.book-home .disclaimer-slot { margin-top: var(--space-6); }
 
 /* ── 장 표지: 결정 53의 가죽 장정을 장마다 한 장 ── */
 .chapter-cover { display: grid; gap: var(--space-5); }
@@ -5106,7 +5103,6 @@ body:has(#screen-paypopup.is-active) .topbar { display: none; }
 .map-manage__item:hover, .map-manage__item:focus-visible { background: var(--c-surface-2); color: var(--c-text-strong); }
 .map-manage__item--danger { color: var(--c-danger); }
 .map-manage__item.is-hidden { display: none; }
-.map-disclaimer:empty { display: none; }
 .map-back { justify-self: center; }
 
 /* ───────── ⑦·⑨ 궁합 묶음 (친구 카드·팝업 공용) ───────── */
@@ -5407,3 +5403,107 @@ body.is-reading .map-node--owner::after, body.is-reading .map-card__dot--f { ani
   border: 1px solid var(--c-line-strong);
   box-shadow: none;
 }
+
+/* ═══ (19단계 K1) 입구 바로 가기 띠 · 지도 동의 화면 접기 · 면책 빠진 자리 여백 — 명세: design/strange-oracle.md 「19단계 (K1)」 ═══ */
+
+/* ── 1. 입구 바로 가기 띠 (nav.hub-tabs). 입구(#screen-hub) 안에만 있어 입구가 숨으면 함께 숨는다 ── */
+.hub { --tabs-h: 64px; }
+/* 입구가 떠오른 뒤 transform 애니메이션이 남아 있으면(fill both) 띠의 고정 위치 기준이 입구 화면이 된다 → 입구만 끝난 뒤 효과를 남기지 않는다(모양은 같음) */
+#screen-hub.is-active { animation-fill-mode: backwards; }
+/* 낮은 화면(360×640 등): 띠(64px + 안전 영역)가 문 아래를 가리지 않게 문을 줄이고 머리 위 여백을 덜어 문 전체를 첫 화면에 둔다(16단계 H5 지도 띠 규칙과 같은 값) */
+@media (max-height: 700px) {
+  .hub:has(> .hub-tabs) .hub-head { padding-top: 0; }
+  .hub:has(> .hub-tabs) .hub-cta.hub-gate { --gw: 144px; }
+}
+.hub.is-active { padding-bottom: calc(var(--space-16) + var(--tabs-h) + env(safe-area-inset-bottom, 0px)); } /* 쿠키 줄·FAQ 끝이 띠에 가리지 않게 */
+.hub-tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-sticky);
+  max-width: 480px; margin-inline: auto;
+  padding: 0 var(--space-2) env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid oklch(0.66 0.075 75 / 0.45); /* --bronze 옅게 */
+  background: oklch(0.12 0.035 var(--room-h, 285) / 0.97);
+  box-shadow: 0 -10px 24px oklch(0 0 0 / 0.35);
+  transition: transform var(--dur-base) var(--ease-out), visibility 0s linear 0s;
+  /* 입구가 떠오르는 700ms(screen-in, transform이 걸려 고정 위치가 풀림) 뒤에 아래에서 올라온다. 숨김(transform)과 겹치지 않게 translate로 */
+  animation: hub-tabs-in var(--dur-base) var(--ease-out) 700ms both;
+}
+@keyframes hub-tabs-in { from { translate: 0 100%; opacity: 0; } to { translate: none; opacity: 1; } }
+.hub-tabs__row {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 120px); justify-content: center;
+  min-height: var(--tabs-h);
+}
+.hub-tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-width: 0; min-height: var(--tabs-h); padding: var(--space-1) 2px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans); font-size: var(--fs-xs); line-height: 1.2; color: var(--c-text);
+  -webkit-tap-highlight-color: transparent;
+}
+.hub-tab[hidden] { display: none !important; }
+.hub-tab__icon { width: 24px; height: 24px; flex-shrink: 0; fill: none; stroke: var(--bronze-hi); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.hub-tab__dot { fill: var(--bronze-hi); stroke: none; }
+.hub-tab__label { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; word-break: keep-all; }
+.hub-tab:hover .hub-tab__label { color: var(--c-text-strong); }
+.hub-tab:active { background: oklch(1 0 0 / 0.06); }
+.hub-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+/* 보이는 칸이 하나뿐(off·0/7 = 공유만): 그림과 이름을 한 줄로 눕힌 넓은 칸 */
+.hub-tabs__row:not(:has(> .hub-tab:not([hidden]) ~ .hub-tab:not([hidden]))) { grid-auto-columns: minmax(0, 200px); }
+.hub-tabs__row:not(:has(> .hub-tab:not([hidden]) ~ .hub-tab:not([hidden]))) .hub-tab { flex-direction: row; gap: var(--space-2); font-size: var(--fs-sm); }
+/* 공유 완료 줄: 띠 바로 위에 뜨는 말풍선(띠 높이는 그대로) */
+.hub-tabs__status {
+  position: absolute; left: 50%; bottom: calc(100% + var(--space-2)); transform: translateX(-50%);
+  width: max-content; max-width: calc(100% - 2 * var(--gutter)); margin: 0;
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+  background: var(--c-surface-3); color: var(--c-text-strong); box-shadow: var(--shadow-2);
+  font-size: var(--fs-sm); text-align: center; overflow-wrap: anywhere;
+}
+.hub-tabs__status.is-hidden { display: none; }
+/* 숨김: 입구 글 칸(이어가기 코드)에 초점 · 문 열리는 연출 중 · JS .is-hidden. 아래로 빠지고 누를 수 없다 */
+.hub:has(:is(input, textarea, select):focus) .hub-tabs,
+.hub:has(:is(.hub-cta, .door).is-entering) .hub-tabs,
+.hub-tabs.is-hidden {
+  transform: translateY(calc(100% + 12px)); visibility: hidden;
+  transition: transform var(--dur-base) var(--ease-out), visibility 0s linear var(--dur-base);
+}
+/* 토스트(지도 칸 7/7 전 안내 등)는 입구에서 띠 위로 올린다 */
+body:has(.hub.is-active) .toast { bottom: calc(var(--tabs-h, 64px) + var(--space-4) + env(safe-area-inset-bottom, 0px)); }
+@media (prefers-reduced-motion: reduce) {
+  .hub-tabs, .hub:has(:is(input, textarea, select):focus) .hub-tabs, .hub:has(:is(.hub-cta, .door).is-entering) .hub-tabs, .hub-tabs.is-hidden { transition: none; }
+}
+/* 정적 검토 모드: 고정하지 않고 입구 맨 끝에 놓는다 */
+.is-static-preview .hub-tabs { position: relative; margin-top: var(--space-8); animation: none; }
+
+/* ── 2. 지도 동의 화면: 한 줄 요약 + 동의 체크 + 바로 아래 "자세히 보기"(details) ── */
+.map-summary {
+  display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: var(--space-2); align-items: start;
+  margin: 0; padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--accent-line); border-radius: var(--radius-lg); background: var(--accent-soft);
+  font-family: var(--font-sans); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); word-break: keep-all;
+}
+.map-summary__icon { width: 18px; height: 18px; margin-top: 2px; fill: none; stroke: var(--accent); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.map-summary b { color: var(--c-text-strong); }
+.map-consent__agree { display: grid; gap: 0; }
+.map-more { margin: 0; }
+.map-more__toggle {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  min-height: var(--tap-min); padding: 0 var(--space-2); margin-left: calc(22px + var(--space-3) - var(--space-2)); /* 체크 글 첫머리와 맞춤 */
+  border-radius: var(--radius-sm, 6px);
+  font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--accent);
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--accent-line);
+  cursor: pointer; list-style: none;
+}
+.map-more__toggle::-webkit-details-marker { display: none; }
+.map-more__toggle::marker { content: ""; }
+.map-more__toggle:hover { text-decoration-color: currentColor; }
+.map-more__toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.map-more__chev { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform var(--dur-base) var(--ease-out); }
+.map-more[open] .map-more__chev { transform: rotate(180deg); }
+.map-more__close, .map-more[open] .map-more__open { display: none; }
+.map-more[open] .map-more__close { display: inline; }
+.map-more__body { display: grid; gap: var(--space-3); margin-top: var(--space-2); }
+.map-notice__row--purpose dd { color: var(--c-text); }
+@media (prefers-reduced-motion: reduce) { .map-more__chev { transition: none; } }
+
+/* ── 3. 면책 문구가 빠진 자리: 결과 9곳은 마지막 말(say--close / 만신 기준 줄) 바로 뒤에 공유 줄이 붙는다 → 읽을거리와 행동 사이 간격을 지킨다 ── */
+.result .say--close + .result-more { margin-top: var(--space-8); }
+.result .saju-basis + .result-more { margin-top: var(--space-6); }

@@ -120,7 +120,6 @@
 .pv-go { margin-top: var(--space-4); }
 /* 7 보조 글자 링크 두 개, 8 면책 */
 .pv-links { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-1) var(--space-5); margin-top: var(--space-5); }
-.preview .disclaimer-slot { margin-top: var(--space-8); }
 
 /* ── 2. 대조표 (미리보기 맛보기 · 새 장 1쪽 공용, 늘 종이 위) — 진짜 table + th. 막대 값은 숫자로도 ── */
 .cross-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: 1.35; color: var(--ink); text-indent: 0; }

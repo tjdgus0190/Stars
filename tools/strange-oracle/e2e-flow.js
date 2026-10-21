@@ -3,7 +3,7 @@
 //       node tools/strange-oracle/mock-server.js --port 8788 --mode off   (13단계: 정적 배포 폴더 dist/public)
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-flow.js [reduced|motion]
 // 결과: 콘솔 PASS/FAIL + tools/strange-oracle/out/p8<r|m>-*.png, result.txt
-const { launch } = require("./cdp.js");
+const { launch, googleCount } = require("./cdp.js");
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
@@ -486,7 +486,10 @@ function paidSentences() {
   check("주소 해시에 입력값 없음(화면 이름만)", /^#?[a-z-]*$/.test(await ev("location.hash")));
   check("localStorage·쿠키 0", (await ev("localStorage.length")) === 0 && (await ev("document.cookie")) === "");
   const ext = b.log.requests.filter((r) => !r.includes("127.0.0.1:") && !r.includes("cdn.jsdelivr.net") && !r.startsWith("GET data:") && !r.startsWith("GET blob:") && !r.includes("about:blank"));
-  check("외부 요청 = jsdelivr뿐", ext.length === 0, ext.join(" | "));
+  // (19-5) GA4 gtag.js(googletagmanager, 시험 ID)는 부르되 cdp.js가 막는다 → 막힌 구글 요청은 외부 전송이 아니다
+  const ga = ext.filter((r) => /^GET https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-TEST12345$/.test(r));
+  const gc = googleCount();
+  check("외부 요청 = jsdelivr뿐 (+ 막힌 gtag.js, 나간 구글 요청 0)", ext.length === ga.length && gc.leaked === 0 && gc.blocked >= ga.length, `gtag ${ga.length}건 · ${JSON.stringify(gc)}` + (ext.length > ga.length ? " · " + ext.filter((r) => !ga.includes(r)).join(" | ") : ""));
   check("콘솔 오류 없음", b.log.errors.length === 0, b.log.errors.join(" | "));
 
   fs.mkdirSync(OUT, { recursive: true });

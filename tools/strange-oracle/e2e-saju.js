@@ -87,7 +87,7 @@ function sog1(c) {
   log.requests.length = 0;
   await fresh();
   const src = (await ev("document.documentElement.outerHTML")).replace(/<!--[\s\S]*?-->/g, ""); // 마크업 주석은 designer F6 정리 대상
-  check("7: 첫 화면 소스에 adsbygoogle·googletag·ads.js·잠금 버튼 0건", !/adsbygoogle|googletag|common\/ads\.js|data-js="unlock|book-unlock/.test(src));
+  check("7: 첫 화면 소스에 adsbygoogle·googletag(광고)·ads.js·잠금 버튼 0건 (19-5: GA4 gtag.js의 googletagmanager는 허용)", !/adsbygoogle|googletag(?!manager)|common\/ads\.js|data-js="unlock|book-unlock/.test(src));
   const adCopy = (src.match(/[^>]{0,30}광고 한 편[^<]{0,10}/g) || []);
   check("7: 첫 화면 소스에 '광고 한 편' — 남은 곳은 data.js 문구(F5 copywriter)뿐", adCopy.every((t) => /책|열려요|열리고/.test(t)), adCopy.length + "곳(F5): " + adCopy.join(" / "));
   await sleep(300);
@@ -122,8 +122,8 @@ function sog1(c) {
     return { undef: (t.match(/.{0,30}(undefined|NaN|\\{\\w+\\}).{0,10}/) || [''])[0], chars: [...s.querySelectorAll('[data-js=saju-wonguk] .wonguk__char b')].map(b => b.textContent).join(''),
       sum: [...s.querySelectorAll('[data-js=saju-ohaeng-count]')].reduce((a, b) => a + Number(b.textContent), 0), s4: !s.querySelector('[data-js=saju-s4]').classList.contains('is-hidden'),
       s1: s.querySelector('[data-js=saju-s1-body]').textContent.length, s5: s.querySelector('[data-js=saju-s5]').textContent.length, title: s.querySelector('[data-js=result-title]').textContent,
-      next: s.querySelector('[data-js=result-next-door]').dataset.room, disc: s.querySelector('[data-js=disclaimer-slot]').textContent.length }; })()`);
-  check("4·5: 결과 빈칸·undefined 0, 원국 8글자, 오행 합 8, 대운 단락, S1·S5 채움, 면책", !res.undef && res.chars.length === 8 && res.sum === 8 && res.s4 && res.s1 > 500 && res.s5 > 50 && res.disc > 0, JSON.stringify(res));
+      next: s.querySelector('[data-js=result-next-door]').dataset.room, disc: !s.querySelector('[data-js=disclaimer-slot]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(s.textContent) }; })()`);
+  check("4·5: 결과 빈칸·undefined 0, 원국 8글자, 오행 합 8, 대운 단락, S1·S5 채움, 면책 문구 0(19-2)", !res.undef && res.chars.length === 8 && res.sum === 8 && res.s4 && res.s1 > 500 && res.s5 > 50 && res.disc === true, JSON.stringify(res));
   check("떡밥: 다음 문 = Ⅱ 오검", res.next === "ogham");
   const st1 = await ev("JSON.parse(sessionStorage.getItem('strange-oracle'))");
   check("6장: visits.saju = 결과 코드·원형만, profile.gender = m", JSON.stringify(Object.keys(st1.visits.saju).sort()) === '["archetype","code"]' && st1.profile.gender === "m");
@@ -175,7 +175,7 @@ function sog1(c) {
     const ss = await ev("(() => { const o = {}; for (let i = 0; i < sessionStorage.length; i++) { const k = sessionStorage.key(i); o[k] = sessionStorage.getItem(k); } const s = JSON.parse(o['strange-oracle']); delete s.profile; o['strange-oracle'] = JSON.stringify(s); return JSON.stringify(o); })()");
     const ls = await ev("JSON.stringify(Object.assign({}, localStorage)) + '|' + document.cookie");
     const reqs = log.requests.map((r) => (typeof r === "string" ? r : JSON.stringify(r))).filter((u) => !/r=\d+/.test(u)).sort().join("\n");
-    const gtag = await ev("JSON.stringify(window.dataLayer || [])");
+    const gtag = (await ev("JSON.stringify(window.dataLayer || [])")).replace(/"\d{4}-\d\d-\d\dT[^"]*"/g, '"<시각>"'); // (19-5) gtag("js", new Date())의 시각만 빼고 비교
     runs[g] = { card, code, ss, ls, reqs, gtag };
   }
   const same = (k) => runs.m[k] === runs.f[k] && runs.f[k] === runs.x[k];

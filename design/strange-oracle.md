@@ -3702,3 +3702,120 @@ JS·data*.js는 고치지 않았다. 아래 7절(광고)에서 "지금 지운 �
   - **6길 × 2 모두 책·미리보기·결제 전 화면이 style-book.css 적용 전에 보인 프레임 0.** 늦춘 판에서도 1.5초 동안 이전 화면(입구·나의 이야기, style.css로 다 꾸며짐)에 머물다 load 뒤 10~30ms 안에 바뀜. 중간·끝 스크린샷으로 확인(스타일 없는 화면 0).
   - **판단 기록(developer·운영자):** 주소로 바로 들어올 때는 받는 동안 입구 화면이 먼저 보인다(지연 0에서 약 0.2~0.4초, 느린 망이면 받는 시간만큼). 스타일이 깨진 화면은 아니고 입구가 잠깐 보였다 넘어가는 것이다. 18단계 전(3dface5)에도 그랬는지는 미확인. 거슬리면 주소 직접 진입 때 입구 대신 빈 밤 바탕(로딩)을 두는 안이 있으나 이번 범위 밖이라 고치지 않음.
   - 측정 스크립트·스크린샷은 저장소 밖(designer 작업 폴더)에 두었다(tools/는 이번 담당 범위 밖).
+
+## 19단계 (K1): 입구 바로 가기 띠 · 지도 동의 화면 접기 · 면책 빠진 자리 (디자인 · 2026-10-18)
+
+기준: specs/strange-oracle.md 「19단계」 19-2·19-3·19-4·19-7의 5·19-8 K1, 결정 124·125, CLAUDE.md 6장 예외 2의 2026-10-18 줄·8장 strange-oracle 면책 예외.
+반영 위치: index.html 입구 끝 `nav.hub-tabs`(새), `#screen-map-consent`(map-tpl 안) 고지 구획, style.css 맨 끝 「(19단계 K1)」 블록과 면책 규칙 4줄 삭제. JS·data*.js·style-book.css는 고치지 않았다.
+새 문구는 모두 `[초안]` 견본이다(아래 5절 키). off 배포판에도 띠가 보이므로 build-dist의 "[초안] 남음(index.html 3)"은 K3 copywriter → [초안] 정리 뒤 0이 된다.
+
+### 0. 디자인 방향
+- 띠는 **길 안내판**이지 메뉴판이 아니다. 밤 바탕에 청동 실선 한 줄, 청동빛 선 그림 + 짧은 이름. 주 버튼(고대의 문)보다 눈에 덜 띄게: 채운 바탕·강조색 글자 없음.
+- 광고·가격·결제 말 0. 띠 안 글자는 칸 이름 4개와 공유 완료 줄뿐.
+- 동의 화면은 "읽을 것이 한 덩어리"였던 고지를 **요약 한 줄 → 동의 → 자세히 보기**로 줄였다. 고지 항목은 하나도 지우지 않고 같은 화면 DOM 안에 접어 둔다(6장 예외 2의 2026-10-18 줄).
+
+### 1. 입구 바로 가기 띠 `nav.hub-tabs` (결정 125, 19-4)
+
+| 요소 | 모양 |
+|---|---|
+| 자리 | `#screen-hub` 맨 끝 자식. `position: fixed; bottom: 0`, 가운데 최대 480px(PC에서도 입구 열과 같은 폭). 입구가 숨으면(다른 화면) 함께 숨는다 — 방·책·지도 화면에 띠 0 |
+| 높이 | 칸 64px(`--tabs-h`) + 위 테두리 1px + `env(safe-area-inset-bottom)`(아이폰 아래 막대만큼 바탕이 늘어나고 칸은 그 위) |
+| 바탕 | `oklch(0.12 0.035 hall / 0.97)` 단색 + 위 청동 실선(--bronze 45%) + 위쪽 그림자. blur·filter 0 |
+| 칸 | `<button class="hub-tab">` = 그림 24px(인라인 SVG 선 1.6, --bronze-hi) + 이름 13px(--c-text). 누름 영역 = 칸 전체(높이 64 ≥ 44) |
+| 칸 나누기 | grid 열 자동, 칸 하나 최대 120px, 가운데 모음. **보이는 칸 수에 따라 저절로**: 4칸 360px = 86px씩 · 480px = 116px씩, 3칸 = 115/120px, 2칸 = 120px 두 개 가운데, **1칸(off·0/7 공유만) = 그림과 이름을 한 줄로 눕힌 200px 칸**(14px). `hidden` 칸·걷어 낸 칸은 자리도 차지하지 않는다 |
+| 포커스 | `:focus-visible` 강조색 2px 안쪽 테두리(-3px). 탭 순서 = 공유 → 나의 이야기 → 책 → 지도 |
+| 누름 | `:active` 흰빛 6% 바탕. 선택됨 상태 없음(탭 목록 아님) |
+| 공유 완료 줄 | `share-link-status`(띠 nav 안, 칸 줄 위). 보일 때 띠 바로 위 8px에 뜨는 말풍선(--c-surface-3, 둥근 알약, 14px). 띠 높이는 그대로. 클립보드가 막혀 주소가 나오는 경우 두 줄까지 감싼다 |
+| 입구 끝 여백 | `.hub.is-active` 아래 여백 = 64 + 64(띠) + 안전 영역. 쿠키 줄·지우기 안내·FAQ 끝이 띠에 가리지 않는다(측정: 바닥글 끝과 입구 끝 사이 128px) |
+| 토스트 | 입구가 보일 때 `.toast`를 띠 위(64 + 16 + 안전 영역)로 올린다 → 지도 칸 7/7 전 안내가 띠에 가리지 않음 |
+
+- **칸 그림(직접 그린 선 그림, 24×24)**: 공유 = 세 점 이은 공유 표시 · 나의 이야기 = 귀 접힌 종이 + 두 줄 · 한 권의 책 = 세운 책 + 표지 위 인장 동그라미 · 친구 지도 = 오각형 + 점 셋(지도 화면 오각형과 같은 꼴, 지금 `map-hub-link` 그림과 같은 결).
+- **첫 화면 문 가림 0**: 360×640(상단 막대 포함)에서 띠 위 끝 575px. 이를 위해 **높이 700px 이하 화면에서는 문을 줄인다**(`--gw` 184 → 144px, 입구 머리 위 여백 0 — 16단계 H5 지도 띠 규칙과 같은 값). 측정: 0/7(만신 대문, 지붕 포함) 문 아래 끝 559px, 3/7·7/7 546px → 띠와 16~29px 떨어짐. 480×800은 줄이지 않고 문 아래 끝 666~681px, 띠 735px. 701~760px 높이는 줄이지 않아도 문 아래 끝(약 625px)이 띠 위.
+  - test·map on에서 입구 위 초대 띠(`map-slot-hub`)까지 함께 뜨는 낮은 화면은 이번에 재지 못했다(지름길로 초대 상태를 만들지 않음) → **K4에서 잼**.
+- **숨김 (CSS만으로 동작)**:
+  - 입구 안 글 칸(이어가기 코드 `resume-input`)에 초점 → `.hub:has(input:focus)`로 띠가 아래로 빠진(transform) 뒤 `visibility: hidden`(Tab으로 닿지 않음). 초점이 빠지면 돌아옴. 측정(초점 흉내 켬): 초점 때 hidden, 뺀 뒤 visible.
+  - 문 열리는 연출(`.hub-cta.is-entering` 또는 `.door.is-entering`) 중 같은 방식으로 숨김. 측정: hidden.
+  - 그 밖에 JS가 숨겨야 할 때는 `nav.hub-tabs`에 `.is-hidden`.
+- **나타남**: 입구가 떠오르는 700ms 뒤 300ms 동안 아래에서 올라옴(`translate`, 숨김의 transform과 겹치지 않음). 입구 화면 전환 효과(`screen-in`, transform)가 끝난 뒤에도 남아 있으면(fill both) 고정 위치의 기준이 입구 화면이 되어 띠가 페이지 맨 아래로 가 버린다 → **입구만** 애니메이션 끝 효과를 남기지 않게 했다(`#screen-hub.is-active { animation-fill-mode: backwards }`, 보이는 모양 차이 없음).
+- **움직임 줄이기**: 나타남·숨김 이동 0(base.css가 애니메이션을 즉시 끝냄 + 띠 transition none). 숨김은 바로 사라짐.
+- **정적 검토 모드**(`body.is-static-preview`): 띠를 고정하지 않고 입구 맨 끝에 놓는다.
+- 넘침: 360·480 모두 가로 넘침 0, 칸 이름 잘림 0("한 권의 책"·"나의 이야기" 5자 기준, 4칸 360px).
+
+### 2. 띠 칸과 off 걷어 내기 (developer)
+
+| 칸 | data-js / data-tab | 구획 | 보이는 때 (JS) | off 원본 대비 |
+|---|---|---|---|---|
+| 공유하기 | `share-link-copy` / `share` | 없음(늘 있음) | 늘 | — |
+| 나의 이야기 | `hub-tab-story` / `story`, `data-go="story"` | 없음 | 1/7 이상(0/7이면 `hidden`) | — |
+| 한 권의 책 | `hub-tab-book` / `book` | `<!-- pay:on -->` | test·live 이고 1/7 이상 | build-dist off는 구획째 걷어 냄. **원본을 off로 그대로 열 때를 위해 app.js `gone` 목록에 `js("hub-tab-book")`를 더한다**(19-4) |
+| 친구 지도 | `hub-tab-map` / `map` | `<!-- map:on -->` | map on일 때 | build-dist off는 구획째 걷어 냄. map off 원본에서는 기존 지도 걷어 내기와 같은 곳에서 함께 지운다 |
+
+- 칸은 모두 `<button type="button">`. `data-tab` 값이 곧 `so_tab`의 `tab` 값이다(share·story·book·map, 정해 둔 낱말).
+- 공유 칸은 share-buttons가 클릭을 받는다(`data-js="share-link-copy"`). `so_tab {tab:"share"}`는 같은 클릭에서 `data-tab`을 읽어 따로 보낸다. 완료 줄은 nav 안 `share-link-status` 하나(공유 칸에서 위로 올라가 처음 만남) → 3/7 줄(`hub-half`) 완료 줄과 섞이지 않음. 측정: 띠 공유 칸을 누르면 띠 완료 줄만 보이고 3/7 쪽은 숨김 그대로.
+- 띠 전체: `data-js="hub-tabs"`, `aria-label` = `data-aria="hub.tabs.aria"`.
+
+### 3. 지도 동의 화면 `#screen-map-consent` (결정 124, 19-3)
+
+순서(위→아래): 제목 · (down 띠) · 별명 칸 · 아이콘 24개 — **그대로** → ① 한 줄 요약 → ② 동의 체크 → ③ "자세히 보기"(체크 바로 아래 줄) → (unsure 블록) → 보내기·보내지 않기 — 그대로.
+
+| 요소 | 마크업 | 모양 |
+|---|---|---|
+| ① 요약 | `p.map-summary` > 방패 그림 18px + `span[data-js=map-consent-summary]` | 강조색 옅은 바탕(--accent-soft)·옅은 강조 테두리, 둥근 16px, 14px 글. 원형 이름 두 개는 굵게(`b`). 360px 3줄 |
+| ② 동의 | `label.check.map-agree` + `input[data-js=map-agree]` (처음 꺼짐, 그대로) | 기존 체크 모양 |
+| ③ 자세히 보기 | `details.map-more[data-js=map-more]` > `summary.map-more__toggle` | 체크 글 첫머리에 맞춰 들여 쓴 강조색 굵은 14px 밑줄 글 + 아래 꺾쇠. 누름 높이 44px. 펼치면 글자가 "접기"(`.map-more__close`)로 바뀌고 꺾쇠가 위로(움직임 줄이기에서 회전 이동 0). 포커스 = 강조색 2px 테두리. 기본 표지(marker)는 숨김 |
+| 펼친 안 | `div.map-more__body` > `dl.map-notice`(기존 표) + `p.map-optional` | 표 맨 위 줄이 **이용 목적**(`map-notice__row--purpose`, 글 --c-text) → 보내는 것(강조 바탕, `map-send-arch` 그대로) → 보내지 않음 → 보는 사람(주인/친구 역할별 그대로) → 저장 위치 → 보관 기간 → 지우는 법. 표 아래 선택 사항 줄. 항목 8개 |
+
+- 접혀 있어도 8항목 모두 이 화면 DOM 안(`details` 안)에 있다. 펼침 상태는 저장하지 않는다 — 화면에 들어올 때마다 접힌 채(JS: 동의 화면을 열 때 `map-more`의 `open`을 지움).
+- 키보드: `summary`가 Tab으로 닿고 Enter/Space로 펼침(측정: Enter로 open=true). 화면 읽기는 `details/summary` 기본(펼침/접힘 상태 읽힘).
+- 측정(360·480, 견본 글): 접힘 때 보이는 고지 dt 0 · 펼침 때 7 + 선택 사항 줄, 가로 넘침 0 둘 다. "자세히 보기"는 체크 줄 바로 아래(체크 아래 끝 = summary 위 끝).
+- 체크 전 [보내기] 비활성은 그대로(JS).
+- **시험 기대값이 바뀐다(K2-g)**: e2e-map 125줄 "합격9 고지 6항목 + 선택 사항 줄 보임"은 접힘 때문에 실패한다(이번 실행에서도 실패). 19-3 검사로 바꾼다: 접힌 상태에서 `#screen-map-consent .map-notice dt` 7개 + `.map-optional`가 DOM에 있음, `details.map-more`가 처음 닫힘, 요약 줄에 원형 이름·"90일", 펼친 뒤 모두 보임·넘침 0.
+
+### 4. 면책 문구가 빠진 자리의 여백 (결정 123, 19-2)
+
+마크업의 `disclaimer-slot` 9곳·`map-disclaimer` 2곳·스크립트 줄은 developer가 지운다. designer는 여백만 정했다.
+
+| 곳 | 빠진 뒤 이어지는 것 | 여백 규칙 |
+|---|---|---|
+| 방 결과 6곳(오검·별·데칸·촐킨·룬·시빌라) | 안내자 마지막 말 `say--close` → 공유 줄 `result-more` | `.result .say--close + .result-more { margin-top: 32px }` — 읽을거리와 행동 줄 사이를 한 단 띄운다(없으면 say--close 아래 24px에 붙음) |
+| 만신 결과 | 기준 한 줄 `saju-basis` → `result-more` | `.result .saju-basis + .result-more { margin-top: 24px }` — 작은 각주 줄과 공유 줄을 나눈다 |
+| 책 목차 끝 | 법적 고지 링크 `book-home__legal`이 마지막 | 추가 규칙 없음(기존 위 16px, 화면 아래 여백 64px) |
+| 책 끝 쪽(app-book.js) | 쪽 끝 장식 `page-end` | 추가 규칙 없음 |
+| 미리보기(7/7, test·live) | 보조 링크 `pv-links`가 마지막(순서 1~7) | 추가 규칙 없음. style-book.css `.preview .disclaimer-slot` 줄은 developer가 지움 |
+| 지도 화면 · 친구 결과 | 관리 접기 → "나의 이야기로" / "나도 친구 지도 만들기" → "나의 이야기로" | 그리드 간격 20px 그대로, 추가 규칙 없음 |
+
+- style.css에서 지운 규칙: `.disclaimer-slot`(결과), `.book-page .disclaimer-slot, .book-page .disclaimer`, `.book-home .disclaimer-slot`, `.map-disclaimer:empty`. base.css·docs/design-system.md의 공통 `.disclaimer`는 그대로(19-2).
+
+### 5. developer 요청 (K2-c·d, JS) · data 키 (K3 copywriter)
+1. **띠 연결**: 2절 표의 보이기 조건. `hub-tab-story` → 기존 `data-go="story"` 처리. `hub-tab-book` → `hub-book-go`와 같은 곳(18-5 상태표). `hub-tab-map` → 19-4 표(키 있음 → 지도 보기 / 없음·7/7 → 나의 이야기의 지도 만들기 자리 / 없음·7/7 전 → 토스트 `map.tabLocked`). 모든 칸 `so_tab {tab: data-tab}`. `applyText`가 nav의 `data-aria`를 채운다.
+2. **gone 목록**: off 걷어 내기에 `js("hub-tab-book")` 더함. 지도 칸은 map off 걷어 내기와 함께.
+3. **map-hub-link 지우기**: 지도 칸과 같은 일이므로 map-tpl의 `<button class="map-hub-link" data-js="map-hub-link">`와 그 JS를 developer가 함께 지운다(이 마크업 줄 지우기는 designer가 넘김. 초대 띠 `map-invite`는 그대로). 남는 `.map-hub-link` CSS는 K4에서 정리.
+4. **동의 화면**: `map-consent-summary`를 `map.consent.summary`로 채움(`fillInto`, `{main}`·`{sub}` = `map-send-arch`와 같은 원형 이름, 굵게). 화면을 열 때마다 `map-more.open = false`.
+5. **data 키(새, [초안] 견본 = index.html 글)**:
+   - data.js: `hub.tabs.aria`("바로 가기"), `hub.tabs.share`, `hub.tabs.story`, `hub.tabs.book`.
+   - data-map.js: `map.tab`(지도 칸 이름), `map.tabLocked`(토스트), `map.consent.summary`({main}·{sub}), `map.consent.more`("자세히 보기"), `map.consent.less`("접기"), `map.consent.purposeLabel`("이용 목적"), `map.consent.purpose`. 바뀌는 키: `map.consent.agree`(19-3의 5).
+   - 키 이름은 developer가 정해도 된다. 바꾸면 index.html `data-t`도 함께.
+
+### 6. 텍스트 길이 제한 (copywriter용)
+| 요소 | 최대 | 넘으면 |
+|---|---|---|
+| 띠 칸 이름 4개 | 5자(공백 포함) | 4칸 360px에서 말줄임(…) |
+| 띠 `aria-label` | 10자 | 화면에 안 보임 |
+| 지도 칸 토스트 `map.tabLocked` | 30자 | 토스트 2줄 |
+| 동의 요약 `map.consent.summary`(원형 이름 두 개 포함) | 60자 | 360px 4줄(3줄 권장) |
+| "자세히 보기" / "접기" | 6자 / 4자 | 2줄 |
+| 이용 목적 라벨 / 본문 | 6자 / 60자 | 라벨 칸 2줄 / 본문 4줄(허용) |
+| 동의 문구 `agree` | 50자 | 360px 3줄(허용) |
+
+### 7. 합격 기준 대조 (19-7의 5·4, 견본 단계)
+- 측정은 designer 작업 폴더의 일회용 스크립트(cdp.js 사용, 견본 글을 채워 잼). 실제 문구·JS 연결 뒤 상태표(0/7·1/7·3/7·7/7 × off/test × map on/off)·대비·14세 막기 길·초대 띠와 함께 뜬 낮은 화면은 **K4에서** 잰다.
+- 360×640: 문 전체 보임(문 아래 끝 546~559 < 띠 575). 480×800: 666~681 < 735.
+- 칸 1·2·3·4개 모양 확인, 넘침 0, 이름 잘림 0, 포커스 표시 있음(키보드 Tab), 글 칸 초점·문 열림 때 숨김, 다른 화면에서 띠 0, 공유 완료 줄이 띠 안에서 뜸(3/7 줄 안 뜸).
+- 동의 화면: 접힘/펼침, Enter로 펼침, 넘침 0, 8항목 DOM 안.
+
+### 8. 시험 (K1 뒤, build-dist → 8788 test 재시작)
+- build-dist: dist 생성됨. 실패는 **⑭(privacy ◯◯) 하나뿐**(developer가 넣은 새 가드, 19-5 기대대로). [초안] 남음: index.html 3(띠 이름 2·aria — K3 뒤 정리), data.js 6(developer 새 키).
+- e2e-flow reduced 126/1 — 실패 1 "외부 요청 = jsdelivr뿐"(GA4 gtag.js가 막힌 채 요청됨, 19-5에 따른 기대값 변경 = K2-g). 띠 때문에 실패한 항목 0.
+- e2e-map 77/3 — 실패 3: "합격9 고지 6항목 보임"(3절, 접힘으로 기대값 변경) · "친구 카드 아래 면책 문구"·"지도 아래 면책 문구"(19-2로 뒤집을 기대값). 동의 → 보내기 흐름(체크·보내기)은 통과.
+- 구글 요청: 두 실행기 모두 "막지 않고 나간 구글 요청 0건".
+- 작업 사본에는 developer K2 진행분(app.js·map.js·data.js·cdp.js·mock-server.js·build-dist.js 등)이 함께 있었다.

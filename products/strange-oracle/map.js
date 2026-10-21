@@ -348,7 +348,6 @@
     doc.body.prepend(sprite);
     const cardTpl = take("map-card");
     const invite = take("map-invite");
-    take("map-hub-link"); // 입구 작은 링크는 app.js가 지도 파일 없이 붙인다
     const consent = take("screen-map-consent");
     const mapScr = take("screen-map");
     const friendScr = take("screen-map-friend");
@@ -393,8 +392,6 @@
     ctx.addScreen("map-consent", consent);
     ctx.addScreen("map", mapScr);
     ctx.addScreen("map-friend", friendScr);
-    ctx.Disclaimer.mount(js("map-disclaimer", mapScr));
-    ctx.Disclaimer.mount(js("map-friend-disclaimer", friendScr));
 
     // ═════════ 지도 카드 (결말·나의 이야기) ═════════
     let cardBusy = ""; // birth | young | down | loading — 행동 중에만. 비면 기본 상태
@@ -653,6 +650,10 @@
       sendBtn.textContent = M.consent.sendBtn;
       sendBtn.removeAttribute("aria-busy");
       fillInto(js("map-send-arch", consent), M.consent.sendArch, { main: archName(code.main), sub: archName(code.sub) });
+      // (19-3, 결정 124) 한 줄 요약(원형 이름 굵게) · 자세히 보기는 화면에 들어올 때마다 접힘(펼침 상태 저장 안 함)
+      fillInto(js("map-consent-summary", consent), M.consent.summary, { main: archName(code.main), sub: archName(code.sub) }, ["main", "sub"]);
+      const more = js("map-more", consent);
+      if (more) more.open = false;
       fillInto(js("map-consent-who-friend", consent), M.consent.whoFriend, { owner: mem.owner ? mem.owner.nick : "" }, ["owner"]);
       syncSend();
       ctx.go("map-consent");

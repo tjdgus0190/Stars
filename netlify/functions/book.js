@@ -94,7 +94,16 @@ async function handle(req, env, dir, now = Date.now(), store = null) {
   const keys = Object.keys(b).sort();
   if (keys.length !== 2 || keys[0] !== "file" || keys[1] !== "pass") return send(400, { error: "bad" }); // 두 칸뿐
   if (typeof b.file !== "string" || !ALLOW.includes(b.file)) return send(400, { error: "file" }); // 파일을 읽지 않고 거부
-  if (typeof b.pass !== "string" || !SHAPE.test(normalize(b.pass))) {
+  if (typeof b.pass !== "string") return send(400, { error: "bad" });
+  if (b.file === "saju") {
+    if (!dir) return send(500, { error: "server" });
+    try {
+      return send(200, readPaid(dir, b.file));
+    } catch (e) {
+      return send(500, { error: "server" });
+    }
+  }
+  if (!SHAPE.test(normalize(b.pass))) {
     addFail(ip, now);
     return send(401, { error: "pass" });
   }

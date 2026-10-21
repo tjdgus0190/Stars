@@ -5,7 +5,7 @@
 // 결제 전 화면·틀린 코드·off 배포판 DOM 0은 e2e-pay.js가 본다.
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-book.js
 // 결과: 콘솔 PASS/FAIL + tools/strange-oracle/out/e2e-book.txt (+ out/book-variety-e2e.txt)
-const { launch } = require("./cdp.js");
+const { launch, googleCount } = require("./cdp.js");
 const fs = require("fs");
 const path = require("path");
 const BASE = "http://127.0.0.1:8788/products/strange-oracle/index.html";
@@ -289,7 +289,7 @@ const STUB_ADS = `(function () {
   await sleep(200);
   check("옛 영수증 칸 → 지우고 목차로", (await active()) === "screen-report" && (await ev("sessionStorage.getItem('strange-oracle-receipt')")) === null);
   const nReqPay = b.log.requests.length;
-  await b.goto(BASE + "?pay=success&paymentKey=PK_TEST&orderId=ORDER_TEST&amount=3900#hub");
+  await b.goto(BASE + "?pay=success&paymentKey=PK_TEST&orderId=ORDER_TEST&amount=5900#hub");
   await sleep(300);
   check("옛 결제 복귀 주소: query 지움·/api 요청 0", (await ev("location.search")) === "" && !b.log.requests.slice(nReqPay).some((r) => /\/api\//.test(r)));
 
@@ -373,10 +373,10 @@ const STUB_ADS = `(function () {
   await fresh(["saju"], "#report", PROFILE, false);
   const rb = await rows();
   check("18-2 방 1개: 새 장 need-room · 상태 한 줄 = book.toc.needCross · 누르면 안내만", rb.cross === "need-room" && (await ev("document.querySelector('[data-js=book-chapter][data-chapter=cross] [data-js=book-chapter-state]').textContent === TEXT.book.toc.needCross")), JSON.stringify(rb));
-  check("18-5 1/7 결제 전: 맨 위 띠 숨김 · 맨 아래 작은 글자 버튼 하나(btn--text, {price} 채움)", await ev("document.querySelector('[data-js=book-preview-band]').hidden && !document.querySelector('[data-js=book-buy-row]').hidden && document.querySelectorAll('[data-js=book-buy]').length === 1 && document.querySelector('[data-js=book-buy]').classList.contains('btn--text') && !/\\{price\\}/.test(document.querySelector('[data-js=book-buy]').textContent) && /3,900/.test(document.querySelector('[data-js=book-buy]').textContent)"));
+  check("18-5 1/7 결제 전: 맨 위 띠 숨김 · 맨 아래 작은 글자 버튼 하나(btn--text, {price} 채움)", await ev("document.querySelector('[data-js=book-preview-band]').hidden && !document.querySelector('[data-js=book-buy-row]').hidden && document.querySelectorAll('[data-js=book-buy]').length === 1 && document.querySelector('[data-js=book-buy]').classList.contains('btn--text') && !/\\{price\\}/.test(document.querySelector('[data-js=book-buy]').textContent) && /5,900/.test(document.querySelector('[data-js=book-buy]').textContent)"));
   await b.goto(BASE + "#hub");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
-  const hubPrice = await ev("/3,900|\\d+원/.test(document.querySelector('[data-js=hub-book]').textContent)");
+  const hubPrice = await ev("/5,900|\\d+원/.test(document.querySelector('[data-js=hub-book]').textContent)");
   check("18-5 1/7 입구 카드: some · 버튼 '목차 보기'", await ev("document.querySelector('[data-js=hub-book]').dataset.state === 'some' && document.querySelector('[data-js=hub-book-go]').textContent === TEXT.hub.book.goToc"));
   out.push(`INFO  18-12의 8 입구 카드 가격 0: ${hubPrice ? "아직 가격 있음(hub.book.desc — copywriter J3가 가격을 뺌)" : "가격 0"}`);
   console.log(out[out.length - 1]);
@@ -446,13 +446,13 @@ const STUB_ADS = `(function () {
   const api7 = nApi0(), sdk7 = sdkReq();
   await click("[data-js=story-preview-go]");
   await waitFor("document.querySelector('#screen-preview')?.dataset.state === 'ready' && document.querySelector('.screen.is-active')?.id === 'screen-preview'", 8000);
-  const pv = JSON.parse(await ev(`JSON.stringify((() => { const s = document.querySelector('#screen-preview'); const y = (el) => el ? el.getBoundingClientRect().top + scrollY : -1; const seq = [s.querySelector('.pv-head'), s.querySelector('.pv-toc'), s.querySelector('.pv-sample'), s.querySelector('.pv-diff'), s.querySelector('.pv-once'), s.querySelector('[data-js=preview-go]'), s.querySelector('.pv-links'), s.querySelector('[data-js=disclaimer-slot]')].map(y);
+  const pv = JSON.parse(await ev(`JSON.stringify((() => { const s = document.querySelector('#screen-preview'); const y = (el) => el ? el.getBoundingClientRect().top + scrollY : -1; const seq = [s.querySelector('.pv-head'), s.querySelector('.pv-toc'), s.querySelector('.pv-sample'), s.querySelector('.pv-diff'), s.querySelector('.pv-once'), s.querySelector('[data-js=preview-go]'), s.querySelector('.pv-links')].map(y);
     return { seq: seq.every((v, i) => v >= 0 && (i === 0 || v > seq[i - 1])), title: s.querySelector('[data-js=preview-title]').textContent, toc: [...s.querySelectorAll('[data-js=preview-chapter]')].map(li => li.dataset.chapter + ':' + li.dataset.kind).join(), free: [...s.querySelectorAll('[data-js=preview-chapter][data-kind=free] [data-js=preview-chapter-tag]')].every(e => e.textContent === TEXT.book.preview.tagFree),
       open: s.querySelector('[data-js=preview-open]').children.length, drop: s.querySelector('[data-js=preview-open] p').classList.contains('has-dropcap'), firsts: [...s.querySelectorAll('[data-js=preview-first-text]')].filter(e => e.textContent.length > 10).length, cross: s.querySelectorAll('[data-js=preview-cross] [data-js=cross-row]').length, crossText: s.querySelector('[data-js=preview-cross]').querySelectorAll('.prose').length,
-      closeHidden: s.querySelector('[data-js=preview-close]').hidden, closeHas: s.querySelector('[data-js=preview-close]').children.length > 0, disc: s.querySelector('[data-js=disclaimer-slot]').textContent.length > 10, ads: s.querySelectorAll('[data-ad], .ad-slot').length, band: !s.querySelector('[data-js=preview-test-band]').classList.contains('is-hidden'),
+      closeHidden: s.querySelector('[data-js=preview-close]').hidden, closeHas: s.querySelector('[data-js=preview-close]').children.length > 0, disc: !s.querySelector('[data-js=disclaimer-slot]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(s.textContent), ads: s.querySelectorAll('[data-ad], .ad-slot').length, band: !s.querySelector('[data-js=preview-test-band]').classList.contains('is-hidden'),
       prim: s.querySelectorAll('.btn--primary').length, price: s.querySelector('[data-js=preview-go-label]').textContent, h: [...s.querySelectorAll('h1,h2,h3')].map(h => h.tagName).join(''), interest: !s.querySelector('[data-js=preview-interest]').hidden && s.querySelector('[data-js=preview-interest-text]').textContent === TEXT.book.interest.sibyl.love,
       bad: /undefined|\\{(who|n|price|arch|sub)\\}/.test(s.textContent), wide: document.documentElement.scrollWidth <= innerWidth }; })())`));
-  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~8 · 14장 목차(무료 2 글자 표지) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 14 && pv.toc.startsWith("open:free,saju:paid") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /3,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
+  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 14장 목차(무료 2 글자 표지) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 14 && pv.toc.startsWith("open:free,saju:paid") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /5,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
   // 유료 문장 지문(build-dist와 같은 규칙: 30자 이상 문자열의 가운데 60자, 공개 data*.js와 같은 문자열은 뺌)이 미리보기 화면 HTML에 0
   const prints = (() => {
     const vm = require("vm");
@@ -561,7 +561,10 @@ const STUB_ADS = `(function () {
   check("13-7.11 상대·내 이름·생일·관계 유형·옛 결제 값: 요청 URL·본문·gtag 인자·storage·쿠키 0건", hits.length === 0, hits.join(","));
   check("localStorage·쿠키 0", (await ev("localStorage.length")) === 0 && (await ev("document.cookie")) === "");
   const realGoogle = b.log.requests.filter((u) => /google|doubleclick/.test(u)).map((u) => u.replace(/^\w+ /, ""));
-  check("구글 주소 요청은 모두 가로채 가짜로 답함 (실제 전송 0)", realGoogle.every((u) => ext.some((x) => x.url === u)), `${realGoogle.length}건`);
+  // (19-5) GA4 주소(googletagmanager·google-analytics)는 cdp.js가 먼저 막아 가짜 답 단계까지 오지 않는다 → 막힘으로 센다
+  const gaRe = /googletagmanager\.com|google-analytics\.com/;
+  const gc = googleCount();
+  check("구글 주소 요청은 모두 가로채 가짜로 답하거나(광고) cdp.js가 막음(GA4) (실제 전송 0)", realGoogle.filter((u) => !gaRe.test(u)).every((u) => ext.some((x) => x.url === u)) && gc.leaked === 0 && gc.blocked >= realGoogle.filter((u) => gaRe.test(u)).length, `${realGoogle.length}건 · ${JSON.stringify(gc)}`);
   const errs = b.log.errors.filter((e) => !/favicon/.test(e));
   check("콘솔 오류 0", errs.length === 0, errs.slice(0, 3).join(" | "));
 

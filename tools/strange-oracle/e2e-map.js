@@ -48,7 +48,7 @@ async function browser(port, ga) {
       if (/\/map\.js$/.test(request.url) && intercept.failMapJs) return send("Fetch.failRequest", { requestId, errorReason: "ConnectionRefused" });
       if (ga && /\/data\.js$/.test(request.url) && responseStatusCode) {
         const r = await send("Fetch.getResponseBody", { requestId });
-        const t = (r.base64Encoded ? Buffer.from(r.body, "base64").toString("utf8") : r.body).replace(/analytics:\s*\{\s*ga4:\s*""/, 'analytics: { ga4: "G-E2EMAP0001"');
+        const t = (r.base64Encoded ? Buffer.from(r.body, "base64").toString("utf8") : r.body).replace(/analytics:\s*\{\s*ga4:\s*"[^"]*"/, 'analytics: { ga4: "G-E2EMAP0001"');
         return send("Fetch.fulfillRequest", { requestId, responseCode: 200, responseHeaders: [{ name: "Content-Type", value: "text/javascript; charset=utf-8" }], body: Buffer.from(t).toString("base64") });
       }
       send("Fetch.continueRequest", { requestId });
@@ -122,7 +122,25 @@ const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStor
     await A.click(`${card()} [data-js=map-create]`);
     check("1 동의 화면", await A.waitFor("document.querySelector('.screen.is-active')?.id === 'screen-map-consent'"));
     check("합격9 별명 칸 비어 있음 · 동의 체크 꺼짐 · 아이콘 선택 없음", await A.ev("document.querySelector('[data-js=map-nick]').value === '' && !document.querySelector('[data-js=map-agree]').checked && !document.querySelector('input[name=map-icon]:checked')"));
-    check("합격9 고지 6항목 + 선택 사항 줄 보임", await A.ev("[...document.querySelectorAll('#screen-map-consent .map-notice dt')].filter((e) => e.getClientRects().length).length === 6 && !!document.querySelector('#screen-map-consent .map-optional').getClientRects().length"));
+    // (19-3, 결정 124) 접힌 동의 화면: 요약 줄 · 체크 꺼짐 · 자세히 보기 접힘 · 고지 8항목(목적 + 6 + 선택 사항)은 접혀 있어도 이 화면 DOM 안
+    const FOLD = `JSON.stringify((() => { const s = document.querySelector('#screen-map-consent'); const d = s.querySelector('[data-js=map-more]'); const sum = s.querySelector('[data-js=map-consent-summary]'); const vis = (e) => !!e && e.checkVisibility() && e.getClientRects().length > 0;
+      return { open: !!d && d.open, inDetails: !!d && d.contains(s.querySelector('.map-notice')) && d.contains(s.querySelector('.map-optional')) && !!s.querySelector('.map-notice__row--purpose') && d.contains(s.querySelector('.map-notice__row--purpose')),
+        purposeFirst: !!d && d.querySelector('.map-notice__row') === s.querySelector('.map-notice__row--purpose'), dtShown: [...s.querySelectorAll('.map-notice dt')].filter(vis).map((e) => e.textContent), optShown: vis(s.querySelector('.map-optional')),
+        sum: sum ? sum.textContent : '', sumB: sum ? sum.querySelectorAll('b').length : 0, sumVis: vis(sum), agreeOff: !s.querySelector('[data-js=map-agree]').checked, sendOff: s.querySelector('[data-js=map-send]').disabled,
+        sumTab: !!d && d.querySelector('summary').tabIndex >= 0, near: !!d && d.parentElement === s.querySelector('[data-js=map-agree]').closest('label').parentElement, wide: document.documentElement.scrollWidth <= innerWidth }; })())`;
+    const fd0 = JSON.parse(await A.ev(FOLD));
+    check("19-3 접힘: 요약 줄 보임(원형 2개 굵게·90일·1년) · 자세히 보기 접힘·체크 바로 아래 · 펼친 안 맨 앞 목적 줄 · 고지 8항목 DOM 안(보이는 고지 0) · 체크 꺼짐·보내기 비활성 · 360 넘침 0",
+      !fd0.open && fd0.near && fd0.inDetails && fd0.purposeFirst && fd0.dtShown.length === 0 && !fd0.optShown && fd0.sumVis && fd0.sumB === 2 && /90일/.test(fd0.sum) && /1년/.test(fd0.sum) && !/\{(main|sub)\}|undefined/.test(fd0.sum) && fd0.agreeOff && fd0.sendOff && fd0.wide, JSON.stringify(fd0));
+    // 키보드: summary가 Tab 순서에 있고 Enter로 펼침 · Space로 접힘 (화면 읽기·키보드 기본 동작)
+    await A.ev("document.querySelector('#screen-map-consent [data-js=map-more] summary').focus(); true");
+    const press = async (key, code, vk, text) => { await A.send("Input.dispatchKeyEvent", Object.assign({ type: "keyDown", key, code, windowsVirtualKeyCode: vk }, text ? { text } : {})); await A.send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk }); await A.sleep(150); };
+    await press("Enter", "Enter", 13, "\r");
+    const fd1 = JSON.parse(await A.ev(FOLD));
+    await press(" ", "Space", 32, " ");
+    const fd2 = JSON.parse(await A.ev(FOLD));
+    check("19-3 summary Tab 순서 · Enter로 펼침(고지 7줄 + 선택 사항 보임, 360 넘침 0) · Space로 접힘", fd0.sumTab && fd1.open && fd1.dtShown.length === 7 && fd1.optShown && fd1.wide && !fd2.open, JSON.stringify({ shown: fd1.dtShown, closedAgain: !fd2.open }));
+    await A.ev("document.querySelector('#screen-map-consent [data-js=map-more]').open = true; true");
+    check("합격9 (펼친 뒤) 고지 7항목(목적 포함) + 선택 사항 줄 보임", await A.ev("[...document.querySelectorAll('#screen-map-consent .map-notice dt')].filter((e) => e.getClientRects().length).length === 7 && !!document.querySelector('#screen-map-consent .map-optional').getClientRects().length"));
     check("합격9 보내는 원형 이름 두 개 표시", /전사|현자|연인|반항아|돌봄이|탐험가|창조자|통치자/.test(await A.text("[data-js=map-send-arch]")));
     await A.setNick("별빛토끼");
     await A.click("input[name=map-icon][value=i05]");
@@ -175,16 +193,17 @@ const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStor
     check("2 삭제 코드 SOD · 점수 40~99", /^SOD(-[0-9A-Z]{1,4}){7}$/.test(delCode) && +friendScore >= 40 && +friendScore <= 99, friendScore);
     check("2 삭제 코드는 sessionStorage del에만, localStorage 0", (await B.ev("JSON.parse(sessionStorage.getItem('strange-oracle-map')||'{}').del")) === delCode && (await B.ev("localStorage.length")) === 0);
     lsSnaps.push(await B.ev("JSON.stringify(localStorage)"));
-    check("2 친구 카드 아래 면책 문구", (await B.text("[data-js=map-friend-disclaimer]")).includes("재미로 보는 콘텐츠"));
+    check("2 (19-2) 친구 카드 화면에 면책 자리·문구 0", (await B.ev("!document.querySelector('[data-js=map-friend-disclaimer]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(document.querySelector('#screen-map-friend').textContent)")) === true);
 
     // ── 3·4. 주인 지도: 아이콘·순위·팝업, 점수 같음, 새로고침 두 번 좌표 같음
     const openMap = async () => {
       await A.goto(TEST + P);
-      await A.waitFor("!!document.querySelector('[data-js=map-hub-link]')");
-      await A.click("[data-js=map-hub-link]");
+      // (19-4) 입구 작은 링크 대신 바로 가기 띠의 지도 칸(열람 키 있음 → 지도 보기)
+      await A.waitFor("!!document.querySelector('[data-js=hub-tab-map]') && !document.querySelector('[data-js=map-hub-link]')");
+      await A.click("[data-js=hub-tab-map]");
       return A.waitFor("['ready','empty','notfound','down'].includes(document.querySelector('#screen-map')?.dataset.state) && document.querySelector('.screen.is-active')?.id === 'screen-map'", 10000);
     };
-    check("3 입구 작은 링크로 지도 다시 열기(이동·새로고침 뒤 localStorage 키)", await openMap());
+    check("3 (19-4) 바로 가기 지도 칸으로 지도 다시 열기(작은 링크 없음)(이동·새로고침 뒤 localStorage 키)", await openMap());
     check("3 친구 아이콘 1 · 순위 1 · 인원 1", (await A.ev("document.querySelectorAll('[data-js=map-node]').length")) === 1 && (await A.ev("document.querySelectorAll('[data-js=map-rank-row]').length")) === 1 && (await A.text("[data-js=map-count]")) === "1");
     check("3 순위 점수 = 친구 카드 점수", (await A.text("[data-js=map-rank-row] .map-rank__score")) === friendScore, friendScore);
     await A.click("[data-js=map-rank-row]");
@@ -193,7 +212,7 @@ const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStor
     check("13 상세 궁합 줄: test·결제 전 → 가격 없는 한 줄만", (await A.visible("[data-js=map-pop-dialog] [data-js=map-deep-free]")) && !(await A.visible("[data-js=map-pop-dialog] [data-js=map-deep-paid]")));
     check("13 지도·팝업·순위·친구 카드에 가격·결제 버튼·광고 0", !(await A.ev("[...document.querySelectorAll('#screen-map, [data-js=map-pop-dialog]')].some((s) => /\\d[\\d,]*\\s*원(?!형)/.test(s.textContent) || s.querySelector('[data-js*=pay], [data-js*=ad-], .ad-slot, ins'))")) && !(await B.ev("/\\d[\\d,]*\\s*원(?!형)/.test(document.querySelector('#screen-map-friend').textContent) || !!document.querySelector('#screen-map-friend [data-js*=pay], #screen-map-friend .ad-slot')")));
     await A.click("[data-js=map-pop-close]");
-    check("합격 지도 아래 면책 문구", (await A.text("[data-js=map-disclaimer]")).includes("재미로 보는 콘텐츠"));
+    check("(19-2) 지도 화면에 면책 자리·문구 0", (await A.ev("!document.querySelector('[data-js=map-disclaimer]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(document.querySelector('#screen-map').textContent)")) === true);
     const coords = () => A.ev("[...document.querySelectorAll('[data-js=map-node]')].map((n) => n.dataset.id + n.style.getPropertyValue('--x') + ',' + n.style.getPropertyValue('--y')).join('|')");
     const c1 = await coords();
     await openMap();

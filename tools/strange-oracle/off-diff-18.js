@@ -4,7 +4,7 @@
 //   node <옛 폴더>/tools/strange-oracle/mock-server.js --port 8793 --mode off     (옛 off)
 //   node tools/build-dist.js ; node tools/strange-oracle/mock-server.js --port 8794 --mode off   (새 off)
 //   (첫 화면 대조만 test로도: 옛 --mode test --port 8795, 새 = 8788 test)
-// 실행: node --experimental-websocket tools/strange-oracle/off-diff-18.js [--old URL] [--new URL] [--first-only] [--tag 이름]
+// 실행: node --experimental-websocket tools/strange-oracle/off-diff-18.js [--old URL] [--new URL] [--first-only] [--tag 이름] [--stage19]
 //   → out/off-diff-18[-이름].txt
 // 보는 것
 //  1 첫 화면(입구, 빈 탭, 캐시 끔): 부른 파일 목록과 파일마다 전송 바이트(encodedDataLength). 옛·새가 같아야 한다(줄어드는 것은 괜찮음)
@@ -19,6 +19,16 @@ const OLD = arg("--old", "http://127.0.0.1:8793");
 const NEW = arg("--new", "http://127.0.0.1:8794");
 const TAG = arg("--tag", "");
 const FIRST_ONLY = process.argv.includes("--first-only");
+// (19단계 19-7의 10) --stage19: 19단계에서 의도한 off 화면 차이(바로 가기 띠 · 쿠키 줄 보임 · 면책 자리·문구·스크립트 없음 · GA4 gtag.js 스크립트)를
+// 옛·새 두 쪽에서 똑같이 걷어 낸 뒤 견준다. 걷어 낸 것은 화면마다 [옛 | 새] 개수로 적는다 → "남은 차이 0"이면 차이가 이 목록뿐이라는 뜻
+const STAGE19 = process.argv.includes("--stage19");
+const NORM19 = `(() => { const c = { tabs: 0, cookieShown: 0, disc: 0, discJs: 0, gtag: 0 };
+  document.querySelectorAll('[data-js=hub-tabs]').forEach((e) => { c.tabs++; e.remove(); });
+  const ck = document.querySelector('[data-js=cookie-line]'); if (ck && !ck.hidden) { c.cookieShown++; ck.hidden = true; }
+  document.querySelectorAll('[data-js=disclaimer-slot], [data-js=map-disclaimer], [data-js=map-friend-disclaimer], .disclaimer').forEach((e) => { c.disc++; e.remove(); });
+  document.querySelectorAll('script[src*="disclaimer.js"]').forEach((e) => { c.discJs++; e.remove(); });
+  document.querySelectorAll('script[src*="googletagmanager.com"]').forEach((e) => { c.gtag++; e.remove(); });
+  return c; })()`;
 const P = "/products/strange-oracle/index.html";
 const ORDER = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
 const DATA = (() => { const w = {}; for (const f of ["data-saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"]) require("vm").runInNewContext(fs.readFileSync(path.resolve(__dirname, "..", "..", "products", "strange-oracle", f), "utf8"), { window: w }); return w; })();
@@ -63,7 +73,9 @@ async function screens(base, port) {
       await b.evaluate(`sessionStorage.clear(); sessionStorage.setItem('strange-oracle', ${JSON.stringify(JSON.stringify({ profile: PROFILE, visits: seedVisits(ORDER.slice(0, n)) }))}); true`);
       await b.goto(base + P + "#" + scr);
       await b.sleep(1500);
+      const norm = STAGE19 ? await b.evaluate(NORM19) : null;
       out[`${n}/7 ${scr}`] = await b.evaluate(`JSON.stringify({ active: document.querySelector('.screen.is-active')?.id, text: document.querySelector('.screen.is-active')?.innerText || '', dom: document.body.outerHTML.replace(/<!--[\\s\\S]*?-->/g, '').replace(/\\s+/g, ' ') })`).then(JSON.parse); // 주석(마크업 설명)은 화면 DOM 노드가 아니라 뺀다
+      if (norm) out[`${n}/7 ${scr}`].norm = norm;
     }
   }
   const req = b.log.requests.filter((r) => /data-book-sample|arch-core|app-book|style-book|\/api\/book|data-book-/.test(r)); // (결정 120) 책 전용 파일도
@@ -106,7 +118,7 @@ async function screens(base, port) {
       if (!t || !d || a.active !== c.active) bad++;
       let at = "";
       if (!d) { let i = 0; while (i < a.dom.length && a.dom[i] === c.dom[i]) i++; at = ` 첫 차이 @${i}: 옛 "${a.dom.slice(i - 40, i + 80)}" / 새 "${c.dom.slice(i - 40, i + 80)}"`; }
-      log(`  ${t && d ? "같음" : "다름"} ${k} (${a.active}) | ${t ? "글자 같음" : "글자 다름"} | ${d ? "DOM 같음" : "DOM 다름" + at}`);
+      log(`  ${t && d ? "같음" : "다름"} ${k} (${a.active}) | ${t ? "글자 같음" : "글자 다름"} | ${d ? "DOM 같음" : "DOM 다름" + at}${a.norm ? ` | 걷어 냄 옛 ${JSON.stringify(a.norm)} · 새 ${JSON.stringify(c.norm)}` : ""}`);
     }
     log(`  새 off 화면의 책 파일·새 파일 요청: ${sn.req.length}건${sn.req.length ? " " + sn.req.join(" ") : ""} (옛 ${so.req.length}건)`);
     log(`  결과(18-12의 10): 화면 ${Object.keys(so.out).length}개 중 다름 ${bad} · 새 파일 요청 ${sn.req.length} → ${bad === 0 && sn.req.length === 0 ? "PASS" : "FAIL"}`);

@@ -35,7 +35,7 @@ const CASES = [
       if (/googletagmanager|google-analytics/.test(request.url)) return send("Fetch.failRequest", { requestId, errorReason: "BlockedByClient" });
       if (/\/data\.js$/.test(request.url) && responseStatusCode) {
         const r = await send("Fetch.getResponseBody", { requestId });
-        const t = (r.base64Encoded ? Buffer.from(r.body, "base64").toString("utf8") : r.body).replace(/analytics:\s*\{\s*ga4:\s*""/, 'analytics: { ga4: "G-E2EUTM0001"');
+        const t = (r.base64Encoded ? Buffer.from(r.body, "base64").toString("utf8") : r.body).replace(/analytics:\s*\{\s*ga4:\s*"[^"]*"/, 'analytics: { ga4: "G-E2EUTM0001"');
         return send("Fetch.fulfillRequest", { requestId, responseCode: 200, responseHeaders: [{ name: "Content-Type", value: "text/javascript; charset=utf-8" }], body: Buffer.from(t).toString("base64") });
       }
       send("Fetch.continueRequest", { requestId });

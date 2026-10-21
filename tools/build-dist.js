@@ -26,6 +26,7 @@
 //      legal privacy에 map:on 구획이 없거나, data-map.js·privacy 지도 구획에 ◯◯가 남으면 실패
 //   ② 유료 문장 지문 검사에 data-map.js(원본)도 넣는다
 //   ⑭ (18단계 결정 120) pay.mode off면 책 전용 파일(app-book.js·style-book.css) 없음. ④ 첫 화면은 이 둘과 arch-core.js도 부르지 않음
+//   ⑮ (19단계 19-5, 기획서의 「⑭」, 확인 133) analytics.ga4가 차 있으면 배포판 legal/privacy.html(표지 걷어 낸 뒤)에 ◯◯가 0이어야 한다(off·live 모두). tools/ga4-guard.js
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -40,9 +41,11 @@ const PUBLIC = path.join(DIST, "public");
 const PAYAPP_SDK = "https://lite.payapp.kr/public/api/v2/payapp-lite.js"; // (15-7) 페이앱 공식 SDK 주소 (결정 98: 최신 판, 버전 고정 대상 아님)
 const SECRET_WORDS = ["linkkey", "linkval", "PASS_SECRET", "PAYAPP_", "PAY_DEBUG", "__dev"]; // (15-7) dist/public 텍스트에 0건이어야 하는 낱말
 const og = require("./og-tags.js");
+const Ga4Guard = require("./ga4-guard.js"); // (19-5) ⑮ GA4 privacy 빈칸 가드
 const PaySec = require("./pay-sections.js");
 const MapSec = PaySec.map; // (16단계) 지도 표지 map:on/off
 const MODES = {}; // slug → pay.mode
+const GA4 = {}; // slug → analytics.ga4 (19-5 ⑮)
 const MAP_MODES = {}; // slug → map.mode (16단계)
 const MAP_FILES = ["map.js", "data-map.js"]; // 지도 파일: map.mode off면 배포 폴더에 넣지 않는다(⑪)
 const BOOK_FILES = ["app-book.js", "style-book.css"]; // (18단계 결정 120) 책·미리보기·결제 전 화면 전용 코드·스타일: pay.mode off면 배포 폴더에 넣지 않는다(⑭)
@@ -75,6 +78,7 @@ for (const slug of PRODUCTS) {
   for (const slug of PRODUCTS) {
     const T = readData(slug);
     const ga4 = String((T.analytics && T.analytics.ga4) || "").trim();
+    GA4[slug] = ga4;
     if (!ga4) console.log(`  경고: products/${slug}/data.js의 analytics.ga4가 비어 있음 — 분석 스크립트를 불러오지 않고 동작합니다`);
     else if (!Analytics.configured(ga4)) {
       console.error(`오류: products/${slug}/data.js — analytics.ga4 모양이 틀림 (GA4 "G-…")`);
@@ -174,6 +178,11 @@ for (const slug of PRODUCTS) {
     for (const rel of pages.filter((r) => r.startsWith("legal/")))
       if (fs.readFileSync(path.join(dst, rel), "utf8").includes("◯◯")) fails.push(`⑦ live: public/products/${slug}/${rel}에 ◯◯가 남음`);
   }
+}
+// ⑮ (19-5, 기획서 「⑭」) GA4 ID가 있으면 배포판 privacy에 ◯◯ 0
+for (const slug of PRODUCTS) {
+  const bad = Ga4Guard.ga4PrivacyFile(GA4[slug], path.join(PUBLIC, "products", slug, "legal", "privacy.html"));
+  if (bad) fails.push(`⑮(19-5 ⑭) products/${slug}: ${bad}`);
 }
 // 제품 index.html 복사본: og:image 절대 경로, og:url·canonical 추가 (site.url이 있을 때만)
 for (const slug of PRODUCTS) {
@@ -297,4 +306,4 @@ for (const slug of PRODUCTS) if (fs.existsSync(path.join(PUBLIC, "products", slu
 if (fails.length) {
   console.error("  실패: 배포 점검 — " + fails.slice(0, 15).join(" | "));
   process.exitCode = 1;
-} else console.log("  배포 점검 통과 (pay.mode off · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
+} else console.log("  배포 점검 통과 (pay.mode off · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음 · GA4 ID 있으면 privacy ◯◯ 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
