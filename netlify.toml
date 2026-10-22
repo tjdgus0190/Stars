@@ -1,6 +1,6 @@
 # 낯선 점술관 — Netlify 설정 (spec 14-5, 결정 93). 저장소 루트에 둔다. Netlify 화면 설정·push·환경 변수는 운영자가 한다.
-# 배포 브랜치: Netlify 운영(production) 브랜치는 release. 에이전트는 main에만 커밋하고 release는 만지지 않는다.
-#   QA 판정 "배포 가능" 뒤에만 운영자가 main → release 병합·push. main 브랜치 배포·미리보기 배포(deploy preview)는 끈다(HANDOFF 1장).
+# 배포 브랜치(2026-10-22 운영자 확인): Netlify 운영(production) 브랜치는 main. main에 push하면 바로 배포된다.
+#   에이전트는 작업 브랜치에 커밋하고, 운영자가 승인할 때만 main에 반영한다(HANDOFF 1장).
 # 공개되는 것은 dist/public뿐이다. 제품 폴더·저장소 루트를 publish로 지정하지 않는다(유료 원본 api/_paid가 정적 주소로 새지 않게).
 
 [build]

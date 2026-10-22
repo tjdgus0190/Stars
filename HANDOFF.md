@@ -20,7 +20,7 @@
   - 열람 코드는 다른 기기에서 "이미 샀어요 · 열람 코드 넣기"로 다시 연다. 코드를 잃으면 운영자가 `make-pass.js`로 수동 코드를 준다(15-5).
   - **본 페이지(배포판)는 `pay.mode = "off"`**: 결제 화면·책이 DOM에 없다. 결제는 시험 페이지(모의 서버 `--mode test`)에서만 시험한다. live 전환은 운영자 몫(specs 54·39·62번, 계획서 7장).
 - **배포(결정 93, 14-5): GitHub 연결 Netlify.** 저장소 루트 `netlify.toml`이 `node tools/build-dist.js`로 `dist/public`을 만들고, 함수 두 개(`netlify/functions/book.js`, 15단계 `pay.js`)를 붙인다. 결제 기록은 Netlify Blobs 저장소 `strange-oracle-pay`. `@netlify/blobs` 11.1.4는 루트 package.json에 고정, Node 22.12 이상이 필요해 netlify.toml에 `NODE_VERSION = "22"`를 두었다(함수 실행 환경이 이 값을 따르는지는 미확인, 3장).
-  - **배포 브랜치 흐름:** Netlify 운영 브랜치는 `release`다. **에이전트는 `main`에만 커밋하고 `release`는 만지지 않는다**(만들기·병합·push 모두 안 함). QA 판정이 "배포 가능"일 때만 **운영자가** `main`을 `release`에 병합하고 push한다 → Netlify가 빌드·배포한다. `main` 브랜치 배포·미리보기 배포는 끈다(14-5 운영자 설정 7가지).
+  - **배포 브랜치 흐름(2026-10-22 운영자 확인):** Netlify 운영(production) 브랜치는 **`main`**이다(옛 기록의 `release`는 만들어진 적이 없다). `main`에 push하면 곧바로 배포되므로, 에이전트는 작업 브랜치(예: `claude/...`)에 커밋하고 **운영자가 승인할 때만** `main`에 반영한다(빨리 감기, 기록 고쳐 쓰기 없음). 2026-10-22에 운영자 승인으로 `main`을 6613e6e로 반영했다(그 전 `main`은 13단계 3eb82ec라 netlify.toml이 없어 404였음).
   - GitHub 연결 첫 push 전에 저장소가 **비공개**인지 운영자가 확인한다(유료 원본이 저장소에 있음, 62번).
   - 에이전트는 배포·push·계정 작업을 하지 않는다(CLAUDE.md 10장).
 - **유료 원본:** `products/strange-oracle/api/_paid/book/` 한 곳뿐이다. 공개 폴더에 들어가지 않고 함수 묶음(`included_files`)으로만 서버에 간다. 옛 토스 api·core.js·move-book은 지웠다(F4-B2). `paycode.js`는 이어가기 코드(SOG)와 열람 코드 모양(SOP)에 쓴다.
