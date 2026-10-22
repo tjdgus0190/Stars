@@ -4499,7 +4499,7 @@
       const o = siteOrigin();
       P.setDefault("userid", PA.userid);
       P.setDefault("shopname", PA.shopname || "");
-      const v = { goodname: PA.goodname, price: String(PAY.amount), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return`, var1: r, var2: PA.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y" };
+      const v = { goodname: PA.goodname, price: String(PAY.amount), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return`, var1: r, var2: PA.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y", redirectpay: "1" }; // (2026-10-22) redirectpay 1 = 결제요청 문자 대신 결제수단 화면으로 바로 이동(페이앱 JS 전용)
       Object.keys(v).forEach((k) => P.setParam(k, v[k]));
       // (2026-10-22) 결제창을 팝업이 아니라 이 탭에서 연다. SDK를 버튼 뒤에 받으므로(3장) 팝업은 사용자 동작이 끊겨 모바일·인앱 브라우저에서 막히기 쉽다.
       //   같은 탭이면 returnurl → /api/pay/return → #paid로 돌아오고, 이 탭의 sessionStorage(R)가 그대로 남는다(15-2 이동 방식)

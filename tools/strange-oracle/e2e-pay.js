@@ -186,8 +186,8 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("B2 가짜 결제창(이동 방식)이 열리고 [결제 완료]", okB);
   const coB = b.log.bodies.filter((x) => /\/__dev\/payapp\/checkout/.test(x.url)).pop();
   const sent = Object.fromEntries(new URLSearchParams(coB ? coB.body : ""));
-  const WANT = ["checkretry", "feedbackurl", "goodname", "openpaytype", "price", "returnurl", "shopname", "skip_cstpage", "smsuse", "userid", "var1", "var2"];
-  check("B3 결제창으로 간 값 = 15-2 표의 12칸뿐(recvphone 없음), price 9900·var2 so-book-1·var1 32자 16진수·returnurl /api/pay/return", Object.keys(sent).sort().join() === WANT.join() && sent.price === "9900" && sent.var2 === "so-book-1" && /^[0-9a-f]{32}$/.test(sent.var1) && /\/api\/pay\/return$/.test(sent.returnurl) && /\/api\/pay\/feedback$/.test(sent.feedbackurl) && /card/.test(sent.openpaytype) && !/phone|vbank|rbank/.test(sent.openpaytype), Object.keys(sent).join(","));
+  const WANT = ["checkretry", "feedbackurl", "goodname", "openpaytype", "price", "redirectpay", "returnurl", "shopname", "skip_cstpage", "smsuse", "userid", "var1", "var2"]; // (2026-10-22) redirectpay 더함
+  check("B3 결제창으로 간 값 = 15-2 표의 12칸 + redirectpay 1(recvphone 없음), price 9900·var2 so-book-1·var1 32자 16진수·returnurl /api/pay/return", Object.keys(sent).sort().join() === WANT.join() && sent.price === "9900" && sent.var2 === "so-book-1" && /^[0-9a-f]{32}$/.test(sent.var1) && /\/api\/pay\/return$/.test(sent.returnurl) && /\/api\/pay\/feedback$/.test(sent.feedbackurl) && sent.redirectpay === "1" && /card/.test(sent.openpaytype) && /phone/.test(sent.openpaytype) && /naverpay/.test(sent.openpaytype) && !/vbank|rbank/.test(sent.openpaytype), Object.keys(sent).join(","));
   allReqs.push(sent.var1);
   const openB = await waitFor("!!document.querySelector('[data-js=pay-code-dialog]')?.open", 30000);
   const codeB = (await codesShown())[0] || "";

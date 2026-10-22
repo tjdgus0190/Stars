@@ -72,7 +72,7 @@ window.TEXT = {
   pay: {
     mode: "live",
     amount: 9900,
-    payapp: { userid: "tjdgus0190", shopname: "SHA Studio", goodname: "낯선 점술관 한 권의 책", tag: "so-book-1", sdk: "https://lite.payapp.kr/public/api/v2/payapp-lite.js", openpaytype: "card,kakaopay,naverpay,smilepay,applepay,payco" },
+    payapp: { userid: "tjdgus0190", shopname: "SHA Studio", goodname: "낯선 점술관 한 권의 책", tag: "so-book-1", sdk: "https://lite.payapp.kr/public/api/v2/payapp-lite.js", openpaytype: "card,phone,naverpay,kakaopay,tosspay,payco,smilepay,applepay" },
     contact: "tjdgus0190@naver.com", // 문의처 = 판매자 이메일 (운영자, 2026-10-22)
     testBand: "시험 중 — 아직 판매하지 않아요", // 맨 위 띠 (test에서만, 최대 20자)
     eyebrow: "THE WHOLE BOOK",
@@ -81,7 +81,7 @@ window.TEXT = {
     price: { title: "가격", text: "{price}원" }, // text: "{price}" 자리(쉼표 붙은 숫자, 예 9,900)
     method: { // 3 결제 방법·판매자 (옛 store)
       title: "결제 방법·판매자",
-      body: "페이앱 결제창에서 신용카드나 간편결제(카카오페이·네이버페이 등)로 결제해요. 따로 가입하지 않아도 돼요.",
+      body: "페이앱 결제창에서 신용카드, 휴대폰 결제, 간편결제(네이버페이·카카오페이 등)로 결제해요. 따로 가입하지 않아도 돼요.",
       seller: "판매자 SHA Studio(개인판매자) · 결제대행 페이앱",
       phone: "휴대폰 번호는 페이앱 결제창에만 넣어요. 이 서비스는 읽거나 저장하지 않아요.",
     },
