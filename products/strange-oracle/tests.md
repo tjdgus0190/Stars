@@ -1113,3 +1113,10 @@
 - `dist/public`을 tools/serve.js로 띄워 `/`(→ 제품으로 이동)·`/products/strange-oracle/`·legal·og-image 모두 200, 360px 입구 화면 [초안] 0·콘솔 오류 0(favicon 404만).
 - e2e-tabs 「4 입구 글 칸 초점」 실패 원인: 브라우저 둘이 함께 뜬 상태에서 시험 창이 뒤에 있어 `document.hasFocus()`가 false → CSS `:focus`가 맞지 않음(제품 문제 아님). 시험에서 `Page.bringToFront` 뒤 초점 → 30/30 통과.
 - 단위 176, e2e-saju 41 통과.
+
+## 2026-10-22 · 결제 켬(live)과 운영 확인
+- 운영에서 결제 확인이 503("store")이던 원인: Lambda 호환 함수의 `connectLambda`가 Blobs strong 읽기에 필요한 `uncachedEdgeURL`을 주지 않음(@netlify/blobs 11.1.4·11.1.6 모두). 함수를 Functions v2(`netlify/functions/pay.mjs`·`book.mjs`, 로직은 `netlify/lib/`)로 바꿔 해결.
+- 운영 주소 https://glowing-semolina-5a4e78.netlify.app 확인(밖에서 요청): `/api/pay/status` 200 pending · `/api/book` 가짜 코드 401 · 만신 장 코드 없이 200 · `/api/pay/feedback` 가짜 키 403 · `/api/pay/return` 303 → `/products/strange-oracle/#paid`.
+- 결제창: 버튼 뒤 SDK를 받아 팝업이 막히기 쉬워 같은 탭(`setTarget("_self")`)으로 연다. 헤드리스 Chromium으로 운영 사이트 [결제하기] → `lite.payapp.kr/pay`에 상점명 SHA Studio · 상품명 낯선 점술관 한 권의 책 · 5,900원 표시 확인(결제는 하지 않음).
+- 실결제 1건 + 취소(15-6 ①~⑧)는 운영자가 한다 — 미확인.
+- 시험: 단위 176, e2e-pay 63(배포판 live → J 묶음 대신 L 묶음 4개), e2e-book 97, e2e-tabs 30, e2e-flow 127, e2e-map 82, e2e-utm 29, e2e-saju 41.
