@@ -3101,7 +3101,13 @@
       return id === "rune" ? BV.rune.base + BV.rune.past[x[0]] + BV.rune.now[x[1]] + BV.rune.next[x[2]] : id === "tzolkin" ? BV.room.tzolkin[x.sign] : BV.room[id][x];
     }
     if (id === "flow") return a && c.band != null ? BV.timeline[a][c.band] : BV.avg.timeline;
-    if (id === "yeon") return BookCore.yeonVolume(BV.yeon, yeonCtx()); // (검수 2차 권장 5) 그 사람이 받는 판(기본·한결같은 결·나이 모름)의 값
+    if (id === "yeon") {
+      // (검수 2차 권장 5) 그 사람이 받는 판(기본·한결같은 결·나이 모름)의 값. (2026-10-22) 원형이 아직 없으면(0/7) 원형 8개 평균 — 전에는 "약 0자"로 보였다
+      const cx = yeonCtx();
+      if (cx.arch) return BookCore.yeonVolume(BV.yeon, cx);
+      const all = Object.keys(BV.yeon.pull);
+      return Math.round(all.reduce((n, a) => n + BookCore.yeonVolume(BV.yeon, Object.assign({}, cx, { arch: a, sub: a })), 0) / all.length);
+    }
     if (id === "year") return BookCore.yearVolume(BV.year, yearCtx()); // (20단계) 일간 판, 만신 미방문이면 공통판
     if (id === "cross") {
       // (18-9) 그 사람 경로의 값, 모르면 평균
@@ -4495,6 +4501,9 @@
       P.setDefault("shopname", PA.shopname || "");
       const v = { goodname: PA.goodname, price: String(PAY.amount), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return`, var1: r, var2: PA.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y" };
       Object.keys(v).forEach((k) => P.setParam(k, v[k]));
+      // (2026-10-22) 결제창을 팝업이 아니라 이 탭에서 연다. SDK를 버튼 뒤에 받으므로(3장) 팝업은 사용자 동작이 끊겨 모바일·인앱 브라우저에서 막히기 쉽다.
+      //   같은 탭이면 returnurl → /api/pay/return → #paid로 돌아오고, 이 탭의 sessionStorage(R)가 그대로 남는다(15-2 이동 방식)
+      if (typeof P.setTarget === "function") P.setTarget("_self");
       P.payrequest();
     }
     function startPay(r) {
