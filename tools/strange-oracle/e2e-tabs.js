@@ -118,6 +118,7 @@ async function open({ port, width = 360, height = 640, reduced = true, mapOff = 
   // 글 칸 초점 때 숨김 (0/7 이어가기 코드 넣기)
   await A.toHub(TEST, 0);
   await A.click("[data-js=resume-enter-toggle]");
+  await A.send("Page.bringToFront"); // (2026-10-22) 브라우저 둘이 함께 떠 있으면 이 창이 뒤에 있어 document.hasFocus()가 false → :focus가 안 맞음(리눅스 Chromium에서 확인)
   await A.ev("document.querySelector('[data-js=resume-input]').focus(); true");
   await sleep(250);
   const hid = await A.ev("getComputedStyle(document.querySelector('[data-js=hub-tabs]')).visibility");

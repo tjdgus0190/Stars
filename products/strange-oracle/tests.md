@@ -1108,3 +1108,8 @@
 - 바뀐 기대값: book.test.js 허용 목록 13개, cross.test.js 제2부 순서에 year(flow 바로 뒤), e2e-book 14장 → 15장·인연의 장은 2027년의 흐름 다음·미리보기 목차 15줄, e2e-pay 받는 것 12줄(year 9번째). e2e-book에 새 장 열기 시험 1개 더함.
 - 결과: 단위 176, e2e-book 97, e2e-pay 69, e2e-flow reduced 127, e2e-saju 41, e2e-map 82, e2e-utm 29, make-volume 대조 9,011건 불일치 0, build-dist 통과(유료 지문 year 119개 → 공개 폴더 0건). 모두 실패 0.
 - e2e-tabs 29/30(「4 입구 글 칸 초점 → 띠 숨김」)은 20단계 전과 같은 실패, 19단계 몫.
+
+## 2026-10-22 · 배포 준비 점검
+- `dist/public`을 tools/serve.js로 띄워 `/`(→ 제품으로 이동)·`/products/strange-oracle/`·legal·og-image 모두 200, 360px 입구 화면 [초안] 0·콘솔 오류 0(favicon 404만).
+- e2e-tabs 「4 입구 글 칸 초점」 실패 원인: 브라우저 둘이 함께 뜬 상태에서 시험 창이 뒤에 있어 `document.hasFocus()`가 false → CSS `:focus`가 맞지 않음(제품 문제 아님). 시험에서 `Page.bringToFront` 뒤 초점 → 30/30 통과.
+- 단위 176, e2e-saju 41 통과.

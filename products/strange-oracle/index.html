@@ -499,30 +499,30 @@
            탭 목록 역할이 아니라 화면을 옮기는 버튼들. 칸 수는 1~4개(off·0/7 = 공유 1칸 … test·map on = 4칸), 칸이 빠지거나 hidden이어도 CSS가 고르게 나눈다.
            공유 칸 = share-buttons의 share-link-copy 그대로. 완료 줄 share-link-status는 이 nav 안(공유 칸에서 위로 올라가 처음 만나는 것)이라 3/7 줄의 완료 줄과 섞이지 않는다.
            숨김: 입구 글 칸 초점·문 열리는 연출 중(CSS :has) + JS가 .is-hidden을 붙여도 숨는다. 명세: design/strange-oracle.md 「19단계 (K1)」 1절 -->
-      <nav class="hub-tabs" data-js="hub-tabs" data-aria="hub.tabs.aria" aria-label="[초안] 바로 가기">
+      <nav class="hub-tabs" data-js="hub-tabs" data-aria="hub.tabs.aria" aria-label="바로 가기">
         <p class="share-status hub-tabs__status is-hidden" data-js="share-link-status" role="status"><span class="share-status__msg" data-js="share-link-msg" data-t="share.copied">주소를 복사했어요</span><span class="share-url is-hidden" data-js="share-link-url"></span></p>
         <div class="hub-tabs__row">
           <button class="hub-tab" type="button" data-js="share-link-copy" data-tab="share">
             <svg class="hub-tab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="17.5" cy="5.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/><path d="M8.7 10.7l6.6-3.9M8.7 13.3l6.6 3.9"/></svg>
-            <span class="hub-tab__label" data-t="hub.tabs.share">[초안] 공유하기</span>
+            <span class="hub-tab__label" data-t="hub.tabs.share">공유하기</span>
           </button>
           <!-- 1/7 이상만 (0/7이면 JS가 hidden) -->
           <button class="hub-tab" type="button" data-js="hub-tab-story" data-tab="story" data-go="story">
             <svg class="hub-tab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h8.5l4 4V20.5H6Z"/><path d="M14.5 3.5v4h4"/><path d="M9 12h6.5M9 15.5h4.5"/></svg>
-            <span class="hub-tab__label" data-t="hub.tabs.story">[초안] 나의 이야기</span>
+            <span class="hub-tab__label" data-t="hub.tabs.story">나의 이야기</span>
           </button>
           <!-- pay:on -->
           <!-- test·live이고 1/7 이상만. 누르면 hub-book-go와 같은 곳. off 원본을 그대로 열 때는 app.js gone 목록에 hub-tab-book을 더해 지운다 -->
           <button class="hub-tab" type="button" data-js="hub-tab-book" data-tab="book">
             <svg class="hub-tab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5.5a2 2 0 0 1 2-2h12v14H7a2 2 0 0 0-2 2Z"/><path d="M5 19.5a2 2 0 0 0 2 2h12v-4"/><circle cx="12.5" cy="10.5" r="2.4"/></svg>
-            <span class="hub-tab__label" data-t="hub.tabs.book">[초안] 한 권의 책</span>
+            <span class="hub-tab__label" data-t="hub.tabs.book">한 권의 책</span>
           </button>
           <!-- /pay:on -->
           <!-- map:on -->
           <!-- map on일 때만. 열람 키 있음 → 지도 보기 · 없음·7/7 → 지도 만들기 자리 · 없음·7/7 전 → 토스트 map.tabLocked -->
           <button class="hub-tab" type="button" data-js="hub-tab-map" data-tab="map">
             <svg class="hub-tab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.2l8.4 6.1-3.2 9.9H6.8L3.6 9.3Z"/><circle class="hub-tab__dot" cx="12" cy="11.5" r="1.6"/><circle class="hub-tab__dot" cx="8.6" cy="14.6" r="1.1"/><circle class="hub-tab__dot" cx="15.2" cy="9.4" r="1.1"/></svg>
-            <span class="hub-tab__label" data-t="map.tab">[초안] 친구 지도</span>
+            <span class="hub-tab__label" data-t="map.tab">친구 지도</span>
           </button>
           <!-- /map:on -->
         </div>
@@ -4028,17 +4028,17 @@
            요약 = map.consent.summary, {main}·{sub}는 map-send-arch와 같은 원형 이름(굵게). 보내는 항목과 보관 기간을 담는다.
            펼친 안: ① 이용 목적(새 줄) ② 보내는 것 ③ 보내지 않음 ④ 보는 사람 ⑤ 저장 위치 ⑥ 보관 기간 ⑦ 지우는 법 ⑧ 선택 사항.
            접혀 있어도 모두 이 화면 DOM 안에 있다(지우지 않음). 펼침 상태는 저장하지 않는다(화면에 들어올 때마다 접힘). 모두 버튼 위 -->
-      <p class="map-summary"><svg class="map-summary__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.8l5.4 2v4.1c0 3.1-2.3 5.4-5.4 6.3-3.1-.9-5.4-3.2-5.4-6.3V3.8Z"/><path d="M5.6 8.1l1.7 1.7 3.2-3.4"/></svg><span data-js="map-consent-summary">[초안] 별명·아이콘·원형 두 개(<b>현자</b>·<b>탐험가</b>)를 보내고, 마지막 활동 뒤 90일(최대 1년) 보관해요.</span></p>
+      <p class="map-summary"><svg class="map-summary__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.8l5.4 2v4.1c0 3.1-2.3 5.4-5.4 6.3-3.1-.9-5.4-3.2-5.4-6.3V3.8Z"/><path d="M5.6 8.1l1.7 1.7 3.2-3.4"/></svg><span data-js="map-consent-summary">별명·아이콘·원형 두 개(<b>현자</b>·<b>탐험가</b>)를 보내고, 마지막 활동 뒤 90일(최대 1년) 보관해요.</span></p>
 
       <div class="map-consent__agree">
-        <label class="check map-agree"><input type="checkbox" data-js="map-agree" /><span data-t="map.consent.agree">[초안] 요약과 자세히 보기의 내용을 확인했고, 별명·아이콘·원형 두 개를 보내는 데 동의해요</span></label>
+        <label class="check map-agree"><input type="checkbox" data-js="map-agree" /><span data-t="map.consent.agree">요약과 자세히 보기의 내용을 확인했고, 별명·아이콘·원형 두 개를 보내는 데 동의해요</span></label>
         <details class="map-more" data-js="map-more">
-          <summary class="map-more__toggle"><span class="map-more__open" data-t="map.consent.more">[초안] 자세히 보기</span><span class="map-more__close" data-t="map.consent.less">[초안] 접기</span><svg class="map-more__chev" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 6l4 4 4-4"/></svg></summary>
+          <summary class="map-more__toggle"><span class="map-more__open" data-t="map.consent.more">자세히 보기</span><span class="map-more__close" data-t="map.consent.less">접기</span><svg class="map-more__chev" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 6l4 4 4-4"/></svg></summary>
           <div class="map-more__body">
       <dl class="map-notice">
         <div class="map-notice__row map-notice__row--purpose">
-          <dt data-t="map.consent.purposeLabel">[초안] 이용 목적</dt>
-          <dd data-t="map.consent.purpose">[초안] 친구 궁합 지도를 만들고, 초대한 친구와 서로의 원형 궁합을 보여 주려고 써요.</dd>
+          <dt data-t="map.consent.purposeLabel">이용 목적</dt>
+          <dd data-t="map.consent.purpose">친구 궁합 지도를 만들고, 초대한 친구와 서로의 원형 궁합을 보여 주려고 써요.</dd>
         </div>
         <div class="map-notice__row map-notice__row--send">
           <dt data-t="map.consent.sendLabel">보내는 것</dt>
