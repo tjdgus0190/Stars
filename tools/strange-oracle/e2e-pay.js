@@ -132,7 +132,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   // (18-9, 기대값 변경) 새로 더해진 장 알약은 인연의 장 → 새 장. 새 장 줄은 방 장 7줄 바로 뒤(제2부 맨 앞), 인연의 장은 그대로 시기별 흐름 다음(관심사 없음)
   const cxName = await ev("TEXT.book.parts.cross"), rmLast = await ev("TEXT.topbar.room.replace('{num}', 'Ⅶ').replace('{name}', TEXT.rooms.sibyl.name)");
   check("18-9 받는 것: 새 장 줄은 방 장 바로 뒤·시기별 흐름 앞, 그 줄 하나만 .pay-list__item--new + 알약 · 2027년의 흐름은 시기별 흐름 다음, 인연의 장은 그 다음(20단계)", lay.names.indexOf(cxName) === 6 && lay.names.indexOf(await ev("TEXT.book.parts.timeline")) === 7 && lay.names.indexOf(await ev("TEXT.book.parts.year")) === 8 && lay.names.indexOf(await ev("TEXT.book.parts.yeon")) === 9 && lay.news.length === 1 && lay.news[0].split("|")[0] === cxName && lay.news[0].split("|")[1].length > 0, JSON.stringify({ names: lay.names, news: lay.news, rmLast }));
-  check("A3 판매자 정보 줄 5칸(신고 줄은 값이 없어 숨김)·legal 3종 링크·결제 버튼은 <button>(href 없음)·옛 칸 2개 없음", lay.seller === 5 && lay.legal === 3 && lay.tag === "BUTTON" && !lay.href && !lay.old);
+  check("A3 판매자 정보 줄 = 값이 있는 칸 + 결제대행(2026-10-22: 빈 연락처·신고 줄은 숨김)·legal 3종 링크·결제 버튼은 <button>(href 없음)·옛 칸 2개 없음", lay.seller === (await ev("['name', 'phone', 'email', 'address', 'reg'].filter((k) => TEXT.pay.seller[k]).length + 1")) && lay.legal === 3 && lay.tag === "BUTTON" && !lay.href && !lay.old);
   check("A4 동의 전 비활성·시험 띠·userid(모의 값) 있으면 '판매 준비 중' 숨김·가로 넘침 0", lay.buyOff && lay.band && !lay.empty && lay.wide);
   // K. (15단계 QA 1차 필수 1) test: 판매자 정보 줄 legal 링크 3개가 200이고 결제 문단이 주석 밖에 보인다
   const legalHrefs = await ev(`[...document.querySelectorAll('#screen-deeper .pay-seller__legal a')].map((a) => a.href)`);

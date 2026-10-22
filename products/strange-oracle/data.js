@@ -73,7 +73,7 @@ window.TEXT = {
     mode: "off",
     amount: 5900,
     payapp: { userid: "tjdgus0190", shopname: "SHA Studio", goodname: "낯선 점술관 한 권의 책", tag: "so-book-1", sdk: "https://lite.payapp.kr/public/api/v2/payapp-lite.js", openpaytype: "card,kakaopay,naverpay,smilepay,applepay,payco" },
-    contact: "",
+    contact: "tjdgus0190@naver.com", // 문의처 = 판매자 이메일 (운영자, 2026-10-22)
     testBand: "시험 중 — 아직 판매하지 않아요", // 맨 위 띠 (test에서만, 최대 20자)
     eyebrow: "THE WHOLE BOOK",
     title: "한 권의 책 전체 열기",
@@ -82,7 +82,7 @@ window.TEXT = {
     method: { // 3 결제 방법·판매자 (옛 store)
       title: "결제 방법·판매자",
       body: "페이앱 결제창에서 신용카드나 간편결제(카카오페이·네이버페이 등)로 결제해요. 따로 가입하지 않아도 돼요.",
-      seller: "판매자 ◯◯(개인판매자) · 결제대행 페이앱",
+      seller: "판매자 SHA Studio(개인판매자) · 결제대행 페이앱",
       phone: "휴대폰 번호는 페이앱 결제창에만 넣어요. 이 서비스는 읽거나 저장하지 않아요.",
     },
     how: { title: "어떻게 읽나요", body: "결제가 확인되면 이 화면에서 바로 책이 열리고, SOP로 시작하는 열람 코드를 보여 드려요. 코드를 적어 두면 다른 기기에서도, 나중에도 '이미 샀어요' 칸에 넣어 다시 열 수 있어요." },
@@ -99,7 +99,7 @@ window.TEXT = {
     seller: { // 버튼 아래 판매자 정보 줄(69번). 값 ◯◯는 운영자 몫. reg(통신판매업 신고번호)가 비면 그 줄을 숨긴다
       title: "판매자 정보",
       labels: { name: "판매자", phone: "연락처", email: "이메일", address: "주소", reg: "통신판매신고", pg: "결제대행" },
-      name: "◯◯", phone: "◯◯", email: "◯◯", address: "◯◯", reg: "", pg: "페이앱",
+      name: "SHA Studio", phone: "", email: "tjdgus0190@naver.com", address: "◯◯", reg: "", pg: "페이앱", // (운영자 2026-10-22) 상호 SHA Studio, 연락처 비움. 빈 값의 줄은 숨긴다. 주소 ◯◯는 운영자 확인 대기
       refund: "구매·환불 안내", legalAria: "구매 관련 고지",
     },
     back: "목차로 돌아가기",

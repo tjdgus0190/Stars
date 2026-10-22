@@ -4386,6 +4386,8 @@
     };
     // 판매자 정보 줄·문의처·시험 띠 (한 번만)
     show(js("pay-seller-reg", payScr), Boolean(PAY.seller && PAY.seller.reg));
+    // (2026-10-22) 값이 빈 판매자 줄(예: 연락처를 두지 않음)은 숨긴다. 결제대행 줄은 늘 보인다
+    $$(".pay-seller__row dd[data-t^='pay.seller.']", payScr).forEach((dd) => { if (dd.dataset.t !== "pay.seller.reg") show(dd.closest(".pay-seller__row"), Boolean(get(dd.dataset.t))); });
     show(js("pay-test-band", payScr), PAY_MODE === "test");
     js("paycheck-test-band", checkScr).hidden = PAY_MODE !== "test";
     js("paycheck-contact-value", checkScr).textContent = PAY.contact || "";
