@@ -23,6 +23,19 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
   box-shadow: 0 0 80px oklch(0.84 0.1 85 / 0.35), inset 0 0 40px oklch(0 0 0 / 0.4); color: var(--gold); }
 .emblem__core svg { width: 200px; height: 200px; stroke-width: 1.6; }
 
+/* ①-B 붉은 인장 */
+.seal-b { position: absolute; left: 50%; top: 50%; width: 760px; height: 760px; translate: -50% -50%; border-radius: 50%; display: grid; place-content: center; text-align: center;
+  background: radial-gradient(circle at 38% 30%, oklch(0.56 0.15 28), oklch(0.36 0.12 25)); box-shadow: 0 0 90px oklch(0.84 0.1 85 / 0.3), inset 0 0 60px oklch(0 0 0 / 0.35); }
+.seal-b__ring { position: absolute; inset: 34px; border-radius: 50%; border: 6px solid oklch(0.9 0.08 85 / 0.85); }
+.seal-b__name { margin: 0; display: grid; gap: 4px; font-weight: 700; color: oklch(0.95 0.05 88); line-height: 1.05; text-shadow: 0 3px 8px oklch(0 0 0 / 0.35); }
+.seal-b__name span:first-child { font-size: 150px; }
+.seal-b__name span:last-child { font-size: 170px; }
+.seal-b__latin { margin: 22px 0 0; font-family: var(--font-latin); font-size: 34px; letter-spacing: 0.28em; color: oklch(0.9 0.08 85 / 0.9); }
+/* ①-C 금빛 문 */
+.door-c { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 30px; }
+.door-c__icon { width: 440px; height: 440px; color: var(--gold); stroke-width: 1.5; filter: drop-shadow(0 0 30px oklch(0.84 0.1 85 / 0.45)); }
+.door-c__name { margin: 0; font-size: 92px; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; }
+
 /* ② 소개 게시물 */
 .art--intro { width: 1080px; height: 1350px; padding: 70px 110px 0; text-align: center; }
 .art--intro .eyebrow { font-size: 28px; }

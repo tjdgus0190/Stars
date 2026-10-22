@@ -10,6 +10,8 @@ const OUT = path.join(__dirname, "out");
 const PORT = 8793;
 const ARTS = [
   { id: "profile", w: 1080, h: 1080, file: "profile-1080.png" },
+  { id: "profile-b", w: 1080, h: 1080, file: "profile-b-seal-1080.png" },
+  { id: "profile-c", w: 1080, h: 1080, file: "profile-c-door-1080.png" },
   { id: "intro", w: 1080, h: 1350, file: "intro-post-1080x1350.png" },
   { id: "story", w: 1080, h: 1920, file: "story-book-1080x1920.png" },
   { id: "hl-rooms", w: 1080, h: 1920, file: "highlight-rooms.png" },
