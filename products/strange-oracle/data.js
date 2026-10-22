@@ -26,7 +26,7 @@ window.TEXT = {
   // site.url: 이 제품 페이지의 전체 주소. "https://"로 시작하고 "/"로 끝나야 한다 (모양: https://<도메인>/products/strange-oracle/).
   //   비워 두면 지금 열린 주소를 쓴다. 이 한 줄만 바꾸면 링크 복사·공유 글·공유 카드 하단·배포본 og:url이 함께 바뀐다.
   //   모양이 틀리면 node tools/build-dist.js가 오류로 멈춘다.
-  site: { url: "" },
+  site: { url: "https://glowing-semolina-5a4e78.netlify.app/products/strange-oracle/" }, // (운영자 2026-10-22) Netlify 주소
   // kakao: 카카오톡 공유. jsKey(카카오 JavaScript 키)와 sdkUrl(SDK 주소, 운영자 결정 32번 뒤) 가운데 하나라도 비어 있으면 버튼을 만들지 않고 SDK도 부르지 않는다
   kakao: { jsKey: "", sdkUrl: "" },
   // (12단계 12-6, 14단계 14-2) 분석 ID — 이 묶음 한 곳에만 둔다. 비어 있으면 구글 스크립트를 하나도 불러오지 않고 쿠키 줄도 없다. (14-2) 광고는 걷어 냈고 GA4만 남는다.

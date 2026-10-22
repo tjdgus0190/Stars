@@ -147,9 +147,9 @@ test("og 태그: site.url 모양 검사", () => {
     assert.equal(typeof og.siteUrlProblem(bad), "string", bad);
 });
 
-test("og 태그: 제품 원본에는 site.url 빈 값·og:image 상대 경로·og:url 없음, 설정 읽기", () => {
+test("og 태그: 제품 원본에는 og:image 상대 경로·og:url 없음(주소는 build-dist가 넣음), site.url은 빈 값 또는 https…/ 주소, 설정 읽기", () => {
   const html = fs.readFileSync(path.join(P, "index.html"), "utf8");
-  assert.equal(og.readSiteUrl(fs.readFileSync(path.join(P, "data.js"), "utf8")), "");
+  assert.match(og.readSiteUrl(fs.readFileSync(path.join(P, "data.js"), "utf8")), /^$|^https:\/\/[^\s"]+\/$/); // (2026-10-22) 운영자가 Netlify 주소를 넣음
   assert.equal(og.readHead(html).ogImage, "og-image.png");
   assert.ok(!/og:url|rel="canonical"/.test(html));
   assert.equal(og.injectOg(html, ""), html); // 빈 값이면 그대로
