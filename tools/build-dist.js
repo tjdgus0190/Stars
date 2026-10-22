@@ -9,7 +9,7 @@
 //   ① dist/public에 api/·_paid·__dev·옛 data-book-*.js(data-book-free.js·data-book-sample.js 말고)·legal/refund.html·_로 시작하는 폴더 없음
 //      (18-7) data-book-sample.js = 방 장 첫 줄 공개 맛보기(결정 117). 허용은 이 이름 하나만 더한다 — 다른 data-book-*.js는 지금처럼 막는다
 //   ② 유료 문장 지문 누출 0: api/_paid/book/의 유료 파일마다 지문(문장 조각)을 뽑아 dist/public 전체에서 찾는다
-//   ③ 배포판 pay.mode = "off" (결정 94)
+//   ③ 배포판 pay.mode = "off" 또는 "live" (결정 94 → 2026-10-22 live 허용, test는 실패)
 //   ④ 첫 화면(index.html이 정적으로 부르는 파일)이 data-book-*.js를 부르지 않음
 //   ⑤ site.url·GA4 ID 모양
 //   ⑥ (15단계) pay.payapp.sdk = 페이앱 공식 주소   ⑦ live 가드: pay.mode live인데 payapp.userid·pay.contact가 비었거나 pay 문구·legal에 ◯◯
@@ -88,7 +88,8 @@ for (const slug of PRODUCTS) {
     //    live로 바꿀 때(운영자, specs 54·39·62번과 계획서 live 조건을 마친 뒤): 아래 조건을 "off" 또는 "live"를 허용하도록 함께 고친다. "test"는 언제나 실패여야 한다.
     const mode = T.pay ? T.pay.mode : "off";
     MODES[slug] = mode;
-    if (mode !== "off") fails.push(`③ products/${slug}/data.js pay.mode = "${mode}" (배포판은 "off"만)`);
+    // (2026-10-22 운영자 "결제 켜줘") live 허용. ⑦ live 가드가 운영자 값·◯◯·refund.html을 그대로 본다. test는 언제나 실패
+    if (mode !== "off" && mode !== "live") fails.push(`③ products/${slug}/data.js pay.mode = "${mode}" (배포판은 "off" 또는 "live"만)`);
     // ⑥ (15단계 15-7) 페이앱 SDK 주소는 공식 주소 그대로(모의 주소가 섞이지 않게). off에서도 본다
     const pa = (T.pay && T.pay.payapp) || {};
     if (pa.sdk !== PAYAPP_SDK) fails.push(`⑥ products/${slug}/data.js pay.payapp.sdk가 공식 주소가 아님 ("${pa.sdk}")`);
@@ -306,4 +307,4 @@ for (const slug of PRODUCTS) if (fs.existsSync(path.join(PUBLIC, "products", slu
 if (fails.length) {
   console.error("  실패: 배포 점검 — " + fails.slice(0, 15).join(" | "));
   process.exitCode = 1;
-} else console.log("  배포 점검 통과 (pay.mode off · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음 · GA4 ID 있으면 privacy ◯◯ 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js");
+} else console.log(`  배포 점검 통과 (pay.mode ${Object.values(MODES).join("·")} · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음 · GA4 ID 있으면 privacy ◯◯ 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js`);

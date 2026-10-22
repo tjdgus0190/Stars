@@ -3662,11 +3662,11 @@
         <p class="pay-price"><b data-js="pay-price"></b></p>
       </section>
 
-      <!-- 3 결제 방법·판매자 (pay.method, 옛 pay.store). 판매자 이름 ◯◯는 운영자 값 -->
+      <!-- 3 결제 방법·판매자 (pay.method, 옛 pay.store). 판매자 이름은 운영자 값(2026-10-22 SHA Studio) -->
       <section class="pay-sec" aria-labelledby="pay-method-title">
         <h2 class="pay-sec__title" id="pay-method-title"><span class="pay-sec__num" aria-hidden="true">3</span><span data-t="pay.method.title">결제 방법·판매자</span></h2>
         <p class="pay-sec__body" data-t="pay.method.body">페이앱 결제창에서 신용카드나 간편결제(카카오페이·네이버페이 등)로 결제해요. 따로 가입하지 않아도 돼요.</p>
-        <p class="pay-method__seller" data-t="pay.method.seller">판매자 ◯◯(개인판매자) · 결제대행 페이앱</p>
+        <p class="pay-method__seller" data-t="pay.method.seller">판매자 SHA Studio(개인판매자) · 결제대행 페이앱</p>
         <p class="pay-note" data-t="pay.method.phone">휴대폰 번호는 페이앱 결제창에만 넣어요. 이 서비스는 읽거나 저장하지 않아요.</p>
       </section>
 
@@ -3713,15 +3713,15 @@
         </div>
       </div>
 
-      <!-- 판매자 정보 줄 (15-4, 버튼 아래). 값 ◯◯는 운영자 몫(69번). 신고번호 줄은 값이 생기면 JS가 .is-hidden 해제.
+      <!-- 판매자 정보 줄 (15-4, 버튼 아래). 값은 운영자 몫(69번), 빈 값의 줄은 JS가 숨김. 신고번호 줄은 값이 생기면 JS가 .is-hidden 해제.
            legal 3종: 구매·환불 안내 / 이용약관 / 개인정보처리방침 (test·live의 결제 문단) -->
       <footer class="pay-seller" data-js="pay-seller" aria-labelledby="pay-seller-title">
         <h2 class="pay-seller__title" id="pay-seller-title" data-t="pay.seller.title">판매자 정보</h2>
         <dl class="pay-seller__list">
-          <div class="pay-seller__row"><dt data-t="pay.seller.labels.name">판매자</dt><dd data-t="pay.seller.name">◯◯</dd></div>
-          <div class="pay-seller__row"><dt data-t="pay.seller.labels.phone">연락처</dt><dd data-t="pay.seller.phone">◯◯</dd></div>
-          <div class="pay-seller__row"><dt data-t="pay.seller.labels.email">이메일</dt><dd data-t="pay.seller.email">◯◯</dd></div>
-          <div class="pay-seller__row"><dt data-t="pay.seller.labels.address">주소</dt><dd data-t="pay.seller.address">◯◯</dd></div>
+          <div class="pay-seller__row"><dt data-t="pay.seller.labels.name">판매자</dt><dd data-t="pay.seller.name">SHA Studio</dd></div>
+          <div class="pay-seller__row"><dt data-t="pay.seller.labels.phone">연락처</dt><dd data-t="pay.seller.phone"></dd></div>
+          <div class="pay-seller__row"><dt data-t="pay.seller.labels.email">이메일</dt><dd data-t="pay.seller.email">tjdgus0190@naver.com</dd></div>
+          <div class="pay-seller__row"><dt data-t="pay.seller.labels.address">주소</dt><dd data-t="pay.seller.address"></dd></div>
           <div class="pay-seller__row is-hidden" data-js="pay-seller-reg"><dt data-t="pay.seller.labels.reg">통신판매신고</dt><dd data-t="pay.seller.reg"></dd></div>
           <div class="pay-seller__row"><dt data-t="pay.seller.labels.pg">결제대행</dt><dd data-t="pay.seller.pg">페이앱</dd></div>
         </dl>
@@ -3765,7 +3765,7 @@
         <!-- 문의 안내: late·noreq에서. pay.contact가 비면 JS가 .is-hidden (live는 contact 없이 켜지 않음, 39번) -->
         <p class="paycheck__help" data-when="late" data-js="paycheck-contact-late" data-t="pay.late.contact">계속 열리지 않으면 문의처로 결제일과 금액을 알려 주세요. 확인해서 도와 드려요</p>
         <p class="paycheck__help" data-when="noreq" data-js="paycheck-contact-noreq" data-t="pay.noReq.contact">다른 탭이나 브라우저에서 결제했다면 받은 열람 코드를 넣거나, 문의처로 결제일·금액을 알려 주세요</p>
-        <p class="paycheck__contact" data-when="late noreq" data-js="paycheck-contact"><span data-t="pay.contactLabel">문의처</span> <b data-js="paycheck-contact-value">◯◯</b></p>
+        <p class="paycheck__contact" data-when="late noreq" data-js="paycheck-contact"><span data-t="pay.contactLabel">문의처</span> <b data-js="paycheck-contact-value">tjdgus0190@naver.com</b></p>
       </div>
 
       <!-- 로딩 막대: checking에서만. 30초 회차의 진행을 보이지 않는 무한 막대(시간을 약속하지 않음) -->

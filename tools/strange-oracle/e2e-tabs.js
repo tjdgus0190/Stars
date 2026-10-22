@@ -156,12 +156,15 @@ async function open({ port, width = 360, height = 640, reduced = true, mapOff = 
   await sleep(900);
   try {
     const O = await open({ port: 9664 });
-    const wantO = { 0: ["share"], 1: ["share", "story"], 3: ["share", "story"], 7: ["share", "story"] };
+    // (2026-10-22) 배포판 pay.mode를 읽어 기대값을 고른다: live면 책 칸이 1/7부터 보이고 DOM에 있다. 지도 칸은 map off라 늘 DOM 0
+    const live = /\bpay:\s*\{\s*mode:\s*"live"/.test(await (await fetch(`${OFF}/products/strange-oracle/data.js`)).text());
+    const wantO = live ? { 0: ["share"], 1: ["share", "story", "book"], 3: ["share", "story", "book"], 7: ["share", "story", "book"] } : { 0: ["share"], 1: ["share", "story"], 3: ["share", "story"], 7: ["share", "story"] };
+    const PM = live ? "live" : "off";
     for (const n of [0, 1, 3, 7]) {
       await O.toHub(OFF, n);
       const t = await O.tabs();
       const dom = await O.inDom();
-      check(`1 off ${n}/7: 보이는 칸 ${wantO[n].join(",")} · 책·지도 칸 DOM 0 · 넘침 0`, JSON.stringify(t) === JSON.stringify(wantO[n]) && !dom.includes("book") && !dom.includes("map") && (await O.ev("document.documentElement.scrollWidth <= innerWidth")), JSON.stringify({ t, dom }));
+      check(`1 ${PM} ${n}/7: 보이는 칸 ${wantO[n].join(",")} · 책 칸 DOM ${live ? "있음" : "0"} · 지도 칸 DOM 0 · 넘침 0`, JSON.stringify(t) === JSON.stringify(wantO[n]) && dom.includes("book") === live && !dom.includes("map") && (await O.ev("document.documentElement.scrollWidth <= innerWidth")), JSON.stringify({ t, dom }));
     }
     await O.close();
   } finally {

@@ -421,40 +421,55 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   const errs = b.log.errors.filter((e) => !fontErrs.includes(e)).filter((e) => !/favicon|\/api\/|40[0-9]|429|503|ERR_|net::|payapp-lite/.test(e));
   check("I8 test: 콘솔 오류 0 (일부러 낸 401·403·404·429·503·연결 실패 제외)", errs.length === 0, errs.slice(0, 3).join(" | "));
 
-  // ═══ J. off (배포판과 같은 data.js) ═══
+  // ═══ J. 배포판과 같은 data.js (모의 서버 --mode off = dist/public). (2026-10-22) 배포판이 live면 L 묶음, off면 J 묶음 ═══
   const srv = spawn(process.execPath, [path.join(__dirname, "mock-server.js"), "--port", "8791", "--mode", "off"], { stdio: "ignore" });
   await sleep(900);
   try {
-    const nOff = b.log.requests.length;
-    const DOM0 = "#screen-report, #screen-deeper, #screen-paycheck, #screen-paypopup, template, [data-js=pay-tpl], [data-js=pay-toc-tpl], [data-js=pay-code-dialog], [data-js=clear-warn-pay], [data-js=book-code-row], [data-js=hub-book], [data-js=result-book-line], [data-js=story-book], [data-js=story-book-link], [data-js=pass-enter], [data-js=book-chapter], [data-t='hub.faq.items.4.q'], [data-js=book-toc-open], #screen-preview, [data-js=story-preview], [data-js=book-preview-band], [data-js=book-interest], [data-js=book-buy-row], [data-js=report-cross]"; // (18-7) 미리보기·나의 이야기 카드·목차 조각·새 장 원본 칸도 0
-    const counts = {};
-    check("J1 off: 지름길 rooms=7(결제 표시 없음) → 나의 이야기", await skip(OFF, "rooms=7&paid=1", "screen-story"));
-    counts.story = await ev(`document.querySelectorAll(${JSON.stringify(DOM0)}).length`);
-    for (const h of ["hub", "saju-result", "sibyl-result"]) {
-      await b.goto(`${OFF}${P}#${h}`);
-      await waitFor(`document.querySelector('.screen.is-active')?.id === 'screen-${h}'`, 5000);
-      counts[h] = await ev(`document.querySelectorAll(${JSON.stringify(DOM0)}).length`);
+    const DIST_MODE = ((await (await fetch(`${OFF}/products/strange-oracle/data.js`)).text()).match(/\bpay:\s*\{\s*mode:\s*"(\w+)"/) || [])[1];
+    if (DIST_MODE === "live") {
+      // L. live 배포판: 결제·책 요소가 있고, 결제 SDK는 버튼 전 0, legal 3종 200·◯◯ 0·표지 0, 원본에 [초안]·◯◯·__dev 0
+      const nL = b.log.requests.length;
+      check("L1 live: 1/7 입구에 책 카드·결제 버튼(결정 128)", (await skip(OFF, "rooms=1&to=hub", "screen-hub")) && (await ev("!!document.querySelector('[data-js=hub-book]') && !!document.querySelector('[data-js=hub-pay-btn]')")));
+      check("L2 live: 결제 버튼을 누르기 전 페이앱 SDK·/api/pay 요청 0 (3장)", !b.log.requests.slice(nL).some((r) => /payapp|\/api\/pay/.test(r)));
+      const get = async (p) => { const r = await fetch(`${OFF}/products/strange-oracle/${p}`); return { s: r.status, t: await r.text() }; };
+      const [lPriv, lTerms, lRefund, lIndex, lData] = [await get("legal/privacy.html"), await get("legal/terms.html"), await get("legal/refund.html"), await get("index.html"), await get("data.js")];
+      const legal = lPriv.t + lTerms.t + lRefund.t;
+      check("L3 live: privacy·terms·refund 200, ◯◯·표지·'템플릿' 0, 판매자 SHA Studio·문의 이메일 있음, 결제 문단(페이앱) 있음",
+        lPriv.s === 200 && lTerms.s === 200 && lRefund.s === 200 && !/◯◯|<!--\s*\/?pay:(on|off)\s*-->|운영자 확인 전 템플릿|판매하는 상품이나 결제가 없습니다|결제를 받지 않으므로/.test(legal) && /SHA Studio/.test(lRefund.t) && /@naver\.com/.test(lRefund.t + lTerms.t + lPriv.t) && /페이앱/.test(lTerms.t),
+        `privacy ${lPriv.s} · terms ${lTerms.s} · refund ${lRefund.s}`);
+      check("L4 live: index.html·data.js에 [초안]·◯◯·__dev 0, SDK는 페이앱 공식 주소", lIndex.s === 200 && !/\[초안\]|◯◯|__dev/.test(lIndex.t + lData.t.replace(/\/\/.*$/gm, "")) && /https:\/\/lite\.payapp\.kr\//.test(lData.t));
+    } else {
+      const nOff = b.log.requests.length;
+      const DOM0 = "#screen-report, #screen-deeper, #screen-paycheck, #screen-paypopup, template, [data-js=pay-tpl], [data-js=pay-toc-tpl], [data-js=pay-code-dialog], [data-js=clear-warn-pay], [data-js=book-code-row], [data-js=hub-book], [data-js=result-book-line], [data-js=story-book], [data-js=story-book-link], [data-js=pass-enter], [data-js=book-chapter], [data-t='hub.faq.items.4.q'], [data-js=book-toc-open], #screen-preview, [data-js=story-preview], [data-js=book-preview-band], [data-js=book-interest], [data-js=book-buy-row], [data-js=report-cross]"; // (18-7) 미리보기·나의 이야기 카드·목차 조각·새 장 원본 칸도 0
+      const counts = {};
+      check("J1 off: 지름길 rooms=7(결제 표시 없음) → 나의 이야기", await skip(OFF, "rooms=7&paid=1", "screen-story"));
+      counts.story = await ev(`document.querySelectorAll(${JSON.stringify(DOM0)}).length`);
+      for (const h of ["hub", "saju-result", "sibyl-result"]) {
+        await b.goto(`${OFF}${P}#${h}`);
+        await waitFor(`document.querySelector('.screen.is-active')?.id === 'screen-${h}'`, 5000);
+        counts[h] = await ev(`document.querySelectorAll(${JSON.stringify(DOM0)}).length`);
+      }
+      await click("[data-js=clear-open]");
+      counts.clearDlg = await ev(`document.querySelectorAll(${JSON.stringify(DOM0)}).length`);
+      await click("[data-js=clear-cancel]");
+      check("J2 off: 결제·책 요소 DOM 0개 (결제 확인·팝업·코드 카드·목차 코드 줄·지우기 경고 줄 포함)", Object.values(counts).every((n) => n === 0), JSON.stringify(counts));
+      const txt = await ev("document.body.innerText");
+      check("J3 off: 화면 글에 '준비 중'·'곧 열려요'·가격 0", !/준비 중|곧 열려|3,900|5,900/.test(txt));
+      for (const h of ["report", "deeper", "paid", "paycheck"]) {
+        await b.goto(`${OFF}${P}#${h}`);
+        await sleep(400);
+        const a = await active();
+        check(`J4 off: #${h} → 막다른 곳 없이 화면 하나(${a})`, Boolean(a) && !/report|deeper|paycheck|paypopup/.test(a));
+      }
+      check("J5 off: /api·payapp 요청 0", !b.log.requests.slice(nOff).some((r) => /\/api\/|payapp/.test(r)));
+      // (15단계 QA 1차 필수 1·권장 2) off: legal 결제 문단 0·refund.html 404·index.html 원본에 결제 template·판매자 ◯◯ 0
+      const get = async (p) => { const r = await fetch(`${OFF}/products/strange-oracle/${p}`); return { s: r.status, t: await r.text() }; };
+      const [oPriv, oTerms, oRefund, oIndex] = [await get("legal/privacy.html"), await get("legal/terms.html"), await get("legal/refund.html"), await get("index.html")];
+      check("J6 off: privacy·terms 200, 결제 문단(제4조의3·제2조의2·페이앱·목차 줄)·표지 0, '결제 없음' 문장 있음, refund.html 404",
+        oPriv.s === 200 && oTerms.s === 200 && oRefund.s === 404 && !/s4-3|s2-2|페이앱|3,900|5,900|pay:(on|off)/.test(oPriv.t + oTerms.t) && /결제를 받지 않으므로/.test(oPriv.t) && /판매하는 상품이나 결제가 없습니다/.test(oTerms.t),
+        `privacy ${oPriv.s} · terms ${oTerms.s} · refund ${oRefund.s}`);
+      check("J7 off: index.html 원본(소스 보기)에 pay-tpl·pay-toc-tpl·(18-7) preview-tpl·toc18-tpl·cross-tpl·story-preview-tpl template·'판매자 ◯◯'·표지 0", oIndex.s === 200 && !/pay-tpl|pay-toc-tpl|preview-tpl|toc18-tpl|cross-tpl|story-preview-tpl|판매자 ◯◯|pay:(on|off)\s*-->/.test(oIndex.t));
     }
-    await click("[data-js=clear-open]");
-    counts.clearDlg = await ev(`document.querySelectorAll(${JSON.stringify(DOM0)}).length`);
-    await click("[data-js=clear-cancel]");
-    check("J2 off: 결제·책 요소 DOM 0개 (결제 확인·팝업·코드 카드·목차 코드 줄·지우기 경고 줄 포함)", Object.values(counts).every((n) => n === 0), JSON.stringify(counts));
-    const txt = await ev("document.body.innerText");
-    check("J3 off: 화면 글에 '준비 중'·'곧 열려요'·가격 0", !/준비 중|곧 열려|3,900|5,900/.test(txt));
-    for (const h of ["report", "deeper", "paid", "paycheck"]) {
-      await b.goto(`${OFF}${P}#${h}`);
-      await sleep(400);
-      const a = await active();
-      check(`J4 off: #${h} → 막다른 곳 없이 화면 하나(${a})`, Boolean(a) && !/report|deeper|paycheck|paypopup/.test(a));
-    }
-    check("J5 off: /api·payapp 요청 0", !b.log.requests.slice(nOff).some((r) => /\/api\/|payapp/.test(r)));
-    // (15단계 QA 1차 필수 1·권장 2) off: legal 결제 문단 0·refund.html 404·index.html 원본에 결제 template·판매자 ◯◯ 0
-    const get = async (p) => { const r = await fetch(`${OFF}/products/strange-oracle/${p}`); return { s: r.status, t: await r.text() }; };
-    const [oPriv, oTerms, oRefund, oIndex] = [await get("legal/privacy.html"), await get("legal/terms.html"), await get("legal/refund.html"), await get("index.html")];
-    check("J6 off: privacy·terms 200, 결제 문단(제4조의3·제2조의2·페이앱·목차 줄)·표지 0, '결제 없음' 문장 있음, refund.html 404",
-      oPriv.s === 200 && oTerms.s === 200 && oRefund.s === 404 && !/s4-3|s2-2|페이앱|3,900|5,900|pay:(on|off)/.test(oPriv.t + oTerms.t) && /결제를 받지 않으므로/.test(oPriv.t) && /판매하는 상품이나 결제가 없습니다/.test(oTerms.t),
-      `privacy ${oPriv.s} · terms ${oTerms.s} · refund ${oRefund.s}`);
-    check("J7 off: index.html 원본(소스 보기)에 pay-tpl·pay-toc-tpl·(18-7) preview-tpl·toc18-tpl·cross-tpl·story-preview-tpl template·'판매자 ◯◯'·표지 0", oIndex.s === 200 && !/pay-tpl|pay-toc-tpl|preview-tpl|toc18-tpl|cross-tpl|story-preview-tpl|판매자 ◯◯|pay:(on|off)\s*-->/.test(oIndex.t));
   } finally {
     srv.kill();
   }

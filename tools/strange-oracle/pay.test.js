@@ -500,14 +500,14 @@ test("합격 17: 저장소 파일에 실제 키처럼 보이는 linkkey·linkval
   }
 });
 
-test("data.js 배포판: pay.mode off(모의 서버가 찾는 첫 줄 모양) · 5,900원", () => {
+test("data.js 배포판: pay.mode off 또는 live(2026-10-22 live, 모의 서버가 찾는 첫 줄 모양) · 5,900원", () => {
   const w = {};
   require("vm").runInNewContext(fs.readFileSync(path.join(PROD, "data.js"), "utf8"), { window: w });
-  assert.strictEqual(w.TEXT.pay.mode, "off");
+  assert.ok(["off", "live"].includes(w.TEXT.pay.mode), w.TEXT.pay.mode);
   assert.strictEqual(w.TEXT.pay.amount, 5900);
   // 19-6: 페이앱 공개 값만, 비밀값 키 없음
   assert.strictEqual(w.TEXT.pay.payapp.userid, "tjdgus0190");
   assert.strictEqual(w.TEXT.pay.payapp.shopname, "SHA Studio");
   for (const k of ["linkkey", "linkval", "PASS_SECRET"]) assert.ok(!(k in w.TEXT.pay.payapp), k);
-  assert.match(fs.readFileSync(path.join(PROD, "data.js"), "utf8"), /\bpay:\s*\{\s*mode:\s*"off"/);
+  assert.match(fs.readFileSync(path.join(PROD, "data.js"), "utf8"), /\bpay:\s*\{\s*mode:\s*"(?:off|live)"/);
 });

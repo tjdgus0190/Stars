@@ -59,7 +59,7 @@ window.TEXT = {
   // ── (15단계 15-7) 결제 설정 + 결제 화면 문구. 설정 칸(mode·amount·payapp·contact)은 문구가 아니다.
   // mode: "off" = 본 페이지(배포판, 결정 94) — 결제 화면·열람 코드 칸·책(목차·장·여는/닫는 글)·방 결과의 책 한 줄·입구 책 카드·FAQ 책 문답을 모두 숨긴다.
   //       "test" = 시험 페이지에서만. 이 파일은 고치지 않는다: node tools/strange-oracle/mock-server.js --mode test 가 응답할 때만 바꾼다.
-  //       "live" = 운영자만, 15-9 G7을 마친 뒤. node tools/build-dist.js는 이 값이 "off"가 아니면 실패한다(live 때 그 검사를 함께 푼다).
+  //       "live" = 지금 값(운영자 2026-10-22 "결제 켜줘"). node tools/build-dist.js는 off·live만 통과시키고, live면 ⑦ 가드(판매자 값·◯◯·refund.html)를 본다.
   //   ※ mode는 이 묶음의 첫 줄이어야 한다(모의 서버가 이 모양으로 찾는다).
   // amount: 원 단위 숫자(결제창 price, 함수가 5900과 비교).
   // payapp: 페이앱 결제창에 넘기는 공개 값. 한 줄로 두고 안에 중괄호를 쓰지 않는다(모의 서버가 이 모양으로 찾는다).
@@ -70,7 +70,7 @@ window.TEXT = {
   // contact: 문의처 한 줄(39번). 비면 결제 확인 화면의 문의 줄을 숨기고, live에서 비어 있으면 build-dist 실패
   // 문구: 15단계 G4 copywriter 확정(2026-10-16). 판매자 값·문의처(contact)는 운영자 몫이라 ◯◯·빈칸으로 둔다(69·39번).
   pay: {
-    mode: "off",
+    mode: "live",
     amount: 5900,
     payapp: { userid: "tjdgus0190", shopname: "SHA Studio", goodname: "낯선 점술관 한 권의 책", tag: "so-book-1", sdk: "https://lite.payapp.kr/public/api/v2/payapp-lite.js", openpaytype: "card,kakaopay,naverpay,smilepay,applepay,payco" },
     contact: "tjdgus0190@naver.com", // 문의처 = 판매자 이메일 (운영자, 2026-10-22)
@@ -99,7 +99,7 @@ window.TEXT = {
     seller: { // 버튼 아래 판매자 정보 줄(69번). 값 ◯◯는 운영자 몫. reg(통신판매업 신고번호)가 비면 그 줄을 숨긴다
       title: "판매자 정보",
       labels: { name: "판매자", phone: "연락처", email: "이메일", address: "주소", reg: "통신판매신고", pg: "결제대행" },
-      name: "SHA Studio", phone: "", email: "tjdgus0190@naver.com", address: "◯◯", reg: "", pg: "페이앱", // (운영자 2026-10-22) 상호 SHA Studio, 연락처 비움. 빈 값의 줄은 숨긴다. 주소 ◯◯는 운영자 확인 대기
+      name: "SHA Studio", phone: "", email: "tjdgus0190@naver.com", address: "", reg: "", pg: "페이앱", // (운영자 2026-10-22) 상호 SHA Studio, 연락처·주소 비움. 빈 값의 줄은 숨긴다
       refund: "구매·환불 안내", legalAria: "구매 관련 고지",
     },
     back: "목차로 돌아가기",

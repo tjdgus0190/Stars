@@ -71,7 +71,8 @@ const TYPES = {
   ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".json": "application/json; charset=utf-8", ".md": "text/plain; charset=utf-8",
 };
 const notFound = (res) => res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("없는 파일");
-const PAY_RE = /(\bpay:\s*\{\s*mode:\s*)"off"/;
+const PAY_RE = /(\bpay:\s*\{\s*mode:\s*)"(?:off|live)"/; // (2026-10-22) 배포판이 live여도 시험 페이지는 test로
+const SITE_RE = /(\bsite:\s*\{\s*url:\s*)"[^"]*"/; // (2026-10-22) 시험 페이지는 운영자가 넣은 실제 주소 대신 빈 값 → 공유·초대 링크가 지금 주소(127.0.0.1)로
 const GA4_RE = /(\banalytics:\s*\{\s*ga4:\s*)"[^"]+"/; // 비어 있으면 그대로(분석 스크립트 없음)
 const GA4_TEST = "G-TEST12345";
 // (14-6) 배포처(Netlify)처럼 글자 파일은 압축해서 보낸다 → 성능 측정이 실제 전송량(압축 후)과 맞는다
@@ -184,7 +185,7 @@ location.replace("${P}#${to}");
       return notFound(res);
     }
     // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로)
-    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"'))));
+    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"').replace(SITE_RE, '$1""'))));
     // 19-5 (b): 모든 모드에서 data.js 응답의 GA4 측정 ID를 시험 ID로 (실제 ID로 localhost 방문이 나가지 않게, 파일은 그대로)
     if (/[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(GA4_RE, '$1"' + GA4_TEST + '"'));
     send(req, res, TYPES[path.extname(file)] || "application/octet-stream", data);
