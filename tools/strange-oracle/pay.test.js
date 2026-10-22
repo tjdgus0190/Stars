@@ -27,7 +27,7 @@ let ipN = 0;
 
 const form = (o) => new URLSearchParams(Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined))).toString();
 const notice = (state, mul, r, over = {}) =>
-  form(Object.assign({ userid: ENV.PAYAPP_USERID, linkkey: ENV.PAYAPP_LINKKEY, linkval: ENV.PAYAPP_LINKVAL, goodname: "낯선 점술관 한 권의 책", price: "5900", recvphone: PHONE, mul_no: mul, pay_state: String(state), var1: r, var2: "so-book-1", card_name: "시험카드" }, over));
+  form(Object.assign({ userid: ENV.PAYAPP_USERID, linkkey: ENV.PAYAPP_LINKKEY, linkval: ENV.PAYAPP_LINKVAL, goodname: "낯선 점술관 한 권의 책", price: "9900", recvphone: PHONE, mul_no: mul, pay_state: String(state), var1: r, var2: "so-book-1", card_name: "시험카드" }, over));
 const fb = (store, body, env = ENV) => Pay.handle({ method: "POST", route: "feedback", body, ip: "payapp" }, env, store);
 const status = async (store, r, opts = {}) => {
   const res = await Pay.handle({ method: opts.method || "POST", route: "status", body: typeof r === "string" ? JSON.stringify({ r }) : JSON.stringify(r), ip: opts.ip || `10.2.${ipN >> 8}.${++ipN & 255}` }, opts.env || ENV, store, opts.now);
@@ -87,7 +87,7 @@ test("합격 8: userid·linkkey·linkval 틀림 403 FAIL(길이가 달라도 예
       assert.strictEqual(res.status, 403, JSON.stringify(over));
       assert.strictEqual(res.body, "FAIL");
     }
-  for (const over of [{ price: "100" }, { price: "59000" }, { price: "" }, { price: "5900.5" }, { price: "3900" }, { var2: "so-book-2" }, { var2: undefined }, { var1: "zz" + r.slice(2) }, { var1: r.toUpperCase() }, { var1: r.slice(1) }, { var1: undefined }])
+  for (const over of [{ price: "100" }, { price: "99000" }, { price: "" }, { price: "9900.5" }, { price: "3900" }, { price: "5900" }, { var2: "so-book-2" }, { var2: undefined }, { var1: "zz" + r.slice(2) }, { var1: r.toUpperCase() }, { var1: r.slice(1) }, { var1: undefined }])
     for (const st of [1, 4]) {
       const res = await fb(store, notice(st, mul, r, over));
       assert.strictEqual(res.status, 400, JSON.stringify(over) + st);
@@ -448,7 +448,7 @@ test("PAY_DEBUG_FIELDS=1: 칸 이름과 참·거짓만 로그, 값 0 / 꺼져 �
   assert.strictEqual(lines.length, 1);
   const j = JSON.parse(lines[0].replace(/^pay-debug /, ""));
   assert.ok(j.fields.includes("recvphone") && j.priceOk === true && j.tagOk === true && j.state === "4");
-  for (const f of [PHONE, r, ENV.PAYAPP_LINKKEY, ENV.PAYAPP_LINKVAL, ENV.PAYAPP_USERID, "5900", "so-book-1"]) assert.ok(!lines[0].includes(f), f);
+  for (const f of [PHONE, r, ENV.PAYAPP_LINKKEY, ENV.PAYAPP_LINKVAL, ENV.PAYAPP_USERID, "9900", "so-book-1"]) assert.ok(!lines[0].includes(f), f);
 });
 
 test("새 형식(v2) respond: 경로 끝으로 길을 고르고, 저장소 열기 실패는 503/500, 그 밖 경로 404", async () => {
@@ -504,11 +504,11 @@ test("합격 17: 저장소 파일에 실제 키처럼 보이는 linkkey·linkval
   }
 });
 
-test("data.js 배포판: pay.mode off 또는 live(2026-10-22 live, 모의 서버가 찾는 첫 줄 모양) · 5,900원", () => {
+test("data.js 배포판: pay.mode off 또는 live(2026-10-22 live, 모의 서버가 찾는 첫 줄 모양) · 9,900원(2026-10-22)", () => {
   const w = {};
   require("vm").runInNewContext(fs.readFileSync(path.join(PROD, "data.js"), "utf8"), { window: w });
   assert.ok(["off", "live"].includes(w.TEXT.pay.mode), w.TEXT.pay.mode);
-  assert.strictEqual(w.TEXT.pay.amount, 5900);
+  assert.strictEqual(w.TEXT.pay.amount, 9900);
   // 19-6: 페이앱 공개 값만, 비밀값 키 없음
   assert.strictEqual(w.TEXT.pay.payapp.userid, "tjdgus0190");
   assert.strictEqual(w.TEXT.pay.payapp.shopname, "SHA Studio");

@@ -141,7 +141,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("K1 test: 판매자 정보 줄 legal 링크 3개(refund·terms·privacy) 모두 200", legalRes.length === 3 && legalRes.every((x) => x.s === 200) && ["refund.html", "terms.html", "privacy.html"].every((n) => legalRes.some((x) => x.u === n)), legalRes.map((x) => `${x.u} ${x.s}`).join(" · "));
   const legalText = (n) => (legalRes.find((x) => x.u === n) || { t: "" }).t;
   const vis = (n) => legalText(n).replace(/<!--[\s\S]*?-->/g, ""); // 주석 밖 본문
-  check("K2 test: privacy 제4조의3·terms 제2조의2 결제 문단과 목차 줄이 주석 밖에 보임", /id="s4-3"/.test(vis("privacy.html")) && /href="#s4-3"/.test(vis("privacy.html")) && /페이앱/.test(vis("privacy.html")) && /id="s2-2"/.test(vis("terms.html")) && /href="#s2-2"/.test(vis("terms.html")) && /5,900원/.test(vis("terms.html")));
+  check("K2 test: privacy 제4조의3·terms 제2조의2 결제 문단과 목차 줄이 주석 밖에 보임", /id="s4-3"/.test(vis("privacy.html")) && /href="#s4-3"/.test(vis("privacy.html")) && /페이앱/.test(vis("privacy.html")) && /id="s2-2"/.test(vis("terms.html")) && /href="#s2-2"/.test(vis("terms.html")) && /9,900원/.test(vis("terms.html")));
   check("K3 test: 결제가 꺼진 판 문장('결제를 받지 않으므로'·'판매하는 상품이나 결제가 없습니다') 0·표지 주석 0·refund 본문 있음", !/결제를 받지 않으므로/.test(vis("privacy.html")) && !/판매하는 상품이나 결제가 없습니다/.test(vis("terms.html")) && !legalRes.some((x) => /pay:(on|off)\s*-->/.test(x.t)) && /환불/.test(vis("refund.html")));
   await click("[data-js=pay-agree]");
   check("A5 동의하면 결제 버튼 활성", (await ev("document.querySelector('[data-js=pay-buy]').getAttribute('aria-disabled')")) === "false");
@@ -187,7 +187,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   const coB = b.log.bodies.filter((x) => /\/__dev\/payapp\/checkout/.test(x.url)).pop();
   const sent = Object.fromEntries(new URLSearchParams(coB ? coB.body : ""));
   const WANT = ["checkretry", "feedbackurl", "goodname", "openpaytype", "price", "returnurl", "shopname", "skip_cstpage", "smsuse", "userid", "var1", "var2"];
-  check("B3 결제창으로 간 값 = 15-2 표의 12칸뿐(recvphone 없음), price 5900·var2 so-book-1·var1 32자 16진수·returnurl /api/pay/return", Object.keys(sent).sort().join() === WANT.join() && sent.price === "5900" && sent.var2 === "so-book-1" && /^[0-9a-f]{32}$/.test(sent.var1) && /\/api\/pay\/return$/.test(sent.returnurl) && /\/api\/pay\/feedback$/.test(sent.feedbackurl) && /card/.test(sent.openpaytype) && !/phone|vbank|rbank/.test(sent.openpaytype), Object.keys(sent).join(","));
+  check("B3 결제창으로 간 값 = 15-2 표의 12칸뿐(recvphone 없음), price 9900·var2 so-book-1·var1 32자 16진수·returnurl /api/pay/return", Object.keys(sent).sort().join() === WANT.join() && sent.price === "9900" && sent.var2 === "so-book-1" && /^[0-9a-f]{32}$/.test(sent.var1) && /\/api\/pay\/return$/.test(sent.returnurl) && /\/api\/pay\/feedback$/.test(sent.feedbackurl) && /card/.test(sent.openpaytype) && !/phone|vbank|rbank/.test(sent.openpaytype), Object.keys(sent).join(","));
   allReqs.push(sent.var1);
   const openB = await waitFor("!!document.querySelector('[data-js=pay-code-dialog]')?.open", 30000);
   const codeB = (await codesShown())[0] || "";
@@ -454,7 +454,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       await click("[data-js=clear-cancel]");
       check("J2 off: 결제·책 요소 DOM 0개 (결제 확인·팝업·코드 카드·목차 코드 줄·지우기 경고 줄 포함)", Object.values(counts).every((n) => n === 0), JSON.stringify(counts));
       const txt = await ev("document.body.innerText");
-      check("J3 off: 화면 글에 '준비 중'·'곧 열려요'·가격 0", !/준비 중|곧 열려|3,900|5,900/.test(txt));
+      check("J3 off: 화면 글에 '준비 중'·'곧 열려요'·가격 0", !/준비 중|곧 열려|3,900|5,900|9,900/.test(txt));
       for (const h of ["report", "deeper", "paid", "paycheck"]) {
         await b.goto(`${OFF}${P}#${h}`);
         await sleep(400);
@@ -466,7 +466,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       const get = async (p) => { const r = await fetch(`${OFF}/products/strange-oracle/${p}`); return { s: r.status, t: await r.text() }; };
       const [oPriv, oTerms, oRefund, oIndex] = [await get("legal/privacy.html"), await get("legal/terms.html"), await get("legal/refund.html"), await get("index.html")];
       check("J6 off: privacy·terms 200, 결제 문단(제4조의3·제2조의2·페이앱·목차 줄)·표지 0, '결제 없음' 문장 있음, refund.html 404",
-        oPriv.s === 200 && oTerms.s === 200 && oRefund.s === 404 && !/s4-3|s2-2|페이앱|3,900|5,900|pay:(on|off)/.test(oPriv.t + oTerms.t) && /결제를 받지 않으므로/.test(oPriv.t) && /판매하는 상품이나 결제가 없습니다/.test(oTerms.t),
+        oPriv.s === 200 && oTerms.s === 200 && oRefund.s === 404 && !/s4-3|s2-2|페이앱|3,900|5,900|9,900|pay:(on|off)/.test(oPriv.t + oTerms.t) && /결제를 받지 않으므로/.test(oPriv.t) && /판매하는 상품이나 결제가 없습니다/.test(oTerms.t),
         `privacy ${oPriv.s} · terms ${oTerms.s} · refund ${oRefund.s}`);
       check("J7 off: index.html 원본(소스 보기)에 pay-tpl·pay-toc-tpl·(18-7) preview-tpl·toc18-tpl·cross-tpl·story-preview-tpl template·'판매자 ◯◯'·표지 0", oIndex.s === 200 && !/pay-tpl|pay-toc-tpl|preview-tpl|toc18-tpl|cross-tpl|story-preview-tpl|판매자 ◯◯|pay:(on|off)\s*-->/.test(oIndex.t));
     }

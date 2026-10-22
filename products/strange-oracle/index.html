@@ -465,7 +465,7 @@
         <button class="btn btn--secondary btn--block book-card__go" type="button" data-js="hub-book-go" data-t="hub.book.goToc">목차 보기</button>
         <!-- (2026-10-21 결제 유도 앞당기기) 1/7부터 보이는 결제 버튼 → 결제 전 화면(받는 것·가격·환불 먼저). 0/7·결제함이면 JS가 숨김. hub-book 안이라 off에서는 카드째 지워진다 -->
         <div class="pay-entry is-hidden" data-js="pay-entry">
-          <button class="btn btn--primary btn--block" type="button" data-js="hub-pay-btn">책 전체 열기 · 5,900원</button>
+          <button class="btn btn--primary btn--block" type="button" data-js="hub-pay-btn">책 전체 열기 · 9,900원</button>
           <p class="pay-entry__note" data-js="hub-pay-note"></p>
         </div>
       </aside>
@@ -479,7 +479,7 @@
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">타고난 그릇에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요. 첫 방에서 넣은 정보는 뒤의 방들이 이어서 써요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름·생년월일·태어난 시각·성별은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
           <!-- (14단계) 책 문답: 무엇이 담기는지 (답 150자). 시험 페이지(test)에서만 구매 문답 -->
-          <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">방의 장과 숨은 장, 「겹치는 곳, 갈리는 곳」·시기별 흐름·2027년의 흐름·인연의 장·궁합·원형 심층까지 유료 12장이에요. 페이앱에서 5,900원을 결제하면 바로 열리고, 코드로 다른 기기에서도 열 수 있어요. 여는 글·닫는 글·목차·만신의 장은 무료예요.</dd>
+          <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">방의 장과 숨은 장, 「겹치는 곳, 갈리는 곳」·시기별 흐름·2027년의 흐름·인연의 장·궁합·원형 심층까지 유료 12장이에요. 페이앱에서 9,900원을 결제하면 바로 열리고, 코드로 다른 기기에서도 열 수 있어요. 여는 글·닫는 글·목차·만신의 장은 무료예요.</dd>
           </div>
           <!-- map:on -->
           <!-- (16단계) 지도 문답 2개 (답 150자 이내). copywriter(H4)가 data.js에 넣고 견본을 정리한다 -->
@@ -3627,7 +3627,7 @@
     <!-- ═════════ 6-P. (14·15단계) 결제 — pay.mode가 test·live일 때만 (결정 94, 15단계 페이앱) ═════════
          template 안에 둔다: off(배포판)에서는 DOM에 결제 요소가 0개여야 한다(14-7의 8, 15-8의 1). JS가 test·live에서만 template 내용 전부를
          (최상위 요소 4개: #screen-deeper · #screen-paycheck · #screen-paypopup · dialog pay-code-dialog) 꺼내 붙이고 applyText를 돌린다. off면 template째 지운다.
-         순서 고정(15-4): 1 받는 것 → 2 가격 → 3 결제 방법·판매자 → 4 열람 방법 → 5 환불·청약철회 → 6 동의 → 7 5,900원 결제하기 → 8 열람 코드 넣기 → 판매자 정보 줄.
+         순서 고정(15-4): 1 받는 것 → 2 가격 → 3 결제 방법·판매자 → 4 열람 방법 → 5 환불·청약철회 → 6 동의 → 7 9,900원 결제하기 → 8 열람 코드 넣기 → 판매자 정보 줄.
          1~6은 모두 결제 버튼보다 위. 포스타입 구매처(stores)·새 탭 안내(newTab)·가격 단위(price.unit)는 15-7에서 삭제됨. 명세: design/strange-oracle.md 「15단계」 -->
     <template data-js="pay-tpl">
     <section class="screen pay" id="screen-deeper" data-js="screen-deeper" data-room="hall" data-preview="6-P. 결제 전 화면 (test·live에서만)">
@@ -3656,7 +3656,7 @@
         <p class="pay-note" data-t="pay.what.free">여는 글·닫는 글과 목차는 결제 없이 먼저 읽을 수 있고, 일곱 방을 모두 지나면 방 장마다 첫 줄도 미리 볼 수 있어요. 아직 지나지 않은 방의 장은 그 방을 지나면 열려요. 「겹치는 곳, 갈리는 곳」은 방을 둘 이상 지나면 열리고, 방을 더 지나면 내용이 바뀔 수 있어요.</p>
       </section>
 
-      <!-- 2 가격: 5,900원 한 줄 (price.unit 삭제) -->
+      <!-- 2 가격: 9,900원 한 줄 (price.unit 삭제) -->
       <section class="pay-sec pay-sec--row" aria-labelledby="pay-price-title">
         <h2 class="pay-sec__title" id="pay-price-title"><span class="pay-sec__num" aria-hidden="true">2</span><span data-t="pay.price.title">가격</span></h2>
         <p class="pay-price"><b data-js="pay-price"></b></p>
@@ -3688,7 +3688,7 @@
            이 탭에 이미 strange-oracle-pass가 있고 책이 열려 있으면 JS가 .pay-act에 .is-opened → 동의·버튼·안내를 숨기고 pay-opened를 보인다 -->
       <div class="pay-act" data-js="pay-act">
         <label class="check pay-agree"><input type="checkbox" data-js="pay-agree" /><span data-t="pay.agree">위 내용(받는 것·가격·결제 방법·판매자·환불 조건)을 확인했어요</span></label>
-        <button class="btn btn--primary btn--block pay-buy" type="button" data-js="pay-buy" aria-disabled="true"><span data-t="pay.buy">5,900원 결제하기</span></button>
+        <button class="btn btn--primary btn--block pay-buy" type="button" data-js="pay-buy" aria-disabled="true"><span data-t="pay.buy">9,900원 결제하기</span></button>
         <p class="pay-act__note is-hidden" data-js="pay-store-empty" data-t="pay.storeEmpty">판매 준비 중</p>
         <div class="pay-opened" data-js="pay-opened" role="status">
           <svg class="pay-opened__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3 4.5C5.5 3.8 8 4 10 5.5c2-1.5 4.5-1.7 7-1v11c-2.5-.7-5-.5-7 1-2-1.5-4.5-1.7-7-1Z M10 5.5v11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
