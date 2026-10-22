@@ -70,7 +70,7 @@ window.TEXT = {
   // contact: 문의처 한 줄(39번). 비면 결제 확인 화면의 문의 줄을 숨기고, live에서 비어 있으면 build-dist 실패
   // 문구: 15단계 G4 copywriter 확정(2026-10-16). 판매자 값·문의처(contact)는 운영자 몫이라 ◯◯·빈칸으로 둔다(69·39번).
   pay: {
-    mode: "live",
+    mode: "off",
     amount: 5900,
     payapp: { userid: "tjdgus0190", shopname: "SHA Studio", goodname: "낯선 점술관 한 권의 책", tag: "so-book-1", sdk: "https://lite.payapp.kr/public/api/v2/payapp-lite.js", openpaytype: "card,kakaopay,naverpay,smilepay,applepay,payco" },
     contact: "tjdgus0190@naver.com", // 문의처 = 판매자 이메일 (운영자, 2026-10-22)
