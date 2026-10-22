@@ -13,7 +13,7 @@ const PROD = path.join(ROOT, "products", "strange-oracle");
 const PAIDDIR = path.join(PROD, "api", "_paid", "book");
 const Book = require(path.join(PROD, "book.js"));
 const PayCode = require(path.join(PROD, "paycode.js"));
-const Fn = require(path.join(ROOT, "netlify", "functions", "book.js"));
+const Fn = require(path.join(ROOT, "netlify", "lib", "book.js"));
 
 const W = {};
 vm.runInNewContext(fs.readFileSync(path.join(PAIDDIR, "book-year.js"), "utf8"), { window: W });

@@ -6,7 +6,7 @@
 "use strict";
 const path = require("path");
 const PayCode = require(path.join(__dirname, "..", "..", "products", "strange-oracle", "paycode.js"));
-const { hashOf } = require(path.join(__dirname, "..", "..", "netlify", "functions", "book.js"));
+const { hashOf } = require(path.join(__dirname, "..", "..", "netlify", "lib", "book.js"));
 
 const n = Math.max(1, Math.min(50, Number(process.argv[2]) | 0 || 1));
 const hashes = [];

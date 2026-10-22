@@ -18,20 +18,8 @@
   # 함수 book이 읽을 유료 원본. 함수 묶음에만 들어가고 정적 주소로는 내려받을 수 없다.
   included_files = ["products/strange-oracle/api/_paid/book/**"]
 
-# 화면은 /api/book으로 부른다 → 함수로 잇는다. 1차 배포판(pay.mode off)은 부르지 않고,
-# 환경 변수 PASS_MODE·BOOK_PASS_HASHES가 없으면 함수는 모든 요청에 503을 준다(안전).
-[[redirects]]
-  from = "/api/book"
-  to = "/.netlify/functions/book"
-  status = 200
-  force = true
-
-# (15단계, spec 15-3·15-7) 페이앱 결제: /api/pay/feedback·status·return → 함수 pay (경로 유지).
-# 함수 pay는 PASS_MODE·PAYAPP_USERID·PAYAPP_LINKKEY·PAYAPP_LINKVAL·PASS_SECRET(32바이트 이상) 중 하나라도 없으면 503(안전).
-# 결제 기록은 Netlify Blobs 저장소 "strange-oracle-pay"(strong). @netlify/blobs는 루트 package.json에 버전 고정(Node 22.12 이상 필요).
-# included_files는 함수 book만 쓰지만 [functions] 공용 설정이라 그대로 둔다(pay 묶음에도 유료 원본이 들어가나 정적 주소로는 나가지 않음).
-[[redirects]]
-  from = "/api/pay/*"
-  to = "/.netlify/functions/pay/:splat"
-  status = 200
-  force = true
+# (2026-10-22) 함수는 새 형식(Functions v2, netlify/functions/*.mjs)이고 주소를 각 파일의 config.path로 정한다:
+#   book.mjs → /api/book, pay.mjs → /api/pay/feedback·status·return. 옛 [[redirects]](→ /.netlify/functions/…)는 지웠다.
+#   옛 Lambda 호환 형식은 Blobs strong 읽기에 필요한 값을 주지 않아 결제 확인이 503("store")이었다.
+# 로직은 netlify/lib/(CommonJS)에 있고 모의 서버·단위 시험이 그대로 부른다.
+# 환경 변수 PASS_MODE·PAYAPP_USERID·PAYAPP_LINKKEY·PAYAPP_LINKVAL·PASS_SECRET(32바이트 이상) 중 하나라도 없으면 함수는 503(안전).

@@ -186,7 +186,7 @@ test('"받는 것" 인연의 장 글자 수 = 그 사람이 받는 판의 실제
 
 test("함수 book: file yeon → 200, 본문은 { pass, file } 두 칸 그대로, 인연의 장 전체를 준다", async () => {
   // 열람 코드 왕복(200·no-store·file 그대로)은 book.test.js "수동 코드 + 허용 file" 시험이 ALLOW 전체(yeon 포함)를 돌며 본다
-  const Fn = require(path.join(__dirname, "..", "..", "netlify", "functions", "book.js"));
+  const Fn = require(path.join(__dirname, "..", "..", "netlify", "lib", "book.js"));
   assert.ok(Fn.ALLOW.includes("yeon"));
   const r = await Fn.handle({ method: "POST", body: JSON.stringify({ pass: "SOP0000000000000", file: "yeon", arch: "sage" }), ip: "10.17.0.1" }, { PASS_MODE: "test" }, L.PAID);
   assert.ok(r.status >= 400, "본문에 셋째 칸(원형 등)이 있으면 받지 않음: " + r.status);

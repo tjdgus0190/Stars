@@ -138,7 +138,7 @@ function emptyCross() {
 }
 const CROSS_HEAD = `// ═══════════════════════════════════════════════════════════════════════
 // 한 권의 책 — 제2부 맨 앞 새 장 「겹치는 곳, 갈리는 곳」(가칭) (유료 원본, spec 18-2). 유료 문장의 유일한 원본이다. 공개 폴더에 복사하지 않는다(CLAUDE.md 7장).
-// 함수 book(netlify/functions/book.js, file "cross")만 읽어 열람 코드가 확인된 사람에게 통째로 준다. 고르기는 브라우저(book.js crossPick·crossChapter)가 한다.
+// 함수 book(netlify/lib/book.js, file "cross")만 읽어 열람 코드가 확인된 사람에게 통째로 준다. 고르기는 브라우저(book.js crossPick·crossChapter)가 한다.
 // 문구만, 로직 없음. 평문만. 문구는 tools/strange-oracle/apply-17.js --stage 18로 넣는다(손으로 고쳐도 되지만 키 구조는 바꾸지 않는다).
 //  1쪽 shape.<one 한 목소리|two 두 갈래|trunk 굵은 줄기|many 여러 갈래>.<주 원형> 32 · 2쪽 common.<공통 축 act|talk|heart|order|free>.<주 원형> 40
 //  3쪽 split.<차이 축> 5 · 3쪽 대신 even.<주 원형> 8 (고른 결) · 4쪽 lens.<홀로 다른 방 saju|ogham|star|decan|tzolkin|rune|sibyl> 7
@@ -165,7 +165,7 @@ function emptyYeon() {
 }
 const YEON_HEAD = `// ═══════════════════════════════════════════════════════════════════════
 // 한 권의 책 — 제2부 「인연의 장」 (유료 원본, spec 17-2). 유료 문장의 유일한 원본이다. 공개 폴더에 복사하지 않는다(CLAUDE.md 7장).
-// 함수 book(netlify/functions/book.js, file "yeon")만 읽어 열람 코드가 확인된 사람에게 통째로 준다. 고르기는 브라우저(book.js yeonChapter)가 한다.
+// 함수 book(netlify/lib/book.js, file "yeon")만 읽어 열람 코드가 확인된 사람에게 통째로 준다. 고르기는 브라우저(book.js yeonChapter)가 한다.
 // 문구만, 로직 없음. 평문만. 문구는 tools/strange-oracle/apply-17.js로 넣는다(손으로 고쳐도 되지만 키 구조는 바꾸지 않는다).
 //  pull 끌림의 결 · mirror 연애 습관 거울 · meet 만나야 할 사람 · scene 만남의 장면 = 주 원형 8
 //  twist 의외의 끌림 = 보조 원형 8 · time 인연의 시기 = "<주 원형>-b<나이 구간 1~7>" 56 · season 인연의 계절 = 일간 오행 5(wood fire earth metal water)

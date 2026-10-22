@@ -1,4 +1,4 @@
-// 15단계 G2 단위 시험: 함수 pay(netlify/functions/pay.js) + pay·book 연동 + 배포 설정. spec 15-3·15-6, 합격 5·6·8·13·17·20~24·26~28(서버 쪽).
+// 15단계 G2 단위 시험: 함수 pay(netlify/lib/pay.js) + pay·book 연동 + 배포 설정. spec 15-3·15-6, 합격 5·6·8·13·17·20~24·26~28(서버 쪽).
 // 함수 book 단독 시험·열람 코드 모양·make-pass는 book.test.js로 옮겼다.
 // 실행: node --test "tools/strange-oracle/*.test.js"
 // 모의 userid·linkkey·linkval·PASS_SECRET·R은 이 실행 안에서 무작위로 만들고 버린다(파일·저장소에 쓰지 않음).
@@ -12,8 +12,8 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..", "..");
 const PROD = path.join(ROOT, "products", "strange-oracle");
 const PAIDDIR = path.join(PROD, "api", "_paid", "book");
-const Pay = require(path.join(ROOT, "netlify", "functions", "pay.js"));
-const Book = require(path.join(ROOT, "netlify", "functions", "book.js"));
+const Pay = require(path.join(ROOT, "netlify", "lib", "pay.js"));
+const Book = require(path.join(ROOT, "netlify", "lib", "book.js"));
 const { Pass } = require(path.join(PROD, "paycode.js"));
 const { MemStore } = require("./mem-store.js");
 
@@ -451,21 +451,21 @@ test("PAY_DEBUG_FIELDS=1: 칸 이름과 참·거짓만 로그, 값 0 / 꺼져 �
   for (const f of [PHONE, r, ENV.PAYAPP_LINKKEY, ENV.PAYAPP_LINKVAL, ENV.PAYAPP_USERID, "5900", "so-book-1"]) assert.ok(!lines[0].includes(f), f);
 });
 
-test("Netlify handler: 경로 끝으로 길을 고르고 base64 본문을 받음, 저장소 열기 실패는 503/500", async () => {
-  const saved = Object.assign({}, process.env);
-  Object.assign(process.env, ENV);
-  try {
-    const ret = await Pay.handler({ httpMethod: "GET", path: "/api/pay/return", headers: {} });
-    assert.strictEqual(ret.statusCode, 303);
-    // Blobs 연결 정보(event.blobs)가 없으면 열기 실패 → 읽기 실패와 같게
-    const st = await Pay.handler({ httpMethod: "POST", path: "/.netlify/functions/pay/status", headers: { "x-nf-client-connection-ip": "10.6.6.6" }, isBase64Encoded: true, body: Buffer.from(JSON.stringify({ r: newR() })).toString("base64") });
-    assert.strictEqual(st.statusCode, 503);
-    const f = await Pay.handler({ httpMethod: "POST", path: "/api/pay/feedback", headers: {}, body: notice(4, newMul(), newR()) });
-    assert.strictEqual(f.statusCode, 500);
-    assert.strictEqual((await Pay.handler({ httpMethod: "POST", path: "/api/pay/other", headers: {}, body: "" })).statusCode, 404);
-  } finally {
-    for (const k of Object.keys(ENV)) if (!(k in saved)) delete process.env[k];
-  }
+test("새 형식(v2) respond: 경로 끝으로 길을 고르고, 저장소 열기 실패는 503/500, 그 밖 경로 404", async () => {
+  const fail = () => { throw new Error("저장소 열기 실패"); };
+  const R = (p, init) => new Request("https://x.example" + p, init);
+  const ret = await Pay.respond(R("/api/pay/return"), {}, fail, ENV);
+  assert.strictEqual(ret.status, 303);
+  const st = await Pay.respond(R("/api/pay/status", { method: "POST", body: JSON.stringify({ r: newR() }) }), { ip: "10.6.6.6" }, fail, ENV);
+  assert.strictEqual(st.status, 503);
+  const f = await Pay.respond(R("/api/pay/feedback", { method: "POST", body: notice(4, newMul(), newR()) }), {}, fail, ENV);
+  assert.strictEqual(f.status, 500);
+  assert.strictEqual((await Pay.respond(R("/api/pay/other", { method: "POST", body: "" }), {}, fail, ENV)).status, 404);
+  // 저장소가 열리면 status는 pending (메모리 저장소를 Blobs 모양으로)
+  const mem = new Map();
+  const blobsLike = () => ({ get: async (k) => (mem.has(k) ? JSON.parse(mem.get(k)) : null), setJSON: async (k, v) => (mem.set(k, JSON.stringify(v)), { modified: true }) });
+  const ok = await Pay.respond(R("/api/pay/status", { method: "POST", body: JSON.stringify({ r: newR() }) }), { ip: "10.6.6.7" }, blobsLike, ENV);
+  assert.deepStrictEqual(await ok.json(), { state: "pending" });
 });
 
 // ── 설정 파일 ──
@@ -481,19 +481,23 @@ test("합격 18: package.json @netlify/blobs 버전 고정 + package-lock.json, 
   assert.ok(/onlyIfNew\?: boolean/.test(dts) && /modified: boolean/.test(dts) && /connectLambda/.test(dts));
 });
 
-test("netlify.toml: build-dist·dist/public·함수 폴더·included_files 유지, /api/book·/api/pay/* 연결", () => {
+test("netlify.toml·v2 함수: build-dist·dist/public·함수 폴더·included_files 유지, /api/book·/api/pay/* 는 config.path", () => {
   const t = fs.readFileSync(path.join(ROOT, "netlify.toml"), "utf8");
   assert.match(t, /command = "node tools\/build-dist\.js"/);
   assert.match(t, /publish = "dist\/public"/);
   assert.match(t, /directory = "netlify\/functions"/);
   assert.deepStrictEqual([...t.matchAll(/included_files = \[([^\]]*)\]/g)].map((m) => m[1].trim()), ['"products/strange-oracle/api/_paid/book/**"']);
-  assert.match(t, /from = "\/api\/book"\s+to = "\/\.netlify\/functions\/book"/);
-  assert.match(t, /from = "\/api\/pay\/\*"\s+to = "\/\.netlify\/functions\/pay\/:splat"\s+status = 200\s+force = true/);
-  assert.ok(fs.existsSync(path.join(ROOT, "netlify", "functions", "pay.js")));
+  // (2026-10-22) 함수는 v2(.mjs), 주소는 config.path. 옛 redirects·v1 파일 없음
+  assert.ok(!/\.netlify\/functions/.test(t.replace(/^#.*$/gm, "")), "옛 redirects 없음");
+  assert.ok(fs.existsSync(path.join(ROOT, "netlify", "lib", "pay.js")) && !fs.existsSync(path.join(ROOT, "netlify", "functions", "pay.js")) && !fs.existsSync(path.join(ROOT, "netlify", "functions", "book.js")));
+  const pm = fs.readFileSync(path.join(ROOT, "netlify", "functions", "pay.mjs"), "utf8"), bm = fs.readFileSync(path.join(ROOT, "netlify", "functions", "book.mjs"), "utf8");
+  assert.match(pm, /export default/); assert.match(pm, /consistency: "strong"/);
+  assert.match(pm, /path: \["\/api\/pay\/feedback", "\/api\/pay\/status", "\/api\/pay\/return"\]/);
+  assert.match(bm, /path: "\/api\/book"/); assert.ok(!/connectLambda/.test(pm + bm));
 });
 
 test("합격 17: 저장소 파일에 실제 키처럼 보이는 linkkey·linkval·PASS_SECRET 값 0건 (함수·모의 서버·시험)", () => {
-  const files = ["netlify/functions/pay.js", "netlify/functions/book.js", "tools/strange-oracle/mock-server.js", "tools/strange-oracle/mock-pay.js", "tools/strange-oracle/pay.test.js", "netlify.toml", "package.json"];
+  const files = ["netlify/lib/pay.js", "netlify/lib/book.js", "netlify/functions/pay.mjs", "netlify/functions/book.mjs", "tools/strange-oracle/mock-server.js", "tools/strange-oracle/mock-pay.js", "tools/strange-oracle/pay.test.js", "netlify.toml", "package.json"];
   for (const f of files) {
     const t = fs.readFileSync(path.join(ROOT, f), "utf8");
     assert.ok(!/(PAYAPP_LINK(KEY|VAL)|PASS_SECRET|linkkey|linkval)\s*[:=]\s*["'][^"']{8,}["']/.test(t), f);

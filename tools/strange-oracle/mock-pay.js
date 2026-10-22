@@ -1,6 +1,6 @@
 // 15단계 모의 페이앱 (spec 15-6) — mock-server.js --mode test에서만 붙는다. 배포 폴더·본 페이지에는 없다(__dev 길, build-dist 가드).
 // 길:
-//   /api/pay/feedback|status|return  함수 netlify/functions/pay.js의 handle()을 그대로 부른다(Blobs 대신 메모리 저장소)
+//   /api/pay/feedback|status|return  함수 netlify/lib/pay.js의 handle()을 그대로 부른다(Blobs 대신 메모리 저장소)
 //   /__dev/payapp-lite.js            가짜 SDK. PayApp.setDefault·setParam·payrequest·call. 결제창 방식은 스위치 win(redirect 기본 | popup)
 //   /__dev/payapp/checkout (POST)    가짜 결제창. 받은 값(상품명·금액·결제수단)과 단추. 견본 HTML이 있으면 그것을 쓴다(CHECKOUT_TEMPLATE)
 //   /__dev/payapp/act (POST JSON)    단추 동작 → 가짜 통보를 함수 pay에 보낸다 → { results, next }
@@ -19,7 +19,7 @@ const path = require("path");
 const { MemStore } = require("./mem-store.js");
 
 const ROOT = path.resolve(__dirname, "..", "..");
-const Pay = require(path.join(ROOT, "netlify", "functions", "pay.js"));
+const Pay = require(path.join(ROOT, "netlify", "lib", "pay.js"));
 const CHECKOUT_TEMPLATE = path.join(__dirname, "payapp-mock.html");
 const MOCK_USERID = "mock-seller";
 const TEST_PHONE = "01099990000"; // 가짜 통보 recvphone 기본값(시험용, 실재 번호 아님)

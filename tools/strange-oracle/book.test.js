@@ -213,7 +213,7 @@ test("다양성 실측 → out/book-variety.txt", () => {
   assert.ok(same.length > 0 && types.length === 1200);
 });
 
-// ════ 함수 book (netlify/functions/book.js) — 14단계 F4-B2 시험을 pay.test.js에서 옮기고 15단계 Blobs 확인을 더함 ════
+// ════ 함수 book (netlify/lib/book.js) — 14단계 F4-B2 시험을 pay.test.js에서 옮기고 15단계 Blobs 확인을 더함 ════
 // 15-6 "book.test.js": Blobs paid 통과, cancelled 403, 읽기 실패 503(틀린 시도로 안 셈), 환경 변수 수동 코드 통과 유지. 합격 28.
 // 시험 코드·비밀값은 이 실행 안에서 무작위로 만들고 버린다(파일·저장소에 쓰지 않음).
 {
@@ -221,8 +221,8 @@ test("다양성 실측 → out/book-variety.txt", () => {
   const { execFileSync } = require("child_process");
   const ROOT = path.resolve(__dirname, "..", "..");
   const PAIDDIR = path.join(PROD, "api", "_paid", "book");
-  const Fn = require(path.join(ROOT, "netlify", "functions", "book.js"));
-  const Pay = require(path.join(ROOT, "netlify", "functions", "pay.js"));
+  const Fn = require(path.join(ROOT, "netlify", "lib", "book.js"));
+  const Pay = require(path.join(ROOT, "netlify", "lib", "pay.js"));
   const { MemStore } = require("./mem-store.js");
   const { Pass } = PayCode;
   const CODE = Pass.make();
@@ -323,18 +323,13 @@ test("다양성 실측 → out/book-variety.txt", () => {
       assert.strictEqual(store.log.length, 0);
     }
   });
-  test("함수 book: Netlify handler 형식, 본문 base64도 받음", async () => {
-    process.env.PASS_MODE = "test";
-    process.env.BOOK_PASS_HASHES = ENV.BOOK_PASS_HASHES;
-    try {
-      const r = await Fn.handler({ httpMethod: "POST", headers: { "x-nf-client-connection-ip": "10.1.1.1" }, isBase64Encoded: true, body: Buffer.from(JSON.stringify({ pass: CODE, file: "flow" })).toString("base64") });
-      assert.strictEqual(r.statusCode, 200);
-      assert.strictEqual(r.headers["Cache-Control"], "no-store");
-      assert.strictEqual(JSON.parse(r.body).file, "flow");
-    } finally {
-      delete process.env.PASS_MODE;
-      delete process.env.BOOK_PASS_HASHES;
-    }
+  test("함수 book: 새 형식(v2) respond — 웹 Request를 받아 Response(no-store), IP는 context.ip", async () => {
+    const env = { PASS_MODE: "test", BOOK_PASS_HASHES: ENV.BOOK_PASS_HASHES };
+    const req = new Request("https://x.example/api/book", { method: "POST", body: JSON.stringify({ pass: CODE, file: "flow" }) });
+    const r = await Fn.respond(req, { ip: "10.1.1.1" }, () => { throw new Error("수동 코드는 저장소를 열지 않는다"); }, env);
+    assert.strictEqual(r.status, 200);
+    assert.strictEqual(r.headers.get("Cache-Control"), "no-store");
+    assert.strictEqual((await r.json()).file, "flow");
   });
   test("열람 코드 모양: SOP+12+검사 1자, 표기·소문자·헷갈리는 글자, SO1·SOG는 따로", () => {
     for (let i = 0; i < 200; i++) {

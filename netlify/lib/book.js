@@ -38,7 +38,7 @@ const SHAPE = /^SOP[0-9A-HJKMNP-TV-Z]{13}$/; // SOP + 무작위 12자 + 검사 1
 
 // 유료 폴더 찾기: Netlify 함수 묶음 안 상대 경로(included_files는 저장소 기준 경로를 유지) — 실제 위치는 미확인이라 후보를 차례로 본다
 function paidDir() {
-  const roots = [process.env.LAMBDA_TASK_ROOT, process.cwd(), path.resolve(__dirname, "..", "..")].filter(Boolean);
+  const roots = [process.env.LAMBDA_TASK_ROOT, process.cwd(), typeof __dirname === "string" ? path.resolve(__dirname, "..", "..") : ""].filter(Boolean);
   for (const r of roots) {
     const d = path.join(r, PAID_REL);
     if (fs.existsSync(d)) return d;
@@ -135,13 +135,11 @@ async function handle(req, env, dir, now = Date.now(), store = null) {
   }
 }
 
-// Netlify 함수 (v1 형식). 주소: /.netlify/functions/book, netlify.toml에서 /api/book으로 잇는다
-async function handler(event) {
-  const hd = event.headers || {};
-  const ip = hd["x-nf-client-connection-ip"] || String(hd["x-forwarded-for"] || "").split(",")[0].trim();
-  const body = event.isBase64Encoded ? Buffer.from(event.body || "", "base64").toString("utf8") : event.body;
-  const r = await handle({ method: event.httpMethod, body, ip }, process.env, paidDir(), Date.now(), Pay.blobStore(event));
-  return { statusCode: r.status, headers: r.headers, body: r.body };
+// 새 형식 함수(v2, netlify/functions/book.mjs)의 요청 → handle. 저장소는 Pay.storeFrom으로 감싼다
+async function respond(req, context, openStore, env = process.env) {
+  const body = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
+  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown") }, env, paidDir(), Date.now(), Pay.storeFrom(openStore));
+  return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
-module.exports = { handler, handle, normalize, hashOf, ALLOW, FILES, _fails: fails };
+module.exports = { respond, handle, normalize, hashOf, ALLOW, FILES, _fails: fails };

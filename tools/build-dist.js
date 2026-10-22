@@ -2,7 +2,7 @@
 // 사용: node tools/build-dist.js      (Netlify도 저장소 루트 netlify.toml의 [build] command로 이것을 그대로 부른다, 결정 93)
 // 결과 (14단계 F4-B2):
 //   dist/public/   정적 사이트 전체 (index.html → 제품으로 이동, common/, products/<slug>/). netlify.toml publish = "dist/public"
-//   유료 원본 products/<slug>/api/_paid/book/은 public/에 넣지 않는다. 함수 netlify/functions/book.js의 묶음(included_files)으로만 서버에 올라간다.
+//   유료 원본 products/<slug>/api/_paid/book/은 public/에 넣지 않는다. 함수 netlify/lib/book.js의 묶음(included_files)으로만 서버에 올라간다.
 //   본 페이지 = dist/public + 함수 하나(book).
 // 내부 문서(specs, reports, design, agents, CLAUDE.md)와 제품 폴더의 meta.json·tests.md·api/는 넣지 않는다.
 // 하나라도 어기면 빌드 실패(exit 1) → Netlify 배포도 멈춘다:
@@ -307,4 +307,4 @@ for (const slug of PRODUCTS) if (fs.existsSync(path.join(PUBLIC, "products", slu
 if (fails.length) {
   console.error("  실패: 배포 점검 — " + fails.slice(0, 15).join(" | "));
   process.exitCode = 1;
-} else console.log(`  배포 점검 통과 (pay.mode ${Object.values(MODES).join("·")} · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음 · GA4 ID 있으면 privacy ◯◯ 0) — 공개 폴더: dist/public, 함수: netlify/functions/book.js`);
+} else console.log(`  배포 점검 통과 (pay.mode ${Object.values(MODES).join("·")} · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음 · GA4 ID 있으면 privacy ◯◯ 0) — 공개 폴더: dist/public, 함수: netlify/lib/book.js`);

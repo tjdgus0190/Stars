@@ -7,7 +7,7 @@
 //     --src         : 정적 = 저장소 루트 (고치면서 바로 보기). 제품 안 api/ 경로는 정적으로 내주지 않는다
 //     --mode off    : (기본) 배포판과 같다. 결제·책 화면 없음. /api/book은 503
 //     --mode test   : 시험 페이지. data.js의 pay.mode를 **응답할 때만** "test"로 바꾼다(파일은 고치지 않음).
-//                     /api/book은 함수 netlify/functions/book.js의 handle()을 그대로 불러 흉내 낸다(PASS_MODE=test).
+//                     /api/book은 함수 netlify/lib/book.js의 handle()을 그대로 불러 흉내 낸다(PASS_MODE=test).
 //                     유료 원본 products/strange-oracle/api/_paid/book/에서 읽는다(함수 묶음과 같은 원본, 배포 폴더에는 없음).
 //                     모의 열람 코드는 시작할 때 새로 만들어 터미널에만 찍는다(파일·저장소에 쓰지 않음).
 //     --host        : 같은 와이파이의 휴대폰으로 볼 때만 0.0.0.0. 외부 공개 주소에는 올리지 않는다.
@@ -51,7 +51,7 @@ const HOST = arg("--host", "127.0.0.1");
 const MODE = arg("--mode", "off") === "test" ? "test" : "off";
 const STATIC = SRC ? ROOT : path.join(ROOT, "dist", "public");
 const PAID = path.join(ROOT, "products", "strange-oracle", "api", "_paid", "book");
-const Book = require(path.join(ROOT, "netlify", "functions", "book.js"));
+const Book = require(path.join(ROOT, "netlify", "lib", "book.js"));
 const PayCode = require(path.join(ROOT, "products", "strange-oracle", "paycode.js"));
 const PaySec = require(path.join(ROOT, "tools", "pay-sections.js"));
 const og = require(path.join(ROOT, "tools", "og-tags.js"));

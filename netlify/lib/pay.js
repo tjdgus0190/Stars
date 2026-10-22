@@ -12,7 +12,7 @@
 // 503(로그 없음): PASS_MODE가 test·live가 아님 / PAYAPP_USERID·LINKKEY·LINKVAL 중 빈 칸 / PASS_SECRET 32바이트 미만.
 // 비밀값 비교는 양쪽 SHA-256 뒤 timingSafeEqual. 요청 본문·머리·IP를 console에 찍지 않는다(예외: PAY_DEBUG_FIELDS=1일 때 칸 이름과 참·거짓만).
 // 모든 응답 Cache-Control: no-store. 핵심 handle(req, env, store, now)을 모의 서버와 단위 시험이 그대로 부른다.
-// 형식: Netlify 함수 v1(Lambda 호환). Blobs는 connectLambda(event) 뒤 getStore로 연다(book과 같은 형식 유지).
+// 형식: 핵심 로직(이 파일, CommonJS). 실제 함수는 netlify/functions/pay.mjs(Functions v2)가 respond()를 부른다.
 "use strict";
 const crypto = require("crypto");
 
@@ -239,17 +239,12 @@ async function handle(req, env, store, now = Date.now()) {
   return json(404, { error: "route" });
 }
 
-// Netlify Blobs를 위 store 모양으로 (처음 쓸 때 연다. 열기 실패도 읽기·쓰기 실패로 다룬다)
-function blobStore(event) {
+// Netlify Blobs 저장소(getStore 결과)를 위 store 모양으로. open()은 처음 쓸 때 한 번(열기 실패도 읽기·쓰기 실패로 다룬다)
+//   (2026-10-22) 옛 Lambda 호환 함수의 connectLambda는 strong 읽기에 필요한 uncachedEdgeURL을 주지 않아 모든 읽기가 실패했다(운영 503 "store").
+//   그래서 함수를 새 형식(Functions v2, netlify/functions/pay.mjs)으로 바꾸고, 저장소는 그쪽에서 getStore로 열어 넘긴다.
+function storeFrom(openStore) {
   let s = null;
-  const open = () => {
-    if (!s) {
-      const B = require("@netlify/blobs");
-      B.connectLambda(event);
-      s = B.getStore({ name: STORE_NAME, consistency: "strong" });
-    }
-    return s;
-  };
+  const open = () => s || (s = openStore());
   return {
     get: async (key) => open().get(key, { type: "json" }),
     set: async (key, value, o) => {
@@ -259,15 +254,13 @@ function blobStore(event) {
   };
 }
 
-const ipOf = (hd) => hd["x-nf-client-connection-ip"] || String(hd["x-forwarded-for"] || "").split(",")[0].trim();
-const bodyOf = (event) => (event.isBase64Encoded ? Buffer.from(event.body || "", "base64").toString("utf8") : event.body || "");
-
-// Netlify 함수 (v1 형식). /api/pay/* → /.netlify/functions/pay/:splat (netlify.toml)
-async function handler(event) {
-  const route = (String(event.path || "").match(/\/(feedback|status|return)\/?$/) || [])[1] || "";
-  const r = await handle({ method: event.httpMethod, route, body: bodyOf(event), ip: ipOf(event.headers || {}) }, process.env, blobStore(event));
-  return { statusCode: r.status, headers: r.headers, body: r.body };
+// 새 형식 함수(v2)의 요청 → handle. req = 웹 표준 Request, context.ip = 접속 IP(메모리 Map 키로만)
+async function respond(req, context, openStore, env = process.env) {
+  const route = (new URL(req.url).pathname.match(/\/(feedback|status|return)\/?$/) || [])[1] || "";
+  const body = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
+  const r = await handle({ method: req.method, route, body, ip: String((context && context.ip) || "unknown") }, env, storeFrom(openStore), Date.now());
+  return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
 const _reset = () => hits.clear();
-module.exports = { handler, handle, blobStore, passOf, hashOfPass, passState, secretOk, normalize, ipOf, bodyOf, STORE_NAME, PRICE, TAG, CANCEL_STATES, _hits: hits, _reset };
+module.exports = { respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, STORE_NAME, PRICE, TAG, CANCEL_STATES, _hits: hits, _reset };
