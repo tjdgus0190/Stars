@@ -4832,6 +4832,14 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .code-card__double.is-hidden { display: none; }
 .code-card__text { line-height: var(--lh-ui); text-align: left; word-break: keep-all; }
 .code-card__tab { font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-faint); text-align: left; word-break: keep-all; }
+/* (21단계) 카카오 로그인 버튼 — 카카오 디자인 가이드: 바탕 #FEE500 · 말풍선 #000 · 글자 #000 85% · 모서리 12px */
+.btn-kakao { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: var(--tap-min, 48px); padding: 0 16px; border: 0; border-radius: 12px; background: #FEE500; color: rgba(0, 0, 0, 0.85); font-family: var(--font-sans); font-size: var(--fs-md, 16px); font-weight: 700; cursor: pointer; }
+.btn-kakao:focus-visible { outline: 3px solid var(--accent, #fff); outline-offset: 2px; }
+.btn-kakao__sym { width: 20px; height: 20px; fill: #000; flex: none; }
+.kakao-row, .kakao-link { display: grid; gap: var(--space-2); margin: var(--space-3) 0; }
+.kakao-row__help { font-family: var(--font-sans); font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--c-text-muted); word-break: keep-all; }
+.code-card .kakao-row__help { color: var(--c-text-faint); }
+.kakao-row__forget { justify-self: start; font-size: var(--fs-xs); }
 /* G5: 코드가 2개 이상이면 코드 상자를 조금 좁혀 360×640에서도 [책 읽으러 가기]까지 스크롤 없이 보이게 한다(3개 이상은 기존대로 dialog 안 스크롤) */
 .code-card__body:has(.code-card__list > li + li) { gap: var(--space-2); padding-top: var(--space-5); }
 .code-card__list:has(> li + li) { gap: var(--space-2); }

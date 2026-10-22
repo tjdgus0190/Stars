@@ -32,6 +32,12 @@ class MemStore {
     this.map.set(key, JSON.stringify(value));
     return { modified: true };
   }
+  async del(key) {
+    if (this.before) await this.before("del", key);
+    this.log.push(["del", key]);
+    if (this._fail(this.failWrite, key)) throw new Error("store write");
+    this.map.delete(key);
+  }
   dump() {
     return Object.fromEntries([...this.map].sort(([a], [b]) => (a < b ? -1 : 1)).map(([k, v]) => [k, JSON.parse(v)]));
   }

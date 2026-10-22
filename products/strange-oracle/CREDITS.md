@@ -58,3 +58,6 @@ Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키
 - 데칸 이집트 이름(facts.egyptian): Wikipedia "Decan"(https://en.wikipedia.org/wiki/Decan) "Names of the Decans" 표의 Greco-Egyptian names 열. 출처는 Budge(1904) pp.304–308 · Gundel(1936). 2026-09-28 Wikipedia 원문(wikitext)과 36칸을 한 칸씩 기계 대조해 모두 일치 확인.
 - 데칸 다스리는 별(facts.ruler): 헬레니즘 점성술의 칼데아 순서(화성·태양·금성·수성·달·토성·목성 반복)로 채움.
 - 공유 카드의 껍질·해시계·마야 숫자·카르투슈·월계관·양피지: common/share-card.js가 canvas로 직접 그림(외부 이미지 없음).
+
+## 카카오 로그인 버튼 (21단계, 2026-10-22)
+- 카카오 말풍선 기호는 카카오 로그인 디자인 가이드(developers.kakao.com)의 색·모양 규칙(#FEE500 바탕, 검은 말풍선)을 따라 인라인 SVG로 그렸다. 카카오 상표이며 카카오 로그인 버튼 용도로만 쓴다(가이드 준수 여부는 운영자가 카카오 앱 검수 때 함께 확인 — 미확인).

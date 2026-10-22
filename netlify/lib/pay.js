@@ -251,6 +251,7 @@ function storeFrom(openStore) {
       const w = await open().setJSON(key, value, o && o.onlyIfNew ? { onlyIfNew: true } : {});
       return { modified: !w || w.modified !== false };
     },
+    del: async (key) => open().delete(key), // (21단계) 카카오 로그인 표·연결 지우기
   };
 }
 

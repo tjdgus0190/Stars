@@ -4304,6 +4304,7 @@
   //  함수 status로는 { r } 한 칸만, 팝업의 postMessage에는 { type }만 보낸다. 분석 이벤트는 단계 이름뿐.
   let payScr = null;
   let payReturn = null; // #paid 복귀 처리(시작 때 부름). off면 null
+  let kakaoBoot = null; // (21단계) #kakao-… 복귀 처리(시작 때 부름). 카카오 꺼짐·결제 off면 null
   // (18-11) 결제 전 화면에 들어온 길: preview · toc · other
   let payFrom = "other";
   // (2026-10-21) hub·story·locked 길을 더함. 결제 전 화면으로 갔으면 true
@@ -4756,6 +4757,69 @@
       e.preventDefault();
       submit();
     });
+
+    // ── (21단계, 결정 133) 카카오 로그인으로 산 책 연결·다시 열기. 브라우저는 무작위 state S만 sessionStorage(strange-oracle-kakao)에 두고,
+    //   회원번호·토큰은 보지 않는다. 서버가 #kakao-<표>-<S>로 돌려보내면 표를 한 번 써서(claim) 열람 코드를 받거나 연결한다
+    const AUTH = T.auth || {};
+    const KAKAO_KEY = "strange-oracle-kakao";
+    const kakaoEls = [js("kakao-row", payScr), js("kakao-link", codeDlg)];
+    if (AUTH.kakao !== "on") kakaoEls.forEach((el) => el && el.remove());
+    else {
+      const kakaoStart = (mode) => {
+        const b = new Uint8Array(16);
+        window.crypto.getRandomValues(b);
+        const st = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
+        try {
+          window.sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode }));
+        } catch (e) {
+          return toast(AUTH.msg.error || "");
+        }
+        track("so_auth", { step: "start", mode });
+        location.href = "/api/auth/kakao/start?state=" + st;
+      };
+      js("kakao-restore", payScr).addEventListener("click", () => kakaoStart("restore"));
+      js("kakao-forget", payScr).addEventListener("click", () => window.confirm(AUTH.forgetConfirm || "") && kakaoStart("forget"));
+      js("kakao-link-btn", codeDlg).addEventListener("click", () => passNow() && kakaoStart("link"));
+      // 시작할 때 #kakao-… 로 돌아왔으면: 주소에서 표를 바로 지우고, state가 이 탭 것과 같을 때만 묻는다
+      kakaoBoot = (frag) => {
+        const m = /^kakao-([0-9a-f]{32})-([0-9a-f]{32})$/.exec(frag);
+        let saved = null;
+        try {
+          saved = JSON.parse(window.sessionStorage.getItem(KAKAO_KEY) || "null");
+          window.sessionStorage.removeItem(KAKAO_KEY);
+        } catch (e) {
+          saved = null;
+        }
+        const mode = saved && saved.mode;
+        if (!m || !saved || saved.s !== m[2]) {
+          track("so_auth", { step: "fail", mode: ["restore", "link", "forget"].includes(mode) ? mode : "restore" });
+          return { first: "deeper", after: () => toast(AUTH.msg.error || "") };
+        }
+        const body = { t: m[1], s: m[2] };
+        if (mode === "link" && passNow()) body.pass = passNow();
+        if (mode === "forget") body.forget = true;
+        return {
+          first: mode === "link" ? "report" : "deeper",
+          after: async () => {
+            let res = null;
+            try {
+              const r = await fetch("/api/auth/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" });
+              res = r.status === 200 ? await r.json() : { state: r.status === 503 ? "off" : "error" };
+            } catch (e) {
+              res = { state: "error" };
+            }
+            const stp = ["linked", "found", "none", "forgot"].includes(res.state) ? res.state : "fail";
+            track("so_auth", { step: stp, mode });
+            if (res.state === "found" && res.passes && res.passes[0]) {
+              writePass(window.PayCode.Pass.normalize(res.passes[0]));
+              toast(AUTH.msg.found || "");
+              return go("report");
+            }
+            toast((AUTH.msg[res.state] || AUTH.msg.error) || "");
+          },
+        };
+      };
+    }
   }
 
   // ═════════ 7단계: 여섯 문이 모이는 결말 (spec 7-6) ═════════
@@ -4797,6 +4861,7 @@
     so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
+    so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail"], mode: ["restore", "link", "forget"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
     so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "hub", "story", "locked", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
@@ -5054,7 +5119,12 @@
   }
   // (15-2) 결제 복귀 #paid(페이앱 → /api/pay/return → 303)와 결제 확인 화면 새로고침(#paycheck): 팝업이면 팝업 화면, 아니면 이 탭의 R로 묻기
   let payAfter = null;
-  if (BOOK_ON && payReturn && (hash === "paid" || hash === "paycheck")) {
+  if (BOOK_ON && kakaoBoot && /^kakao-/.test(hash)) {
+    const kb = kakaoBoot(hash);
+    history.replaceState(history.state, "", location.pathname); // 표·state를 주소에서 바로 지운다
+    first = kb.first;
+    payAfter = kb.after;
+  } else if (BOOK_ON && payReturn && (hash === "paid" || hash === "paycheck")) {
     const pr = payReturn();
     first = pr.first;
     payAfter = pr.after || null;

@@ -52,6 +52,7 @@ const MODE = arg("--mode", "off") === "test" ? "test" : "off";
 const STATIC = SRC ? ROOT : path.join(ROOT, "dist", "public");
 const PAID = path.join(ROOT, "products", "strange-oracle", "api", "_paid", "book");
 const Book = require(path.join(ROOT, "netlify", "lib", "book.js"));
+const Auth = require(path.join(ROOT, "netlify", "lib", "auth.js")); // (21단계) 카카오 로그인 흉내
 const PayCode = require(path.join(ROOT, "products", "strange-oracle", "paycode.js"));
 const PaySec = require(path.join(ROOT, "tools", "pay-sections.js"));
 const og = require(path.join(ROOT, "tools", "og-tags.js"));
@@ -105,6 +106,33 @@ const server = http.createServer((req, res) => {
     });
     req.on("end", async () => {
       const r = await Book.handle({ method: req.method, body: big ? "x".repeat(600) : body, ip: req.socket.remoteAddress }, bookEnv(), PAID, Date.now(), PAYMOCK ? PAYMOCK.store : null);
+      res.writeHead(r.status, r.headers).end(r.body);
+      log(r.status);
+    });
+    return;
+  }
+  // (21단계) 카카오 로그인 흉내 — test에서만. 시작은 실제 카카오 대신 가짜 동의 화면(/__dev/kakao/authorize)으로, 콜백·claim은 함수 auth의 handle 그대로(가짜 카카오)
+  if (PAYMOCK && (rel.startsWith("/api/auth/") || rel === "/__dev/kakao/authorize")) {
+    const origin = `http://127.0.0.1:${PORT}`;
+    const authEnv = { PASS_MODE: "test", KAKAO_REST_KEY: "mock-rest-key", PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET, SITE_URL: `${origin}/products/strange-oracle/` };
+    if (rel === "/api/auth/kakao/start") {
+      const st = url.searchParams.get("state") || "";
+      res.writeHead(/^[0-9a-f]{32}$/.test(st) ? 302 : 400, { Location: `/__dev/kakao/authorize?state=${encodeURIComponent(st)}`, "Cache-Control": "no-store" }).end();
+      return log(302);
+    }
+    if (rel === "/__dev/kakao/authorize") {
+      const st = String(url.searchParams.get("state") || "").replace(/[^0-9a-f]/g, "");
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }).end(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>가짜 카카오 로그인</title>
+<body style="font-family:sans-serif;padding:24px"><h1>가짜 카카오 로그인 (시험 전용)</h1><label>가짜 회원번호 <input data-field="kid" value="1001"></label>
+<p><button data-act="agree" onclick="location.href='/api/auth/kakao/callback?code=mock-'+document.querySelector('[data-field=kid]').value.replace(/\D/g,'')+'&state=${st}'">동의하고 계속하기</button>
+<button data-act="cancel" onclick="location.href='/api/auth/kakao/callback?error=access_denied&state=${st}'">취소</button></p></body>`);
+      return log(200);
+    }
+    const kakao = { idOf: async (code) => { const m = /^mock-(\d{1,20})$/.exec(code); if (!m) throw new Error("code"); return m[1]; } };
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", async () => {
+      const r = await Auth.handle({ method: req.method, url: origin + url.pathname + url.search, body }, authEnv, PAYMOCK.store, kakao);
       res.writeHead(r.status, r.headers).end(r.body);
       log(r.status);
     });
@@ -185,7 +213,7 @@ location.replace("${P}#${to}");
       return notFound(res);
     }
     // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로)
-    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"').replace(SITE_RE, '$1""'))));
+    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"').replace(SITE_RE, '$1""').replace(/(\bauth:\s*\{\s*kakao:\s*)"off"/, '$1"on"'))));
     // 19-5 (b): 모든 모드에서 data.js 응답의 GA4 측정 ID를 시험 ID로 (실제 ID로 localhost 방문이 나가지 않게, 파일은 그대로)
     if (/[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(GA4_RE, '$1"' + GA4_TEST + '"'));
     send(req, res, TYPES[path.extname(file)] || "application/octet-stream", data);
