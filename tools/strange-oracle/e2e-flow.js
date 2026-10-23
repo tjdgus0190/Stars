@@ -423,7 +423,8 @@ function paidSentences() {
 
   // ═══ 11단계 묶음 1 (off): H3 흔들리는 원형 · H4 바통 질문 · H5 3/6 중간 결말 · 11-5 막다른 곳 0 ═══
   // (2026-10-21) 결제 유도 버튼(나의 이야기 story-pay-btn·입구 pay-entry, 19단계 K10)의 가격은 의도된 것이라 가격 검사에서 뺀다
-  const deadScan = (scope) => ev(`(() => { const sc = document.querySelector(${JSON.stringify(scope)}); let t = sc.innerText; sc.querySelectorAll('[data-js=story-pay-btn], [data-js=pay-entry]').forEach((el) => { t = t.replace(el.innerText, ''); }); return { price: /[0-9],[0-9]{3}\\s*원/.test(t), soon: t.includes('곧 열'), dead: [...sc.querySelectorAll('button[disabled], button[aria-disabled=true]')].filter(b => b.offsetHeight > 0 && !b.closest('[data-js^=hub-door-]')).length, book: /한 권의 책|책을 준비/.test(t) }; })()`);
+  // (22단계, 결정 134) 방 결과의 "이 방의 나머지 이야기" 칸(room-rest)은 가격을 적는 자리 — 칸 밖 가격만 센다
+  const deadScan = (scope) => ev(`(() => { const sc = document.querySelector(${JSON.stringify(scope)}); let t = sc.innerText; sc.querySelectorAll('[data-js=story-pay-btn], [data-js=pay-entry], [data-js=room-rest]').forEach((el) => { t = t.replace(el.innerText, ''); }); return { price: /[0-9],[0-9]{3}\\s*원/.test(t), soon: t.includes('곧 열'), dead: [...sc.querySelectorAll('button[disabled], button[aria-disabled=true]')].filter(b => b.offsetHeight > 0 && !b.closest('[data-js^=hub-door-]')).length, book: /한 권의 책|책을 준비/.test(t) }; })()`);
   const hookCount = (scope) => ev(`[...document.querySelectorAll(['result-archetype-sway', 'hub-archetype-sway', 'result-bridge', 'story-half'].map(k => ${JSON.stringify(scope)} + ' [data-js=' + k + ']').join(','))].filter(e => e.offsetHeight > 0 && e.textContent.trim()).length`);
   const swayWant = (n, arch) => ev(`TEXT.result.archetypeSway.replace('{arch}', TEXT.archetypes[${JSON.stringify(arch)}].name).replace('{n}', ${n})`);
   await seed(["saju", "ogham", "star"]);

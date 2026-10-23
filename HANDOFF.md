@@ -4,6 +4,7 @@
 규칙은 **CLAUDE.md**가 기준이고, 이 문서는 현재 상태와 일하는 요령만 적는다. 둘이 다르면 CLAUDE.md가 이긴다.
 
 ## 1. 지금 상태 한눈에
+- **2026-10-23 22단계(결정 134):** 만신의 방은 끝까지 무료(결과 아래 [이어서 읽기 · 무료]), 오검~시빌라는 결과 아래 「이 방의 나머지 이야기」가 잠김 → 결제하면 그 방에서 바로 열림(app.js renderRest, 함수 book 그대로). 시험: e2e-rest.js.
 - **2026-10-22~23 카카오 로그인(21단계):** 함수 auth(v2), 운영자가 카카오 앱·`KAKAO_REST_KEY` 설정(2026-10-23). 화면 버튼은 data.js `auth.kakao`로 켜고 끈다. 시험: auth.test.js·e2e-auth.js.
 - **2026-10-22 결제 켬(live):** 운영 https://glowing-semolina-5a4e78.netlify.app (Netlify 운영 브랜치 `main`). `pay.mode` live, 판매자 SHA Studio·문의 tjdgus0190@naver.com, 연락처·주소 비움(줄 숨김), 환불 안내 빈칸 항목 뺌(운영자). 함수는 Functions v2(`netlify/functions/*.mjs` → 로직 `netlify/lib/`). 결제창은 같은 탭. 20단계 「2027년의 흐름」 포함 책 15장(유료 12장). **실결제 1건+취소 시험은 운영자 몫(미확인).** 아래 내용 중 이와 다른 옛 설명(pay.mode off·release 브랜치·v1 함수)은 이 줄이 우선한다.
 - 제품은 하나다: `products/strange-oracle` "낯선 점술관". 일곱 점술 방(Ⅰ 만신 → 오검 → 별 → 데칸 → 촐킨 → 룬 → 시빌라, 결정 91)을 돌고 결과를 모아 "나의 이야기"와 "한 권의 책"(13장, 17단계에 「인연의 장」 더함)으로 엮는다.
@@ -87,6 +88,7 @@ node tools/build-dist.js                       # dist/public 생성 + 점검(pay
 node --test "tools/strange-oracle/*.test.js"    # 단위 시험 (glob을 따옴표로 감쌀 것. 폴더만 주면 Node 24에서 실패)
 node tools/strange-oracle/mock-server.js --port 8788 --mode test  # 시험 페이지 = e2e가 쓰는 서버 (백그라운드). off는 배포판과 같음
 node tools/strange-oracle/e2e-saju.js
+node tools/strange-oracle/e2e-rest.js           # (22단계) 방 결과 나머지 이야기: 만신 무료·잠김·방에서 결제 복귀
 node tools/strange-oracle/e2e-book.js           # 결제한 탭으로 책 14장(인연의 장·새 장 포함) + (18단계) 미리보기·잠긴 장 네 길·상태표·#preview·관심사·이벤트 값
 node tools/strange-oracle/e2e-flow.js reduced   # motion도 있음
 node tools/strange-oracle/e2e-map.js            # 16단계 친구 지도(브라우저 둘 = 주인·친구, 약 2분) + off 배포판 DOM 0 (off 서버 8792를 스스로 띄우고 끔)

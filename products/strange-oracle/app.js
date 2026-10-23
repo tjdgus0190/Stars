@@ -264,6 +264,7 @@
       window.sessionStorage.removeItem("strange-oracle-bookmark"); // (13단계) 이어 읽기 장 id·쪽 번호
       window.sessionStorage.removeItem("strange-oracle-receipt"); // 12단계까지의 영수증 코드 칸
       window.sessionStorage.removeItem(PASS_KEY); // (14-4) 열람 코드도 "내 정보 지우기"로 함께 지운다
+      window.sessionStorage.removeItem("strange-oracle-payroom"); // (22단계) 결제를 시작한 방 이름
       window.sessionStorage.removeItem(PAYREQ_KEY); // (15-2) 결제 확인용 R도 지운다 → 이 탭에서 책이 자동으로 열리지 않음(확인 창 경고 줄)
       window.sessionStorage.removeItem(MAP_SES); // (16-2의 8) 지도 초대·참여 표시·삭제 코드도 늘 지운다(서버 기록 지우기는 대화 상자의 선택 칸)
     } catch (e) {
@@ -507,6 +508,7 @@
       if (name === "saju-intro") sajuGateOpen();
       onScreen(name, next); // 화면 이벤트(GA4)
       if (name === "hub" || /-result$/.test(name)) prefetchNext();
+      if (/-result$/.test(name)) renderRest(next); // (22단계) 이 방의 나머지 이야기
     };
     currentName = name; // 전환 중에 다시 불려도 이전 화면 기준으로 기록하지 않게
     if (prev && prev !== next && !reduceMotion && !opts.instant) {
@@ -2867,6 +2869,7 @@
       /* 저장이 막힌 브라우저: 이 화면에서만 */
     }
     memPass = p || "";
+    if (/-result$/.test(currentName)) renderRest(screens[currentName]); // (22단계) 결제·코드 확인·폐기 → 방 결과의 나머지 칸 다시
   };
   const passNow = () => readPass() || memPass;
   // 함수 book 부르기 → { ok, data } 또는 { kind: fail | wait | offline }. 본문은 pass·file 두 칸뿐, 응답은 저장하지 않는다(no-store)
@@ -2902,6 +2905,145 @@
     return paidLoading[file];
   }
   const sajuHiddenTitle = (c) => strip(SAJU.groups[Object.keys(SAJU.groups)[BookCore.sajuGroup(c.saju)]].hiddenTitle || "");
+
+  // ── (22단계, 결정 134) 방 결과 아래 "이 방의 나머지 이야기" (room-rest, JS가 책 한 줄 뒤에 만든다)
+  //   만신: 무료 — [이어서 읽기]를 누르면 함수 book에서 saju 장(열람 코드 없이)을 받아 이 자리에 펼친다.
+  //   오검~시빌라: 결제 전에는 잠긴 장 이름·분량·결제 버튼만(유료 문장은 공개 파일에 없다, 7장). 결제한 탭에서는 그 방 장을 받아
+  //   Ⅰ장 나머지·Ⅱ~Ⅳ장·숨은 장을 바로 보여 준다. 보내는 값은 { pass, file } 두 칸뿐(6장). off 배포판에서는 그리지 않는다.
+  const RT = (T.room && T.room.rest) || {};
+  const restState = {}; // 방 → loading | fail (메모리만)
+  const PAYROOM_KEY = "strange-oracle-payroom"; // 결제를 시작한 방 이름(입력값 아님) — 결제창에서 돌아오면 그 방 결과로
+  const rmk = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  function restSection(num, name, list, cls) {
+    const s = rmk("section", "room-rest__ch" + (cls ? " " + cls : ""));
+    const h = rmk("h3", "room-rest__name");
+    if (num) h.append(rmk("span", "room-rest__num", num));
+    h.append(rmk("span", "", name));
+    s.append(h);
+    const body = rmk("div", "prose room-rest__body");
+    list.forEach((x) => body.append(typeof x === "object" ? rmk("p", "room-rest__sub", x.text) : rmk("p", "", x))); // 소제목은 { text } (문자열의 옛 .sub() 메서드와 헷갈리지 않게 typeof로)
+    s.append(body);
+    return s;
+  }
+  function renderRestOpen(box, room) {
+    const c = myCodes();
+    const fr = BookCore.fullRoom(BookCore.contentFrom(window), room, c);
+    const names = T.result.chapterNames;
+    let ch1 = [];
+    if (room === "rune") {
+      c.rune.forEach((i, k) => {
+        const rest = fr.ch1Rest[k] || [];
+        if (rest.length) ch1 = ch1.concat([{ text: strip(fill(T.rune.result.ch1Sub, { norn: T.rune.norns[k].name, name: RUNES[i].name })) }], rest.map(strip));
+      });
+    } else ch1 = (fr.ch1Rest || []).map(strip);
+    if (fr.heartLine) ch1.push(strip(fr.heartLine));
+    const tail = topicTail(fr, c);
+    if (ch1.length) box.append(restSection(ROMAN[0], RT.ch1Rest || names[0], ch1));
+    box.append(restSection(ROMAN[1], names[1], fr.ch2.map(strip)));
+    box.append(restSection(ROMAN[2], names[2], fr.ch3.map(strip)));
+    box.append(restSection(ROMAN[3], names[3], (tail ? fr.ch4.concat(tail) : fr.ch4).map(strip)));
+    box.append(restSection("", room === "saju" ? sajuHiddenTitle(c) || T.book.hiddenChapter : strip(fr.hidden.title || T.book.hiddenChapter), fr.hidden.paragraphs.map(strip), "room-rest__ch--hidden"));
+  }
+  function renderRest(scr) {
+    const room = scr && scr.dataset.room;
+    if (!BOOK_ON || !CHAPTER_ORDER.includes(room) || !isDone(room)) return;
+    let box = js("room-rest", scr);
+    if (!box) {
+      const after = js("result-book-line", scr);
+      if (!after) return;
+      box = rmk("section", "room-rest");
+      box.dataset.js = "room-rest";
+      after.after(box);
+    }
+    box.textContent = "";
+    const free = !PAID_IDS.has(room);
+    const loaded = Boolean(window[PAID_GLOBAL[room]]);
+    const open = free || Boolean(passNow());
+    const n = comma(chapterChars(room));
+    box.dataset.state = open && loaded ? "open" : open ? restState[room] || (free ? "free" : "loading") : "locked";
+    box.append(rmk("h2", "room-rest__title", RT.title || ""));
+    const st = box.dataset.state;
+    if (st === "open") {
+      if (!free) box.append(rmk("p", "room-rest__note", RT.openNote || ""));
+      return renderRestOpen(box, room);
+    }
+    if (st === "locked") {
+      box.append(rmk("p", "room-rest__lead", fill(RT.lockedLead, { n })));
+      const ul = rmk("ul", "room-rest__locks");
+      [[ROMAN[0], RT.lockedRest], [ROMAN[1], T.result.chapterNames[1]], [ROMAN[2], T.result.chapterNames[2]], [ROMAN[3], T.result.chapterNames[3]], ["", T.book.hiddenChapter]].forEach(([num, name]) => {
+        const li = rmk("li", "room-rest__lock");
+        li.append(rmk("span", "room-rest__num", num)); // 숨은 장은 빈 칸(줄 맞춤)
+        li.append(rmk("span", "room-rest__lock-name", name));
+        const bars = rmk("span", "room-rest__bars"); // 흐린 막대(글자 아님)
+        bars.setAttribute("aria-hidden", "true");
+        li.append(bars);
+        ul.append(li);
+      });
+      box.append(ul);
+      const price = comma(PAY.amount);
+      box.append(rmk("p", "room-rest__price", fill(RT.lockedNote, { price })));
+      const buy = rmk("button", "btn btn--primary btn--block room-rest__buy", fill(RT.buyBtn, { price }));
+      buy.type = "button";
+      buy.dataset.js = "room-rest-buy";
+      buy.addEventListener("click", () => {
+        try {
+          window.sessionStorage.setItem(PAYROOM_KEY, room);
+        } catch (e) {
+          /* 저장이 막힌 브라우저: 돌아오면 책 목차로 */
+        }
+        goPay("room");
+      });
+      const have = rmk("button", "text-link room-rest__have", RT.haveCode || "");
+      have.type = "button";
+      have.dataset.js = "room-rest-have";
+      have.addEventListener("click", () => {
+        if (!goPay("room")) return;
+        const t = js("pass-toggle", payScr);
+        if (t && t.getAttribute("aria-expanded") !== "true") setTimeout(() => t.click(), 0);
+      });
+      box.append(buy, have);
+      return;
+    }
+    // free(만신, 아직 안 받음) · loading · fail
+    if (st === "free") box.append(rmk("p", "room-rest__lead", fill(RT.freeLead, { n })));
+    if (st === "loading") box.append(rmk("p", "room-rest__lead", RT.loading || ""));
+    if (st === "fail") box.append(rmk("p", "room-rest__lead", RT.fail || ""));
+    if (st !== "loading") {
+      const b = rmk("button", st === "free" ? "btn btn--primary btn--block room-rest__read" : "btn btn--ghost btn--block room-rest__read", st === "free" ? RT.freeBtn : RT.retry);
+      b.type = "button";
+      b.dataset.js = "room-rest-read";
+      b.addEventListener("click", () => loadRest(scr, room));
+      box.append(b);
+    } else loadRest(scr, room);
+  }
+  const restBusy = {};
+  function loadRest(scr, room) {
+    if (restBusy[room]) return;
+    restBusy[room] = true;
+    restState[room] = "loading";
+    renderRest(scr);
+    Promise.all([loadPaid(PAID_FILE[room]), ensureRooms([room])])
+      .then(() => delete restState[room], () => (passNow() || !PAID_IDS.has(room) ? (restState[room] = "fail") : delete restState[room])) // 코드가 막혔으면 잠긴 칸으로
+      .then(() => {
+        restBusy[room] = false;
+        if (currentName === `${room}-result`) renderRest(scr);
+      });
+  }
+  // 결제창에서 돌아왔을 때: 결제를 시작한 방(있으면)
+  function takePayRoom() {
+    try {
+      const r = window.sessionStorage.getItem(PAYROOM_KEY);
+      window.sessionStorage.removeItem(PAYROOM_KEY);
+      return CHAPTER_ORDER.includes(r) && isDone(r) ? r : null;
+    } catch (e) {
+      return null;
+    }
+  }
 
   // data-t가 붙은 요소를 한 덩어리 안에서만 다시 채운다 (복제한 틀에 쓴다)
   const textIn = (el) => $$("[data-t]", el).forEach((x) => (x.textContent = get(x.dataset.t) ?? ""));
@@ -4308,10 +4450,11 @@
   // (18-11) 결제 전 화면에 들어온 길: preview · toc · other
   let payFrom = "other";
   // (2026-10-21) hub·story·locked 길을 더함. 결제 전 화면으로 갔으면 true
-  const PAY_FROM = ["preview", "toc", "hub", "story", "locked"];
+  const PAY_FROM = ["preview", "toc", "hub", "story", "locked", "room"]; // (22단계) room = 방 결과의 나머지 이야기 칸
   function goPay(from) {
     if (!payScr) return false;
     payFrom = PAY_FROM.includes(from) ? from : "other";
+    if (from !== "room") takePayRoom(); // 다른 길로 왔으면 지난 방 기억은 지운다
     go("deeper");
     return true;
   }
@@ -4653,7 +4796,9 @@
       writePass(fresh[0]);
       track("so_pay", { step: "done" });
       coverNext = null;
-      go("report");
+      const back = takePayRoom(); // (22단계) 방에서 결제를 시작했으면 그 방 결과로(나머지 이야기가 바로 열림)
+      if (back) ensureRoom(back).then(() => go(roomTarget(back)), () => go("report"));
+      else go("report");
       openCodeCard();
     }
     // ── 코드 카드 (15-5)
@@ -4862,7 +5007,7 @@
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
     so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail"], mode: ["restore", "link", "forget"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
-    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "hub", "story", "locked", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "hub", "story", "locked", "room", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
