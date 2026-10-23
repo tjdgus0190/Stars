@@ -148,7 +148,7 @@ window.TEXT = {
 
   // ── (21단계, 결정 133) 카카오 로그인으로 산 책 다시 열기. kakao: "on"이면 버튼을 보인다(서버 환경 변수 KAKAO_REST_KEY가 없으면 누를 때 off 안내)
   auth: {
-    kakao: "off", // (2026-10-22) 운영자가 카카오 앱·KAKAO_REST_KEY를 넣은 뒤 "on". 시험 페이지(모의 서버 test)는 응답할 때만 on
+    kakao: "on", // (2026-10-23) 운영자가 카카오 앱·KAKAO_REST_KEY를 넣음 → 켬. "off"면 버튼을 지운다
     restore: "카카오로 산 책 다시 열기",
     restoreHelp: "결제할 때 카카오에 연결해 두었다면, 로그인만으로 다시 열려요.",
     link: "카카오 계정에 이 책 연결하기",
