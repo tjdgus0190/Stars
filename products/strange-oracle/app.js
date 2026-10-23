@@ -145,7 +145,8 @@
   const PAY = T.pay || {};
   const PAY_MODE = PAY.mode === "test" || PAY.mode === "live" ? PAY.mode : "off";
   const BOOK_ON = PAY_MODE !== "off";
-  let syncHubKakao = () => {}; // (22단계) 입구 카카오 버튼 보이기(열람 코드가 없을 때만). 결제 화면을 붙일 때 바뀐다
+  let syncHubKakao = () => {}; // (22·23단계) 입구 카카오 줄(로그인 전 버튼 / 로그인 뒤 상태). 결제 화면을 붙일 때 바뀐다
+  const onAccount = { saved: () => {}, pass: () => {}, clear: () => {} }; // (23단계) 카카오 계정 저장 고리(로그인·동의 상태는 그쪽에서 확인)
   // (18단계) BX = app-book.js mount 결과, storyBookHook = 나의 이야기 7/7 미리보기 카드
   let BX = null;
   let bookGo = "";
@@ -257,6 +258,7 @@
     } catch (e) {
       /* 저장이 막힌 브라우저: 이 화면 안에서만 기억한다 */
     }
+    onAccount.saved(); // (23단계) 로그인·저장 동의한 기기면 카카오 계정에도(1.5초 모아서)
   }
   function clearAll() {
     try {
@@ -272,6 +274,7 @@
       /* 무시 */
     }
     if (onClearPay) onClearPay();
+    onAccount.clear(); // (23단계) 이 기기 카카오 로그인도 푼다(계정에 저장한 기록은 입구 '저장한 기록 지우기'로)
     state = emptyState();
     Object.keys(editing).forEach((k) => (editing[k] = false));
     $$("input[data-js], textarea[data-js]").forEach((el) => (el.type === "checkbox" || el.type === "radio" ? (el.checked = false) : (el.value = "")));
@@ -2632,7 +2635,7 @@
   const SITE_URL = ShareButtons.siteUrl(T.site.url);
   ShareButtons.init({
     url: SITE_URL,
-    kakao: { jsKey: T.kakao.jsKey, sdkUrl: T.kakao.sdkUrl, label: T.share.kakao, title: T.meta.title, description: T.meta.description, imageUrl: new URL("og-image.png", SITE_URL).href, onFail: () => toast(T.toast.shareFail) },
+    kakao: { jsKey: T.kakao.jsKey, sdkUrl: T.kakao.sdkUrl, integrity: T.kakao.integrity, label: T.share.kakao, title: T.meta.title, description: T.meta.description, imageUrl: new URL("og-image.png", SITE_URL).href, onFail: () => toast(T.toast.shareFail) },
   });
 
   // ═════════ 공유 카드 ═════════
@@ -2872,6 +2875,7 @@
     }
     memPass = p || "";
     syncHubKakao();
+    if (p) onAccount.pass(p); // (23단계) 로그인한 기기면 결제 코드를 계정에 연결
     if (/-result$/.test(currentName)) renderRest(screens[currentName]); // (22단계) 결제·코드 확인·폐기 → 방 결과의 나머지 칸 다시
   };
   const passNow = () => readPass() || memPass;
@@ -4928,12 +4932,198 @@
       js("kakao-restore", payScr).addEventListener("click", () => kakaoStart("restore"));
       js("kakao-forget", payScr).addEventListener("click", () => window.confirm(AUTH.forgetConfirm || "") && kakaoStart("forget"));
       js("kakao-link-btn", codeDlg).addEventListener("click", () => passNow() && kakaoStart("link"));
-      // (22단계) 입구 버튼: 이 탭에 열람 코드가 없을 때만 보인다(renderHub가 다시 맞춘다)
-      const hubKakao = js("hub-kakao");
-      if (hubKakao) {
-        js("hub-kakao-btn", hubKakao).addEventListener("click", () => kakaoStart("restore"));
-        syncHubKakao = () => show(hubKakao, !passNow());
+      // ── (23단계, 결정 135 — CLAUDE.md 3장·6장 예외 4) 로그인 유지·진행 저장.
+      //   로그인 표 sid(무작위 32자, 입력값 아님)만 이 기기 localStorage(LOGIN_KEY)에 30일. 이름·생년월일·태어난 시각·성별·방 결과는
+      //   저장 동의(consent true)와 만 14세 이상일 때만 함수 auth(save)로 보내고, 서버는 암호문으로만 둔다. 궁합 상대·질문 글은 보내지 않는다.
+      const LOGIN_KEY = "strange-oracle-login";
+      const ACC = AUTH.account || {};
+      const CON = AUTH.consent || {};
+      const DAY30 = 30 * 24 * 60 * 60 * 1000;
+      const readLogin = () => {
+        try {
+          const x = JSON.parse(window.localStorage.getItem(LOGIN_KEY) || "null");
+          return x && /^[0-9a-f]{32}$/.test(x.sid) && x.exp > Date.now() ? x : null;
+        } catch (e) {
+          return null;
+        }
+      };
+      const writeLogin = (x) => {
+        try {
+          if (x) window.localStorage.setItem(LOGIN_KEY, JSON.stringify(x));
+          else window.localStorage.removeItem(LOGIN_KEY);
+        } catch (e) {
+          /* 저장이 막힌 브라우저: 이 화면에서만 */
+        }
+      };
+      const authPost = async (path, body) => {
+        try {
+          const r = await fetch("/api/auth/" + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" });
+          return { status: r.status, j: r.status === 200 ? await r.json() : null };
+        } catch (e) {
+          return { status: 0, j: null };
+        }
+      };
+      const young = () => Boolean(state.profile.birth) && BookCore.ageOf(state.profile.birth) < 14;
+      // 보내는 값: 정해 둔 칸만 (서버 dataOk와 같은 규칙. 맞지 않는 칸은 빼고 보낸다)
+      const leaf = (x) => x === null || typeof x === "boolean" || (typeof x === "number" && Number.isFinite(x)) || (typeof x === "string" && x.length <= 24);
+      function payload() {
+        const p = {};
+        const sp = state.profile || {};
+        if (sp.name) p.name = sp.name;
+        if (sp.birth) p.birth = { y: sp.birth.y, m: sp.birth.m, d: sp.birth.d };
+        if (sp.time) p.time = { h: sp.time.h, m: sp.time.m };
+        if (sp.gender) p.gender = sp.gender;
+        const v = {};
+        for (const r of CHAPTER_ORDER) {
+          const x = state.visits[r];
+          if (!x) continue;
+          v[r] = {};
+          for (const [k, val] of Object.entries(x)) if (leaf(val) || (Array.isArray(val) && val.length <= 3 && val.every(leaf))) v[r][k] = val;
+        }
+        return { p, v };
+      }
+      let saveTimer = 0;
+      const expired = () => {
+        writeLogin(null);
         syncHubKakao();
+        toast(AUTH.msg.expired || "");
+      };
+      function pushSave(now) {
+        clearTimeout(saveTimer);
+        const lg = readLogin();
+        if (!lg || lg.consent !== true || young()) return;
+        saveTimer = setTimeout(async () => {
+          const r = await authPost("save", { sid: lg.sid, data: payload() });
+          if (r.status === 401) expired();
+        }, now ? 0 : 1500);
+      }
+      onAccount.saved = () => pushSave(false);
+      // 결제한 코드는 로그인만 했으면(저장 동의와 별개) 계정에 연결 — 21단계 범위
+      onAccount.pass = (p) => {
+        const lg = readLogin();
+        if (lg && p) authPost("save", { sid: lg.sid, pass: p }).then((r) => r.status === 401 && expired());
+      };
+      onAccount.clear = () => {
+        const lg = readLogin();
+        if (lg) authPost("logout", { sid: lg.sid });
+        writeLogin(null);
+        syncHubKakao();
+      };
+      // 동의 대화 상자
+      const conDlg = js("kakao-consent");
+      const conAgree = js("kakao-consent-agree", conDlg);
+      const conErr = js("kakao-consent-error", conDlg);
+      js("kakao-consent-list", conDlg).replaceChildren(...(CON.items || []).map((t) => Object.assign(document.createElement("li"), { textContent: t })));
+      const closeCon = () => (conDlg.close ? conDlg.close() : conDlg.removeAttribute("open"));
+      function openConsent() {
+        conAgree.checked = false;
+        show(conErr, false);
+        if (conDlg.open) return;
+        if (conDlg.showModal) conDlg.showModal();
+        else conDlg.setAttribute("open", "");
+      }
+      const setConsent = (v) => {
+        const lg = readLogin();
+        if (lg) writeLogin(Object.assign(lg, { consent: v }));
+        syncHubKakao();
+      };
+      js("kakao-consent-yes", conDlg).addEventListener("click", () => {
+        if (!conAgree.checked) {
+          conErr.textContent = CON.needAgree || "";
+          return show(conErr, true);
+        }
+        closeCon();
+        if (young()) {
+          setConsent(false);
+          return toast(AUTH.msg.under14 || "");
+        }
+        setConsent(true);
+        track("so_auth", { step: "consent", mode: "login" });
+        pushSave(true);
+        toast(AUTH.msg.saved || "");
+      });
+      js("kakao-consent-no", conDlg).addEventListener("click", () => {
+        closeCon();
+        setConsent(false);
+        toast(AUTH.msg.noSave || "");
+      });
+      // 입구: 로그인 전 = [카카오 로그인] / 로그인 뒤 = 상태 한 줄 + 진행 저장 켜기·로그아웃·저장한 기록 지우기
+      const hubKakao = js("hub-kakao");
+      const hubOn = js("hub-kakao-on", hubKakao);
+      js("hub-kakao-btn", hubKakao).addEventListener("click", () => kakaoStart("login"));
+      js("hub-kakao-consent", hubKakao).addEventListener("click", openConsent);
+      js("hub-kakao-logout", hubKakao).addEventListener("click", async () => {
+        const lg = readLogin();
+        if (lg) await authPost("logout", { sid: lg.sid });
+        writeLogin(null);
+        syncHubKakao();
+        track("so_auth", { step: "logout", mode: "login" });
+        toast(AUTH.msg.logout || "");
+      });
+      js("hub-kakao-erase", hubKakao).addEventListener("click", async () => {
+        const lg = readLogin();
+        if (!lg || !window.confirm(ACC.eraseConfirm || "")) return;
+        const r = await authPost("erase", { sid: lg.sid });
+        if (r.status !== 200 && r.status !== 401) return toast(AUTH.msg.off || "");
+        writeLogin(null);
+        syncHubKakao();
+        track("so_auth", { step: "erase", mode: "login" });
+        toast(AUTH.msg.erased || "");
+      });
+      syncHubKakao = () => {
+        const lg = readLogin();
+        show(js("hub-kakao-btn", hubKakao), !lg);
+        show(hubOn, Boolean(lg));
+        if (lg) {
+          js("hub-kakao-state", hubKakao).textContent = lg.consent === true ? ACC.on : ACC.onNoSave;
+          show(js("hub-kakao-consent", hubKakao), lg.consent !== true);
+        }
+        const link = js("kakao-link", codeDlg);
+        if (link) show(link, !lg); // 로그인한 기기는 결제 코드가 자동으로 연결된다
+      };
+      syncHubKakao();
+      // 로그인 결과 반영: 저장한 진행이 이 탭보다 많으면 불러와 다시 시작, 아니면 이 탭 진행을 올림. 처음이면 동의 묻기
+      const AUTH_NOTE = "strange-oracle-authnote"; // 다시 시작한 뒤 띄울 안내 이름(한 번)
+      const AUTH_ONCE = "strange-oracle-authonce"; // 이 탭에서 계정 진행을 이미 불러왔음
+      function applyAccount(j, fresh) {
+        const gotBook = Boolean(j.passes && j.passes[0] && !passNow());
+        if (gotBook) writePass(window.PayCode.Pass.normalize(j.passes[0]));
+        const d = j.data;
+        const theirs = d && d.v ? Object.keys(d.v).length : 0;
+        let once = false;
+        try {
+          once = Boolean(window.sessionStorage.getItem(AUTH_ONCE));
+        } catch (e) {
+          once = true;
+        }
+        if (d && !once && (theirs > filledRooms().length || (!state.profile.name && d.p && d.p.name))) {
+          try {
+            window.sessionStorage.setItem(STORE_KEY, JSON.stringify({ profile: d.p || {}, visits: d.v || {} }));
+            window.sessionStorage.setItem(AUTH_NOTE, "restored");
+            window.sessionStorage.setItem(AUTH_ONCE, "1"); // 이 탭에서는 한 번만 불러온다(다시 시작 반복 막기)
+          } catch (e) {
+            return;
+          }
+          return location.replace(location.pathname); // 방 파일·화면을 처음부터 다시 맞춘다
+        }
+        if (d) pushSave(true);
+        else if (fresh && readLogin() && readLogin().consent == null) openConsent();
+        if (fresh) toast((gotBook ? AUTH.msg.found : AUTH.msg.login) || "");
+      }
+      try {
+        const note = window.sessionStorage.getItem(AUTH_NOTE);
+        window.sessionStorage.removeItem(AUTH_NOTE);
+        if (note) setTimeout(() => toast(AUTH.msg.restored || ""), 800);
+      } catch (e) {
+        /* 무시 */
+      }
+      // 이 기기에 로그인이 남아 있고 이 탭이 비어 있으면(새 탭·다음 방문) 저장한 진행을 한 번 불러온다
+      const lg0 = readLogin();
+      if (lg0 && !/^#kakao-/.test(location.hash)) {
+        authPost("me", { sid: lg0.sid }).then((r) => {
+          if (r.status === 401) return expired();
+          if (r.j) applyAccount(r.j, false);
+        });
       }
       // 시작할 때 #kakao-… 로 돌아왔으면: 주소에서 표를 바로 지우고, state가 이 탭 것과 같을 때만 묻는다
       kakaoBoot = (frag) => {
@@ -4948,12 +5138,13 @@
         const mode = saved && saved.mode;
         const home = saved && saved.from === "hub" ? "hub" : "deeper"; // (22단계) 입구에서 시작했으면 입구로
         if (!m || !saved || saved.s !== m[2]) {
-          track("so_auth", { step: "fail", mode: ["restore", "link", "forget"].includes(mode) ? mode : "restore" });
+          track("so_auth", { step: "fail", mode: ["restore", "link", "forget", "login"].includes(mode) ? mode : "restore" });
           return { first: home, after: () => toast(AUTH.msg.error || "") };
         }
         const body = { t: m[1], s: m[2] };
         if (mode === "link" && passNow()) body.pass = passNow();
         if (mode === "forget") body.forget = true;
+        if (mode === "login") body.login = true; // (23단계) 로그인 유지 표 받기
         return {
           first: mode === "link" ? "report" : home,
           after: async () => {
@@ -4966,6 +5157,12 @@
             }
             const stp = ["linked", "found", "none", "forgot"].includes(res.state) ? res.state : "fail";
             track("so_auth", { step: stp, mode });
+            if (mode === "login") {
+              if (!res.sid) return toast((AUTH.msg[res.state] || AUTH.msg.error) || "");
+              writeLogin({ sid: res.sid, exp: Date.now() + DAY30, consent: res.data ? true : null });
+              syncHubKakao();
+              return applyAccount(res, true);
+            }
             if (res.state === "found" && res.passes && res.passes[0]) {
               writePass(window.PayCode.Pass.normalize(res.passes[0]));
               toast(AUTH.msg.found || "");
@@ -5017,7 +5214,7 @@
     so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
-    so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail"], mode: ["restore", "link", "forget"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
+    so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail", "consent", "logout", "erase"], mode: ["restore", "link", "forget", "login"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
     so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "hub", "story", "locked", "room", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},

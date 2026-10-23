@@ -66,23 +66,29 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   const back = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report' && !!sessionStorage.getItem('strange-oracle-pass')", 8000);
   check("B1 다른 기기: 카카오 로그인만으로 같은 코드 받음 → 목차", back && (await ss("strange-oracle-pass")) === pass, await toastText());
 
-  // 2-1. (22단계) 입구(첫 화면) 카카오 버튼: 방을 하나도 안 지난 새 탭에서도 보이고, 로그인하면 책이 열림 · 연결 없는 계정은 입구로 돌아와 안내
+  // 2-1. (22→23단계) 입구 [카카오 로그인]: 방을 하나도 안 지난 새 탭에서도 보임 · 연결 없는 계정은 입구에 남아 저장 동의를 물음 · 연결된 계정은 책 코드를 받음
   await b.goto(TEST + P);
-  await ev("sessionStorage.clear()");
+  await ev("sessionStorage.clear(); localStorage.clear(); true");
   await b.goto(TEST + P);
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
   check("H1 입구(0/7): 카카오 로그인 버튼 보임(#FEE500)", await ev("(() => { const el = document.querySelector('[data-js=hub-kakao]'); const btn = document.querySelector('[data-js=hub-kakao-btn]'); return !!el && !el.classList.contains('is-hidden') && el.offsetHeight > 0 && getComputedStyle(btn).backgroundColor === 'rgb(254, 229, 0)'; })()"));
   await click("[data-js=hub-kakao-btn]");
   await kakaoLogin(2003);
-  await waitFor(`document.querySelector('[data-js=toast]')?.textContent === ${JSON.stringify(msg.noneHub)}`, 6000);
-  check("H2 연결 없는 카카오 → 입구로 돌아옴 · 입구용 안내", (await toastText()) === msg.noneHub && (await active()) === "screen-hub", await toastText());
+  const askH = await waitFor("!!document.querySelector('[data-js=kakao-consent]')?.open", 6000);
+  await click("[data-js=kakao-consent-no]");
+  await waitFor(`document.querySelector('[data-js=toast]')?.textContent === ${JSON.stringify(msg.noSave)}`, 5000);
+  check("H2 연결 없는 카카오 → 입구 · 저장 동의 물음 · [저장하지 않기] → 안내 · '저장하지 않음' 줄", askH && (await active()) === "screen-hub" && (await toastText()) === msg.noSave && (await ev("document.querySelector('[data-js=hub-kakao-state]').textContent")).includes("저장하지"), await toastText());
+  await ev("localStorage.clear(); sessionStorage.clear(); true");
+  await b.goto(TEST + P);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
   await click("[data-js=hub-kakao-btn]");
   await kakaoLogin(1001);
-  const hubBack = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report' && !!sessionStorage.getItem('strange-oracle-pass')", 8000);
-  check("H3 연결된 카카오 → 같은 코드 · 책 목차", hubBack && (await ss("strange-oracle-pass")) === pass, await toastText());
-  await ev("StrangeOracle.go('hub')");
-  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
-  check("H4 열람 코드가 있는 탭 → 입구 버튼 숨김", await ev("document.querySelector('[data-js=hub-kakao]').classList.contains('is-hidden')"));
+  const hubBack = await waitFor("sessionStorage.getItem('strange-oracle-pass') !== null", 8000);
+  await waitFor(`document.querySelector('[data-js=toast]')?.textContent === ${JSON.stringify(msg.found)}`, 5000);
+  check("H3 책을 연결해 둔 카카오 → 같은 코드 받음 · '책을 열었어요'", hubBack && (await ss("strange-oracle-pass")) === pass, await toastText());
+  await ev("(() => { const d = document.querySelector('[data-js=kakao-consent]'); if (d.open) d.close(); return true; })()");
+  check("H4 로그인한 기기 → 입구 버튼 숨김 · 상태 줄 보임", (await ev("document.querySelector('[data-js=hub-kakao-btn]').classList.contains('is-hidden')")) && (await ev("!document.querySelector('[data-js=hub-kakao-on]').classList.contains('is-hidden')")));
+  await ev("localStorage.clear(); true");
 
   // 3. 다른 카카오 → 없음 / 취소 → 오류
   await ev("sessionStorage.removeItem('strange-oracle-pass')");
@@ -113,6 +119,68 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   await sleep(1200);
   check("E1 이 탭이 시작하지 않은 #kakao-… → claim 요청 0 · 오류 안내", !b.log.requests.slice(nC).some((r) => /\/api\/auth\/claim/.test(r)) && (await toastText()) === msg.error);
   check("E2 콘솔 오류 0", b.log.errors.filter((e) => !/favicon|40[0-9]|net::|fonts/.test(e)).length === 0, b.log.errors.slice(0, 2).join(" | "));
+
+  // 6. (23단계, 결정 135) 입구 로그인 → 저장 동의 → 진행·입력값 자동 저장 → 다른 기기 로그인으로 복원 · 새 탭 자동 복원 · 로그아웃 · 지우기 · 만 14세 미만
+  const lsLogin = () => ev("localStorage.getItem('strange-oracle-login')");
+  const dumpNow = async () => JSON.stringify(await (await fetch(`${TEST}/__dev/pay-store`)).json());
+  await b.goto(TEST + P);
+  await ev("sessionStorage.clear(); localStorage.clear(); true");
+  await b.goto(`${TEST}/__dev/skip?rooms=3&to=hub`);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(5005);
+  const conOpen = await waitFor("!!document.querySelector('[data-js=kakao-consent]')?.open", 6000);
+  check("L1 처음 로그인 → 저장 동의 창 · 체크 꺼짐 · 자세히 보기 9줄 · localStorage엔 sid·만료·동의 칸뿐", conOpen && !(await ev("document.querySelector('[data-js=kakao-consent-agree]').checked")) && (await ev("document.querySelectorAll('[data-js=kakao-consent-list] li').length")) === 9 && Object.keys(JSON.parse((await lsLogin()) || "{}")).sort().join() === "consent,exp,sid");
+  await click("[data-js=kakao-consent-yes]");
+  check("L2 체크 없이 [저장] → 안내 · 창 그대로", (await ev("!document.querySelector('[data-js=kakao-consent-error]').classList.contains('is-hidden')")) && (await ev("document.querySelector('[data-js=kakao-consent]').open")));
+  const nS = b.log.bodies.length;
+  await ev("document.querySelector('[data-js=kakao-consent-agree]').click(); true");
+  await click("[data-js=kakao-consent-yes]");
+  await sleep(1200);
+  const saves = b.log.bodies.slice(nS).filter((x) => /\/api\/auth\/save/.test(x.url));
+  const sv = saves.length ? JSON.parse(saves[0].body) : {};
+  check("L3 동의 → save 한 번 · 본문 sid·data(p·v)만 · p는 이름·생일·시각·성별만", saves.length >= 1 && Object.keys(sv).sort().join() === "data,sid" && Object.keys(sv.data).sort().join() === "p,v" && Object.keys(sv.data.p).every((k) => ["name", "birth", "time", "gender"].includes(k)) && Object.keys(sv.data.v).length === 3, saves.map((x) => x.body.replace(/"sid":"[^"]+"/, '"sid":"…"').slice(0, 160)).join(" | "));
+  const d1 = await dumpNow();
+  check("L4 저장소: 이름·생년 원문 0(암호문만) · 입구 줄 '로그인됨 · 자동 저장'", !d1.includes("테스트") && !d1.includes("1995") && /"data":"/.test(d1) && (await ev("document.querySelector('[data-js=hub-kakao-state]').textContent")).includes("자동 저장"));
+  // 다른 기기: 저장소 전부 비움 → 같은 카카오로 로그인 → 다시 시작하며 복원
+  await ev("sessionStorage.clear(); localStorage.clear(); true");
+  await b.goto(TEST + P);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(5005);
+  const rest = await waitFor("(() => { try { const s = JSON.parse(sessionStorage.getItem('strange-oracle')); return s && s.profile.name === '테스트' && Object.keys(s.visits).length === 3; } catch (e) { return false; } })()", 10000);
+  await waitFor(`document.querySelector('[data-js=toast]')?.textContent === ${JSON.stringify(msg.restored)}`, 5000);
+  check("L5 다른 기기 로그인 → 이름·방 3개 복원 · '불러왔어요' · 동의 창 다시 안 뜸", rest && (await toastText()) === msg.restored && !(await ev("!!document.querySelector('[data-js=kakao-consent]')?.open")), await toastText());
+  // 같은 기기 새 탭(로그인 남음, sessionStorage 빔) → 자동 복원
+  await ev("sessionStorage.clear(); true");
+  await b.goto(TEST + P);
+  const auto = await waitFor("(() => { try { return Object.keys(JSON.parse(sessionStorage.getItem('strange-oracle')).visits).length === 3; } catch (e) { return false; } })()", 10000);
+  check("L6 같은 기기 새 탭 → 로그인 유지 · 자동 복원", auto && !!(await lsLogin()));
+  // 로그아웃 → 버튼 다시 · localStorage 비움 · 서버 기록은 남음
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=hub-kakao-logout]");
+  await waitFor(`document.querySelector('[data-js=toast]')?.textContent === ${JSON.stringify(msg.logout)}`, 5000);
+  check("L7 로그아웃 → [카카오 로그인] 다시 · localStorage 비움 · 계정 기록 남음", (await lsLogin()) === null && (await ev("!document.querySelector('[data-js=hub-kakao-btn]').classList.contains('is-hidden')")) && /"data":"/.test(await dumpNow()));
+  // 지우기
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(5005);
+  await waitFor("!!localStorage.getItem('strange-oracle-login') && document.querySelector('.screen.is-active')?.id === 'screen-hub'", 8000);
+  await sleep(600);
+  await click("[data-js=hub-kakao-erase]");
+  await waitFor(`document.querySelector('[data-js=toast]')?.textContent === ${JSON.stringify(msg.erased)}`, 5000);
+  check("L8 저장한 기록 지우기 → 계정 기록 0 · 로그아웃", !/"data":"/.test(await dumpNow()) && (await lsLogin()) === null, await toastText());
+  // 만 14세 미만: 동의해도 저장 안 함
+  await ev("sessionStorage.clear(); localStorage.clear(); true");
+  await b.goto(`${TEST}/__dev/skip?rooms=2&to=hub&birth=2016-05-05`);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(6006);
+  await waitFor("!!document.querySelector('[data-js=kakao-consent]')?.open", 6000);
+  const nY = b.log.bodies.length;
+  await ev("document.querySelector('[data-js=kakao-consent-agree]').click(); document.querySelector('[data-js=kakao-consent-yes]').click(); true");
+  await sleep(2000);
+  check("L9 만 14세 미만 → 저장 안 함(save 요청 0) · 안내", !b.log.bodies.slice(nY).some((x) => /\/api\/auth\/save/.test(x.url)) && (await toastText()) === msg.under14, await toastText());
+  check("L10 콘솔 오류 0", b.log.errors.filter((e) => !/favicon|40[0-9]|net::|fonts/.test(e)).length === 0, b.log.errors.slice(0, 2).join(" | "));
 
   await b.close();
   fs.mkdirSync(OUT, { recursive: true });

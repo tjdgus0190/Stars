@@ -271,7 +271,34 @@
            이 탭에 이미 열람 코드가 있으면 숨긴다. 카카오 디자인 가이드 색(#FEE500·검은 말풍선) -->
       <div class="hub-kakao" data-js="hub-kakao">
         <button class="btn-kakao" type="button" data-js="hub-kakao-btn"><svg class="btn-kakao__sym" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.2C6.6 3.2 2.3 6.6 2.3 10.8c0 2.7 1.8 5.1 4.6 6.5l-1 3.6c-.1.3.3.6.6.4l4.3-2.8c.4 0 .8.1 1.2.1 5.4 0 9.7-3.4 9.7-7.8S17.4 3.2 12 3.2Z"/></svg><span data-t="auth.hub">카카오 로그인</span></button>
+        <!-- (23단계) 로그인한 기기: 상태 한 줄 + 진행 저장 켜기(동의 전)·로그아웃·저장한 기록 지우기 -->
+        <div class="hub-kakao__on is-hidden" data-js="hub-kakao-on">
+          <p class="hub-kakao__state" data-js="hub-kakao-state"></p>
+          <p class="hub-kakao__links">
+            <button class="text-link" type="button" data-js="hub-kakao-consent" data-t="auth.account.consentOpen">진행 저장 켜기</button>
+            <button class="text-link" type="button" data-js="hub-kakao-logout" data-t="auth.account.logout">로그아웃</button>
+            <button class="text-link" type="button" data-js="hub-kakao-erase" data-t="auth.account.erase">저장한 기록 지우기</button>
+          </p>
+        </div>
       </div>
+      <!-- (23단계, 결정 135) 카카오 계정에 진행·입력값 저장 동의 (CLAUDE.md 6장 예외 4). 체크는 처음에 꺼짐. 자세히 보기 = 동의 체크 바로 옆에서 펼침 -->
+      <dialog class="dialog kakao-consent" data-js="kakao-consent" aria-labelledby="kakao-consent-title">
+        <div class="dialog__body">
+          <h2 class="dialog__title" id="kakao-consent-title" data-t="auth.consent.title">진행 상황을 카카오 계정에 저장할까요?</h2>
+          <p class="kakao-consent__lead" data-t="auth.consent.lead">저장하면 다른 기기에서도 카카오 로그인만으로 이어서 볼 수 있어요.</p>
+          <p class="kakao-consent__sum" data-t="auth.consent.summary">저장하는 것: 이름·생년월일·태어난 시각·성별, 방 결과, 결제한 열람 코드 · 마지막 이용 뒤 1년 보관</p>
+          <label class="kakao-consent__check"><input type="checkbox" data-js="kakao-consent-agree" /> <span data-t="auth.consent.agree">위 내용을 확인했고 저장에 동의해요 (선택)</span></label>
+          <details class="kakao-consent__more">
+            <summary data-t="auth.consent.more">자세히 보기</summary>
+            <ul class="kakao-consent__list" data-js="kakao-consent-list"></ul>
+          </details>
+          <p class="field__error is-hidden" data-js="kakao-consent-error" role="alert"></p>
+          <div class="dialog__actions">
+            <button class="btn btn--primary btn--block" type="button" data-js="kakao-consent-yes" data-t="auth.consent.yes">저장하고 계속하기</button>
+            <button class="btn btn--ghost btn--block" type="button" data-js="kakao-consent-no" data-t="auth.consent.no">저장하지 않기</button>
+          </div>
+        </div>
+      </dialog>
       <!-- /pay:on -->
 
       <!-- (10단계 10-1 b) 이어가기 코드 넣기: 마친 방이 0개일 때만 JS가 .is-hidden 해제. 주 버튼보다 조용한 글자 링크.

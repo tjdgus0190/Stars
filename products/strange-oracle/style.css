@@ -5542,3 +5542,15 @@ body:has(.hub.is-active) .toast { bottom: calc(var(--tabs-h, 64px) + var(--space
 .room-rest__ch--hidden .room-rest__name { color: var(--gold, var(--accent)); }
 /* (22단계) 입구 카카오 로그인 — 문 아래 안내 줄 다음, 이어가기 링크 위 */
 .hub-kakao { margin: var(--space-4) auto 0; max-width: 360px; text-align: center; }
+/* (23단계) 입구 로그인 상태 줄 · 저장 동의 대화 상자 */
+.hub-kakao__on { padding: var(--space-3) var(--space-4); border: 1px solid var(--accent-line); border-radius: 12px; }
+.hub-kakao__state { margin: 0; font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--c-text); }
+.hub-kakao__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 var(--space-3); margin: var(--space-1) 0 0; }
+.hub-kakao__links .text-link { min-height: var(--tap-min); font-size: var(--fs-sm); }
+.kakao-consent__lead, .kakao-consent__sum { margin: 0 0 var(--space-3); font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-muted); word-break: keep-all; }
+.kakao-consent__sum { color: var(--c-text); }
+.kakao-consent__check { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text-strong); }
+.kakao-consent__check input { width: 20px; height: 20px; margin-top: 2px; flex: none; }
+.kakao-consent__more { margin: var(--space-2) 0 var(--space-3); font-size: var(--fs-sm); }
+.kakao-consent__more summary { min-height: var(--tap-min); display: flex; align-items: center; cursor: pointer; color: var(--accent); }
+.kakao-consent__list { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-1); color: var(--c-text-muted); line-height: var(--lh-ui); word-break: keep-all; }
