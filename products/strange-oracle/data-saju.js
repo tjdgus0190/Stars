@@ -37,7 +37,7 @@ window.SAJU = {
     "hubDoor": {
       "label": "Ⅰ 만신의 방",
       "sub": "대문을 지나면 세상의 여섯 문이 열려요",
-      "chip": "일곱 방 무료"
+      "chip": "일곱 문화 점술"
     },
     "intro": {
       "eyebrow": "SAJU · THE EIGHT CHARACTERS",
