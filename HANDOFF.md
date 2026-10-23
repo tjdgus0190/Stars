@@ -4,6 +4,7 @@
 규칙은 **CLAUDE.md**가 기준이고, 이 문서는 현재 상태와 일하는 요령만 적는다. 둘이 다르면 CLAUDE.md가 이긴다.
 
 ## 1. 지금 상태 한눈에
+- **2026-10-23 입구 카카오 로그인·루트 주소:** 첫 화면(입구)에 [카카오 로그인] 버튼(이 탭에 열람 코드가 없을 때만, auth.kakao on일 때). 연결된 책이 있으면 바로 책 목차, 없으면 입구로 돌아와 안내. 사이트 주소(/)는 netlify.toml 301로 바로 입구(/products/strange-oracle/)로 보낸다(예전 흰 화면 "바로가기" 없앰). 시험: e2e-auth H1~H4.
 - **2026-10-23 22단계(결정 134):** 만신의 방은 끝까지 무료(결과 아래 [이어서 읽기 · 무료]), 오검~시빌라는 결과 아래 「이 방의 나머지 이야기」가 잠김 → 결제하면 그 방에서 바로 열림(app.js renderRest, 함수 book 그대로). 시험: e2e-rest.js.
 - **2026-10-22~23 카카오 로그인(21단계):** 함수 auth(v2), 운영자가 카카오 앱·`KAKAO_REST_KEY` 설정(2026-10-23). 화면 버튼은 data.js `auth.kakao`로 켜고 끈다. 시험: auth.test.js·e2e-auth.js.
 - **2026-10-22 결제 켬(live):** 운영 https://glowing-semolina-5a4e78.netlify.app (Netlify 운영 브랜치 `main`). `pay.mode` live, 판매자 SHA Studio·문의 tjdgus0190@naver.com, 연락처·주소 비움(줄 숨김), 환불 안내 빈칸 항목 뺌(운영자). 함수는 Functions v2(`netlify/functions/*.mjs` → 로직 `netlify/lib/`). 결제창은 같은 탭. 20단계 「2027년의 흐름」 포함 책 15장(유료 12장). **실결제 1건+취소 시험은 운영자 몫(미확인).** 아래 내용 중 이와 다른 옛 설명(pay.mode off·release 브랜치·v1 함수)은 이 줄이 우선한다.

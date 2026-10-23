@@ -75,9 +75,12 @@ function rootPage(home, head, siteUrl) {
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="refresh" content="0; url=products/${home}/" />
+  <meta name="color-scheme" content="dark" />
   ${tags.join("\n  ")}
+  <script>location.replace("products/${home}/" + location.search + location.hash);</script>
+  <style>html,body{margin:0;min-height:100%;background:#120f1c}</style>
 </head>
-<body><a href="products/${home}/">바로가기</a></body>
+<body><noscript><a href="products/${home}/" style="color:#e8dcc0">낯선 점술관으로 가기</a></noscript></body>
 </html>
 `;
 }

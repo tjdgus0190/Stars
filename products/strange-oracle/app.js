@@ -145,6 +145,7 @@
   const PAY = T.pay || {};
   const PAY_MODE = PAY.mode === "test" || PAY.mode === "live" ? PAY.mode : "off";
   const BOOK_ON = PAY_MODE !== "off";
+  let syncHubKakao = () => {}; // (22단계) 입구 카카오 버튼 보이기(열람 코드가 없을 때만). 결제 화면을 붙일 때 바뀐다
   // (18단계) BX = app-book.js mount 결과, storyBookHook = 나의 이야기 7/7 미리보기 카드
   let BX = null;
   let bookGo = "";
@@ -708,6 +709,7 @@
     return { title: strip(ORACLES[c.sibyl].title), key: strip(ORACLES[c.sibyl].key) };
   }
   function renderHub() {
+    syncHubKakao();
     const next = nextRoom();
     const filled = filledRooms();
     const n = filled.length;
@@ -2869,6 +2871,7 @@
       /* 저장이 막힌 브라우저: 이 화면에서만 */
     }
     memPass = p || "";
+    syncHubKakao();
     if (/-result$/.test(currentName)) renderRest(screens[currentName]); // (22단계) 결제·코드 확인·폐기 → 방 결과의 나머지 칸 다시
   };
   const passNow = () => readPass() || memPass;
@@ -4907,7 +4910,7 @@
     //   회원번호·토큰은 보지 않는다. 서버가 #kakao-<표>-<S>로 돌려보내면 표를 한 번 써서(claim) 열람 코드를 받거나 연결한다
     const AUTH = T.auth || {};
     const KAKAO_KEY = "strange-oracle-kakao";
-    const kakaoEls = [js("kakao-row", payScr), js("kakao-link", codeDlg)];
+    const kakaoEls = [js("kakao-row", payScr), js("kakao-link", codeDlg), js("hub-kakao")];
     if (AUTH.kakao !== "on") kakaoEls.forEach((el) => el && el.remove());
     else {
       const kakaoStart = (mode) => {
@@ -4915,7 +4918,7 @@
         window.crypto.getRandomValues(b);
         const st = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
         try {
-          window.sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode }));
+          window.sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode, from: currentName === "hub" ? "hub" : "pay" })); // from: 돌아올 화면(입구·결제 전)
         } catch (e) {
           return toast(AUTH.msg.error || "");
         }
@@ -4925,6 +4928,13 @@
       js("kakao-restore", payScr).addEventListener("click", () => kakaoStart("restore"));
       js("kakao-forget", payScr).addEventListener("click", () => window.confirm(AUTH.forgetConfirm || "") && kakaoStart("forget"));
       js("kakao-link-btn", codeDlg).addEventListener("click", () => passNow() && kakaoStart("link"));
+      // (22단계) 입구 버튼: 이 탭에 열람 코드가 없을 때만 보인다(renderHub가 다시 맞춘다)
+      const hubKakao = js("hub-kakao");
+      if (hubKakao) {
+        js("hub-kakao-btn", hubKakao).addEventListener("click", () => kakaoStart("restore"));
+        syncHubKakao = () => show(hubKakao, !passNow());
+        syncHubKakao();
+      }
       // 시작할 때 #kakao-… 로 돌아왔으면: 주소에서 표를 바로 지우고, state가 이 탭 것과 같을 때만 묻는다
       kakaoBoot = (frag) => {
         const m = /^kakao-([0-9a-f]{32})-([0-9a-f]{32})$/.exec(frag);
@@ -4936,15 +4946,16 @@
           saved = null;
         }
         const mode = saved && saved.mode;
+        const home = saved && saved.from === "hub" ? "hub" : "deeper"; // (22단계) 입구에서 시작했으면 입구로
         if (!m || !saved || saved.s !== m[2]) {
           track("so_auth", { step: "fail", mode: ["restore", "link", "forget"].includes(mode) ? mode : "restore" });
-          return { first: "deeper", after: () => toast(AUTH.msg.error || "") };
+          return { first: home, after: () => toast(AUTH.msg.error || "") };
         }
         const body = { t: m[1], s: m[2] };
         if (mode === "link" && passNow()) body.pass = passNow();
         if (mode === "forget") body.forget = true;
         return {
-          first: mode === "link" ? "report" : "deeper",
+          first: mode === "link" ? "report" : home,
           after: async () => {
             let res = null;
             try {
@@ -4960,7 +4971,7 @@
               toast(AUTH.msg.found || "");
               return go("report");
             }
-            toast((AUTH.msg[res.state] || AUTH.msg.error) || "");
+            toast((home === "hub" && res.state === "none" ? AUTH.msg.noneHub : AUTH.msg[res.state] || AUTH.msg.error) || "");
           },
         };
       };

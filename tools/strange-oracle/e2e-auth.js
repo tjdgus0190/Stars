@@ -66,6 +66,24 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   const back = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report' && !!sessionStorage.getItem('strange-oracle-pass')", 8000);
   check("B1 다른 기기: 카카오 로그인만으로 같은 코드 받음 → 목차", back && (await ss("strange-oracle-pass")) === pass, await toastText());
 
+  // 2-1. (22단계) 입구(첫 화면) 카카오 버튼: 방을 하나도 안 지난 새 탭에서도 보이고, 로그인하면 책이 열림 · 연결 없는 계정은 입구로 돌아와 안내
+  await b.goto(TEST + P);
+  await ev("sessionStorage.clear()");
+  await b.goto(TEST + P);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  check("H1 입구(0/7): 카카오 로그인 버튼 보임(#FEE500)", await ev("(() => { const el = document.querySelector('[data-js=hub-kakao]'); const btn = document.querySelector('[data-js=hub-kakao-btn]'); return !!el && !el.classList.contains('is-hidden') && el.offsetHeight > 0 && getComputedStyle(btn).backgroundColor === 'rgb(254, 229, 0)'; })()"));
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(2003);
+  await waitFor(`document.querySelector('[data-js=toast]')?.textContent === ${JSON.stringify(msg.noneHub)}`, 6000);
+  check("H2 연결 없는 카카오 → 입구로 돌아옴 · 입구용 안내", (await toastText()) === msg.noneHub && (await active()) === "screen-hub", await toastText());
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(1001);
+  const hubBack = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report' && !!sessionStorage.getItem('strange-oracle-pass')", 8000);
+  check("H3 연결된 카카오 → 같은 코드 · 책 목차", hubBack && (await ss("strange-oracle-pass")) === pass, await toastText());
+  await ev("StrangeOracle.go('hub')");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  check("H4 열람 코드가 있는 탭 → 입구 버튼 숨김", await ev("document.querySelector('[data-js=hub-kakao]').classList.contains('is-hidden')"));
+
   // 3. 다른 카카오 → 없음 / 취소 → 오류
   await ev("sessionStorage.removeItem('strange-oracle-pass')");
   await ev("StrangeOracle.go('deeper')");
