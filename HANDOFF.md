@@ -4,6 +4,7 @@
 규칙은 **CLAUDE.md**가 기준이고, 이 문서는 현재 상태와 일하는 요령만 적는다. 둘이 다르면 CLAUDE.md가 이긴다.
 
 ## 1. 지금 상태 한눈에
+- **2026-10-22~23 카카오 로그인(21단계):** 함수 auth(v2), 운영자가 카카오 앱·`KAKAO_REST_KEY` 설정(2026-10-23). 화면 버튼은 data.js `auth.kakao`로 켜고 끈다. 시험: auth.test.js·e2e-auth.js.
 - **2026-10-22 결제 켬(live):** 운영 https://glowing-semolina-5a4e78.netlify.app (Netlify 운영 브랜치 `main`). `pay.mode` live, 판매자 SHA Studio·문의 tjdgus0190@naver.com, 연락처·주소 비움(줄 숨김), 환불 안내 빈칸 항목 뺌(운영자). 함수는 Functions v2(`netlify/functions/*.mjs` → 로직 `netlify/lib/`). 결제창은 같은 탭. 20단계 「2027년의 흐름」 포함 책 15장(유료 12장). **실결제 1건+취소 시험은 운영자 몫(미확인).** 아래 내용 중 이와 다른 옛 설명(pay.mode off·release 브랜치·v1 함수)은 이 줄이 우선한다.
 - 제품은 하나다: `products/strange-oracle` "낯선 점술관". 일곱 점술 방(Ⅰ 만신 → 오검 → 별 → 데칸 → 촐킨 → 룬 → 시빌라, 결정 91)을 돌고 결과를 모아 "나의 이야기"와 "한 권의 책"(13장, 17단계에 「인연의 장」 더함)으로 엮는다.
 - **17단계(UI 다듬기·리포트 고도화, specs 17단계)**: I1(디자인)·I2(developer: 문구 도구 items.json·apply-17·check-17, book-yeon.js 키 구조·인연의 장 고르기(브라우저만)·make-volume, yeon-tpl 연결·첫 줄·마음 한 줄·결제 전 새 장 줄, 성능 측정, 17-9 작은 일)이 끝났다. 진행 기록은 `tools/strange-oracle/PROGRESS-17.md`, 결과는 tests.md 「17단계」. 지금 I3(copywriter: 유료 원본 book-yeon·heartLine·firstLine, data.js `book.yeon.*`·`book.heartLabel`·`pay.what.newBadge` [초안], index.html [초안] 정리)가 진행 중 → I4(UI 점검) → I5(QA).
