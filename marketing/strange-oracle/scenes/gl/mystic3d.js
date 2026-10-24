@@ -53,9 +53,11 @@ export function createStage(canvas, { fov = 42, fog = 0.028 } = {}) {
     on(fn) {
       updaters.push(fn);
     },
+    post: null, // (4안) 후처리를 쓰는 장면은 post(t)가 화면을 그린다
     seek(t) {
       for (const fn of updaters) fn(t);
-      renderer.render(scene, camera);
+      if (this.post) this.post(t);
+      else renderer.render(scene, camera);
     },
   };
 }

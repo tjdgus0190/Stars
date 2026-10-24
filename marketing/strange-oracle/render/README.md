@@ -73,7 +73,7 @@ node marketing/strange-oracle/render/sound-ad1.js --raw    # 정규화 전 float
 |---|---|
 | utm_source | `instagram` · `tiktok` |
 | utm_medium | `paid_social` · `organic` |
-| utm_campaign | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ig_profile` |
-| utm_content | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ig_profile` · `ig_story_book` |
+| utm_campaign | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ig_profile` |
+| utm_content | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ig_profile` · `ig_story_book` |
 
 예: `https://<제품 주소>/?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors`

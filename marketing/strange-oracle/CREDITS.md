@@ -12,3 +12,6 @@
 | 3D판 장면(`scenes/gl/`, `*-3d.html`, 2026-10-24) | 별·성운·금빛 먼지·천문 고리·둥근 바닥·일곱 문·메달·책을 three.js 도형·셰이더·캔버스 글자로 직접 그림. 그림 파일·외부 모델·실사·사람 모습 없음 | 자체 제작 |
 | three.js | 0.160.0, jsdelivr에서 버전 고정 https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js (영상 렌더에만 쓰고 결과물에는 그림만 남음) | MIT (Copyright © 2010-2024 three.js authors) |
 | 렌더 도구 | Microsoft Edge(헤드리스), FFmpeg(libx264) — 렌더에만 쓰고 결과물에 포함되지 않음 | — |
+| 4안 글꼴 | Noto Serif KR 900 — @fontsource/noto-serif-kr 5.3.1, jsdelivr에서 버전 고정(SRI sha384) https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/900.css . 4안에서 내리꽂히는 문장·「결제하면…」·끝 화면 버튼 글자 | SIL Open Font License 1.1 |
+| 4안 장면(`scenes/ad4-busted-3d.html`, `scenes/gl/ad4-3d.js`, 2026-10-24) | 거울·금·파편·빛줄기·문장 고리·글자를 three.js 도형·셰이더·캔버스 글자로 직접 그림. 후처리(번쩍임·색 갈라짐·글리치)도 직접 쓴 셰이더. 그림 파일·외부 모델·실사·사람 모습 없음 | 자체 제작 |
+| 소리(4안 소리판 `out/ad4-busted-3d-ko-sound.mp4`) | 직접 합성(`render/sound-ad4.js`, 2026-10-24). 사인·노이즈·간단한 잔향을 스크립트가 계산, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
