@@ -63,3 +63,11 @@
 - 단위 188(auth 12), e2e-auth 27, rest 12, book 97, pay 63, tabs 30, saju 41, utm 29, flow 127, map 82 — 실패 0. build-dist 통과. 카카오 SDK 2.7.4가 integrity로 불러와져 초기화됨(모의 서버).
 - 개인정보: 저장 동의(체크 꺼짐·자세히 보기 9줄), 저장소 원문 0(암호문), save 본문 sid·data(p·v)만, 만 14세 미만 저장 0, 로그아웃·지우기 즉시, 1년 자동 삭제(sweep). 개인정보처리방침 제4조의5·약관 제2조 갱신.
 - 미확인: 실제 카카오 계정으로 저장·복원 왕복, 카카오톡 공유 창(운영자가 JavaScript SDK 도메인 등록 뒤), 예약 함수 auth-sweep의 Netlify 실행 기록.
+
+---
+
+# 최종 배포 전 점검 (2026-10-24, qa-reviewer) — 판정: 배포 가능
+- 시험: 단위 188, e2e auth 27·rest 12·book 97·pay 63·tabs 30·saju 41·utm 29·flow 127·map 82 — 실패 0. build-dist 통과(유료 지문 5151개 공개 0건, ⑯ 제작 도구 흔적 0건).
+- 운영 사이트(2026-10-24): / → 301 입구 · 제품·legal 3종·og-image 200 · 유료 원본 경로 404 · /api/book 가짜 코드 401·만신 200 · /api/pay/status 200 pending · /api/auth/me 가짜 표 401 · og 태그 정상 · 첫 화면 FCP 약 1.2초(헤드리스) · 콘솔 오류 0 · [초안]·"무료" 0 · 결제 전 화면에 9,900원·환불·판매자(SHA Studio).
+- 11장: 판정 배포 가능, meta.json status 검수통과로 바꿈, og-image·소개 글(FAQ 답 616자)·CREDITS.md 있음, 면책 문구는 8장 예외로 없음.
+- 미확인(운영자 몫): 실결제 1건·취소, 실제 카카오 계정 저장·복원 왕복, 카카오톡 공유 창(JavaScript SDK 도메인 등록 뒤), 예약 함수 auth-sweep 실행 기록, 판매자 주소·연락처 빈칸의 법적 충분성.
