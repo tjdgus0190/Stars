@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════
-// 한 권의 책 — Ⅰ 만신 장 (유료 원본, spec 14-4). 공개 폴더에 복사하지 않는다 (CLAUDE.md 7장).
+// 한 권의 책 — Ⅰ 만신 장 (유료 원본, spec 14-4). 공개 폴더에 복사하지 않는다 (운영 규칙 7장).
 // 모양은 data-book-ogham.js와 같다: full[일간] = identity.rest + Ⅱ·Ⅲ·Ⅳ장 본문, hidden[십신 묶음] = 숨은 장.
 // Ⅰ장은 data-saju.js stems[i].identity(title·lede) + body(S1) + 이 파일 identity.rest 순서로 읽는다.
 // 숨은 장은 우세 십신 묶음(code "saju-<묶음>")으로 고른다. 제목은 data-saju.js groups[묶음].hiddenTitle 한 곳에만 있다(목차에 무료로 보임).

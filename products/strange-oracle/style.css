@@ -689,7 +689,7 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
   isolation: isolate;
   text-align: center;
   min-height: calc(100dvh - var(--topbar-h));
-  /* developer 추가(2026-09-25, designer 확인 필요): 되감기 궤적·지평선 빛이 화면 폭을 넘어 360px에서 가로 스크롤·축소가 생겨 잘라 낸다 */
+  /* 개발 담당 추가(2026-09-25, 디자인 담당 확인 필요): 되감기 궤적·지평선 빛이 화면 폭을 넘어 360px에서 가로 스크롤·축소가 생겨 잘라 낸다 */
   overflow-x: hidden;
   overflow-x: clip;
 }
@@ -1611,7 +1611,7 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
 .evidence { margin-top: var(--space-5); border-top: 1px solid var(--c-line); text-align: left; }
 .evidence__item { display: grid; grid-template-columns: 28px 1fr auto; grid-template-areas: "g room tag" "g type tag"; column-gap: var(--space-3); align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--c-line); }
 .evidence__glyph { grid-area: g; text-align: center; font-size: var(--fs-lg); color: var(--accent); }
-/* (2단계 developer, designer 확인 필요) 근거 목록 기호를 글자 대신 방 아이콘 SVG로 — .next-room__glyph svg와 같은 방식 */
+/* (2단계 개발 담당, 디자인 담당 확인 필요) 근거 목록 기호를 글자 대신 방 아이콘 SVG로 — .next-room__glyph svg와 같은 방식 */
 .evidence__glyph svg { width: 22px; height: 22px; overflow: visible; vertical-align: middle; }
 .evidence__glyph svg use { fill: none; stroke: currentColor; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
 .evidence__room { grid-area: room; font-family: var(--font-sans); font-size: var(--fs-xs); color: var(--c-text-muted); }
@@ -2621,7 +2621,7 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
   .bark__blade::after { display: none; }
 }
 
-/* ═════════ 정적 검토 모드 (body.is-static-preview) — developer가 class를 지우면 모두 꺼진다 ═════════ */
+/* ═════════ 정적 검토 모드 (body.is-static-preview) — 개발 담당이 class를 지우면 모두 꺼진다 ═════════ */
 body:not(.is-static-preview) [data-preview-only] { display: none; }
 .is-static-preview .screen {
   display: block;
@@ -3781,12 +3781,12 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
   --ink-soft: oklch(0.4 0.04 50);
   --ink-rubric: oklch(0.43 0.13 32);   /* 머리글자·장 번호 (붉은 잉크) */
   --ink-line: oklch(0.55 0.05 55 / 0.45);
-  /* 쪽 치수: developer는 이 값으로 쪽을 재어 나눈다 */
+  /* 쪽 치수: 개발 담당은 이 값으로 쪽을 재어 나눈다 */
   --book-bar-h: 60px;
   --book-line: 30px;                   /* 본문 한 줄 = 17px 글자 × 약 1.76 */
   --page-run-h: 22px;                  /* 머리글(달리는 제목) */
   --page-folio-h: 22px;                /* 쪽 번호 */
-  --turn-dur: 380ms;                   /* (14-6 성능) 520ms → 380ms: 쪽 넘김 0.45초 기준. 넘김 모양은 그대로 (developer, designer 확인 필요) */
+  --turn-dur: 380ms;                   /* (14-6 성능) 520ms → 380ms: 쪽 넘김 0.45초 기준. 넘김 모양은 그대로 (개발 담당, 디자인 담당 확인 필요) */
   --turn-ease: cubic-bezier(0.3, 0.1, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -3803,7 +3803,7 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
   overflow: visible; /* 좌우 -12px로 넓힌 책이 잘리지 않게. 세로는 높이 고정 + 자식 min-height:0 */
 }
 .book-source[hidden] { display: none !important; }
-/* 9칸 진행률은 은퇴: 쪽 번호와 book-bar 진행 줄이 대신한다 (developer가 마크업·코드 삭제) */
+/* 9칸 진행률은 은퇴: 쪽 번호와 book-bar 진행 줄이 대신한다 (개발 담당이 마크업·코드 삭제) */
 .read-progress--book { display: none !important; }
 
 /* ── 보기 전환: 표지 ↔ 책장 ── */
@@ -4733,7 +4733,7 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
   .ritual--saju[data-stage="gongsu"] .gongsu, .ohaeng__bar i { animation: none; }
 }
 
-/* ───────── (14-6 성능, developer — designer 확인 필요) ─────────
+/* ───────── (14-6 성능, 개발 담당 — 디자인 담당 확인 필요) ─────────
    입구 첫 화면 아래쪽(지금까지·책 안내·묻고 답하기·바닥글)은 화면 가까이 올 때 배치한다.
    첫 배치(Layout)가 360px·CPU 4배에서 약 1.2~1.5초 걸렸고, 대부분이 이 아래쪽 글이었다. 보이는 모양은 그대로다. */
 .hub > .so-far,

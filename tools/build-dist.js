@@ -26,6 +26,7 @@
 //      legal privacy에 map:on 구획이 없거나, data-map.js·privacy 지도 구획에 ◯◯가 남으면 실패
 //   ② 유료 문장 지문 검사에 data-map.js(원본)도 넣는다
 //   ⑭ (18단계 결정 120) pay.mode off면 책 전용 파일(app-book.js·style-book.css) 없음. ④ 첫 화면은 이 둘과 arch-core.js도 부르지 않음
+//   ⑯ (2026-10-24 운영자) 공개 파일에 CLAUDE.md·Claude·ChatGPT·Clipwave·인공지능·생성형·AI·에이전트 같은 제작 도구·작업 체계 흔적이 0이어야 한다
 //   ⑮ (19단계 19-5, 기획서의 「⑭」, 확인 133) analytics.ga4가 차 있으면 배포판 legal/privacy.html(표지 걷어 낸 뒤)에 ◯◯가 0이어야 한다(off·live 모두). tools/ga4-guard.js
 "use strict";
 const fs = require("fs");
@@ -228,6 +229,9 @@ const publicTexts = [];
       if (/\.(js|html|css|json|txt|md|svg|xml)$/.test(e.name)) {
         const t = fs.readFileSync(p, "utf8");
         publicTexts.push(t);
+        // ⑯ (2026-10-24 운영자 "AI가 만들었다는 내용은 모두 지워") 공개 파일에 제작 도구·작업 체계 흔적 0
+        const tell = t.match(/CLAUDE\.md|\bClaude\b|\bAnthropic\b|ChatGPT|OpenAI|Clipwave|인공지능|생성형|\bAI\b|에이전트|assets\/ai\//);
+        if (tell) fails.push(`⑯ public/${rel}에 "${tell[0]}"`);
         for (const w of SECRET_WORDS) if (t.includes(w)) fails.push(`⑧ public/${rel}에 "${w}" 있음`); // (15-7) 결제 비밀값 이름·모의 길 0건
         for (const w of MAP_WORDS) if (t.includes(w)) fails.push(`⑫ public/${rel}에 "${w}" 있음`); // (16-8) 지도 서버 칸·설정 이름·모의 지도 길 0건
       }
@@ -307,4 +311,4 @@ for (const slug of PRODUCTS) if (fs.existsSync(path.join(PUBLIC, "products", slu
 if (fails.length) {
   console.error("  실패: 배포 점검 — " + fails.slice(0, 15).join(" | "));
   process.exitCode = 1;
-} else console.log(`  배포 점검 통과 (pay.mode ${Object.values(MODES).join("·")} · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음 · GA4 ID 있으면 privacy ◯◯ 0) — 공개 폴더: dist/public, 함수: netlify/lib/book.js`);
+} else console.log(`  배포 점검 통과 (pay.mode ${Object.values(MODES).join("·")} · map.mode off · 지도 표지 처리(off: 지도 template·자리·map.js·data-map.js 없음) · friend-map·지도 서버 칸 이름 0건 · 결제 표지 처리(off: legal 결제 문단·결제 template·refund.html 없음) · 페이앱 SDK 공식 주소 · 결제 비밀값 이름·__dev 0건 · api/·_paid·__dev·옛 책 파일·ads.js 없음 · 유료 문장 지문 0건 · 첫 화면 책 파일 0 · off: app-book.js·style-book.css 없음 · GA4 ID 있으면 privacy ◯◯ 0 · 제작 도구 흔적 0) — 공개 폴더: dist/public, 함수: netlify/lib/book.js`);

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════
-// 만신의 방(Ⅰ, slug saju) 콘텐츠 — 문구만, 로직 없음 (CLAUDE.md 3장). 일간 한자·오행 표처럼 계산에 쓰는 표는 계산 코드 쪽에 둔다 (spec 14-1).
+// 만신의 방(Ⅰ, slug saju) 콘텐츠 — 문구만, 로직 없음 (운영 규칙 3장). 일간 한자·오행 표처럼 계산에 쓰는 표는 계산 코드 쪽에 둔다 (spec 14-1).
 // 이 파일은 content-work/apply-14.js가 content-work/out-14/*.json에서 만든다. 문구를 고칠 때는 json을 고치고 다시 실행한다.
 // 결과 조립 (spec 14-1): S1 stems[일간].body → S2a elements.many[많은 오행] → S2b elements.empty 또는 elements.few[적은 오행]
 //   → S3 groups[우세 묶음].text → S4 daeun.forward|backward ({age} = text.result.daeunAge 결과) → 원형 한 줄 → S5 stems[일간].gongsu

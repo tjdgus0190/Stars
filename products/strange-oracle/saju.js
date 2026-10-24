@@ -37,7 +37,7 @@
   const STEM_EL = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4];
   const BRANCH_EL = [4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4];
   const GROUPS = ["bigeop", "siksang", "jaeseong", "gwanseong", "inseong"]; // 비겁·식상·재성·관성·인성 (동률 순서)
-  // 일간 → 원형 태그 [기획서 기본값, copywriter가 바꿀 수 있음]
+  // 일간 → 원형 태그 [기획서 기본값, 문구 담당이 바꿀 수 있음]
   const ARCHETYPE_BY_STEM = ["ruler", "lover", "explorer", "creator", "ruler", "caregiver", "warrior", "rebel", "explorer", "sage"];
 
   // 한국 법정 시간대: [이 UTC 시각부터, UTC와의 차이(분)]. 첫 항목 이전은 UTC+9.

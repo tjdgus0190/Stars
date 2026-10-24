@@ -7,7 +7,7 @@
 //   입구가 그려진 뒤 한가할 때 다음 방 파일을 미리 받는다. 이 탭에 마친 방이 있으면 그 방 파일을 모두 받은 뒤 화면을 그린다.
 // 요소는 id 또는 data-js로 찾는다(class 이름에 기능을 걸지 않음). 상태는 is-* class를 붙였다 뗀다.
 //
-// 개인정보 (CLAUDE.md 6장 sessionStorage 예외):
+// 개인정보 (운영 규칙 6장 sessionStorage 예외):
 //  - 이 탭의 sessionStorage 한 칸("strange-oracle")에만 저장한다. 탭을 닫으면 사라진다.
 //  - 저장하는 값: profile = 이름, 생년월일, 태어난 시각(모르면 null, 묻지 않았으면 없음) / visits = 방마다 결과 유형 코드와 원형 태그
 //  - 시빌라 신탁의 방 질문(자유 입력)은 어디에도 저장하지 않는다(sessionStorage 포함). 이 스크립트 안 변수와 화면에만 있다.
@@ -190,7 +190,7 @@
     decan: { bgTop: "#080717", bgBottom: "#2e1706", accent: "#fcbc7c", text: "#f5f2e9", muted: "#b8b8ce" },
     tzolkin: { bgTop: "#080717", bgBottom: "#00282a", accent: "#80ded7", text: "#f5f2e9", muted: "#b8b8ce" },
     sibyl: { bgTop: "#080717", bgBottom: "#2c1026", accent: "#fab8a8", text: "#f5f2e9", muted: "#b8b8ce" },
-    saju: { bgTop: "#080717", bgBottom: "#2a1a0e", accent: "#f2a585", text: "#f5f2e9", muted: "#c8bca8" }, // (14단계) --room-h 25 · 단청 주홍 (designer 확인)
+    saju: { bgTop: "#080717", bgBottom: "#2a1a0e", accent: "#f2a585", text: "#f5f2e9", muted: "#c8bca8" }, // (14단계) --room-h 25 · 단청 주홍 (디자인 담당 확인)
   };
   const SIBYL_TOPIC_KEYS = Object.keys(T.sibyl.topics);
 
@@ -543,7 +543,7 @@
     if (fromEl) fromEl.classList.add(openCls);
     if (!reduceMotion) buzz(20);
     const total = reduceMotion ? 400 : flash ? 500 : 1200;
-    // (14-6) 움직임 줄이기: 문장 빛이 보인 뒤 100ms에 방 화면으로 (예전 200ms. 방 전환 0.3초 기준, designer 확인 필요)
+    // (14-6) 움직임 줄이기: 문장 빛이 보인 뒤 100ms에 방 화면으로 (예전 200ms. 방 전환 0.3초 기준, 디자인 담당 확인 필요)
     const swapAt = reduceMotion ? 100 : flash ? 250 : 1000;
     sigil.classList.add(flash && !reduceMotion ? "is-flash" : "is-playing");
     const s = { swapped: false, emblem: null, t: [] };
@@ -1089,7 +1089,7 @@
 
   // ───────── 결과 본문 조립 (8단계, spec 8-1: 방은 짧고 완결된 계시) ─────────
   // 핵심 풀이 한 덩어리(장 번호·제목 없음): identity.lede → body 앞 단락(공개 파일에 남은 것) → 사실 목록 → 해석 안내 한 줄.
-  // identity.close(copywriter의 맺음 한 문장, 선택)는 아래 reading-close 칸에만 쓴다. 책에는 넣지 않는다 (R-1)
+  // identity.close(문구 담당의 맺음 한 문장, 선택)는 아래 reading-close 칸에만 쓴다. 책에는 넣지 않는다 (R-1)
   const rLede = (t) => `<p class="reading__lede" data-reveal>${t}</p>`;
   const rP = (t) => `<p data-reveal>${t}</p>`;
   function factsUl(rows) {
@@ -2825,7 +2825,7 @@
   // ═════════ (13단계 → 15·17단계) 한 권의 책: 목차 · 장 표지 · 장 안 (spec 13-1~13-8·14-4·17-2, design 「13단계」·「17단계」) ═════════
   // (13단계 결정 75 → 15단계) 옛 토스 결제·영수증 코드(SO1)·광고로 여는 책은 은퇴했다. 지금은 열람 코드(SOP)로 여는 페이앱 결제(아래 「결제」 묶음, test·live에서만).
   // paycode.js는 이어가기 코드(PayCode.Resume)와 원형·방 순서 표 때문에 그대로 쓴다.
-  // 개인정보 (CLAUDE.md 6장, spec 13-4·13-8):
+  // 개인정보 (운영 규칙 6장, spec 13-4·13-8):
   //  - 책은 이 브라우저에서 결과 코드·원형·나이 구간만으로 조립한다(book.js). 장 문구 파일(data-book-*.js)은 방·주제 단위 이름으로만,
   //    같은 출처 정적 <script>로 받는다(결과 번호·query 없음). 잠긴 장의 문장은 DOM에 넣지 않는다.
   //  - 궁합 상대의 이름·생년월일·관계 유형은 궁합 표지 입력칸과 이 함수들의 지역 값에만 둔다(sessionStorage에도 넣지 않음).
@@ -3079,7 +3079,7 @@
   yeonBox.dataset.js = "report-yeon";
   yeonBox.hidden = true;
   js("book-source").append(yeonBox);
-  // (17-2) 목차 「인연의 장」 줄: index.html 목차에 줄 마크업이 없어 시기별 흐름 줄을 복제해 그 뒤에 둔다(designer가 줄을 넣으면 그 줄을 그대로 쓴다)
+  // (17-2) 목차 「인연의 장」 줄: index.html 목차에 줄 마크업이 없어 시기별 흐름 줄을 복제해 그 뒤에 둔다(디자인 담당이 줄을 넣으면 그 줄을 그대로 쓴다)
   if (BOOK_ON && !$('[data-js="book-chapter"][data-chapter="yeon"]')) {
     const flowRow = $('[data-js="book-chapter"][data-chapter="flow"]');
     if (flowRow) {
@@ -4447,7 +4447,7 @@
 
   // ═════════ (14·15단계) 결제 — 결제 전 화면 · 결제 확인 · 팝업 · 코드 카드 (test·live에서만 template에서 꺼냄) ═════════
   // 결제 전 순서 고정(15-4): 1 받는 것 → 2 가격 → 3 결제 방법·판매자 → 4 열람 방법 → 5 환불 → 6 동의 → 7 결제하기 → 8 열람 코드 넣기 → 판매자 정보 줄.
-  // 페이앱 SDK는 [결제하기]를 누른 뒤에만 <script>로 한 번 붙인다(CLAUDE.md 3장). 첫 화면·목차·결제 전 화면에서는 부르지 않는다.
+  // 페이앱 SDK는 [결제하기]를 누른 뒤에만 <script>로 한 번 붙인다(운영 규칙 3장). 첫 화면·목차·결제 전 화면에서는 부르지 않는다.
   // 개인정보 (6장, 15-8의 11~14): 결제창에 넘기는 값은 15-2 표의 값뿐(이름·생일·결과 없음, 휴대폰 번호는 넘기지 않음).
   //  R(결제 확인용 무작위 값)·P(열람 코드)는 sessionStorage(payreq·pass)에만 둔다. console·분석·주소·localStorage·쿠키에 넣지 않는다.
   //  함수 status로는 { r } 한 칸만, 팝업의 postMessage에는 { type }만 보낸다. 분석 이벤트는 단계 이름뿐.
@@ -4932,7 +4932,7 @@
       js("kakao-restore", payScr).addEventListener("click", () => kakaoStart("restore"));
       js("kakao-forget", payScr).addEventListener("click", () => window.confirm(AUTH.forgetConfirm || "") && kakaoStart("forget"));
       js("kakao-link-btn", codeDlg).addEventListener("click", () => passNow() && kakaoStart("link"));
-      // ── (23단계, 결정 135 — CLAUDE.md 3장·6장 예외 4) 로그인 유지·진행 저장.
+      // ── (23단계, 결정 135 — 운영 규칙 3장·6장 예외 4) 로그인 유지·진행 저장.
       //   로그인 표 sid(무작위 32자, 입력값 아님)만 이 기기 localStorage(LOGIN_KEY)에 30일. 이름·생년월일·태어난 시각·성별·방 결과는
       //   저장 동의(consent true)와 만 14세 이상일 때만 함수 auth(save)로 보내고, 서버는 암호문으로만 둔다. 궁합 상대·질문 글은 보내지 않는다.
       const LOGIN_KEY = "strange-oracle-login";

@@ -1,4 +1,4 @@
-// 분석 부품: GA4(gtag) (CLAUDE.md 3장 구글 예외·6장). 사용법: docs/common.md "analytics.js"
+// 분석 부품: GA4(gtag) (운영 규칙 3장 구글 예외·6장). 사용법: docs/common.md "analytics.js"
 // - 측정 ID가 비었거나 모양이 틀리면 gtag.js를 불러오지 않고 track은 아무 일도 하지 않는다.
 // - 주소에 ?가 있는 동안(결제 복귀 등)은 불러오지도 보내지도 않는다. 제품은 시작할 때 query를 지운 뒤 init을 부른다.
 // - 캠페인 구분(2026-10-17, 제안서 strange-oracle-ads 8장 4번): 제품이 지우기 전의 query를 opts.utm.search로 넘기면

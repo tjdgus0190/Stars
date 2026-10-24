@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════
 // 한 권의 책 — 궁합: 원형 쌍 36(pairs) + 방별 관계 10(rooms) + 13-4 궁합 다양화 모듈(bond, 옛 data-book-bond.js 원문 그대로) (유료 원본, spec 14-4). 유료 문장의 유일한 원본이다. 문구 수정은 여기서만 한다.
-// 공개 폴더에 복사하지 않는다 (CLAUDE.md 7장). 서버리스 함수 book(netlify/functions/book.js)만 읽어 열람 코드가 확인된 사람에게 준다.
+// 공개 폴더에 복사하지 않는다 (운영 규칙 7장). 서버리스 함수 book(netlify/functions/book.js)만 읽어 열람 코드가 확인된 사람에게 준다.
 // 문구만, 로직 없음. 평문만(HTML 없음, 화면에는 textContent로 넣는다). 2026-10-15 F4-B2에서 옛 공개 data-book-*.js를 글자 손실 0으로 옮김.
 // ═══════════════════════════════════════════════════════════════════════
 window.BOOK_MATCH = {
@@ -593,7 +593,7 @@ window.BOOK_MATCH = {
 };
 
 // ── 아래는 옛 data-book-bond.js 원문(주석 포함)이다. 전역 이름만 BOOK_BOND → BOOK_MATCH.bond로 바꿨다.
-// 진행 메모 (copywriter, 2026-10-03, 13단계 E2): M5 peekLine ✔ · M2 pairUse/pairOverride ✔ · M1 first ✔ · M3 role ✔ · M4 roomVariants ✔ · 자체 검사 ✔ (node 검사 통과, 끝)
+// 진행 메모 (문구 담당, 2026-10-03, 13단계 E2): M5 peekLine ✔ · M2 pairUse/pairOverride ✔ · M1 first ✔ · M3 role ✔ · M4 roomVariants ✔ · 자체 검사 ✔ (node 검사 통과, 끝)
 // ═══════════════════════════════════════════════════════════════════════
 // 책 「궁합」 장 — 궁합 다양화 모듈 (spec 13-4). 로직 없음. 궁합 표지를 열 때 data-book-match.js와 함께 불러온다 (13-5).
 // 화면 UI 문구(관계 유형 이름·입력 오류 등, M0)는 data.js book.match에 있다. 이 파일은 본문 모듈만.
@@ -619,7 +619,7 @@ window.BOOK_MATCH = {
 //                 변형 v = (내 방 코드 + 상대 방 코드) mod 3. v=0이면 기존 PAID_MATCH_ROOMS의 text, 1·2면 이 칸.
 //                 label(관계 이름)은 변형과 상관없이 기존 PAID_MATCH_ROOMS의 label을 그대로 쓴다.
 //
-// 규칙 (CLAUDE.md 8장, spec 13-4 궁합 8장 보강)
+// 규칙 (운영 규칙 8장, spec 13-4 궁합 8장 보강)
 //   평문만(HTML 없음, textContent). 해요체. 성별 가정 없음. spec 13-4 8장 보강과 13-7의 14 금지어 목록을 따른다
 //   (금지어 검색이 이 주석에 걸리지 않도록 단어를 여기 적지 않는다). 연인 유형은 상대의 반응과 속도를 존중하는 방향으로만,
 //   가족 유형은 서로 나눠 드는 방향으로만 쓴다. 상대 탓 시점 없음. 모든 모듈 끝은 실행 가능한 긍정 문장.
