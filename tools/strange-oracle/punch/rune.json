@@ -1,0 +1,1730 @@
+[
+ {
+  "file": "data-runes.js",
+  "id": "fehu",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 마음도 돈도 정확히 잰 뒤에 건네는 사람이에요. 손해가 싫은 게 아니라, 기대는 게 싫어서죠.",
+  "new": "당신은 마음도 돈도 정확히 잰 뒤에 건네는 사람이에요. 손해가 싫은 게 아니라, 기대는 게 싫어서죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "fehu",
+  "field": "now.hook",
+  "max": 45,
+  "old": "이 계산하는 마음, 요즘은 어느 장면에서 튀어나올까요?",
+  "new": "이 계산하는 마음, 요즘은 어느 장면에서 튀어나올까요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "uruz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 순해 보여도, 아니다 싶으면 아무도 못 말리는 사람이에요. 그 고집을 아는 사람은 몇 없죠.",
+  "new": "당신은 순해 보여도, 아니다 싶으면 아무도 못 말리는 사람이에요. 그 고집을 아는 사람은 몇 없죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "uruz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 길들여지지 않은 힘, 요즘은 어디서 들이받고 있나요?",
+  "new": "그 길들여지지 않은 힘, 요즘은 어디서 들이받고 있나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "thurisaz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 상처받기 전에 먼저 가시를 세우는 사람이에요. 차가운 게 아니라, 그만큼 여린 거죠.",
+  "new": "당신은 상처받기 전에 먼저 가시를 세우는 사람이에요. 차가운 게 아니라, 그만큼 여린 거죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "thurisaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 가시, 요즘은 누구 앞에서 돋아났나요?",
+  "new": "그 가시, 요즘은 누구 앞에서 돋아났나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "ansuz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 남이 흘린 한마디를 며칠씩 곱씹는 사람이에요. 그 말, 상대는 벌써 잊었는데도요.",
+  "new": "당신은 남이 흘린 한마디를 며칠씩 곱씹는 사람이에요. 그 말, 상대는 벌써 잊었는데도요."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "ansuz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "요즘 당신 머릿속을 맴도는 그 한마디, 누구의 말이에요?",
+  "new": "요즘 당신 머릿속을 맴도는 그 한마디, 누구의 말이에요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "raidho",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 한곳에 오래 있으면 숨이 막히는 사람이에요. 떠나고 싶다는 생각, 이번 주에도 했죠?",
+  "new": "당신은 한곳에 오래 있으면 숨이 막히는 사람이에요. 떠나고 싶다는 생각, 이번 주에도 했죠?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "raidho",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 떠나고 싶은 마음, 요즘 어디서 꿈틀대고 있나요?",
+  "new": "그 떠나고 싶은 마음, 요즘 어디서 꿈틀대고 있나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "kenaz",
+  "field": "key",
+  "max": 60,
+  "old": "당신 안엔 아직 아무에게도 안 보여 준 재능이 있어요. '언젠가'라는 말로 몇 년째 미뤄 둔 그거요.",
+  "new": "당신 안엔 아직 아무에게도 안 보여 준 재능이 있어요. '언젠가'라는 말로 몇 년째 미뤄 둔 그거요."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "kenaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 불씨, 요즘 몰래 다시 꺼내 보진 않았나요?",
+  "new": "그 불씨, 요즘 몰래 다시 꺼내 보진 않았나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "gebo",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 받은 건 꼭 갚아야 마음이 놓이는 사람이에요. 받기만 하는 사람에겐, 몰래 장부를 적죠.",
+  "new": "당신은 받은 건 꼭 갚아야 마음이 놓이는 사람이에요. 받기만 하는 사람에겐, 몰래 장부를 적죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "gebo",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그런데 요즘, 그 '갚음'이 누군가를 재는 잣대가 되진 않았나요?",
+  "new": "그런데 요즘, 그 '갚음'이 누군가를 재는 잣대가 되진 않았나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "wunjo",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 모두가 편해야 비로소 편해지는 사람이에요. 정작 당신이 불편한 건, 아무도 몰라요.",
+  "new": "당신은 모두가 편해야 비로소 편해지는 사람이에요. 정작 당신이 불편한 건, 아무도 몰라요."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "wunjo",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 습관, 오늘도 당신의 하루를 채우고 있죠.",
+  "new": "그 습관, 오늘도 당신의 하루를 채우고 있죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "hagalaz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 억울한 일을 떠안고도 티 한 번 안 낸 사람이에요. 그 억울함, 아직 다 삭이지 못했죠.",
+  "new": "당신은 억울한 일을 떠안고도 티 한 번 안 낸 사람이에요. 그 억울함, 아직 다 삭이지 못했죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "hagalaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 억울함, 사실 지금도 진행 중이죠?",
+  "new": "그 억울함, 사실 지금도 진행 중이죠?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "nauthiz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 늘 뭔가 부족하다는 느낌에 쫓겨 온 사람이에요. 그 결핍이, 당신을 여기까지 끌고 왔죠.",
+  "new": "당신은 늘 뭔가 부족하다는 느낌에 쫓겨 온 사람이에요. 그 결핍이, 당신을 여기까지 끌고 왔죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "nauthiz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 '조금만 더'라는 마음, 지금도 당신을 밀고 있죠?",
+  "new": "그 '조금만 더'라는 마음, 지금도 당신을 밀고 있죠?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "isa",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 아무것도 안 하는 것 같지만, 속으론 누구보다 많은 생각을 하는 사람이에요. 그래서 멈춰 있죠.",
+  "new": "당신은 아무것도 안 하는 것 같지만, 속으론 누구보다 많은 생각을 하는 사람이에요. 그래서 멈춰 있죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "isa",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 멈춤, 지금도 계속되고 있진 않나요?",
+  "new": "그 멈춤, 지금도 계속되고 있진 않나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "jera",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 아무도 몰라줘도 꾸준히 해 온 게 있는 사람이에요. '별거 아냐'라고 하지만, 사실 꽤 자랑스럽죠.",
+  "new": "당신은 아무도 몰라줘도 꾸준히 해 온 게 있는 사람이에요. '별거 아냐'라고 하지만, 사실 꽤 자랑스럽죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "jera",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 씨앗, 지금은 얼마나 자랐을까요?",
+  "new": "그 씨앗, 지금은 얼마나 자랐을까요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "eihwaz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 한 번 크게 무너졌다가 다시 일어선 사람이에요. 그 뒤로, 끝을 너무 쉽게 고르기도 하죠.",
+  "new": "당신은 한 번 크게 무너졌다가 다시 일어선 사람이에요. 그 뒤로, 끝을 너무 쉽게 고르기도 하죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "eihwaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그런데 그 단단함, 요즘 다른 방식으로 시험받고 있죠?",
+  "new": "그런데 그 단단함, 요즘 다른 방식으로 시험받고 있죠?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "perthro",
+  "field": "key",
+  "max": 60,
+  "old": "당신에겐 아무에게도 말 안 한 계획이 하나 있어요. 말하는 순간, 진짜 해야 할 것 같아서 숨겨 두었죠.",
+  "new": "당신에겐 아무에게도 말 안 한 계획이 하나 있어요. 말하는 순간, 진짜 해야 할 것 같아서 숨겨 두었죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "perthro",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 비밀, 요즘도 서랍 안에서 잘 지내고 있나요?",
+  "new": "그 비밀, 요즘도 서랍 안에서 잘 지내고 있나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "algiz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 '어쩐지 싸한데' 하는 촉이 늘 맞았던 사람이에요. 그래서 사람을 쉽게 들이지 않죠.",
+  "new": "당신은 '어쩐지 싸한데' 하는 촉이 늘 맞았던 사람이에요. 그래서 사람을 쉽게 들이지 않죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "algiz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 촉, 요즘은 누구를 향해 켜져 있나요?",
+  "new": "그 촉, 요즘은 누구를 향해 켜져 있나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "sowilo",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 스스로 생각하는 것보다 훨씬 빛나는 사람이에요. 칭찬을 들으면 화제부터 돌리는 게 문제죠.",
+  "new": "당신은 스스로 생각하는 것보다 훨씬 빛나는 사람이에요. 칭찬을 들으면 화제부터 돌리는 게 문제죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "sowilo",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 밝음, 요즘은 조금 인정하기 시작했나요?",
+  "new": "그 밝음, 요즘은 조금 인정하기 시작했나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "tiwaz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 손해를 봐도 '아닌 건 아니다'라고 말하는 사람이에요. 그래서 이기고도, 혼자 남곤 하죠.",
+  "new": "당신은 손해를 봐도 '아닌 건 아니다'라고 말하는 사람이에요. 그래서 이기고도, 혼자 남곤 하죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "tiwaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 흔들리지 않는 태도, 요즘 조금 외롭지 않나요?",
+  "new": "그 흔들리지 않는 태도, 요즘 조금 외롭지 않나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "berkano",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 남을 챙기느라 자기를 늘 맨 뒤에 둔 사람이에요. 이제는 당신이 돌봄을 받을 차례예요.",
+  "new": "당신은 남을 챙기느라 자기를 늘 맨 뒤에 둔 사람이에요. 이제는 당신이 돌봄을 받을 차례예요."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "berkano",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 돌봄의 방향, 이제 당신 쪽으로 돌릴 때가 됐어요.",
+  "new": "그 돌봄의 방향, 이제 당신 쪽으로 돌릴 때가 됐어요."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "ehwaz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 말 없이도 통하는 사람을 원하는 사람이에요. 그런 사람이 있거나, 간절히 기다리는 중이죠.",
+  "new": "당신은 말 없이도 통하는 사람을 원하는 사람이에요. 그런 사람이 있거나, 간절히 기다리는 중이죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "ehwaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 말 없는 호흡, 요즘 누구와 나누고 있나요?",
+  "new": "그 말 없는 호흡, 요즘 누구와 나누고 있나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "mannaz",
+  "field": "key",
+  "max": 60,
+  "old": "남들이 아는 당신과 진짜 당신 사이엔 아무도 모르는 틈이 있어요. 그 틈에서, 당신은 혼자 지쳐요.",
+  "new": "남들이 아는 당신과 진짜 당신 사이엔 아무도 모르는 틈이 있어요. 그 틈에서, 당신은 혼자 지쳐요."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "mannaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 틈, 요즘도 벌어지고 있진 않나요?",
+  "new": "그 틈, 요즘도 벌어지고 있진 않나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "laguz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 이유 없이 마음이 출렁이는 날이 많은 사람이에요. 그 파도를, 남들보다 몇 배로 깊이 느끼죠.",
+  "new": "당신은 이유 없이 마음이 출렁이는 날이 많은 사람이에요. 그 파도를, 남들보다 몇 배로 깊이 느끼죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "laguz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "요즘도 그 물결, 유독 자주 찾아오지 않나요?",
+  "new": "요즘도 그 물결, 유독 자주 찾아오지 않나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "ingwaz",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 준비가 완벽해야 움직이는 사람이에요. 늦어 보여도, 시작하면 끝을 보죠. 시작만 한다면요.",
+  "new": "당신은 준비가 완벽해야 움직이는 사람이에요. 늦어 보여도, 시작하면 끝을 보죠. 시작만 한다면요."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "ingwaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 씨앗, 지금은 어디쯤 여물고 있을까요?",
+  "new": "그 씨앗, 지금은 어디쯤 여물고 있을까요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "dagaz",
+  "field": "key",
+  "max": 60,
+  "old": "당신 안에서 긴 밤이 끝나 가는 소리, 당신이 제일 먼저 듣고 있어요. 다만, 아직 확신이 없을 뿐이죠.",
+  "new": "당신 안에서 긴 밤이 끝나 가는 소리, 당신이 제일 먼저 듣고 있어요. 다만, 아직 확신이 없을 뿐이죠."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "dagaz",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 전환점, 요즘 다시 가까워지고 있진 않나요?",
+  "new": "그 전환점, 요즘 다시 가까워지고 있진 않나요?"
+ },
+ {
+  "file": "data-runes.js",
+  "id": "othala",
+  "field": "key",
+  "max": 60,
+  "old": "당신은 가족에게 받은 것과, 가족과 다르게 살고 싶은 마음 사이에서 오래 흔들려 온 사람이에요.",
+  "new": "당신은 가족에게 받은 것과, 가족과 다르게 살고 싶은 마음 사이에서 오래 흔들려 온 사람이에요."
+ },
+ {
+  "file": "data-runes.js",
+  "id": "othala",
+  "field": "now.hook",
+  "max": 45,
+  "old": "그 물려받은 것, 요즘은 어떻게 다시 쌓고 있나요?",
+  "new": "그 물려받은 것, 요즘은 어떻게 다시 쌓고 있나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "fehu",
+  "field": "past.lede",
+  "max": 80,
+  "old": "새벽 한 시쯤, 누군가의 메시지 알림이 떴는데 바로 열지 않고 한참 화면만 본 적 있죠. 답장을 쓰다 지우고, 다시 쓰다 지우고.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "fehu",
+  "field": "now.quote",
+  "max": 50,
+  "old": "당신은 마음을 아끼는 게 아니라, 제대로 쓰고 싶어서 세어 보는 사람이에요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "fehu",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 정확한 계산, 사람 사이에도 하고 있지 않나요?",
+  "new": "그런데 그 정확한 계산, 사람 사이에도 하고 있지 않나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "fehu",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "1원 단위까지 맞추자는 당신에게 친구들은 웃었지만, 속으론 조금 서운했을지도 몰라요.",
+  "new": "1원 단위까지 맞추자는 당신에게 친구들은 웃었지만, 속으론 조금 서운했을지도 몰라요."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "fehu",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "공정함을 지키려던 마음이, 가끔은 혼자 무거워질 때가 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "fehu",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 페후가 놓였어요. 손에 쥔 것이 많을 때예요. 마음이 가는 사람 앞에서 당신은 아낌없이 나눠요. 맛있는 것도, 좋은 정보도, 시간도요. 그 사람은 그 넉넉함에 끌려요. 바람이 이렇게 전해요. 주는 만큼 받는 것도 풍요예요. 오늘은 그 사람이 건네는 것을 기쁘게 받아 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "uruz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "회의실에서 다들 고개를 끄덕일 때, 혼자 손을 든 적이 있죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "uruz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "순해 보이는 얼굴 뒤에는, 절대 굽히지 않는 뿔이 하나 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "uruz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 힘, 쉬어야 할 때도 멈추지 않죠?",
+  "new": "그런데 그 힘, 쉬어야 할 때도 멈추지 않죠?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "uruz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "다들 퇴근해도 당신은 먼저 일어나지 않아요. 지는 것 같아서요. 그 오기가 당신을 제일 지치게 하죠.",
+  "new": "다들 퇴근해도 당신은 먼저 일어나지 않아요. 지는 것 같아서요. 그 오기가 당신을 제일 지치게 하죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "uruz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "멈추지 않는 힘도, 가끔은 스스로를 쉬게 해 줘야 오래가요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "uruz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 우루즈가 놓였어요. 길들여지지 않은 힘이 차오를 때예요. 마음이 가는 사람 앞에서 당신은 거침없어져요. 하고 싶은 말을 바로 하고, 만나고 싶으면 바로 연락해요. 그 사람은 그 힘에 설레요. 물결이 이렇게 전해요. 힘은 고르게 흐를 때 멀리 가요. 오늘은 한 박자만 쉬었다 다가가 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "thurisaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "소개팅 자리에서 상대의 농담이 선을 넘었을 때, 당신은 웃으며 화제를 돌렸어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "thurisaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "가시는 미워서가 아니라, 지키고 싶어서 돋는 거예요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "thurisaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 가시, 이제는 누가 다가오기도 전에 돋지 않나요?",
+  "new": "그런데 그 가시, 이제는 누가 다가오기도 전에 돋지 않나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "thurisaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "처음엔 다가오는 사람에게만 돋던 가시가, 이제는 아무도 오지 않았는데 먼저 서 있어요.",
+  "new": "처음엔 다가오는 사람에게만 돋던 가시가, 이제는 아무도 오지 않았는데 먼저 서 있어요."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "thurisaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "가시를 세우는 것과 마음을 닫는 것은, 사실 다른 일이에요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "thurisaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 투리사즈가 놓였어요. 앞을 막는 가시가 보이는 때예요. 마음이 가는 사람 앞에서 당신은 괜히 퉁명스러워져요. 들킬까 봐 가시를 세우는 거예요. 그 사람은 그 가시 너머를 궁금해해요. 바람이 이렇게 전해요. 가시 하나만 눕혀 보세요. \"사실 반가웠어.\" 그 말이 길을 열어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ansuz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "고등학교 때 선생님이 지나가듯 던진 한마디가, 진로를 완전히 바꿔 놓은 적 있죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ansuz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "당신에게는 스쳐 가는 말이 없어요, 전부 남아서 뜻이 돼요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ansuz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 말, 정말 그런 뜻이었을까요?",
+  "new": "그런데 그 말, 정말 그런 뜻이었을까요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ansuz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "누군가 별생각 없이 한 말을 당신 혼자 몇 주째 해석하고 있어요. 그 사이 마음만 닳았죠.",
+  "new": "누군가 별생각 없이 한 말을 당신 혼자 몇 주째 해석하고 있어요. 그 사이 마음만 닳았죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ansuz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "모든 말에 뜻을 다 캐낼 필요는 없어요, 흘려보내도 괜찮은 말이 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ansuz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 안수즈가 놓였어요. 메시지가 도착하는 때예요. 마음이 가는 사람에게서 온 짧은 말 한 줄이 하루 종일 맴돌아요. 무슨 뜻일까, 몇 번이고 다시 읽어요. 그 설렘은 진짜예요. 물결이 이렇게 전해요. 해석은 그만, 답장을 보내 보세요. 당신의 말도 그 사람에게 메시지로 도착해요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "raidho",
+  "field": "past.lede",
+  "max": 80,
+  "old": "스무 살 여름, 편도 티켓 한 장만 끊고 무작정 떠난 적 있죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "raidho",
+  "field": "now.quote",
+  "max": 50,
+  "old": "당신에게 여행은 목적지가 아니라, 걷는 리듬 그 자체예요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "raidho",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 떠나고 싶다면서, 왜 아직 그 자리예요?",
+  "new": "그런데 떠나고 싶다면서, 왜 아직 그 자리예요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "raidho",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "떠나고는 싶은데 막상 어디로 갈지 정하지 못해요. 완벽한 목적지를 기다리다 계절이 바뀌죠.",
+  "new": "떠나고는 싶은데 막상 어디로 갈지 정하지 못해요. 완벽한 목적지를 기다리다 계절이 바뀌죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "raidho",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "완벽한 길을 찾다가, 아예 떠나지 못하게 되지 않도록 하세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "raidho",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 라이도가 놓였어요. 길이 움직이는 때예요. 마음이 가는 사람과 어딘가로 함께 가고 싶어져요. 가까운 동네라도, 먼 바닷가라도요. 그 사람은 당신의 \"같이 가자\"에 설레요. 바람이 이렇게 전해요. 목적지보다 함께 걷는 길이 중요해요. 오늘은 짧은 산책부터 청해 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "kenaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "미술학원 대신 안정적인 학과를 골랐지만, 그림은 마음 한구석에 남아 있었죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "kenaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "당신 안의 불씨는, 누가 보지 않아도 스스로 타올라요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "kenaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 '언젠가', 정말 오긴 할까요?",
+  "new": "그런데 그 '언젠가', 정말 오긴 할까요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "kenaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "몇 년째 '언젠가 제대로 해 봐야지'만 말하고 있어요. 사실은 해 봤다가 별로일까 봐 무서운 거죠.",
+  "new": "몇 년째 '언젠가 제대로 해 봐야지'만 말하고 있어요. 사실은 해 봤다가 별로일까 봐 무서운 거죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "kenaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "완벽한 불꽃을 기다리다가, 불씨 자체를 꺼트리지 마세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "kenaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 케나즈가 놓였어요. 어둠 속에 불씨가 켜지는 때예요. 마음이 가는 사람을 떠올리면 무언가를 만들고 싶어져요. 짧은 글, 노래 목록, 작은 그림. 그 불씨가 당신 안을 환하게 밝혀요. 물결이 이렇게 전해요. 불씨는 나눌 때 더 커져요. 오늘은 만든 것 하나를 그 사람에게 보여 주세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "gebo",
+  "field": "past.lede",
+  "max": 80,
+  "old": "대학 시절 조모임이 끝난 밤마다, 혼자 정산 앱을 열어 100원 단위까지 맞추고서야 잠들던 때가 있었어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "gebo",
+  "field": "now.quote",
+  "max": 50,
+  "old": "주고받음이 정확할수록, 마음은 오히려 더 멀어질 때가 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "gebo",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 마음의 장부, 몇 명이나 적혀 있어요?",
+  "new": "그런데 그 마음의 장부, 몇 명이나 적혀 있어요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "gebo",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "주고받은 걸 정확히 세는 마음의 장부가 있어요. 그 장부가 어느새, 사람을 재는 잣대가 됐죠.",
+  "new": "주고받은 걸 정확히 세는 마음의 장부가 있어요. 그 장부가 어느새, 사람을 재는 잣대가 됐죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "gebo",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "받기만 해도 괜찮은 순간이, 관계에는 꼭 필요해요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "gebo",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 게보가 놓였어요. 주고받는 때예요. 마음이 가는 사람과 작은 것들이 오가요. 빌려준 책, 나눠 먹은 간식, 주고받은 안부. 그 사이에 마음이 조금씩 쌓여요. 바람이 이렇게 전해요. 주고받는 일에 셈은 필요 없어요. 오늘은 이유 없는 작은 선물 하나를 건네 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "wunjo",
+  "field": "past.lede",
+  "max": 80,
+  "old": "대학 엠티를 기획할 때마다, 결국 숙소와 일정을 다 맞추는 역할은 늘 당신 몫이었어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "wunjo",
+  "field": "now.quote",
+  "max": 50,
+  "old": "모두를 웃게 하려다, 정작 자기 웃음은 잊을 때가 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "wunjo",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 모두가 웃을 때, 당신은 진짜 웃고 있었나요?",
+  "new": "그런데 모두가 웃을 때, 당신은 진짜 웃고 있었나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "wunjo",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "당신의 기쁨은 늘 '우리'에 맞춰져 있어요. '나는 뭘 원하지?'라는 질문 앞에서, 오래 멈칫하죠.",
+  "new": "당신의 기쁨은 늘 '우리'에 맞춰져 있어요. '나는 뭘 원하지?'라는 질문 앞에서, 오래 멈칫하죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "wunjo",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "모두의 기쁨을 챙기는 사람에게도, 쉬어 가는 자리가 필요해요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "wunjo",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 운요가 놓였어요. 함께 웃는 기쁨의 때예요. 마음이 가는 사람과 있으면 사소한 일에도 웃음이 터져요. 같은 장면에서, 같은 순간에요. 그 웃음이 둘을 이어 줘요. 물결이 이렇게 전해요. 기쁨은 말로 남길 때 오래가요. 오늘은 \"너랑 있으면 웃게 돼\" 하고 말해 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "hagalaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "월요일 아침, 팀장이 공지 하나로 부서를 통째로 바꾼 날이 있었어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "hagalaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "억울함을 삼키는 담담함도, 결국 버텨 낸 힘이에요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "hagalaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그렇게 참아 온 것들, 어디로 갔을까요?",
+  "new": "그런데 그렇게 참아 온 것들, 어디로 갔을까요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "hagalaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "너무 오래 참으면 어느 날 엉뚱한 곳에서 우박처럼 쏟아져요. 그 순간 당신도 당신이 낯설죠.",
+  "new": "너무 오래 참으면 어느 날 엉뚱한 곳에서 우박처럼 쏟아져요. 그 순간 당신도 당신이 낯설죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "hagalaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "쌓인 것은 언젠가 나오고, 미리 흘려보내는 편이 덜 아파요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "hagalaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 하갈라즈가 놓였어요. 폭풍이 지나가는 때예요. 마음이 가는 사람 앞에서 당신의 마음이 크게 흔들려요. 기대했다가 걱정했다가, 하루에도 여러 번이요. 그 흔들림은 마음이 진짜라는 뜻이에요. 바람이 이렇게 전해요. 폭풍은 지나가요. 오늘은 흔들리는 마음을 한 줄로 적어 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "nauthiz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "자취를 막 시작했을 때, 통장 잔고가 바닥나서야 요리를 제대로 배우기 시작했어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "nauthiz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "부족함이 당신을 다그치지만, 그만큼 멀리 데려가기도 해요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "nauthiz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 이미 채워진 것, 알아보고 있나요?",
+  "new": "그런데 이미 채워진 것, 알아보고 있나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "nauthiz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "결핍이 익숙해서 채워져도 채워진 걸 못 느껴요. 컵이 가득해도, 당신은 여전히 목이 마르죠.",
+  "new": "결핍이 익숙해서 채워져도 채워진 걸 못 느껴요. 컵이 가득해도, 당신은 여전히 목이 마르죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "nauthiz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "이미 채운 것을 알아보는 것도, 결핍만큼 중요한 힘이에요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "nauthiz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 나우티즈가 놓였어요. 모자람이 힘이 되는 때예요. 마음이 가는 사람 앞에서 당신은 부족한 점이 자꾸 보여요. 그래서 더 노력하게 돼요. 그 사람은 그 진심을 알아봐요. 물결이 이렇게 전해요. 모자란 모습도 당신이에요. 오늘은 서툰 모습 그대로 그 사람 앞에 서 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "isa",
+  "field": "past.lede",
+  "max": 80,
+  "old": "다니던 스터디 모임에 발길을 끊고, 딱히 이유도 대지 못한 채 몇 달을 흘려보낸 적 있었죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "isa",
+  "field": "now.quote",
+  "max": 50,
+  "old": "멈춰 있는 것처럼 보여도, 속에서는 계속 흐르고 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "isa",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 얼음, 언제 녹을 것 같아요?",
+  "new": "그런데 그 얼음, 언제 녹을 것 같아요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "isa",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "생각이 길어질수록 시작이 더 무거워져요. 얼음이 녹길 기다리다, 얼음 속에 갇혀 버리죠.",
+  "new": "생각이 길어질수록 시작이 더 무거워져요. 얼음이 녹길 기다리다, 얼음 속에 갇혀 버리죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "isa",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "얼음은 저절로 녹지 않아요. 한 번은 손을 대야 풀려요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "isa",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 이사가 놓였어요. 잠시 멈추는 때예요. 마음이 가는 사람 앞에서 당신은 한 발 물러서 지켜봐요. 서두르지 않고, 천천히 살펴요. 그 고요함이 그 사람에겐 신비롭게 느껴져요. 바람이 이렇게 전해요. 얼음도 녹는 때가 와요. 오늘은 멈춘 자리에서 눈인사 한 번만 건네 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "jera",
+  "field": "past.lede",
+  "max": 80,
+  "old": "동아리에서 다들 그만둔 뒤에도, 혼자 연습실 열쇠를 받아 몇 달을 더 다녔던 적 있었죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "jera",
+  "field": "now.quote",
+  "max": 50,
+  "old": "뿌린 것은 사라지지 않아요. 계절이 돌아오면 모습을 드러내요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "jera",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 결실이 늦어질 때, 당신은 무엇을 의심했나요?",
+  "new": "그런데 결실이 늦어질 때, 당신은 무엇을 의심했나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "jera",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "열매가 늦으면 내가 뿌린 것 자체를 의심해요. '이게 맞나' 싶어서 다 뽑아 버리고 싶은 날이 있죠.",
+  "new": "열매가 늦으면 내가 뿌린 것 자체를 의심해요. '이게 맞나' 싶어서 다 뽑아 버리고 싶은 날이 있죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "jera",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "덜 여문 열매를 먼저 따면, 단맛을 보기 전에 놓치고 말아요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "jera",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 예라가 놓였어요. 뿌린 것을 거두는 때예요. 마음이 가는 사람과 쌓아 온 작은 순간들이 열매를 맺어요. 오래 나눈 대화, 꾸준한 안부. 그 사람도 당신을 특별하게 느끼기 시작해요. 물결이 이렇게 전해요. 거둔 것을 나누세요. 오늘은 그동안 고마웠던 것을 그 사람에게 말해 주세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "eihwaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "다니던 회사 책상을 마지막으로 정리하던 날, 생각보다 눈물이 안 났어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "eihwaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "끝은 그저 다음 장의 첫 줄일 뿐이에요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "eihwaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 자꾸 갈아엎고 싶은 마음, 어디서 오는 걸까요?",
+  "new": "그런데 자꾸 갈아엎고 싶은 마음, 어디서 오는 걸까요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "eihwaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "끝을 두려워하지 않는 사람은, 버텨 볼 만한 것까지 너무 쉽게 끝내 버려요. 당신도 알잖아요.",
+  "new": "끝을 두려워하지 않는 사람은, 버텨 볼 만한 것까지 너무 쉽게 끝내 버려요. 당신도 알잖아요."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "eihwaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "모든 끝이 새 시작인 건 아니에요. 어떤 끝은, 그냥 서두른 끝이죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "eihwaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 에이와즈가 놓였어요. 오래 버티는 나무의 때예요. 마음이 가는 사람에게 당신은 쉽게 마음을 접지 않아요. 답이 느려도, 만남이 뜸해도 꾸준히 곁에 있어요. 그 사람은 그 한결같음을 느껴요. 바람이 이렇게 전해요. 뿌리 깊은 나무는 서두르지 않아요. 오늘은 짧은 안부 한 줄이면 충분해요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "perthro",
+  "field": "past.lede",
+  "max": 80,
+  "old": "밤 11시, 방 안 책상 서랍 안쪽에 아무도 모르게 계획을 적어 둔 적이 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "perthro",
+  "field": "now.quote",
+  "max": 50,
+  "old": "말하지 않은 계획은, 아직 완전히 당신 것이에요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "perthro",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 비밀, 너무 오래 품고 있진 않나요?",
+  "new": "그런데 그 비밀, 너무 오래 품고 있진 않나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "perthro",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "아무에게도 말하지 않은 채 너무 오래 품다 보니, 계획이 설렘에서 짐으로 바뀌어 가고 있어요.",
+  "new": "아무에게도 말하지 않은 채 너무 오래 품다 보니, 계획이 설렘에서 짐으로 바뀌어 가고 있어요."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "perthro",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "제비는 던져야 결과가 나와요. 손안에 쥐고만 있으면, 아무 일도 안 일어나요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "perthro",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 페르트로가 놓였어요. 아직 모르는 운이 잔에 담긴 때예요. 마음이 가는 사람이 어떤 마음인지 아직 알 수 없어요. 그래서 더 궁금하고, 더 설레요. 물결이 이렇게 전해요. 모르는 채로 즐겨도 괜찮아요. 오늘은 답을 캐묻는 대신 그 사람과 보내는 시간 자체를 즐겨 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "algiz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "회의실에서 계약서에 도장을 찍기 직전, 이상하게 손이 멈췄던 적이 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "algiz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "촉이 켜지는 데는 다 이유가 있어요. 그 이유를 믿으세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "algiz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 울타리, 반가운 사람까지 막고 있진 않나요?",
+  "new": "그런데 그 울타리, 반가운 사람까지 막고 있진 않나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "algiz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "지키는 힘이 강한 사람은, 지킬 필요가 없는 것까지 지켜요. 그 울타리 밖에서 돌아선 사람이 있죠.",
+  "new": "지키는 힘이 강한 사람은, 지킬 필요가 없는 것까지 지켜요. 그 울타리 밖에서 돌아선 사람이 있죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "algiz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "울타리가 높을수록, 안에 있는 사람도 밖을 못 봐요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "algiz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 알기즈가 놓였어요. 나를 지키는 뿔이 선 때예요. 마음이 가는 사람 앞에서도 당신은 조심스러워요. 쉽게 다가가지 않고, 천천히 마음을 열어요. 그 신중함이 당신을 지켜 줘요. 바람이 이렇게 전해요. 지키는 것과 닫는 것은 달라요. 오늘은 창문 하나만 열어 그 사람의 인사를 받아 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "sowilo",
+  "field": "past.lede",
+  "max": 80,
+  "old": "동창회 자리에서 다들 '너 요즘 잘나간다며'라고 했을 때, 웃어넘기며 화제를 돌린 적이 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "sowilo",
+  "field": "now.quote",
+  "max": 50,
+  "old": "구름은 해를 이길 수 없어요. 늦출 뿐이에요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "sowilo",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 밝음, 곁의 누군가를 그늘지게 하진 않았나요?",
+  "new": "그런데 그 밝음, 곁의 누군가를 그늘지게 하진 않았나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "sowilo",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "확실하게 빛나는 사람 곁엔, 자기도 모르게 그늘로 밀려난 사람이 있어요. 당신은 몰랐겠지만요.",
+  "new": "확실하게 빛나는 사람 곁엔, 자기도 모르게 그늘로 밀려난 사람이 있어요. 당신은 몰랐겠지만요."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "sowilo",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "가장 밝은 빛도, 가끔은 스스로 눈을 가려 줄 때 더 따뜻해져요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "sowilo",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 소윌로가 놓였어요. 구름을 뚫고 해가 나오는 때예요. 마음이 가는 사람 앞에서 당신은 환하게 빛나요. 자신감이 차오르고, 웃음이 밝아져요. 그 사람은 그 빛에 이끌려요. 물결이 이렇게 전해요. 해는 혼자 빛나지 않아요. 오늘은 그 사람의 좋은 점 하나를 환하게 비춰 말해 주세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "tiwaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "화요일 오후 회의, 다들 찬성하는 안건에 혼자 손을 들어 반대한 적이 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "tiwaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "옳은 것은 늘 다수결로 정해지지 않아요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "tiwaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 원칙을 지키다, 사람을 잃은 적은 없나요?",
+  "new": "그런데 원칙을 지키다, 사람을 잃은 적은 없나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "tiwaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "옳은 걸 지키느라 가까운 사람의 사정을 못 봤어요. 원칙은 지켰는데, 그 사람은 떠났죠.",
+  "new": "옳은 걸 지키느라 가까운 사람의 사정을 못 봤어요. 원칙은 지켰는데, 그 사람은 떠났죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "tiwaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "옳음을 지키는 것과 사람을 지키는 것, 둘 다 놓치지 않아도 돼요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "tiwaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 티와즈가 놓였어요. 옳은 것을 지키는 때예요. 마음이 가는 사람이 곤란할 때 당신은 망설이지 않고 편이 되어 줘요. 그 사람은 그 용기를 오래 기억해요. 바람이 이렇게 전해요. 지켜 주는 마음만큼 당신도 소중해요. 오늘은 당신이 바라는 것도 하나 그 사람에게 말해 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "berkano",
+  "field": "past.lede",
+  "max": 80,
+  "old": "동생 이사를 도와주느라 주말을 다 쓰고, 정작 내 방 정리는 두 달째 미뤄 둔 적이 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "berkano",
+  "field": "now.quote",
+  "max": 50,
+  "old": "돌보는 사람도 가끔은 돌봄을 받아야 계속 자랄 수 있어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "berkano",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 돌봄이 익숙해져서, 당신을 잊지 않았나요?",
+  "new": "그런데 그 돌봄이 익숙해져서, 당신을 잊지 않았나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "berkano",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "남의 이사는 주말 다 바쳐 도우면서, 내 방 정리는 두 달째 그대로예요. 당신은 늘 순서가 꼴찌죠.",
+  "new": "남의 이사는 주말 다 바쳐 도우면서, 내 방 정리는 두 달째 그대로예요. 당신은 늘 순서가 꼴찌죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "berkano",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "나무는 뿌리부터 자라야 가지도 무성해져요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "berkano",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 베르카나가 놓였어요. 새싹이 조용히 자라는 때예요. 마음이 가는 사람을 향한 마음이 천천히, 그러나 분명히 자라요. 매일 조금씩 더 궁금해지고, 조금씩 더 반가워져요. 물결이 이렇게 전해요. 새싹은 볕을 받아야 자라요. 오늘은 그 마음에 다정한 말 한마디로 볕을 비춰 주세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ehwaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "단톡방 공지 없이도, 같은 조원과 자료 준비가 이상하게 딱딱 맞아떨어지던 때가 있었죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ehwaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "말이 없어도 나란히 달릴 수 있는 사이가 있다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ehwaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 사람 없이도, 당신은 결정할 수 있나요?",
+  "new": "그런데 그 사람 없이도, 당신은 결정할 수 있나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ehwaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "믿는 사람이 생기면 그 사람 없이는 아무것도 못 정하게 돼요. 기대는 게 아니라, 묶여 버리는 거죠.",
+  "new": "믿는 사람이 생기면 그 사람 없이는 아무것도 못 정하게 돼요. 기대는 게 아니라, 묶여 버리는 거죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ehwaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "둘이 걷던 길도, 가끔은 혼자 걸어 봐야 넓어진다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ehwaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 에와즈가 놓였어요. 믿고 함께 달리는 때예요. 마음이 가는 사람과 호흡이 척척 맞아요. 하나를 말하면 둘을 알아채고, 같은 방향을 봐요. 그 순간이 당신을 설레게 해요. 바람이 이렇게 전해요. 함께 달리려면 속도를 맞춰야 하죠. 오늘은 그 사람이 정한 속도로 함께 걸어 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "mannaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "회식 자리에서 분위기를 살피며 웃음소리를 만들어 내던 밤을 떠올려 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "mannaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "남들 앞의 나와 혼자인 나 사이, 거울 하나가 놓여 있다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "mannaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 남을 살피느라, 당신 신호는 놓치지 않았나요?",
+  "new": "그런데 남을 살피느라, 당신 신호는 놓치지 않았나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "mannaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "회식 자리에선 분위기를 띄우고, 집에 오면 말 한마디 하기 싫어요. 그 둘 다 당신인데, 한쪽만 보여 주죠.",
+  "new": "회식 자리에선 분위기를 띄우고, 집에 오면 말 한마디 하기 싫어요. 그 둘 다 당신인데, 한쪽만 보여 주죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "mannaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "남을 비추던 거울도, 가끔은 자기 쪽으로 돌려야 한다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "mannaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 만나즈가 놓였어요. 거울 속 나를 보는 때예요. 마음이 가는 사람 앞에서 당신은 자신을 새롭게 발견해요. 이런 말도 할 줄 아는구나, 이렇게 웃기도 하는구나. 물결이 이렇게 전해요. 그 사람 덕분에 만난 당신도 진짜 당신이에요. 오늘은 그 새로운 모습을 반갑게 맞아 주세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "laguz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "영화관 불이 켜지기도 전에, 이유를 알 수 없이 눈물이 먼저 차오른 적 있었죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "laguz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "설명할 수 없어도, 느껴지는 것들이 있다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "laguz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 파도에 너무 오래 잠겨 있진 않나요?",
+  "new": "그런데 그 파도에 너무 오래 잠겨 있진 않나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "laguz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "감정에 잠기면 결정을 자꾸 미뤄요. 기분이 좀 나아지면 하자고 하다가, 그 '나중'이 길어지죠.",
+  "new": "감정에 잠기면 결정을 자꾸 미뤄요. 기분이 좀 나아지면 하자고 하다가, 그 '나중'이 길어지죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "laguz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "파도는 밀려왔다가 다시 빠져나간다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "laguz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 라구즈가 놓였어요. 직감이 물처럼 흐르는 때예요. 마음이 가는 사람의 기분을 당신은 말하기 전에 먼저 느껴요. 그 사람은 당신 앞에서 이해받는다고 느껴요. 바람이 이렇게 전해요. 직감은 말로 확인할 때 더 맑아져요. 오늘은 \"혹시 이런 기분이야?\" 하고 다정하게 물어보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ingwaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "시험이나 발표 몇 달 전부터, 아무도 모르게 혼자 계획표를 짜 두었던 적 있죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ingwaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "보이지 않는 뿌리가, 보이는 열매를 만든다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ingwaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 준비만 하다, 시작할 때를 놓치진 않았나요?",
+  "new": "그런데 준비만 하다, 시작할 때를 놓치진 않았나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ingwaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "완벽한 준비를 기다리다 출발선에서 계절이 바뀌어요. 준비가 끝나는 날은, 사실 오지 않아요.",
+  "new": "완벽한 준비를 기다리다 출발선에서 계절이 바뀌어요. 준비가 끝나는 날은, 사실 오지 않아요."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ingwaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "여문 씨앗은 땅속보다 밖에서 더 빛난다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "ingwaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 잉와즈가 놓였어요. 땅속에서 씨앗이 여무는 때예요. 마음이 가는 사람을 향한 마음이 아직 겉으로 드러나지 않았어요. 안에서 조용히 무르익고 있어요. 물결이 이렇게 전해요. 여문 씨앗은 언젠가 싹을 틔워요. 오늘은 그 마음을 소중히 품되, 작은 친절 하나로 먼저 꺼내 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "dagaz",
+  "field": "past.lede",
+  "max": 80,
+  "old": "오랫동안 망설이던 일을, 어느 이른 아침 갑자기 마음먹어 버린 적 있었죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "dagaz",
+  "field": "now.quote",
+  "max": 50,
+  "old": "가장 어두운 순간이, 새벽에 가장 가깝다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "dagaz",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 너무 급하게 다 뒤집으면, 어떻게 될까요?",
+  "new": "그런데 너무 급하게 다 뒤집으면, 어떻게 될까요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "dagaz",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "오래 참다 마음먹으면 한꺼번에 다 바꾸고 싶어져요. 그 속도에 주변도, 당신도 숨이 차죠.",
+  "new": "오래 참다 마음먹으면 한꺼번에 다 바꾸고 싶어져요. 그 속도에 주변도, 당신도 숨이 차죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "dagaz",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "빛도 너무 갑자기 켜지면 눈이 부시다.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "dagaz",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 다가즈가 놓였어요. 어둠이 걷히고 새벽이 오는 때예요. 마음이 가는 사람 앞에서 당신은 오래 망설이던 문을 열어요. 갑자기 용기가 생기고, 하고 싶은 말이 선명해져요. 바람이 이렇게 전해요. 새벽의 용기는 귀해요. 오늘은 그 용기로 먼저 인사를 건네 보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "othala",
+  "field": "past.lede",
+  "max": 80,
+  "old": "명절마다 할머니 댁 마당에 모여 같은 나물을 무치던 손, 그 손끝을 유심히 본 적 있었죠.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "othala",
+  "field": "now.quote",
+  "max": 50,
+  "old": "누구를 내 울타리 안에 두는가, 그게 결국 당신을 만들어요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "othala",
+  "field": "shadow.hook",
+  "max": 45,
+  "old": "그런데 그 울타리, 바깥 사람에겐 너무 높지 않나요?",
+  "new": "그런데 그 울타리, 바깥 사람에겐 너무 높지 않나요?"
+ },
+ {
+  "file": "book-rune.js",
+  "id": "othala",
+  "field": "shadow.lede",
+  "max": 80,
+  "old": "내 사람에겐 한없이 너그러운데, 울타리 밖 사람에겐 이상하게 차가워져요. 당신도 느끼고 있죠.",
+  "new": "내 사람에겐 한없이 너그러운데, 울타리 밖 사람에겐 이상하게 차가워져요. 당신도 느끼고 있죠."
+ },
+ {
+  "file": "book-rune.js",
+  "id": "othala",
+  "field": "shadow.quote",
+  "max": 50,
+  "old": "물려받은 울타리라도, 손보아야 할 곳은 손봐야 해요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "othala",
+  "field": "heartLine",
+  "max": 170,
+  "old": "지금 자리에 오탈라가 놓였어요. 뿌리와 집을 돌보는 때예요. 마음이 가는 사람에게 당신은 편안한 집이 되어 주고 싶어요. 좋아하는 음식을 기억하고, 쉬어 갈 자리를 마련해요. 그 사람은 당신 곁에서 마음을 놓아요. 물결이 이렇게 전해요. 집은 함께 꾸밀 때 더 따뜻해요. 오늘은 그 사람의 취향도 물어보세요.",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-fehu",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "다시 세는 곳간",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-uruz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "일어나는 힘의 기억",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-thurisaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "처음 그은 선",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-ansuz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "못다한 한마디",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-raidho",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "다시 오르는 길",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-kenaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "혼자 밝힌 불",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-gebo",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "되돌아온 손길",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-wunjo",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "식탁 위의 웃음",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-hagalaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "무너진 뒤의 아침",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-nauthiz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "버틴 밤의 라면",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-isa",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "얼어붙은 창밖",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-jera",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "가을의 수확",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-eihwaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "오래된 나무 아래",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-perthro",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "열어본 상자",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-algiz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "뻗은 손의 순간",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-sowilo",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "정상에서 본 해",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-tiwaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "손해 본 선택",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-berkano",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "새로 들인 화분",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-ehwaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "발 맞춘 동료",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-mannaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "거울 속 나",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-laguz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "밤바다의 생각",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-ingwaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "기다리는 씨앗",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-dagaz",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "새벽에 온 답",
+  "new": ""
+ },
+ {
+  "file": "book-rune.js",
+  "id": "rune-othala",
+  "field": "hidden.title",
+  "max": 16,
+  "old": "고향집 서랍",
+  "new": ""
+ }
+]
