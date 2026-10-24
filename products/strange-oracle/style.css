@@ -5554,3 +5554,44 @@ body:has(.hub.is-active) .toast { bottom: calc(var(--tabs-h, 64px) + var(--space
 .kakao-consent__more { margin: var(--space-2) 0 var(--space-3); font-size: var(--fs-sm); }
 .kakao-consent__more summary { min-height: var(--tap-min); display: flex; align-items: center; cursor: pointer; color: var(--accent); }
 .kakao-consent__list { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-1); color: var(--c-text-muted); line-height: var(--lh-ui); word-break: keep-all; }
+
+/* ── (24단계) 직격: 유료 장 맨 앞 세 마디 + 한 줄. 화면에 들어오면 한 마디씩 내리꽂힌다 ── */
+.strike { position: relative; margin: var(--space-3) 0 var(--space-5); padding: 22px 18px 20px; border: 1px solid oklch(0.55 0.17 28 / 0.6); border-radius: 14px; overflow: hidden; isolation: isolate;
+  background: radial-gradient(120% 90% at 50% 0%, oklch(0.27 0.1 25 / 0.95), oklch(0.13 0.035 285) 72%);
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.4), 0 18px 40px oklch(0.1 0.06 25 / 0.55); }
+.strike::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0.22;
+  background: repeating-linear-gradient(115deg, transparent 0 22px, oklch(0.7 0.16 28 / 0.12) 22px 23px); }
+.strike::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 38%, oklch(0.78 0.2 30 / 0.65), transparent 62%); }
+.strike__label { margin: 0 0 14px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.08em; color: oklch(0.76 0.15 30); }
+.strike__line { margin: 0 0 10px; font-size: clamp(19px, 5.6vw, 23px); line-height: 1.42; font-weight: 800; letter-spacing: -0.01em; color: #fff; word-break: keep-all; text-wrap: pretty; transform-origin: 50% 60%; }
+.strike__line:first-of-type { font-size: clamp(21px, 6.2vw, 26px); }
+.strike__turn { margin: 16px 0 0; word-break: keep-all; padding-top: 14px; border-top: 1px solid oklch(0.6 0.12 30 / 0.35); font-size: var(--fs-sm); line-height: 1.7; color: oklch(0.9 0.06 80); }
+.strike.is-armed .strike__line, .strike.is-armed .strike__turn { opacity: 0; }
+.strike.is-hit { animation: strike-quake 2.9s linear 0.35s both; }
+.strike.is-hit::after { animation: strike-flash 2.9s linear 0.35s both; }
+.strike.is-hit .strike__line { animation: strike-slam 0.52s cubic-bezier(0.2, 1.5, 0.35, 1) calc(0.35s + var(--i, 0) * 1s) both; }
+.strike.is-hit .strike__turn { animation: strike-rise 0.9s ease-out 3.5s both; }
+@keyframes strike-slam {
+  0% { opacity: 0; transform: scale(1.9) translateY(-8px); filter: blur(8px); text-shadow: 0 0 34px oklch(0.7 0.22 28); }
+  55% { opacity: 1; transform: scale(0.97); filter: blur(0); }
+  100% { opacity: 1; transform: none; text-shadow: 0 0 0 transparent; }
+}
+@keyframes strike-quake { /* 마디가 꽂히는 0초·1초·2초(= 0%·34.5%·69%)에 짧게 흔들림 */
+  0%, 8%, 34.5%, 42.5%, 69%, 77%, 100% { transform: none; }
+  2%, 36.5%, 71% { transform: translate(-6px, 3px) rotate(-0.4deg); }
+  4%, 38.5%, 73% { transform: translate(5px, -3px) rotate(0.3deg); }
+  6%, 40.5%, 75% { transform: translate(-2px, 1px); }
+}
+@keyframes strike-flash {
+  0%, 34.5%, 69% { opacity: 0; }
+  1.5%, 36%, 70.5% { opacity: 1; }
+  12%, 46%, 80%, 100% { opacity: 0; }
+}
+@keyframes strike-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* 책 장의 직격 (종이 위, 움직임 없음) */
+.book-strike { display: block; margin-block: calc(var(--book-line) / 2); padding: var(--space-3) 0; border-top: 2px solid oklch(0.43 0.13 32 / 0.75); border-bottom: 1px solid oklch(0.43 0.13 32 / 0.35); text-indent: 0; }
+.book-strike__label { display: block; margin-bottom: 4px; font-family: var(--font-sans); font-size: var(--fs-xs); letter-spacing: 0.12em; color: oklch(0.43 0.13 32); }
+.book-strike__line { display: block; font-size: var(--fs-lg); line-height: 1.55; font-weight: 700; color: var(--ink-strong); }
+.book-strike__turn { display: block; margin-top: 6px; font-size: var(--fs-read); line-height: var(--book-line); color: var(--ink); }

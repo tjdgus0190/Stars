@@ -43,14 +43,20 @@ const paidLine = (file, global, pick) => {
   const sajuReq = b.log.bodies.slice(n0).filter((x) => /\/api\/book/.test(x.url));
   check("A2 펼침: Ⅱ~Ⅳ장·숨은 장 문단(빈 문단 0) · 요청 본문 = pass·file 두 칸, file=saju", r && r.state === "open" && r.ps >= 8 && r.empty === 0 && sajuReq.length === 1 && Object.keys(JSON.parse(sajuReq[0].body)).sort().join() === "file,pass" && JSON.parse(sajuReq[0].body).file === "saju", `${r && r.ps}문단 · ${sajuReq.map((x) => x.body.replace(/"pass":"[^"]*"/, '"pass":"…"')).join(" | ")}`);
 
+  const strikeOf = () => ev("(() => { const x = document.querySelector('.screen.is-active [data-js=room-strike]'); return x ? { lines: [...x.querySelectorAll('.strike__line')].map((p) => p.textContent), turn: x.querySelector('.strike__turn')?.textContent || '', first: x.parentElement.querySelector('.room-rest__title + *, .room-rest__note + *') === x } : null; })()");
+  const sajuStrike = paidLine("book-saju.js", "BOOK_SAJU", (x) => x.full.map((e) => e.strike.lines[0]));
+  let st = await strikeOf();
+  check("A3 (24단계) 만신 펼침: 직격 세 마디 + 한 줄이 장 맨 앞 · 유료 원본 문장", st && st.lines.length === 3 && st.turn.length > 10 && st.first && sajuStrike.includes(st.lines[0]), st && st.lines[0]);
+
   // 2. 오검: 결제 전 잠김 — 장 이름·분량·결제 버튼, 유료 문장 0
   const ogLine = paidLine("book-ogham.js", "BOOK_OGHAM", (x) => x.full[2].event.body[0]);
   const n1 = b.log.bodies.length;
   await skip("ogham-result");
   r = await rest();
   const html = await ev("document.documentElement.outerHTML");
-  check("B1 오검 결과(결제 전): locked · 잠긴 줄 5개 · 9,900원 · [모두 열기]·[이미 샀어요]", r && r.state === "locked" && (await ev("document.querySelectorAll('.screen.is-active .room-rest__lock').length")) === 5 && /9,900원/.test(r.text) && (await ev("!!document.querySelector('.screen.is-active [data-js=room-rest-buy]') && !!document.querySelector('.screen.is-active [data-js=room-rest-have]')")), r && r.state);
-  check("B2 결제 전 화면에 유료 문장 0 · 함수 book 요청 0", !html.includes(ogLine.slice(0, 30)) && !b.log.bodies.slice(n1).some((x) => /\/api\/book/.test(x.url)));
+  check("B1 오검 결과(결제 전): locked · 잠긴 줄 6개(직격 포함) · 9,900원 · [모두 열기]·[이미 샀어요]", r && r.state === "locked" && (await ev("document.querySelectorAll('.screen.is-active .room-rest__lock').length")) === 6 && /9,900원/.test(r.text) && (await ev("!!document.querySelector('.screen.is-active [data-js=room-rest-buy]') && !!document.querySelector('.screen.is-active [data-js=room-rest-have]')")), r && r.state);
+  const ogStrike = paidLine("book-ogham.js", "BOOK_OGHAM", (x) => x.full.flatMap((e) => e.strike.lines.concat(e.strike.turn)));
+  check("B2 결제 전 화면에 유료 문장 0(직격 포함) · 함수 book 요청 0", !ogStrike.some((t) => html.includes(t)) && !(await ev("!!document.querySelector('.screen.is-active [data-js=room-strike]')")) && !html.includes(ogLine.slice(0, 30)) && !b.log.bodies.slice(n1).some((x) => /\/api\/book/.test(x.url)));
   await click(".screen.is-active [data-js=room-rest-have]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
   await sleep(300);
@@ -74,6 +80,8 @@ const paidLine = (file, global, pick) => {
   await skip("rune-result", 1);
   await waitFor("document.querySelector('.screen.is-active [data-js=room-rest]')?.dataset.state === 'open'");
   r = await rest();
+  st = await strikeOf();
+  check("D0 (24단계) 룬(결제한 탭): 직격 = '지금' 자리 돌의 세 마디", st && st.lines.length === 3 && paidLine("book-rune.js", "BOOK_RUNE", (x) => x.full.map((e) => e.strike.lines[0])).includes(st.lines[0]), st && st.lines[0]);
   check("D1 룬(결제한 탭): 바로 open · 돌 소제목 · 빈 문단 0", r && r.state === "open" && (await ev("document.querySelectorAll('.screen.is-active .room-rest__sub').length")) >= 1 && r.empty === 0, r && r.state);
   await skip("sibyl-result", 1);
   await waitFor("document.querySelector('.screen.is-active [data-js=room-rest]')?.dataset.state === 'open'");

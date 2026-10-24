@@ -68,6 +68,7 @@
         hidden,
         firstLine: firstOf(C, room, codes.rune[1]), // (17-3) 여러 결과를 엮는 장(룬뿐) = "지금" 자리 결과 하나의 firstLine·heartLine
         heartLine: now.heartLine || "",
+        strike: now.strike || null, // (24단계) 직격 세 마디 + 한 줄 = "지금" 자리 결과
       };
     }
     const ei = room === "tzolkin" ? codes.tzolkin.sign : room === "saju" ? sajuStem(codes.saju) : codes[room];
@@ -82,6 +83,7 @@
       ch4: [e.advice.lede, ...e.advice.body],
       hidden,
       firstLine: firstOf(C, room, ei), // (17-3) 장 첫 쪽 맨 앞 한 문장. 빈칸이면 그리지 않는다
+      strike: e.strike || null, // (24단계) 직격 { lines[3], turn } — 유료 장 맨 앞(app.js가 그림)
       heartLine: e.heartLine || "", // (17-3) 장 가운데 한 장면 = identity 뒤·shadow 앞(Ⅰ장 끝, 룬은 "지금" 묶음 끝. app.js가 aside.book-heart로 그림)
     };
     if (room === "sibyl") out.topics = Object.assign({}, e.topics);

@@ -2937,10 +2937,45 @@
     s.append(body);
     return s;
   }
+  // (24단계) 직격: 유료 장 맨 앞 세 마디 + 한 줄. 처음 화면에 들어올 때 한 마디씩 내리꽂힌다(움직임 줄이기면 그냥 보임)
+  const strikeSeen = new Set(); // 이 탭에서 연출을 이미 본 방(메모리만)
+  function strikeBlock(st, room) {
+    if (!st || !Array.isArray(st.lines) || !st.lines.length) return null;
+    const s = rmk("section", "strike");
+    s.dataset.js = "room-strike";
+    s.append(rmk("p", "strike__label", (room === "saju" && RT.strikeLabelSaju) || RT.strikeLabel || ""));
+    st.lines.forEach((t, i) => {
+      const p = rmk("p", "strike__line", strip(t));
+      p.style.setProperty("--i", i);
+      s.append(p);
+    });
+    if (st.turn) s.append(rmk("p", "strike__turn", strip(st.turn)));
+    return s;
+  }
+  function armStrike(s, room) {
+    if (reduceMotion || strikeSeen.has(room) || !("IntersectionObserver" in window)) return;
+    s.classList.add("is-armed");
+    const io = new IntersectionObserver(
+      (es) => {
+        if (!es.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        strikeSeen.add(room);
+        s.classList.add("is-hit");
+        [350, 1350, 2350].forEach((ms) => setTimeout(() => buzz(28), ms)); // 마디가 꽂히는 순간(style.css strike-slam 지연과 같은 값)
+      },
+      { threshold: 0.45 }
+    );
+    io.observe(s);
+  }
   function renderRestOpen(box, room) {
     const c = myCodes();
     const fr = BookCore.fullRoom(BookCore.contentFrom(window), room, c);
     const names = T.result.chapterNames;
+    const sb = strikeBlock(fr.strike, room);
+    if (sb) {
+      box.append(sb);
+      armStrike(sb, room);
+    }
     let ch1 = [];
     if (room === "rune") {
       c.rune.forEach((i, k) => {
@@ -2982,7 +3017,7 @@
     if (st === "locked") {
       box.append(rmk("p", "room-rest__lead", fill(RT.lockedLead, { n })));
       const ul = rmk("ul", "room-rest__locks");
-      [[ROMAN[0], RT.lockedRest], [ROMAN[1], T.result.chapterNames[1]], [ROMAN[2], T.result.chapterNames[2]], [ROMAN[3], T.result.chapterNames[3]], ["", T.book.hiddenChapter]].forEach(([num, name]) => {
+      [["", RT.strikeLock], [ROMAN[0], RT.lockedRest], [ROMAN[1], T.result.chapterNames[1]], [ROMAN[2], T.result.chapterNames[2]], [ROMAN[3], T.result.chapterNames[3]], ["", T.book.hiddenChapter]].forEach(([num, name]) => {
         const li = rmk("li", "room-rest__lock");
         li.append(rmk("span", "room-rest__num", num)); // 숨은 장은 빈 칸(줄 맞춤)
         li.append(rmk("span", "room-rest__lock-name", name));
@@ -3594,6 +3629,27 @@
     js("book-heart-text", a).textContent = t;
     return a;
   };
+  // (24단계) 책 장의 직격: aside.book-strike (머리말 + 세 마디 + 한 줄, 움직임 없음)
+  const bookStrikeNode = (st, id) => {
+    const a = mk("aside", "book-strike", "");
+    const lab = document.createElement("span");
+    lab.className = "book-strike__label";
+    lab.textContent = (id === "saju" && T.room.rest.strikeLabelSaju) || T.room.rest.strikeLabel || "";
+    a.append(lab);
+    (st.lines || []).forEach((t) => {
+      const l = document.createElement("span");
+      l.className = "book-strike__line";
+      l.textContent = t;
+      a.append(l);
+    });
+    if (st.turn) {
+      const t = document.createElement("span");
+      t.className = "book-strike__turn";
+      t.textContent = st.turn;
+      a.append(t);
+    }
+    return a;
+  };
   const rich = (el, list) => {
     el.textContent = "";
     list.forEach((x) => {
@@ -3675,7 +3731,7 @@
       js("book-room-key", el).textContent = h.key;
       // (17-3, design 「17단계」 5절) 첫 줄 = Ⅰ장 첫 단락(p.book-first-line). 마음 한 줄 = aside.book-heart(한 덩어리), identity 뒤·shadow 앞 = Ⅰ장 끝.
       //   룬은 세 돌 가운데 "지금" 자리 묶음 끝(셋째 소제목 "다음" 앞). 빈칸이면 그리지 않는다
-      const ch1 = (fr.firstLine ? [{ node: firstLineNode(fr.firstLine) }] : []).concat(bookCh1(id, c, fr.ch1Rest));
+      const ch1 = (fr.firstLine ? [{ node: firstLineNode(fr.firstLine) }] : []).concat(fr.strike ? [{ node: bookStrikeNode(fr.strike, id) }] : [], bookCh1(id, c, fr.ch1Rest)); // (24단계) 직격 = 첫 줄 바로 뒤
       if (fr.heartLine) {
         const heart = { node: heartNode(fr.heartLine) };
         const subs = ch1.map((x, i) => (x.sub ? i : -1)).filter((i) => i >= 0);

@@ -65,7 +65,7 @@ function actual(c) {
   const rep = core.buildReport(c);
   const ch = Object.fromEntries(rep.chapters.map((x) => [x.id, x]));
   let n = charsOf(ch.open.paragraphs);
-  for (const fr of ch.rooms.rooms) n += bookCh1Len(fr.room, c, fr.ch1Rest) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs, fr.firstLine, fr.heartLine]);
+  for (const fr of ch.rooms.rooms) n += bookCh1Len(fr.room, c, fr.ch1Rest) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs, fr.firstLine, fr.heartLine, fr.strike]);
   return n + charsOf([ch.timeline, ch.match, ch.deep]) + charsOf(ch.close.paragraphs);
 }
 
@@ -75,7 +75,7 @@ function roomOnly(room, val) {
   const c = Object.assign({}, base, { [room]: val });
   const rep = core.buildReport(c);
   const fr = rep.chapters.find((x) => x.id === "rooms").rooms[0];
-  return bookCh1Len(room, c, fr.ch1Rest) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs, fr.firstLine, fr.heartLine]);
+  return bookCh1Len(room, c, fr.ch1Rest) + charsOf([fr.ch2, fr.ch3, fr.ch4, fr.hidden.paragraphs, fr.firstLine, fr.heartLine, fr.strike]);
 }
 const V = { room: {}, rune: {}, open: {}, close: {}, deep: {}, timeline: {}, map: {}, pair: {}, rel: {}, avg: {}, yeon: Book.yeonTable(BW.BOOK_YEON), cross: Book.crossTable(BW.BOOK_CROSS), year: Book.yearTable(BW.BOOK_YEAR) }; // (20단계) year = 일간 0~9 + unknown
 // 만신: 일간 10 × 우세 묶음 5 = 50칸, 칸 번호 = 일간*5 + 묶음 (app.js chapterChars와 같은 식). 대표 코드 = 그 일간·묶음의 첫 코드
