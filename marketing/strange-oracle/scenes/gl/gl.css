@@ -1,0 +1,5 @@
+/* 3D 판(2026-10-24): WebGL 캔버스가 맨 뒤에서 배경과 문·메달·책을 그리고, CSS로 그리던 같은 그림은 숨긴다. 자막·방 이름·목차·결과 카드·끝 화면 글자는 그대로 */
+canvas.gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; display: block; }
+.is-3d .sky, .is-3d .spill, .is-3d .doors, .is-3d .ring-layer { visibility: hidden; }
+.is-3d [data-ad="ad1-seven-doors-3d"] .book, .is-3d [data-ad="ad3-book-3d"] .book__cover { visibility: hidden; }
+.is-3d .cap, .is-3d .room-name, .is-3d .end__price { text-shadow: 0 2px 10px oklch(0 0 0 / 0.85), 0 0 2px oklch(0 0 0 / 0.9); }

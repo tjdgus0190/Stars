@@ -20,6 +20,9 @@ const ADS = {
   ad1: { scene: "ad1-seven-doors.html", out: "ad1-seven-doors-ko.mp4", frames: 450 },
   ad2: { scene: "ad2-manshin.html", out: "ad2-manshin-ko.mp4", frames: 270 },
   ad3: { scene: "ad3-book.html", out: "ad3-book-ko.mp4", frames: 450 }, // (2026-10-21) 「한 권의 책」 15초
+  ad1x: { scene: "ad1-seven-doors-3d.html", out: "ad1-seven-doors-3d-ko.mp4", frames: 450 }, // (2026-10-24) 1안 3D판(WebGL 층 scenes/gl/)
+  ad3x: { scene: "ad3-book-3d.html", out: "ad3-book-3d-ko.mp4", frames: 450 }, // (2026-10-24) 3안 3D판
+  ad2x: { scene: "ad2-manshin-3d.html", out: "ad2-manshin-3d-ko.mp4", frames: 270 }, // (2026-10-24) 2안 배경 3D판
 };
 
 const args = process.argv.slice(2);
@@ -28,7 +31,7 @@ const checkOnly = args.includes("--check");
 const PORT = Number(args[args.indexOf("--port") + 1]) || 8790;
 if (PORT === 8787 || PORT === 8788) throw new Error("포트 8787·8788은 쓰지 않는다 (8790 권장)");
 const list = which === "all" ? Object.keys(ADS) : [which];
-if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | ad3 | all)`);
+if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | ad3 | ad1x | ad2x | ad3x | all)`);
 
 async function waitServer() {
   for (let i = 0; i < 50; i++) {
@@ -44,6 +47,7 @@ async function prepare(b, url) {
   const info = await b.evaluate(`(async () => {
     await document.fonts.ready;
     document.documentElement.classList.add("is-paused");
+    if (window.__ready3d) await window.__ready3d; // (3D판) WebGL 층 준비(글꼴로 그린 글자 포함)
     const fonts = [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family + " " + f.weight);
     const st = document.querySelector(".stage");
     return { fonts, anims: document.getAnimations().length, duration: Number(st.dataset.duration), fps: Number(st.dataset.fps),
@@ -55,6 +59,7 @@ async function seek(b, n) {
   await b.evaluate(`(async () => {
     const t = ${n} * 1000 / ${FPS};
     document.getAnimations().forEach((a) => { a.pause(); a.currentTime = t; });
+    if (window.__seek3d) window.__seek3d(t / 1000); // (3D판) 같은 시각으로 WebGL 한 장
     await document.fonts.ready; // 뒤 장면에서 처음 쓰는 글꼴이 있으면 그 글꼴까지
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
   })()`);

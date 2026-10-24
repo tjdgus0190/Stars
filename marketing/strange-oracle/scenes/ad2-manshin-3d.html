@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko" class="is-3d">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1080, height=1920" />
+  <title>광고 2안 「만신이 쌀 위에 여덟 글자를」 9초 (한국판) 3D판</title>
+  <!-- 글꼴: 제품과 같은 jsdelivr fontsource 5.3.0 (버전 고정, SRI sha384) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/400.css" integrity="sha384-UmN2JKCN3ZzGKhUCbF72zmj7SCKSsgzpBPRTuYCs90jUI3LUOfltMKpFi9ZWIfoL" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/700.css" integrity="sha384-EIZic2kT4Iyqg6Rn2tm4B7Ql9xDJWopYmx3ry1RafjC/gfDHItTLBMXp6jrmkxla" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.3.0/500.css" integrity="sha384-7v1bWR/nP3kDOX0ewP+ZV/TdyDB1LMi6swZIHUv+/ihIN+yo/tIKCXkVJk1WaZ2b" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.3.0/700.css" integrity="sha384-O/oLJBLGGldMs7HxAYRnSN50LYc4P4P3qiJbqSV358VWDpuJKiErXj9iWy8+R3LZ" crossorigin="anonymous" />
+  <!-- 한자(원국·일간 카드): Gowun Batang에 없는 글자를 Noto Serif KR 700으로. unicode-range 부분 파일이라 쓰인 글자 묶음만 받는다 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/700.css" integrity="sha384-LXacqt3WHgv2kABrVAfRqRh7wRqX5H060k/lYSUdYfX+vONJfNDiOITwd8LJv+EV" crossorigin="anonymous" />
+  <link rel="stylesheet" href="common.css" />
+  <link rel="stylesheet" href="ad2-manshin.css" />
+  <link rel="stylesheet" href="gl/gl.css" />
+</head>
+<body>
+<!-- 1080x1920 · 30fps · 9.0초(270프레임). 장면: A 0~1 소반·방울 / B 1~4 여덟 글자 / C 4~6.5 열 가지 일간 / D 6.5~9 끝 화면 (storyboard.md) -->
+<main class="stage" data-room="saju" data-ad="ad2-manshin-3d" data-duration="9" data-fps="30">
+  <canvas class="gl" width="1080" height="1920" aria-hidden="true"></canvas>
+  <div class="sky" aria-hidden="true"></div>
+  <i class="candle" aria-hidden="true"></i>
+
+  <!-- ── A·B: 소반과 쌀, 방울, 여덟 글자 ── -->
+  <div class="layer soban-layer">
+    <div class="soban">
+      <i class="soban__legs" aria-hidden="true"></i>
+      <i class="soban__top" aria-hidden="true"></i>
+      <i class="soban__rice" aria-hidden="true"></i>
+      <!-- 가상 생일의 원국 (예시 값: 1990-05-09 인시 기준으로 맞춘 것, 제품 saju.js 계산과 대조함 — 17단계 QA 1차).
+           왼쪽부터 시·일·월·년, 위 = 천간, 아래 = 지지. --n = 붓으로 쓰는 차례(년 → 월 → 일 → 시) -->
+      <ol class="wonguk" aria-label="여덟 글자 예시">
+        <li><b data-el="fire"  style="--n:6">丙</b><b data-el="wood"  style="--n:7">寅</b></li>
+        <li class="is-day"><b data-el="wood" style="--n:4">甲</b><b data-el="earth" style="--n:5">戌</b></li>
+        <li><b data-el="metal" style="--n:2">辛</b><b data-el="fire"  style="--n:3">巳</b></li>
+        <li><b data-el="metal" style="--n:0">庚</b><b data-el="fire"  style="--n:1">午</b></li>
+      </ol>
+    </div>
+    <div class="bell" aria-hidden="true">
+      <i class="bell__ring"></i><i class="bell__ring bell__ring--2"></i>
+      <!-- 제품 방울 아이콘(#icon-saju)과 같은 선 -->
+      <svg class="bell__icon" viewBox="0 0 40 40"><path d="M20 3v9M13 12h14M14 12v5.5M26 12v5.5M20 12v13.5" /><path d="M10.5 21a3.5 3.5 0 0 1 7 0l.8 3h-8.6ZM22.5 21a3.5 3.5 0 0 1 7 0l.8 3h-8.6ZM16.5 29a3.5 3.5 0 0 1 7 0l.8 3h-8.6Z" /><path d="M15 33c-1 2.6 0 4.4-1 6M20 33v6M25 33c1 2.6 0 4.4 1 6" /></svg>
+    </div>
+  </div>
+
+  <!-- ── C: 열 가지 일간 카드 (제품 data-saju.js stems의 이름·제목 그대로, 0.22초씩) ── -->
+  <div class="layer cards-layer">
+    <div class="card">
+      <div class="face" data-el="wood"  style="--k:0"><b>甲</b><span data-label="stem-gap">갑목</span><em data-label="stem-gap-title">곧게 선 큰 나무</em></div>
+      <div class="face" data-el="wood"  style="--k:1"><b>乙</b><span data-label="stem-eul">을목</span><em data-label="stem-eul-title">바람에 휘는 덩굴</em></div>
+      <div class="face" data-el="fire"  style="--k:2"><b>丙</b><span data-label="stem-byeong">병화</span><em data-label="stem-byeong-title">한낮의 해</em></div>
+      <div class="face" data-el="fire"  style="--k:3"><b>丁</b><span data-label="stem-jeong">정화</span><em data-label="stem-jeong-title">밤을 지키는 등불</em></div>
+      <div class="face" data-el="earth" style="--k:4"><b>戊</b><span data-label="stem-mu">무토</span><em data-label="stem-mu-title">말없이 선 큰 산</em></div>
+      <div class="face" data-el="earth" style="--k:5"><b>己</b><span data-label="stem-gi">기토</span><em data-label="stem-gi-title">씨앗을 품은 밭</em></div>
+      <div class="face" data-el="metal" style="--k:6"><b>庚</b><span data-label="stem-gyeong">경금</span><em data-label="stem-gyeong-title">갓 캐낸 무쇠</em></div>
+      <div class="face" data-el="metal" style="--k:7"><b>辛</b><span data-label="stem-sin">신금</span><em data-label="stem-sin-title">빛을 머금은 보석</em></div>
+      <div class="face" data-el="water" style="--k:8"><b>壬</b><span data-label="stem-im">임수</span><em data-label="stem-im-title">멀리 흐르는 큰 강</em></div>
+      <div class="face" data-el="water" style="--k:9"><b>癸</b><span data-label="stem-gye">계수</span><em data-label="stem-gye-title">새벽에 내린 이슬비</em></div>
+      <div class="face face--ask" style="--k:10"><b>?</b></div>
+    </div>
+  </div>
+
+  <!-- ── D: 끝 화면. 뒤에 여섯 문이 희미하게 ── -->
+  <div class="layer end-layer">
+    <div class="six" aria-hidden="true">
+      <i data-room="ogham" style="--k:0"></i><i data-room="star" style="--k:1"></i><i data-room="decan" style="--k:2"></i><i data-room="tzolkin" style="--k:3"></i><i data-room="rune" style="--k:4"></i><i data-room="sibyl" style="--k:5"></i>
+    </div>
+    <svg class="end__bell" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3v9M13 12h14M14 12v5.5M26 12v5.5M20 12v13.5" /><path d="M10.5 21a3.5 3.5 0 0 1 7 0l.8 3h-8.6ZM22.5 21a3.5 3.5 0 0 1 7 0l.8 3h-8.6ZM16.5 29a3.5 3.5 0 0 1 7 0l.8 3h-8.6Z" /><path d="M15 33c-1 2.6 0 4.4-1 6M20 33v6M25 33c1 2.6 0 4.4 1 6" /></svg>
+    <p class="end__logo logo" data-label="logo">낯선 점술관</p>
+  </div>
+
+  <!-- ── 자막 (최종 문구는 copywriter) ── -->
+  <p class="cap win win--rise" data-cap="S1" style="--in:0.1s;  --out:3.95s">만신이 쌀 위에 펼치는, 내 생일 여덟 글자</p>
+  <p class="cap win win--rise" data-cap="S2" style="--in:4.05s; --out:6.45s">열 개의 하늘 글자, 내 글자는 어느 쪽?</p>
+  <p class="cap win-in win--rise" data-cap="S3" style="--in:6.6s">첫 방은 만신, 다음은 세계의 여섯 점술</p>
+  <p class="cap cap--cta win-in win--rise end__cta" data-cap="S4" style="--in:6.95s">내 여덟 글자 펼쳐 보기</p>
+
+  <div class="safe-guide" id="safe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+</main>
+<script type="module" src="gl/bg-3d.js"></script>
+</body>
+</html>

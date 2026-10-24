@@ -15,6 +15,17 @@ node --experimental-websocket marketing/strange-oracle/render/render.js all --ch
 - Edge 경로가 다르면 환경 변수 `EDGE_PATH`. CDP 드라이버는 `tools/strange-oracle/cdp.js`(디버깅 포트 9350).
 - 걸리는 시간: 이 PC에서 1안 약 4분, 2안 약 2.5분.
 
+## 3D판 (2026-10-24)
+```
+node --experimental-websocket marketing/strange-oracle/render/render.js ad1x   # 1안 3D판 → out/ad1-seven-doors-3d-ko.mp4 (약 11~15분, WebGL 소프트웨어 렌더)
+node --experimental-websocket marketing/strange-oracle/render/render.js ad3x   # 3안 3D판 → out/ad3-book-3d-ko.mp4
+node --experimental-websocket marketing/strange-oracle/render/render.js ad2x   # 2안 배경 3D판 → out/ad2-manshin-3d-ko.mp4
+```
+- 장면: `scenes/*-3d.html` = 원래 장면 + `<canvas class="gl">`(맨 뒤) + `scenes/gl/*.js`(three.js 0.160.0, jsdelivr). CSS로 그리던 하늘·문·고리·책 표지는 `gl/gl.css`가 숨기고, 자막·방 이름·목차·카드·끝 화면 글자는 HTML 그대로.
+- 시간 맞추기: 장면이 `window.__ready3d`(글꼴로 그린 글자 준비)와 `window.__seek3d(초)`를 둔다. render.js는 준비를 기다린 뒤 프레임마다 CSS 애니메이션과 같은 시각으로 `__seek3d`를 부른다. 3D의 모든 움직임은 시각의 함수이고 무작위는 고정 씨앗이라 다시 렌더해도 같은 그림이다.
+- 소리판: 시간표가 원래 안과 같으므로 원래 소리판의 소리 트랙을 그대로 붙인다(`ffmpeg -i 3d.mp4 -i 원래-sound.mp4 -map 0:v -map 1:a -c copy`).
+- 브라우저에서 미리 보기: 정적 서버로 `scenes/ad1-seven-doors-3d.html`을 열면 실제 시간으로 돈다.
+
 ## 하는 일
 1. 뷰포트 1080x1920 · deviceScaleFactor 1 · mobile 아님. 움직임 줄이기(prefers-reduced-motion)는 켜지 않는다.
 2. 장면을 열고 `document.fonts.ready`를 기다린 뒤 `html.is-paused`로 모든 애니메이션을 멈춘다.
