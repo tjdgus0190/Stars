@@ -25,6 +25,7 @@ const BGS = {
   "mirror-st": "type=mirror&w=1080&h=1920&cy=0.5&s=1.25",
   "ring-og": "type=ring&w=1200&h=630&cy=0.5&cx=0.75&s=0.92",
   "void-kakao": "type=void&w=1200&h=600&cy=0.5",
+  "ring-x": "type=ring&w=1500&h=500&cy=0.5&cx=0.8&s=0.78",
 };
 const SQ = [1080, 1080], PT = [1080, 1350], ST = [1080, 1920];
 const CARDS = [
@@ -38,7 +39,12 @@ const CARDS = [
   // (2026-10-25) 제품 공유 그림: og-image(1200x630) · 카카오톡 공유(1200x600, 기본 + 방 일곱) → 아래에서 제품 폴더로 옮겨 담는다
   ["og", [1200, 630]], ["kakao-main", [1200, 600]],
   ...["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"].map((r) => [`kakao-${r}`, [1200, 600]]),
+  // (2026-10-25) X(트위터) 헤더 1500x500
+  ["x-header", [1500, 500]],
 ];
+// 인자로 판 이름을 주면 그 판(과 그 판의 배경)만 찍는다. 예: render-ig2.js x-header ring-x
+const ONLY = process.argv.slice(2);
+const pick = (n) => !ONLY.length || ONLY.includes(n);
 
 async function shot(b, url, w, h, file, wait) {
   await b.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
@@ -57,20 +63,23 @@ async function shot(b, url, w, h, file, wait) {
       try { if ((await fetch(`http://127.0.0.1:${PORT}/marketing/strange-oracle/instagram/ig2.css`)).ok) break; } catch (e) {}
       await sleep(100);
     }
-    b = await launch({ port: 9361, width: 1080, height: 1920 });
+    b = await launch({ port: 9361, width: 1500, height: 1920 }); // 창이 판보다 좁으면 1080 밖이 잘린다(og·카카오 1200, X 헤더 1500)
     const base = `http://127.0.0.1:${PORT}/marketing/strange-oracle/instagram`;
     for (const [name, q] of Object.entries(BGS)) {
+      if (!pick(name)) continue;
       const u = new URLSearchParams(q);
       await shot(b, `${base}/bg3d.html?${q}`, +u.get("w"), +u.get("h"), path.join(BG, `${name}.png`),
         "(async () => { for (let k = 0; k < 100 && !window.__ready3d; k++) await new Promise((r) => setTimeout(r, 100)); await window.__ready3d; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); })()");
       console.log(`  배경 ${name}`);
     }
     for (const [id, [w, h]] of CARDS) {
+      if (!pick(id)) continue;
       await shot(b, `${base}/ig2.html?k=${id}#${id}`, w, h, path.join(OUT, `${id}.png`),
         "(async () => { await document.fonts.ready; await Promise.all([...document.querySelectorAll('.card:target')].map((c) => new Promise((r) => { const m = /url\\(\"?([^\")]+)\"?\\)/.exec(getComputedStyle(c).backgroundImage); if (!m) return r(); const i = new Image(); i.onload = i.onerror = r; i.src = m[1]; }))); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); })()");
       console.log(`→ v2/${id}.png (${w}x${h})`);
     }
     // 제품 폴더로: og-image.png(팔레트 PNG) · share/kakao-*.jpg (카카오 공유 서버가 확실히 읽는 형식, 200KB 아래)
+    if (ONLY.length && !ONLY.some((n) => n === "og" || n.startsWith("kakao-"))) return;
     const PROD = path.join(ROOT, "products", "strange-oracle");
     fs.mkdirSync(path.join(PROD, "share"), { recursive: true });
     const ff = (args) => { const r = spawnSync("ffmpeg", ["-y", "-loglevel", "error", ...args]); if (r.status !== 0) throw new Error("ffmpeg 실패 " + args.join(" ")); };

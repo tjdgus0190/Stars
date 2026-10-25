@@ -20,7 +20,11 @@ node --experimental-websocket marketing/strange-oracle/render/render.js all --ch
 node --experimental-websocket marketing/strange-oracle/render/render.js ad1x   # 1안 3D판 → out/ad1-seven-doors-3d-ko.mp4 (약 11~15분, WebGL 소프트웨어 렌더)
 node --experimental-websocket marketing/strange-oracle/render/render.js ad3x   # 3안 3D판 → out/ad3-book-3d-ko.mp4
 node --experimental-websocket marketing/strange-oracle/render/render.js ad2x   # 2안 배경 3D판 → out/ad2-manshin-3d-ko.mp4
+node --experimental-websocket marketing/strange-oracle/render/render.js ad5x   # 5안 「언제까지 사주만」 → out/ad5-saju-only-3d-ko.mp4 (약 20분)
+node --experimental-websocket marketing/strange-oracle/render/render.js ad6x   # 6안 「사주가 알려주지 않은 이야기」 → out/ad6-untold-3d-ko.mp4
+node marketing/strange-oracle/render/sound-ad56.js ad5                         # 5안 소리판 → out/ad5-saju-only-3d-ko-sound.mp4 (ad6 = 6안)
 ```
+- 5·6안(2026-10-25)은 HTML 글자 없이 전부 WebGL. 공용 부품 `scenes/gl/fx.js`(후처리·화면 글자층)·`scenes/gl/cards.js`(일곱 방 카드·사주 원국 카드).
 - 장면: `scenes/*-3d.html` = 원래 장면 + `<canvas class="gl">`(맨 뒤) + `scenes/gl/*.js`(three.js 0.160.0, jsdelivr). CSS로 그리던 하늘·문·고리·책 표지는 `gl/gl.css`가 숨기고, 자막·방 이름·목차·카드·끝 화면 글자는 HTML 그대로.
 - 시간 맞추기: 장면이 `window.__ready3d`(글꼴로 그린 글자 준비)와 `window.__seek3d(초)`를 둔다. render.js는 준비를 기다린 뒤 프레임마다 CSS 애니메이션과 같은 시각으로 `__seek3d`를 부른다. 3D의 모든 움직임은 시각의 함수이고 무작위는 고정 씨앗이라 다시 렌더해도 같은 그림이다.
 - 소리판: 시간표가 원래 안과 같으므로 원래 소리판의 소리 트랙을 그대로 붙인다(`ffmpeg -i 3d.mp4 -i 원래-sound.mp4 -map 0:v -map 1:a -c copy`).
@@ -71,9 +75,9 @@ node marketing/strange-oracle/render/sound-ad1.js --raw    # 정규화 전 float
 
 | 키 | 허용 값 |
 |---|---|
-| utm_source | `instagram` · `tiktok` |
+| utm_source | `instagram` · `tiktok` · `x` |
 | utm_medium | `paid_social` · `organic` |
-| utm_campaign | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ig_profile` |
-| utm_content | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ig_profile` · `ig_story_book` |
+| utm_campaign | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ad5_saju_only` · `ad6_untold` · `ig_profile` · `x_profile` |
+| utm_content | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ad5_saju_only` · `ad6_untold` · `ig_profile` · `ig_story_book` · `x_profile` · `x_pinned` |
 
 예: `https://<제품 주소>/?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors`

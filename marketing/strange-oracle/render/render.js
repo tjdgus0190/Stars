@@ -24,6 +24,8 @@ const ADS = {
   ad3x: { scene: "ad3-book-3d.html", out: "ad3-book-3d-ko.mp4", frames: 450 }, // (2026-10-24) 3안 3D판
   ad2x: { scene: "ad2-manshin-3d.html", out: "ad2-manshin-3d-ko.mp4", frames: 270 }, // (2026-10-24) 2안 배경 3D판
   ad4x: { scene: "ad4-busted-3d.html", out: "ad4-busted-3d-ko.mp4", frames: 450 }, // (2026-10-24) 4안 「들켰죠」 (글자까지 WebGL, 후처리)
+  ad5x: { scene: "ad5-saju-only-3d.html", out: "ad5-saju-only-3d-ko.mp4", frames: 450 }, // (2026-10-25) 5안 「언제까지 사주만」
+  ad6x: { scene: "ad6-untold-3d.html", out: "ad6-untold-3d-ko.mp4", frames: 450 }, // (2026-10-25) 6안 「사주가 알려주지 않은 이야기」
 };
 
 const args = process.argv.slice(2);
@@ -32,7 +34,7 @@ const checkOnly = args.includes("--check");
 const PORT = Number(args[args.indexOf("--port") + 1]) || 8790;
 if (PORT === 8787 || PORT === 8788) throw new Error("포트 8787·8788은 쓰지 않는다 (8790 권장)");
 const list = which === "all" ? Object.keys(ADS) : [which];
-if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | ad3 | ad1x | ad2x | ad3x | ad4x | all)`);
+if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | ad3 | ad1x | ad2x | ad3x | ad4x | ad5x | ad6x | all)`);
 
 async function waitServer() {
   for (let i = 0; i < 50; i++) {

@@ -15,3 +15,5 @@
 | 4안 글꼴 | Noto Serif KR 900 — @fontsource/noto-serif-kr 5.3.1, jsdelivr에서 버전 고정(SRI sha384) https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/900.css . 4안에서 내리꽂히는 문장·「결제하면…」·끝 화면 버튼 글자 | SIL Open Font License 1.1 |
 | 4안 장면(`scenes/ad4-busted-3d.html`, `scenes/gl/ad4-3d.js`, 2026-10-24) | 거울·금·파편·빛줄기·문장 고리·글자를 three.js 도형·셰이더·캔버스 글자로 직접 그림. 후처리(번쩍임·색 갈라짐·글리치)도 직접 쓴 셰이더. 그림 파일·외부 모델·실사·사람 모습 없음 | 자체 제작 |
 | 소리(4안 소리판 `out/ad4-busted-3d-ko-sound.mp4`) | 직접 합성(`render/sound-ad4.js`, 2026-10-24). 사인·노이즈·간단한 잔향을 스크립트가 계산, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
+| 5·6안 장면(`scenes/ad5-saju-only-3d.html`·`ad6-untold-3d.html`, `scenes/gl/ad5-3d.js`·`ad6-3d.js`·`fx.js`·`cards.js`, 2026-10-25) | 사주 원국 카드·일곱 방 카드(문장·결과 글자)·빛 입자·후처리를 three.js 도형·셰이더·캔버스 글자로 직접 그림. 그림 파일·외부 모델·실사·사람 모습 없음. 글꼴은 위 Noto Serif KR·Gowun Batang·Cinzel(같은 판·SRI) | 자체 제작 |
+| 소리(5·6안 소리판 `out/ad5-saju-only-3d-ko-sound.mp4`·`ad6-untold-3d-ko-sound.mp4`) | 직접 합성(`render/sound-ad56.js`, 2026-10-25). 사인·노이즈·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
