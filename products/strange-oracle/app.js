@@ -338,8 +338,14 @@
     const c = document.getElementById("sky");
     const ctx = c.getContext("2d");
     let stars = [];
+    // (2026-10-25 성능) 휴대폰에서는 스크롤 때 주소창이 숨었다 나오며 높이만 조금 바뀐다 → 그때는 다시 만들지 않는다(캔버스는 CSS로 늘어남).
+    //   해상도는 최대 1.5배(작은 별이라 차이가 안 보임), 그리기는 초당 약 20번, 스크롤 중에는 쉰다
+    let lastW = 0, lastH = 0;
     function resize() {
-      const dpr = window.devicePixelRatio || 1;
+      if (innerWidth === lastW && Math.abs(innerHeight - lastH) < 160) return;
+      lastW = innerWidth;
+      lastH = innerHeight;
+      const dpr = Math.min(1.5, window.devicePixelRatio || 1);
       c.width = innerWidth * dpr;
       c.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -359,9 +365,13 @@
         ctx.fill();
       }
     }
+    let lastDraw = 0;
     function frame(t) {
-      // 긴 글을 읽는 동안에는 다시 그리지 않는다 (배경 정지)
-      if (!body.classList.contains("is-reading")) draw(t);
+      // 긴 글을 읽는 동안·스크롤 중·탭이 숨었을 때는 다시 그리지 않는다
+      if (t - lastDraw > 50 && !body.classList.contains("is-reading") && !body.classList.contains("is-scrolling") && !document.hidden) {
+        lastDraw = t;
+        draw(t);
+      }
       requestAnimationFrame(frame);
     }
     addEventListener("resize", resize);
@@ -609,15 +619,22 @@
   });
 
   // ───────── 스크롤: 별 시차(--scroll) + 책 읽기 진행률 ─────────
+  // (2026-10-25 성능) --scroll은 :root가 아니라 배경(.cosmos)에만 둔다 — :root에 두면 스크롤마다 페이지 전체 스타일을 다시 계산해 끊긴다.
+  //   스크롤하는 동안 body.is-scrolling(배경 애니메이션·별 캔버스 쉼), 멈추고 0.15초 뒤 풀림
   let scrollQueued = false;
+  let scrollIdle = 0;
+  const cosmosEl = document.querySelector(".cosmos");
   addEventListener(
     "scroll",
     () => {
+      if (!body.classList.contains("is-scrolling")) body.classList.add("is-scrolling");
+      clearTimeout(scrollIdle);
+      scrollIdle = setTimeout(() => body.classList.remove("is-scrolling"), 150);
       if (scrollQueued) return;
       scrollQueued = true;
       requestAnimationFrame(() => {
         scrollQueued = false;
-        if (!reduceMotion) root.style.setProperty("--scroll", Math.round(window.scrollY));
+        if (!reduceMotion && cosmosEl) cosmosEl.style.setProperty("--scroll", Math.round(window.scrollY));
       });
     },
     { passive: true }

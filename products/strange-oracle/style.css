@@ -100,7 +100,7 @@ body {
     oklch(0.62 0.12 calc(var(--accent-h) + 60) / 0.12) 48%,
     oklch(0.72 0.1 var(--accent-h) / 0.15) 68%,
     transparent 90%);
-  filter: blur(28px);
+  /* (2026-10-25 성능) filter: blur(28px) 뺌 — 흔들리는 큰 판을 매 프레임 흐리게 다시 그려 휴대폰에서 끊겼다. 대신 가장자리를 더 부드럽게 */
   -webkit-mask: linear-gradient(to bottom, transparent, #000 30%, #000 55%, transparent);
   mask: linear-gradient(to bottom, transparent, #000 30%, #000 55%, transparent);
   transform-origin: 50% 0;
@@ -226,9 +226,7 @@ body.is-reading #sky { opacity: 0.2; }
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  background: oklch(0.14 0.04 var(--hue-neutral) / 0.78);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  background: oklch(0.14 0.04 var(--hue-neutral) / 0.94); /* (2026-10-25 성능) 뒤 흐림(backdrop-filter) 대신 거의 불투명한 바탕 — 스크롤 중 매 프레임 흐림 계산 없앰 */
   border-bottom: 1px solid oklch(0.4 0.04 var(--hue-neutral) / 0.45);
 }
 .topbar__inner {
@@ -1148,9 +1146,7 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
   padding: var(--space-4) var(--space-5);
   border: 1px solid var(--c-line);
   border-radius: var(--radius-lg);
-  background: oklch(0.18 0.04 var(--room-h) / 0.6);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: oklch(0.17 0.04 var(--room-h) / 0.88); /* (2026-10-25 성능) 뒤 흐림 대신 진한 바탕 */
   font-size: var(--fs-md);
   line-height: var(--lh-ui);
   color: var(--c-text-muted);
@@ -5603,3 +5599,6 @@ body:has(.hub.is-active) .toast { bottom: calc(var(--tabs-h, 64px) + var(--space
 .ask-answer p { margin: 0 0 var(--space-3); line-height: 1.75; word-break: keep-all; }
 .ask-answer__open { color: var(--accent); }
 .ask-answer__act { margin-bottom: 0 !important; padding-top: var(--space-3); border-top: 1px dashed oklch(0.8 0.08 35 / 0.35); color: var(--c-text-strong); font-weight: 700; }
+
+/* (2026-10-25 성능) 스크롤하는 동안 배경 애니메이션을 잠시 멈춘다 (JS가 body.is-scrolling, 멈추고 0.15초 뒤 풀림) */
+body.is-scrolling .cosmos > * { animation-play-state: paused; }
