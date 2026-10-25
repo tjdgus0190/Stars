@@ -2437,6 +2437,7 @@
       file: C.file, text: strip(fill(C.shareText, { name: st.title })),
       opts: {
         theme: CARD_THEME.saju, eyebrow: strip(C.eyebrow || ""), seed: 71 + SAJU.stems.indexOf(st),
+        emblem: { paths: [...document.querySelectorAll("#icon-saju path")].map((p) => p.getAttribute("d")), label: C.emblem || "" },
         title: strip(st.title), subtitle: `${st.name} ${st.hanja}`,
         lines: [strip(st.key)],
         badges: [strip(C.badge || ""), T.archetypes[st.archetype].name],
@@ -2633,9 +2634,36 @@
   // 서비스 주소는 이 값 하나만 쓴다: data.js site.url, 비어 있으면 지금 주소(쿼리·해시 없음). 입력값·결과 코드는 넣지 않는다.
   // 카카오톡: kakao.jsKey·sdkUrl이 비어 있으면 버튼을 만들지 않고 SDK도 부르지 않는다. 공유 내용은 제목·설명·og-image·주소뿐
   const SITE_URL = ShareButtons.siteUrl(T.site.url);
+  const K = T.share.kakaoMsg || {};
+  // 카카오로 받은 사람이 누른 링크: 캠페인 값만(입력값·결과 코드 없음). 분석 허용 목록(CAMPAIGN)과 같은 값
+  const kakaoLink = (what) => `${SITE_URL}?utm_source=kakao&utm_medium=share&utm_campaign=kakao_share&utm_content=kakao_${what}`;
   ShareButtons.init({
     url: SITE_URL,
-    kakao: { jsKey: T.kakao.jsKey, sdkUrl: T.kakao.sdkUrl, integrity: T.kakao.integrity, label: T.share.kakao, title: T.meta.title, description: T.meta.description, imageUrl: new URL("og-image.png", SITE_URL).href, onFail: () => toast(T.toast.shareFail) },
+    kakao: {
+      jsKey: T.kakao.jsKey, sdkUrl: T.kakao.sdkUrl, integrity: T.kakao.integrity, label: T.share.kakao,
+      title: K.title, description: K.description, imageUrl: new URL("share/kakao-main.jpg", SITE_URL).href, imageWidth: 1200, imageHeight: 600, button: K.button,
+      url: kakaoLink("main"),
+      // (2026-10-25) 방 결과 화면에서 보내면 그 방 그림 + "○○의 방에서 나는 '결과 이름'" + 결과 첫 문장(공개 결과 문장, 입력값 0)
+      content(slot) {
+        const scr = slot.closest(".screen");
+        const room = scr && scr.dataset.room;
+        if (!room || !CARD_BUILD[room] || !scr.id.endsWith("-result") || !isDone(room)) return null;
+        let o;
+        try {
+          o = CARD_BUILD[room]().opts;
+        } catch (e) {
+          return null;
+        }
+        const line = (o.lines && o.lines[0]) || (o.parchment && o.parchment.text) || "";
+        return {
+          title: fill(K.roomTitle, { room: T.rooms[room].name, result: o.title }),
+          description: line.length > 70 ? line.slice(0, 68) + "…" : line,
+          imageUrl: new URL(`share/kakao-${room}.jpg`, SITE_URL).href,
+          url: kakaoLink(room),
+        };
+      },
+      onFail: () => toast(T.toast.shareFail),
+    },
   });
 
   // ═════════ 공유 카드 ═════════
@@ -2646,7 +2674,8 @@
       const { opts, file, text } = build();
       // (10단계 10-2) 공유 글 끝에 표시용 주소를 붙이고, 공유 시트에는 url도 넘긴다. 카드 하단 주소 줄은 site.url을 넣었을 때만
       const showUrl = ShareButtons.displayUrl(SITE_URL);
-      const canvas = await ShareCard.render(Object.assign({ fonts: FONTS, footer: T.card.footer, footerY: 1630, footerUrl: T.site.url ? showUrl : "" }, opts));
+      // (2026-10-25) 고급판(deluxe): 성운 배경·모서리 장식 테·큰 인용 본문·아래 금빛 로고 묶음(cta 한 줄 포함)
+      const canvas = await ShareCard.render(Object.assign({ fonts: FONTS, deluxe: true, cta: T.card.cta, footer: T.card.footer, footerUrl: T.site.url ? showUrl : "" }, opts));
       const how = await ShareCard.share(canvas, file, `${text} ${showUrl}`, SITE_URL);
       if (how === "downloaded") toast(T.toast.saved);
     } catch (err) {
@@ -2739,7 +2768,7 @@
       file: S.file, text: S.shareText,
       opts: {
         theme: CARD_THEME.story, eyebrow: S.eyebrow, seed: 11,
-        progress: { done: filled.map(chapterOf), total: 6, label: fill(S.progress, { n: filled.length }) },
+        progress: { done: filled.map(chapterOf), total: 7, label: fill(S.progress, { n: filled.length }) },
         lead: S.lead,
         title: T.archetypes[top].name, titleSize: 150, titleColor: "accent", titleGlow: true,
         lines: [strip(T.archetypes[top].line)],
@@ -5144,6 +5173,8 @@
       function applyAccount(j, fresh) {
         const gotBook = Boolean(j.passes && j.passes[0] && !passNow());
         if (gotBook) writePass(window.PayCode.Pass.normalize(j.passes[0]));
+        // 먼저 결제하고 나중에 로그인한 기기: 이 기기의 결제 코드를 계정에 붙인다(서버가 결제 확인된 코드만 받음)
+        else if (passNow() && !(j.passes || []).includes(passNow())) onAccount.pass(passNow());
         const d = j.data;
         const theirs = d && d.v ? Object.keys(d.v).length : 0;
         let once = false;
@@ -5280,10 +5311,10 @@
   // 값을 더하려면 제안서와 marketing/strange-oracle/render/README.md 표도 함께 고친다. 사용자 입력값은 이 목록에 들어갈 수 없다(6장).
   const CAMPAIGN = {
     allow: {
-      utm_source: ["instagram", "tiktok"],
-      utm_medium: ["paid_social", "organic"],
-      utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ig_profile"],
-      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ig_profile", "ig_story_book"],
+      utm_source: ["instagram", "tiktok", "kakao"],
+      utm_medium: ["paid_social", "organic", "share"],
+      utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ig_profile", "kakao_share"],
+      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ig_profile", "ig_story_book", "kakao_main", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
     },
     ignore: ["fbclid", "ttclid"],
   };

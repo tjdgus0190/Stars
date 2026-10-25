@@ -1020,8 +1020,15 @@ window.TEXT = {
     copyLink: "링크 복사",          // (최대 8자)
     copied: "주소를 복사했어요",     // (최대 16자)
     kakao: "카카오톡으로 보내기",    // (최대 12자) kakao 설정이 채워졌을 때만 보인다
+    // (2026-10-25) 카카오톡으로 보낸 메시지. 그림은 share/kakao-*.jpg (marketing/strange-oracle/instagram/render-ig2.js가 만든다)
+    kakaoMsg: {
+      title: "낯선 점술관 — 일곱 점술이 본 나",              // 입구·나의 이야기 등에서 보낼 때
+      description: "만신 · 오검 · 베다 · 데칸 · 촐킨 · 룬 · 시빌라. 당신의 방은 무엇일까요?",
+      roomTitle: "{room}에서 나는 '{result}'",               // 방 결과에서 보낼 때. {room}=방 이름, {result}=결과 이름 (설명 칸에는 그 결과의 첫 문장)
+      button: "나도 문 열어 보기",                            // (최대 14자)
+    },
   },
-  // ── (10단계 10-2) og-image.png 글자. 고친 뒤 node --experimental-websocket tools/strange-oracle/make-og.js 로 이미지를 다시 만든다
+  // ── (10단계 10-2) 옛 og-image.png 글자(tools/strange-oracle/make-og.js). 2026-10-25부터 og-image.png는 3D판(marketing/strange-oracle/instagram/render-ig2.js의 #og)으로 만든다
   og: {
     title: "일곱 방, 나의 이야기 한 편",          // (최대 16자)
     sub: "만신·오검·베다·데칸·촐킨·룬·시빌라", // 방 순서는 Ⅰ~Ⅶ 그대로 (최대 28자)
@@ -1029,6 +1036,7 @@ window.TEXT = {
 
   // ── 공유 카드 공통·나의 이야기 카드
   card: {
+    cta: "당신의 방은 무엇일까요?", // (2026-10-25) 카드 아래 로고 위 한 줄 (최대 18자)
     footer: "낯선 점술관",  // 모든 카드 맨 아래 제품 이름. 주소는 여기 쓰지 않는다 — 맨 위 site.url이 있으면 코드가 아래 줄에 덧붙인다
     story: {
       eyebrow: "낯선 점술관 · 나의 이야기",

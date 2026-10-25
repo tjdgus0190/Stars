@@ -1,7 +1,7 @@
 // 인스타그램 2판 PNG 찍기 (2026-10-25). 저장소 루트에서: node --experimental-websocket marketing/strange-oracle/instagram/render-ig2.js
 // 1) bg3d.html로 3D 배경 → out/v2/bg/
 // 2) ig2.html#<판>을 판 크기 뷰포트로 열어 → out/v2/<판>.png. tools/serve.js를 포트 8796에 띄웠다가 끈다. 리눅스는 EDGE_PATH에 Chromium.
-const { spawn } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const { launch, sleep } = require("../../../tools/strange-oracle/cdp.js");
@@ -23,6 +23,8 @@ const BGS = {
   "void-st": "type=void&w=1080&h=1920&cy=0.5",
   mirror: "type=mirror&w=1080&h=1350&cy=0.5",
   "mirror-st": "type=mirror&w=1080&h=1920&cy=0.5&s=1.25",
+  "ring-og": "type=ring&w=1200&h=630&cy=0.5&cx=0.75&s=0.92",
+  "void-kakao": "type=void&w=1200&h=600&cy=0.5",
 };
 const SQ = [1080, 1080], PT = [1080, 1350], ST = [1080, 1920];
 const CARDS = [
@@ -33,6 +35,9 @@ const CARDS = [
   ["reel-4", ST], ["reel-1", ST], ["reel-3", ST],
   ["hl-rooms", ST], ["hl-book", ST], ["hl-guide", ST],
   ["story-open", ST], ["story-busted", ST],
+  // (2026-10-25) 제품 공유 그림: og-image(1200x630) · 카카오톡 공유(1200x600, 기본 + 방 일곱) → 아래에서 제품 폴더로 옮겨 담는다
+  ["og", [1200, 630]], ["kakao-main", [1200, 600]],
+  ...["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"].map((r) => [`kakao-${r}`, [1200, 600]]),
 ];
 
 async function shot(b, url, w, h, file, wait) {
@@ -65,6 +70,13 @@ async function shot(b, url, w, h, file, wait) {
         "(async () => { await document.fonts.ready; await Promise.all([...document.querySelectorAll('.card:target')].map((c) => new Promise((r) => { const m = /url\\(\"?([^\")]+)\"?\\)/.exec(getComputedStyle(c).backgroundImage); if (!m) return r(); const i = new Image(); i.onload = i.onerror = r; i.src = m[1]; }))); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); })()");
       console.log(`→ v2/${id}.png (${w}x${h})`);
     }
+    // 제품 폴더로: og-image.png(팔레트 PNG) · share/kakao-*.jpg (카카오 공유 서버가 확실히 읽는 형식, 200KB 아래)
+    const PROD = path.join(ROOT, "products", "strange-oracle");
+    fs.mkdirSync(path.join(PROD, "share"), { recursive: true });
+    const ff = (args) => { const r = spawnSync("ffmpeg", ["-y", "-loglevel", "error", ...args]); if (r.status !== 0) throw new Error("ffmpeg 실패 " + args.join(" ")); };
+    ff(["-i", path.join(OUT, "og.png"), "-vf", "split[a][b];[a]palettegen=max_colors=192[p];[b][p]paletteuse=dither=sierra2_4a", path.join(PROD, "og-image.png")]);
+    for (const [id] of CARDS.filter(([id]) => id.startsWith("kakao-"))) ff(["-i", path.join(OUT, `${id}.png`), "-q:v", "4", path.join(PROD, "share", `${id}.jpg`)]);
+    console.log("→ products/strange-oracle/og-image.png · share/kakao-*.jpg");
     const errs = b.log.errors.filter((e) => !/favicon/.test(e));
     if (errs.length) console.log("오류:", errs.slice(0, 5).join(" | "));
   } finally {

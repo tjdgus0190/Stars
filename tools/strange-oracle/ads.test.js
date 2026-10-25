@@ -195,10 +195,10 @@ test("analytics: 모양이 틀린 측정 ID는 불러오지 않음", () => {
 
 // ── (광고 측정) 캠페인 utm 허용 목록 — 제안서 strange-oracle-ads 8장 4번 ──
 const UTM_ALLOW = {
-  utm_source: ["instagram", "tiktok"],
-  utm_medium: ["paid_social", "organic"],
-  utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ig_profile"],
-  utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ig_profile", "ig_story_book"],
+  utm_source: ["instagram", "tiktok", "kakao"],
+  utm_medium: ["paid_social", "organic", "share"],
+  utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ig_profile", "kakao_share"],
+  utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ig_profile", "ig_story_book", "kakao_main", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
 };
 const UTM_IGNORE = ["fbclid", "ttclid"];
 

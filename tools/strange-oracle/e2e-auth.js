@@ -182,6 +182,64 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   check("L9 만 14세 미만 → 저장 안 함(save 요청 0) · 안내", !b.log.bodies.slice(nY).some((x) => /\/api\/auth\/save/.test(x.url)) && (await toastText()) === msg.under14, await toastText());
   check("L10 콘솔 오류 0", b.log.errors.filter((e) => !/favicon|40[0-9]|net::|fonts/.test(e)).length === 0, b.log.errors.slice(0, 2).join(" | "));
 
+  // 7. (점검 2026-10-25) 입구 로그인(저장 동의 안 함) → 방 결과에서 결제 → 결제 코드가 계정에 붙음 → 다른 기기에서 같은 카카오로 로그인하면 바로 열림
+  await ev("sessionStorage.clear(); localStorage.clear(); true");
+  await b.goto(`${TEST}/__dev/skip?rooms=7&to=hub`);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(7007);
+  await waitFor("!!document.querySelector('[data-js=kakao-consent]')?.open", 6000);
+  await click("[data-js=kakao-consent-no]");
+  await ev("StrangeOracle.go('star-result'); true");
+  await waitFor("!!document.querySelector('.screen.is-active [data-js=room-rest-buy]')", 8000);
+  const nP = b.log.bodies.length;
+  await click(".screen.is-active [data-js=room-rest-buy]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  await ev("(() => { const a = document.querySelector('[data-js=pay-agree]'); if (!a.checked) a.click(); })()");
+  await click("[data-js=pay-buy]");
+  await waitFor("location.pathname === '/__dev/payapp/checkout' && !!document.querySelector('[data-act]')", 8000);
+  await ev("document.querySelector('[data-act=complete]').click()");
+  await waitFor("!!sessionStorage.getItem('strange-oracle-pass')", 30000);
+  const passM = await ss("strange-oracle-pass");
+  await sleep(1500);
+  const linkSave = b.log.bodies.slice(nP).filter((x) => /\/api\/auth\/save/.test(x.url)).map((x) => JSON.parse(x.body));
+  check("M1 로그인한 채 결제 → save에 결제 코드만(sid·pass, 입력값 0)", !!passM && linkSave.some((x) => x.pass && Object.keys(x).sort().join() === "pass,sid"), JSON.stringify(linkSave.map((x) => Object.keys(x))));
+  await ev("sessionStorage.clear(); localStorage.clear(); true");
+  await b.goto(TEST + P);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(7007);
+  const gotM = await waitFor(`sessionStorage.getItem('strange-oracle-pass') === ${JSON.stringify(passM)}`, 10000);
+  await waitFor(`document.querySelector('[data-js=toast]')?.textContent === ${JSON.stringify(msg.found)}`, 5000);
+  check("M2 다른 기기(저장소 빔)에서 같은 카카오 로그인 → 결제 코드 바로 불러옴 · '산 책을 찾았어요' 안내", gotM && (await toastText()) === msg.found, await toastText());
+
+  // 먼저 결제(로그인 없이) → 나중에 입구에서 로그인 → 다른 기기에서 그 카카오로 열림
+  await ev("sessionStorage.clear(); localStorage.clear(); true");
+  await b.goto(`${TEST}/__dev/skip?rooms=7&to=star-result`);
+  await waitFor("!!document.querySelector('.screen.is-active [data-js=room-rest-buy]')", 8000);
+  await click(".screen.is-active [data-js=room-rest-buy]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  await ev("(() => { const a = document.querySelector('[data-js=pay-agree]'); if (!a.checked) a.click(); })()");
+  await click("[data-js=pay-buy]");
+  await waitFor("location.pathname === '/__dev/payapp/checkout' && !!document.querySelector('[data-act]')", 8000);
+  await ev("document.querySelector('[data-act=complete]').click()");
+  await waitFor("!!sessionStorage.getItem('strange-oracle-pass')", 30000);
+  const passN = await ss("strange-oracle-pass");
+  await ev("document.querySelector('[data-js=pay-code-dialog]')?.close?.(); StrangeOracle.go('hub'); true");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(8008);
+  await waitFor("!!document.querySelector('[data-js=kakao-consent]')?.open", 6000);
+  await click("[data-js=kakao-consent-no]");
+  await sleep(1500);
+  await ev("sessionStorage.clear(); localStorage.clear(); true");
+  await b.goto(TEST + P);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=hub-kakao-btn]");
+  await kakaoLogin(8008);
+  const gotN = await waitFor(`sessionStorage.getItem('strange-oracle-pass') === ${JSON.stringify(passN)}`, 10000);
+  check("M3 먼저 결제하고 나중에 로그인 → 계정에 자동 연결 → 다른 기기 로그인으로 열림", !!passN && gotN);
+
   await b.close();
   fs.mkdirSync(OUT, { recursive: true });
   fs.writeFileSync(path.join(OUT, "e2e-auth.txt"), out.join("\n") + "\n");

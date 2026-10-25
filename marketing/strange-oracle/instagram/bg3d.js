@@ -2,7 +2,7 @@
 //   ?type=ring   일곱 방 문장 고리 + 가운데 금빛 문 (프로필·소개)
 //   ?type=mirror 금이 간 검은 아치 거울, 금 사이로 붉은 빛 (들켰죠 계열)
 //   ?type=void   성운·별·금빛 먼지·먼 천문 고리만 (글자 카드)
-//   &w=1080&h=1350 크기 · &cy=0.45 고리/거울 가운데(위에서 비율) · &s=1 크기 배율 · &hue=violet|red · &t=4 시각(초) · &dim=1 고리 밝기
+//   &w=1080&h=1350 크기 · &cy=0.45 고리/거울 가운데(위에서 비율) · &cx=0.5 고리 가로 자리(왼쪽에서 비율) · &s=1 크기 배율 · &hue=violet|red · &t=4 시각(초) · &dim=1 고리 밝기
 // render-ig2.js가 window.__ready3d를 기다렸다가 찍는다. 무작위는 고정 씨앗이라 다시 찍어도 같다.
 import { THREE, addNebula, addStars, addDust, addAstrolabe, glowSprite, rng, ROOMS, roomColor, clamp } from "../scenes/gl/mystic3d.js";
 
@@ -10,6 +10,7 @@ const P = new URLSearchParams(location.search);
 const W = Number(P.get("w") || 1080), H = Number(P.get("h") || 1350);
 const TYPE = P.get("type") || "void";
 const CY = Number(P.get("cy") || 0.45);
+const CX = Number(P.get("cx") || 0.5); // 고리 가운데(왼쪽에서 비율)
 const S = Number(P.get("s") || 1);
 const HUE = P.get("hue") || (TYPE === "mirror" ? "red" : "violet");
 const T = Number(P.get("t") || 4);
@@ -36,6 +37,7 @@ const CAM_Z = 10;
 const VIEW_H = 2 * CAM_Z * Math.tan((20 * Math.PI) / 180);
 const PX = H / VIEW_H; // z=0에서 1단위 = PX 픽셀
 const yAt = (frac) => (0.5 - frac) * VIEW_H; // 위에서 frac 비율 자리의 세계 y
+const xAt = (frac) => (frac - 0.5) * VIEW_H * (W / H); // 왼쪽에서 frac 비율 자리의 세계 x
 camera.position.set(0, 0, CAM_Z);
 camera.lookAt(0, 0, 0);
 
@@ -83,7 +85,7 @@ const cssOf = (col) => `rgb(${(col.r * 255) | 0},${(col.g * 255) | 0},${(col.b *
 
 if (TYPE === "ring") {
   const g = new THREE.Group();
-  g.position.set(0, yAt(CY), 0);
+  g.position.set(xAt(CX), yAt(CY), 0);
   g.scale.setScalar(S);
   scene.add(g);
   const R = 1.55;

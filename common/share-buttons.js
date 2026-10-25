@@ -85,10 +85,15 @@
     const Kakao = await loadKakao(k);
     if (!Kakao.isInitialized()) Kakao.init(k.jsKey);
     const link = { mobileWebUrl: url, webUrl: url };
-    Kakao.Share.sendDefault({ objectType: "feed", content: { title: k.title || "", description: k.description || "", imageUrl: k.imageUrl || "", link } });
+    const content = { title: k.title || "", description: k.description || "", imageUrl: k.imageUrl || "", link };
+    if (k.imageWidth && k.imageHeight) Object.assign(content, { imageWidth: k.imageWidth, imageHeight: k.imageHeight });
+    const msg = { objectType: "feed", content };
+    if (k.button) msg.buttons = [{ title: k.button, link }]; // (2026-10-25) 버튼 이름(없으면 카카오 기본 버튼)
+    Kakao.Share.sendDefault(msg);
   }
 
-  // opts: { url, root = document, onCopy(ok), kakao: { jsKey, sdkUrl, integrity, label, title, description, imageUrl, onFail() } }
+  // opts: { url, root = document, onCopy(ok), kakao: { jsKey, sdkUrl, integrity, label, title, description, imageUrl, imageWidth?, imageHeight?, button?, content?(slot), onFail() } }
+  //   (2026-10-25) content(slot): 누른 자리에 맞춘 { title, description, imageUrl, url } 을 돌려주면 그 값으로 보낸다(빠진 칸은 위 기본값)
   function init(opts) {
     const root = opts.root || document;
     const url = siteUrl(opts.url);
@@ -106,7 +111,10 @@
         b.type = "button";
         b.className = "text-link";
         b.textContent = k.label || "";
-        b.addEventListener("click", () => sendKakao(k, url).catch(() => k.onFail && k.onFail()));
+        b.addEventListener("click", () => {
+          const c = (k.content && k.content(slot)) || {};
+          sendKakao(Object.assign({}, k, c), c.url || url).catch(() => k.onFail && k.onFail());
+        });
         slot.replaceChildren(b);
       });
     }

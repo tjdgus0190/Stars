@@ -11,6 +11,8 @@
 // 2026-09-28 6단계 추가(역시 선택): frame:"keepsake"(금선 두 겹 + 모서리 인장), topBadge, pair, keyword, roomGrid, closeLine (유료 소장판 카드)
 // 2026-09-30 10단계 추가(역시 선택): footerUrl — footer 아래 서비스 주소 한 줄(표시용 글자). share()의 넷째 인자 url(선택)
 // 2026-09-29 9단계 추가(역시 선택): guideSignature: { name, line } — 흐름의 마지막 줄에 안내자 서명 1줄. 안 넘기면 예전과 똑같이 그린다
+// 2026-10-25 추가(역시 선택): deluxe:true — 성운 배경·방 색 빛·모서리 장식 테·인용 부호 붙은 큰 본문·아래 로고 묶음(footer = 로고 글자, cta = 로고 위 한 줄).
+//   emblem: { paths: [SVG path(viewBox 0 0 40 40)…], label } — 이중 원 안의 문장(紋章) 그림 블록. 안 넘기면 예전과 똑같이 그린다
 (function () {
   const W = 1080;
   const H = 1920;
@@ -632,6 +634,169 @@
     ctx.restore();
   }
 
+  // (2026-10-25) 이중 원 + 문장(viewBox 40 단위 path)
+  function emblemBlock(o, fonts) {
+    const R = 150;
+    return {
+      height: R * 2 + (o.label ? 70 : 20),
+      draw(ctx, top, t) {
+        const cx = W / 2, cy = top + R + 10;
+        ctx.save();
+        const g = ctx.createRadialGradient(cx, cy, 10, cx, cy, R * 1.6);
+        g.addColorStop(0, alpha(t.accent, 0.35));
+        g.addColorStop(1, alpha(t.accent, 0));
+        ctx.fillStyle = g;
+        ctx.fillRect(cx - R * 1.6, cy - R * 1.6, R * 3.2, R * 3.2);
+        ctx.strokeStyle = t.accent;
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath(); ctx.arc(cx, cy, R - 14, 0, Math.PI * 2); ctx.stroke();
+        for (let k = 0; k < 48; k++) {
+          const a = (k / 48) * Math.PI * 2, l = k % 4 ? 8 : 18;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a) * (R + 6), cy + Math.sin(a) * (R + 6));
+          ctx.lineTo(cx + Math.cos(a) * (R + 6 + l), cy + Math.sin(a) * (R + 6 + l));
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        const k = 6;
+        ctx.translate(cx - 20 * k, cy - 20 * k);
+        ctx.scale(k, k);
+        ctx.lineCap = ctx.lineJoin = "round";
+        ctx.strokeStyle = t.accent;
+        ctx.shadowColor = t.accent;
+        ctx.shadowBlur = 14;
+        ctx.lineWidth = 1.6;
+        for (const d of o.paths || []) ctx.stroke(new Path2D(d));
+        ctx.restore();
+        if (o.label) drawLabel(ctx, { label: o.label, labelColor: "accent" }, top + R * 2 + 14, t, fonts);
+      },
+    };
+  }
+  // (2026-10-25) 고급판 배경: 성운 구름 + 방 색 빛 + 가장자리 어둡게 + 반짝이는 별
+  function deluxeBackground(ctx, t, seed) {
+    let s = (seed || 7) * 7919;
+    const rand = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 7; i++) {
+      const x = rand() * W, y = rand() * H, r = 300 + rand() * 520;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const c = i % 3 === 0 ? t.accent : i % 3 === 1 ? "#6a3fb0" : "#2a5f8a";
+      g.addColorStop(0, alpha(c, 0.13 + rand() * 0.08));
+      g.addColorStop(1, alpha(c, 0));
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+    }
+    const halo = ctx.createRadialGradient(W / 2, 560, 0, W / 2, 560, 620);
+    halo.addColorStop(0, alpha(t.accent, 0.22));
+    halo.addColorStop(1, alpha(t.accent, 0));
+    ctx.fillStyle = halo;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+    // 가장자리
+    const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.75);
+    v.addColorStop(0, "rgba(0,0,0,0)");
+    v.addColorStop(1, "rgba(0,0,0,0.55)");
+    ctx.fillStyle = v;
+    ctx.fillRect(0, 0, W, H);
+    // 별 (몇 개는 십자 반짝임)
+    for (let i = 0; i < 260; i++) {
+      const x = rand() * W, y = rand() * H, r = rand() * 1.9 + 0.3;
+      ctx.globalAlpha = 0.2 + rand() * 0.75;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      if (r > 1.9 && rand() > 0.4) {
+        ctx.globalAlpha *= 0.6;
+        ctx.fillRect(x - 9, y - 0.6, 18, 1.2);
+        ctx.fillRect(x - 0.6, y - 9, 1.2, 18);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+  // (2026-10-25) 고급판 테: 가는 금선 두 겹 + 모서리 꺾쇠 + 위·아래 가운데 마름모
+  function deluxeFrame(ctx, t) {
+    ctx.save();
+    ctx.strokeStyle = t.accent;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.6;
+    ctx.strokeRect(54, 54, W - 108, H - 108);
+    ctx.globalAlpha = 0.25;
+    ctx.strokeRect(68, 68, W - 136, H - 136);
+    ctx.globalAlpha = 0.95;
+    ctx.lineWidth = 3;
+    for (const [x, y, sx, sy] of [[54, 54, 1, 1], [W - 54, 54, -1, 1], [54, H - 54, 1, -1], [W - 54, H - 54, -1, -1]]) {
+      ctx.beginPath();
+      ctx.moveTo(x, y + sy * 70);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x + sx * 70, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x + sx * 14, y + sy * 14, 4, 0, Math.PI * 2);
+      ctx.fillStyle = t.accent;
+      ctx.fill();
+    }
+    for (const y of [54, H - 54]) {
+      ctx.save();
+      ctx.translate(W / 2, y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = t.bgTop;
+      ctx.fillRect(-12, -12, 24, 24);
+      ctx.strokeRect(-12, -12, 24, 24);
+      ctx.fillStyle = t.accent;
+      ctx.fillRect(-5, -5, 10, 10);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  // (2026-10-25) 아래 로고 묶음: cta 한 줄 → 장식선 → 금빛 로고 → STRANGE ORACLE → 주소
+  function deluxeBrand(ctx, t, opts, fonts, urlLine, sans) {
+    ctx.save();
+    ctx.textAlign = "center";
+    let y = 1468;
+    if (opts.cta) {
+      ctx.font = `500 40px ${fonts.serif}`;
+      ctx.fillStyle = t.accent;
+      ctx.fillText(opts.cta, W / 2, y);
+    }
+    y += 52;
+    ctx.strokeStyle = t.accent;
+    ctx.globalAlpha = 0.6;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(W / 2 - 170, y); ctx.lineTo(W / 2 - 22, y); ctx.moveTo(W / 2 + 22, y); ctx.lineTo(W / 2 + 170, y); ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.save(); ctx.translate(W / 2, y); ctx.rotate(Math.PI / 4); ctx.fillStyle = t.accent; ctx.fillRect(-6, -6, 12, 12); ctx.restore();
+    y += 92;
+    ctx.font = `700 70px ${fonts.serif}`;
+    try { ctx.letterSpacing = "0.06em"; } catch (e) { /* 지원하지 않는 브라우저 */ }
+    const tw = ctx.measureText(opts.footer).width;
+    const g = ctx.createLinearGradient(W / 2 - tw / 2, 0, W / 2 + tw / 2, 0);
+    g.addColorStop(0, "#b8904c"); g.addColorStop(0.45, "#fff3d6"); g.addColorStop(0.55, "#ecca82"); g.addColorStop(1, "#b8904c");
+    ctx.shadowColor = "rgba(255,180,90,0.55)";
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = g;
+    ctx.fillText(opts.footer, W / 2, y);
+    ctx.shadowBlur = 0;
+    y += 50;
+    ctx.font = `500 26px ${fonts.latin}`;
+    try { ctx.letterSpacing = "0.32em"; } catch (e) { /* 지원하지 않는 브라우저 */ }
+    ctx.fillStyle = t.muted;
+    ctx.fillText("STRANGE ORACLE", W / 2, y);
+    if (urlLine) {
+      y += 46;
+      ctx.globalAlpha = 0.85;
+      ctx.font = `400 ${urlLine.size}px ${sans}`;
+      try { ctx.letterSpacing = "0.02em"; } catch (e) { /* 지원하지 않는 브라우저 */ }
+      ctx.fillText(urlLine.text, W / 2, y);
+    }
+    ctx.restore();
+  }
+
   async function render(opts) {
     const t = Object.assign({}, DEFAULT_THEME, opts.theme);
     const serif = opts.fonts?.serif || "serif";
@@ -649,15 +814,19 @@
     bg.addColorStop(1, t.bgBottom);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
-    drawStars(ctx, opts.seed);
-
-    // 테두리 장식
-    ctx.strokeStyle = t.accent;
-    ctx.globalAlpha = 0.5;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(48, 48, W - 96, H - 96);
-    ctx.strokeRect(60, 60, W - 120, H - 120);
-    ctx.globalAlpha = 1;
+    if (opts.deluxe) {
+      deluxeBackground(ctx, t, opts.seed);
+      deluxeFrame(ctx, t);
+    } else {
+      drawStars(ctx, opts.seed);
+      // 테두리 장식
+      ctx.strokeStyle = t.accent;
+      ctx.globalAlpha = 0.5;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(48, 48, W - 96, H - 96);
+      ctx.strokeRect(60, 60, W - 120, H - 120);
+      ctx.globalAlpha = 1;
+    }
     if (opts.frame === "keepsake") keepsakeFrame(ctx, t);
 
     ctx.textAlign = "center";
@@ -666,7 +835,7 @@
     // 먼저 줄 목록과 높이를 계산한 뒤, 본문 전체를 안전 영역 가운데에 놓는다.
     // 스토리 화면 위아래(약 250px)는 인스타그램 UI에 가려진다.
     // footerY를 넘기면 아래 안전선을 그 위로 올린다(제품 이름이 본문과 겹치지 않게).
-    const SAFE_TOP = 260;
+    const SAFE_TOP = opts.deluxe ? 180 : 260;
     // (10단계) footerUrl: footer 아래 주소 한 줄. 44자를 넘으면 24px, 그래도 가로 900px를 넘으면 그리지 않는다(이때 footer 자리도 그대로).
     // 그릴 때는 footer 줄을 40px 올려 주소 줄 아래 끝이 원래 footer 자리(안전 영역)를 넘지 않게 한다
     const sans = opts.fonts?.sans || "system-ui, -apple-system, 'Segoe UI', sans-serif";
@@ -680,7 +849,7 @@
       if (ctx.measureText(text).width <= 900) urlLine = { text, size };
       ctx.restore();
     }
-    const SAFE_BOTTOM = (opts.footerY ? Math.min(H - 320, opts.footerY - 90) : H - 320) - (urlLine ? 40 : 0);
+    const SAFE_BOTTOM = opts.deluxe ? (opts.cta ? 1415 : 1460) : (opts.footerY ? Math.min(H - 320, opts.footerY - 90) : H - 320) - (urlLine ? 40 : 0);
     const rows = []; // { text, font, color, lineH, glow } | { gap } | { block }
     const add = (text, font, color, lineH, glow) => rows.push({ text, font, color, lineH, glow });
     const gap = (h) => rows.push({ gap: h });
@@ -698,6 +867,7 @@
       gap(40);
     }
     // (2026-09-28) 방별 그림 블록. 여러 개를 넘기면 이 순서대로 쌓인다
+    if (opts.emblem) { block(emblemBlock(opts.emblem, fonts)); gap(40); }
     if (opts.bark) { block(barkBlock(opts.bark, fonts)); gap(40); }
     if (opts.sundial) { block(sundialBlock(opts.sundial, fonts)); gap(40); }
     if (opts.dayGlyph) { block(dayGlyphBlock(opts.dayGlyph, fonts)); gap(40); }
@@ -731,10 +901,11 @@
       const col = opts.closeLine.color === "accent" ? t.accent : t.text;
       for (const l of clampLines(ctx, opts.closeLine.text || "", W - 260, opts.closeLine.maxLines || 2)) add(l, ctx.font, col, Math.round(size * 1.5));
     }
-    gap(60);
-    ctx.font = `400 46px ${serif}`;
+    gap(opts.deluxe ? 40 : 60);
+    if (opts.deluxe && (opts.lines || []).length) add("\u201C", `700 110px ${serif}`, t.accent, 70);
+    ctx.font = opts.deluxe ? `700 50px ${serif}` : `400 46px ${serif}`;
     for (const para of opts.lines || []) {
-      for (const l of wrap(ctx, para, W - 260)) add(l, ctx.font, t.text, 70);
+      for (const l of wrap(ctx, para, W - 260)) add(l, ctx.font, t.text, opts.deluxe ? 78 : 70);
       gap(30);
     }
     if (opts.parchment) { block(parchmentBlock(opts.parchment, fonts)); gap(40); }
@@ -744,13 +915,23 @@
       for (const l of wrap(ctx, opts.hook, W - 260)) add(l, ctx.font, t.accent, 62);
       gap(30);
     }
-    for (const b of opts.badges || []) { block(badgeBlock(b, fonts)); gap(24); }
+    // 고급판은 본문 한 문장이 주인공이라 알약·서명을 그리지 않는다(넘쳐서 본문이 잘리지 않게)
+    if (!opts.deluxe) for (const b of opts.badges || []) { block(badgeBlock(b, fonts)); gap(24); }
     // (9단계) 안내자 서명: 흐름의 마지막 줄. guideSignature: { name, line }. 없으면 지금과 동일하게 그린다
-    if (opts.guideSignature) { gap(12); block(signatureBlock(opts.guideSignature, fonts)); }
+    if (opts.guideSignature && !opts.deluxe) { gap(12); block(signatureBlock(opts.guideSignature, fonts)); }
 
     const heightOf = (r) => r.gap || r.lineH || r.block.height;
     let total = rows.reduce((s, r) => s + heightOf(r), 0);
-    while (total > SAFE_BOTTOM - SAFE_TOP && rows.length) total -= heightOf(rows.pop()); // 넘치면 뒤쪽 줄을 버린다
+    // 넘치면 뒤쪽 줄을 버린다. 고급판은 먼저 사이 간격을 줄여 본문 줄이 잘리지 않게 한다
+    if (opts.deluxe && total > SAFE_BOTTOM - SAFE_TOP) {
+      const over = total - (SAFE_BOTTOM - SAFE_TOP);
+      const gaps = rows.filter((r) => r.gap);
+      const room = gaps.reduce((a, r) => a + r.gap * 0.6, 0);
+      const k = Math.min(1, over / Math.max(1, room));
+      gaps.forEach((r) => (r.gap = Math.round(r.gap * (1 - 0.6 * k))));
+      total = rows.reduce((s, r) => s + heightOf(r), 0);
+    }
+    while (total > SAFE_BOTTOM - SAFE_TOP && rows.length) total -= heightOf(rows.pop());
     let y = SAFE_TOP + Math.max(0, (SAFE_BOTTOM - SAFE_TOP - total) / 2);
 
     for (const r of rows) {
@@ -771,7 +952,8 @@
       ctx.restore();
     }
 
-    if (opts.footer) {
+    if (opts.footer && opts.deluxe) deluxeBrand(ctx, t, opts, fonts, urlLine, sans);
+    else if (opts.footer) {
       ctx.fillStyle = t.muted;
       ctx.font = `500 ${opts.footerY ? 32 : 36}px ${serif}`;
       ctx.textAlign = "center";

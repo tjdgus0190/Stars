@@ -136,3 +136,25 @@ body { font-family: var(--font-serif); color: var(--ink); -webkit-font-smoothing
 .story .slot { position: absolute; left: 50%; bottom: 470px; transform: translateX(-50%); width: 560px; height: 120px; border: 3px dashed oklch(0.86 0.1 85 / 0.55); border-radius: 26px; display: grid; place-items: center; color: oklch(0.86 0.1 85 / 0.8); font-size: 30px; }
 .list-card.center { display: none; flex-direction: column; justify-content: center; padding-top: 0; padding-bottom: 60px; }
 .list-card.center:target { display: flex; }
+
+/* ── (2026-10-25) 제품 공유 그림: og-image 1200x630 · 카카오톡 1200x600 */
+.og { width: 1200px; height: 630px; --shade: linear-gradient(90deg, oklch(0.07 0.03 285 / 0.88) 0%, oklch(0.07 0.03 285 / 0.6) 48%, transparent 70%); }
+.og .txt { position: absolute; left: 80px; top: 50%; transform: translateY(-50%); width: 600px; }
+.og .eyebrow { text-align: left; font-size: 20px; }
+.og .logo { text-align: left; font-size: 96px; margin-top: 10px; }
+.og .h { text-align: left; font-size: 40px; margin-top: 18px; }
+.og .rooms-line { margin: 26px 0 0; font-size: 24px; color: var(--ink-soft); letter-spacing: 0.04em; }
+.kk { width: 1200px; height: 600px; --shade: radial-gradient(ellipse 60% 80% at 22% 50%, transparent 0 30%, oklch(0.06 0.03 285 / 0.5) 70%); }
+.kk .em { position: absolute; left: 90px; top: 50%; transform: translateY(-50%); width: 360px; height: 360px; border-radius: 50%; display: grid; place-items: center;
+  border: 3px solid var(--acc); background: radial-gradient(circle, color-mix(in oklch, var(--acc) 30%, transparent), oklch(0.1 0.04 285 / 0.85) 70%);
+  box-shadow: 0 0 80px color-mix(in oklch, var(--acc) 55%, transparent), inset 0 0 50px color-mix(in oklch, var(--acc) 30%, transparent); }
+.kk .em::before { content: ""; position: absolute; inset: -22px; border-radius: 50%; border: 1px solid color-mix(in oklch, var(--acc) 50%, transparent); }
+.kk .em .sig { font-size: 220px; color: var(--acc); filter: drop-shadow(0 0 18px var(--acc)); }
+.kk .txt { position: absolute; left: 540px; right: 70px; top: 50%; transform: translateY(-50%); }
+.kk .num { margin: 0; font-family: var(--font-latin); font-size: 30px; letter-spacing: 0.2em; color: var(--acc); }
+.kk .h { text-align: left; font-size: 80px; margin-top: 8px; }
+.kk .origin { margin: 14px 0 0; font-size: 32px; color: var(--ink-soft); }
+.kk .brand2 { margin: 46px 0 0; display: flex; align-items: baseline; gap: 18px; }
+.kk .brand2 .logo { font-size: 44px; text-align: left; }
+.kk .brand2 span { font-family: var(--font-latin); font-size: 18px; letter-spacing: 0.3em; color: var(--gold-dim); }
+.kk.main .em .sig { font-size: 240px; }
