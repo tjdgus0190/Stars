@@ -5595,3 +5595,11 @@ body:has(.hub.is-active) .toast { bottom: calc(var(--tabs-h, 64px) + var(--space
 .book-strike__label { display: block; margin-bottom: 4px; font-family: var(--font-sans); font-size: var(--fs-xs); letter-spacing: 0.12em; color: oklch(0.43 0.13 32); }
 .book-strike__line { display: block; font-size: var(--fs-lg); line-height: 1.55; font-weight: 700; color: var(--ink-strong); }
 .book-strike__turn { display: block; margin-top: 6px; font-size: var(--fs-read); line-height: var(--book-line); color: var(--ink); }
+
+/* ── (2026-10-25) 시빌라: 당신의 질문에 대한 신탁 (질문을 적었을 때만) */
+.ask-answer { margin: var(--space-5) 0 0; padding: var(--space-5) var(--space-4); border: 1px solid var(--accent-line, oklch(0.8 0.08 35 / 0.4)); border-radius: 16px; background: linear-gradient(180deg, oklch(0.24 0.05 20 / 0.55), oklch(0.17 0.04 300 / 0.55)); }
+.ask-answer .eyebrow { margin: 0; text-align: left; }
+.ask-answer__title { margin: var(--space-1) 0 var(--space-3); font-size: var(--fs-lg); color: var(--c-text-strong); }
+.ask-answer p { margin: 0 0 var(--space-3); line-height: 1.75; word-break: keep-all; }
+.ask-answer__open { color: var(--accent); }
+.ask-answer__act { margin-bottom: 0 !important; padding-top: var(--space-3); border-top: 1px dashed oklch(0.8 0.08 35 / 0.35); color: var(--c-text-strong); font-weight: 700; }

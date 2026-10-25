@@ -2102,9 +2102,26 @@
     js("sibyl-result-category", scr).textContent = topic;
     js("sibyl-result-question", scr).textContent = question ? fill(R.question, { q: question }) : "";
     js("sibyl-scroll-quote", scr).textContent = strip(o.line);
+    renderSibylAnswer(scr, o, v.topic, question);
     setTurn("sibyl", scr, o.turn);
     entryReading(scr, o, [], R.interpretNote);
     finishResult(scr, "sibyl", o, R);
+  }
+  // (2026-10-25) 질문 풀이: 질문 글에서 묻는 꼴·고민 갈래만 찾아(Calc.sibylAsk, 이 브라우저 안에서만) 신탁 열쇠말·두루마리와 엮는다.
+  //   질문 글·찾은 갈래는 저장·분석·공유 어디에도 넣지 않는다(6장). 질문이 없으면 칸을 숨긴다
+  function renderSibylAnswer(scr, o, topic, question) {
+    const box = js("sibyl-answer", scr);
+    const A = T.sibyl.ask;
+    if (!question || !A) return show(box, false);
+    const r = Calc.sibylAsk(question, A);
+    const form = A.forms.find((f) => f.id === r.form);
+    const c = A.concerns.find((x) => x.id === r.concern) || A.other;
+    const slots = { key: (o.keywords || [])[0] || "", line: strip(o.line).replace(/[.。]\s*$/, ""), lens: ((ORACLE_TOPICS || {})[topic] || {}).lens || "" };
+    js("sibyl-answer-open", box).textContent = form ? form.text : A.plain;
+    const withJosa = (t) => t.replace(/\{(key|line)\|([^}]+)\}/g, (m, k, pair) => particle(slots[k], pair)); // {key|은/는} → 받침에 맞는 조사
+    js("sibyl-answer-body", box).textContent = fill(withJosa(c.text), slots);
+    js("sibyl-answer-act", box).textContent = c.act;
+    show(box, true);
   }
   js("result-retry", screens["sibyl-result"]).addEventListener("click", () => go("sibyl-input"));
 

@@ -145,6 +145,18 @@
     return buf[0] % n;
   }
 
+  // (2026-10-25) 시빌라 질문 읽기: 적은 질문 글에서 "묻는 꼴"(form)과 "고민 갈래"(concern)를 찾는다. 이 브라우저 안에서만 쓰고 어디에도 보내지 않는다(6장).
+  //   rules = data.js sibyl.ask { forms: [{ id, words: [...] }], concerns: [{ id, words: [...] }] } — 앞에 있는 것이 먼저 맞는다(돈·몸을 맨 앞에 둔다)
+  //   띄어쓰기를 지운 글에서 낱말을 찾으므로 "다시 만나"·"다시만나" 둘 다 맞는다. 맞는 갈래가 없으면 concern = null
+  function sibylAsk(question, rules) {
+    const q = String(question || "").toLowerCase().replace(/\s+/g, "");
+    if (!q || !rules) return { form: null, concern: null };
+    const hit = (list) => (list || []).find((x) => (x.words || []).some((w) => w && q.includes(String(w).toLowerCase().replace(/\s+/g, ""))));
+    const f = hit(rules.forms);
+    const c = hit(rules.concerns);
+    return { form: f ? f.id : "plain", concern: c ? c.id : null };
+  }
+
   // 날짜 검사: 정수, 실제로 있는 날짜, 1900~2100년
   function validDate(y, m, d) {
     if (![y, m, d].every(Number.isInteger) || y < 1900 || y > 2100) return false;
@@ -152,5 +164,5 @@
     return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
   }
 
-  window.Calc = { ogham, nameToOgham, romanize, OGHAM_GLYPHS, decan, tzolkin, jdn, pickOracle, validDate };
+  window.Calc = { ogham, nameToOgham, romanize, OGHAM_GLYPHS, decan, tzolkin, jdn, pickOracle, sibylAsk, validDate };
 })();
