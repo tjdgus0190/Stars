@@ -26,7 +26,7 @@ window.TEXT = {
   // site.url: 이 제품 페이지의 전체 주소. "https://"로 시작하고 "/"로 끝나야 한다 (모양: https://<도메인>/products/strange-oracle/).
   //   비워 두면 지금 열린 주소를 쓴다. 이 한 줄만 바꾸면 링크 복사·공유 글·공유 카드 하단·배포본 og:url이 함께 바뀐다.
   //   모양이 틀리면 node tools/build-dist.js가 오류로 멈춘다.
-  site: { url: "https://glowing-semolina-5a4e78.netlify.app/products/strange-oracle/" }, // (운영자 2026-10-22) Netlify 주소
+  site: { url: "https://strange-oracle.com/products/strange-oracle/" }, // (2026-10-25) 새 도메인 HTTPS 열림. 옛 Netlify 주소도 그대로 동작(결제·로그인은 시작한 주소로 돌아옴)
   // kakao: 카카오톡 공유. jsKey(카카오 JavaScript 키)와 sdkUrl(SDK 주소, 운영자 결정 32번 뒤) 가운데 하나라도 비어 있으면 버튼을 만들지 않고 SDK도 부르지 않는다
   //   (23단계, 운영자 2026-10-23 "카카오톡 공유 켬", 운영 규칙 3장 예외) jsKey = 카카오 JavaScript 키(브라우저에 공개되는 키. 카카오 콘솔에 등록한 사이트 도메인에서만 동작),
   //   sdkUrl = 카카오 공식 주소의 판 고정 SDK(2.7.4, 2024-11), integrity = 그 파일의 sha384. 공유 버튼을 누른 뒤에만 불러온다(share-buttons.js)

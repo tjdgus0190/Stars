@@ -415,13 +415,13 @@ test("검수 D: status 횟수 제한 — 모양 틀림 10회까지 400, 11회째
   Pay._reset();
 });
 
-test("return: 본문을 읽지 않고 303 → SITE_URL#paid, 비면 상대 경로, R·결제 값 없음", async () => {
+test("return: 본문을 읽지 않고 303 → SITE_URL의 경로#paid(주소는 붙이지 않음 — 시작한 도메인으로), 비면 상대 경로, R·결제 값 없음", async () => {
   const store = new MemStore();
   const r = newR();
   for (const method of ["GET", "POST"]) {
     const res = await Pay.handle({ method, route: "return", body: notice(4, newMul(), r), ip: "x" }, ENV, store);
     assert.strictEqual(res.status, 303);
-    assert.strictEqual(res.headers.Location, ENV.SITE_URL + "#paid");
+    assert.strictEqual(res.headers.Location, new URL(ENV.SITE_URL).pathname + "#paid");
     assert.strictEqual(res.headers["Cache-Control"], "no-store");
   }
   for (const site of ["", "javascript:alert(1)/", "https://x.test/no-slash", "https://x.test/a/?q=1/"]) {

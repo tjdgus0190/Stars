@@ -226,7 +226,8 @@ async function status(req, env, store, now) {
 function back(req, env) {
   if (req.method !== "GET" && req.method !== "POST") return text(405, "");
   const site = String(env.SITE_URL || "");
-  const to = /^https?:\/\/[^\s#?"'<>]+\/$/.test(site) ? site + "#paid" : RETURN_FALLBACK;
+  // (2026-10-25 도메인 이전) 주소(origin)는 붙이지 않고 경로만 → 이용자가 결제를 시작한 주소(Netlify 주소·strange-oracle.com)로 돌아가 그 탭의 sessionStorage가 이어진다
+  const to = /^https?:\/\/[^\s#?"'<>]+\/$/.test(site) ? new URL(site).pathname + "#paid" : RETURN_FALLBACK;
   return { status: 303, headers: Object.assign({}, H_TEXT, { Location: to }), body: "" }; // R·결제 값을 붙이지 않는다
 }
 

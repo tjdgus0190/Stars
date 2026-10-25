@@ -58,8 +58,8 @@ node --experimental-websocket marketing/strange-oracle/instagram/render-ig.js
 찔렸다면, 이미 들킨 거예요
 👇 첫 번째 문 열기
 ```
-- 링크(지금): `https://glowing-semolina-5a4e78.netlify.app/?utm_source=instagram&utm_medium=organic&utm_campaign=ig_profile&utm_content=ig_profile`
-  — strange-oracle.com HTTPS가 열리면 앞부분만 `https://strange-oracle.com/`으로 바꾼다.
+- 링크: `https://strange-oracle.com/?utm_source=instagram&utm_medium=organic&utm_campaign=ig_profile&utm_content=ig_profile`
+  — (2026-10-25) 새 도메인 HTTPS 열림.
 - 프로페셔널 계정(크리에이터 또는 비즈니스)으로 바꾸면 통계·광고 집행이 된다. 카테고리 예: 「엔터테인먼트 웹사이트」.
 
 ## 하이라이트 (커버 → 넣을 스토리)

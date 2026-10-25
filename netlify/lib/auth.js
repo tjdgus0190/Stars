@@ -42,7 +42,12 @@ function envOk(env) {
   if (env.PASS_MODE !== "live" && env.PASS_MODE !== "test") return false;
   return Boolean(env.KAKAO_REST_KEY) && Pay.secretOk(env.PASS_SECRET) && siteOk(env.SITE_URL);
 }
-const redirectUri = (env) => originOf(env.SITE_URL) + "/api/auth/kakao/callback";
+const CALLBACK = "/api/auth/kakao/callback";
+const redirectUri = (env) => originOf(env.SITE_URL) + CALLBACK;
+// (2026-10-25 도메인 이전) 요청이 들어온 주소(우리 사이트의 Netlify 주소 또는 strange-oracle.com)를 기준으로 오가게 한다.
+//   이용자가 시작한 주소로 돌아와야 그 탭의 sessionStorage(state)가 맞는다. 카카오 콘솔에는 두 주소의 Redirect URI를 모두 등록한다.
+const redirectUriAt = (url) => url.origin + CALLBACK;
+const homeAt = (url, env) => url.origin + new URL(env.SITE_URL).pathname; // 제품 경로는 SITE_URL에서, 주소(origin)는 요청에서
 
 // 열람 코드 암호화 (저장소가 새도 코드가 드러나지 않게)
 const encKey = (secret) => crypto.createHmac("sha256", secret).update("kakao-enc").digest();
@@ -62,8 +67,8 @@ function open(secret, b64) {
 // 실제 카카오 호출 (시험에서는 같은 모양의 가짜를 넘긴다): code → 회원번호(문자열) | throw
 function realKakao(env, fetchImpl) {
   return {
-    async idOf(code) {
-      const form = new URLSearchParams({ grant_type: "authorization_code", client_id: env.KAKAO_REST_KEY, redirect_uri: redirectUri(env), code });
+    async idOf(code, ru = redirectUri(env)) {
+      const form = new URLSearchParams({ grant_type: "authorization_code", client_id: env.KAKAO_REST_KEY, redirect_uri: ru, code });
       if (env.KAKAO_CLIENT_SECRET) form.set("client_secret", env.KAKAO_CLIENT_SECRET);
       const t = await fetchImpl(KAUTH + "/oauth/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8" }, body: form.toString() });
       if (!t.ok) throw new Error("token");
@@ -81,18 +86,18 @@ function realKakao(env, fetchImpl) {
 async function start(url, env) {
   const s = url.searchParams.get("state") || "";
   if (!HEX32.test(s)) return json(400, { error: "bad" });
-  const q = new URLSearchParams({ client_id: env.KAKAO_REST_KEY, redirect_uri: redirectUri(env), response_type: "code", state: s });
+  const q = new URLSearchParams({ client_id: env.KAKAO_REST_KEY, redirect_uri: redirectUriAt(url), response_type: "code", state: s });
   return go(302, KAUTH + "/oauth/authorize?" + q.toString());
 }
 
 async function callback(url, env, store, kakao, now) {
-  const back = (frag) => go(303, env.SITE_URL + "#" + frag);
+  const back = (frag) => go(303, homeAt(url, env) + "#" + frag);
   const s = url.searchParams.get("state") || "";
   const code = url.searchParams.get("code") || "";
   if (!HEX32.test(s) || !code || code.length > 512) return back("kakao-error");
   let id;
   try {
-    id = await kakao.idOf(code);
+    id = await kakao.idOf(code, redirectUriAt(url));
   } catch (e) {
     return back("kakao-error");
   }

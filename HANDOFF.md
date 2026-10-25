@@ -132,3 +132,4 @@ node tools/strange-oracle/make-pass.js 1        # 운영자용: 열람 코드·�
 - 운영자가 ID·주소·◯◯ 값을 주면 data.js·legal에 넣고 build-dist로 검사한 뒤 `dist/public`을 다시 만든다.
 - 위 3-6의 정리 4건.
 - 출시 뒤 GA4 숫자(완주율, 장 열기 수)를 보고 다음 다듬기를 제안한다(specs/proposal-…).
+- **2026-10-25 도메인 이전:** https://strange-oracle.com (Let's Encrypt, www → 본 도메인). data.js site.url을 새 도메인으로. 결제 복귀(/api/pay/return)는 SITE_URL의 경로만 쓰고, 카카오 로그인은 요청이 들어온 주소로 오가므로 옛 Netlify 주소에서도 그대로 동작한다. 카카오 콘솔에 새 도메인(웹 플랫폼)과 Redirect URI https://strange-oracle.com/api/auth/kakao/callback 등록 필요(운영자).
