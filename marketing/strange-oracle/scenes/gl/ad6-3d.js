@@ -85,7 +85,7 @@ stage.on((t) => {
   saju.group.rotation.set(0, Math.PI * flip + 0.06 * Math.sin(t * 0.8) * (1 - flip), 0);
   saju.group.position.set(lerp(lerp(0, -2.5, away), MID, bookIn), lerp(lerp(Y0, Y0 + 1.2, away), Y0 + 0.02 * 7, bookIn), lerp(lerp(0, -6, away), 0.3, bookIn));
   saju.group.scale.setScalar((1 + 0.08 * Math.sin(Math.PI * clamp((t - T_FLIP) / 0.6))) * lerp(1, 0.9, bookIn));
-  saju.setOpacity((1 - smooth(T_FLIP + 0.8, T_FLIP + 1.3, t) + smooth(T_BOOK, T_BOOK + 0.6, t)) * (1 - 0.88 * smooth(T_END - 0.2, T_END + 0.5, t)));
+  saju.setOpacity((1 - smooth(T_FLIP + 0.8, T_FLIP + 1.3, t) + smooth(T_BOOK, T_BOOK + 0.6, t)) * (1 - smooth(T_END - 0.2, T_END + 0.5, t)));
   if (bookIn > 0) saju.group.rotation.set(0, Math.PI * (1 - bookIn) + 0, 0); // 묶일 때는 앞면이 위로(표지 = 사주 원국)
 
   // ── 여섯 장: 뒤에서 날아와 줄 서고, 끝에 한 묶음으로
@@ -100,8 +100,8 @@ stage.on((t) => {
     const focus = Math.exp(-Math.pow((camX(t) - xOf(k)) / 1.2, 2)); // 카메라 앞일수록 1
     card.group.rotation.set(0, lerp((k % 2 ? -1 : 1) * 0.16 * (1 - focus), 0, bookIn) + (1 - fly) * 1.2, lerp(0, (k - 2.5) * 0.03, bookIn));
     card.group.scale.setScalar(lerp(lerp(0.9, 1.04, focus), 0.9, bookIn));
-    card.setOpacity(smooth(T_FLIP + 0.3 + k * 0.08, T_FLIP + 0.7 + k * 0.08, t) * lerp(0.55 + 0.45 * focus, 1, bookIn) * (1 - 0.9 * smooth(T_END - 0.2, T_END + 0.5, t)));
-    card.halo.material.opacity = (0.15 + 0.55 * focus) * (1 - bookIn * 0.7) * fly;
+    card.setOpacity(smooth(T_FLIP + 0.3 + k * 0.08, T_FLIP + 0.7 + k * 0.08, t) * lerp(0.55 + 0.45 * focus, 1, bookIn) * (1 - smooth(T_END - 0.2, T_END + 0.5, t)));
+    card.halo.material.opacity = (0.15 + 0.55 * focus) * (1 - bookIn * 0.7) * fly * (1 - smooth(T_END - 0.2, T_END + 0.5, t)); // 끝 화면 글자 뒤에 묶음이 비치지 않게
   });
   bookGlow.material.opacity = 0.8 * smooth(T_BOOK + 0.6, T_BOOK + 1.4, t);
   bookGlow.scale.setScalar(3 + 4 * smooth(T_BOOK + 0.6, T_BOOK + 1.6, t));
