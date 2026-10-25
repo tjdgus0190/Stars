@@ -94,7 +94,7 @@ stage.on((t) => {
     g.scale.setScalar(lerp(1, 1.08, hl) * lerp(1, 0.15, gather));
     const appear = k === 0 ? 1 : smooth(T_PULL + 0.2 + k * 0.12, T_PULL + 1.0 + k * 0.12, t);
     card.setOpacity(appear * (1 - smooth(T_GATHER + 0.6, T_GATHER + 1.1, t)) * (0.55 + 0.45 * Math.max(hl, k === 0 && t < T_SPIN ? 1 : 0)));
-    card.halo.material.opacity = 0.2 + 0.5 * hl * appear;
+    card.halo.material.opacity = (0.2 + 0.5 * hl) * appear * (1 - smooth(T_GATHER + 0.6, T_GATHER + 1.1, t)); // 모인 뒤 끝 화면에 테두리 빛이 남지 않게
     if (k === 0) g.position.y += 0.05 * Math.sin(t * 1.3) * (1 - pull);
   });
   core.material.opacity = 0.9 * smooth(T_GATHER + 0.3, T_GATHER + 1.0, t) * (1 - 0.5 * smooth(T_END, 14, t));
