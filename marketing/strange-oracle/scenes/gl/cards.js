@@ -195,5 +195,5 @@ export function makeCard({ front, back = drawCardBack, w = 2.4, h = 3.6, glow = 
   const halo = glowSprite(new THREE.Color(glow), Math.max(w, h) * 1.6, 0.35);
   halo.position.z = -0.1;
   g.add(halo, fMesh, bMesh);
-  return { group: g, halo, front: fm, back: bm, draw() { F.draw(); B.draw(); }, setOpacity(a) { fm.opacity = a; bm.opacity = a; halo.material.opacity = 0.35 * a; } };
+  return { group: g, halo, front: fm, back: bm, draw() { F.draw(); B.draw(); }, setOpacity(a) { fm.opacity = a; bm.opacity = a; halo.material.opacity = 0.35 * a; fMesh.visible = bMesh.visible = a > 0.002; } }; // 다 사라진 카드가 깊이만 남아 뒤의 빛을 네모나게 가리지 않게
 }
