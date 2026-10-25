@@ -204,7 +204,7 @@
     // (14단계) 만신의 방: 결과 코드(1~5000, Saju.encodeCode)만. 원국 8글자·성별·대운은 저장하지 않는다
     if (room === "saju") return Number.isInteger(v.code) && v.code >= 1 && v.code <= 5000 && Boolean(SAJU && SAJU.stems[Saju.decodeCode(v.code).S1]);
     if (room === "rune") return Array.isArray(v.picks) && v.picks.length === 3 && v.picks.every((c) => RUNE_BY_CODE[c]) && T.rune.topics[v.topic];
-    // (10단계) 이어가기 코드로 복원한 별의 방: 나크샤트라 번호만 있고 서양 별자리·해/달 라시는 없다(restored)
+    // (10단계) 이어가기 코드로 복원한 베다의 방: 나크샤트라 번호만 있고 서양 별자리·해/달 라시는 없다(restored)
     if (room === "star") return Number.isInteger(v.nak) && NAKS[v.nak] && (v.restored === true || (RASHIS[v.west] && RASHIS[v.sunRashi] && RASHIS[v.moonRashi]));
     if (room === "ogham") return Number.isInteger(v.ogham) && Boolean(OGHAM[v.ogham]);
     if (room === "decan") return Number.isInteger(v.decan) && Boolean(DECANS[v.decan]);
@@ -910,7 +910,7 @@
     restoreFromCode();
   });
   resumeEl.input.addEventListener("input", () => resumeError(""));
-  // 복원 상태 안내 한 줄(마크업의 별의 방 견본을 틀로 쓴다). text = 문구, room = 다시 입력할 방
+  // 복원 상태 안내 한 줄(마크업의 베다의 방 견본을 틀로 쓴다). text = 문구, room = 다시 입력할 방
   const restoreTpl = js("restore-note");
   function restoreNote(text, room) {
     const el = restoreTpl.cloneNode(true);
@@ -1256,7 +1256,7 @@
     return out;
   }
 
-  // ═════════ 별의 방 ═════════
+  // ═════════ 베다의 방 ═════════
   const starInput = screens["star-input"];
   const f = {
     name: js("star-name"), year: js("star-year"), month: js("star-month"), day: js("star-day"),
@@ -1282,7 +1282,7 @@
   enter["star-input"] = () => {
     const p = state.profile;
     const hasName = Boolean(p.name);
-    // 데칸·촐킨에서 날짜만 넣었으면(시각은 묻지 않음 → p.time 없음) 별의 방에서는 시각을 새로 묻는다
+    // 데칸·촐킨에서 날짜만 넣었으면(시각은 묻지 않음 → p.time 없음) 베다의 방에서는 시각을 새로 묻는다
     const hasBirth = Boolean(p.birth) && p.time !== undefined;
     const useSaved = (hasName || hasBirth) && !editing.star;
     setFieldError("star-date-field", "star-error", "");
@@ -1555,7 +1555,7 @@
   });
 
   // ═════════ 2단계 네 방 공통 ═════════
-  // 핵심 풀이 (별의 방과 같은 순서). e = 데이터 항목, facts = [[항목명, 값]]. II장부터는 책 (서버 full-<방>.js)
+  // 핵심 풀이 (베다의 방과 같은 순서). e = 데이터 항목, facts = [[항목명, 값]]. II장부터는 책 (서버 full-<방>.js)
   function entryReading(scr, e, facts, interpretNote) {
     renderReading(scr, [rLede(e.identity.lede), ...e.identity.body.map(rP), factsUl(facts), rP(interpretNote)], e.identity.close);
     renderBookLine(scr, e.event.hook);
@@ -1779,7 +1779,7 @@
         if (!ok) return fy.focus();
         birth = { y, m, d };
       }
-      // 날짜가 바뀌면 전에 별의 방에서 받은 시각은 버린다 (별의 방에서 다시 묻는다)
+      // 날짜가 바뀌면 전에 베다의 방에서 받은 시각은 버린다 (베다의 방에서 다시 묻는다)
       if (!p.birth || p.birth.y !== birth.y || p.birth.m !== birth.m || p.birth.d !== birth.d) delete p.time;
       p.birth = birth;
       save();
@@ -1820,7 +1820,7 @@
   };
   leave["decan-ritual"] = () => decanRitual.classList.remove("is-running", "is-landed");
 
-  // 후보 고르기 (그날 태양이 데칸 경계를 넘음: 2개). 별의 방 후보 화면과 같은 방식
+  // 후보 고르기 (그날 태양이 데칸 경계를 넘음: 2개). 베다의 방 후보 화면과 같은 방식
   const decanWhen = (c) => fill(T.decan.choose.when, { from: hhmm(c.startMin), to: hhmm(c.endMin), part: partOfDay(c) });
   enter["decan-choose"] = () => {
     if (!decanCalc || decanCalc.candidates.length < 2) return go("decan-input", { instant: true });
@@ -3182,7 +3182,7 @@
     });
     return Object.entries(tally).sort((x, y) => y[1].count - x[1].count || x[1].first - y[1].first)[0][0];
   }
-  // 상대: 이름 → 오검, 생년월일 → 데칸(한국 시간 정오, 후보 선택 없음)·촐킨. 별의 방은 시각이 필요해 뺀다
+  // 상대: 이름 → 오검, 생년월일 → 데칸(한국 시간 정오, 후보 선택 없음)·촐킨. 베다의 방은 시각이 필요해 뺀다
   function partnerOf(name, b) {
     const og = Calc.ogham(name);
     if (!og) return null;

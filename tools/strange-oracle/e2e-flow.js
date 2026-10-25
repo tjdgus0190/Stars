@@ -168,11 +168,11 @@ function paidSentences() {
   await sleep(700);
   check("한 번 더 뒤로 → 입구", (await active()) === "screen-hub" && (await ev("location.href.startsWith('http://127.0.0.1:8788/')")));
   check("입구: 2/7 · 지금까지 줄(만신·오검 결과 이름) 2개, '?' 줄은 만들지 않음(10-6)", (await txt("[data-js=hub-progress-count]")) === "2/7" && (await ev("document.querySelectorAll('[data-js=sofar-line]').length")) === 2 && (await ev("document.querySelectorAll('#screen-hub .so-far__item.is-upcoming').length")) === 0 && (await txt("[data-js=sofar-line][data-room=ogham] [data-js=sofar-result]")) === (await ev("OGHAM[JSON.parse(sessionStorage.getItem('strange-oracle')).visits.ogham.ogham].title")));
-  check("주 버튼 = III 별의 방 열기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "star" && (await txt("[data-js=hub-cta-num]")) === "III");
+  check("주 버튼 = III 베다의 방 열기", (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "star" && (await txt("[data-js=hub-cta-num]")) === "III");
   await click("[data-js=sofar-line][data-room=ogham]");
   check("지금까지 줄 → 결과 다시 보기(번쩍)", await waitScreen("screen-ogham-result", 3000));
   await click("#screen-ogham-result [data-js=result-next-door]");
-  check("다음 문 → 상징(별) → Ⅲ 별의 방 시작", (await ev("document.querySelector('[data-js=sigil-rise]').dataset.room")) === "star" && (await waitScreen("screen-star-intro", 3000)));
+  check("다음 문 → 상징(별) → Ⅲ 베다의 방 시작", (await ev("document.querySelector('[data-js=sigil-rise]').dataset.room")) === "star" && (await waitScreen("screen-star-intro", 3000)));
   await click("[data-js=topbar-home]");
   check("입구 버튼 → 입구", await waitScreen("screen-hub", 3000));
 
@@ -343,7 +343,7 @@ function paidSentences() {
   await click("[data-js=sofar-line][data-room=star]");
   await waitScreen("screen-star-result", 3000);
   const starR = await ev("(() => { const s = document.querySelector('#screen-star-result'); const vis = (e) => !!e && e.offsetParent !== null; return { note: vis(s.querySelector('[data-js=restore-note]')), noteText: s.querySelector('[data-js=restore-note] span').textContent, twist: vis(s.querySelector('[data-js=twist-from]')), turnText: vis(s.querySelector('[data-js=turn-text]')), traits: vis(s.querySelector('[data-js=star-traits]')), facts: s.querySelectorAll('.reading__facts li').length, meta: s.querySelector('[data-js=result-meta]').textContent, open: s.querySelector('[data-js=guide-open] .say__line').textContent, bad: /undefined|null|NaN|\\{who\\}/.test(s.innerText) }; })()");
-  check("10-1: 복원한 별의 방 — 반전 카드(서양 별자리→라시)·'마음' 줄 숨김 + '생일을 다시 넣으면' 한 줄, 맞아요 인셋은 그대로", starR.note && starR.noteText === (await ev("TEXT.resume.needInput")) && !starR.twist && !starR.turnText && starR.traits && starR.facts === 4, JSON.stringify(starR).slice(0, 200));
+  check("10-1: 복원한 베다의 방 — 반전 카드(서양 별자리→라시)·'마음' 줄 숨김 + '생일을 다시 넣으면' 한 줄, 맞아요 인셋은 그대로", starR.note && starR.noteText === (await ev("TEXT.resume.needInput")) && !starR.twist && !starR.turnText && starR.traits && starR.facts === 4, JSON.stringify(starR).slice(0, 200));
   check("10-1: 복원 상태 이름 자리 = '당신', 빈칸·undefined 없음", starR.meta.includes("당신") && starR.open.includes("당신") && !starR.bad, starR.meta);
   await hookCards();
   await ev("ShareCard.share = async (c, f, text, url) => { window.__share = { text, url }; return 'downloaded'; }");
@@ -359,7 +359,7 @@ function paidSentences() {
   check("10-2: 클립보드가 막히면 주소를 고를 수 있는 글자로 보여 줌", (await txt("#screen-star-result [data-js=share-link-url]")) === here && !(await hiddenEl("#screen-star-result [data-js=share-link-url]")) && (await hiddenEl("#screen-star-result [data-js=share-link-msg]")));
   await noHScroll("복원한 별 결과");
   await click("#screen-star-result [data-js=restore-reinput]");
-  check("10-1: '다시 입력' → 별의 방 입력 화면(입력칸 보임)", (await waitScreen("screen-star-input", 3000)) && !(await hiddenEl("[data-js=star-year]")));
+  check("10-1: '다시 입력' → 베다의 방 입력 화면(입력칸 보임)", (await waitScreen("screen-star-input", 3000)) && !(await hiddenEl("[data-js=star-year]")));
   await b.goto(BASE + "#ogham");
   await waitScreen("screen-ogham-result", 3000);
   const ogR = await ev("(() => { const s = document.querySelector('#screen-ogham-result'); const n = s.querySelector('[data-js=restore-note]'); return { note: !!n && n.offsetParent !== null && n.querySelector('span').textContent === TEXT.resume.needName, go: n ? n.querySelector('[data-js=restore-reinput]').dataset.go : '', bad: /undefined|NaN|\\{who\\}/.test(s.innerText), meta: s.querySelector('[data-js=result-meta]').textContent }; })()");
@@ -410,7 +410,7 @@ function paidSentences() {
   await waitScreen("screen-star-input", 3000);
   const savedStar = await txt("#screen-star-input [data-js=saved-info-value]");
   await click("#screen-star-input [data-js=saved-info-edit]");
-  check("10-7: 별의 방 입력 — 앞 방 이름이 저장된 정보로 보이고, 다시 입력하면 이름 칸에 미리 채워짐", savedStar.includes(NAME) && (await ev("document.querySelector('[data-js=star-name]').value")) === NAME);
+  check("10-7: 베다의 방 입력 — 앞 방 이름이 저장된 정보로 보이고, 다시 입력하면 이름 칸에 미리 채워짐", savedStar.includes(NAME) && (await ev("document.querySelector('[data-js=star-name]').value")) === NAME);
   await seed(["saju", "ogham", "star", "decan", "tzolkin"], { name: NAME, birth: { y: 1995, m: 3, d: 25 } });
   await b.goto(BASE);
   await ev("StrangeOracle.go('rune-input')");

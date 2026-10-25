@@ -5,7 +5,7 @@
 // 파일 나눔 (운영 규칙 3장)
 //   data.js        이 파일. 버튼·안내·제목 같은 화면 문구, 방 이름, 원형 8개, 나의 이야기, 공유 카드 문구
 //   data-runes.js  룬의 방 콘텐츠 (룬 24개 × 4장 구조, 원형 태그, 나의 이야기 요약)
-//   data-stars.js  별의 방 콘텐츠 (나크샤트라 27개 × 4장 구조, 원형 태그, 나의 이야기 요약, 라시·행성)
+//   data-stars.js  베다의 방 콘텐츠 (나크샤트라 27개 × 4장 구조, 원형 태그, 나의 이야기 요약, 라시·행성)
 //   data-ogham.js  오검의 방 콘텐츠 (오검 20자)          data-decans.js  데칸의 방 콘텐츠 (36데칸)
 //   data-tzolkin.js 촐킨의 방 콘텐츠 (20문양 + 13숫자)   data-oracles.js 시빌라 신탁의 방 콘텐츠 (신탁 32개 + 주제 5개)
 //
@@ -396,7 +396,7 @@ window.TEXT = {
   rooms: {
     saju: { name: "만신의 방", short: "만신", chapterName: "타고난 그릇" }, // (14단계) data-saju.js text.room에서 옮김 — 입구가 방 파일보다 먼저 그려지므로 여기 둔다
     ogham: { name: "오검의 방", short: "오검", chapterName: "뿌리" },
-    star: { name: "별의 방", short: "별", chapterName: "마음결" },
+    star: { name: "베다의 방", short: "베다", chapterName: "마음결" },
     decan: { name: "데칸의 방", short: "데칸", chapterName: "숨은 재능" },
     tzolkin: { name: "촐킨의 방", short: "촐킨", chapterName: "다가올 순환" },
     sibyl: { name: "시빌라 신탁의 방", short: "시빌라", chapterName: "오늘의 질문" },
@@ -574,11 +574,11 @@ window.TEXT = {
     },
   },
 
-  // ═════════ 별의 방 ═════════
+  // ═════════ 베다의 방 ═════════
   star: {
     intro: {
       eyebrow: "THE STAR ROOM",
-      title: "별의 방",
+      title: "베다의 방",
       pitch: "태어난 순간 하늘의 달이 알려주는, 지금의 속마음", // (최대 30자)
       lore: [
         "<b>베다 점성술</b>은 3,000년 넘게 이어진 인도의 점성술이에요. 인도에서는 지금도 결혼 날짜나 아기 이름을 정할 때 이 점성술을 봐요.",
@@ -636,7 +636,7 @@ window.TEXT = {
       note: "고른 집은 나중에 \"다른 날짜로 보기\"에서 언제든 바꿀 수 있어요.",
     },
     result: {
-      eyebrow: "낯선 점술관 · 별의 방",
+      eyebrow: "낯선 점술관 · 베다의 방",
       number: "{n} / 27",                          // 캡처 카드 달 그림 아래. {n}=1~27
       meta: "{who}이 태어난 순간의 달 · 나의 이야기 3장", // (최대 28자)
       twistEyebrow: "PLOT TWIST",
@@ -665,7 +665,7 @@ window.TEXT = {
       retry: "다른 날짜로 보기",
     },
     card: {
-      eyebrow: "낯선 점술관 · 별의 방",
+      eyebrow: "낯선 점술관 · 베다의 방",
       number: "NAKSHATRA {n} / 27",
       twist: "서양 {west} → 베다 {vedic}",   // 알약. 같으면 twistSame
       twistSame: "서양도 베다도 {sign}",
@@ -773,7 +773,7 @@ window.TEXT = {
       title: "그날, 태양이 칸을 넘었어요", // (최대 16자)
       lead: "{date} {time} 무렵, 태양이 다음 데칸으로 옮겨 갔어요. 태어난 때에 더 가까운 쪽을 골라 주세요.", // (최대 90자) {date}=1995년 3월 21일 모양, {time}=15:12 모양
       date: "{y}년 {m}월 {d}일",
-      when: "{from} ~ {to} · {part}",   // 후보 카드 시간 구간 (최대 20자). {part}=별의 방 star.choose.parts 재사용
+      when: "{from} ~ {to} · {part}",   // 후보 카드 시간 구간 (최대 20자). {part}=베다의 방 star.choose.parts 재사용
       name: "{sign} {part} 데칸", // 후보 카드 이름 줄 (최대 20자). 공감 문장 2개 = data-decans.js traits
       trait: "\"{text}\"",
       caption: "하루 가운데 두 데칸에 머문 시간", // 화면 읽기 프로그램용
@@ -789,7 +789,7 @@ window.TEXT = {
       twistTitle: "같은 별자리라도, 세 얼굴이 있어요",
       twistTo: "{part} 데칸",                  // 반전 카드 화살표 오른쪽. 왼쪽은 별자리 이름
       choiceNote: "태어난 날 태양이 칸을 넘어, 고른 쪽({when})으로 보여 드려요", // 후보를 고른 사람만
-      sourceNote: "덴데라 천장에 남은 헬레니즘 시대 36데칸 체계를 따라, 계절 기준(열대) 황경으로 계산했어요. 별의 방(항성 기준)과 기준이 달라요.",
+      sourceNote: "덴데라 천장에 남은 헬레니즘 시대 36데칸 체계를 따라, 계절 기준(열대) 황경으로 계산했어요. 베다의 방(항성 기준)과 기준이 달라요.",
       facts: { sign: "별자리", degrees: "하늘의 자리", ruler: "다스리는 별", egyptian: "이집트 이름" },
       degrees: "{sign} {from}°~{to}°",
       interpretNote: "이 해석은 전해지는 상징을 바탕으로 이 점술관이 새로 쓴 것이에요.",
@@ -1011,7 +1011,7 @@ window.TEXT = {
       pass: "열람 코드는 책에서 넣어요", // (14-4) 이어가기 칸에 열람 코드(SOP)를 넣었을 때. 서버 요청 없음
     },
     restored: "코드에 담긴 결과를 불러왔어요. 호칭은 ‘당신’이에요", // 복원 직후 입구 한 줄. 출처가 드러나게 (최대 30자)
-    needInput: "이 부분은 생일을 다시 넣으면 보여요", // 복원 상태의 별의 방 (최대 30자)
+    needInput: "이 부분은 생일을 다시 넣으면 보여요", // 복원 상태의 베다의 방 (최대 30자)
     needName: "이 부분은 이름을 다시 넣으면 보여요",  // 복원 상태의 오검·룬의 방 이름 글자 자리 (최대 30자, 기획서 문구 자리 목록에 없음 → 운영자·기획 담당 확인)
     reinput: "다시 입력",                            // (최대 8자)
   },
@@ -1024,7 +1024,7 @@ window.TEXT = {
   // ── (10단계 10-2) og-image.png 글자. 고친 뒤 node --experimental-websocket tools/strange-oracle/make-og.js 로 이미지를 다시 만든다
   og: {
     title: "일곱 방, 나의 이야기 한 편",          // (최대 16자)
-    sub: "만신·오검·별·데칸·촐킨·룬·시빌라", // 방 순서는 Ⅰ~Ⅶ 그대로 (최대 28자)
+    sub: "만신·오검·베다·데칸·촐킨·룬·시빌라", // 방 순서는 Ⅰ~Ⅶ 그대로 (최대 28자)
   },
 
   // ── 공유 카드 공통·나의 이야기 카드

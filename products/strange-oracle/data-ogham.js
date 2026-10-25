@@ -17,7 +17,7 @@
 //   facts.meaning 중세 문헌에 전하는 "글자 이름의 뜻". 학계에서 뜻이 갈리는 것은 "미확인" 그대로 둔다
 //   facts.tree    후대(주로 근대) 해석이 붙인 나무. 문헌 이름과 구분해 쓴다 (기획서 고증 주의)
 //                 ※ facts의 괄호 속 영어는 개발 담당이 Wikipedia "Ogham" 표를 기억에 기대어 적은 초안 — 문구 담당이 출처로 확인할 것
-//   공통 네 장 (별의 방 data-stars.js와 같은 모양)
+//   공통 네 장 (베다의 방 data-stars.js와 같은 모양)
 //   identity      첫째 장(정체): title(목차 16자), lede = 첫 문단(강조, 80자) → 사실 목록(facts) → body 단락들 → 해석 안내 한 줄
 //   event         둘째 장(사건): hook = 첫째 장 끝 떡밥(45자), title(16자), lede(80자), body, quote(50자, 둘째 단락 뒤)
 //   shadow        셋째 장(그림자): hook = 둘째 장 끝 떡밥, title, lede, body, quote

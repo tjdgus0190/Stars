@@ -23,9 +23,9 @@
   --mini-stone-w: 64px;
   --mini-stone-h: 76px;
   --dial: min(330px, 86vw);
-  --fs-year: 4.5rem;     /* 별의 방 되감기 연도 */
+  --fs-year: 4.5rem;     /* 베다의 방 되감기 연도 */
   --fs-numeral: 2.5rem;  /* 장 번호 I·II·III·IV */
-  --ritual-ms: 5000ms;   /* 별의 방 의식 길이 (JS 타이머와 맞춘다) */
+  --ritual-ms: 5000ms;   /* 베다의 방 의식 길이 (JS 타이머와 맞춘다) */
   --wheel-ms: 4400ms;    /* 별 바퀴 되감기 */
   --stone-shape: 48% 52% 46% 54% / 55% 50% 50% 45%;
 }
@@ -1007,7 +1007,7 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
 .norn-hint { max-width: 26em; min-height: 3em; margin-top: var(--space-8); font-size: var(--fs-md); line-height: var(--lh-ui); color: var(--c-text-muted); }
 .norn-hint b { color: var(--accent); }
 
-/* ═════════ 3-S. 별의 방 의식 — 손대지 않고 지켜보는 되감기 (밤하늘·달빛) ═════════
+/* ═════════ 3-S. 베다의 방 의식 — 손대지 않고 지켜보는 되감기 (밤하늘·달빛) ═════════
    0.0s .is-running: 테두리 눈금 그리기(1.4s) · 중앙 얀트라(2s) · 27개 별자리가 차례로 이어짐(0.4s+n×60ms)
         바퀴 되감기(--wheel-ms) · 달이 궤도를 따라 이동 · 연도 굴러감(JS)
    4.4s .is-landed: 달 착지 빛, 달이 멈춘 집(.is-home) 점등, 연도 번쩍 */
@@ -2070,7 +2070,7 @@ fieldset.field > legend { padding: 0; margin-bottom: var(--space-2); }
 .decan-note { margin-top: var(--space-3); }
 .ritual.is-running .ritual-timer__bar { animation: ritual-timer var(--ritual-ms) linear forwards; }
 
-/* 데칸 후보 고르기: 별의 방 틀 그대로, 두 칸 색만 이 방에 맞춤 (1 = 호박빛, 2 = 터키석) */
+/* 데칸 후보 고르기: 베다의 방 틀 그대로, 두 칸 색만 이 방에 맞춤 (1 = 호박빛, 2 = 터키석) */
 .decan-choose .day-line__seg:nth-child(1), .decan-choose .choice:nth-child(1) { --seg-h: var(--hue-sand); }
 .decan-choose .day-line__seg:nth-child(2), .decan-choose .choice:nth-child(2) { --seg-h: var(--hue-jade); }
 

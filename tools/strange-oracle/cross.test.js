@@ -111,7 +111,7 @@ test("성별·나이·생년월일을 쓰지 않는다: 입력은 방별 원형�
   assert.strictEqual(Book.crossPick.length, 2);
 });
 
-test("이어가기 코드로 돌아온 탭: 방별 원형만 있으면(별의 방 restored 포함) 같은 장", () => {
+test("이어가기 코드로 돌아온 탭: 방별 원형만 있으면(베다의 방 restored 포함) 같은 장", () => {
   const live = Book.crossPick([{ room: "saju", arch: "ruler" }, { room: "star", arch: "sage" }, { room: "rune", arch: "ruler" }], K);
   const restored = Book.crossPick([{ room: "saju", arch: "ruler", code: 532 }, { room: "star", arch: "sage", restored: true }, { room: "rune", arch: "ruler" }], K);
   assert.deepStrictEqual(live, restored);

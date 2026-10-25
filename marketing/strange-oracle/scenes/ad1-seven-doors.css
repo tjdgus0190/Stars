@@ -210,7 +210,7 @@
 .rcard__eyebrow { position: relative; font-size: 27px; letter-spacing: 0.08em; color: var(--acc-dim); }
 .rcard__emblem { position: relative; height: 250px; margin: 26px 0 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 .rcard__title { position: relative; font-size: 54px; font-weight: 700; line-height: 1.25; color: var(--c-text-strong); white-space: nowrap; }
-.rcard__title--big { font-size: 72px; line-height: 0.94; } /* 제품: 별의 방 제목만 한 단계 크게 */
+.rcard__title--big { font-size: 72px; line-height: 0.94; } /* 제품: 베다의 방 제목만 한 단계 크게 */
 .rcard__names { position: relative; margin-top: 14px; font-size: 30px; line-height: 1.35; color: var(--acc); white-space: nowrap; }
 .rcard__meta { position: relative; margin-top: 22px; font-size: 25px; color: var(--c-text-muted); letter-spacing: 0.02em; }
 .latin { font-family: var(--font-latin); font-weight: 500; letter-spacing: 0.06em; }

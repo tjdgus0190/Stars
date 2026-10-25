@@ -33,7 +33,7 @@ const SIG = {
   rune: ["M14 3V37M14 14L28 5M14 23L28 14"],
   sibyl: ["M20 4C24 10 26 13 26 16.5A6 6 0 0 1 14 16.5C14 13 16 10 20 4ZM20 11.5c1.4 2.3 2 3.8 2 5a2 2 0 0 1-4 0c0-1.2.6-2.7 2-5ZM20 22.5v3M14 26h12v10H14ZM10 36h20"],
 };
-const NAME = { saju: "만신", ogham: "오검", star: "별", decan: "데칸", tzolkin: "촐킨", rune: "룬", sibyl: "시빌라" };
+const NAME = { saju: "만신", ogham: "오검", star: "베다", decan: "데칸", tzolkin: "촐킨", rune: "룬", sibyl: "시빌라" };
 const RING_R = 1.38;
 const ring = new THREE.Group();
 scene.add(ring);

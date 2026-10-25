@@ -367,7 +367,7 @@
             <span class="door__glyph"><svg class="door__moon" viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg></span>
             <svg class="door__seal wax-seal"><use href="#i-seal"/></svg>
           </span>
-          <span class="door__name" data-t="rooms.star.name">별의 방</span>
+          <span class="door__name" data-t="rooms.star.name">베다의 방</span>
           <span class="door__origin" data-t="hub.doors.star.origin">인도 · 베다</span>
           <span class="door__reads" data-t="hub.doors.star.reads">지금의 속마음</span>
           <span class="door__lock visually-hidden" data-t="hub.doorLocked">잠긴 문 — 앞의 문을 지나면 열려요</span>
@@ -456,7 +456,7 @@
           </button></li>
           <li class="so-far__item is-done" data-room="star"><button class="so-far__line" type="button" data-js="sofar-line" data-room="star" data-go="star-result">
             <span class="so-far__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span>
-            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">III · </span><span data-t="rooms.star.name">별의 방</span> · <b data-js="sofar-result"></b></span><span class="so-far__key" data-js="sofar-key"></span></span>
+            <span class="so-far__text"><span class="so-far__room"><span aria-hidden="true">III · </span><span data-t="rooms.star.name">베다의 방</span> · <b data-js="sofar-result"></b></span><span class="so-far__key" data-js="sofar-key"></span></span>
             <span class="so-far__go" aria-hidden="true">›</span>
           </button></li>
         </ol>
@@ -1099,13 +1099,13 @@
 
     </section>
 
-    <!-- ═════════ 1-S. 별의 방: 시작 ═════════ -->
-    <section class="screen screen--dock room-intro" id="screen-star-intro" data-js="screen-star-intro" data-room="star" data-preview="1. 별의 방 — 시작">
+    <!-- ═════════ 1-S. 베다의 방: 시작 ═════════ -->
+    <section class="screen screen--dock room-intro" id="screen-star-intro" data-js="screen-star-intro" data-room="star" data-preview="1. 베다의 방 — 시작">
       <header class="room-head">
         <div class="room-emblem room-emblem--star" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__icon room-emblem__moon" viewBox="0 0 40 40"><use href="#icon-star" /></svg></div>
         <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-star" /></svg>
         <p class="eyebrow" lang="en" data-t="star.intro.eyebrow">THE STAR ROOM</p>
-        <h1 class="room-head__title" data-t="star.intro.title">별의 방</h1>
+        <h1 class="room-head__title" data-t="star.intro.title">베다의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="2"></span> <span data-t="rooms.star.chapterName">마음결</span></p>
         <p class="room-head__pitch" data-t="star.intro.pitch">태어난 순간 하늘의 달이 알려주는, 지금의 속마음</p>
         <!-- (9단계) 안내자 한마디: greet -->
@@ -1124,8 +1124,8 @@
       </div>
     </section>
 
-    <!-- ═════════ 2-S. 별의 방: 입력 ═════════ -->
-    <section class="screen screen--dock room-input" id="screen-star-input" data-js="screen-star-input" data-room="star" data-preview="2. 별의 방 — 입력">
+    <!-- ═════════ 2-S. 베다의 방: 입력 ═════════ -->
+    <section class="screen screen--dock room-input" id="screen-star-input" data-js="screen-star-input" data-room="star" data-preview="2. 베다의 방 — 입력">
       <header class="room-head room-head--compact">
         <p class="eyebrow" lang="en" data-t="star.intro.eyebrow">THE STAR ROOM</p>
         <h1 class="room-head__title" data-t="star.input.title">언제 태어났나요?</h1>
@@ -1184,10 +1184,10 @@
       </div>
     </section>
 
-    <!-- ═════════ 3-S. 별의 방: 의식 (약 5초, 손대지 않고 지켜보는 되감기) ═════════
+    <!-- ═════════ 3-S. 베다의 방: 의식 (약 5초, 손대지 않고 지켜보는 되감기) ═════════
          JS: .star-dial에 style="--moon-deg:57.3deg"(달의 황경), 화면에 .is-running → 약 4.4초 뒤 .is-landed,
              달이 멈춘 집 g[data-js="star-nak"][data-n=번호]에 .is-home -->
-    <section class="screen ritual ritual--star" id="screen-star-ritual" data-js="screen-star-ritual" data-room="star" data-preview="3. 별의 방 — 의식 (정적 검토: 착지한 뒤 모습)">
+    <section class="screen ritual ritual--star" id="screen-star-ritual" data-js="screen-star-ritual" data-room="star" data-preview="3. 베다의 방 — 의식 (정적 검토: 착지한 뒤 모습)">
       <!-- (8단계, U4) 기다리는 구간이 시작되고 1초 뒤 .is-visible. 아무 데나 누르면 결과로 -->
       <p class="ritual-skip" data-js="ritual-skip" data-t="ritual.skipHint">누르면 바로 보기</p>
       <!-- (9단계) 안내자 한마디: ritual -->
@@ -1268,9 +1268,9 @@
       <div class="ritual__horizon" aria-hidden="true"></div>
     </section>
 
-    <!-- ═════════ 3-S′. 별의 방: 시각 모름 → 후보 고르기 (2개 또는 3개) ═════════
+    <!-- ═════════ 3-S′. 베다의 방: 시각 모름 → 후보 고르기 (2개 또는 3개) ═════════
          JS: 후보 수만큼 칸·카드를 보이고 나머지는 .is-hidden. 칸 너비는 style="--share:하루 중 비율" -->
-    <section class="screen star-choose" id="screen-star-choose" data-js="screen-star-choose" data-room="star" data-preview="3′. 별의 방 — 후보 고르기">
+    <section class="screen star-choose" id="screen-star-choose" data-js="screen-star-choose" data-room="star" data-preview="3′. 베다의 방 — 후보 고르기">
       <header class="room-head room-head--compact">
         <p class="eyebrow" lang="en" data-t="star.choose.eyebrow">A RARE DAY</p>
         <h1 class="room-head__title" data-t="star.choose.title">그날, 달이 집을 옮겼어요</h1>
@@ -1319,8 +1319,8 @@
       <p class="star-choose__note" data-t="star.choose.note">고른 집은 나중에 "다른 날짜로 보기"에서 언제든 바꿀 수 있어요.</p>
     </section>
 
-    <!-- ═════════ 4-S. 별의 방: 결과 ═════════ -->
-    <section class="screen result" id="screen-star-result" data-js="screen-star-result" data-room="star" data-preview="4. 별의 방 — 결과">
+    <!-- ═════════ 4-S. 베다의 방: 결과 ═════════ -->
+    <section class="screen result" id="screen-star-result" data-js="screen-star-result" data-room="star" data-preview="4. 베다의 방 — 결과">
 
       <!-- (9단계) 안내자 한마디: open -->
       <div class="say say--open" data-js="guide-open">
@@ -1336,7 +1336,7 @@
           <path class="seal__marks" pathLength="1" d="M100 6V20M100 180V194M6 100H20M180 100H194M33.5 33.5L43 43M157 157L166.5 166.5M166.5 33.5L157 43M43 157L33.5 166.5" />
         </svg>
         <span class="capture__flash" aria-hidden="true"></span>
-        <p class="capture__eyebrow" data-t="star.result.eyebrow">낯선 점술관 · 별의 방</p>
+        <p class="capture__eyebrow" data-t="star.result.eyebrow">낯선 점술관 · 베다의 방</p>
         <div class="moon-emblem" aria-hidden="true" data-js="result-glyphs">
           <svg class="moon-emblem__svg" viewBox="0 0 120 120">
             <circle class="moon-emblem__orbit" cx="60" cy="60" r="56" pathLength="1" />
@@ -1669,7 +1669,7 @@
           <span class="next-door__glyph" aria-hidden="true"><svg class="door__moon" viewBox="0 0 40 40"><path d="M25 7a14 14 0 1 0 0 26a11 11 0 1 1 0-26Z" fill="currentColor"/></svg></span>
           <span class="next-door__num" aria-hidden="true">III</span>
           <span class="next-door__label" data-t="result.nextDoor.open">다음 문 열기</span>
-          <span class="next-door__name" data-t="rooms.star.name">별의 방</span>
+          <span class="next-door__name" data-t="rooms.star.name">베다의 방</span>
         </button>
       </section>
 
@@ -1824,7 +1824,7 @@
       <div class="ritual-timer" aria-hidden="true"><span class="ritual-timer__bar"></span></div>
     </section>
 
-    <!-- ═════════ 3-D′. 데칸의 방: 그날 태양이 데칸 경계를 넘음 → 두 후보 고르기 (별의 방 후보 고르기와 같은 틀·class) ═════════ -->
+    <!-- ═════════ 3-D′. 데칸의 방: 그날 태양이 데칸 경계를 넘음 → 두 후보 고르기 (베다의 방 후보 고르기와 같은 틀·class) ═════════ -->
     <section class="screen star-choose decan-choose" id="screen-decan-choose" data-js="screen-decan-choose" data-room="decan" data-preview="3′. 데칸의 방 — 후보 고르기">
       <header class="room-head room-head--compact">
         <p class="eyebrow" lang="en" data-t="decan.choose.eyebrow">TWO FACES OF THE DAY</p>
@@ -2560,7 +2560,7 @@
         <!-- (2단계) 여섯 방, 2열 × 3행. 장 순서(1~6장)대로 -->
         <div class="story-empty__doors">
           <button class="btn btn--secondary" type="button" data-room="ogham" data-go="ogham-intro" data-t="rooms.ogham.name">오검의 방</button>
-          <button class="btn btn--secondary" type="button" data-room="star" data-go="star-intro" data-t="rooms.star.name">별의 방</button>
+          <button class="btn btn--secondary" type="button" data-room="star" data-go="star-intro" data-t="rooms.star.name">베다의 방</button>
           <button class="btn btn--secondary" type="button" data-room="decan" data-go="decan-intro" data-t="rooms.decan.name">데칸의 방</button>
           <button class="btn btn--secondary" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-t="rooms.tzolkin.name">촐킨의 방</button>
           <button class="btn btn--secondary" type="button" data-room="sibyl" data-go="sibyl-intro" data-t="rooms.sibyl.name">시빌라 신탁의 방</button>
@@ -2725,7 +2725,7 @@
                   <span class="chapter-row__num" aria-hidden="true">III</span>
                   <span class="chapter-row__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span>
                   <span class="chapter-row__text">
-                    <span class="chapter-row__name" data-t="rooms.star.name">별의 방</span>
+                    <span class="chapter-row__name" data-t="rooms.star.name">베다의 방</span>
                     <span class="chapter-row__sub" data-js="book-chapter-sub"></span>
                     <span class="chapter-row__state" data-js="book-chapter-state"></span>
                   </span>
@@ -3048,7 +3048,7 @@
           <article class="book-room report-part" data-js="book-room" data-part="star" data-room="star" id="book-star" style="--i:2" aria-labelledby="book-star-title">
             <header class="book-room__head">
               <span class="book-room__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span>
-              <p class="book-room__num"><span aria-hidden="true">III</span> <span data-t="rooms.star.name">별의 방</span></p>
+              <p class="book-room__num"><span aria-hidden="true">III</span> <span data-t="rooms.star.name">베다의 방</span></p>
               <h3 class="book-room__title" id="book-star-title" data-js="book-room-result"></h3>
               <p class="book-room__key" data-js="book-room-key"></p>
             </header>
@@ -3208,7 +3208,7 @@
                     <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
                   </tr>
                   <tr class="cross-table__row" data-js="cross-row" data-room="star">
-                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">III</span><span class="cross-table__name" data-t="rooms.star.name">별의 방</span><span class="cross-table__result" data-js="cross-result"></span></th>
+                    <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">III</span><span class="cross-table__name" data-t="rooms.star.name">베다의 방</span><span class="cross-table__result" data-js="cross-result"></span></th>
                     <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true"></span><span data-js="cross-arch">연인</span></td>
                     <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:4" aria-hidden="true"></span><span class="axis-meter__num">4</span></td>
                     <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:0" aria-hidden="true"></span><span class="axis-meter__num">0</span></td>
@@ -3423,7 +3423,7 @@
           </li>
           <li class="pv-toc__item" data-js="preview-chapter" data-chapter="star" data-kind="paid" data-room="star">
             <span class="pv-toc__num" aria-hidden="true">III</span>
-            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.star.name">별의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub"></span></span>
+            <span class="pv-toc__text"><span class="pv-toc__name"><span data-t="rooms.star.name">베다의 방</span></span><span class="pv-toc__sub" data-js="preview-chapter-sub"></span></span>
             <span class="pv-toc__meta"><span class="pv-toc__tag" data-js="preview-chapter-tag"></span><span class="pv-toc__vol" data-js="preview-chapter-vol">약 3,400자 · 7분</span></span>
           </li>
           <li class="pv-toc__item" data-js="preview-chapter" data-chapter="decan" data-kind="paid" data-room="decan">
@@ -3517,7 +3517,7 @@
                 <p class="first-lines__rest" data-js="preview-first-rest"></p>
               </li>
               <li class="first-lines__item" data-js="preview-first" data-chapter="star" data-room="star">
-                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">III</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span><span class="first-lines__room" data-t="rooms.star.name">별의 방</span><span class="first-lines__result" data-js="preview-first-result"></span></p>
+                <p class="first-lines__head"><span class="first-lines__num" aria-hidden="true">III</span><span class="first-lines__mark" aria-hidden="true"><svg class="sig" viewBox="0 0 40 40"><use href="#icon-star" /></svg></span><span class="first-lines__room" data-t="rooms.star.name">베다의 방</span><span class="first-lines__result" data-js="preview-first-result"></span></p>
                 <p class="first-lines__text" data-js="preview-first-text"></p>
                 <p class="first-lines__rest" data-js="preview-first-rest"></p>
               </li>
@@ -3571,7 +3571,7 @@
                   <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:2" aria-hidden="true"></span><span class="axis-meter__num">2</span></td>
                 </tr>
                 <tr class="cross-table__row" data-js="cross-row" data-room="star">
-                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">III</span><span class="cross-table__name" data-t="rooms.star.name">별의 방</span><span class="cross-table__result" data-js="cross-result"></span></th>
+                  <th class="cross-table__room" scope="row"><span class="cross-table__num" aria-hidden="true">III</span><span class="cross-table__name" data-t="rooms.star.name">베다의 방</span><span class="cross-table__result" data-js="cross-result"></span></th>
                   <td class="cross-table__arch"><span class="cross-table__mark" data-js="cross-mark" aria-hidden="true"></span><span data-js="cross-arch">연인</span></td>
                   <td class="cross-table__val cross-table__c" data-js="cross-c"><span class="axis-meter" style="--v:4" aria-hidden="true"></span><span class="axis-meter__num">4</span></td>
                   <td class="cross-table__val cross-table__d" data-js="cross-d"><span class="axis-meter" style="--v:0" aria-hidden="true"></span><span class="axis-meter__num">0</span></td>
