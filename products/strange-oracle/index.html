@@ -513,7 +513,7 @@
           <div class="faq__item"><dt data-t="hub.faq.items.2.q">왜 순서대로 열리나요?</dt><dd data-t="hub.faq.items.2.a">타고난 그릇에서 오늘의 질문까지 한 사람의 이야기가 이어지도록 장 순서를 정해 두었어요. 첫 방에서 넣은 정보는 뒤의 방들이 이어서 써요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.3.q">내 정보는 어디에 남나요?</dt><dd data-t="hub.faq.items.3.a">이름·생년월일·태어난 시각·성별은 이 탭 안에서만 계산에 쓰고 어디에도 보내지 않아요. 탭을 닫거나 내 정보 지우기를 누르면 사라져요.</dd></div>
           <!-- (14단계) 책 문답: 무엇이 담기는지 (답 150자). 시험 페이지(test)에서만 구매 문답 -->
-          <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">방의 장과 숨은 장, 「겹치는 곳, 갈리는 곳」·시기별 흐름·2027년의 흐름·인연의 장·궁합·원형 심층까지 유료 12장이에요. 페이앱에서 9,900원을 결제하면 바로 열리고, 코드로 다른 기기에서도 열 수 있어요.</dd>
+          <div class="faq__item"><dt data-t="hub.faq.items.4.q">한 권의 책은 어떻게 사나요?</dt><dd data-t="hub.faq.items.4.a">방의 장과 숨은 장, 「겹치는 곳, 갈리는 곳」·시기별 흐름·2027년의 흐름·인연의 장·궁합·원형 심층까지 유료 13장이에요. 페이앱에서 9,900원을 결제하면 바로 열리고, 코드로 다른 기기에서도 열 수 있어요.</dd>
           </div>
           <!-- map:on -->
           <!-- (16단계) 지도 문답 2개 (답 150자 이내). 문구 담당(H4)가 data.js에 넣고 견본을 정리한다 -->
@@ -761,7 +761,17 @@
         <p class="capture__meta" data-js="result-meta"></p>
       </div>
 
+      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
+      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
       <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
+
+      <!-- (2026-10-25) 만신의 판정: 일간별 한 줄 + 일상 장면 세 줄 + 긍정 한 줄(data-saju.js stems[].verdict). 없으면(옛 data) 숨김 -->
+      <section class="verdict" data-js="saju-verdict" aria-labelledby="saju-verdict-label" hidden>
+        <p class="verdict__label" id="saju-verdict-label" data-t="saju.result.verdictLabel">만신의 판정</p>
+        <p class="verdict__head" data-js="saju-verdict-head"></p>
+        <ul class="verdict__lines" data-js="saju-verdict-lines"></ul>
+        <p class="verdict__turn" data-js="saju-verdict-turn"></p>
+      </section>
 
       <!-- 원국 판: 한지 종이. 시각 모름이면 시주 칸 "모름" + saju-hour-note. 절입일+시각 모름이면 saju-jeolip-note(JS가 템플릿 채움).
            이어가기 코드로 복원한 방: 표·막대 대신 saju-restored-note 한 줄(.is-hidden 해제), wonguk·ohaeng은 hidden -->
@@ -1016,6 +1026,8 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
+      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
+      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
       <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
@@ -1352,6 +1364,8 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
+      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
+      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
       <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
@@ -1581,6 +1595,8 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
+      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
+      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
       <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
@@ -1903,6 +1919,8 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
+      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
+      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
       <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
@@ -2164,6 +2182,8 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
+      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
+      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
       <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
@@ -2386,6 +2406,8 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
+      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
+      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
       <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
@@ -3681,7 +3703,7 @@
         <h1 class="room-head__title" data-t="pay.title">한 권의 책 전체 열기</h1>
       </header>
 
-      <!-- 1 받는 것: 유료 12장(17단계 인연의 장, 18단계 「겹치는 곳, 갈리는 곳」 더함)과 장마다 분량(실측), 합계. li는 JS가 data-volume 실측값으로 만든다 (아래는 견본 4줄) -->
+      <!-- 1 받는 것: 유료 13장(2026-10-25 만신의 장, 17단계 인연의 장, 18단계 「겹치는 곳, 갈리는 곳」 더함)과 장마다 분량(실측), 합계. li는 JS가 data-volume 실측값으로 만든다 (아래는 견본 4줄) -->
       <section class="pay-sec" aria-labelledby="pay-what-title">
         <h2 class="pay-sec__title" id="pay-what-title"><span class="pay-sec__num" aria-hidden="true">1</span><span data-t="pay.what.title">받는 것</span></h2>
         <ol class="pay-list" data-js="pay-chapters">
@@ -4408,6 +4430,8 @@
   </dialog>
 
 
+  <!-- (2026-10-25) 결과 화면 아래 결제 버튼(잠긴 방에서만). 방 결과 아래 결제 버튼이 화면에 보이면 숨긴다. app.js updateDock -->
+  <div class="pay-dock" data-js="pay-dock" hidden><button class="pay-dock__btn" type="button" data-js="pay-dock-btn"><span class="pay-dock__label" data-js="pay-dock-label"></span><span class="pay-dock__price" data-js="pay-dock-price"></span></button></div>
   <p class="toast" data-js="toast" role="status" aria-live="polite"></p>
 
 </body>

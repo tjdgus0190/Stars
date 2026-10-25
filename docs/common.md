@@ -111,7 +111,7 @@ await ShareButtons.copyText(글자); // 클립보드 쓰기 → true/false (버�
 ShareButtons.reset();            // 완료 줄 모두 닫기 (화면을 옮길 때)
 ```
 - 링크 복사: `share-link-copy`를 누르면 주소를 클립보드에 넣고, 그 버튼에서 위로 올라가며 처음 만나는 `share-link-status`를 연다. 성공이면 `share-link-msg`, 막혔으면 `share-link-url`에 주소를 넣어 보인다. 버튼이 여러 곳에 있어도 init은 한 번만 부른다.
-- 카카오톡: `jsKey`와 `sdkUrl`이 **둘 다** 있을 때만 `share-kakao-slot` 안에 `<button class="text-link">`를 넣는다. 하나라도 비면 버튼도 SDK 요청도 없다. SDK는 버튼을 누른 순간에만 불러온다. 공유 내용은 title·description·imageUrl·주소뿐.
+- 카카오톡: `jsKey`와 `sdkUrl`이 **둘 다** 있을 때만 `share-kakao-slot` 안에 `<button class="text-link">`를 넣는다. (2026-10-25) 자리에 `data-variant="big"`을 붙이면 글자 링크 대신 노란 카카오 버튼(`btn-kakao btn-kakao--share`, 말풍선 기호 + 설정 `bigLabel`, 없으면 `label`)을 넣는다. 버튼 모양 CSS는 제품 쪽에 둔다. 하나라도 비면 버튼도 SDK 요청도 없다. SDK는 버튼을 누른 순간에만 불러온다. 공유 내용은 title·description·imageUrl·주소뿐.
   - SDK 주소는 운영자 결정(strange-oracle 기획서 32번) 전이라 넣지 않았다. **키·주소를 넣은 뒤의 실제 공유 동작은 미확인**(빈 키 분기까지만 시험). 키는 운영자가 넣는다.
 - 개인정보: 주소에 입력값·결과 코드를 넣지 않는다(쿼리·해시를 뺀다). 이 부품은 입력값을 받지 않는다.
 

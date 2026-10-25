@@ -5602,3 +5602,53 @@ body:has(.hub.is-active) .toast { bottom: calc(var(--tabs-h, 64px) + var(--space
 
 /* (2026-10-25 성능) 스크롤하는 동안 배경 애니메이션을 잠시 멈춘다 (JS가 body.is-scrolling, 멈추고 0.15초 뒤 풀림) */
 body.is-scrolling .cosmos > * { animation-play-state: paused; }
+
+/* ── (2026-10-25) 만신의 판정: 결과 카드 바로 아래, 직설 세 줄 ── */
+.verdict { margin: var(--space-4) 0 var(--space-5); padding: 20px 18px 18px; border: 1px solid oklch(0.78 0.11 75 / 0.55); border-radius: 14px;
+  background: linear-gradient(160deg, oklch(0.26 0.05 60 / 0.55), oklch(0.17 0.035 285 / 0.75)); box-shadow: 0 0 28px oklch(0.75 0.12 70 / 0.12); }
+.verdict[hidden] { display: none; }
+.verdict__label { margin: 0 0 10px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.08em; color: oklch(0.82 0.11 80); }
+.verdict__head { margin: 0 0 14px; font-size: clamp(20px, 5.8vw, 24px); line-height: 1.4; font-weight: 800; color: #fff; word-break: keep-all; text-wrap: pretty; }
+.verdict__lines { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.verdict__line { position: relative; padding-left: 18px; font-size: var(--fs-md); line-height: 1.55; color: var(--c-text-strong); word-break: keep-all; }
+.verdict__line::before { content: ""; position: absolute; left: 2px; top: 0.62em; width: 7px; height: 7px; border-radius: 50%; background: oklch(0.8 0.12 75); box-shadow: 0 0 8px oklch(0.8 0.12 75 / 0.7); }
+.verdict__turn { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid oklch(0.78 0.11 75 / 0.3); font-size: var(--fs-sm); line-height: 1.7; color: oklch(0.9 0.06 85); word-break: keep-all; }
+
+/* ── (2026-10-25) 만신의 방 잠긴 칸: "여기까지가 흔히 보던 사주" ── */
+.room-rest--saju { border-color: oklch(0.78 0.11 75 / 0.6); background: linear-gradient(180deg, oklch(0.22 0.045 60 / 0.5), oklch(0.17 0.035 285 / 0.8)); }
+.room-rest__cut { margin: 0 0 var(--space-2); font-size: clamp(20px, 5.8vw, 24px); line-height: 1.4; font-weight: 800; color: #fff; word-break: keep-all; }
+.room-rest--saju .room-rest__lead { color: var(--c-text); font-size: var(--fs-md); line-height: 1.65; word-break: keep-all; }
+.room-rest--saju .room-rest__lock { grid-template-columns: 28px 1fr 36px; }
+.room-rest--saju .room-rest__lock-name { white-space: normal; word-break: keep-all; line-height: 1.45; }
+.room-rest__more { margin: var(--space-3) 0 0; font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); word-break: keep-all; }
+
+/* ── (2026-10-25) 결제 버튼: 금빛으로 크고 눈에 띄게 (방 결과 아래 · 결제 전 화면 · 떠 있는 버튼 같은 결) ── */
+.room-rest__buy, .pay-buy, .pay-dock__btn {
+  min-height: 58px; border: 0; border-radius: 14px; font-size: 18px; font-weight: 800; letter-spacing: -0.01em;
+  background: linear-gradient(100deg, oklch(0.74 0.12 70), oklch(0.88 0.11 88) 50%, oklch(0.76 0.13 66));
+  color: oklch(0.2 0.04 60); box-shadow: 0 8px 28px oklch(0.75 0.13 70 / 0.42), inset 0 1px 0 oklch(1 0 0 / 0.5);
+}
+.room-rest__buy:hover, .pay-buy:not([aria-disabled="true"]):hover, .pay-dock__btn:hover { filter: brightness(1.06); }
+.pay-buy[aria-disabled="true"] { filter: grayscale(0.6); }
+.room-rest__buy { margin-top: var(--space-3); }
+
+/* 결과 화면 아래 떠 있는 결제 버튼 */
+.pay-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: calc(var(--z-toast) - 1); padding: 10px var(--gutter, 16px) calc(10px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, transparent, oklch(0.12 0.03 285 / 0.92) 38%); pointer-events: none; transition: transform 0.25s ease, opacity 0.25s ease; }
+.pay-dock[hidden] { display: none; }
+.pay-dock.is-tucked { transform: translateY(110%); opacity: 0; }
+.pay-dock__btn { pointer-events: auto; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 448px; margin: 0 auto; padding: 0 18px; font-family: var(--font-sans); cursor: pointer; }
+.pay-dock__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pay-dock__price { flex: none; white-space: nowrap; padding: 3px 10px; border-radius: 999px; background: oklch(0.2 0.04 60 / 0.14); font-size: 15px; font-weight: 800; }
+body.has-pay-dock .screen.is-active { padding-bottom: calc(var(--space-16) + 84px); }
+body.has-pay-dock .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+@media (prefers-reduced-motion: reduce) { .pay-dock { transition: none; } }
+
+/* ── (2026-10-25) 카카오톡 공유: 결과 카드 바로 아래 큰 노란 버튼 ── */
+.kakao-share { margin: var(--space-4) 0 0; }
+.kakao-share:empty { display: none; }
+.btn-kakao--share { min-height: 54px; border-radius: 14px; font-size: 17px; font-weight: 800; box-shadow: 0 6px 22px rgba(254, 229, 0, 0.22); }
+.btn-kakao--share .btn-kakao__sym { width: 22px; height: 22px; }
+.btn-kakao--share span { white-space: nowrap; }
+/* 큰 버튼이 있는 화면에서는 아래 글자 링크의 카카오 자리를 감춘다(같은 일을 두 번 보이지 않게) */
+.screen:has(.kakao-share:not(:empty)) .result-more .share-kakao-slot { display: none; }

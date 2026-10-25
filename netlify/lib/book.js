@@ -96,14 +96,7 @@ async function handle(req, env, dir, now = Date.now(), store = null) {
   if (keys.length !== 2 || keys[0] !== "file" || keys[1] !== "pass") return send(400, { error: "bad" }); // 두 칸뿐
   if (typeof b.file !== "string" || !ALLOW.includes(b.file)) return send(400, { error: "file" }); // 파일을 읽지 않고 거부
   if (typeof b.pass !== "string") return send(400, { error: "bad" });
-  if (b.file === "saju") {
-    if (!dir) return send(500, { error: "server" });
-    try {
-      return send(200, readPaid(dir, b.file));
-    } catch (e) {
-      return send(500, { error: "server" });
-    }
-  }
+  // (2026-10-25 운영자) 만신의 장도 유료로 되돌렸다: 방 결과는 무료, "이 방의 나머지 이야기"부터 결제. 예외 없이 아래 열람 코드 확인을 거친다
   if (!SHAPE.test(normalize(b.pass))) {
     addFail(ip, now);
     return send(401, { error: "pass" });

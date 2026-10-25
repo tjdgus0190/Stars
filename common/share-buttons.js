@@ -92,7 +92,7 @@
     Kakao.Share.sendDefault(msg);
   }
 
-  // opts: { url, root = document, onCopy(ok), kakao: { jsKey, sdkUrl, integrity, label, title, description, imageUrl, imageWidth?, imageHeight?, button?, content?(slot), onFail() } }
+  // opts: { url, root = document, onCopy(ok), kakao: { jsKey, sdkUrl, integrity, label, bigLabel?, title, description, imageUrl, imageWidth?, imageHeight?, button?, content?(slot), onFail() } }
   //   (2026-10-25) content(slot): 누른 자리에 맞춘 { title, description, imageUrl, url } 을 돌려주면 그 값으로 보낸다(빠진 칸은 위 기본값)
   function init(opts) {
     const root = opts.root || document;
@@ -109,8 +109,17 @@
       root.querySelectorAll('[data-js="share-kakao-slot"]').forEach((slot) => {
         const b = document.createElement("button");
         b.type = "button";
-        b.className = "text-link";
-        b.textContent = k.label || "";
+        // (2026-10-25) data-variant="big": 노란 카카오 버튼(말풍선 기호 + bigLabel). 그 밖은 예전처럼 글자 링크
+        if (slot.dataset.variant === "big") {
+          b.className = "btn-kakao btn-kakao--share";
+          b.innerHTML = '<svg class="btn-kakao__sym" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.2C6.6 3.2 2.3 6.6 2.3 10.8c0 2.7 1.8 5.1 4.6 6.5l-1 3.6c-.1.3.3.6.6.4l4.3-2.8c.4 0 .8.1 1.2.1 5.4 0 9.7-3.4 9.7-7.8S17.4 3.2 12 3.2Z"/></svg>';
+          const t = document.createElement("span");
+          t.textContent = k.bigLabel || k.label || "";
+          b.append(t);
+        } else {
+          b.className = "text-link";
+          b.textContent = k.label || "";
+        }
         b.addEventListener("click", () => {
           const c = (k.content && k.content(slot)) || {};
           sendKakao(Object.assign({}, k, c), c.url || url).catch(() => k.onFail && k.onFail());

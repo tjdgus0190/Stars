@@ -411,7 +411,7 @@ const STUB_ADS = `(function () {
   check("18-5 #preview 직접 0/7 → 입구", (await active()) === "screen-hub");
 
   // 18-c 결제 전 3/7: 잠긴 장으로 가는 길 — (2026-10-21 기대값 변경, 결제 유도 앞당기기) 결제 전 화면으로 간다. SDK·유료 장 요청은 0
-  //   만신의 장은 무료가 되어(로컬 작업 4cc23a1) 여는 글 끝 "다음 장"(saju)은 잠긴 길이 아니라 그 장 표지로 열린다
+  //   (2026-10-25 운영자) 만신의 장도 다시 유료 → 여는 글 끝 "다음 장"(saju)도 잠긴 길(결제 전 화면)
   await fresh(["saju", "ogham", "star"], "#report", PROFILE, false);
   const sdk3 = sdkReq();
   const toReport = async () => { await b.goto(BASE + "#report"); await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'"); };
@@ -441,7 +441,7 @@ const STUB_ADS = `(function () {
   await toDeeper();
   const road4 = { scr: await active() };
   const roads = [road1, road2, road3, road4];
-  check("18-12의 8 (2026-10-21) 1~6/7 결제 전 잠긴 길(목차 잠긴 장·방 결과 책 한 줄·이어 읽기) → 결제 전 화면 · 여는 글 다음 장 = 무료 만신의 장 표지 · SDK 0", [road1, road2, road4].every((r) => r.scr === "screen-deeper") && road3.next === "saju" && road3.scr === "screen-report" && road3.view !== "toc" && sdkReq() === sdk3, JSON.stringify(roads));
+  check("18-12의 8 (2026-10-21 → 2026-10-25) 1~6/7 결제 전 잠긴 길(목차 잠긴 장·방 결과 책 한 줄·여는 글 다음 장(만신, 이제 유료)·이어 읽기) → 결제 전 화면 · SDK 0", roads.every((r) => r.scr === "screen-deeper") && road3.next === "saju" && sdkReq() === sdk3, JSON.stringify(roads));
   await toReport();
   await click("[data-js=book-buy]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
@@ -463,7 +463,7 @@ const STUB_ADS = `(function () {
       closeHidden: s.querySelector('[data-js=preview-close]').hidden, closeHas: s.querySelector('[data-js=preview-close]').children.length > 0, disc: !s.querySelector('[data-js=disclaimer-slot]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(s.textContent), ads: s.querySelectorAll('[data-ad], .ad-slot').length, band: !s.querySelector('[data-js=preview-test-band]').classList.contains('is-hidden'),
       prim: s.querySelectorAll('.btn--primary').length, price: s.querySelector('[data-js=preview-go-label]').textContent, h: [...s.querySelectorAll('h1,h2,h3')].map(h => h.tagName).join(''), interest: !s.querySelector('[data-js=preview-interest]').hidden && s.querySelector('[data-js=preview-interest-text]').textContent === TEXT.book.interest.sibyl.love,
       bad: /undefined|\\{(who|n|price|arch|sub)\\}/.test(s.textContent), wide: document.documentElement.scrollWidth <= innerWidth }; })())`));
-  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 15장 목차(무료 3 글자 표지, 20단계 year 포함) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 15 && pv.toc.startsWith("open:free,saju:free") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid,year:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /9,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
+  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 15장 목차(무료 2 글자 표지 — 2026-10-25 만신의 장 유료, 20단계 year 포함) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 15 && pv.toc.startsWith("open:free,saju:paid") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid,year:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /9,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
   // 유료 문장 지문(build-dist와 같은 규칙: 30자 이상 문자열의 가운데 60자, 공개 data*.js와 같은 문자열은 뺌)이 미리보기 화면 HTML에 0
   const prints = (() => {
     const vm = require("vm");
@@ -492,8 +492,8 @@ const STUB_ADS = `(function () {
   const pay7 = await ev("Object.fromEntries([...document.querySelectorAll('[data-js=pay-chapters] li')].map(li => [li.firstElementChild.firstChild.textContent, (li.querySelector('.pay-list__vol').textContent.match(/[\\d,]+/) || [''])[0]]))");
   const roomName = await ev("Object.fromEntries(" + JSON.stringify(ORDER) + ".map((r) => [r, TEXT.rooms[r].name]))");
   const payOf = (r) => { const k = Object.keys(pay7).find((x) => x.endsWith(" " + roomName[r])); return k ? pay7[k] : null; };
-  const sameN = ORDER.filter((r) => r !== "saju").every((r) => rests[r] && rests[r] === payOf(r)) && payOf("saju") === null; // (2026-10-21) 만신의 장은 무료라 '받는 것'에 없음
-  check("18-12의 7 '이 장의 나머지 약 {n}자' = 결제 전 화면 '받는 것'의 그 장 분량 (유료 방 장 6개, 만신의 장은 무료)", sameN, JSON.stringify({ rests, pay7 }));
+  const sameN = ORDER.every((r) => rests[r] && rests[r] === payOf(r)); // (2026-10-25) 만신의 장도 유료라 '받는 것'에 7개 방 장 모두
+  check("18-12의 7 '이 장의 나머지 약 {n}자' = 결제 전 화면 '받는 것'의 그 장 분량 (유료 방 장 7개, 2026-10-25 만신 포함)", sameN, JSON.stringify({ rests, pay7 }));
   const pvp = await dlNow();
   check("18-5·18-11 미리보기 주 버튼 → 결제 전 화면(결제하지 않음, SDK 0) · so_pay from preview · 미리보기로 돌아가기 보임", evSeen(pvp, "so_pay", { step: "view", from: "preview" }) && !(await ev("document.querySelector('[data-js=pay-back-preview]').hidden")) && sdkReq() === sdk7, JSON.stringify(pvp.filter((a) => a[1] === "so_pay")));
   await click("[data-js=pay-back-preview]");
@@ -519,8 +519,7 @@ const STUB_ADS = `(function () {
   await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))");
   await sleep(150);
   await click("[data-js=book-page].is-current [data-js=chapter-end-next]");
-  await sleep(600);
-  const p3 = (await active()) === "screen-report" && (await view()) !== "toc"; // (2026-10-21) 여는 글 다음 장 = 무료 만신의 장 → 미리보기가 아니라 그 장이 열린다
+  const p3 = (await toPv()) && (await targetIs("[data-js=preview-first][data-chapter=saju]")); // (2026-10-25) 만신의 장도 유료 → 다른 잠긴 방 장처럼 미리보기의 그 장 첫 줄 자리
   await ev("sessionStorage.setItem('strange-oracle-bookmark', 'ogham:2')");
   await b.goto(BASE + "#report");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'");

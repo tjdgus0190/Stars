@@ -32,21 +32,38 @@ const paidLine = (file, global, pick) => {
     await sleep(400);
   };
 
-  // 1. 만신: 무료 — [이어서 읽기] → 함수 book(saju, 코드 없이) → 펼침
+  // 1. (2026-10-25 운영자) 만신도 유료: 결제 전 = 판정 + "여기까지가 흔히 보던 사주" 잠긴 칸(이 사람의 장 제목) + 떠 있는 결제 버튼. 함수 book 요청 0
+  const PUB = (() => { const w = {}; new Function("window", fs.readFileSync(path.join(PAID, "..", "..", "..", "data-saju.js"), "utf8"))(w); return w.SAJU; })();
+  const sajuStrikeAll = paidLine("book-saju.js", "BOOK_SAJU", (x) => x.full.flatMap((e) => e.strike.lines.concat(e.strike.turn)));
+  const n0 = b.log.bodies.length;
   await skip("saju-result");
   let r = await rest();
-  check("A1 만신 결과: 나머지 이야기 칸 free · 가격 없음 · [이어서 읽기 · 무료]", r && r.state === "free" && !/[0-9],[0-9]{3}\s*원/.test(r.text) && (await ev("!!document.querySelector('.screen.is-active [data-js=room-rest-read]')")), r && r.state);
-  const n0 = b.log.bodies.length;
-  await click(".screen.is-active [data-js=room-rest-read]");
+  const sj = await ev(`(() => { const s = document.querySelector('.screen.is-active'); const v = s.querySelector('[data-js=saju-verdict]'); const d = document.querySelector('[data-js=pay-dock]');
+    return { verdict: v && !v.hidden ? { head: v.querySelector('[data-js=saju-verdict-head]').textContent, lines: [...v.querySelectorAll('.verdict__line')].map((x) => x.textContent), turn: v.querySelector('[data-js=saju-verdict-turn]').textContent, beforeBoard: !!(v.compareDocumentPosition(s.querySelector('[data-js=saju-board]')) & 4) } : null,
+      cut: s.querySelector('.room-rest__cut')?.textContent || '', locks: [...s.querySelectorAll('.room-rest__lock-name')].map((x) => x.textContent), buy: !!s.querySelector('[data-js=room-rest-buy]'),
+      dock: d && !d.hidden ? d.querySelector('[data-js=pay-dock-label]').textContent + ' ' + d.querySelector('[data-js=pay-dock-price]').textContent : null, html: document.documentElement.outerHTML }; })()`);
+  const stem = PUB.stems.find((x) => sj.verdict && x.verdict && sj.verdict.lines[0] === x.verdict.lines[0]);
+  check("A1 만신 결과(결제 전): 판정(머리 한 줄·세 줄·맺음, 원국 판보다 위)이 이 사람 일간의 공개 문장", Boolean(sj.verdict && stem && sj.verdict.lines.length === 3 && sj.verdict.head.includes(stem.verdict.head) && sj.verdict.turn === stem.verdict.turn && sj.verdict.beforeBoard), JSON.stringify(sj.verdict));
+  check("A2 만신 나머지 칸 locked · '여기까지가 흔히 보던 사주예요.' · 잠긴 줄 6개 = 직언 + 이 사람의 장 제목 4개 + 숨은 장 제목 · 9,900원 · [모두 열기]", r && r.state === "locked" && /흔히 보던 사주/.test(sj.cut) && sj.locks.length === 6 && stem && sj.locks[1] === stem.identity.title && sj.locks[2] === stem.event.title && sj.locks[3] === stem.shadow.title && sj.locks[4] === stem.advice.title && sj.locks[5].length > 0 && /9,900원/.test(r.text) && sj.buy, JSON.stringify(sj.locks));
+  check("A3 결제 전 만신 화면에 유료 원본 문장(직언 포함) 0 · 함수 book 요청 0", !sajuStrikeAll.some((t) => sj.html.includes(t)) && !b.log.bodies.slice(n0).some((x) => /\/api\/book/.test(x.url)));
+  check("A4 떠 있는 결제 버튼: 만신 문구 + 9,900원", /만신/.test(sj.dock || "") && /9,900원/.test(sj.dock || ""), sj.dock);
+  // 떠 있는 버튼 → 결제 전 화면, 결제를 시작한 방 = saju. 다른 화면에서는 숨음
+  await click("[data-js=pay-dock-btn]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  await sleep(300);
+  check("A5 떠 있는 버튼 → 결제 전 화면 · payroom=saju · 결제 전 화면에서는 버튼 숨음 · 받는 것에 Ⅰ 만신의 방", (await ev("sessionStorage.getItem('strange-oracle-payroom')")) === "saju" && (await ev("document.querySelector('[data-js=pay-dock]').hidden")) && /만신의 방/.test(await ev("document.querySelector('.screen.is-active').innerText")));
+  // 결제한 탭: 만신 바로 열림(직언이 장 맨 앞) · 떠 있는 버튼 없음
+  const n0b = b.log.bodies.length;
+  await skip("saju-result", 1);
   await waitFor("document.querySelector('.screen.is-active [data-js=room-rest]')?.dataset.state === 'open'");
   r = await rest();
-  const sajuReq = b.log.bodies.slice(n0).filter((x) => /\/api\/book/.test(x.url));
-  check("A2 펼침: Ⅱ~Ⅳ장·숨은 장 문단(빈 문단 0) · 요청 본문 = pass·file 두 칸, file=saju", r && r.state === "open" && r.ps >= 8 && r.empty === 0 && sajuReq.length === 1 && Object.keys(JSON.parse(sajuReq[0].body)).sort().join() === "file,pass" && JSON.parse(sajuReq[0].body).file === "saju", `${r && r.ps}문단 · ${sajuReq.map((x) => x.body.replace(/"pass":"[^"]*"/, '"pass":"…"')).join(" | ")}`);
+  const sajuReq = b.log.bodies.slice(n0b).filter((x) => /\/api\/book/.test(x.url));
+  check("A6 만신(결제한 탭): 바로 open · Ⅱ~Ⅳ장·숨은 장 문단(빈 문단 0) · 요청 본문 = pass·file 두 칸, file=saju · 떠 있는 버튼 숨음", r && r.state === "open" && r.ps >= 8 && r.empty === 0 && sajuReq.length >= 1 && sajuReq.every((q) => Object.keys(JSON.parse(q.body)).sort().join() === "file,pass" && JSON.parse(q.body).pass.length > 0) && sajuReq.some((q) => JSON.parse(q.body).file === "saju") && (await ev("document.querySelector('[data-js=pay-dock]').hidden")), `${r && r.ps}문단 · ${sajuReq.map((x) => x.body.replace(/"pass":"[^"]*"/, '"pass":"…"')).join(" | ")}`);
 
-  const strikeOf = () => ev("(() => { const x = document.querySelector('.screen.is-active [data-js=room-strike]'); return x ? { lines: [...x.querySelectorAll('.strike__line')].map((p) => p.textContent), turn: x.querySelector('.strike__turn')?.textContent || '', first: x.parentElement.querySelector('.room-rest__title + *, .room-rest__note + *') === x } : null; })()");
+  const strikeOf = () => ev("(() => { const x = document.querySelector('.screen.is-active [data-js=room-strike]'); return x ? { lines: [...x.querySelectorAll('.strike__line')].map((p) => p.textContent), turn: x.querySelector('.strike__turn')?.textContent || '', first: /room-rest__(title|note)/.test((x.previousElementSibling || {}).className || '') } : null; })()");
   const sajuStrike = paidLine("book-saju.js", "BOOK_SAJU", (x) => x.full.map((e) => e.strike.lines[0]));
   let st = await strikeOf();
-  check("A3 (24단계) 만신 펼침: 직격 세 마디 + 한 줄이 장 맨 앞 · 유료 원본 문장", st && st.lines.length === 3 && st.turn.length > 10 && st.first && sajuStrike.includes(st.lines[0]), st && st.lines[0]);
+  check("A7 (24단계) 만신 펼침: 직격 세 마디 + 한 줄이 장 맨 앞 · 유료 원본 문장", st && st.lines.length === 3 && st.turn.length > 10 && st.first && sajuStrike.includes(st.lines[0]), st && st.lines[0]);
 
   // 2. 오검: 결제 전 잠김 — 장 이름·분량·결제 버튼, 유료 문장 0
   const ogLine = paidLine("book-ogham.js", "BOOK_OGHAM", (x) => x.full[2].event.body[0]);
@@ -56,6 +73,7 @@ const paidLine = (file, global, pick) => {
   const html = await ev("document.documentElement.outerHTML");
   check("B1 오검 결과(결제 전): locked · 잠긴 줄 6개(직격 포함) · 9,900원 · [모두 열기]·[이미 샀어요]", r && r.state === "locked" && (await ev("document.querySelectorAll('.screen.is-active .room-rest__lock').length")) === 6 && /9,900원/.test(r.text) && (await ev("!!document.querySelector('.screen.is-active [data-js=room-rest-buy]') && !!document.querySelector('.screen.is-active [data-js=room-rest-have]')")), r && r.state);
   const ogStrike = paidLine("book-ogham.js", "BOOK_OGHAM", (x) => x.full.flatMap((e) => e.strike.lines.concat(e.strike.turn)));
+  check("B1b 오검(결제 전): 떠 있는 결제 버튼 보임(오검 문구) · 큰 카카오톡 버튼 1개 · 작은 카카오 글자 링크는 감춤", (await ev("(() => { const d = document.querySelector('[data-js=pay-dock]'); return !d.hidden && /이 방 이야기/.test(d.innerText); })()")) && (await ev("document.querySelectorAll('.screen.is-active .kakao-share .btn-kakao--share').length")) === 1 && (await ev("getComputedStyle(document.querySelector('.screen.is-active .result-more [data-js=share-kakao-slot]')).display")) === "none");
   check("B2 결제 전 화면에 유료 문장 0(직격 포함) · 함수 book 요청 0", !ogStrike.some((t) => html.includes(t)) && !(await ev("!!document.querySelector('.screen.is-active [data-js=room-strike]')")) && !html.includes(ogLine.slice(0, 30)) && !b.log.bodies.slice(n1).some((x) => /\/api\/book/.test(x.url)));
   await click(".screen.is-active [data-js=room-rest-have]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");

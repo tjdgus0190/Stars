@@ -259,6 +259,12 @@ test("다양성 실측 → out/book-variety.txt", () => {
     assert.strictEqual(store.log.length, 0);
     assert.ok((await call({ pass: CODE, file: "match" })).json.data.bond.first, "궁합 다양화 모듈(bond) 포함");
   });
+  test("함수 book (2026-10-25 운영자): 만신의 장(saju)도 유료 — 코드 없음·빈 코드·틀린 코드 401, 맞는 코드 200", async () => {
+    for (const pass of ["", "SOP-0000-0000-0000"]) assert.strictEqual((await call({ pass, file: "saju" }, { store: new MemStore() })).status, 401, JSON.stringify(pass));
+    const ok = await call({ pass: CODE, file: "saju" });
+    assert.strictEqual(ok.status, 200);
+    assert.strictEqual(ok.json.file, "saju");
+  });
   test("함수 book: 허용 목록 밖 file 400, 두 칸뿐, 405", async () => {
     for (const file of ["../x", "book-ogham", "OGHAM", "ogham.js", "../../../etc/passwd", "", "open", "close", ["ogham"], null])
       assert.strictEqual((await call({ pass: CODE, file })).status, 400, JSON.stringify(file));

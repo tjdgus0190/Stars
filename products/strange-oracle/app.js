@@ -523,6 +523,7 @@
       onScreen(name, next); // 화면 이벤트(GA4)
       if (name === "hub" || /-result$/.test(name)) prefetchNext();
       if (/-result$/.test(name)) renderRest(next); // (22단계) 이 방의 나머지 이야기
+      else updateDock(); // (2026-10-25) 방 결과가 아니면 떠 있는 결제 버튼을 숨긴다
     };
     currentName = name; // 전환 중에 다시 불려도 이전 화면 기준으로 기록하지 않게
     if (prev && prev !== next && !reduceMotion && !opts.instant) {
@@ -2424,6 +2425,25 @@
       });
     }
 
+    // (2026-10-25) 만신의 판정: 결과 맨 위. 옛 data(verdict 없음)면 칸째 숨김
+    const vd = js("saju-verdict", scr);
+    if (vd) {
+      const V = st.verdict;
+      const ok = Boolean(V && Array.isArray(V.lines) && V.lines.length);
+      vd.hidden = !ok;
+      js("saju-verdict-head", vd).textContent = ok ? strip(fill(R.verdictHead || "{head}", { head: V.head || "" })) : "";
+      const ul = js("saju-verdict-lines", vd);
+      ul.textContent = "";
+      if (ok)
+        V.lines.forEach((t) => {
+          const li = document.createElement("li"); // rmk는 아래(책 칸)에서 정의된다 — 처음 그릴 때 순서에 기대지 않게 직접 만든다
+          li.className = "verdict__line";
+          li.textContent = strip(t);
+          ul.append(li);
+        });
+      js("saju-verdict-turn", vd).textContent = ok ? strip(V.turn || "") : "";
+    }
+
     // 풀이 S1 → S2a → S2b → S3 → S4
     js("saju-s1-body", scr).innerHTML = sajuParas(st.body);
     js("saju-s2a-body", scr).innerHTML = sajuParas(SAJU.elements.many[sel.S2a]);
@@ -2674,7 +2694,7 @@
   ShareButtons.init({
     url: SITE_URL,
     kakao: {
-      jsKey: T.kakao.jsKey, sdkUrl: T.kakao.sdkUrl, integrity: T.kakao.integrity, label: T.share.kakao,
+      jsKey: T.kakao.jsKey, sdkUrl: T.kakao.sdkUrl, integrity: T.kakao.integrity, label: T.share.kakao, bigLabel: T.share.kakaoBig,
       title: K.title, description: K.description, imageUrl: new URL("share/kakao-main.jpg", SITE_URL).href, imageWidth: 1200, imageHeight: 600, button: K.button,
       url: kakaoLink("main"),
       // (2026-10-25) 방 결과 화면에서 보내면 그 방 그림 + "○○의 방에서 나는 '결과 이름'" + 결과 첫 문장(공개 결과 문장, 입력값 0)
@@ -2901,15 +2921,15 @@
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   const OLD_RECEIPT_KEY = "strange-oracle-receipt"; // 12단계까지 영수증 코드 칸. 남아 있으면 지우고 목차로 보낸다(13-4)
-  // (14단계 F4-B2 → 18단계) 책 14장 = 여는 글 + 방 7장(Ⅰ 만신 포함) + 새 장·시기별 흐름·인연의 장·궁합·원형 심층 + 닫는 글. 유료는 여는 글·닫는 글을 뺀 12장.
+  // (14단계 F4-B2 → 18단계) 책 14장 = 여는 글 + 방 7장(Ⅰ 만신 포함) + 새 장·시기별 흐름·인연의 장·궁합·원형 심층 + 닫는 글. 유료는 여는 글·닫는 글을 뺀 13장(2026-10-25 만신의 장도 유료).
   //  - 여는 글·닫는 글: 공개 정적 파일 data-book-free.js (무료 맛보기)
-  //  - 유료 12장: 함수 book(POST /api/book, 본문 { pass, file } 두 칸뿐)이 열람 코드를 확인한 뒤 JSON으로 준다. 받은 값은 같은 전역(BOOK_SAJU…)에 둔다.
+  //  - 유료 13장: 함수 book(POST /api/book, 본문 { pass, file } 두 칸뿐)이 열람 코드를 확인한 뒤 JSON으로 준다. 받은 값은 같은 전역(BOOK_SAJU…)에 둔다.
   //    결과 코드·입력값은 보내지 않는다(6장). file 이름은 장 단위 고정 문자열(허용 목록 12개).
   //    인연의 장(17-2)은 book-yeon 전체를 받아 원형·보조 원형·오행·나이 구간을 이 브라우저가 고른다(19세 미만도 b1 — 결정 114)(yeonCtx, 보내지 않고 저장하지 않음).
   const BOOK_ROOMS = CHAPTER_ORDER;
   const BOOK_IDS = ["open", ...BOOK_ROOMS, "cross", "flow", "year", "yeon", "match", "deep", "close"]; // (20단계) year = 「2027년의 흐름」
   const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
-  const PAID_IDS = new Set([...BOOK_ROOMS.filter(r => r !== "saju"), "cross", "flow", "year", "yeon", "match", "deep"]);
+  const PAID_IDS = new Set([...BOOK_ROOMS, "cross", "flow", "year", "yeon", "match", "deep"]); // (2026-10-25 운영자) 만신의 장도 유료: 방 결과까지 무료, "나머지 이야기"부터 결제
   const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { cross: "cross", flow: "flow", year: "year", yeon: "yeon", match: "match", deep: "arch" });
   const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { cross: "BOOK_CROSS", flow: "BOOK_FLOW", year: "BOOK_YEAR", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
   const FREE_FILE = "data-book-free.js";
@@ -2977,7 +2997,7 @@
   const sajuHiddenTitle = (c) => strip(SAJU.groups[Object.keys(SAJU.groups)[BookCore.sajuGroup(c.saju)]].hiddenTitle || "");
 
   // ── (22단계, 결정 134) 방 결과 아래 "이 방의 나머지 이야기" (room-rest, JS가 책 한 줄 뒤에 만든다)
-  //   만신: 무료 — [이어서 읽기]를 누르면 함수 book에서 saju 장(열람 코드 없이)을 받아 이 자리에 펼친다.
+  //   만신: (2026-10-25 운영자) 다른 방과 같이 유료. 잠긴 칸은 "여기까지가 흔히 보던 사주" 머리말과 이 사람의 장 제목으로 그린다(RT.saju).
   //   오검~시빌라: 결제 전에는 잠긴 장 이름·분량·결제 버튼만(유료 문장은 공개 파일에 없다, 7장). 결제한 탭에서는 그 방 장을 받아
   //   Ⅰ장 나머지·Ⅱ~Ⅳ장·숨은 장을 바로 보여 준다. 보내는 값은 { pass, file } 두 칸뿐(6장). off 배포판에서는 그리지 않는다.
   const RT = (T.room && T.room.rest) || {};
@@ -3054,7 +3074,35 @@
     box.append(restSection(ROMAN[3], names[3], (tail ? fr.ch4.concat(tail) : fr.ch4).map(strip)));
     box.append(restSection("", room === "saju" ? sajuHiddenTitle(c) || T.book.hiddenChapter : strip(fr.hidden.title || T.book.hiddenChapter), fr.hidden.paragraphs.map(strip), "room-rest__ch--hidden"));
   }
+  // (2026-10-25) 결과 화면 아래에 떠 있는 결제 버튼: 지금 화면이 방 결과이고 나머지 칸이 잠겨 있을 때만. 방 결과 아래 결제 버튼이 보이면 내려 숨긴다
+  let dockIO = null;
+  function updateDock() {
+    const dock = js("pay-dock");
+    if (!dock) return;
+    const scr = screens[currentName];
+    const box = scr && /-result$/.test(currentName) ? js("room-rest", scr) : null;
+    const on = Boolean(box && box.dataset.state === "locked" && payScr);
+    if (dockIO) dockIO.disconnect();
+    dockIO = null;
+    dock.hidden = !on;
+    dock.classList.remove("is-tucked");
+    body.classList.toggle("has-pay-dock", on);
+    if (!on) return;
+    const room = scr.dataset.room;
+    dock.dataset.room = room;
+    js("pay-dock-label", dock).textContent = (room === "saju" && RT.dockSaju) || RT.dock || "";
+    js("pay-dock-price", dock).textContent = fill(RT.dockPrice || "", { price: comma(PAY.amount) });
+    const buy = js("room-rest-buy", box);
+    if (buy && "IntersectionObserver" in window) {
+      dockIO = new IntersectionObserver((es) => dock.classList.toggle("is-tucked", es.some((e) => e.isIntersecting)), { threshold: 0.2 });
+      dockIO.observe(buy);
+    }
+  }
   function renderRest(scr) {
+    renderRestBox(scr);
+    if (scr && screens[currentName] === scr) updateDock();
+  }
+  function renderRestBox(scr) {
     const room = scr && scr.dataset.room;
     if (!BOOK_ON || !CHAPTER_ORDER.includes(room) || !isDone(room)) return;
     let box = js("room-rest", scr);
@@ -3078,9 +3126,20 @@
       return renderRestOpen(box, room);
     }
     if (st === "locked") {
-      box.append(rmk("p", "room-rest__lead", fill(RT.lockedLead, { n })));
+      // (2026-10-25) 만신: "여기까지가 흔히 보던 사주" — 잠긴 줄에 이 사람의 장 제목(공개 data)을 보여 준다
+      const SJ = room === "saju" && RT.saju ? RT.saju : null;
+      const sst = SJ ? SAJU.stems[BookCore.sajuStem(myCodes().saju)] : null;
+      const tt = (x) => (x && x.title ? strip(x.title) : "");
+      if (SJ) {
+        box.classList.add("room-rest--saju");
+        box.append(rmk("p", "room-rest__cut", SJ.cut || ""));
+        box.append(rmk("p", "room-rest__lead", fill(SJ.lead || RT.lockedLead, { n })));
+      } else box.append(rmk("p", "room-rest__lead", fill(RT.lockedLead, { n })));
       const ul = rmk("ul", "room-rest__locks");
-      [["", RT.strikeLock], [ROMAN[0], RT.lockedRest], [ROMAN[1], T.result.chapterNames[1]], [ROMAN[2], T.result.chapterNames[2]], [ROMAN[3], T.result.chapterNames[3]], ["", T.book.hiddenChapter]].forEach(([num, name]) => {
+      const rows = SJ && sst
+        ? [["", SJ.strike || RT.strikeLock], [ROMAN[0], tt(sst.identity) || RT.lockedRest], [ROMAN[1], tt(sst.event) || T.result.chapterNames[1]], [ROMAN[2], tt(sst.shadow) || T.result.chapterNames[2]], [ROMAN[3], tt(sst.advice) || T.result.chapterNames[3]], ["", sajuHiddenTitle(myCodes()) || T.book.hiddenChapter]]
+        : [["", RT.strikeLock], [ROMAN[0], RT.lockedRest], [ROMAN[1], T.result.chapterNames[1]], [ROMAN[2], T.result.chapterNames[2]], [ROMAN[3], T.result.chapterNames[3]], ["", T.book.hiddenChapter]];
+      rows.forEach(([num, name]) => {
         const li = rmk("li", "room-rest__lock");
         li.append(rmk("span", "room-rest__num", num)); // 숨은 장은 빈 칸(줄 맞춤)
         li.append(rmk("span", "room-rest__lock-name", name));
@@ -3091,6 +3150,7 @@
       });
       box.append(ul);
       const price = comma(PAY.amount);
+      if (SJ && SJ.more) box.append(rmk("p", "room-rest__more", SJ.more));
       box.append(rmk("p", "room-rest__price", fill(RT.lockedNote, { price })));
       const buy = rmk("button", "btn btn--primary btn--block room-rest__buy", fill(RT.buyBtn, { price }));
       buy.type = "button";
@@ -3325,7 +3385,7 @@
   const roomsDone = () => filledRooms().length;
   // (18-2) 새 장은 마친 방 2개 이상
   const available = (id) => (CHAPTER_ORDER.includes(id) ? isDone(id) : id === "close" ? roomsDone() === CHAPTER_ORDER.length : id === "cross" ? roomsDone() >= 2 : roomsDone() > 0);
-  // (14-4) 유료 12장은 열람 코드가 확인된 탭에서만 열린다. 7/7 전에 사도 되고, 지나지 않은 방의 장은 그 방을 지나면 열린다(59번)
+  // (14-4) 유료 13장은 열람 코드가 확인된 탭에서만 열린다. 7/7 전에 사도 되고, 지나지 않은 방의 장은 그 방을 지나면 열린다(59번)
   const isOpen = (id) => !PAID_IDS.has(id) || Boolean(passNow());
   const readSet = new Set(); // 이 화면에서 끝까지 읽은 장 (메모리만)
   const chapterState = (id) => (!available(id) ? "need-room" : !isOpen(id) ? "can-open" : readSet.has(id) ? "read" : "opened");
@@ -4576,13 +4636,27 @@
   // (18-11) 결제 전 화면에 들어온 길: preview · toc · other
   let payFrom = "other";
   // (2026-10-21) hub·story·locked 길을 더함. 결제 전 화면으로 갔으면 true
-  const PAY_FROM = ["preview", "toc", "hub", "story", "locked", "room"]; // (22단계) room = 방 결과의 나머지 이야기 칸
+  const PAY_FROM = ["preview", "toc", "hub", "story", "locked", "room", "dock"]; // (22단계) room = 방 결과의 나머지 이야기 칸 · (2026-10-25) dock = 결과 화면 아래 떠 있는 버튼
   function goPay(from) {
     if (!payScr) return false;
     payFrom = PAY_FROM.includes(from) ? from : "other";
-    if (from !== "room") takePayRoom(); // 다른 길로 왔으면 지난 방 기억은 지운다
+    if (from !== "room" && from !== "dock") takePayRoom(); // 다른 길로 왔으면 지난 방 기억은 지운다
     go("deeper");
     return true;
+  }
+  // (2026-10-25) 떠 있는 결제 버튼: 방 결과 아래 결제 버튼과 같은 길(결제를 시작한 방 기억 → 결제 전 화면)
+  {
+    const dockBtn = js("pay-dock-btn");
+    if (dockBtn)
+      dockBtn.addEventListener("click", () => {
+        const room = js("pay-dock").dataset.room;
+        try {
+          if (CHAPTER_ORDER.includes(room)) window.sessionStorage.setItem(PAYROOM_KEY, room);
+        } catch (e) {
+          /* 저장이 막힌 브라우저: 돌아오면 책 목차로 */
+        }
+        goPay("dock");
+      });
   }
 
   // (결정 120) 책 화면을 처음 열 때 app-book.js를 받아 mount 한 번
@@ -5336,7 +5410,7 @@
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
     so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail", "consent", "logout", "erase"], mode: ["restore", "link", "forget", "login"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
-    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "hub", "story", "locked", "room", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
