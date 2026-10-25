@@ -41,6 +41,8 @@ const CARDS = [
   ...["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"].map((r) => [`kakao-${r}`, [1200, 600]]),
   // (2026-10-25) X(트위터) 헤더 1500x500
   ["x-header", [1500, 500]],
+  // (2026-10-25) 구글 애즈 정사각 로고 1200x1200
+  ["gads-logo", [1200, 1200]],
 ];
 // 인자로 판 이름을 주면 그 판(과 그 판의 배경)만 찍는다. 예: render-ig2.js x-header ring-x
 const ONLY = process.argv.slice(2);

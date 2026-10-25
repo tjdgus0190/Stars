@@ -195,10 +195,10 @@ test("analytics: 모양이 틀린 측정 ID는 불러오지 않음", () => {
 
 // ── (광고 측정) 캠페인 utm 허용 목록 — 제안서 strange-oracle-ads 8장 4번 ──
 const UTM_ALLOW = {
-  utm_source: ["instagram", "tiktok", "kakao", "x"],
-  utm_medium: ["paid_social", "organic", "share"],
-  utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ig_profile", "x_profile", "kakao_share"],
-  utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "kakao_main", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
+  utm_source: ["instagram", "tiktok", "kakao", "x", "google"],
+  utm_medium: ["paid_social", "organic", "share", "cpc"],
+  utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ig_profile", "x_profile", "gads_main", "kakao_share"],
+  utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
 };
 const UTM_IGNORE = ["fbclid", "ttclid"];
 
@@ -213,7 +213,7 @@ test("analytics utm: 허용 키·값만 정해진 순서로 남긴다", () => {
 
 test("analytics utm: 거부 — 목록 밖 값·다른 키·섞인 쿼리·source 없음", () => {
   const c = env().win.Analytics.campaign;
-  ["", "?", "?utm_source=facebook", "?utm_source=instagram&utm_medium=cpc", "?utm_source=instagram&utm_term=saju",
+  ["", "?", "?utm_source=facebook", "?utm_source=instagram&utm_medium=email", "?utm_source=instagram&utm_term=saju",
     "?utm_source=instagram&name=김서윤", "?utm_source=instagram&birth=1995-03-25", "?pay=success&utm_source=instagram",
     "?utm_medium=paid_social", "?utm_source=instagram&utm_source=tiktok", "?utm_source", "?utm_source=", "?utm_source=instagram&",
     "?constructor=x&utm_source=instagram", "?__proto__=x", "?utm_source=hasOwnProperty",

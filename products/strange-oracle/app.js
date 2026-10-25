@@ -5345,10 +5345,10 @@
   // 값을 더하려면 제안서와 marketing/strange-oracle/render/README.md 표도 함께 고친다. 사용자 입력값은 이 목록에 들어갈 수 없다(6장).
   const CAMPAIGN = {
     allow: {
-      utm_source: ["instagram", "tiktok", "kakao", "x"],
-      utm_medium: ["paid_social", "organic", "share"],
-      utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ig_profile", "x_profile", "kakao_share"],
-      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "kakao_main", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
+      utm_source: ["instagram", "tiktok", "kakao", "x", "google"],
+      utm_medium: ["paid_social", "organic", "share", "cpc"],
+      utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ig_profile", "x_profile", "gads_main", "kakao_share"],
+      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
     },
     ignore: ["fbclid", "ttclid"],
   };
