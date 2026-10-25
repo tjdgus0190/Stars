@@ -1,0 +1,138 @@
+/* 인스타그램 2판 (2026-10-25). 3D 배경(bg3d.html이 찍은 PNG) 위에 글자만 HTML로 또렷하게 얹는다.
+   판 하나 = section.card (뷰포트 크기 = 판 크기). 색·글꼴은 광고 장면(../scenes/common.css)과 같다. */
+:root {
+  --gold: oklch(0.86 0.1 85);
+  --gold-dim: oklch(0.72 0.09 80);
+  --ink: oklch(0.96 0.012 90);
+  --ink-soft: oklch(0.84 0.025 285);
+  --red: oklch(0.68 0.2 28);
+  --line: oklch(0.86 0.1 85 / 0.35);
+  --punch: "Noto Serif KR", "Gowun Batang", serif;
+}
+html, body { margin: 0; padding: 0; background: #07050f; overflow: hidden; }
+body { font-family: var(--font-serif); color: var(--ink); -webkit-font-smoothing: antialiased; }
+.card { display: none; position: relative; overflow: hidden; background: #07050f center / cover no-repeat; }
+.card:target, .card.is-on { display: block; }
+.card::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--shade, none); }
+.card > * { position: relative; z-index: 1; }
+.sq { width: 1080px; height: 1080px; }
+.pt { width: 1080px; height: 1350px; }
+.st { width: 1080px; height: 1920px; }
+
+/* 공통 글자 */
+.eyebrow { margin: 0; font-family: var(--font-latin); font-weight: 500; font-size: 26px; letter-spacing: 0.32em; color: var(--gold-dim); text-align: center; }
+.logo { margin: 0; font-weight: 700; text-align: center; letter-spacing: 0.08em;
+  background: linear-gradient(100deg, var(--gold-dim) 0%, oklch(0.98 0.04 90) 38%, var(--gold) 52%, oklch(0.98 0.04 90) 66%, var(--gold-dim) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 24px oklch(0.7 0.14 70 / 0.45)); }
+.h { margin: 0; font-weight: 700; text-align: center; line-height: 1.32; word-break: keep-all; text-wrap: balance; text-shadow: 0 2px 18px oklch(0 0 0 / 0.85); }
+.punch { font-family: var(--punch); font-weight: 900; }
+.soft { color: var(--ink-soft); }
+.gold { color: var(--gold); }
+.red { color: oklch(0.8 0.15 32); }
+.foot { position: absolute; left: 0; right: 0; bottom: 64px; text-align: center; font-size: 30px; color: var(--ink-soft); }
+.foot b { color: var(--gold); font-weight: 700; }
+.page { position: absolute; top: 56px; right: 64px; font-family: var(--font-latin); font-size: 24px; letter-spacing: 0.15em; color: var(--gold-dim); }
+.brand { position: absolute; top: 56px; left: 64px; font-size: 26px; letter-spacing: 0.12em; color: var(--gold-dim); }
+.rule { width: 72px; height: 2px; margin: 36px auto; background: var(--gold); opacity: 0.7; }
+.sig { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.next { display: inline-flex; gap: 14px; align-items: center; }
+.next::after { content: ""; width: 44px; height: 2px; background: currentColor; }
+
+/* 방 색 */
+[data-room="saju"] { --h: 18; } [data-room="ogham"] { --h: 150; } [data-room="star"] { --h: 295; } [data-room="decan"] { --h: 65; }
+[data-room="tzolkin"] { --h: 190; } [data-room="rune"] { --h: 230; } [data-room="sibyl"] { --h: 35; }
+[data-room] { --acc: oklch(0.8 0.12 var(--h)); }
+
+/* ── 소개 1: 표지 */
+.cover-ring { --shade: linear-gradient(180deg, oklch(0.08 0.03 285 / 0.75) 0%, transparent 26%, transparent 66%, oklch(0.08 0.03 285 / 0.9) 100%); }
+.cover-ring .top { position: absolute; top: 96px; left: 0; right: 0; }
+.cover-ring .logo { font-size: 128px; margin-top: 18px; }
+.cover-ring .bottom { position: absolute; left: 0; right: 0; bottom: 150px; }
+.cover-ring .bottom .h { font-size: 64px; }
+
+/* 목록 판 (일곱 방, 책 목차) */
+.list-card { --shade: radial-gradient(ellipse 80% 60% at 50% 50%, oklch(0.08 0.03 285 / 0.55), oklch(0.06 0.03 285 / 0.8)); padding: 150px 96px 0; box-sizing: border-box; }
+.list-card .h { font-size: 60px; }
+.list-card .sub { margin: 20px 0 0; text-align: center; font-size: 30px; color: var(--ink-soft); }
+.rooms { list-style: none; margin: 56px 0 0; padding: 0; display: grid; gap: 18px; }
+.rooms li { display: grid; grid-template-columns: 72px 1fr auto; align-items: center; gap: 22px; padding: 18px 28px; border: 1px solid var(--line); border-radius: 18px; background: oklch(0.14 0.035 285 / 0.72); }
+.rooms .sig { font-size: 52px; color: var(--acc); filter: drop-shadow(0 0 10px var(--acc)); }
+.rooms b { font-size: 40px; font-weight: 700; }
+.rooms b i { font-style: normal; font-family: var(--font-latin); color: var(--gold-dim); margin-right: 14px; font-size: 30px; }
+.rooms span { font-size: 26px; color: var(--ink-soft); }
+
+/* 단계 판 */
+.steps { list-style: none; margin: 90px 0 0; padding: 0; display: grid; gap: 64px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 96px 1fr; gap: 28px; align-items: start; }
+.steps li::before { content: counter(s); display: grid; place-items: center; width: 96px; height: 96px; border-radius: 50%; border: 2px solid var(--gold); color: var(--gold); font-family: var(--font-latin); font-size: 46px; font-weight: 700; background: oklch(0.14 0.035 285 / 0.8); }
+.steps b { display: block; font-size: 48px; margin-top: 8px; }
+.steps span { display: block; margin-top: 14px; font-size: 34px; line-height: 1.55; color: var(--ink-soft); word-break: keep-all; }
+
+/* 거울 표지 (들켰죠 계열) */
+.cover-mirror { --shade: linear-gradient(180deg, oklch(0.07 0.03 20 / 0.55) 0%, oklch(0.06 0.03 20 / 0.25) 35%, oklch(0.06 0.03 20 / 0.25) 60%, oklch(0.05 0.03 20 / 0.9) 100%); }
+.cover-mirror .mid { position: absolute; left: 70px; right: 70px; top: 50%; transform: translateY(-50%); }
+.cover-mirror .mid::before { content: ""; position: absolute; z-index: -1; left: -60px; right: -60px; top: -110px; bottom: -90px; background: radial-gradient(ellipse 50% 50% at 50% 50%, oklch(0.05 0.03 20 / 0.92) 40%, oklch(0.05 0.03 20 / 0) 100%); }
+.cover-mirror .h { font-size: 92px; line-height: 1.24; text-shadow: 0 0 2px #000, 0 4px 30px oklch(0.3 0.15 25 / 0.95), 0 0 60px oklch(0.55 0.2 28 / 0.6); }
+.cover-mirror .sub { margin: 34px 0 0; text-align: center; font-size: 36px; color: oklch(0.9 0.04 40); text-shadow: 0 2px 12px #000; }
+
+/* 한 문장 판 */
+.quote-card { --shade: radial-gradient(ellipse 85% 55% at 50% 52%, oklch(0.07 0.03 285 / 0.72), oklch(0.05 0.03 285 / 0.88)); }
+.quote-card .badge { position: absolute; top: 150px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.quote-card .badge .sig { font-size: 92px; color: var(--acc); filter: drop-shadow(0 0 18px var(--acc)); }
+.quote-card .badge p { margin: 0; font-size: 36px; color: var(--acc); letter-spacing: 0.06em; }
+.quote-card blockquote { position: absolute; left: 96px; right: 96px; top: 50%; transform: translateY(-38%); margin: 0; }
+.quote-card blockquote p { margin: 0; font-family: var(--punch); font-weight: 900; font-size: 66px; line-height: 1.42; text-align: center; word-break: keep-all; text-wrap: balance; text-shadow: 0 3px 22px #000; }
+.quote-card blockquote p + p { margin-top: 30px; color: oklch(0.86 0.09 30); }
+
+/* 직격 예고 판 */
+.bars { margin: 70px auto 0; width: 820px; display: grid; gap: 26px; }
+.bars i { display: block; height: 62px; border-radius: 12px; background: linear-gradient(90deg, oklch(0.95 0.02 60 / 0.75), oklch(0.85 0.06 40 / 0.55)); filter: blur(13px); }
+.bars i:nth-child(2) { width: 86%; } .bars i:nth-child(3) { width: 70%; }
+.label-red { display: inline-block; margin: 0 auto; padding: 10px 26px; border: 1.5px solid oklch(0.68 0.2 28 / 0.8); border-radius: 999px; color: oklch(0.82 0.13 32); font-size: 30px; letter-spacing: 0.08em; }
+
+/* 목차 */
+.toc { list-style: none; margin: 46px 0 0; padding: 30px 46px; border: 1px solid var(--line); border-radius: 22px; background: oklch(0.92 0.03 82 / 0.94); color: oklch(0.26 0.03 50); display: grid; gap: 12px; }
+.toc li { display: flex; align-items: baseline; gap: 16px; font-size: 32px; border-bottom: 1px dashed oklch(0.5 0.04 60 / 0.35); padding-bottom: 10px; }
+.toc li:last-child { border-bottom: 0; padding-bottom: 0; }
+.toc i { font-style: normal; font-family: var(--font-latin); color: oklch(0.45 0.13 32); width: 46px; }
+.toc em { margin-left: auto; font-style: normal; font-family: var(--font-latin); font-size: 20px; padding: 3px 10px; border-radius: 6px; background: oklch(0.45 0.13 32); color: #fff; }
+
+/* 가격 판 */
+.price { margin: 60px 0 0; text-align: center; }
+.price b { display: block; font-family: var(--font-latin); font-size: 150px; font-weight: 700; color: var(--gold); line-height: 1; }
+.price b small { font-family: var(--font-serif); font-size: 60px; }
+.price span { display: block; margin-top: 18px; font-size: 34px; color: var(--ink-soft); }
+.checks { list-style: none; margin: 56px auto 0; padding: 0; width: 820px; display: grid; gap: 20px; }
+.checks li { position: relative; padding-left: 56px; font-size: 34px; line-height: 1.45; word-break: keep-all; }
+.checks li::before { content: ""; position: absolute; left: 6px; top: 12px; width: 22px; height: 12px; border-left: 3px solid var(--gold); border-bottom: 3px solid var(--gold); transform: rotate(-45deg); }
+
+/* CTA */
+.cta-card { --shade: linear-gradient(180deg, oklch(0.07 0.03 285 / 0.85) 0%, oklch(0.07 0.03 285 / 0.3) 30%, oklch(0.07 0.03 285 / 0.3) 62%, oklch(0.06 0.03 285 / 0.92) 100%); }
+.cta-card .top { position: absolute; top: 130px; left: 80px; right: 80px; }
+.cta-card .top .h { font-size: 70px; }
+.cta-card .bottom { position: absolute; left: 0; right: 0; bottom: 120px; text-align: center; }
+.btnlike { display: inline-block; padding: 26px 56px; border-radius: 999px; background: linear-gradient(180deg, oklch(0.88 0.1 85), oklch(0.74 0.11 75)); color: oklch(0.2 0.04 60); font-size: 42px; font-weight: 700; box-shadow: 0 10px 40px oklch(0.7 0.14 70 / 0.45); }
+.cta-card .bottom p { margin: 26px 0 0; font-size: 30px; color: var(--ink-soft); }
+
+/* 릴스 표지 (1080x1920, 격자에서는 가운데 1080x1440만 보임 → 글자는 y 300~1500 안) */
+.reel { --shade: linear-gradient(180deg, oklch(0.05 0.03 285 / 0.6) 0%, transparent 30%, transparent 75%, oklch(0.05 0.03 285 / 0.7) 100%); }
+.reel .title { position: absolute; left: 70px; right: 70px; top: 330px; }
+.reel .title::before { content: ""; position: absolute; z-index: -1; left: -70px; right: -70px; top: -80px; bottom: -70px; background: radial-gradient(ellipse 55% 50% at 50% 50%, oklch(0.05 0.03 285 / 0.85) 35%, transparent 100%); }
+.reel .big { position: absolute; left: 50%; top: 1150px; transform: translate(-50%, -50%); font-size: 420px; color: var(--gold); filter: drop-shadow(0 0 40px oklch(0.75 0.14 70 / 0.8)); }
+.reel .title .h { font-size: 110px; line-height: 1.15; }
+.reel .title p { margin: 22px 0 0; text-align: center; font-size: 38px; color: var(--ink-soft); }
+.reel .tag { position: absolute; top: 330px; left: 0; right: 0; text-align: center; }
+
+/* 하이라이트 표지: 가운데 원(지름 약 800px)만 보인다 */
+.hl { --shade: radial-gradient(circle at 50% 50%, transparent 0 360px, oklch(0.05 0.03 285 / 0.4) 420px); }
+.hl .disc { position: absolute; left: 50%; top: 50%; width: 600px; height: 600px; transform: translate(-50%, -50%); border-radius: 50%; border: 4px solid var(--gold); display: grid; place-items: center; background: radial-gradient(circle, oklch(0.2 0.06 285 / 0.75), oklch(0.1 0.04 285 / 0.85)); box-shadow: 0 0 60px oklch(0.7 0.14 70 / 0.35), inset 0 0 40px oklch(0.7 0.14 70 / 0.25); }
+.hl .disc .sig { font-size: 300px; color: var(--gold); filter: drop-shadow(0 0 22px oklch(0.75 0.14 70 / 0.8)); }
+
+/* 스토리 */
+.story { --shade: linear-gradient(180deg, oklch(0.07 0.03 285 / 0.8) 0%, transparent 25%, transparent 60%, oklch(0.06 0.03 285 / 0.92) 100%); }
+.story .top { position: absolute; top: 300px; left: 80px; right: 80px; }
+.story .top::before { content: ""; position: absolute; z-index: -1; left: -80px; right: -80px; top: -90px; bottom: -80px; background: radial-gradient(ellipse 55% 50% at 50% 50%, oklch(0.05 0.03 20 / 0.88) 35%, transparent 100%); }
+.story .top .h { font-size: 84px; }
+.story .slot { position: absolute; left: 50%; bottom: 470px; transform: translateX(-50%); width: 560px; height: 120px; border: 3px dashed oklch(0.86 0.1 85 / 0.55); border-radius: 26px; display: grid; place-items: center; color: oklch(0.86 0.1 85 / 0.8); font-size: 30px; }
+.list-card.center { display: none; flex-direction: column; justify-content: center; padding-top: 0; padding-bottom: 60px; }
+.list-card.center:target { display: flex; }
