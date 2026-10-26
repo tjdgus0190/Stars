@@ -686,6 +686,15 @@
             a.append(st);
           }
         }
+        // (2026-10-26) 장마다 한 줄 설명: 방 장 = pay.roomSub, 그 밖 = book.chapter.blurbs. 궁합 줄은 강조
+        const subText = x.CHAPTER_ORDER.includes(id) ? PAY.roomSub : ((T.book.chapter || {}).blurbs || {})[id];
+        if (subText) {
+          const sub = document.createElement("span");
+          sub.className = "pay-list__sub";
+          sub.textContent = subText;
+          a.append(sub);
+        }
+        if (id === "match") li.classList.add("pay-list__item--hot");
         const b = document.createElement("span");
         b.className = "pay-list__vol";
         b.textContent = fill(PAY.what.item || "", { n: comma(Math.round(n / 100) * 100) });

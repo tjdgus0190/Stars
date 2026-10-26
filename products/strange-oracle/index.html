@@ -3708,6 +3708,12 @@
       <!-- 1 받는 것: 유료 13장(2026-10-25 만신의 장, 17단계 인연의 장, 18단계 「겹치는 곳, 갈리는 곳」 더함)과 장마다 분량(실측), 합계. li는 JS가 data-volume 실측값으로 만든다 (아래는 견본 4줄) -->
       <section class="pay-sec" aria-labelledby="pay-what-title">
         <h2 class="pay-sec__title" id="pay-what-title"><span class="pay-sec__num" aria-hidden="true">1</span><span data-t="pay.what.title">받는 것</span></h2>
+        <!-- (2026-10-26 운영자) 궁합 강조 카드: 받는 것 목록 위 -->
+        <div class="pay-highlight" data-js="pay-highlight">
+          <p class="pay-highlight__label" data-t="pay.highlight.label">함께 열려요</p>
+          <p class="pay-highlight__title" data-t="pay.highlight.title">궁합 — 그 사람과 나</p>
+          <p class="pay-highlight__body" data-t="pay.highlight.body">그 사람의 이름과 생년월일만 넣으면 두 사람의 원형을 겹쳐 읽어 드려요. 연인·친구·동료·가족 모두.</p>
+        </div>
         <ol class="pay-list" data-js="pay-chapters">
           <li class="pay-list__item"><span class="pay-list__name"></span><span class="pay-list__vol"></span></li>
           <li class="pay-list__item"><span class="pay-list__name"></span><span class="pay-list__vol"></span></li>
@@ -3755,6 +3761,7 @@
       <div class="pay-act" data-js="pay-act">
         <label class="check pay-agree"><input type="checkbox" data-js="pay-agree" /><span data-t="pay.agree">위 내용(받는 것·가격·결제 방법·판매자·환불 조건)을 확인했어요</span></label>
         <button class="btn btn--primary btn--block pay-buy" type="button" data-js="pay-buy" aria-disabled="true"><span data-t="pay.buy">9,900원 결제하기</span></button>
+        <p class="pay-safe" data-js="pay-safe" data-t="pay.safe">결제 즉시 바로 열려요 · 한 번 결제, 구독 아님 · 결제 오류·중복 결제는 전액 환불</p>
         <p class="pay-act__note is-hidden" data-js="pay-store-empty" data-t="pay.storeEmpty">판매 준비 중</p>
         <div class="pay-opened" data-js="pay-opened" role="status">
           <svg class="pay-opened__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3 4.5C5.5 3.8 8 4 10 5.5c2-1.5 4.5-1.7 7-1v11c-2.5-.7-5-.5-7 1-2-1.5-4.5-1.7-7-1Z M10 5.5v11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>

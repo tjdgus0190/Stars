@@ -31,7 +31,7 @@ function seedVisits(R) {
 }
 const NAME = "김서윤";
 
-// 책 문장 목록 (13단계: data-book-*.js 전부, 옛 api/_paid에서 옮긴 문장 + 궁합 새 모듈), 12자 이상. 무료 칸(key·summary)과 원래 같은 문장은 build-dist.js와 같은 규칙으로 뺀다.
+// 책 문장 목록 (13단계: data-book-*.js 전부, 옛 api/_paid에서 옮긴 문장 + 궁합 새 모듈), 12자 이상. 무료 칸(key·summary·(2026-10-26) strikeTease = 직격 첫 마디 맛보기)과 원래 같은 문장은 build-dist.js와 같은 규칙으로 뺀다.
 // 방 결과 등 무료 화면에는 책 문장이 0건이어야 한다(책 문장은 장을 열 때만).
 function paidSentences() {
   const set = new Set();
@@ -47,7 +47,7 @@ function paidSentences() {
   for (const f of fs.readdirSync(PROD).filter((n) => /^data-.*\.js$/.test(n) && !/^data-book-/.test(n))) {
     const w = {};
     vm.runInNewContext(fs.readFileSync(path.join(PROD, f), "utf8"), { window: w });
-    const grab = (v, k) => (typeof v === "string" ? (k === "key" || k === "summary") && free.push(v) : Array.isArray(v) ? v.forEach((x) => grab(x, k)) : v && typeof v === "object" && Object.entries(v).forEach(([kk, x]) => grab(x, k === "summary" ? k : kk)));
+    const grab = (v, k) => (typeof v === "string" ? (k === "key" || k === "summary" || k === "strikeTease") && free.push(v) : Array.isArray(v) ? v.forEach((x) => grab(x, k)) : v && typeof v === "object" && Object.entries(v).forEach(([kk, x]) => grab(x, k === "summary" ? k : kk)));
     Object.values(w).forEach((v) => grab(v, ""));
   }
   return [...set].filter((s) => !free.some((t) => t.includes(s)));

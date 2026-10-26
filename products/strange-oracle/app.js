@@ -3098,6 +3098,22 @@
       dockIO.observe(buy);
     }
   }
+  // (2026-10-26) 잠긴 칸에 쓸 이 사람의 공개 결과 항목(장 제목·직격 첫 마디). 방 파일이 아직 없거나 코드가 없으면 null
+  function restEntry(room) {
+    const c = myCodes();
+    try {
+      if (room === "saju") return SAJU.stems[BookCore.sajuStem(c.saju)] || null;
+      if (room === "ogham") return OGHAM[c.ogham] || null;
+      if (room === "star") return NAKS[c.star] || null;
+      if (room === "decan") return DECANS[c.decan] || null;
+      if (room === "tzolkin") return TZ_SIGNS[c.tzolkin.sign] || null;
+      if (room === "rune") return RUNES[c.rune[1]] || null; // 직격은 '지금' 자리 돌
+      if (room === "sibyl") return ORACLES[c.sibyl] || null;
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
   function renderRest(scr) {
     renderRestBox(scr);
     if (scr && screens[currentName] === scr) updateDock();
@@ -3126,19 +3142,40 @@
       return renderRestOpen(box, room);
     }
     if (st === "locked") {
-      // (2026-10-25) 만신: "여기까지가 흔히 보던 사주" — 잠긴 줄에 이 사람의 장 제목(공개 data)을 보여 준다
+      // (2026-10-25) 만신: "여기까지가 흔히 보던 사주" 머리말
+      // (2026-10-26) 모든 방: 직격 첫 마디 맛보기(공개 data strikeTease, 나머지 두 마디는 흐린 막대) · 잠긴 줄 = 이 사람의 장 제목(공개 data) · 궁합 강조 · 안심 한 줄
       const SJ = room === "saju" && RT.saju ? RT.saju : null;
-      const sst = SJ ? SAJU.stems[BookCore.sajuStem(myCodes().saju)] : null;
+      const pe = restEntry(room);
       const tt = (x) => (x && x.title ? strip(x.title) : "");
       if (SJ) {
         box.classList.add("room-rest--saju");
         box.append(rmk("p", "room-rest__cut", SJ.cut || ""));
         box.append(rmk("p", "room-rest__lead", fill(SJ.lead || RT.lockedLead, { n })));
       } else box.append(rmk("p", "room-rest__lead", fill(RT.lockedLead, { n })));
+      const tease = pe && typeof pe.strikeTease === "string" && pe.strikeTease ? strip(pe.strikeTease) : "";
+      if (tease) {
+        const t = rmk("section", "strike strike--tease");
+        t.dataset.js = "room-strike-tease";
+        t.append(rmk("p", "strike__label", (room === "saju" && RT.strikeLabelSaju) || RT.strikeLabel || ""));
+        t.append(rmk("p", "strike__line", tease));
+        for (let i = 0; i < 2; i++) {
+          const bar = rmk("span", "strike__blur");
+          bar.setAttribute("aria-hidden", "true");
+          t.append(bar);
+        }
+        t.append(rmk("p", "strike__more", RT.teaseMore || ""));
+        box.append(t);
+      }
       const ul = rmk("ul", "room-rest__locks");
-      const rows = SJ && sst
-        ? [["", SJ.strike || RT.strikeLock], [ROMAN[0], tt(sst.identity) || RT.lockedRest], [ROMAN[1], tt(sst.event) || T.result.chapterNames[1]], [ROMAN[2], tt(sst.shadow) || T.result.chapterNames[2]], [ROMAN[3], tt(sst.advice) || T.result.chapterNames[3]], ["", sajuHiddenTitle(myCodes()) || T.book.hiddenChapter]]
-        : [["", RT.strikeLock], [ROMAN[0], RT.lockedRest], [ROMAN[1], T.result.chapterNames[1]], [ROMAN[2], T.result.chapterNames[2]], [ROMAN[3], T.result.chapterNames[3]], ["", T.book.hiddenChapter]];
+      const own = pe && room !== "rune"; // 룬은 장 구조(지나온·지금 자리)가 달라 장 이름 그대로
+      const rows = [
+        [ROMAN[0], (own && tt(pe.identity)) || RT.lockedRest],
+        [ROMAN[1], (own && tt(pe.event)) || T.result.chapterNames[1]],
+        [ROMAN[2], (own && tt(pe.shadow)) || T.result.chapterNames[2]],
+        [ROMAN[3], (own && tt(pe.advice)) || T.result.chapterNames[3]],
+        ["", (room === "saju" && sajuHiddenTitle(myCodes())) || T.book.hiddenChapter],
+      ];
+      if (!tease) rows.unshift(["", (SJ && SJ.strike) || RT.strikeLock]);
       rows.forEach(([num, name]) => {
         const li = rmk("li", "room-rest__lock");
         li.append(rmk("span", "room-rest__num", num)); // 숨은 장은 빈 칸(줄 맞춤)
@@ -3149,8 +3186,17 @@
         ul.append(li);
       });
       box.append(ul);
+      // 결제하면 함께 열리는 것: 궁합 강조 + 나머지 장 이름
+      if (RT.match && RT.match.title) {
+        const m = rmk("section", "room-rest__match");
+        m.dataset.js = "room-rest-match";
+        m.append(rmk("p", "room-rest__match-label", RT.match.label || ""));
+        m.append(rmk("p", "room-rest__match-title", RT.match.title));
+        m.append(rmk("p", "room-rest__match-body", RT.match.body || ""));
+        if (RT.match.also) m.append(rmk("p", "room-rest__match-also", RT.match.also));
+        box.append(m);
+      }
       const price = comma(PAY.amount);
-      if (SJ && SJ.more) box.append(rmk("p", "room-rest__more", SJ.more));
       box.append(rmk("p", "room-rest__price", fill(RT.lockedNote, { price })));
       const buy = rmk("button", "btn btn--primary btn--block room-rest__buy", fill(RT.buyBtn, { price }));
       buy.type = "button";
@@ -3171,7 +3217,9 @@
         const t = js("pass-toggle", payScr);
         if (t && t.getAttribute("aria-expanded") !== "true") setTimeout(() => t.click(), 0);
       });
-      box.append(buy, have);
+      box.append(buy);
+      if (RT.safe) box.append(rmk("p", "room-rest__safe", RT.safe)); // (2026-10-26) 안심 한 줄: 구매·환불 안내에 적힌 것만
+      box.append(have);
       return;
     }
     // free(만신, 아직 안 받음) · loading · fail
