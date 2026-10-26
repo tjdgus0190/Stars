@@ -190,7 +190,7 @@ window.SAJU = {
       "eyebrow": "낯선 점술관 · 만신의 방",
       "badge": "나의 이야기 1장 · 타고난 그릇",
       "emblem": "MANSHIN · SAJU",
-      "shareText": "만신이 읽어 준 나의 타고난 그릇 '{name}'",
+      "shareText": "나는 '{name}'래. 너의 일간은 뭐야?",
       "file": "my-saju.png"
     }
   },

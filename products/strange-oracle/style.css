@@ -5673,3 +5673,4 @@ body.has-pay-dock .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px))
 .pay-list__sub { display: block; margin-top: 2px; font-family: var(--font-sans); font-size: var(--fs-xs); line-height: 1.45; color: var(--c-text-muted); }
 .pay-list__item--hot .pay-list__name > :first-child, .pay-list__item--hot { color: oklch(0.88 0.1 350); }
 .pay-list__item--hot .pay-list__sub { color: oklch(0.8 0.07 350); }
+.story-hint { margin: var(--space-2) auto 0; max-width: 300px; font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text-muted); text-align: center; word-break: keep-all; }

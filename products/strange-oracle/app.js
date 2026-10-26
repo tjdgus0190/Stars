@@ -2490,7 +2490,7 @@
     return {
       file: C.file, text: strip(fill(C.shareText, { name: st.title })),
       opts: {
-        theme: CARD_THEME.saju, eyebrow: strip(C.eyebrow || ""), seed: 71 + SAJU.stems.indexOf(st),
+        theme: CARD_THEME.saju, eyebrow: strip(C.eyebrow || ""), seed: 71 + SAJU.stems.indexOf(st), cta: T.card.ctaSaju || T.card.cta, // (2026-10-26) "너의 일간은 뭐야?"
         emblem: { paths: [...document.querySelectorAll("#icon-saju path")].map((p) => p.getAttribute("d")), label: C.emblem || "" },
         title: strip(st.title), subtitle: `${st.name} ${st.hanja}`,
         lines: [strip(st.key)],

@@ -503,6 +503,7 @@ window.TEXT = {
     // (11단계 H3) 원형 줄 아래 한 줄 · 입구 "지금의 원형" 아래 (최대 40자). {arch}=지금 앞선 원형 이름, {n}=남은 문 수. 마친 방 1~6개일 때만
     archetypeSway: "앞선 원형 {arch}, 남은 문 {n}개. 다음 방이 굳힐까요, 뒤집을까요?",
     shareTop: "이 카드 저장 · 공유",           // 캡처 카드 바로 아래 작은 버튼
+    storyHint: "인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.", // (2026-10-26) 저장·공유 버튼 아래 한 줄 (최대 50자)
     share: "결과 카드 저장·공유하기",         // 면책 문구 아래 주요 버튼 (최대 14자 권장)
     tocAria: "이 결과의 목차",
     length: "네 개의 장 · 약 {n}분",           // 목차 위. {n}=네 장 합계 읽기 시간(자동)
@@ -592,7 +593,7 @@ window.TEXT = {
       eyebrow: "낯선 점술관 · 룬의 방",
       subtitle: "다가올 자리: {keyword}",   // {keyword}=[다가올] 룬 keyword (최대 20자)
       badge: "나의 이야기 6장 · 과거·현재·미래",
-      shareText: "바이킹의 룬으로 본 나의 운명",  // 공유 시트에 함께 붙는 글
+      shareText: "바이킹의 룬이 읽은 나의 운명. 너는?",  // 공유 시트에 함께 붙는 글
       file: "my-runes.png",
     },
   },
@@ -693,7 +694,7 @@ window.TEXT = {
       twist: "서양 {west} → 베다 {vedic}",   // 알약. 같으면 twistSame
       twistSame: "서양도 베다도 {sign}",
       badge: "나의 이야기 3장 · 마음결",
-      shareText: "베다 점성술로 본 나는 '{house}'",
+      shareText: "베다 점성술로 본 나는 '{house}'. 너는?",
       file: "my-nakshatra.png",
     },
   },
@@ -751,7 +752,7 @@ window.TEXT = {
     card: {
       eyebrow: "낯선 점술관 · 오검의 방",
       badge: "나의 이야기 2장 · 뿌리",
-      shareText: "켈트 오검으로 새긴 나의 뿌리 '{latin}'",
+      shareText: "켈트 오검이 새긴 나의 뿌리 '{latin}'. 너는?",
       file: "my-ogham.png",
     },
   },
@@ -822,7 +823,7 @@ window.TEXT = {
       eyebrow: "낯선 점술관 · 데칸의 방",
       number: "DECAN {n} / 36",
       badge: "나의 이야기 4장 · 숨은 재능",
-      shareText: "이집트 데칸으로 본 나의 숨은 재능",
+      shareText: "이집트 데칸이 찾은 나의 숨은 재능. 너는?",
       file: "my-decan.png",
     },
   },
@@ -875,7 +876,7 @@ window.TEXT = {
       eyebrow: "낯선 점술관 · 촐킨의 방",
       count: "{n} / 260",
       badge: "나의 이야기 5장 · 다가올 순환",
-      shareText: "마야 촐킨으로 본 나의 날 '{day}'",
+      shareText: "마야 촐킨으로 본 나의 날 '{day}'. 너는?",
       file: "my-tzolkin.png",
     },
   },
@@ -985,7 +986,7 @@ window.TEXT = {
       eyebrow: "낯선 점술관 · 시빌라 신탁의 방",
       label: "SORS",
       badge: "나의 이야기 7장 · 오늘의 질문",
-      shareText: "촛불에 떠오른 오늘의 신탁",
+      shareText: "촛불에 떠오른 오늘의 신탁. 너도 하나 뽑아 봐",
       file: "my-oracle.png",
     },
   },
@@ -1100,7 +1101,7 @@ window.TEXT = {
     kakaoMsg: {
       title: "낯선 점술관 — 일곱 점술이 본 나",              // 입구·나의 이야기 등에서 보낼 때
       description: "만신 · 오검 · 베다 · 데칸 · 촐킨 · 룬 · 시빌라. 당신의 방은 무엇일까요?",
-      roomTitle: "{room}에서 나는 '{result}'",               // 방 결과에서 보낼 때. {room}=방 이름, {result}=결과 이름 (설명 칸에는 그 결과의 첫 문장)
+      roomTitle: "{room}에서 나는 '{result}'래. 너는?",               // 방 결과에서 보낼 때. {room}=방 이름, {result}=결과 이름 (설명 칸에는 그 결과의 첫 문장)
       button: "나도 문 열어 보기",                            // (최대 14자)
     },
   },
@@ -1112,7 +1113,8 @@ window.TEXT = {
 
   // ── 공유 카드 공통·나의 이야기 카드
   card: {
-    cta: "당신의 방은 무엇일까요?", // (2026-10-25) 카드 아래 로고 위 한 줄 (최대 18자)
+    cta: "너는 뭐가 나올까?", // (2026-10-25) 카드 아래 로고 위 한 줄 (최대 18자). (2026-10-26) 친구에게 묻는 말로
+    ctaSaju: "너의 일간은 뭐야?", // (2026-10-26) 만신의 방 카드 (최대 18자)
     footer: "낯선 점술관",  // 모든 카드 맨 아래 제품 이름. 주소는 여기 쓰지 않는다 — 맨 위 site.url이 있으면 코드가 아래 줄에 덧붙인다
     story: {
       eyebrow: "낯선 점술관 · 나의 이야기",
