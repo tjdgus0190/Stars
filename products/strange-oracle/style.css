@@ -5652,3 +5652,4 @@ body.has-pay-dock .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px))
 .btn-kakao--share span { white-space: nowrap; }
 /* 큰 버튼이 있는 화면에서는 아래 글자 링크의 카카오 자리를 감춘다(같은 일을 두 번 보이지 않게) */
 .screen:has(.kakao-share:not(:empty)) .result-more .share-kakao-slot { display: none; }
+.room-cookie { margin: var(--space-4) 0 0; padding: 0 var(--space-2); }

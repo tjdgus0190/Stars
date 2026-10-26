@@ -14,15 +14,20 @@ const check = (name, ok, extra = "") => {
   out.push(l);
   console.log(l);
 };
-const INPUTS = ["테스트", "%ED%85%8C", "1995", "0325", "name", "birth", "fbclid", "ttclid", "IWAR", "CLICKSECRET", "pay=", "Facebook", "utm_term"];
+const INPUTS = ["테스트", "%ED%85%8C", "1995", "0325", "name", "birth", "fbclid", "ttclid", "gclid", "igsh", "IWAR", "CLICKSECRET", "pay=", "Facebook", "utm_term", "link_in_bio"];
+// (2026-10-26) 섞인 쿼리도 허용 utm만 남긴다(모르는 키·목록 밖 값은 그 칸만 건너뜀). land = 처음 보이는 화면: 광고(paid_social·cpc 또는 fbclid) → 만신의 방 대문, 그 밖은 입구
+const HUB = "screen-hub", SAJU = "screen-saju-intro";
 const CASES = [
-  { name: "허용 utm 4개 + fbclid", q: "?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors&fbclid=IWAR_CLICKSECRET", want: "?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors" },
-  { name: "허용 utm, 순서 섞임 + ttclid", q: "?ttclid=CLICKSECRET&utm_content=ad2_manshin&utm_source=tiktok&utm_medium=paid_social&utm_campaign=ad2_manshin", want: "?utm_source=tiktok&utm_medium=paid_social&utm_campaign=ad2_manshin&utm_content=ad2_manshin" },
-  { name: "utm + 입력값처럼 생긴 키(섞인 쿼리)", q: "?utm_source=instagram&name=%ED%85%8C%EC%8A%A4%ED%8A%B8&birth=1995-03-25", want: "" },
-  { name: "목록 밖 값(대소문자)", q: "?utm_source=Facebook&utm_medium=paid_social", want: "" },
-  { name: "목록 밖 키(utm_term)", q: "?utm_source=instagram&utm_term=1995", want: "" },
-  { name: "옛 결제 복귀 query", q: "?pay=success&orderId=CLICKSECRET", want: "" },
-  { name: "query 없음", q: "", want: "" },
+  { name: "허용 utm 4개 + fbclid", q: "?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors&fbclid=IWAR_CLICKSECRET", want: "?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors", land: SAJU },
+  { name: "허용 utm, 순서 섞임 + ttclid", q: "?ttclid=CLICKSECRET&utm_content=ad2_manshin&utm_source=tiktok&utm_medium=paid_social&utm_campaign=ad2_manshin", want: "?utm_source=tiktok&utm_medium=paid_social&utm_campaign=ad2_manshin&utm_content=ad2_manshin", land: SAJU },
+  { name: "utm + 입력값처럼 생긴 키(섞인 쿼리)", q: "?utm_source=instagram&name=%ED%85%8C%EC%8A%A4%ED%8A%B8&birth=1995-03-25", want: "?utm_source=instagram", land: HUB },
+  { name: "목록 밖 값(대소문자)", q: "?utm_source=Facebook&utm_medium=paid_social", want: "", land: HUB },
+  { name: "목록 밖 키(utm_term)", q: "?utm_source=instagram&utm_term=1995", want: "?utm_source=instagram", land: HUB },
+  { name: "인스타 프로필 링크 + 인스타가 덧붙인 값", q: "?utm_source=instagram&utm_medium=organic&utm_campaign=ig_profile&utm_content=ig_profile&utm_source=ig&utm_medium=social&utm_content=link_in_bio&igsh=CLICKSECRET", want: "?utm_source=instagram&utm_medium=organic&utm_campaign=ig_profile&utm_content=ig_profile", land: HUB },
+  { name: "utm 없는 메타 광고 링크(fbclid만)", q: "?fbclid=IWAR_CLICKSECRET", want: "", land: SAJU },
+  { name: "구글 광고(cpc)", q: "?utm_source=google&utm_medium=cpc&utm_campaign=gads_main&utm_content=gads_main&gclid=CLICKSECRET", want: "?utm_source=google&utm_medium=cpc&utm_campaign=gads_main&utm_content=gads_main", land: SAJU },
+  { name: "옛 결제 복귀 query", q: "?pay=success&orderId=CLICKSECRET", want: "", land: HUB },
+  { name: "query 없음", q: "", want: "", land: HUB },
 ];
 
 (async () => {
@@ -49,7 +54,12 @@ const CASES = [
     for (const c of CASES) {
       await b.goto("about:blank");
       await b.goto(PAGE + c.q);
+      let scr = "";
+      for (let i = 0; i < 40 && !(scr = await b.evaluate("document.querySelector('.screen.is-active')?.id || ''")); i++) await sleep(100);
       await sleep(400);
+      scr = await b.evaluate("document.querySelector('.screen.is-active')?.id || ''");
+      check(`${c.name}: 처음 화면 ${c.land === SAJU ? "만신의 방 대문(광고)" : "입구"}`, scr === c.land, scr);
+      if (c.land === SAJU) check(`${c.name}: 대문에 쿠키 한 줄 보임 · 입구 버튼 있음`, await b.evaluate("!document.querySelector('#screen-saju-intro [data-js=cookie-line-intro]').hidden && !document.querySelector('[data-js=topbar-home]').classList.contains('is-hidden')"));
       const r = await b.evaluate(`({ dl: JSON.stringify((window.dataLayer || []).map((a) => Array.from(a)).filter((a) => a[0] !== "js")), search: location.search, href: location.href,
         gtag: [...document.scripts].filter((s) => /googletagmanager/.test(s.src)).length })`);
       const dl = JSON.parse(r.dl);

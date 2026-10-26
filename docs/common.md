@@ -158,10 +158,10 @@ Analytics.track("so_result", { room: "rune", archetype: "warrior" }); // 보낸 
 - 캠페인 구분(utm, 2026-10-17): 제품은 시작할 때 `location.search`를 따로 받아 두고(`bootSearch`) 주소창의 query를 지운 뒤 init에 `utm.search`로 넘긴다.
   - 허용 키는 `utm_source`·`utm_medium`·`utm_campaign`·`utm_content` 넷뿐(부품에 고정). 값 목록(`utm.allow`)은 제품이 정한다(설정이므로 data.js가 아니라 app.js. strange-oracle은 `CAMPAIGN`). 값 모양은 소문자·숫자·밑줄 1~40자만.
   - 키·값이 모두 목록과 **정확히**(대소문자 구분, % 디코드 뒤) 같고 `utm_source`가 있을 때만 `page_location` = origin+pathname+`?utm_source=…&utm_medium=…&utm_campaign=…&utm_content=…`(이 순서, 있는 것만).
-  - 다른 키·목록 밖 값·같은 키 두 번·빈 값·깨진 인코딩이 하나라도 있으면 캠페인 값을 모두 버리고 query 없는 주소로 보낸다(방문은 기록). 입력값이 주소에 섞여 들어와도 분석에는 가지 않는다(6장).
+  - (2026-10-26 바뀜) 다른 키·목록 밖 값·빈 값·깨진 인코딩은 **그 칸만 건너뛴다**(예전에는 캠페인 값을 모두 버렸다 — 인스타그램이 링크 뒤에 `igsh`·`utm_source=ig` 등을 덧붙여 광고 구분이 통째로 사라졌다). 같은 키가 두 번이면 앞의 허용 값. 허용된 `utm_source`가 없으면 query 없는 주소로 보낸다(방문은 기록). 모르는 키는 값을 읽지 않으므로 입력값이 주소에 섞여 들어와도 분석에는 가지 않는다(6장).
   - `utm.ignore`의 키(광고 플랫폼이 붙이는 클릭 ID: fbclid·ttclid)는 값을 보지 않고 버린다. 섞인 쿼리로 치지 않는다. utm 키는 ignore에 넣어도 검사한다.
   - 공유 링크에 utm이 남지 않게 제품이 시작할 때 주소창 query를 지운다(strange-oracle은 원래부터 지움 → page_view 전에 이미 없음).
-  - 시험: `tools/strange-oracle/ads.test.js`(analytics utm 4건), `tools/strange-oracle/e2e-utm.js`.
+  - 시험: `tools/strange-oracle/ads.test.js`(analytics utm 5건), `tools/strange-oracle/e2e-utm.js`(처음 화면 포함).
 - 이 부품을 쓰는 제품은 개인정보처리방침에 구글 애널리틱스·쿠키·국외 이전 안내를 넣고, 입구에 쿠키 한 줄을 둔다(strange-oracle 12-5 참고).
 
 ## disclaimer.js

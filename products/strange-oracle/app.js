@@ -5458,6 +5458,9 @@
 
   // 입구: 쿠키 한 줄(GA4 ID가 있을 때만)
   js("cookie-line").hidden = !Analytics.configured(T.analytics.ga4);
+  // (2026-10-26) 광고로 온 사람은 입구를 건너뛰므로 만신의 방 대문에도 같은 한 줄
+  const cookieIntro = js("cookie-line-intro");
+  if (cookieIntro) cookieIntro.hidden = !Analytics.configured(T.analytics.ga4);
 
   // 공유 이벤트: 방법만 (공유 글·주소·카드 내용은 보내지 않는다)
   const shareRoom = () => {
@@ -5681,6 +5684,12 @@
     if (hash === "story") first = "story";
     else if (CHAPTER_ORDER.includes(hash)) first = roomTarget(hash);
     else if (CHAPTER_ORDER.includes(hashRoom) && !TRANSIENT_TO(hash)) first = hash === `${hashRoom}-result` && isDone(hashRoom) ? roomTarget(hashRoom) : hash;
+  }
+  // (2026-10-26 운영자) 광고로 처음 온 사람(허용 utm의 medium이 paid_social·cpc이거나 메타 클릭 ID fbclid가 있음)은 입구를 건너뛰고 만신의 방 대문으로.
+  //   이 탭에 마친 방이 없고 주소에 화면 이름이 없을 때만. 입구 이탈이 82%였다(GA4 2026-10-25). query 값은 분석 부품의 허용 목록 검사만 거친다(6장)
+  if (first === "hub" && !hash && !filledRooms().length) {
+    const ad = /(^|&)utm_medium=(paid_social|cpc)(&|$)/.test(Analytics.campaign(bootSearch, CAMPAIGN.allow, CAMPAIGN.ignore)) || /(^\?|&)fbclid=/.test(bootSearch);
+    if (ad && screens["saju-intro"]) first = "saju-intro";
   }
   renderHub();
   setTopbar("hub");

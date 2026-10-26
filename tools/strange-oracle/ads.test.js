@@ -211,16 +211,33 @@ test("analytics utm: 허용 키·값만 정해진 순서로 남긴다", () => {
   assert.strictEqual(c("?ttclid=E.C.P.abc&utm_source=tiktok", UTM_ALLOW, UTM_IGNORE), "utm_source=tiktok");
 });
 
-test("analytics utm: 거부 — 목록 밖 값·다른 키·섞인 쿼리·source 없음", () => {
+test("analytics utm: 거부 — 허용된 utm_source가 없으면 \"\"", () => {
   const c = env().win.Analytics.campaign;
-  ["", "?", "?utm_source=facebook", "?utm_source=instagram&utm_medium=email", "?utm_source=instagram&utm_term=saju",
-    "?utm_source=instagram&name=김서윤", "?utm_source=instagram&birth=1995-03-25", "?pay=success&utm_source=instagram",
-    "?utm_medium=paid_social", "?utm_source=instagram&utm_source=tiktok", "?utm_source", "?utm_source=", "?utm_source=instagram&",
-    "?constructor=x&utm_source=instagram", "?__proto__=x", "?utm_source=hasOwnProperty",
-  ].forEach((q) => assert.strictEqual(c(q, UTM_ALLOW, UTM_IGNORE), "", q));
-  assert.strictEqual(c("?utm_source=instagram&fbclid=x", UTM_ALLOW), "", "무시 목록이 없으면 클릭 ID도 섞인 쿼리");
+  ["", "?", "?utm_source=facebook", "?utm_medium=paid_social", "?utm_source", "?utm_source=", "?__proto__=x", "?utm_source=hasOwnProperty",
+    "?name=김서윤&birth=1995-03-25", "?utm_source=ig&utm_medium=social&utm_content=link_in_bio", "?fbclid=x"].forEach((q) => assert.strictEqual(c(q, UTM_ALLOW, UTM_IGNORE), "", q));
   assert.strictEqual(c("?utm_source=instagram", null), "", "허용 목록 없음");
   assert.strictEqual(c("?utm_source=facebook", UTM_ALLOW, ["utm_source"]), "", "utm 키는 무시 목록에 넣어도 검사");
+});
+
+test("analytics utm (2026-10-26): 섞인 쿼리 — 모르는 키·목록 밖 값·같은 키 두 번은 그 칸만 건너뛰고 허용 값만 남긴다(입력값은 나가지 않음)", () => {
+  const c = env().win.Analytics.campaign;
+  [["?utm_source=instagram&utm_medium=email", "utm_source=instagram"],
+    ["?utm_source=instagram&utm_term=saju", "utm_source=instagram"],
+    ["?utm_source=instagram&name=김서윤", "utm_source=instagram"],
+    ["?utm_source=instagram&birth=1995-03-25", "utm_source=instagram"],
+    ["?pay=success&utm_source=instagram", "utm_source=instagram"],
+    ["?utm_source=instagram&utm_source=tiktok", "utm_source=instagram"],
+    ["?utm_source=Facebook&utm_source=instagram", "utm_source=instagram"],
+    ["?utm_source=instagram&", "utm_source=instagram"],
+    ["?constructor=x&utm_source=instagram", "utm_source=instagram"],
+    ["?utm_source=instagram&fbclid=x", "utm_source=instagram"],
+    ["?utm_source=instagram&x=%E0%A4", "utm_source=instagram"],
+    // 인스타 프로필 링크: 인스타그램이 뒤에 utm_source=ig 등과 igsh를 덧붙인다
+    ["?utm_source=instagram&utm_medium=organic&utm_campaign=ig_profile&utm_content=ig_profile&utm_source=ig&utm_medium=social&utm_content=link_in_bio&igsh=ZXhhbXBsZQ%3D%3D", "utm_source=instagram&utm_medium=organic&utm_campaign=ig_profile&utm_content=ig_profile"],
+    // 인스타 광고: 클릭 ID와 함께 오는 경우
+    ["?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors&fbclid=PAZXh0bgNhZW0BMA&igsh=abc", "utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors"],
+  ].forEach(([q, want]) => assert.strictEqual(c(q, UTM_ALLOW, UTM_IGNORE), want, q));
+  assert.strictEqual(c("?utm_source=instagram&fbclid=x", UTM_ALLOW), "utm_source=instagram", "무시 목록이 없어도 모르는 키는 건너뜀");
 });
 
 test("analytics utm: 대소문자·인코딩", () => {
@@ -243,8 +260,14 @@ test("analytics utm: init — 허용이면 page_location에 utm만, 거부면 qu
   e = env();
   e.win.Analytics.init({ ga4: "G-TEST12345", events, utm: { search: "?utm_source=instagram&name=%EA%B9%80%EC%84%9C%EC%9C%A4&birth=1995-03-25", allow: UTM_ALLOW, ignore: UTM_IGNORE } });
   cfg = [...e.win.dataLayer].map((a) => [...a]).find((a) => a[0] === "config");
-  assert.strictEqual(cfg[2].page_location, "http://127.0.0.1:8788/products/strange-oracle/index.html");
-  const all = JSON.stringify([...e.win.dataLayer].map((a) => [...a]));
+  assert.strictEqual(cfg[2].page_location, "http://127.0.0.1:8788/products/strange-oracle/index.html?utm_source=instagram", "(2026-10-26) 섞인 쿼리도 허용 utm만 남김");
+  let all = JSON.stringify([...e.win.dataLayer].map((a) => [...a]));
+  ["김서윤", "%EA%B9%80", "1995", "name", "birth"].forEach((s) => assert.ok(!all.includes(s), s));
+  e = env();
+  e.win.Analytics.init({ ga4: "G-TEST12345", events, utm: { search: "?name=%EA%B9%80%EC%84%9C%EC%9C%A4&birth=1995-03-25", allow: UTM_ALLOW, ignore: UTM_IGNORE } });
+  cfg = [...e.win.dataLayer].map((a) => [...a]).find((a) => a[0] === "config");
+  assert.strictEqual(cfg[2].page_location, "http://127.0.0.1:8788/products/strange-oracle/index.html", "utm_source가 없으면 query 없는 주소");
+  all = JSON.stringify([...e.win.dataLayer].map((a) => [...a]));
   ["김서윤", "1995", "name", "birth", "utm_"].forEach((s) => assert.ok(!all.includes(s), s));
   e = env("?utm_source=instagram");
   assert.strictEqual(e.win.Analytics.init({ ga4: "G-TEST12345", events, utm: { search: "?utm_source=instagram", allow: UTM_ALLOW } }), false, "주소창에 query가 남아 있으면 여전히 시작하지 않음(제품이 먼저 지운다)");
