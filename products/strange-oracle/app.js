@@ -5415,7 +5415,7 @@
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
   // (광고 측정, 제안서 strange-oracle-ads 8장 4번) 캠페인 구분: 광고 링크의 utm은 아래 값과 정확히 같을 때만 page_location에 남긴다.
-  // 다른 query·목록 밖 값이 하나라도 있으면 캠페인 값을 모두 버린다(방문은 query 없는 주소로 기록). 클릭 ID(fbclid·ttclid)는 값을 보지 않고 버린다.
+  // (2026-10-26) 다른 query·목록 밖 값은 그 칸만 건너뛰고 허용 값만 남긴다(허용된 utm_source가 없으면 query 없는 주소로 기록). 클릭 ID(fbclid·ttclid)는 값을 보지 않고 버린다.
   // 값을 더하려면 제안서와 marketing/strange-oracle/render/README.md 표도 함께 고친다. 사용자 입력값은 이 목록에 들어갈 수 없다(6장).
   const CAMPAIGN = {
     allow: {
