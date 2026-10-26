@@ -17,3 +17,5 @@
 | 소리(4안 소리판 `out/ad4-busted-3d-ko-sound.mp4`) | 직접 합성(`render/sound-ad4.js`, 2026-10-24). 사인·노이즈·간단한 잔향을 스크립트가 계산, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
 | 5·6안 장면(`scenes/ad5-saju-only-3d.html`·`ad6-untold-3d.html`, `scenes/gl/ad5-3d.js`·`ad6-3d.js`·`fx.js`·`cards.js`, 2026-10-25) | 사주 원국 카드·일곱 방 카드(문장·결과 글자)·빛 입자·후처리를 three.js 도형·셰이더·캔버스 글자로 직접 그림. 그림 파일·외부 모델·실사·사람 모습 없음. 글꼴은 위 Noto Serif KR·Gowun Batang·Cinzel(같은 판·SRI) | 자체 제작 |
 | 소리(5·6안 소리판 `out/ad5-saju-only-3d-ko-sound.mp4`·`ad6-untold-3d-ko-sound.mp4`) | 직접 합성(`render/sound-ad56.js`, 2026-10-25). 사인·노이즈·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
+| 방 소개 릴스 장면(`scenes/reel-room.html`, `scenes/reel/*`, 2026-10-26) | 하늘·빛줄기·고리·방 무늬를 CSS·SVG로 직접 그림. 안내자 기호는 제품 index.html의 자체 제작 SVG. 그림 파일·실사·사람 모습 없음. 글꼴은 위 Noto Serif KR·Gowun Batang·Cinzel(같은 판·SRI) | 자체 제작 |
+| 소리(방 소개 릴스 `out/reel-<방>-ko-sound.mp4`) | 직접 합성(`render/sound-reel.js`, 2026-10-26). 사인·노이즈·줄 튕김(카플러스-스트롱)·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |

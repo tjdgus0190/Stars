@@ -81,3 +81,13 @@ node marketing/strange-oracle/render/sound-ad1.js --raw    # 정규화 전 float
 | utm_content | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ad5_saju_only` · `ad6_untold` · `ad7_rooms` · `ig_profile` · `ig_story_book` · `x_profile` · `x_pinned` · `gads_main` |
 
 예: `https://<제품 주소>/?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors`
+
+## 방 소개 릴스 7편 (2026-10-26)
+```
+node --experimental-websocket marketing/strange-oracle/render/render.js reel-saju   # → out/reel-saju-ko.mp4 (25초 750프레임, 약 20분)
+#   방: reel-saju · reel-ogham · reel-star · reel-decan · reel-tzolkin · reel-rune · reel-sibyl
+#   두 편을 함께 돌릴 때는 포트를 나눈다: --port 8791 --cdp 9351
+node marketing/strange-oracle/render/sound-reel.js all                              # 소리판 → out/reel-<방>-ko-sound.mp4 (방 이름 하나만 줘도 됨)
+```
+- 장면 하나(`scenes/reel-room.html?room=<방>`)가 `scenes/reel/reel-data.js`(대본)·`reel.js`(방마다 무늬)·`reel.css`(효과)로 일곱 편을 그린다. 3D 없음.
+- 시간표는 일곱 편이 같다: 0 첫 일격 · 2.4 둘째 일격 · 4.8 방 이름 · 7.2/10.6/14.0/17.2 이야기 · 20.4 다른 방 · 22.8 끝.

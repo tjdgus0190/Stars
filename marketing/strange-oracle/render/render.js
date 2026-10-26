@@ -1,5 +1,5 @@
 // 광고 영상 렌더: 장면 HTML(../scenes/) → 프레임 PNG(임시 폴더) → ffmpeg H.264 mp4(../out/)
-// 사용법·결과는 README.md. 실행: node --experimental-websocket marketing/strange-oracle/render/render.js [ad1|ad2|all] [--check] [--port 8790]
+// 사용법·결과는 README.md. 실행: node --experimental-websocket marketing/strange-oracle/render/render.js [ad1|ad2|all] [--check] [--port 8790] [--cdp 9350]
 // - 헤드리스 Edge (tools/strange-oracle/cdp.js 재사용), 뷰포트 1080x1920 · 배율 1 · mobile 아님, 움직임 줄이기 설정 켜지 않음
 // - document.fonts.ready 뒤 모든 애니메이션을 멈추고 프레임 n마다 currentTime = n*1000/30 으로 고정해 캡처
 // - --check: 주소에 #safe를 붙여 1초 간격 확인 컷(+마지막 프레임)을 ../out/check/에 찍고, 자막 줄 수를 check.json에 적는다
@@ -26,6 +26,13 @@ const ADS = {
   ad4x: { scene: "ad4-busted-3d.html", out: "ad4-busted-3d-ko.mp4", frames: 450 }, // (2026-10-24) 4안 「들켰죠」 (글자까지 WebGL, 후처리)
   ad5x: { scene: "ad5-saju-only-3d.html", out: "ad5-saju-only-3d-ko.mp4", frames: 450 }, // (2026-10-25) 5안 「언제까지 사주만」
   ad6x: { scene: "ad6-untold-3d.html", out: "ad6-untold-3d-ko.mp4", frames: 450 }, // (2026-10-25) 6안 「사주가 알려주지 않은 이야기」
+  "reel-saju": { scene: "reel-room.html?room=saju", out: "reel-saju-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
+  "reel-ogham": { scene: "reel-room.html?room=ogham", out: "reel-ogham-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
+  "reel-star": { scene: "reel-room.html?room=star", out: "reel-star-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
+  "reel-decan": { scene: "reel-room.html?room=decan", out: "reel-decan-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
+  "reel-tzolkin": { scene: "reel-room.html?room=tzolkin", out: "reel-tzolkin-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
+  "reel-rune": { scene: "reel-room.html?room=rune", out: "reel-rune-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
+  "reel-sibyl": { scene: "reel-room.html?room=sibyl", out: "reel-sibyl-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
 };
 
 const args = process.argv.slice(2);
@@ -34,7 +41,7 @@ const checkOnly = args.includes("--check");
 const PORT = Number(args[args.indexOf("--port") + 1]) || 8790;
 if (PORT === 8787 || PORT === 8788) throw new Error("포트 8787·8788은 쓰지 않는다 (8790 권장)");
 const list = which === "all" ? Object.keys(ADS) : [which];
-if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | ad3 | ad1x | ad2x | ad3x | ad4x | ad5x | ad6x | all)`);
+if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | ad3 | ad1x | ad2x | ad3x | ad4x | ad5x | ad6x | reel-<방> | all)`);
 
 async function waitServer() {
   for (let i = 0; i < 50; i++) {
@@ -125,7 +132,7 @@ async function renderAd(b, key) {
   let b;
   try {
     await waitServer();
-    b = await launch({ port: 9350, width: W, height: H });
+    b = await launch({ port: Number(args[args.indexOf("--cdp") + 1]) || 9350, width: W, height: H });
     await b.send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: 1, mobile: false });
     const results = [];
     for (const key of list) {
