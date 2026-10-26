@@ -5637,12 +5637,32 @@ body.is-scrolling .cosmos > * { animation-play-state: paused; }
   background: linear-gradient(180deg, transparent, oklch(0.12 0.03 285 / 0.92) 38%); pointer-events: none; transition: transform 0.25s ease, opacity 0.25s ease; }
 .pay-dock[hidden] { display: none; }
 .pay-dock.is-tucked { transform: translateY(110%); opacity: 0; }
-.pay-dock__btn { pointer-events: auto; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 448px; margin: 0 auto; padding: 0 18px; font-family: var(--font-sans); cursor: pointer; }
+/* (2026-10-27) 버튼 하나가 두 모습으로: data-mode="next" 다음 문(어두운 문 + 진행 점) ↔ "pay" 금색 결제. 같은 자리에 겹쳐 두고 바꿔 끼운다 */
+.pay-dock__row { display: grid; max-width: 448px; margin: 0 auto; }
+.pay-dock__next, .pay-dock__btn { grid-area: 1 / 1; pointer-events: auto; min-width: 0; font-family: var(--font-sans); cursor: pointer;
+  transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s linear 0s; }
+.pay-dock[data-mode="next"] .pay-dock__btn, .pay-dock[data-mode="pay"] .pay-dock__next { opacity: 0; transform: translateY(10px) scale(0.96); visibility: hidden; pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s; }
+.pay-dock__next { min-height: 58px; display: grid; justify-items: center; align-content: center; gap: 3px; padding: 7px 16px; border-radius: 14px;
+  border: 1.5px solid oklch(0.82 0.1 82 / 0.7); color: var(--c-text);
+  background: radial-gradient(120% 140% at 50% 0%, oklch(0.32 0.06 calc(var(--room-h, 285) + 0) / 0.96), oklch(0.15 0.03 285 / 0.97));
+  box-shadow: 0 10px 28px oklch(0 0 0 / 0.45), inset 0 1px 0 oklch(1 0 0 / 0.12), 0 0 0 4px oklch(0.82 0.1 82 / 0.08); }
+.pay-dock__next:hover { border-color: oklch(0.9 0.1 85); }
+.pay-dock__next-top { display: inline-flex; align-items: center; gap: 8px; }
+.pay-dock__rail { display: inline-flex; gap: 4px; }
+.pay-dock__dot { width: 6px; height: 6px; border-radius: 50%; background: oklch(1 0 0 / 0.22); }
+.pay-dock__dot.is-done { background: oklch(0.82 0.1 82); }
+.pay-dock__dot.is-here { box-shadow: 0 0 0 2px oklch(0.82 0.1 82 / 0.45); }
+.pay-dock__dot.is-next { background: oklch(0.95 0.06 90); box-shadow: 0 0 8px oklch(0.9 0.1 85); animation: dock-next 1.6s ease-in-out infinite; }
+@keyframes dock-next { 50% { transform: scale(1.5); } }
+.pay-dock__next-label { font-size: 12px; font-weight: 700; letter-spacing: 0.02em; color: oklch(0.86 0.08 85); white-space: nowrap; }
+.pay-dock__next-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 18px; font-weight: 800; }
+.pay-dock__btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 18px; }
 .pay-dock__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pay-dock__price { flex: none; white-space: nowrap; padding: 3px 10px; border-radius: 999px; background: oklch(0.2 0.04 60 / 0.14); font-size: 15px; font-weight: 800; }
 body.has-pay-dock .screen.is-active { padding-bottom: calc(var(--space-16) + 84px); }
 body.has-pay-dock .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-@media (prefers-reduced-motion: reduce) { .pay-dock { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pay-dock, .pay-dock__next, .pay-dock__btn { transition: none !important; } .pay-dock__dot.is-next { animation: none; } }
 
 /* ── (2026-10-25) 카카오톡 공유: 결과 카드 바로 아래 큰 노란 버튼 ── */
 .kakao-share { margin: var(--space-4) 0 0; }
@@ -5674,3 +5694,18 @@ body.has-pay-dock .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px))
 .pay-list__item--hot .pay-list__name > :first-child, .pay-list__item--hot { color: oklch(0.88 0.1 350); }
 .pay-list__item--hot .pay-list__sub { color: oklch(0.8 0.07 350); }
 .story-hint { margin: var(--space-2) auto 0; max-width: 300px; font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text-muted); text-align: center; word-break: keep-all; }
+
+/* ── (2026-10-27) 잠긴 칸: 한 번 결제로 열리는 일곱 방 · 결제는 갈림길(다음 문으로 바로) ── */
+.room-rest__all { margin: var(--space-4) 0 0; padding: 14px 10px 12px; border-radius: 14px; border: 1px solid oklch(0.86 0.09 85 / 0.45); background: oklch(0.86 0.09 85 / 0.06); text-align: center; }
+.room-rest__all-head { margin: 0; font-size: 18px; font-weight: 800; line-height: 1.4; color: oklch(0.9 0.1 85); word-break: keep-all; }
+.room-rest__rooms { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin: 12px 0 0; padding: 0; list-style: none; }
+.room-rest__room { display: grid; justify-items: center; gap: 2px; opacity: 0.6; }
+.room-rest__room-fig { width: 26px; height: 34px; color: oklch(0.86 0.06 85); fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.room-rest__room-name { font-size: 11px; line-height: 1.2; color: var(--c-text-muted); white-space: nowrap; }
+.room-rest__room.is-here { opacity: 1; }
+.room-rest__room.is-here .room-rest__room-fig { color: var(--accent); filter: drop-shadow(0 0 6px var(--accent)); }
+.room-rest__room.is-here .room-rest__room-name { color: var(--c-text); font-weight: 700; }
+.room-rest__all-plus { margin: 10px 0 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--c-text); word-break: keep-all; }
+.room-rest__next { margin: var(--space-5) 0 0; padding-top: var(--space-4); border-top: 1px dashed oklch(1 0 0 / 0.16); text-align: center; }
+.room-rest__next-text { margin: 0 0 var(--space-2); font-size: var(--fs-sm); line-height: 1.6; color: var(--c-text); word-break: keep-all; }
+.room-rest__next-btn { min-height: 52px; font-size: 17px; font-weight: 700; border: 1.5px solid oklch(0.86 0.09 85 / 0.6); border-radius: 14px; color: var(--c-text); }

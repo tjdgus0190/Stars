@@ -3074,30 +3074,77 @@
     box.append(restSection(ROMAN[3], names[3], (tail ? fr.ch4.concat(tail) : fr.ch4).map(strip)));
     box.append(restSection("", room === "saju" ? sajuHiddenTitle(c) || T.book.hiddenChapter : strip(fr.hidden.title || T.book.hiddenChapter), fr.hidden.paragraphs.map(strip), "room-rest__ch--hidden"));
   }
-  // (2026-10-25) 결과 화면 아래에 떠 있는 결제 버튼: 지금 화면이 방 결과이고 나머지 칸이 잠겨 있을 때만. 방 결과 아래 결제 버튼이 보이면 내려 숨긴다
+  // (2026-10-25) 결과 화면 아래에 떠 있는 버튼. (2026-10-27) 다음 문 ↔ 결제로 바뀌는 버튼 하나
   let dockIO = null;
   function updateDock() {
     const dock = js("pay-dock");
     if (!dock) return;
+    // (2026-10-27) 버튼 하나가 자리에 맞게 바뀐다: 읽는 동안 = 다음 문(무료) · 잠긴 칸이 보이면 = 7개 방 전부(결제) · 칸 안 결제 버튼이나 진짜 문이 보이면 내려 숨김
     const scr = screens[currentName];
-    const box = scr && /-result$/.test(currentName) ? js("room-rest", scr) : null;
-    const on = Boolean(box && box.dataset.state === "locked" && payScr);
+    const res = scr && /-result$/.test(currentName) ? scr : null;
+    const door = res ? js("result-next-door", res) : null;
+    const box = res ? js("room-rest", res) : null;
+    const locked = Boolean(box && box.dataset.state === "locked" && payScr);
+    const on = Boolean(door);
     if (dockIO) dockIO.disconnect();
     dockIO = null;
     dock.hidden = !on;
     dock.classList.remove("is-tucked");
+    dock.dataset.mode = "next";
     body.classList.toggle("has-pay-dock", on);
     if (!on) return;
-    const room = scr.dataset.room;
+    const room = res.dataset.room;
     dock.dataset.room = room;
-    js("pay-dock-label", dock).textContent = (room === "saju" && RT.dockSaju) || RT.dock || "";
+    const fin = door.dataset.go === "finale";
+    const ni = CHAPTER_ORDER.indexOf(door.dataset.room);
+    js("pay-dock-next-label", dock).textContent = (fin ? RT.dockNextFinale : RT.dockNext) || "";
+    js("pay-dock-next-name", dock).textContent = fill(RT.dockNextName || "{name} →", { num: ni >= 0 ? ROMAN[ni] : "", name: doorName(door) }).trim();
+    const rail = js("pay-dock-rail", dock); // 일곱 방 진행 점: 지난 방 · 지금 방 · 다음 문
+    rail.textContent = "";
+    CHAPTER_ORDER.forEach((r) => {
+      const d = rmk("span", "pay-dock__dot");
+      d.classList.toggle("is-done", isDone(r));
+      d.classList.toggle("is-here", r === room);
+      d.classList.toggle("is-next", !fin && r === door.dataset.room);
+      rail.append(d);
+    });
+    js("pay-dock-next", dock).classList.remove("is-opening");
+    js("pay-dock-label", dock).textContent = RT.dock || "";
     js("pay-dock-price", dock).textContent = fill(RT.dockPrice || "", { price: comma(PAY.amount) });
-    const buy = js("room-rest-buy", box);
-    if (buy && "IntersectionObserver" in window) {
-      dockIO = new IntersectionObserver((es) => dock.classList.toggle("is-tucked", es.some((e) => e.isIntersecting)), { threshold: 0.2 });
-      dockIO.observe(buy);
-    }
+    if (!("IntersectionObserver" in window)) return;
+    const buy = locked ? js("room-rest-buy", box) : null;
+    const passage = js("result-passage", res);
+    const vis = new Map();
+    const seen = (el) => Boolean(el && vis.get(el));
+    dockIO = new IntersectionObserver((es) => {
+      es.forEach((e) => vis.set(e.target, e.isIntersecting && (e.target === box || e.intersectionRatio >= 0.2)));
+      dock.classList.toggle("is-tucked", seen(buy) || seen(passage));
+      // 잠긴 칸에 들어섰고 칸 안 결제 버튼을 아직 지나지 않았을 때만 결제 모습
+      dock.dataset.mode = locked && seen(box) && buy && buy.getBoundingClientRect().bottom > 0 ? "pay" : "next";
+    }, { threshold: [0, 0.2] });
+    [box, buy, passage].filter(Boolean).forEach((el) => dockIO.observe(el));
   }
+  // (2026-10-27) 다음 문 이름(시빌라 = 마지막 문). 문 버튼에 적힌 이름 그대로
+  function doorName(door) {
+    const n = door && $(".next-door__name", door);
+    return n ? n.textContent.trim() : (T.result.nextDoor && T.result.nextDoor.finaleName) || "";
+  }
+  // (2026-10-27) 다음 문을 아래까지 내려가지 않고 연다: 떠 있는 왼쪽 버튼 · 잠긴 칸의 "결제는 나중에" 버튼. 문 버튼과 같은 길(openNextDoor)
+  function goNextDoor(scr, fromEl, from) {
+    const door = scr && js("result-next-door", scr);
+    if (!door || sig) return;
+    track("so_next", { room: scr.dataset.room, from });
+    const room = door.dataset.go === "finale" ? nextRoom() : door.dataset.room;
+    if (CHAPTER_ORDER.includes(room)) return playSigil(room, fromEl, roomTarget(room), isDone(room), "is-opening");
+    fromEl.classList.add("is-opening");
+    later(() => go("finale"), 650);
+  }
+  // (2026-10-27) 공유·다시 하기 줄은 다음 문 아래로: 결제 칸을 지나면 바로 다음 문이 나오게
+  Object.values(screens).forEach((s) => {
+    const p = js("result-passage", s);
+    const m = $(".result-more", s);
+    if (p && m && p.compareDocumentPosition(m) & Node.DOCUMENT_POSITION_PRECEDING) p.after(m);
+  });
   // (2026-10-26) 잠긴 칸에 쓸 이 사람의 공개 결과 항목(장 제목·직격 첫 마디). 방 파일이 아직 없거나 코드가 없으면 null
   function restEntry(room) {
     const c = myCodes();
@@ -3135,8 +3182,8 @@
     const open = free || Boolean(passNow());
     const n = comma(chapterChars(room));
     box.dataset.state = open && loaded ? "open" : open ? restState[room] || (free ? "free" : "loading") : "locked";
-    box.append(rmk("h2", "room-rest__title", RT.title || ""));
     const st = box.dataset.state;
+    box.append(rmk("h2", "room-rest__title", (st === "locked" && RT.titleLocked) || RT.title || ""));
     if (st === "open") {
       if (!free) box.append(rmk("p", "room-rest__note", RT.openNote || ""));
       return renderRestOpen(box, room);
@@ -3144,14 +3191,17 @@
     if (st === "locked") {
       // (2026-10-25) 만신: "여기까지가 흔히 보던 사주" 머리말
       // (2026-10-26) 모든 방: 직격 첫 마디 맛보기(공개 data strikeTease, 나머지 두 마디는 흐린 막대) · 잠긴 줄 = 이 사람의 장 제목(공개 data) · 궁합 강조 · 안심 한 줄
+      // (2026-10-27) 둘째 방부터는 "아까 본 그 9,900원에 이 방도 들어 있다"로 짧게(궁합 카드 생략). 방마다 새 가격표처럼 보이지 않게
       const SJ = room === "saju" && RT.saju ? RT.saju : null;
+      const again = CHAPTER_ORDER.indexOf(room) > 0 && Boolean(RT.againLead);
+      const price = comma(PAY.amount);
       const pe = restEntry(room);
       const tt = (x) => (x && x.title ? strip(x.title) : "");
       if (SJ) {
         box.classList.add("room-rest--saju");
         box.append(rmk("p", "room-rest__cut", SJ.cut || ""));
         box.append(rmk("p", "room-rest__lead", fill(SJ.lead || RT.lockedLead, { n })));
-      } else box.append(rmk("p", "room-rest__lead", fill(RT.lockedLead, { n })));
+      } else box.append(rmk("p", "room-rest__lead", fill(again ? RT.againLead : RT.lockedLead, { n, price })));
       const tease = pe && typeof pe.strikeTease === "string" && pe.strikeTease ? strip(pe.strikeTease) : "";
       if (tease) {
         const t = rmk("section", "strike strike--tease");
@@ -3187,7 +3237,7 @@
       });
       box.append(ul);
       // 결제하면 함께 열리는 것: 궁합 강조 + 나머지 장 이름
-      if (RT.match && RT.match.title) {
+      if (!again && RT.match && RT.match.title) {
         const m = rmk("section", "room-rest__match");
         m.dataset.js = "room-rest-match";
         m.append(rmk("p", "room-rest__match-label", RT.match.label || ""));
@@ -3196,8 +3246,21 @@
         if (RT.match.also) m.append(rmk("p", "room-rest__match-also", RT.match.also));
         box.append(m);
       }
-      const price = comma(PAY.amount);
-      box.append(rmk("p", "room-rest__price", fill(RT.lockedNote, { price })));
+      // (2026-10-27) 한 번 결제로 열리는 것: 일곱 방 문장 줄(지금 방 강조) + 함께 열리는 장
+      const all = rmk("section", "room-rest__all");
+      all.dataset.js = "room-rest-all";
+      all.append(rmk("p", "room-rest__all-head", fill(RT.allHead || RT.lockedNote, { price })));
+      const rooms = rmk("ul", "room-rest__rooms");
+      CHAPTER_ORDER.forEach((r) => {
+        const li = rmk("li", r === room ? "room-rest__room is-here" : "room-rest__room");
+        li.dataset.room = r;
+        li.innerHTML = `<svg class="room-rest__room-fig" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-${r}" /></svg>`;
+        li.append(rmk("span", "room-rest__room-name", T.rooms[r].short));
+        rooms.append(li);
+      });
+      all.append(rooms);
+      if (RT.allPlus) all.append(rmk("p", "room-rest__all-plus", RT.allPlus));
+      box.append(all);
       const buy = rmk("button", "btn btn--primary btn--block room-rest__buy", fill(RT.buyBtn, { price }));
       buy.type = "button";
       buy.dataset.js = "room-rest-buy";
@@ -3220,6 +3283,19 @@
       box.append(buy);
       if (RT.safe) box.append(rmk("p", "room-rest__safe", RT.safe)); // (2026-10-26) 안심 한 줄: 구매·환불 안내에 적힌 것만
       box.append(have);
+      // (2026-10-27) 결제는 갈림길: 하지 않아도 다음 문으로 바로
+      const door = js("result-next-door", scr);
+      if (door) {
+        const fin = door.dataset.go === "finale";
+        const nx = rmk("div", "room-rest__next");
+        nx.append(rmk("p", "room-rest__next-text", fin ? RT.freeNextFinale || "" : fill(RT.freeNext || "", { next: doorName(door) })));
+        const nb = rmk("button", "btn btn--ghost btn--block room-rest__next-btn", RT.freeNextBtn || "");
+        nb.type = "button";
+        nb.dataset.js = "room-rest-next";
+        nb.addEventListener("click", () => goNextDoor(scr, nb, "locked"));
+        nx.append(nb);
+        box.append(nx);
+      }
       return;
     }
     // free(만신, 아직 안 받음) · loading · fail
@@ -4705,6 +4781,8 @@
         }
         goPay("dock");
       });
+    const dockNext = js("pay-dock-next");
+    if (dockNext) dockNext.addEventListener("click", () => goNextDoor(screens[currentName], dockNext, "dock"));
   }
 
   // (결정 120) 책 화면을 처음 열 때 app-book.js를 받아 mount 한 번
@@ -5454,6 +5532,7 @@
     so_result: { room: CHAPTER_ORDER, archetype: ARCHETYPES },
     so_story: { step: ["3of6", "6of6"] },
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
+    so_next: { room: CHAPTER_ORDER, from: ["dock", "locked"] }, // (2026-10-27) 다음 방을 떠 있는 버튼·잠긴 칸 버튼으로 열었을 때(아래 문 버튼은 so_room_view로 충분)
     so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
