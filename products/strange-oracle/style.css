@@ -5737,3 +5737,8 @@ body.has-pay-dock .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px))
 .season__tag { padding: 2px 10px; border-radius: 999px; border: 1px solid oklch(0.82 0.1 82 / 0.6); font-size: var(--fs-xs); color: oklch(0.88 0.09 85); }
 .season__line { margin: 6px 0 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--c-text); word-break: keep-all; }
 .season__after { margin: 2px 0 0; font-size: var(--fs-xs); color: var(--c-text-muted); }
+/* (2026-10-27 운영자) 첫 계절: 가격 자리마다 줄 그은 정가 */
+s.was { margin-right: 2px; font-weight: 500; opacity: 0.62; text-decoration-thickness: 2px; text-decoration-color: currentColor; }
+.pay-dock__price s.was { font-size: 12px; }
+.was-pair { white-space: nowrap; }
+.room-rest__buy s.was, .pay-buy s.was, .btn s.was { font-size: 0.8em; }

@@ -318,7 +318,11 @@
   // ───────── 정적 문구 채우기 ─────────
   function applyText(scope = document) {
     const priced = (v) => (typeof v === "string" && v.includes("{price}") ? v.split("{price}").join(Number(PAY.amount).toLocaleString("ko-KR")) : v); // (2026-10-27) 가격 자리는 지금 판매 값으로
-    $$("[data-t]", scope).forEach((el) => (el.textContent = priced(get(el.dataset.t)) ?? ""));
+    $$("[data-t]", scope).forEach((el) => {
+      const v = get(el.dataset.t);
+      if (typeof v === "string" && v.includes("{price}원") && PAY.regular) setPriced(el, v); // 첫 계절: 줄 그은 정가 + 지금 값
+      else el.textContent = priced(v) ?? "";
+    });
     $$("[data-h]", scope).forEach((el) => (el.innerHTML = get(el.dataset.h) ?? ""));
     $$("[data-ph]", scope).forEach((el) => (el.placeholder = get(el.dataset.ph) ?? ""));
     $$("[data-aria]", scope).forEach((el) => el.setAttribute("aria-label", get(el.dataset.aria) ?? ""));
@@ -811,7 +815,7 @@
       }
       const entry = payBtn.closest('[data-js="pay-entry"]') || payBtn;
       show(entry, n > 0 && !passNow());
-      payBtn.textContent = fill(T.pay.hubBuy || T.pay.buy || "", { price: Number(PAY.amount).toLocaleString("ko-KR") });
+      setPriced(payBtn, T.pay.hubBuy || T.pay.buy || "");
       const note = js("hub-pay-note");
       if (note) note.textContent = n === CHAPTER_ORDER.length ? T.pay.hubNoteAll || "" : T.pay.hubNote || "";
     }
@@ -2929,6 +2933,28 @@
   const BV = window.BOOK_VOLUME;
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
   const comma = (n) => Number(n).toLocaleString("ko-KR");
+  // (2026-10-27 운영자) 가격 자리: 첫 계절이면 템플릿의 "{price}원"을 [줄 그은 정가] + 지금 값으로. 아니면 지금 값만(글자 그대로)
+  function setPriced(el, tpl) {
+    const t = String(tpl == null ? "" : tpl);
+    const f = (x) => fill(x, { price: comma(PAY.amount) });
+    if (!PAY.regular || !t.includes("{price}원")) {
+      el.textContent = f(t);
+      return el;
+    }
+    const at = t.indexOf("{price}원");
+    const was = document.createElement("s");
+    was.className = "was";
+    was.textContent = `${comma(PAY.regular)}원`;
+    el.textContent = "";
+    const pair = document.createElement("span"); // 줄 그은 정가와 지금 값은 한 덩어리(줄바꿈 없이)
+    pair.className = "was-pair";
+    pair.append(was, document.createTextNode(` ${comma(PAY.amount)}원`));
+    const box = document.createElement("span"); // 버튼이 flex여도 한 줄 글로 흐르게 한 덩어리로
+    box.className = "priced";
+    box.append(document.createTextNode(f(t.slice(0, at))), pair, document.createTextNode(f(t.slice(at + "{price}원".length))));
+    el.append(box);
+    return el;
+  }
   const OLD_RECEIPT_KEY = "strange-oracle-receipt"; // 12단계까지 영수증 코드 칸. 남아 있으면 지우고 목차로 보낸다(13-4)
   // (14단계 F4-B2 → 18단계) 책 14장 = 여는 글 + 방 7장(Ⅰ 만신 포함) + 새 장·시기별 흐름·인연의 장·궁합·원형 심층 + 닫는 글. 유료는 여는 글·닫는 글을 뺀 13장(2026-10-25 만신의 장도 유료).
   //  - 여는 글·닫는 글: 공개 정적 파일 data-book-free.js (무료 맛보기)
@@ -3119,7 +3145,7 @@
     });
     js("pay-dock-next", dock).classList.remove("is-opening");
     js("pay-dock-label", dock).textContent = RT.dock || "";
-    js("pay-dock-price", dock).textContent = fill(RT.dockPrice || "", { price: comma(PAY.amount) });
+    setPriced(js("pay-dock-price", dock), RT.dockPrice || "");
     if (!("IntersectionObserver" in window)) return;
     const buy = locked ? js("room-rest-buy", box) : null;
     const passage = js("result-passage", res);
@@ -3245,15 +3271,13 @@
     return p;
   }
   // (2026-10-27 운영자) 첫 계절의 값: 줄 그은 정가 + 지금 값 + 꼬리표, 그 아래 두 줄. 계절이 아니면 null
-  function seasonBlock(noNow) {
+  function seasonBlock() {
     const S = PAY.season;
     if (!S || !PAY.regular) return null;
     const d = rmk("div", "season");
     d.dataset.js = "season";
     const pr = rmk("p", "season__price");
-    pr.append(rmk("s", "season__regular", `${comma(PAY.regular)}원`));
-    if (!noNow) pr.append(rmk("b", "season__now", `${comma(PAY.amount)}원`)); // 결제 화면은 위 가격 줄이 지금 값을 이미 보인다
-    pr.append(rmk("span", "season__tag", S.label || ""));
+    pr.append(rmk("span", "season__tag", S.label || "")); // 가격(줄 그은 정가 + 지금 값)은 버튼·가격 줄이 이미 보인다
     d.append(pr, rmk("p", "season__line", fill(S.line || "", { price: comma(PAY.amount) })), rmk("p", "season__after", fill(S.after || "", { regular: comma(PAY.regular) })));
     return d;
   }
@@ -3344,7 +3368,7 @@
       if (tier === "mini") {
         // 작은 칸: 직언 맛보기 + "책에서 이어져요" 한 줄 + 작은 글자 링크(지금 바로 열고 싶은 사람만)
         box.append(rmk("p", "room-rest__mini", RT.mini || ""));
-        const now = rmk("button", "text-link room-rest__mini-buy", fill(RT.miniBuy || "", { price }));
+        const now = setPriced(rmk("button", "text-link room-rest__mini-buy"), RT.miniBuy || "");
         now.type = "button";
         now.dataset.js = "room-rest-buy-mini";
         now.addEventListener("click", goBuy);
@@ -3383,7 +3407,7 @@
         // (2026-10-27) 한 번 결제로 열리는 것: 일곱 방 문장 줄(지금 방 강조) + 함께 열리는 장
         const all = rmk("section", "room-rest__all");
         all.dataset.js = "room-rest-all";
-        all.append(rmk("p", "room-rest__all-head", fill(RT.allHead || RT.lockedNote, { price })));
+        all.append(setPriced(rmk("p", "room-rest__all-head"), RT.allHead || RT.lockedNote));
         const rooms = rmk("ul", "room-rest__rooms");
         CHAPTER_ORDER.forEach((r) => {
           const li = rmk("li", r === room ? "room-rest__room is-here" : "room-rest__room");
@@ -3397,7 +3421,7 @@
         box.append(all);
         const sb = seasonBlock();
         if (sb) box.append(sb);
-        const buy = rmk("button", "btn btn--primary btn--block room-rest__buy", fill(RT.buyBtn, { price }));
+        const buy = setPriced(rmk("button", "btn btn--primary btn--block room-rest__buy"), RT.buyBtn);
         buy.type = "button";
         buy.dataset.js = "room-rest-buy";
         buy.addEventListener("click", goBuy);
@@ -4908,7 +4932,7 @@
 
   // (결정 120) 책 화면을 처음 열 때 app-book.js를 받아 mount 한 번
   const ensureBook = () => bookFiles().then(() => BX || (BX = window.BookPlus.mount({
-    T, PAY, PAY_MODE, state, $, $$, js, jsAll, show, fill, strip, comma, toast, track, applyText, paras, textIn, BookCore, ROMAN, CHAPTER_ORDER, PAID_IDS,
+    T, PAY, PAY_MODE, state, $, $$, js, jsAll, show, fill, strip, comma, setPriced, toast, track, applyText, paras, textIn, BookCore, ROMAN, CHAPTER_ORDER, PAID_IDS,
     crossTpl, reportScr, screens, enter, reduceMotion, FREE_FILE, SAMPLE_FILE, visitType, chapterOf, crossList, crossPickNow, interestNow, previewOn,
     passNow, allDone, roomsDone, filledRooms, myCodes, whoOf, chapterChars, chapterName, available, bookOrder, minutes, isDone, headOf, loadFile, ensureRooms, goPay, go,
     current: () => currentName,
@@ -4947,7 +4971,7 @@
         (card || slot).after(storyPayBtn);
       }
       if (storyPayBtn) {
-        storyPayBtn.textContent = fill(T.pay.buyDetail || T.pay.buy || "", { price: comma(PAY.amount) });
+        setPriced(storyPayBtn, T.pay.buyDetail || T.pay.buy || "");
         show(storyPayBtn, allDone && !passNow());
       }
       const lab = $("[data-t='story.bookLink']", slot) || $("span", js("story-book-link"));
@@ -4992,11 +5016,11 @@
 
     enter.deeper = () => {
       BX.payList(payScr, payFrom); // (18단계) 받는 것 목록(목차와 같은 순서)·미리보기로 돌아가기
-      js("pay-price", payScr).textContent = fill(PAY.price.text || "", { price: comma(PAY.amount) });
+      setPriced(js("pay-price", payScr), PAY.price.text || "");
       { // (2026-10-27) 첫 계절의 값: 가격 줄 아래에 한 번만
         const old = js("season", payScr);
         if (old) old.remove();
-        const sb = seasonBlock(true);
+        const sb = seasonBlock();
         if (sb) js("pay-price", payScr).after(sb);
       }
       show(js("pay-refund-link", payScr), false); // legal/refund.html은 지금 배포 폴더에서 빠진다(build-dist) → 본문 링크 숨김. 결제 문단은 G4

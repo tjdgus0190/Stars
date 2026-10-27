@@ -186,7 +186,7 @@
 
   // ═════════ 화면 (브라우저만). x = app.js가 넘기는 도우미·상태 (app.js bookCtx 참고) ═════════
   function mount(x) {
-    const { T, PAY, state, $, $$, js, jsAll, show, fill, strip, comma, toast, track, applyText, paras, textIn, BookCore, ROMAN, CHAPTER_ORDER, PAID_IDS } = x;
+    const { T, PAY, state, $, $$, js, jsAll, show, fill, strip, comma, setPriced, toast, track, applyText, paras, textIn, BookCore, ROMAN, CHAPTER_ORDER, PAID_IDS } = x;
     const AC = root.ArchCore;
 
     // ── (18-2) 새 장 도우미: 자리 값 채우기 · 대조표(무료 값만) · 축 표지 · 방 표지. 미리보기 대조표도 같은 함수(유료 문장 0)
@@ -383,7 +383,7 @@
       if (tocKit.buy) {
         tocKit.buy.hidden = Boolean(x.passNow()) || n === 0;
         const lab = $('[data-t="book.toc.buyNow"]', tocKit.buy) || js("book-buy", tocKit.buy);
-        lab.textContent = fill(T.book.toc.buyNow || "", { price: comma(PAY.amount) });
+        setPriced(lab, T.book.toc.buyNow || ""); // (2026-10-27) 첫 계절: 줄 그은 정가 + 지금 값
       }
     }
 
@@ -502,7 +502,7 @@
       });
       // 5 한 번 결제 · 6 주 버튼 (가격은 이 자리에 한 번만)
       js("preview-once-price", scr).textContent = fill(PV().once || "", { price: comma(PAY.amount) });
-      js("preview-go-label", scr).textContent = fill(PV().go || "", { price: comma(PAY.amount) });
+      setPriced(js("preview-go-label", scr), PV().go || "");
     }
     // 길 끝: 방 장 = 「일곱 장의 첫 줄」의 그 방 줄 · 새 장 = 대조표 미리 보기 · 그 밖 제2부 장 = 미리보기 목차의 그 장 줄
     function previewScrollTo(id) {
