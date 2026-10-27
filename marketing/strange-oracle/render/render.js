@@ -26,6 +26,7 @@ const ADS = {
   ad4x: { scene: "ad4-busted-3d.html", out: "ad4-busted-3d-ko.mp4", frames: 450 }, // (2026-10-24) 4안 「들켰죠」 (글자까지 WebGL, 후처리)
   ad5x: { scene: "ad5-saju-only-3d.html", out: "ad5-saju-only-3d-ko.mp4", frames: 450 }, // (2026-10-25) 5안 「언제까지 사주만」
   ad6x: { scene: "ad6-untold-3d.html", out: "ad6-untold-3d-ko.mp4", frames: 450 }, // (2026-10-25) 6안 「사주가 알려주지 않은 이야기」
+  ad8: { scene: "ad8-profile.html", out: "ad8-profile-ko.mp4", frames: 450 }, // (2026-10-27) 8안 「일곱 문의 점술관」 프로필 유입 15초
   ad7: { scene: "ad7-season.html", out: "ad7-season-ko.mp4", frames: 450 }, // (2026-10-27) 7안 「첫 계절의 값」 15초
   "reel-saju": { scene: "reel-room.html?room=saju", out: "reel-saju-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
   "reel-ogham": { scene: "reel-room.html?room=ogham", out: "reel-ogham-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초

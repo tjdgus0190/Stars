@@ -97,3 +97,9 @@ node marketing/strange-oracle/render/sound-reel.js all                          
 node --experimental-websocket marketing/strange-oracle/render/render.js ad7   # → out/ad7-season-ko.mp4 (15초 450프레임)
 node marketing/strange-oracle/render/sound-ad7.js                             # 소리판 → out/ad7-season-ko-sound.mp4
 ```
+
+## 8안 「일곱 문의 점술관」 프로필 유입 (2026-10-27)
+```
+node --experimental-websocket marketing/strange-oracle/render/render.js ad8   # → out/ad8-profile-ko.mp4 (15초 450프레임, 격자는 instagram/out/의 실제 표지)
+node marketing/strange-oracle/render/sound-ad8.js                             # 소리판 → out/ad8-profile-ko-sound.mp4
+```
