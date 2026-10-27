@@ -91,3 +91,9 @@ node marketing/strange-oracle/render/sound-reel.js all                          
 ```
 - 장면 하나(`scenes/reel-room.html?room=<방>`)가 `scenes/reel/reel-data.js`(대본)·`reel.js`(방마다 무늬)·`reel.css`(효과)로 일곱 편을 그린다. 3D 없음.
 - 시간표는 일곱 편이 같다: 0 첫 일격 · 2.4 둘째 일격 · 4.8 방 이름 · 7.2/10.6/14.0/17.2 이야기 · 20.4 다른 방 · 22.8 끝.
+
+## 7안 「첫 계절의 값」 (2026-10-27)
+```
+node --experimental-websocket marketing/strange-oracle/render/render.js ad7   # → out/ad7-season-ko.mp4 (15초 450프레임)
+node marketing/strange-oracle/render/sound-ad7.js                             # 소리판 → out/ad7-season-ko-sound.mp4
+```

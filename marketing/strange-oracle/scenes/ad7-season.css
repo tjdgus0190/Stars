@@ -1,0 +1,32 @@
+/* 광고 7안 「첫 계절의 값」 (2026-10-27). reel/reel.css 위에 얹는다. 15초 */
+.bg { animation: bg-zoom 15s linear 0s both; }
+.a7-seven { top: 330px; }
+.a7-hook { top: 600px; }
+.a7-book { top: 560px; }
+/* 가격 */
+.a7-price { position: absolute; left: 0; right: 0; top: 520px; height: 760px; opacity: 0; }
+.a7-was { position: absolute; left: 0; right: 0; top: 40px; text-align: center; font: 900 150px "Noto Serif KR", var(--font-serif); color: oklch(0.85 0.02 285); letter-spacing: -0.02em; opacity: 0;
+  text-shadow: 0 4px 18px #000; }
+.a7-slash { position: absolute; left: 190px; top: 125px; width: 700px; height: 14px; border-radius: 7px; transform-origin: left center; rotate: -9deg; scale: 0 1;
+  background: linear-gradient(90deg, oklch(0.75 0.13 70), oklch(0.96 0.08 90), oklch(0.78 0.14 66)); box-shadow: 0 0 30px oklch(0.85 0.14 80), 0 0 80px oklch(0.8 0.15 70 / 0.6); }
+@keyframes a7-slash { to { scale: 1 1; } }
+@keyframes a7-was-dim { to { opacity: 0.45; filter: blur(1px); } }
+.a7-now { position: absolute; left: 0; right: 0; top: 270px; text-align: center; font: 900 240px "Noto Serif KR", var(--font-serif); letter-spacing: -0.03em; opacity: 0;
+  background: linear-gradient(100deg, oklch(0.74 0.12 70), oklch(0.98 0.06 92) 45%, oklch(0.86 0.13 82) 55%, oklch(0.74 0.13 66)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 40px oklch(0.85 0.14 80 / 0.7)) drop-shadow(0 6px 10px #000); }
+.a7-tag { position: absolute; left: 50%; top: 600px; translate: -50% 0; white-space: nowrap; padding: 16px 44px; border-radius: 999px; border: 3px solid var(--gold); opacity: 0;
+  font: 800 50px "Noto Serif KR", var(--font-serif); color: var(--gold); background: oklch(0.12 0.03 285 / 0.75); box-shadow: 0 0 40px oklch(0.84 0.12 85 / 0.45); }
+/* 마감: 시계 */
+.a7-clock { position: absolute; left: 50%; top: 330px; width: 300px; height: 300px; margin-left: -150px; border-radius: 50%; border: 3px solid oklch(0.84 0.1 85 / 0.7); opacity: 0;
+  box-shadow: 0 0 60px oklch(0.84 0.12 85 / 0.35), inset 0 0 40px oklch(0.84 0.12 85 / 0.15); }
+.a7-clock i { position: absolute; left: 50%; top: 50%; width: 4px; height: 22px; margin: -11px 0 0 -2px; background: var(--gold); transform: rotate(var(--r)) translateY(-125px); }
+.a7-hand { position: absolute; left: 50%; top: 50%; width: 8px; height: 120px; margin-left: -4px; border-radius: 4px; transform-origin: 50% 0; background: oklch(0.96 0.06 90); box-shadow: 0 0 18px var(--gold); rotate: 120deg; }
+.a7-hand.m { height: 90px; width: 10px; margin-left: -5px; background: var(--gold); rotate: 160deg; }
+@keyframes a7-hand { to { rotate: 540deg; } }
+@keyframes a7-hand-m { to { rotate: 180deg; } }
+.a7-close { top: 760px; }
+.a7-after { top: 1200px; font: 700 46px var(--font-serif); color: var(--c-text-strong); text-shadow: 0 3px 10px #000; }
+/* 끝 */
+.a7-end .end__lead { top: 800px; }
+.a7-end .end__sub { position: absolute; top: 930px; left: 0; right: 0; text-align: center; font: 700 44px var(--font-serif); color: var(--gold); text-shadow: 0 3px 10px #000; }
+.a7-end .end__cta { top: 1060px; }

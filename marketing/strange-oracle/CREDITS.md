@@ -19,3 +19,5 @@
 | 소리(5·6안 소리판 `out/ad5-saju-only-3d-ko-sound.mp4`·`ad6-untold-3d-ko-sound.mp4`) | 직접 합성(`render/sound-ad56.js`, 2026-10-25). 사인·노이즈·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
 | 방 소개 릴스 장면(`scenes/reel-room.html`, `scenes/reel/*`, 2026-10-26) | 하늘·빛줄기·고리·방 무늬를 CSS·SVG로 직접 그림. 안내자 기호는 제품 index.html의 자체 제작 SVG. 그림 파일·실사·사람 모습 없음. 글꼴은 위 Noto Serif KR·Gowun Batang·Cinzel(같은 판·SRI) | 자체 제작 |
 | 소리(방 소개 릴스 `out/reel-<방>-ko-sound.mp4`) | 직접 합성(`render/sound-reel.js`, 2026-10-26). 사인·노이즈·줄 튕김(카플러스-스트롱)·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
+| 7안 장면(`scenes/ad7-season.html`·`ad7-season.css`·`ad7-season.js`, 2026-10-27) | 성운 배경(자체 3D 렌더 그림)·빛줄기·문장·시계·가격 글자를 CSS로 직접 그림. 글꼴은 위 Noto Serif KR·Gowun Batang·Cinzel(같은 판·SRI) | 자체 제작 |
+| 소리(7안 소리판 `out/ad7-season-ko-sound.mp4`) | 직접 합성(`render/sound-ad7.js`, 2026-10-27). 사인·노이즈·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
