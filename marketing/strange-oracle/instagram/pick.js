@@ -1,4 +1,4 @@
-// "골라 봐" 캐러셀 (2026-10-27). pick.html?set=<묶음>&p=<쪽>. 쪽 구성: 표지(셋 중 하나 고르기) → ①②③ 답 → 끝(댓글·팔로우).
+// "셋 중 하나" 캐러셀 (2026-10-27, 화면 표기는 "오늘의 신탁" — 운영자: '골라 봐' 표현은 쓰지 않는다). pick.html?set=<묶음>&p=<쪽>. 쪽 구성: 표지(셋 중 하나 고르기) → ①②③ 답 → 끝(댓글·팔로우).
 // 답 쪽: 이름·제목·첫 두 문장(key)은 제품 공개 데이터 그대로, word = "이번 주 한마디"(실천할 수 있는 긍정 문장, 운영 규칙 8장).
 (() => {
   const W = window;
@@ -64,7 +64,7 @@
   page.dataset.room = S.room;
   page.classList.add("pk", `pk-${S.kind}`);
   page.style.backgroundImage = `url(out/v2/bg/${p % 2 ? "void-b" : "void-a"}.png)`;
-  const head = `<p class="brand">낯선 점술관</p><p class="page">${p + 1} / ${total}</p><p class="tag"><i>${NUM[S.n]}</i>${S.name} · 골라 봐</p>`;
+  const head = `<p class="brand">낯선 점술관</p><p class="page">${p + 1} / ${total}</p><p class="tag"><i>${NUM[S.n]}</i>${S.name} · 오늘의 신탁</p>`;
   const items = S.picks.map((pk) => Object.assign(S.item(pk.code, pk), { word: pk.word }));
   const mark = (it) => it.sym ? `<svg class="pk-sym${it.tall ? " tall" : ""}" viewBox="${it.tall ? "0 0 40 80" : "0 0 40 60"}"><use href="#${it.sym}" /></svg>` : `<svg class="sig"><use href="#i-${it.icon}" /></svg>`;
 
@@ -82,7 +82,7 @@
     page.classList.add("pk-cta");
     page.innerHTML = `${head}<div class="mid"><p class="h ask2">몇 번을 골랐나요?</p><p class="sub2">댓글에 번호만 남겨 주세요 ${CIR.join(" ")}</p>
       <div class="more"><p>${S.more}</p><b>프로필 링크 · 낯선 점술관</b></div>
-      <p class="fl">팔로우하면 새 ‘골라 봐’가 계속 열려요</p><p class="hd">@strange_oracle_off</p></div>`;
+      <p class="fl">팔로우하면 다음 신탁이 계속 열려요</p><p class="hd">@strange_oracle_off</p></div>`;
   }
 
   W.__ready = (async () => {

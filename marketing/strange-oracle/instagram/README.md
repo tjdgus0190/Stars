@@ -137,7 +137,7 @@ node --experimental-websocket marketing/strange-oracle/instagram/render-types.js
 - 배경은 `render-ig2.js`가 찍어 둔 `out/v2/bg/void-*.png`(저장소에 없으면 먼저 `render-ig2.js void-a void-b void-r`).
 - 게시 문구는 `../sns.md` 「방별 유형 캐러셀 7편」.
 
-## "골라 봐" 캐러셀 (2026-10-27, 팔로워 모으기용)
+## "셋 중 하나" 캐러셀(화면 표기 "오늘의 신탁") (2026-10-27, 팔로워 모으기용)
 ```
 node --experimental-websocket marketing/strange-oracle/instagram/render-pick.js          # 네 묶음 → out/pick/<묶음>-NN.jpg
 node --experimental-websocket marketing/strange-oracle/instagram/render-pick.js rune     # 한 묶음만 (rune · sibyl · ogham · star)
