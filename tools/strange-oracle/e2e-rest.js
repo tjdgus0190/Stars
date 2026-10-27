@@ -134,9 +134,10 @@ const paidLine = (file, global, pick) => {
   await waitFor("/^screen-ogham-(intro|result)$/.test(document.querySelector('.screen.is-active')?.id || '')", 6000);
   check("F1 만신(결제 전) 떠 있는 [다음 방 · 무료] → 오검의 방(이미 지난 방이면 결과)", /^screen-ogham-(intro|result)$/.test(await ev("document.querySelector('.screen.is-active').id")));
   await skip("ogham-result");
-  await click(".screen.is-active [data-js=room-rest-next]");
+  check("F2a (2026-10-27) 잠긴 칸의 갈림길 = 글자 버튼 없이 진짜 문(안내자 한마디 + 문 버튼) 하나 · 칸 밖에 문 없음", (await ev("(() => { const s = document.querySelector('.screen.is-active'); const doors = s.querySelectorAll('[data-js=result-next-door]'); return doors.length === 1 && !!doors[0].closest('[data-js=room-rest-next]') && !s.querySelector('.room-rest__next-btn'); })()")));
+  await click(".screen.is-active [data-js=room-rest-next] [data-js=result-next-door]");
   await waitFor("/^screen-star-(intro|result)$/.test(document.querySelector('.screen.is-active')?.id || '')", 6000);
-  check("F2 오검(결제 전) 잠긴 칸 [다음 문 열기] → 베다의 방(이미 지난 방이면 결과)", /^screen-star-(intro|result)$/.test(await ev("document.querySelector('.screen.is-active').id")));
+  check("F2 오검(결제 전) 잠긴 칸 안의 문 버튼 → 베다의 방(이미 지난 방이면 결과)", /^screen-star-(intro|result)$/.test(await ev("document.querySelector('.screen.is-active').id")));
   await skip("sibyl-result");
   await click("[data-js=pay-dock-next]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-finale'", 6000);

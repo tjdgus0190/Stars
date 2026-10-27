@@ -3141,11 +3141,23 @@
     later(() => go("finale"), 650);
   }
   // (2026-10-27) 공유·다시 하기 줄은 다음 문 아래로: 결제 칸을 지나면 바로 다음 문이 나오게
+  // (2026-10-27 운영자) 잠긴 칸에서는 다음 문(안내자 한마디 + 문 버튼)을 "결제는 나중에" 줄 바로 아래로 옮겨 온다. 원래 자리는 표시(주석 노드)로 기억해 두고, 칸을 다시 그리기 전에 돌려놓는다
+  const passageHome = new Map();
   Object.values(screens).forEach((s) => {
     const p = js("result-passage", s);
     const m = $(".result-more", s);
     if (p && m && p.compareDocumentPosition(m) & Node.DOCUMENT_POSITION_PRECEDING) p.after(m);
+    if (p) {
+      const home = document.createComment("result-passage");
+      p.before(home);
+      passageHome.set(s, home);
+    }
   });
+  function passageBack(scr) {
+    const p = js("result-passage", scr);
+    const home = passageHome.get(scr);
+    if (p && home && home.nextSibling !== p) home.after(p);
+  }
   // (2026-10-27 운영자) 인스타그램 따라오기 한 줄: 방 결과 아래(공유 줄 밑) · 나의 이야기(카드 공유 밑). 계정 주소로 가는 링크일 뿐, 아무 값도 붙이지 않는다
   function followLink(from) {
     const a = document.createElement("a");
@@ -3198,6 +3210,7 @@
       box.dataset.js = "room-rest";
       after.after(box);
     }
+    passageBack(scr); // 잠긴 칸 안으로 옮겨 둔 다음 문을 먼저 제자리로(칸을 비울 때 함께 지워지지 않게)
     box.textContent = "";
     const free = !PAID_IDS.has(room);
     const loaded = Boolean(window[PAID_GLOBAL[room]]);
@@ -3305,17 +3318,15 @@
       box.append(buy);
       if (RT.safe) box.append(rmk("p", "room-rest__safe", RT.safe)); // (2026-10-26) 안심 한 줄: 구매·환불 안내에 적힌 것만
       box.append(have);
-      // (2026-10-27) 결제는 갈림길: 하지 않아도 다음 문으로 바로
+      // (2026-10-27) 결제는 갈림길: 하지 않아도 다음 문으로 바로. (운영자) 글자 버튼 대신 진짜 문(안내자 한마디 + 문 버튼)을 이 자리로 옮겨 온다
       const door = js("result-next-door", scr);
-      if (door) {
+      const passage = js("result-passage", scr);
+      if (door && passage) {
         const fin = door.dataset.go === "finale";
         const nx = rmk("div", "room-rest__next");
+        nx.dataset.js = "room-rest-next";
         nx.append(rmk("p", "room-rest__next-text", fin ? RT.freeNextFinale || "" : fill(RT.freeNext || "", { next: doorName(door) })));
-        const nb = rmk("button", "btn btn--ghost btn--block room-rest__next-btn", RT.freeNextBtn || "");
-        nb.type = "button";
-        nb.dataset.js = "room-rest-next";
-        nb.addEventListener("click", () => goNextDoor(scr, nb, "locked"));
-        nx.append(nb);
+        nx.append(passage);
         box.append(nx);
       }
       return;
@@ -5835,12 +5846,7 @@
     else if (CHAPTER_ORDER.includes(hash)) first = roomTarget(hash);
     else if (CHAPTER_ORDER.includes(hashRoom) && !TRANSIENT_TO(hash)) first = hash === `${hashRoom}-result` && isDone(hashRoom) ? roomTarget(hashRoom) : hash;
   }
-  // (2026-10-26 운영자) 광고로 처음 온 사람(허용 utm의 medium이 paid_social·cpc이거나 메타 클릭 ID fbclid가 있음)은 입구를 건너뛰고 만신의 방 대문으로.
-  //   이 탭에 마친 방이 없고 주소에 화면 이름이 없을 때만. 입구 이탈이 82%였다(GA4 2026-10-25). query 값은 분석 부품의 허용 목록 검사만 거친다(6장)
-  if (first === "hub" && !hash && !filledRooms().length) {
-    const ad = /(^|&)utm_medium=(paid_social|cpc)(&|$)/.test(Analytics.campaign(bootSearch, CAMPAIGN.allow, CAMPAIGN.ignore)) || /(^\?|&)fbclid=/.test(bootSearch);
-    if (ad && screens["saju-intro"]) first = "saju-intro";
-  }
+  // (2026-10-27 운영자) 광고로 온 사람도 입구부터(2026-10-26의 "광고 → 만신의 방 대문 바로" 규칙은 걷어 냄)
   renderHub();
   setTopbar("hub");
   if (state.visits.saju && Saju) Saju.loadLunar().catch(() => {}); // 원국 표는 생일이 있을 때만 다시 그린다
