@@ -18,6 +18,7 @@
 const { launch, googleCount } = require("./cdp.js");
 const fs = require("fs");
 const path = require("path");
+const SALE = require("./sale-price.js"); // (2026-10-27) 지금 판매 값(첫 계절 4,900원)
 const { spawn } = require("child_process");
 const OUT = path.join(__dirname, "out");
 const TEST = "http://127.0.0.1:8788";
@@ -187,7 +188,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   const coB = b.log.bodies.filter((x) => /\/__dev\/payapp\/checkout/.test(x.url)).pop();
   const sent = Object.fromEntries(new URLSearchParams(coB ? coB.body : ""));
   const WANT = ["checkretry", "feedbackurl", "goodname", "openpaytype", "price", "redirectpay", "returnurl", "shopname", "skip_cstpage", "smsuse", "userid", "var1", "var2"]; // (2026-10-22) redirectpay 더함
-  check("B3 결제창으로 간 값 = 15-2 표의 12칸 + redirectpay 1(recvphone 없음), price 9900·var2 so-book-1·var1 32자 16진수·returnurl /api/pay/return", Object.keys(sent).sort().join() === WANT.join() && sent.price === "9900" && sent.var2 === "so-book-1" && /^[0-9a-f]{32}$/.test(sent.var1) && /\/api\/pay\/return$/.test(sent.returnurl) && /\/api\/pay\/feedback$/.test(sent.feedbackurl) && sent.redirectpay === "1" && /card/.test(sent.openpaytype) && /phone/.test(sent.openpaytype) && /naverpay/.test(sent.openpaytype) && !/vbank|rbank/.test(sent.openpaytype), Object.keys(sent).join(","));
+  check("B3 결제창으로 간 값 = 15-2 표의 12칸 + redirectpay 1(recvphone 없음), price = 지금 판매 값(첫 계절 4900)·var2 so-book-1·var1 32자 16진수·returnurl /api/pay/return", Object.keys(sent).sort().join() === WANT.join() && sent.price === String(SALE.amount) && sent.var2 === "so-book-1" && /^[0-9a-f]{32}$/.test(sent.var1) && /\/api\/pay\/return$/.test(sent.returnurl) && /\/api\/pay\/feedback$/.test(sent.feedbackurl) && sent.redirectpay === "1" && /card/.test(sent.openpaytype) && /phone/.test(sent.openpaytype) && /naverpay/.test(sent.openpaytype) && !/vbank|rbank/.test(sent.openpaytype), Object.keys(sent).join(","));
   allReqs.push(sent.var1);
   const openB = await waitFor("!!document.querySelector('[data-js=pay-code-dialog]')?.open", 30000);
   const codeB = (await codesShown())[0] || "";
@@ -454,7 +455,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       await click("[data-js=clear-cancel]");
       check("J2 off: 결제·책 요소 DOM 0개 (결제 확인·팝업·코드 카드·목차 코드 줄·지우기 경고 줄 포함)", Object.values(counts).every((n) => n === 0), JSON.stringify(counts));
       const txt = await ev("document.body.innerText");
-      check("J3 off: 화면 글에 '준비 중'·'곧 열려요'·가격 0", !/준비 중|곧 열려|3,900|5,900|9,900/.test(txt));
+      check("J3 off: 화면 글에 '준비 중'·'곧 열려요'·가격 0", !/준비 중|곧 열려|3,900|4,900|5,900|9,900/.test(txt));
       for (const h of ["report", "deeper", "paid", "paycheck"]) {
         await b.goto(`${OFF}${P}#${h}`);
         await sleep(400);
@@ -466,7 +467,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       const get = async (p) => { const r = await fetch(`${OFF}/products/strange-oracle/${p}`); return { s: r.status, t: await r.text() }; };
       const [oPriv, oTerms, oRefund, oIndex] = [await get("legal/privacy.html"), await get("legal/terms.html"), await get("legal/refund.html"), await get("index.html")];
       check("J6 off: privacy·terms 200, 결제 문단(제4조의3·제2조의2·페이앱·목차 줄)·표지 0, '결제 없음' 문장 있음, refund.html 404",
-        oPriv.s === 200 && oTerms.s === 200 && oRefund.s === 404 && !/s4-3|s2-2|페이앱|3,900|5,900|9,900|pay:(on|off)/.test(oPriv.t + oTerms.t) && /결제를 받지 않으므로/.test(oPriv.t) && /판매하는 상품이나 결제가 없습니다/.test(oTerms.t),
+        oPriv.s === 200 && oTerms.s === 200 && oRefund.s === 404 && !/s4-3|s2-2|페이앱|3,900|4,900|5,900|9,900|pay:(on|off)/.test(oPriv.t + oTerms.t) && /결제를 받지 않으므로/.test(oPriv.t) && /판매하는 상품이나 결제가 없습니다/.test(oTerms.t),
         `privacy ${oPriv.s} · terms ${oTerms.s} · refund ${oRefund.s}`);
       check("J7 off: index.html 원본(소스 보기)에 pay-tpl·pay-toc-tpl·(18-7) preview-tpl·toc18-tpl·cross-tpl·story-preview-tpl template·'판매자 ◯◯'·표지 0", oIndex.s === 200 && !/pay-tpl|pay-toc-tpl|preview-tpl|toc18-tpl|cross-tpl|story-preview-tpl|판매자 ◯◯|pay:(on|off)\s*-->/.test(oIndex.t));
     }

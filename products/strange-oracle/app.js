@@ -143,6 +143,13 @@
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII"];
   // (14단계 14-4) 결제 모드: data.js pay.mode. off(본 페이지, 결정 94) = 책·결제 요소를 DOM에서 모두 걷어 낸다. test(시험 페이지)·live = 책 + 결제 전 화면
   const PAY = T.pay || {};
+  // (2026-10-27 운영자) 첫 계절의 값: 마감(한국 시각) 전이면 판매 값을 season.amount로 — 화면의 {price}와 결제창 price가 모두 따라간다. 정가는 PAY.regular
+  const SEASON_END = PAY.season ? Date.parse(PAY.season.until) : NaN;
+  const seasonOn = () => Date.now() < SEASON_END;
+  if (PAY.season && seasonOn()) {
+    PAY.regular = PAY.amount;
+    PAY.amount = PAY.season.amount;
+  }
   const PAY_MODE = PAY.mode === "test" || PAY.mode === "live" ? PAY.mode : "off";
   const BOOK_ON = PAY_MODE !== "off";
   let syncHubKakao = () => {}; // (22·23단계) 입구 카카오 줄(로그인 전 버튼 / 로그인 뒤 상태). 결제 화면을 붙일 때 바뀐다
@@ -310,7 +317,8 @@
 
   // ───────── 정적 문구 채우기 ─────────
   function applyText(scope = document) {
-    $$("[data-t]", scope).forEach((el) => (el.textContent = get(el.dataset.t) ?? ""));
+    const priced = (v) => (typeof v === "string" && v.includes("{price}") ? v.split("{price}").join(Number(PAY.amount).toLocaleString("ko-KR")) : v); // (2026-10-27) 가격 자리는 지금 판매 값으로
+    $$("[data-t]", scope).forEach((el) => (el.textContent = priced(get(el.dataset.t)) ?? ""));
     $$("[data-h]", scope).forEach((el) => (el.innerHTML = get(el.dataset.h) ?? ""));
     $$("[data-ph]", scope).forEach((el) => (el.placeholder = get(el.dataset.ph) ?? ""));
     $$("[data-aria]", scope).forEach((el) => el.setAttribute("aria-label", get(el.dataset.aria) ?? ""));
@@ -3085,7 +3093,7 @@
     const res = scr && /-result$/.test(currentName) ? scr : null;
     const door = res ? js("result-next-door", res) : null;
     const box = res ? js("room-rest", res) : null;
-    const locked = Boolean(box && box.dataset.state === "locked" && payScr);
+    const locked = Boolean(box && box.dataset.state === "locked" && box.dataset.tier !== "mini" && payScr); // (2026-10-27) 작은 칸에서는 결제 모습으로 바뀌지 않는다
     const on = Boolean(door);
     if (dockIO) dockIO.disconnect();
     dockIO = null;
@@ -3199,6 +3207,56 @@
     renderRestBox(scr);
     if (scr && screens[currentName] === scr) updateDock();
   }
+  // (2026-10-27 운영자) 겹침: 이 방까지 지난 방들의 원형(방마다 무료로 보이는 원형)을 세어, 가장 많이 겹친 원형과 그 수. 브라우저 안 계산
+  const KO_NUM = ["", "한", "두", "세", "네", "다섯", "여섯", "일곱"];
+  function overlapUpTo(room) {
+    const tags = [];
+    for (const r of CHAPTER_ORDER) {
+      const v = state.visits[r];
+      if (isDone(r) && v && v.archetype && T.archetypes[v.archetype]) tags.push([r, v.archetype]);
+      if (r === room) break;
+    }
+    if (!tags.length) return null;
+    const arch = tallyArchetype(tags);
+    return { arch, count: tags.filter(([, a]) => a === arch).length, rooms: tags.length };
+  }
+  // 결제를 크게 묻는 방: 지난 방을 차례로 보며 처음으로 같은 원형이 둘 이상 된 방. 세 방을 지나도 안 겹치면 세 번째 방. 아직 못 정했으면 null
+  function bigRoom() {
+    let k = 0;
+    for (const r of CHAPTER_ORDER) {
+      if (!isDone(r)) continue;
+      k += 1;
+      const o = overlapUpTo(r);
+      if ((o && o.count >= 2) || k >= 3) return r;
+    }
+    return null;
+  }
+  function restTier(room) {
+    const big = bigRoom();
+    if (!big) return "mini";
+    const d = CHAPTER_ORDER.indexOf(room) - CHAPTER_ORDER.indexOf(big);
+    return d < 0 ? "mini" : d === 0 ? "big" : "again";
+  }
+  function overlapLine(ov) {
+    const o = RT.overlap;
+    const txt = ov.rooms === 1 ? fill(o.one, { arch: T.archetypes[ov.arch].name }) : ov.count >= 2 ? fill(o.match, { rooms: KO_NUM[ov.rooms] || ov.rooms, count: KO_NUM[ov.count] || ov.count, arch: T.archetypes[ov.arch].name }) : fill(o.none, { rooms: KO_NUM[ov.rooms] || ov.rooms });
+    const p = rmk("p", "room-rest__overlap", txt);
+    p.dataset.js = "room-rest-overlap";
+    return p;
+  }
+  // (2026-10-27 운영자) 첫 계절의 값: 줄 그은 정가 + 지금 값 + 꼬리표, 그 아래 두 줄. 계절이 아니면 null
+  function seasonBlock(noNow) {
+    const S = PAY.season;
+    if (!S || !PAY.regular) return null;
+    const d = rmk("div", "season");
+    d.dataset.js = "season";
+    const pr = rmk("p", "season__price");
+    pr.append(rmk("s", "season__regular", `${comma(PAY.regular)}원`));
+    if (!noNow) pr.append(rmk("b", "season__now", `${comma(PAY.amount)}원`)); // 결제 화면은 위 가격 줄이 지금 값을 이미 보인다
+    pr.append(rmk("span", "season__tag", S.label || ""));
+    d.append(pr, rmk("p", "season__line", fill(S.line || "", { price: comma(PAY.amount) })), rmk("p", "season__after", fill(S.after || "", { regular: comma(PAY.regular) })));
+    return d;
+  }
   function renderRestBox(scr) {
     const room = scr && scr.dataset.room;
     if (!BOOK_ON || !CHAPTER_ORDER.includes(room) || !isDone(room)) return;
@@ -3226,17 +3284,30 @@
     if (st === "locked") {
       // (2026-10-25) 만신: "여기까지가 흔히 보던 사주" 머리말
       // (2026-10-26) 모든 방: 직격 첫 마디 맛보기(공개 data strikeTease, 나머지 두 마디는 흐린 막대) · 잠긴 줄 = 이 사람의 장 제목(공개 data) · 궁합 강조 · 안심 한 줄
-      // (2026-10-27) 둘째 방부터는 "아까 본 그 9,900원에 이 방도 들어 있다"로 짧게(궁합 카드 생략). 방마다 새 가격표처럼 보이지 않게
+      // (2026-10-27 운영자) 결제를 묻는 크기 세 단계(restTier): mini = 겹침 전(만신 등) 작은 칸, 하단 결제 모습 없음 /
+      //   big = 처음으로 두 문화의 원형이 겹친 방(세 방을 지나도 안 겹치면 세 번째 방)에서 한 번 크게 / again = 그 뒤 "아까 본 그 값에 이 방도"
+      const tier = restTier(room);
+      box.dataset.tier = tier;
       const SJ = room === "saju" && RT.saju ? RT.saju : null;
-      const again = CHAPTER_ORDER.indexOf(room) > 0 && Boolean(RT.againLead);
       const price = comma(PAY.amount);
       const pe = restEntry(room);
       const tt = (x) => (x && x.title ? strip(x.title) : "");
+      const ov = overlapUpTo(room);
+      $(".room-rest__title", box).textContent = (tier === "mini" ? RT.title : RT.titleLocked) || RT.title || "";
+      if (tier === "big" && RT.big && ov) {
+        // 첫 겹침(또는 세 방째)의 큰 머리말: 실제로 센 수
+        const head = rmk("div", "room-rest__moment");
+        head.dataset.js = "room-rest-moment";
+        head.append(rmk("p", "room-rest__moment-head", ov.count >= 2 ? fill(RT.big.match, { count: KO_NUM[ov.count] || ov.count }) : fill(RT.big.none, { rooms: KO_NUM[ov.rooms] || ov.rooms })));
+        head.append(rmk("p", "room-rest__moment-sub", (ov.count >= 2 ? RT.big.sub : RT.big.subNone || RT.big.sub) || ""));
+        box.append(head);
+      }
       if (SJ) {
         box.classList.add("room-rest--saju");
         box.append(rmk("p", "room-rest__cut", SJ.cut || ""));
         box.append(rmk("p", "room-rest__lead", fill(SJ.lead || RT.lockedLead, { n })));
-      } else box.append(rmk("p", "room-rest__lead", fill(again ? RT.againLead : RT.lockedLead, { n, price })));
+      } else box.append(rmk("p", "room-rest__lead", fill(tier === "again" ? RT.againLead : RT.lockedLead, { n, price })));
+      if (ov && RT.overlap && tier !== "big") box.append(overlapLine(ov));
       const tease = pe && typeof pe.strikeTease === "string" && pe.strikeTease ? strip(pe.strikeTease) : "";
       if (tease) {
         const t = rmk("section", "strike strike--tease");
@@ -3251,73 +3322,90 @@
         t.append(rmk("p", "strike__more", RT.teaseMore || ""));
         box.append(t);
       }
-      const ul = rmk("ul", "room-rest__locks");
-      const own = pe && room !== "rune"; // 룬은 장 구조(지나온·지금 자리)가 달라 장 이름 그대로
-      const rows = [
-        [ROMAN[0], (own && tt(pe.identity)) || RT.lockedRest],
-        [ROMAN[1], (own && tt(pe.event)) || T.result.chapterNames[1]],
-        [ROMAN[2], (own && tt(pe.shadow)) || T.result.chapterNames[2]],
-        [ROMAN[3], (own && tt(pe.advice)) || T.result.chapterNames[3]],
-        ["", (room === "saju" && sajuHiddenTitle(myCodes())) || T.book.hiddenChapter],
-      ];
-      if (!tease) rows.unshift(["", (SJ && SJ.strike) || RT.strikeLock]);
-      rows.forEach(([num, name]) => {
-        const li = rmk("li", "room-rest__lock");
-        li.append(rmk("span", "room-rest__num", num)); // 숨은 장은 빈 칸(줄 맞춤)
-        li.append(rmk("span", "room-rest__lock-name", name));
-        const bars = rmk("span", "room-rest__bars"); // 흐린 막대(글자 아님)
-        bars.setAttribute("aria-hidden", "true");
-        li.append(bars);
-        ul.append(li);
-      });
-      box.append(ul);
-      // 결제하면 함께 열리는 것: 궁합 강조 + 나머지 장 이름
-      if (!again && RT.match && RT.match.title) {
-        const m = rmk("section", "room-rest__match");
-        m.dataset.js = "room-rest-match";
-        m.append(rmk("p", "room-rest__match-label", RT.match.label || ""));
-        m.append(rmk("p", "room-rest__match-title", RT.match.title));
-        m.append(rmk("p", "room-rest__match-body", RT.match.body || ""));
-        if (RT.match.also) m.append(rmk("p", "room-rest__match-also", RT.match.also));
-        box.append(m);
+      function haveLink() {
+        const have = rmk("button", "text-link room-rest__have", RT.haveCode || "");
+        have.type = "button";
+        have.dataset.js = "room-rest-have";
+        have.addEventListener("click", () => {
+          if (!goPay("room")) return;
+          const t = js("pass-toggle", payScr);
+          if (t && t.getAttribute("aria-expanded") !== "true") setTimeout(() => t.click(), 0);
+        });
+        return have;
       }
-      // (2026-10-27) 한 번 결제로 열리는 것: 일곱 방 문장 줄(지금 방 강조) + 함께 열리는 장
-      const all = rmk("section", "room-rest__all");
-      all.dataset.js = "room-rest-all";
-      all.append(rmk("p", "room-rest__all-head", fill(RT.allHead || RT.lockedNote, { price })));
-      const rooms = rmk("ul", "room-rest__rooms");
-      CHAPTER_ORDER.forEach((r) => {
-        const li = rmk("li", r === room ? "room-rest__room is-here" : "room-rest__room");
-        li.dataset.room = r;
-        li.innerHTML = `<svg class="room-rest__room-fig" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-${r}" /></svg>`;
-        li.append(rmk("span", "room-rest__room-name", T.rooms[r].short));
-        rooms.append(li);
-      });
-      all.append(rooms);
-      if (RT.allPlus) all.append(rmk("p", "room-rest__all-plus", RT.allPlus));
-      box.append(all);
-      const buy = rmk("button", "btn btn--primary btn--block room-rest__buy", fill(RT.buyBtn, { price }));
-      buy.type = "button";
-      buy.dataset.js = "room-rest-buy";
-      buy.addEventListener("click", () => {
+      const goBuy = () => {
         try {
           window.sessionStorage.setItem(PAYROOM_KEY, room);
         } catch (e) {
           /* 저장이 막힌 브라우저: 돌아오면 책 목차로 */
         }
         goPay("room");
-      });
-      const have = rmk("button", "text-link room-rest__have", RT.haveCode || "");
-      have.type = "button";
-      have.dataset.js = "room-rest-have";
-      have.addEventListener("click", () => {
-        if (!goPay("room")) return;
-        const t = js("pass-toggle", payScr);
-        if (t && t.getAttribute("aria-expanded") !== "true") setTimeout(() => t.click(), 0);
-      });
-      box.append(buy);
-      if (RT.safe) box.append(rmk("p", "room-rest__safe", RT.safe)); // (2026-10-26) 안심 한 줄: 구매·환불 안내에 적힌 것만
-      box.append(have);
+      };
+      if (tier === "mini") {
+        // 작은 칸: 직언 맛보기 + "책에서 이어져요" 한 줄 + 작은 글자 링크(지금 바로 열고 싶은 사람만)
+        box.append(rmk("p", "room-rest__mini", RT.mini || ""));
+        const now = rmk("button", "text-link room-rest__mini-buy", fill(RT.miniBuy || "", { price }));
+        now.type = "button";
+        now.dataset.js = "room-rest-buy-mini";
+        now.addEventListener("click", goBuy);
+        box.append(now, haveLink()); // 다른 기기에서 다시 온 구매자는 만신의 방부터 보므로 작은 칸에도 "이미 샀어요"
+      } else {
+        const ul = rmk("ul", "room-rest__locks");
+        const own = pe && room !== "rune"; // 룬은 장 구조(지나온·지금 자리)가 달라 장 이름 그대로
+        const rows = [
+          [ROMAN[0], (own && tt(pe.identity)) || RT.lockedRest],
+          [ROMAN[1], (own && tt(pe.event)) || T.result.chapterNames[1]],
+          [ROMAN[2], (own && tt(pe.shadow)) || T.result.chapterNames[2]],
+          [ROMAN[3], (own && tt(pe.advice)) || T.result.chapterNames[3]],
+          ["", (room === "saju" && sajuHiddenTitle(myCodes())) || T.book.hiddenChapter],
+        ];
+        if (!tease) rows.unshift(["", (SJ && SJ.strike) || RT.strikeLock]);
+        rows.forEach(([num, name]) => {
+          const li = rmk("li", "room-rest__lock");
+          li.append(rmk("span", "room-rest__num", num)); // 숨은 장은 빈 칸(줄 맞춤)
+          li.append(rmk("span", "room-rest__lock-name", name));
+          const bars = rmk("span", "room-rest__bars"); // 흐린 막대(글자 아님)
+          bars.setAttribute("aria-hidden", "true");
+          li.append(bars);
+          ul.append(li);
+        });
+        box.append(ul);
+        // 결제하면 함께 열리는 것: 궁합 강조 (큰 칸에서만)
+        if (tier === "big" && RT.match && RT.match.title) {
+          const m = rmk("section", "room-rest__match");
+          m.dataset.js = "room-rest-match";
+          m.append(rmk("p", "room-rest__match-label", RT.match.label || ""));
+          m.append(rmk("p", "room-rest__match-title", RT.match.title));
+          m.append(rmk("p", "room-rest__match-body", RT.match.body || ""));
+          if (RT.match.also) m.append(rmk("p", "room-rest__match-also", RT.match.also));
+          box.append(m);
+        }
+        // (2026-10-27) 한 번 결제로 열리는 것: 일곱 방 문장 줄(지금 방 강조) + 함께 열리는 장
+        const all = rmk("section", "room-rest__all");
+        all.dataset.js = "room-rest-all";
+        all.append(rmk("p", "room-rest__all-head", fill(RT.allHead || RT.lockedNote, { price })));
+        const rooms = rmk("ul", "room-rest__rooms");
+        CHAPTER_ORDER.forEach((r) => {
+          const li = rmk("li", r === room ? "room-rest__room is-here" : "room-rest__room");
+          li.dataset.room = r;
+          li.innerHTML = `<svg class="room-rest__room-fig" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-${r}" /></svg>`;
+          li.append(rmk("span", "room-rest__room-name", T.rooms[r].short));
+          rooms.append(li);
+        });
+        all.append(rooms);
+        if (RT.allPlus) all.append(rmk("p", "room-rest__all-plus", RT.allPlus));
+        box.append(all);
+        const sb = seasonBlock();
+        if (sb) box.append(sb);
+        const buy = rmk("button", "btn btn--primary btn--block room-rest__buy", fill(RT.buyBtn, { price }));
+        buy.type = "button";
+        buy.dataset.js = "room-rest-buy";
+        buy.addEventListener("click", goBuy);
+        const have = haveLink();
+        box.append(buy);
+        if (RT.safe) box.append(rmk("p", "room-rest__safe", RT.safe)); // (2026-10-26) 안심 한 줄: 구매·환불 안내에 적힌 것만
+        box.append(have);
+      }
       // (2026-10-27) 결제는 갈림길: 하지 않아도 다음 문으로 바로. (운영자) 글자 버튼 대신 진짜 문(안내자 한마디 + 문 버튼)을 이 자리로 옮겨 온다
       const door = js("result-next-door", scr);
       const passage = js("result-passage", scr);
@@ -3325,7 +3413,7 @@
         const fin = door.dataset.go === "finale";
         const nx = rmk("div", "room-rest__next");
         nx.dataset.js = "room-rest-next";
-        nx.append(rmk("p", "room-rest__next-text", fin ? RT.freeNextFinale || "" : fill(RT.freeNext || "", { next: doorName(door) })));
+        if (tier !== "mini") nx.append(rmk("p", "room-rest__next-text", fin ? RT.freeNextFinale || "" : fill(RT.freeNext || "", { next: doorName(door) })));
         nx.append(passage);
         box.append(nx);
       }
@@ -4905,6 +4993,12 @@
     enter.deeper = () => {
       BX.payList(payScr, payFrom); // (18단계) 받는 것 목록(목차와 같은 순서)·미리보기로 돌아가기
       js("pay-price", payScr).textContent = fill(PAY.price.text || "", { price: comma(PAY.amount) });
+      { // (2026-10-27) 첫 계절의 값: 가격 줄 아래에 한 번만
+        const old = js("season", payScr);
+        if (old) old.remove();
+        const sb = seasonBlock(true);
+        if (sb) js("pay-price", payScr).after(sb);
+      }
       show(js("pay-refund-link", payScr), false); // legal/refund.html은 지금 배포 폴더에서 빠진다(build-dist) → 본문 링크 숨김. 결제 문단은 G4
       act.classList.toggle("is-opened", Boolean(passNow())); // (검수 권장 4) 이 탭에서 책이 이미 열려 있으면 결제 버튼 대신 안내
       show(js("pay-store-empty", payScr), !PA.userid);
@@ -5019,6 +5113,12 @@
     }
     buy.addEventListener("click", () => {
       if (buy.getAttribute("aria-disabled") === "true" || passNow()) return;
+      // (2026-10-27) 화면을 연 채 첫 계절이 끝났으면 지금 값으로 다시 그린다(결제창에 지난 값이 가지 않게)
+      if (PAY.regular && !seasonOn()) {
+        toast(PAY.season.ended || "");
+        setTimeout(() => location.reload(), 1600);
+        return;
+      }
       track("so_pay", { step: "start" });
       startPay(newReq()); // 누를 때마다 새 R → 저장한 뒤에야 SDK
     });

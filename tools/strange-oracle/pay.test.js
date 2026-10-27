@@ -515,3 +515,23 @@ test("data.js 배포판: pay.mode off 또는 live(2026-10-22 live, 모의 서버
   for (const k of ["linkkey", "linkval", "PASS_SECRET"]) assert.ok(!(k in w.TEXT.pay.payapp), k);
   assert.match(fs.readFileSync(path.join(PROD, "data.js"), "utf8"), /\bpay:\s*\{\s*mode:\s*"(?:off|live)"/);
 });
+
+test("(2026-10-27 운영자) 첫 계절의 값: 마감 전·24시간 여유 안의 4,900원 결제 받음 · 여유가 지나면 400 · 9,900원은 언제나 · 화면 설정과 같은 값·시각", async () => {
+  const S = Pay.SEASON;
+  assert.strictEqual(S.price, 4900);
+  assert.strictEqual(S.until, Date.parse("2026-11-30T23:59:59+09:00"));
+  for (const [now, price, ok] of [[S.until - 1000, "4900", true], [S.until + S.graceMs - 1000, "4900", true], [S.until + S.graceMs + 1000, "4900", false], [S.until + S.graceMs + 1000, "9900", true], [S.until - 1000, "9900", true]]) {
+    const store = new MemStore();
+    const r = newR();
+    const mul = newMul();
+    for (const st of [1, 4]) {
+      const res = await Pay.handle({ method: "POST", route: "feedback", body: notice(st, mul, r, { price }), ip: "payapp" }, ENV, store, now);
+      assert.strictEqual(res.body, ok ? "SUCCESS" : "FAIL", `${price} @ ${new Date(now).toISOString()} st${st}`);
+    }
+    assert.strictEqual(keys(store).some((k) => k.startsWith("pass/")), ok);
+  }
+  const w = {};
+  new Function("window", fs.readFileSync(path.join(PROD, "data.js"), "utf8"))(w);
+  assert.strictEqual(w.TEXT.pay.season.amount, S.price);
+  assert.strictEqual(Date.parse(w.TEXT.pay.season.until), S.until);
+});

@@ -17,6 +17,7 @@ const BOOK_ROOMS = ORDER; // (F4-B2) Ⅰ 만신 장 포함 → 책 12장, (17단
 // (14-6) 방 문구 파일은 지연 불러오기라 페이지에 전역이 없을 수 있다 → 시험 방문 기록은 node에서 만든다
 const DATA = (() => { const w = {}; for (const f of ["data-saju.js", "data-ogham.js", "data-stars.js", "data-decans.js", "data-tzolkin.js", "data-runes.js", "data-oracles.js"]) require("vm").runInNewContext(require("fs").readFileSync(require("path").resolve(__dirname, "..", "..", "products", "strange-oracle", f), "utf8"), { window: w }); return w; })();
 const SajuLib = require("../../products/strange-oracle/saju.js");
+const SALE = require("./sale-price.js"); // (2026-10-27) 지금 판매 값(첫 계절 4,900원)
 function seedVisits(R) {
   const v = {};
   if (R.includes("saju")) v.saju = { code: 532, archetype: DATA.SAJU.stems[SajuLib.decodeCode(532).S1].archetype };
@@ -382,7 +383,7 @@ const STUB_ADS = `(function () {
   await fresh(["saju"], "#report", PROFILE, false);
   const rb = await rows();
   check("18-2 방 1개: 새 장 need-room · 상태 한 줄 = book.toc.needCross · 누르면 안내만", rb.cross === "need-room" && (await ev("document.querySelector('[data-js=book-chapter][data-chapter=cross] [data-js=book-chapter-state]').textContent === TEXT.book.toc.needCross")), JSON.stringify(rb));
-  check("18-5 1/7 결제 전: 맨 위 띠 숨김 · 맨 아래 작은 글자 버튼 하나(btn--text, {price} 채움)", await ev("document.querySelector('[data-js=book-preview-band]').hidden && !document.querySelector('[data-js=book-buy-row]').hidden && document.querySelectorAll('[data-js=book-buy]').length === 1 && document.querySelector('[data-js=book-buy]').classList.contains('btn--text') && !/\\{price\\}/.test(document.querySelector('[data-js=book-buy]').textContent) && /9,900/.test(document.querySelector('[data-js=book-buy]').textContent)"));
+  check("18-5 1/7 결제 전: 맨 위 띠 숨김 · 맨 아래 작은 글자 버튼 하나(btn--text, {price} 채움)", await ev("document.querySelector('[data-js=book-preview-band]').hidden && !document.querySelector('[data-js=book-buy-row]').hidden && document.querySelectorAll('[data-js=book-buy]').length === 1 && document.querySelector('[data-js=book-buy]').classList.contains('btn--text') && !/\\{price\\}/.test(document.querySelector('[data-js=book-buy]').textContent) && /" + SALE.text + "/.test(document.querySelector('[data-js=book-buy]').textContent)"));
   await b.goto(BASE + "#hub");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
   const hubPrice = await ev("/9,900|\\d+원/.test(document.querySelector('[data-js=hub-book]').textContent)");
@@ -463,7 +464,7 @@ const STUB_ADS = `(function () {
       closeHidden: s.querySelector('[data-js=preview-close]').hidden, closeHas: s.querySelector('[data-js=preview-close]').children.length > 0, disc: !s.querySelector('[data-js=disclaimer-slot]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(s.textContent), ads: s.querySelectorAll('[data-ad], .ad-slot').length, band: !s.querySelector('[data-js=preview-test-band]').classList.contains('is-hidden'),
       prim: s.querySelectorAll('.btn--primary').length, price: s.querySelector('[data-js=preview-go-label]').textContent, h: [...s.querySelectorAll('h1,h2,h3')].map(h => h.tagName).join(''), interest: !s.querySelector('[data-js=preview-interest]').hidden && s.querySelector('[data-js=preview-interest-text]').textContent === TEXT.book.interest.sibyl.love,
       bad: /undefined|\\{(who|n|price|arch|sub)\\}/.test(s.textContent), wide: document.documentElement.scrollWidth <= innerWidth }; })())`));
-  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 15장 목차(무료 2 글자 표지 — 2026-10-25 만신의 장 유료, 20단계 year 포함) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 15 && pv.toc.startsWith("open:free,saju:paid") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid,year:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && /9,900/.test(pv.price) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
+  check("18-12의 7 미리보기(7/7 결제 전): 18-5 순서 1~7(19-2: 8 면책 없음) · 15장 목차(무료 2 글자 표지 — 2026-10-25 만신의 장 유료, 20단계 year 포함) · 여는 글 전문(머리글자) · 첫 줄 7개 · 대조표(쪽 문장 0) · 닫는 글 접힘 · 면책 문구 0 · 광고 0 · 주 버튼 하나 · 시험 띠 · 관심사 줄 · 제목 단계", pv.seq && pv.toc.split(",").length === 15 && pv.toc.startsWith("open:free,saju:paid") && pv.toc.endsWith("close:free") && pv.toc.includes("sibyl:paid,cross:paid,yeon:paid,deep:paid,match:paid,flow:paid,year:paid") && pv.free && pv.open > 0 && pv.drop && pv.firsts === 7 && pv.cross === 7 && pv.crossText === 0 && pv.closeHidden && pv.closeHas && pv.disc && pv.ads === 0 && pv.band && pv.prim === 1 && pv.price.includes(SALE.text) && pv.h === "H1H2H2H3H3H3H3H2H2" && pv.interest && !pv.bad && pv.wide, JSON.stringify(pv));
   // 유료 문장 지문(build-dist와 같은 규칙: 30자 이상 문자열의 가운데 60자, 공개 data*.js와 같은 문자열은 뺌)이 미리보기 화면 HTML에 0
   const prints = (() => {
     const vm = require("vm");

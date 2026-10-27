@@ -18,6 +18,10 @@ const crypto = require("crypto");
 
 const STORE_NAME = "strange-oracle-pay";
 const PRICE = 9900;
+// (2026-10-27 운영자) 첫 계절 값: 이 시각까지 4,900원 결제도 받는다(화면은 products/strange-oracle/data.js pay.season과 같은 값·시각).
+// 마감 뒤 24시간은 마감 직전에 연 결제창이 늦게 끝나도 받는 여유. 취소 통보는 가격을 보지 않으므로 영향 없음
+const SEASON = { price: 4900, until: Date.parse("2026-11-30T23:59:59+09:00"), graceMs: 24 * 60 * 60 * 1000 };
+const priceOk = (n, now) => n === PRICE || (n === SEASON.price && now <= SEASON.until + SEASON.graceMs);
 const TAG = "so-book-1";
 const R_RE = /^[0-9a-f]{32}$/;
 const MUL_RE = /^[0-9A-Za-z_-]{1,40}$/; // 키 이름에 들어가므로 모양을 좁힌다
@@ -158,7 +162,7 @@ async function feedback(req, env, store, now) {
   const f = new URLSearchParams(raw);
   if (env.PAY_DEBUG_FIELDS === "1") {
     // 실결제 시험 G7 ⑦ 전용: 칸 이름과 기대값 일치 여부(참·거짓)만. 값은 남기지 않는다
-    console.log("pay-debug " + JSON.stringify({ fields: [...new Set(f.keys())].sort(), state: /^\d{1,3}$/.test(f.get("pay_state") || "") ? f.get("pay_state") : "?", priceOk: f.get("price") === String(PRICE), tagOk: f.get("var2") === TAG }));
+    console.log("pay-debug " + JSON.stringify({ fields: [...new Set(f.keys())].sort(), state: /^\d{1,3}$/.test(f.get("pay_state") || "") ? f.get("pay_state") : "?", priceOk: priceOk(Number(f.get("price")), now), tagOk: f.get("var2") === TAG }));
   }
   const a = same(f.get("userid"), env.PAYAPP_USERID);
   const b = same(f.get("linkkey"), env.PAYAPP_LINKKEY);
@@ -170,7 +174,7 @@ async function feedback(req, env, store, now) {
   const r = String(f.get("var1") || "");
   if (state === "1" || state === "4") {
     const price = String(f.get("price") || "");
-    if (!/^\d{1,9}$/.test(price) || Number(price) !== PRICE || f.get("var2") !== TAG || !R_RE.test(r)) return text(400, "FAIL");
+    if (!/^\d{1,9}$/.test(price) || !priceOk(Number(price), now) || f.get("var2") !== TAG || !R_RE.test(r)) return text(400, "FAIL");
     if (state === "1") return text(200, "SUCCESS");
     if (!MUL_RE.test(mul)) return text(400, "FAIL");
     try {
@@ -265,4 +269,4 @@ async function respond(req, context, openStore, env = process.env) {
 }
 
 const _reset = () => hits.clear();
-module.exports = { respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, STORE_NAME, PRICE, TAG, CANCEL_STATES, _hits: hits, _reset };
+module.exports = { respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, STORE_NAME, PRICE, SEASON, priceOk, TAG, CANCEL_STATES, _hits: hits, _reset };
