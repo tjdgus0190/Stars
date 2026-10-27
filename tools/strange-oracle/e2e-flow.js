@@ -351,7 +351,7 @@ function paidSentences() {
   await waitFor("window.__share", 5000);
   const shareArgs = await ev("JSON.stringify(window.__share)");
   const cardOpts = await ev("window.__opts[window.__opts.length - 1]");
-  check("10-2: 공유 글 끝에 표시용 주소(https:// 뗌) + url 전달, site.url 빈 값이면 카드 하단 주소 줄 없음", JSON.parse(shareArgs).url === here && JSON.parse(shareArgs).text.endsWith(" " + here.replace(/^https?:\/\//, "")) && JSON.parse(cardOpts).footerUrl === "" && JSON.parse(cardOpts).footer === (await ev("TEXT.card.footer")), shareArgs);
+  check("10-2: 공유 글 끝에 표시용 주소(https:// 뗌) + url 전달 · (2026-10-27) 카드 하단 줄 = 인스타그램 계정 줄(@계정 · strange-oracle.com)", JSON.parse(shareArgs).url === here && JSON.parse(shareArgs).text.endsWith(" " + here.replace(/^https?:\/\//, "")) && JSON.parse(cardOpts).footerUrl === (await ev("TEXT.card.footerLine.replace('{ig}', TEXT.instagram.handle)")) && JSON.parse(cardOpts).footer === (await ev("TEXT.card.footer")), shareArgs);
   check("10-1: 복원한 별 공유 카드 — 반전 알약 없이 만들어짐, 코드 없음", JSON.parse(cardOpts).badges.length === 1 && !CODES.some((c) => cardOpts.includes(c) || shareArgs.includes(c)));
   await stubClip(false);
   await click("#screen-star-result [data-js=share-link-copy]");

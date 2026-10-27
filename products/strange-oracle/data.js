@@ -27,6 +27,8 @@ window.TEXT = {
   //   비워 두면 지금 열린 주소를 쓴다. 이 한 줄만 바꾸면 링크 복사·공유 글·공유 카드 하단·배포본 og:url이 함께 바뀐다.
   //   모양이 틀리면 node tools/build-dist.js가 오류로 멈춘다.
   site: { url: "https://strange-oracle.com/products/strange-oracle/" }, // (2026-10-25) 새 도메인 HTTPS 열림. 옛 Netlify 주소도 그대로 동작(결제·로그인은 시작한 주소로 돌아옴)
+  // (2026-10-27 운영자) 인스타그램 계정. 결과 화면·나의 이야기 화면의 "따라오기" 한 줄과 공유 카드 맨 아래 줄에 쓴다. 비우면 둘 다 안 보인다
+  instagram: { handle: "strange_oracle_off", url: "https://www.instagram.com/strange_oracle_off/" },
   // kakao: 카카오톡 공유. jsKey(카카오 JavaScript 키)와 sdkUrl(SDK 주소, 운영자 결정 32번 뒤) 가운데 하나라도 비어 있으면 버튼을 만들지 않고 SDK도 부르지 않는다
   //   (23단계, 운영자 2026-10-23 "카카오톡 공유 켬", 운영 규칙 3장 예외) jsKey = 카카오 JavaScript 키(브라우저에 공개되는 키. 카카오 콘솔에 등록한 사이트 도메인에서만 동작),
   //   sdkUrl = 카카오 공식 주소의 판 고정 SDK(2.7.4, 2024-11), integrity = 그 파일의 sha384. 공유 버튼을 누른 뒤에만 불러온다(share-buttons.js)
@@ -1122,10 +1124,13 @@ window.TEXT = {
   },
 
   // ── 공유 카드 공통·나의 이야기 카드
+  // (2026-10-27) 인스타그램 따라오기 한 줄 (결과 화면 아래 · 나의 이야기). {ig}=계정 아이디
+  follow: { text: "새 신탁 소식은 인스타그램에서", handle: "@{ig}" },
   card: {
     cta: "너는 뭐가 나올까?", // (2026-10-25) 카드 아래 로고 위 한 줄 (최대 18자). (2026-10-26) 친구에게 묻는 말로
     ctaSaju: "너의 일간은 뭐야?", // (2026-10-26) 만신의 방 카드 (최대 18자)
     footer: "낯선 점술관",  // 모든 카드 맨 아래 제품 이름. 주소는 여기 쓰지 않는다 — 맨 위 site.url이 있으면 코드가 아래 줄에 덧붙인다
+    footerLine: "@{ig} · strange-oracle.com", // (2026-10-27) 카드 맨 아래 작은 줄: 인스타그램 계정 + 주소 ({ig}=계정 아이디, 최대 44자)
     story: {
       eyebrow: "낯선 점술관 · 나의 이야기",
       progress: "{n} / 7장",

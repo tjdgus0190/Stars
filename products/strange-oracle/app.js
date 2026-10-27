@@ -2688,6 +2688,7 @@
   // 서비스 주소는 이 값 하나만 쓴다: data.js site.url, 비어 있으면 지금 주소(쿼리·해시 없음). 입력값·결과 코드는 넣지 않는다.
   // 카카오톡: kakao.jsKey·sdkUrl이 비어 있으면 버튼을 만들지 않고 SDK도 부르지 않는다. 공유 내용은 제목·설명·og-image·주소뿐
   const SITE_URL = ShareButtons.siteUrl(T.site.url);
+  const IG = T.instagram && T.instagram.handle && /^https:\/\/www\.instagram\.com\//.test(T.instagram.url || "") ? T.instagram : null; // (2026-10-27) 인스타그램 계정
   const K = T.share.kakaoMsg || {};
   // 카카오로 받은 사람이 누른 링크: 캠페인 값만(입력값·결과 코드 없음). 분석 허용 목록(CAMPAIGN)과 같은 값
   const kakaoLink = (what) => `${SITE_URL}?utm_source=kakao&utm_medium=share&utm_campaign=kakao_share&utm_content=kakao_${what}`;
@@ -2729,7 +2730,7 @@
       // (10단계 10-2) 공유 글 끝에 표시용 주소를 붙이고, 공유 시트에는 url도 넘긴다. 카드 하단 주소 줄은 site.url을 넣었을 때만
       const showUrl = ShareButtons.displayUrl(SITE_URL);
       // (2026-10-25) 고급판(deluxe): 성운 배경·모서리 장식 테·큰 인용 본문·아래 금빛 로고 묶음(cta 한 줄 포함)
-      const canvas = await ShareCard.render(Object.assign({ fonts: FONTS, deluxe: true, cta: T.card.cta, footer: T.card.footer, footerUrl: T.site.url ? showUrl : "" }, opts));
+      const canvas = await ShareCard.render(Object.assign({ fonts: FONTS, deluxe: true, cta: T.card.cta, footer: T.card.footer, footerUrl: IG && T.card.footerLine ? fill(T.card.footerLine, { ig: IG.handle }) : T.site.url ? showUrl : "" }, opts));
       const how = await ShareCard.share(canvas, file, `${text} ${showUrl}`, SITE_URL);
       if (how === "downloaded") toast(T.toast.saved);
     } catch (err) {
@@ -3145,6 +3146,27 @@
     const m = $(".result-more", s);
     if (p && m && p.compareDocumentPosition(m) & Node.DOCUMENT_POSITION_PRECEDING) p.after(m);
   });
+  // (2026-10-27 운영자) 인스타그램 따라오기 한 줄: 방 결과 아래(공유 줄 밑) · 나의 이야기(카드 공유 밑). 계정 주소로 가는 링크일 뿐, 아무 값도 붙이지 않는다
+  function followLink(from) {
+    const a = document.createElement("a");
+    a.className = "ig-follow";
+    a.href = IG.url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.dataset.js = "ig-follow";
+    a.innerHTML = '<svg class="ig-follow__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4.2" /><circle cx="17.4" cy="6.6" r="1.1" /></svg>';
+    a.append(rmk("span", "ig-follow__text", T.follow.text || ""), rmk("b", "ig-follow__handle", fill(T.follow.handle || "", { ig: IG.handle })));
+    a.addEventListener("click", () => track("so_follow", { from }));
+    return a;
+  }
+  if (IG && T.follow) {
+    CHAPTER_ORDER.forEach((room) => {
+      const m = $(".result-more", screens[`${room}-result`]);
+      if (m) m.after(followLink("result"));
+    });
+    const top = js("story-share-top");
+    if (top) top.after(followLink("story"));
+  }
   // (2026-10-26) 잠긴 칸에 쓸 이 사람의 공개 결과 항목(장 제목·직격 첫 마디). 방 파일이 아직 없거나 코드가 없으면 null
   function restEntry(room) {
     const c = myCodes();
@@ -5532,6 +5554,7 @@
     so_result: { room: CHAPTER_ORDER, archetype: ARCHETYPES },
     so_story: { step: ["3of6", "6of6"] },
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
+    so_follow: { from: ["result", "story"] }, // (2026-10-27) 인스타그램 따라오기 링크 누름: 어느 화면에서인지만
     so_next: { room: CHAPTER_ORDER, from: ["dock", "locked"] }, // (2026-10-27) 다음 방을 떠 있는 버튼·잠긴 칸 버튼으로 열었을 때(아래 문 버튼은 so_room_view로 충분)
     so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
