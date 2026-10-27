@@ -51,7 +51,7 @@
   world.append(feed);
   // 12.8~15 끝
   const end = $("div", "end a8-end");
-  end.append($("p", "end__eyebrow", "SEVEN ORACLES · ONE STORY"), $("p", "logo end__logo", "낯선 점술관"), $("p", "handle", "@strange_oracle_off"), $("p", "end__lead", "일곱 문화의 점술이 같은 나를 읽어요"), $("p", "end__cta", "프로필에서 일곱 문 둘러보기"), $("p", "end__sub", "팔로우하면 새 신탁이 계속 열려요"));
+  end.append($("p", "end__eyebrow", "SEVEN ORACLES · ONE STORY"), $("p", "logo end__logo", "낯선 점술관"), $("p", "end__cta", "프로필에서 일곱 문 둘러보기")); // (운영자) 계정 아이디·덧붙인 문장 없이 프로필 방문 한 줄만
   anim(end.querySelector(".end__logo"), [`logo-shimmer 1.6s ease-in-out ${T.end + 0.5}s both`]);
   win(end, "in-fade", T.end, undefined, 0.5);
   stage.append(end);
