@@ -136,3 +136,11 @@ node --experimental-websocket marketing/strange-oracle/instagram/render-types.js
 - 장면 `types.html?room=<방>&p=<쪽>` + `types.js`·`types.css`. 유형 이름·설명은 제품 공개 데이터(`products/strange-oracle/data-*.js`)를 그대로 읽으므로, 제품 문구를 고치면 다시 찍기만 하면 된다.
 - 배경은 `render-ig2.js`가 찍어 둔 `out/v2/bg/void-*.png`(저장소에 없으면 먼저 `render-ig2.js void-a void-b void-r`).
 - 게시 문구는 `../sns.md` 「방별 유형 캐러셀 7편」.
+
+## "골라 봐" 캐러셀 (2026-10-27, 팔로워 모으기용)
+```
+node --experimental-websocket marketing/strange-oracle/instagram/render-pick.js          # 네 묶음 → out/pick/<묶음>-NN.jpg
+node --experimental-websocket marketing/strange-oracle/instagram/render-pick.js rune     # 한 묶음만 (rune · sibyl · ogham · star)
+```
+- 장면 `pick.html?set=<묶음>&p=<쪽>` + `pick.js`(묶음마다 고른 셋과 "이번 주 한마디")·`pick.css`. 새 묶음은 `pick.js` SETS에 하나 더하면 된다.
+- 게시 문구는 `../sns.md` 「"골라 봐" 캐러셀 4편」.

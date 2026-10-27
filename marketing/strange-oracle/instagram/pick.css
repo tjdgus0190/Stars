@@ -1,0 +1,62 @@
+/* "골라 봐" 캐러셀 (2026-10-27). ig2.css · types.css 위에 얹는다. 판 1080x1350, 방 색 = --acc */
+.pk .tag { top: 118px; }
+
+/* 표지: 셋 중 하나 */
+.pk-cover .ask { position: absolute; left: 60px; right: 60px; top: 210px; font-family: var(--punch); font-weight: 900; font-size: 84px; line-height: 1.26; }
+.pk-cover .three { position: absolute; left: 60px; right: 60px; top: 520px; display: flex; justify-content: space-between; }
+.pk-cover .obj { width: 300px; display: grid; justify-items: center; }
+.pk-cover .shape { position: relative; display: grid; place-items: center; }
+.pk-cover .qm { font-family: var(--font-latin); font-weight: 700; font-size: 110px; color: color-mix(in oklch, var(--acc) 85%, white); text-shadow: 0 0 30px var(--acc); }
+.pk-cover .no { margin: 26px 0 0; font-size: 64px; color: var(--gold); text-shadow: 0 0 18px oklch(0.8 0.12 85 / 0.6); }
+.pk-cover .sub { position: absolute; left: 80px; right: 80px; top: 1040px; margin: 0; text-align: center; font-size: 34px; color: var(--ink-soft); word-break: keep-all; }
+.pk-cover .next-hint { color: var(--acc); font-size: 32px; bottom: 80px; }
+/* 돌 */
+.pk-stone .shape { width: 250px; height: 290px; border-radius: 48% 52% 46% 54% / 44% 46% 54% 56%;
+  background: radial-gradient(ellipse 70% 60% at 38% 30%, oklch(0.5 0.03 240), oklch(0.26 0.03 245) 60%, oklch(0.16 0.02 250));
+  box-shadow: inset -14px -20px 40px oklch(0 0 0 / 0.55), inset 10px 12px 24px oklch(1 0 0 / 0.08), 0 18px 40px oklch(0 0 0 / 0.6), 0 0 50px color-mix(in oklch, var(--acc) 22%, transparent); }
+.pk-stone .s1 { transform: rotate(-6deg); } .pk-stone .s2 { transform: rotate(5deg); }
+/* 두루마리 */
+.pk-scroll .shape { width: 220px; height: 330px; border-radius: 10px; background: linear-gradient(90deg, oklch(0.72 0.05 75), oklch(0.86 0.05 85) 30%, oklch(0.88 0.05 85) 70%, oklch(0.7 0.05 75));
+  box-shadow: 0 18px 40px oklch(0 0 0 / 0.6), 0 0 50px color-mix(in oklch, var(--acc) 25%, transparent); }
+.pk-scroll .shape::before, .pk-scroll .shape::after { content: ""; position: absolute; left: -16px; right: -16px; height: 30px; border-radius: 15px; background: linear-gradient(180deg, oklch(0.55 0.08 50), oklch(0.36 0.06 45)); }
+.pk-scroll .shape::before { top: -14px; } .pk-scroll .shape::after { bottom: -14px; }
+.pk-scroll .qm { color: oklch(0.42 0.1 40); text-shadow: none; }
+/* 나무 */
+.pk-tree .shape { width: 240px; height: 330px; border-radius: 120px 120px 18px 18px; border: 2px solid color-mix(in oklch, var(--acc) 70%, transparent);
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, color-mix(in oklch, var(--acc) 30%, transparent), oklch(0.1 0.03 160 / 0.7) 75%); box-shadow: 0 0 50px color-mix(in oklch, var(--acc) 25%, transparent); }
+.pk-tree .tr { writing-mode: vertical-rl; font-family: var(--punch); font-weight: 900; font-size: 60px; letter-spacing: 0.12em; color: var(--ink); text-shadow: 0 0 20px var(--acc); }
+/* 달 */
+.pk-moon .shape { width: 250px; height: 250px; margin-top: 40px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, oklch(0.96 0.03 90), oklch(0.82 0.05 85) 55%, oklch(0.62 0.05 80));
+  box-shadow: 0 0 60px oklch(0.9 0.06 90 / 0.5), 0 0 120px color-mix(in oklch, var(--acc) 30%, transparent); }
+.pk-moon .s0 { box-shadow: inset -70px 0 0 oklch(0.1 0.03 285 / 0.92), 0 0 60px oklch(0.9 0.06 90 / 0.4); }
+.pk-moon .s2 { box-shadow: inset 90px -20px 0 oklch(0.1 0.03 285 / 0.92), 0 0 60px oklch(0.9 0.06 90 / 0.4); }
+.pk-moon .qm { color: oklch(0.35 0.06 285); text-shadow: none; }
+.pk-moon .no { margin-top: 66px; }
+
+/* 답 */
+.pk-ans .pick { position: absolute; left: 0; right: 0; top: 190px; margin: 0; text-align: center; font-family: var(--punch); font-weight: 900; font-size: 64px; color: var(--gold); }
+.pk-ans .em { top: 300px; width: 180px; height: 180px; }
+.pk-ans .em .sig { font-size: 104px; }
+.pk-ans .pk-sym { width: 66px; height: 99px; fill: none; stroke: var(--acc); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 10px var(--acc)); }
+.pk-ans .pk-sym.tall { width: 52px; height: 104px; stroke-width: 4.5; }
+.pk-ans .nm, .pk-ans .ti, .pk-ans .ln, .pk-ans .ky { position: relative; margin-left: 90px; margin-right: 90px; text-align: center; word-break: keep-all; text-wrap: balance; }
+.pk-ans .nm { margin-top: 520px; margin-bottom: 0; font-size: 36px; color: var(--acc); letter-spacing: 0.06em; }
+.pk-ans .nm .lat { margin-left: 12px; font-family: var(--font-latin); font-size: 26px; color: var(--gold-dim); }
+.pk-ans .ti { margin-top: 12px; margin-bottom: 0; font-family: var(--punch); font-weight: 900; font-size: 60px; line-height: 1.25; color: var(--ink); text-shadow: 0 2px 20px #000; }
+.pk-ans .ln { margin-top: 24px; margin-bottom: 0; font-size: 38px; line-height: 1.5; color: var(--gold); }
+.pk-ans .ky { margin-top: 30px; margin-bottom: 0; font-size: 36px; line-height: 1.6; color: var(--ink-soft); text-wrap: pretty; text-shadow: 0 2px 10px #000; }
+.pk.pk-ans { display: flow-root; } /* 첫 글자 줄의 위 여백이 판 밖으로 새지 않게 */
+.pk-ans:not(:has(.nm)) .ti { margin-top: 520px; }
+.pk-ans .word { position: absolute; left: 90px; right: 90px; bottom: 90px; padding: 28px 34px 32px; border-radius: 22px; border: 1.5px solid color-mix(in oklch, var(--acc) 70%, transparent); background: oklch(0.1 0.03 285 / 0.62); text-align: center; }
+.pk-ans .word span { font-size: 26px; letter-spacing: 0.1em; color: var(--acc); }
+.pk-ans .word p { margin: 10px 0 0; font-size: 38px; line-height: 1.5; font-weight: 700; word-break: keep-all; text-wrap: balance; }
+
+/* 끝 */
+.pk-cta .mid { position: absolute; left: 80px; right: 80px; top: 300px; text-align: center; }
+.pk-cta .ask2 { font-family: var(--punch); font-weight: 900; font-size: 92px; }
+.pk-cta .sub2 { margin: 36px 0 0; font-size: 38px; color: var(--ink-soft); }
+.pk-cta .more { margin: 90px auto 0; padding: 30px 30px 34px; border-radius: 22px; border: 1.5px solid color-mix(in oklch, var(--acc) 70%, transparent); background: oklch(0.1 0.03 285 / 0.6); }
+.pk-cta .more p { margin: 0; font-size: 36px; }
+.pk-cta .more b { display: block; margin-top: 10px; font-size: 40px; color: var(--acc); }
+.pk-cta .fl { margin: 110px 0 0; font-size: 34px; color: var(--ink-soft); }
+.pk-cta .hd { margin: 16px 0 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 700; font-size: 50px; letter-spacing: 0.01em; text-transform: none; color: var(--gold); text-shadow: 0 0 24px oklch(0.8 0.12 85 / 0.5); }
