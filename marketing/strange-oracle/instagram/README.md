@@ -127,3 +127,12 @@ node --experimental-websocket marketing/strange-oracle/instagram/render-ig.js
 #낯선점술관 #사주 #점술 #운세 #속마음
 ```
 - 점검: 정확도 과장("소름"·"100%"·"잘 맞는") 0, 불안 재촉("지금 안 하면") 0, 보는 사람 단정 대신 질문, 실존 인물 0. 「결과 중 하나」 카드 문장은 제품 공개 결과 문장 그대로다(만신 병화 · 오검 두이르 · 베다 슈라바나 · 데칸 12 · 촐킨 키브 · 룬 만나즈 · 시빌라 8).
+
+## 방별 유형 캐러셀 (2026-10-27)
+```
+node --experimental-websocket marketing/strange-oracle/instagram/render-types.js        # 일곱 방 전부 → out/types/<방>-NN.jpg (4:5)
+node --experimental-websocket marketing/strange-oracle/instagram/render-types.js ogham  # 한 방만
+```
+- 장면 `types.html?room=<방>&p=<쪽>` + `types.js`·`types.css`. 유형 이름·설명은 제품 공개 데이터(`products/strange-oracle/data-*.js`)를 그대로 읽으므로, 제품 문구를 고치면 다시 찍기만 하면 된다.
+- 배경은 `render-ig2.js`가 찍어 둔 `out/v2/bg/void-*.png`(저장소에 없으면 먼저 `render-ig2.js void-a void-b void-r`).
+- 게시 문구는 `../sns.md` 「방별 유형 캐러셀 7편」.
