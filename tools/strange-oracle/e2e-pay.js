@@ -177,6 +177,25 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   const k5 = await tryCode(PassCode.pretty(PassCode.make()));
   intercept.failBook = false;
   check("A11 서버에 닿지 않음 → offline 한 줄, 열람 표시 없음", k5 === "offline" && (await ss("strange-oracle-pass")) === null, k5);
+  // (2026-10-28) 입구의 이어가기·열람 코드 칸에 열람 코드(SOP): 결제 화면과 같은 확인 → 열림. 지나온 방이 없는 기기면 입구로 + 안내 한 줄
+  await skip(TEST, "rooms=0&to=hub&paid=1", "screen-hub");
+  const goodPass = await ss("strange-oracle-pass");
+  await ev("sessionStorage.clear()");
+  await b.goto(TEST + P);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=resume-enter-toggle]");
+  const hubTry = async (code) => {
+    await ev(`document.querySelector('[data-js=resume-input]').value = ${JSON.stringify(code)}`);
+    await click("[data-js=resume-go]");
+    await sleep(500);
+    return ev("(() => { const e = document.querySelector('[data-js=resume-error]'); return e.classList.contains('is-hidden') ? '' : e.dataset.kind || 'msg'; })()");
+  };
+  n0 = reqs(/\/api\/book/);
+  const hk = await hubTry(PassCode.pretty(PassCode.make()));
+  check("A12 입구 코드 칸 + 없는 열람 코드 → 열람 코드 확인 실패 한 줄(요청 1), 열람 표시 없음", hk === "pass-fail" && reqs(/\/api\/book/) - n0 === 1 && (await ss("strange-oracle-pass")) === null, hk);
+  const hk2 = await hubTry(PassCode.pretty(goodPass));
+  const toastTxt = await ev("document.querySelector('[data-js=toast]')?.textContent || ''");
+  check("A13 입구 코드 칸 + 맞는 열람 코드 → 오류 없음·열람 표시 저장·지나온 방 없으니 입구에 남고 안내 한 줄(okFresh)", hk2 === "" && (await ss("strange-oracle-pass")) === goodPass && (await active()) === "screen-hub" && toastTxt === (await ev("TEXT.pay.pass.okFresh")), JSON.stringify({ hk2, toastTxt }));
 
   // ═══ B. 이동 방식 ═══
   check("B0 결제 전(7방 마침) → 결제 전 화면", await toPay());
@@ -194,6 +213,9 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   const openB = await waitFor("!!document.querySelector('[data-js=pay-code-dialog]')?.open", 30000);
   const codeB = (await codesShown())[0] || "";
   check("B4 #paid 복귀 → 30초 안에 코드 카드(SOP 코드·[복사])", openB && /^SOP/.test(codeB) && (await ev("document.querySelectorAll('[data-js=pay-code-dialog] [data-js=code-copy]').length")) === 1, codeB);
+  // (2026-10-28) 코드 카드의 [카카오톡으로 코드 보내 두기]: 카카오 키가 있으면 보임. 본문 문구에 {code} 자리, 링크에는 코드 없음(kakaoLink("code"))
+  const kk = await ev("(() => { const r = document.querySelector('[data-js=pay-code-dialog] [data-js=code-kakao-row]'); return { shown: !!r && !r.classList.contains('is-hidden') && r.offsetHeight > 0, key: !!(TEXT.kakao.jsKey && TEXT.kakao.sdkUrl), tpl: TEXT.pay.issued.kakaoText.includes('{code}') && TEXT.pay.issued.kakaoText.length - 6 + 22 <= 200 }; })()");
+  check("B4k 코드 카드: 카카오톡으로 코드 보내 두기 (키 있을 때만 보임, 본문 200자 안·코드 자리)", kk.shown === kk.key && kk.tpl, JSON.stringify(kk));
   const passB = await ss("strange-oracle-pass");
   allCodes.push(passB);
   check("B5 strange-oracle-pass = 카드의 코드(정규화)·payreq에서 그 R이 빠짐·주소에 #paid·R 없음", passB === PassCode.normalize(codeB) && !((await ss("strange-oracle-payreq")) || "").includes(sent.var1) && !/paid|[0-9a-f]{32}/.test(await ev("location.hash")), `${await ev("location.hash")}`);

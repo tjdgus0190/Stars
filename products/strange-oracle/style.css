@@ -5779,3 +5779,6 @@ s.was { margin-right: 2px; font-weight: 500; opacity: 0.62; text-decoration-thic
   .pay-dock__next { background: #241b3a; border-color: #d9b46a; color: #ece6da; }
   a, .text-link { color: #e3c27f; }
 }
+/* (2026-10-28) 코드 카드: 카카오톡으로 코드 보내 두기 */
+.code-card__kakao { margin: var(--space-3) 0 0; display: grid; gap: 6px; justify-items: stretch; }
+.code-card__kakao .kakao-row__help { margin: 0; text-align: center; }

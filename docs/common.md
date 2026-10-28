@@ -183,3 +183,4 @@ CLAUDE.md 6장 예외. 지금은 strange-oracle의 app.js 안에만 있다(쓰�
 ### 2026-10-25 추가 (낯선 점술관이 처음 씀, 다른 제품은 아직 안 씀)
 - **share-card.js** `deluxe: true` — 성운 배경·방 색 빛·모서리 장식 테·인용 부호 붙은 큰 본문·아래 금빛 로고 묶음. `footer`는 로고 글자, `cta`는 로고 위 한 줄. 고급판에서는 알약(badges)·안내자 서명(guideSignature)을 그리지 않고, 넘치면 사이 간격부터 줄여 본문 줄이 잘리지 않게 한다. `emblem: { paths: [viewBox 40 path…], label }` — 이중 원 안의 문장 그림 블록. 둘 다 안 넘기면 예전과 똑같이 그린다.
 - **share-buttons.js** 카카오 설정에 `button`(버튼 이름), `imageWidth`·`imageHeight`, `content(slot)`(누른 자리에 맞춘 `{ title, description, imageUrl, url }`, 빠진 칸은 기본값)을 더할 수 있다. 안 넘기면 예전과 같다. 입력값은 넣지 않는다(6장).
+- **share-buttons.js** (2026-10-28) `ShareButtons.sendKakaoText(kakao, text, url, button)`: 글자만 보내는 카카오톡 메시지(text 템플릿, 200자까지). 받는 사람은 사용자가 카카오 화면에서 고른다. strange-oracle은 결제 직후 코드 카드에서 열람 코드를 자기에게 보낼 때 쓴다. 주소(url)에는 입력값·코드를 넣지 않는다. 기존 동작은 바뀌지 않는다.

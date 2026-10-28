@@ -92,6 +92,16 @@
     Kakao.Share.sendDefault(msg);
   }
 
+  // (2026-10-28) 글자만 보내는 카카오톡 메시지(text 템플릿, 최대 200자). 사용자가 받는 사람(나와의 채팅 등)을 고른다.
+  //   k: { jsKey, sdkUrl, integrity } · text: 보낼 글 · url: 버튼 링크(쿼리에 입력값·코드를 넣지 않는다) · button: 버튼 이름(없으면 카카오 기본)
+  async function sendKakaoText(k, text, url, button) {
+    const Kakao = await loadKakao(k);
+    if (!Kakao.isInitialized()) Kakao.init(k.jsKey);
+    const msg = { objectType: "text", text: String(text).slice(0, 200), link: { mobileWebUrl: url, webUrl: url } };
+    if (button) msg.buttonTitle = button;
+    Kakao.Share.sendDefault(msg);
+  }
+
   // opts: { url, root = document, onCopy(ok), kakao: { jsKey, sdkUrl, integrity, label, bigLabel?, title, description, imageUrl, imageWidth?, imageHeight?, button?, content?(slot), onFail() } }
   //   (2026-10-25) content(slot): 누른 자리에 맞춘 { title, description, imageUrl, url } 을 돌려주면 그 값으로 보낸다(빠진 칸은 위 기본값)
   function init(opts) {
@@ -130,5 +140,5 @@
     return { url };
   }
 
-  window.ShareButtons = { init, siteUrl, displayUrl, copyText, reset };
+  window.ShareButtons = { init, siteUrl, displayUrl, copyText, reset, sendKakaoText };
 })();

@@ -168,6 +168,7 @@
   const MAP_SES = "strange-oracle-map"; // (16-6) 이 탭: 초대 ID(join)·참여한 초대(joined)·삭제 코드(del). clearAll이 늘 지운다
   const MAP_KEY = "strange-oracle-mapkey"; // (16-6) 이 기기 localStorage: 주인 열람 키 문자열 하나. "이 기기에서 지도 잊기"로 지운다
   let onClearPay = null; // 결제 화면이 붙으면(test·live) 묻기 회차·코드 목록을 멈추고 비우는 함수
+  let passFromHub = null; // (2026-10-28) 입구 코드 칸에 열람 코드(SOP)를 넣었을 때: 결제 화면과 같은 확인 → 책. 결제 화면이 없으면 null
   // 1~39 로마 숫자 (신탁 번호 I~XXXII)
   const roman = (n) => "X".repeat(Math.floor(n / 10)) + ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n % 10];
   const chapterOf = (room) => CHAPTER_ORDER.indexOf(room) + 1;
@@ -902,8 +903,14 @@
   async function restoreFromCode() {
     if (filledRooms().length) return; // 넣기는 마친 방이 없을 때만
     if (BOOK_ON && window.PayCode.Pass.looksPass(resumeEl.input.value)) {
-      resumeError(T.resume.errors.pass); // (14-4) 열람 코드는 책에서 넣는다. 서버 요청 없음
-      resumeEl.error.dataset.kind = "pass"; // 시험용 표시 (문구 칸이 비어 있어도 어느 안내인지 알 수 있게)
+      // (2026-10-28) 열람 코드도 이 칸에서 바로 연다: 결제 화면의 [열기]와 같은 확인(서버에는 코드만) → 책 목차
+      if (passFromHub) return passFromHub(resumeEl.input.value, (kind) => {
+        resumeError(kind ? PAY.pass.errors[kind] || T.resume.errors.shape : "");
+        if (kind) resumeEl.error.dataset.kind = "pass-" + kind; // 시험용 표시
+        if (kind) resumeEl.input.focus();
+      });
+      resumeError(T.resume.errors.pass); // 결제 화면이 꺼진 경우(옛 안내)
+      resumeEl.error.dataset.kind = "pass";
       return resumeEl.input.focus();
     }
     const r = Resume.decode(resumeEl.input.value);
@@ -5366,6 +5373,7 @@
         });
         codeList.append(li);
       });
+      show(js("code-kakao-row", codeDlg), Boolean(T.kakao.jsKey && T.kakao.sdkUrl));
       show(js("code-double", codeDlg), codes.length > 1);
       codeStatus.textContent = "";
       show(codeStatus, false);
@@ -5373,6 +5381,14 @@
       if (codeDlg.showModal) codeDlg.showModal();
       else codeDlg.setAttribute("open", "");
     }
+    // (2026-10-28) 열람 코드를 카카오톡으로 보내 두기. 본문에만 코드, 링크는 입구 주소(캠페인 값만). 분석에는 단계 이름만
+    js("code-kakao", codeDlg).addEventListener("click", () => {
+      const now = passNow();
+      const codes = (now ? [now] : []).concat(issued.filter((c) => c !== now)).map((c) => window.PayCode.Pass.pretty(c));
+      if (!codes.length) return;
+      track("so_pay", { step: "code_kakao" });
+      ShareButtons.sendKakaoText(T.kakao, fill(PAY.issued.kakaoText || "", { code: codes.join("\n") }), kakaoLink("code"), PAY.issued.kakaoButton).catch(() => toast(T.toast.shareFail));
+    });
     js("code-close", codeDlg).addEventListener("click", () => (codeDlg.close ? codeDlg.close() : codeDlg.removeAttribute("open")));
     js("pay-opened-code", payScr).addEventListener("click", openCodeCard);
     const showCodeBtn = js("book-show-code");
@@ -5409,26 +5425,35 @@
       if (open) pass.input.focus();
     });
     let passBusy = false;
-    const submit = async () => {
-      if (passBusy) return;
-      const r = window.PayCode.Pass.check(pass.input.value);
-      if (r.error) return passMsg(r.error); // receipt(SO1) · resume(SOG) · shape — 서버에 묻지 않는다
+    // 열람 코드 확인 → 책 목차. 결제 화면 [열기]와 입구 코드 칸(passFromHub)이 함께 쓴다. msg(kind): 오류 종류(빈 값 = 지우기)
+    const openPass = async (value, msg, goBtn) => {
+      if (passBusy) return false;
+      const r = window.PayCode.Pass.check(value);
+      if (r.error) return msg(r.error), false; // receipt(SO1) · resume(SOG) · shape — 서버에 묻지 않는다
       passBusy = true;
-      pass.go.disabled = true;
-      passMsg("");
+      if (goBtn) goBtn.disabled = true;
+      msg("");
       const res = await callBook(r.pass, "arch");
       passBusy = false;
-      pass.go.disabled = false;
+      if (goBtn) goBtn.disabled = false;
       if (!res.ok) {
         track("so_pay", { step: "pass_fail" });
-        return passMsg(res.kind); // fail · wait · offline · cancelled(15-3)
+        return msg(res.kind), false; // fail · wait · offline · cancelled(15-3)
       }
       writePass(r.pass);
       window.BOOK_ARCH = res.data;
-      pass.input.value = "";
       track("so_pay", { step: "pass_ok" });
-      toast(PAY.pass.ok || "");
-      go("report");
+      // 지나온 방이 없는 기기: 코드엔 결과가 담기지 않으니(3장) 빈 목차 대신 입구로 — 첫 문에서 생일을 넣으면 방마다 유료까지 바로 열린다
+      const fresh = !filledRooms().length;
+      toast(fresh ? PAY.pass.okFresh || PAY.pass.ok || "" : PAY.pass.ok || "");
+      go(fresh ? "hub" : "report");
+      return true;
+    };
+    const submit = async () => {
+      if (await openPass(pass.input.value, passMsg, pass.go)) pass.input.value = "";
+    };
+    passFromHub = async (value, msg) => {
+      if (await openPass(value, msg, js("resume-go"))) closeResume();
     };
     pass.go.addEventListener("click", submit);
     pass.input.addEventListener("keydown", (e) => {
@@ -5747,7 +5772,7 @@
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
     so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail", "consent", "logout", "erase"], mode: ["restore", "link", "forget", "login"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
-    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
@@ -5759,7 +5784,7 @@
       utm_source: ["instagram", "tiktok", "kakao", "x", "google"],
       utm_medium: ["paid_social", "organic", "share", "cpc"],
       utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "x_profile", "gads_main", "kakao_share"],
-      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
+      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
     },
     ignore: ["fbclid", "ttclid"],
   };
