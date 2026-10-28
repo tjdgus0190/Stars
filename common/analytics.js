@@ -22,7 +22,7 @@
     const out = {};
     for (const [k, v] of Object.entries(props || {})) {
       const list = Object.prototype.hasOwnProperty.call(allowed, k) ? allowed[k] : null;
-      if (Array.isArray(list) && typeof v === "string" && list.includes(v)) out[k] = v;
+      if (Array.isArray(list) && (typeof v === "string" || (typeof v === "number" && Number.isFinite(v))) && list.includes(v)) out[k] = v; // (2026-10-28) 숫자 값도 허용 목록에 정확히 있을 때만(예: 결제 금액)
     }
     return out;
   }

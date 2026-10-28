@@ -120,8 +120,9 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
     const y = (el) => el.getBoundingClientRect().top + scrollY;
     const secs = [...s.querySelectorAll('.pay-sec')].map(y);
     const buyY = y(s.querySelector('[data-js=pay-buy]'));
-    const order = [...secs, y(s.querySelector('[data-js=pay-agree]')), buyY, y(s.querySelector('[data-js=pass-toggle]')), y(s.querySelector('[data-js=pay-seller]'))];
-    return { n: secs.length, sorted: order.every((v, i) => i === 0 || v > order[i - 1]), items: s.querySelectorAll('[data-js=pay-chapters] li').length,
+    const order = [y(s.querySelector('[data-js=pay-quick]')), y(s.querySelector('[data-js=pay-agree]')), buyY, y(s.querySelector('[data-js=pay-more]')), y(s.querySelector('[data-js=pass-toggle]')), y(s.querySelector('[data-js=pay-seller]'))]; // (2026-10-28) 요약 → 동의 → 책 열기 → 자세한 안내 1~5(접기) → 코드 넣기 → 판매자
+    const inMore = [...s.querySelectorAll('.pay-sec')].every((x) => x.closest('[data-js=pay-more]'));
+    return { n: secs.length, inMore, closed: !s.querySelector('[data-js=pay-more]').open, quick: s.querySelectorAll('[data-js=pay-quick-items] li').length, sorted: order.every((v, i) => i === 0 || v > order[i - 1]), items: s.querySelectorAll('[data-js=pay-chapters] li').length,
       band: s.querySelector('[data-js=pay-test-band]').offsetHeight > 0, buyOff: s.querySelector('[data-js=pay-buy]').getAttribute('aria-disabled') === 'true',
       empty: !s.querySelector('[data-js=pay-store-empty]').classList.contains('is-hidden'), wide: document.documentElement.scrollWidth <= 360,
       seller: s.querySelectorAll('.pay-seller__row:not(.is-hidden)').length, legal: s.querySelectorAll('.pay-seller__legal a').length,
@@ -129,7 +130,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
       old: !!s.querySelector('[data-js=pay-price-unit], [data-js=pay-store-name]'),
       names: [...s.querySelectorAll('[data-js=pay-chapters] li')].map((li) => li.firstElementChild.firstChild.textContent), news: [...s.querySelectorAll('[data-js=pay-chapters] li.pay-list__item--new')].map((li) => li.firstElementChild.firstChild.textContent + '|' + (li.querySelector('.pay-list__new') || {}).textContent) };
   })()`);
-  check("A2 1 받는 것(유료 13장: 2026-10-25 만신의 장도 유료, 20단계 2027년의 흐름 더함)→2 가격→3 결제 방법·판매자→4 열람 방법→5 환불→6 동의→7 결제하기→8 코드 넣기→판매자 정보 줄(아래) 순서", lay.n === 5 && lay.sorted && lay.items === 13 && lay.names[0].includes(await ev("TEXT.rooms.saju.name")), JSON.stringify(lay));
+  check("A2 (2026-10-28) 위쪽 요약(받는 것 세 줄·가격·7일 환불) → 동의 → 책 열기 → 자세한 안내 1~5(받는 것 13장·가격·결제 방법·판매자·열람·환불, 접힌 채) → 코드 넣기 → 판매자 정보 줄 순서", lay.n === 5 && lay.inMore && lay.closed && lay.quick === 3 && lay.sorted && lay.items === 13 && lay.names[0].includes(await ev("TEXT.rooms.saju.name")), JSON.stringify(lay));
   // (18-9, 기대값 변경) 새로 더해진 장 알약은 인연의 장 → 새 장. 새 장 줄은 방 장 7줄 바로 뒤(제2부 맨 앞), 인연의 장은 그대로 시기별 흐름 다음(관심사 없음). (2026-10-25) 만신의 장이 받는 것에 들어와 방 장이 7줄 → 순번 +1
   const cxName = await ev("TEXT.book.parts.cross"), rmLast = await ev("TEXT.topbar.room.replace('{num}', 'Ⅶ').replace('{name}', TEXT.rooms.sibyl.name)");
   check("18-9 받는 것: 새 장 줄은 방 장 바로 뒤·시기별 흐름 앞, 그 줄 하나만 .pay-list__item--new + 알약 · 2027년의 흐름은 시기별 흐름 다음, 인연의 장은 그 다음(20단계)", lay.names.indexOf(cxName) === 7 && lay.names.indexOf(await ev("TEXT.book.parts.timeline")) === 8 && lay.names.indexOf(await ev("TEXT.book.parts.year")) === 9 && lay.names.indexOf(await ev("TEXT.book.parts.yeon")) === 10 && lay.news.length === 1 && lay.news[0].split("|")[0] === cxName && lay.news[0].split("|")[1].length > 0, JSON.stringify({ names: lay.names, news: lay.news, rmLast }));

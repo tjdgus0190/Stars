@@ -5742,3 +5742,40 @@ s.was { margin-right: 2px; font-weight: 500; opacity: 0.62; text-decoration-thic
 .pay-dock__price s.was { font-size: 12px; }
 .was-pair { white-space: nowrap; }
 .room-rest__buy s.was, .pay-buy s.was, .btn s.was { font-size: 0.8em; }
+
+/* ── (2026-10-28) 브랜드: 주인의 봉인 · 말끝 한 줄 / 결과 카드 아래 잠긴 한 대목 / 결제 화면 위쪽 요약 ── */
+.seal { width: 56px; height: 56px; display: block; }
+.seal__wax { fill: oklch(0.42 0.12 32); stroke: oklch(0.32 0.1 30); stroke-width: 1; }
+.seal__rim { fill: none; stroke: oklch(0.82 0.1 82 / 0.75); stroke-width: 1.4; }
+.seal__door { fill: none; stroke: oklch(0.9 0.09 85); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.room-rest__seal { display: flex; justify-content: center; margin: 0 0 var(--space-2); filter: drop-shadow(0 4px 10px oklch(0 0 0 / 0.5)); }
+.room-rest__owner { margin: var(--space-4) 0 0; text-align: center; font-family: var(--font-serif); font-size: var(--fs-sm); font-style: italic; line-height: 1.6; color: oklch(0.82 0.06 80); word-break: keep-all; }
+.room-peek { margin: var(--space-4) 0 0; padding: 16px 16px 12px; border-radius: 14px; border: 1px solid oklch(0.68 0.16 28 / 0.55);
+  background: linear-gradient(180deg, oklch(0.25 0.06 25 / 0.55), oklch(0.16 0.04 285 / 0.55)); }
+.room-peek__label { margin: 0; font-size: var(--fs-xs); letter-spacing: 0.06em; color: oklch(0.78 0.13 30); }
+.room-peek__line { margin: 8px 0 10px; font-family: var(--font-serif); font-size: 19px; font-weight: 700; line-height: 1.5; color: var(--c-text-strong, #fff); word-break: keep-all; }
+.room-peek .strike__blur { margin-top: 6px; }
+.room-peek__more { display: block; margin: 8px auto 0; min-height: var(--tap-min, 44px); color: oklch(0.86 0.09 85); }
+.pay-quick { position: relative; margin: var(--space-4) 0 0; padding: 22px 18px 18px; border-radius: 16px; border: 1px solid oklch(0.82 0.1 82 / 0.5);
+  background: radial-gradient(120% 100% at 50% 0%, oklch(0.82 0.1 82 / 0.12), oklch(0.82 0.1 82 / 0.03) 70%); text-align: center; }
+.pay-quick__seal { display: flex; justify-content: center; margin: -4px 0 6px; }
+.pay-quick__title { margin: 0; font-family: var(--font-serif); font-size: 20px; color: oklch(0.92 0.09 85); }
+.pay-quick__items { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.pay-quick__item { font-size: var(--fs-sm); line-height: 1.5; color: var(--c-text); word-break: keep-all; }
+.pay-quick__item::before { content: "✦ "; color: oklch(0.82 0.1 82); }
+.pay-quick__vol { margin: 10px 0 0; font-size: var(--fs-xs); color: var(--c-text-muted); }
+.pay-quick__price { margin: 12px 0 0; font-size: 26px; font-weight: 800; color: oklch(0.92 0.1 85); }
+.pay-quick__refund { margin: 6px 0 0; font-size: var(--fs-sm); font-weight: 700; color: var(--c-text); }
+.pay-quick + .pay-act { margin-top: var(--space-4); }
+.pay-more { margin: var(--space-5, 20px) 0 0; border-top: 1px solid oklch(1 0 0 / 0.12); padding-top: var(--space-3); }
+.pay-more__toggle { cursor: pointer; min-height: var(--tap-min, 44px); display: flex; align-items: center; justify-content: center; font-size: var(--fs-sm); color: var(--c-text-muted); text-decoration: underline; text-underline-offset: 3px; }
+.pay-more__toggle::-webkit-details-marker { display: none; }
+
+/* ── (2026-10-28) 구형 브라우저(oklch 미지원: 삼성 인터넷 21 이하 등) 대비: 밤 바탕·밝은 글자·금색 버튼만은 보이게 ── */
+@supports not (color: oklch(0 0 0)) {
+  :root, :root[data-theme] { --c-bg: #1b1530; --c-bg-deep: #140f24; --c-text: #ece6da; --c-text-strong: #fffaf0; --c-text-muted: #b9b0c9; --accent: #e3b866; --gold: #e3b866; }
+  html, body { background: #140f24; color: #ece6da; }
+  .btn--primary, .room-rest__buy, .pay-buy, .pay-dock__btn { background: linear-gradient(100deg, #c8954a, #f2d58f 50%, #c98d43); color: #2a1d10; }
+  .pay-dock__next { background: #241b3a; border-color: #d9b46a; color: #ece6da; }
+  a, .text-link { color: #e3c27f; }
+}

@@ -153,6 +153,7 @@ Analytics.track("so_result", { room: "rune", archetype: "warrior" }); // 보낸 
 ```
 - config: `send_page_view:false`, `page_location`은 origin+pathname(`?`·`#` 없음), `allow_google_signals:false`, `allow_ad_personalization_signals:false`. config는 init 한 번뿐(화면 이동 때 다시 부르지 않음).
 - 값은 목록 안의 문자열만 지나간다 → 이름·생일·질문·코드 같은 입력값은 실릴 수 없다. 세부 결과 번호도 목록에 넣지 않는다.
+  - (2026-10-28) 숫자 값도 목록에 **정확히** 있을 때만 지나간다(예: strange-oracle의 GA4 `purchase` `value: [4900, 9900]`, `currency: ["KRW"]`). 쓰는 제품: strange-oracle 하나(확인함). 결제번호·코드 같은 값은 여전히 넣지 않는다.
 - GA4 '향상된 측정'은 운영자가 데이터 스트림 설정에서 끈다(코드만으로 막히는지 미확인).
 - 빈 ID: gtag.js를 불러오지 않고 track은 null. 주소에 `?`가 있는 동안: init·track 모두 아무것도 안 함.
 - 캠페인 구분(utm, 2026-10-17): 제품은 시작할 때 `location.search`를 따로 받아 두고(`bootSearch`) 주소창의 query를 지운 뒤 init에 `utm.search`로 넘긴다.

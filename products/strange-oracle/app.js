@@ -3231,6 +3231,7 @@
   }
   function renderRest(scr) {
     renderRestBox(scr);
+    if (scr && scr.dataset.room) renderPeek(scr, scr.dataset.room, js("room-rest", scr));
     if (scr && screens[currentName] === scr) updateDock();
   }
   // (2026-10-27 운영자) 겹침: 이 방까지 지난 방들의 원형(방마다 무료로 보이는 원형)을 세어, 가장 많이 겹친 원형과 그 수. 브라우저 안 계산
@@ -3281,6 +3282,42 @@
     d.append(pr, rmk("p", "season__line", fill(S.line || "", { price: comma(PAY.amount) })), rmk("p", "season__after", fill(S.after || "", { regular: comma(PAY.regular) })));
     return d;
   }
+  // (2026-10-28 브랜드) 주인의 봉인: 밀랍(가장자리가 고르지 않은 원) + 문 문장. 주인의 유일한 서명
+  const SEAL_SVG = (() => {
+    const pts = [];
+    for (let i = 0; i < 28; i++) {
+      const a = (i / 28) * Math.PI * 2, r = i % 2 ? 27.2 : 29.4;
+      pts.push(`${(32 + r * Math.cos(a)).toFixed(1)} ${(32 + r * Math.sin(a)).toFixed(1)}`);
+    }
+    return `<svg class="seal" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="seal__wax" d="M${pts.join("L")}Z"/><circle class="seal__rim" cx="32" cy="32" r="21"/><path class="seal__door" d="M25 43V31a7 7 0 0 1 14 0v12ZM21.5 43h21M32 24v19"/></svg>`;
+  })();
+  // (2026-10-28) 결과 카드 바로 아래 잠긴 한 대목: 직격 첫 마디(공개 strikeTease) + 흐린 두 줄 + 아래 잠긴 칸으로. 잠기지 않았으면 지운다
+  function renderPeek(scr, room, box) {
+    const slot = js("share-kakao-slot", scr);
+    let peek = js("room-peek", scr);
+    const pe = box && box.dataset.state === "locked" ? restEntry(room) : null;
+    const tease = pe && typeof pe.strikeTease === "string" ? strip(pe.strikeTease) : "";
+    if (!tease || !slot || !RT.peek) {
+      if (peek) peek.remove();
+      return;
+    }
+    if (!peek) {
+      peek = rmk("section", "room-peek");
+      peek.dataset.js = "room-peek";
+      slot.after(peek);
+    }
+    peek.textContent = "";
+    peek.append(rmk("p", "room-peek__label", RT.peek.label || ""), rmk("p", "room-peek__line", tease));
+    for (let i = 0; i < 2; i++) {
+      const bar = rmk("span", "strike__blur");
+      bar.setAttribute("aria-hidden", "true");
+      peek.append(bar);
+    }
+    const more = rmk("button", "text-link room-peek__more", RT.peek.more || "");
+    more.type = "button";
+    more.addEventListener("click", () => box.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }));
+    peek.append(more);
+  }
   function renderRestBox(scr) {
     const room = scr && scr.dataset.room;
     if (!BOOK_ON || !CHAPTER_ORDER.includes(room) || !isDone(room)) return;
@@ -3318,6 +3355,12 @@
       const tt = (x) => (x && x.title ? strip(x.title) : "");
       const ov = overlapUpTo(room);
       $(".room-rest__title", box).textContent = (tier === "mini" ? RT.title : RT.titleLocked) || RT.title || "";
+      { // (2026-10-28 브랜드) 주인의 봉인 + 안내자의 말끝 한 줄(주인은 얼굴 없이 흔적으로만)
+        const sealBox = rmk("div", "room-rest__seal");
+        sealBox.innerHTML = SEAL_SVG;
+        $(".room-rest__title", box).before(sealBox);
+        if (RT.owner && RT.owner[room]) box.append(rmk("p", "room-rest__owner", RT.owner[room]));
+      }
       if (tier === "big" && RT.big && ov) {
         // 첫 겹침(또는 세 방째)의 큰 머리말: 실제로 센 수
         const head = rmk("div", "room-rest__moment");
@@ -5017,11 +5060,18 @@
     enter.deeper = () => {
       BX.payList(payScr, payFrom); // (18단계) 받는 것 목록(목차와 같은 순서)·미리보기로 돌아가기
       setPriced(js("pay-price", payScr), PAY.price.text || "");
-      { // (2026-10-27) 첫 계절의 값: 가격 줄 아래에 한 번만
-        const old = js("season", payScr);
+      { // (2026-10-28) 위쪽 요약: 받는 것 세 줄 · 분량 · 가격(첫 계절이면 줄 그은 정가) · 7일 환불. 자세한 1~5는 아래 접기
+        const q = PAY.quick || {};
+        js("pay-quick", payScr).querySelector(".pay-quick__seal").innerHTML = SEAL_SVG;
+        const ul = js("pay-quick-items", payScr);
+        ul.textContent = "";
+        (q.items || []).forEach((t) => ul.append(rmk("li", "pay-quick__item", t)));
+        js("pay-quick-vol", payScr).textContent = fill(q.volume || "", { total: js("pay-total", payScr).textContent });
+        setPriced(js("pay-quick-price", payScr), PAY.price.text || "");
+        const old = js("season", payScr); // 첫 계절의 값: 요약 가격 줄 아래에 한 번만
         if (old) old.remove();
         const sb = seasonBlock();
-        if (sb) js("pay-price", payScr).after(sb);
+        if (sb) js("pay-quick-price", payScr).after(sb);
       }
       show(js("pay-refund-link", payScr), false); // legal/refund.html은 지금 배포 폴더에서 빠진다(build-dist) → 본문 링크 숨김. 결제 문단은 G4
       act.classList.toggle("is-opened", Boolean(passNow())); // (검수 권장 4) 이 탭에서 책이 이미 열려 있으면 결제 버튼 대신 안내
@@ -5278,6 +5328,7 @@
       issued = fresh.concat(issued.filter((c) => !fresh.includes(c)));
       writePass(fresh[0]);
       track("so_pay", { step: "done" });
+      track("purchase", { value: Number(PAY.amount), currency: "KRW" }); // (2026-10-28) GA4 권장 구매 이벤트: 금액·통화만(결제번호·코드 없음, 6장)
       coverNext = null;
       const back = takePayRoom(); // (22단계) 방에서 결제를 시작했으면 그 방 결과로(나머지 이야기가 바로 열림)
       if (back) ensureRoom(back).then(() => go(roomTarget(back)), () => go("report"));
@@ -5689,7 +5740,8 @@
     so_result: { room: CHAPTER_ORDER, archetype: ARCHETYPES },
     so_story: { step: ["3of6", "6of6"] },
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
-    so_follow: { from: ["result", "story"] }, // (2026-10-27) 인스타그램 따라오기 링크 누름: 어느 화면에서인지만
+    so_follow: { from: ["result", "story"] },
+    purchase: { value: [Number(PAY.amount), Number(PAY.regular || PAY.amount)], currency: ["KRW"] }, // (2026-10-28) GA4 구매(매출 보고서용): 지금 판매 값·정가만 // (2026-10-27) 인스타그램 따라오기 링크 누름: 어느 화면에서인지만
     so_next: { room: CHAPTER_ORDER, from: ["dock", "locked"] }, // (2026-10-27) 다음 방을 떠 있는 버튼·잠긴 칸 버튼으로 열었을 때(아래 문 버튼은 so_room_view로 충분)
     so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
