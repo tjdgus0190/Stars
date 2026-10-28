@@ -2506,7 +2506,7 @@
   const BELL_MAX_X = 140, BELL_MAX_Y = 110;
   function bellPaint() {
     bellBody.style.translate = `${bp.x.toFixed(1)}px ${bp.y.toFixed(1)}px`;
-    bellBody.style.rotate = `${bp.ang.toFixed(1)}deg`;
+    bellBody.style.rotate = `${(20 * Math.tanh(bp.ang / 20)).toFixed(1)}deg`; // 끝에서 딱 막히지 않고 부드럽게 ±20° 안으로
     bellBtn.style.setProperty("--bx", `${bp.x.toFixed(1)}px`);
     bellBtn.style.setProperty("--by", `${bp.y.toFixed(1)}px`);
   }
@@ -2517,8 +2517,9 @@
     bp.x = nx;
     bp.y = ny;
     bp.vx = vx;
-    bp.av += -0.09 * bp.ang - 0.1 * bp.av - 2.2 * ax; // 매달린 방울: 손이 가속하는 반대쪽으로 출렁
-    bp.ang = Math.max(-75, Math.min(75, bp.ang + bp.av));
+    // 무거운 놋방울: 손이 가속하는 반대쪽으로 살짝 기울고 곧 가라앉는다 (2026-10-28 운영자: 너무 출렁여 우스움 → 보이는 기울기 ±20°, 감쇠 크게)
+    bp.av += -0.16 * bp.ang - 0.32 * bp.av - 0.7 * ax;
+    bp.ang = Math.max(-40, Math.min(40, bp.ang + bp.av));
     bellPaint();
     const still = !held && Math.abs(bp.x) < 0.3 && Math.abs(bp.y) < 0.3 && Math.abs(bp.ang) < 0.2 && Math.abs(bp.av) < 0.05;
     if (still) {
