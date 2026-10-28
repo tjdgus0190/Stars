@@ -1,5 +1,5 @@
 // 낯선 점술관 — 함수 auth-sweep (Netlify 예약 함수, 23단계 결정 135). 하루 한 번 지난 로그인 표·세션과 마지막 활동 뒤 1년 지난 카카오 기록을 지운다.
-// 로직은 netlify/lib/auth.js sweep(). 주소 없음(예약 실행만).
+// (2026-10-28) 열람 코드에 담아 둔 결과(keep/)도 마지막 저장 뒤 1년이면 지운다. 로직은 netlify/lib/auth.js sweep(). 주소 없음(예약 실행만).
 import { getStore } from "@netlify/blobs";
 import Auth from "../lib/auth.js";
 import Pay from "../lib/pay.js";

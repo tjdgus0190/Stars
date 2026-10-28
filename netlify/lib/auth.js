@@ -283,10 +283,10 @@ async function account(path, body, env, store, now) {
 // 하루 한 번(함수 auth-sweep): 지난 표·세션·1년 지난 기록 지우기. list = 저장소의 prefix 목록 함수(키 배열)
 async function sweep(store, list, now = Date.now()) {
   let n = 0;
-  for (const pre of ["ticket/", "sess/", "kakao/"]) {
+  for (const pre of ["ticket/", "sess/", "kakao/", "keep/"]) { // (2026-10-28) keep/ = 열람 코드에 담아 둔 결과 암호문(함수 book), 마지막 저장 뒤 1년
     for (const k of await list(pre)) {
       const r = await store.get(k);
-      const gone = !r || (pre === "kakao/" ? !r.at || Date.parse(r.at) + KEEP_MS < now : !(r.exp > now));
+      const gone = !r || (pre === "kakao/" || pre === "keep/" ? !r.at || Date.parse(r.at) + KEEP_MS < now : !(r.exp > now));
       if (gone) {
         await store.del(k);
         n++;

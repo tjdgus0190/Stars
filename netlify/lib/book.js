@@ -11,6 +11,10 @@
 // 틀린 코드 반복: 이 함수 인스턴스 메모리에서 접속 IP별로 10분 동안 틀린 횟수를 세고, 10회를 넘으면 그 10분이 끝날 때까지 429.
 //   IP는 메모리의 Map 키로만 쓰고 저장·기록하지 않는다(인스턴스가 바뀌면 사라짐). 개인정보처리방침 결제 문단에 적을 것(copywriter F5).
 // 모든 응답에 Cache-Control: no-store. 요청 본문·코드는 console에 찍지 않는다.
+// (2026-10-28 운영자 결정, CLAUDE.md 3장) file "keep" = 열람 코드에 담아 둔 방 결과(암호문). 본문 { pass, file: "keep" }은 읽기, { pass, file: "keep", put }은 쓰기(put "" = 지우기).
+//   put은 브라우저가 열람 코드로 만든 AES-GCM 암호문(base64url, 최대 KEEP_MAX자)뿐이다. 서버는 열쇠가 없어 읽을 수 없다(코드 원문을 두지 않으므로).
+//   저장: Blobs keep/<HMAC(PASS_SECRET, "keep:"+코드)> = { c, at }. 마지막 저장 뒤 1년이면 읽을 때 지우고, 함수 auth-sweep이 하루 한 번 지운다.
+//   PASS_SECRET이 없거나 저장소가 없으면 keep만 503(나머지 장은 그대로).
 // 유료 파일: products/strange-oracle/api/_paid/book/book-<file>.js — netlify.toml [functions] included_files로 함수 묶음에만 들어간다.
 "use strict";
 const fs = require("fs");
@@ -30,6 +34,10 @@ const ALLOW = Object.freeze(Object.keys(FILES));
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_FAILS = 10;
 const MAX_BODY = 512;
+const KEEP_MAX = 300; // 암호문 base64url 글자 수 상한 (이어가기 코드 한 줄 + IV 12바이트 + 태그 16바이트면 100자 안팎)
+const KEEP_RE = /^[A-Za-z0-9_-]{24,300}$/;
+const KEEP_MS = 365 * 24 * 60 * 60 * 1000;
+const keepKey = (secret, code) => "keep/" + crypto.createHmac("sha256", secret).update("keep:" + normalize(code)).digest("hex");
 const PAID_REL = path.join("products", "strange-oracle", "api", "_paid", "book");
 
 const normalize = (s) => String(s || "").toUpperCase().replace(/[\s-]+/g, "");
@@ -93,8 +101,10 @@ async function handle(req, env, dir, now = Date.now(), store = null) {
   }
   if (!b || typeof b !== "object" || Array.isArray(b)) return send(400, { error: "bad" });
   const keys = Object.keys(b).sort();
-  if (keys.length !== 2 || keys[0] !== "file" || keys[1] !== "pass") return send(400, { error: "bad" }); // 두 칸뿐
-  if (typeof b.file !== "string" || !ALLOW.includes(b.file)) return send(400, { error: "file" }); // 파일을 읽지 않고 거부
+  const keepPut = b.file === "keep" && keys.length === 3 && keys.join() === "file,pass,put";
+  if (!keepPut && (keys.length !== 2 || keys[0] !== "file" || keys[1] !== "pass")) return send(400, { error: "bad" }); // 두 칸뿐 (keep 쓰기만 put 한 칸 더)
+  if (keepPut && (typeof b.put !== "string" || (b.put !== "" && !KEEP_RE.test(b.put)))) return send(400, { error: "bad" });
+  if (typeof b.file !== "string" || (b.file !== "keep" && !ALLOW.includes(b.file))) return send(400, { error: "file" }); // 파일을 읽지 않고 거부
   if (typeof b.pass !== "string") return send(400, { error: "bad" });
   // (2026-10-25 운영자) 만신의 장도 유료로 되돌렸다: 방 결과는 무료, "이 방의 나머지 이야기"부터 결제. 예외 없이 아래 열람 코드 확인을 거친다
   if (!SHAPE.test(normalize(b.pass))) {
@@ -120,6 +130,25 @@ async function handle(req, env, dir, now = Date.now(), store = null) {
       return send(401, { error: "pass" });
     }
   }
+  if (b.file === "keep") {
+    if (!store || !Pay.secretOk(env.PASS_SECRET)) return send(503, { error: "off" });
+    const key = keepKey(env.PASS_SECRET, b.pass);
+    try {
+      if (keepPut) {
+        if (b.put === "") await store.del(key);
+        else await store.set(key, { c: b.put, at: new Date(now).toISOString() });
+        return send(200, { file: "keep", ok: true });
+      }
+      const r = await store.get(key);
+      if (r && (!r.at || Date.parse(r.at) + KEEP_MS < now)) {
+        await store.del(key);
+        return send(200, { file: "keep", data: null });
+      }
+      return send(200, { file: "keep", data: r && typeof r.c === "string" ? r.c : null });
+    } catch (e) {
+      return send(503, { error: "store" });
+    }
+  }
   if (!dir) return send(500, { error: "server" });
   try {
     return send(200, readPaid(dir, b.file));
@@ -135,4 +164,4 @@ async function respond(req, context, openStore, env = process.env) {
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
-module.exports = { respond, handle, normalize, hashOf, ALLOW, FILES, _fails: fails };
+module.exports = { respond, handle, normalize, hashOf, keepKey, ALLOW, FILES, KEEP_MS, KEEP_MAX, _fails: fails };

@@ -188,6 +188,11 @@ test("23 보관 1년: 지난 기록은 읽을 때 없음 · sweep이 지난 표�
   const n = await Auth.sweep(st, list, later);
   assert.ok(n >= 2, "kakao/·sess/ 지움: " + n);
   assert.strictEqual((await list("kakao/")).length + (await list("sess/")).length, 0);
+  // (2026-10-28) keep/(열람 코드에 담은 결과)도 1년 지나면 지우고, 새 기록은 남긴다
+  st.map.set("keep/old", JSON.stringify({ c: "x", at: new Date(Date.now() - Auth.KEEP_MS - 60000).toISOString() }));
+  st.map.set("keep/new", JSON.stringify({ c: "x", at: new Date().toISOString() }));
+  await Auth.sweep(st, list);
+  assert.deepStrictEqual(await list("keep/"), ["keep/new"]);
 });
 test("23 v2 연결 파일: auth.mjs 새 주소 · auth-sweep 예약", () => {
   const m = fs.readFileSync(path.join(ROOT, "netlify", "functions", "auth.mjs"), "utf8");

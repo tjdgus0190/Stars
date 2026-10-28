@@ -153,6 +153,7 @@
   const PAY_MODE = PAY.mode === "test" || PAY.mode === "live" ? PAY.mode : "off";
   const BOOK_ON = PAY_MODE !== "off";
   let syncHubKakao = () => {}; // (22·23단계) 입구 카카오 줄(로그인 전 버튼 / 로그인 뒤 상태). 결제 화면을 붙일 때 바뀐다
+  const onKeep = { saved: () => {} }; // (2026-10-28) 열람 코드에 결과 담기 고리(결제 화면이 붙으면 채운다)
   const onAccount = { saved: () => {}, pass: () => {}, clear: () => {} }; // (23단계) 카카오 계정 저장 고리(로그인·동의 상태는 그쪽에서 확인)
   // (18단계) BX = app-book.js mount 결과, storyBookHook = 나의 이야기 7/7 미리보기 카드
   let BX = null;
@@ -267,6 +268,7 @@
       /* 저장이 막힌 브라우저: 이 화면 안에서만 기억한다 */
     }
     onAccount.saved(); // (23단계) 로그인·저장 동의한 기기면 카카오 계정에도(1.5초 모아서)
+    onKeep.saved(); // (2026-10-28) 열람 코드에 결과 담기에 동의한 탭이면 암호문도 새로(모아서)
   }
   function clearAll() {
     try {
@@ -277,6 +279,7 @@
       window.sessionStorage.removeItem(PASS_KEY); // (14-4) 열람 코드도 "내 정보 지우기"로 함께 지운다
       window.sessionStorage.removeItem("strange-oracle-payroom"); // (22단계) 결제를 시작한 방 이름
       window.sessionStorage.removeItem(PAYREQ_KEY); // (15-2) 결제 확인용 R도 지운다 → 이 탭에서 책이 자동으로 열리지 않음(확인 창 경고 줄)
+      window.sessionStorage.removeItem("strange-oracle-keep"); // (2026-10-28) 열람 코드에 결과 담기 동의 표시(서버 암호문은 카드의 체크를 꺼서 지운다)
       window.sessionStorage.removeItem(MAP_SES); // (16-2의 8) 지도 초대·참여 표시·삭제 코드도 늘 지운다(서버 기록 지우기는 대화 상자의 선택 칸)
     } catch (e) {
       /* 무시 */
@@ -913,32 +916,41 @@
       resumeEl.error.dataset.kind = "pass";
       return resumeEl.input.focus();
     }
-    const r = Resume.decode(resumeEl.input.value);
+    const done = await applyResume(resumeEl.input.value);
+    if (done === "busy") return;
+    if (done === "load") return toast(T.toast.loadFail || "");
+    if (done !== "ok") {
+      track("so_resume", { step: "failed" });
+      resumeError(T.resume.errors[{ receipt: "notResume" }[done] || done]); // paycode 오류 receipt(옛 영수증 코드) → data.js 키 notResume
+      return resumeEl.input.focus();
+    }
+    track("so_resume", { step: "used" });
+    closeResume(); // 입력 칸을 비운다
+    renderHub();
+    window.scrollTo(0, 0);
+  }
+  // 이어가기 코드 → 방문 기록. "ok" | "busy"(다른 복원이 먼저 끝남) | "load"(방 파일 받기 실패) | 오류 종류(shape·order·receipt…)
+  //   (2026-10-28) 열람 코드에 담아 둔 결과(같은 이어가기 코드 모양)를 풀 때도 쓴다
+  async function applyResume(str) {
+    const r = Resume.decode(str);
     if (r.codes) {
       // (14-6) 복원할 방 파일을 모두 받은 뒤 그린다. 받는 동안 로딩 표시(go()와 같은 is-loading)
       body.classList.add("is-loading");
       try {
         await ensureRooms(CHAPTER_ORDER.filter((room) => r.codes[room] != null));
       } catch (e) {
-        return toast(T.toast.loadFail || "");
+        return "load";
       } finally {
         body.classList.remove("is-loading");
       }
-      if (filledRooms().length) return; // 받는 동안 두 번 눌린 경우: 먼저 끝난 복원만 쓴다
+      if (filledRooms().length) return "busy"; // 받는 동안 두 번 눌린 경우: 먼저 끝난 복원만 쓴다
     }
     const visits = r.codes ? visitsFromCodes(r.codes) : null;
-    if (!visits) {
-      track("so_resume", { step: "failed" });
-      resumeError(T.resume.errors[{ receipt: "notResume" }[r.error] || r.error || "shape"]); // paycode 오류 receipt(옛 영수증 코드) → data.js 키 notResume
-      return resumeEl.input.focus();
-    }
+    if (!visits) return r.error || "shape";
     state = { profile: {}, visits, restored: true };
-    track("so_resume", { step: "used" });
     save();
-    closeResume(); // 입력 칸을 비운다
     justRestored = true;
-    renderHub();
-    window.scrollTo(0, 0);
+    return "ok";
   }
   js("resume-go").addEventListener("click", restoreFromCode);
   resumeEl.input.addEventListener("keydown", (e) => {
@@ -2181,8 +2193,6 @@
   const GENDER_OF = { m: "male", f: "female", x: "none" };
   const SAJU_GROUP_KEY = { bigeop: "bigyeop", siksang: "siksang", jaeseong: "jaeseong", gwanseong: "gwanseong", inseong: "inseong" }; // saju.js 묶음 이름 → data-saju.js groups 키
   const SAJU_PILLARS = ["year", "month", "day", "hour"];
-  const SAJU_STEP_MS = 360; // 글자 사이 (design 14단계 3절)
-  const SAJU_INK_MS = 560; // 글자 하나가 번지는 시간
   function mergeSajuText() {
     const X = SAJU.text;
     const I = X.input || {};
@@ -2200,7 +2210,7 @@
     T.saju = {
       intro: X.intro,
       input: Object.assign({}, I, { dateLabel: I.birthLabel, dateWhy: I.birthWhy, genderM: G.male, genderF: G.female, genderX: G.none }),
-      ritual: { bell: rice.bell, bellLabel: rice.bellLabel, hint: rice.hint, hourUnknown: rice.unknownHour, done: rice.done, call: gongsu.call, callSub: gongsu.callSub, go: gongsu.next },
+      ritual: { bell: rice.bell, bellLabel: rice.bellLabel, hint: rice.hint, mid: rice.mid, near: rice.near, sound: rice.sound !== false, hourUnknown: rice.unknownHour, done: rice.done, call: gongsu.call, callSub: gongsu.callSub, go: gongsu.next },
       pillars: { hour: pl[0], day: pl[1], month: pl[2], year: pl[3], unknown: R.unknownCell },
       elements: R.elementNames || {},
       result: Object.assign({}, R, {
@@ -2381,18 +2391,163 @@
     const st = SAJU.stems[c.dayStem];
     js("saju-gongsu-stem", sajuRitual).textContent = st.hanja;
     js("saju-gongsu-call", sajuRitual).textContent = fill(T.saju.ritual.call || "", { name: st.name, stem: st.name });
+    // (2026-10-28) 방울 의식 준비: 올라올 글자(시를 모르면 6자)·구슬·열기 0
+    bellRite.chars = $$(".wonguk__col:not(.is-unknown) .wonguk__char", js("saju-ritual-pillars", sajuRitual));
+    bellRite.chars.forEach((el) => el.classList.remove("is-up"));
+    bellRite.count = 0;
+    bellBeads.textContent = "";
+    bellRite.chars.forEach(() => bellBeads.append(document.createElement("li")));
+    sajuRitual.classList.remove("is-awake", "is-shaking");
+    sajuRitual.style.setProperty("--heat", "0");
+    sajuGuideLine.textContent = strip(T.guides.saju.ritual || "");
   };
-  js("saju-bell", sajuRitual).addEventListener("click", () => {
-    if (sajuRitual.dataset.stage !== "rice" || !sajuCalc) return;
-    buzz(30);
-    sajuRitual.dataset.stage = "rung";
+  // ── (2026-10-28) 방울 의식: 방울을 잡고 좌우로 흔들면(방향이 바뀔 때마다) 또는 누를 때마다 한 번 울리고,
+  //   그때마다 쌀 위에 글자 하나가 붓으로 올라오며 쌀알이 튀고 불티가 난다. 다 올라오면 소반·일주가 빛나고 공수로.
+  //   움직임 줄이기면 한 번에 모두. 소리는 누른 뒤에만(Web Audio로 합성, 파일 없음), data-saju.js sound false면 끔
+  const bellBtn = js("saju-bell", sajuRitual), bellBody = js("saju-bell-body", sajuRitual), bellBeads = js("saju-beads", sajuRitual);
+  const bellSparks = js("saju-sparks", sajuRitual), sajuGuideLine = js("saju-ritual-guide", sajuRitual);
+  const bellRite = { chars: [], count: 0, drag: null, dragged: false };
+  let bellAudio = null;
+  function bellChime(k) {
+    if (!T.saju.ritual.sound) return;
+    try {
+      bellAudio = bellAudio || new (window.AudioContext || window.webkitAudioContext)();
+      const a = bellAudio, t = a.currentTime, f = 1046 * Math.pow(2, (k % 8) / 24);
+      const out = a.createGain();
+      out.gain.setValueAtTime(0.0001, t);
+      out.gain.exponentialRampToValueAtTime(0.09, t + 0.008);
+      out.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+      out.connect(a.destination);
+      [[1, 1], [2.76, 0.45], [5.4, 0.22], [1.006, 0.6]].forEach(([m, g]) => { // 놋방울 같은 어긋난 배음 + 살짝 어긋난 쌍(맥놀이)
+        const o = a.createOscillator(), og = a.createGain();
+        o.type = "sine";
+        o.frequency.value = f * m;
+        og.gain.value = g;
+        o.connect(og).connect(out);
+        o.start(t);
+        o.stop(t + 1.7);
+      });
+    } catch (e) {
+      /* 소리를 낼 수 없는 브라우저: 조용히 */
+    }
+  }
+  function sparkAt(x, y, kind, n) {
+    for (let i = 0; i < n; i++) {
+      const sp = document.createElement("i");
+      const ang = Math.random() * Math.PI * 2, dist = (kind === "rice" ? 26 : 40) + Math.random() * (kind === "rice" ? 34 : 70);
+      sp.className = "spark spark--" + kind;
+      const size = kind === "gold" ? `--s:${(4 + Math.random() * 4).toFixed(1)}px;` : kind === "ring" ? `--grow:${(2.4 + i * 1.4).toFixed(1)};animation-delay:${i * 140}ms;` : "";
+      sp.style.cssText = `${size}--x:${x}px;--y:${y}px;--dx:${(Math.cos(ang) * dist).toFixed(1)}px;--dy:${(kind === "rice" ? -18 - Math.random() * 40 : Math.sin(ang) * dist).toFixed(1)}px;--r:${Math.round(Math.random() * 360)}deg;--t:${Math.round(800 + Math.random() * 700)}ms`;
+      bellSparks.append(sp);
+      setTimeout(() => sp.remove(), 1900);
+    }
+  }
+  function bellRing() {
+    const n = bellRite.chars.length;
+    if (sajuRitual.dataset.stage !== "rice" || !sajuCalc || !n || bellRite.count >= n) return; // 다 올라온 뒤 마무리 전까지 더 울려도 세지 않는다
+    if (reduceMotion) {
+      bellRite.chars.forEach((el) => el.classList.add("is-up"));
+      $$("li", bellBeads).forEach((li) => li.classList.add("is-on"));
+      bellRite.count = n;
+      return bellAwake();
+    }
+    const k = bellRite.count++;
+    buzz(14 + k * 3);
+    bellChime(k);
+    sajuRitual.classList.add("is-shaking");
+    sajuRitual.style.setProperty("--heat", (bellRite.count / n).toFixed(3));
     js("saju-ritual-hint", sajuRitual).textContent = "";
-    const n = sajuCalc.pillars.hour ? 8 : 6;
+    bellBtn.classList.remove("is-hit");
+    void bellBtn.offsetWidth; // 같은 애니메이션을 다시 틀기
+    bellBtn.classList.add("is-hit");
+    const ch = bellRite.chars[k];
+    ch.classList.add("is-up");
+    const li = bellBeads.children[k];
+    if (li) li.classList.add("is-on");
+    const box = bellSparks.getBoundingClientRect(), r = ch.getBoundingClientRect();
+    const cx = r.left + r.width / 2 - box.left, cy = r.top + r.height / 2 - box.top;
+    sparkAt(cx, cy, "ring", 1);
+    sparkAt(cx, cy, "gold", 12 + k * 2);
+    sparkAt(cx, cy, "star", 2 + (k % 2));
+    sparkAt(cx, cy + r.height * 0.3, "rice", 8);
+    const br = bellBody.getBoundingClientRect();
+    sparkAt(br.left + br.width / 2 - box.left, br.top + br.height * 0.7 - box.top, "gold", 5);
+    if (bellRite.count === Math.ceil(n / 2) && T.saju.ritual.mid) sajuGuideLine.textContent = strip(T.saju.ritual.mid);
+    if (bellRite.count === n - 1 && T.saju.ritual.near) sajuGuideLine.textContent = strip(T.saju.ritual.near);
+    if (bellRite.count >= n) later(bellAwake, 520);
+  }
+  // 다 올라옴: 소반·일주가 빛나고 불티가 크게 한 번 → 공수
+  function bellAwake() {
+    if (sajuRitual.dataset.stage !== "rice") return;
+    sajuRitual.dataset.stage = "rung";
+    sajuRitual.classList.add("is-awake");
+    bellRite.drag = null;
+    bellBody.style.removeProperty("--swing");
+    if (T.saju.ritual.done) sajuGuideLine.textContent = strip(T.saju.ritual.done);
     show(js("saju-hour-unknown", sajuRitual), !sajuCalc.pillars.hour);
+    if (!reduceMotion) {
+      buzz([20, 60, 40]);
+      bellChime(12);
+      const box = bellSparks.getBoundingClientRect(), self = $(".wonguk__col.is-self", js("saju-ritual-pillars", sajuRitual));
+      const r = self ? self.getBoundingClientRect() : box;
+      const sx = r.left + r.width / 2 - box.left, sy = r.top + r.height / 2 - box.top;
+      sparkAt(sx, sy, "ring", 3);
+      sparkAt(sx, sy, "gold", 32);
+      sparkAt(sx, sy, "star", 7);
+    }
     later(() => {
       sajuRitual.dataset.stage = "gongsu";
       js("saju-gongsu-go", sajuRitual).focus({ preventScroll: true });
-    }, reduceMotion ? 0 : (n - 1) * SAJU_STEP_MS + SAJU_INK_MS + 200);
+    }, reduceMotion ? 0 : 1500);
+  }
+  // 끌어 흔들기: 방울이 손가락을 따라 기울고, 방향이 바뀔 때(직전 끝점에서 22px 넘게 움직인 뒤) 한 번 울린다
+  bellBtn.addEventListener("pointerdown", (e) => {
+    if (sajuRitual.dataset.stage !== "rice" || reduceMotion) return;
+    bellRite.drag = { x0: e.clientX, last: e.clientX, ext: e.clientX, dir: 0, moved: 0 };
+    bellRite.dragged = false;
+    bellBody.classList.add("is-held");
+    try {
+      bellBtn.setPointerCapture(e.pointerId);
+    } catch (err) {
+      /* 캡처를 못 해도 움직임은 받는다 */
+    }
+  });
+  bellBtn.addEventListener("pointermove", (e) => {
+    const d = bellRite.drag;
+    if (!d) return;
+    const x = e.clientX, step = x - d.last;
+    d.last = x;
+    d.moved += Math.abs(step);
+    bellBody.style.setProperty("--swing", `${Math.max(-38, Math.min(38, (x - d.x0) * 0.7)).toFixed(1)}deg`);
+    const dir = Math.sign(step);
+    if (!dir) return;
+    if (dir === d.dir) {
+      if ((dir > 0 && x > d.ext) || (dir < 0 && x < d.ext)) d.ext = x;
+      return;
+    }
+    if (d.dir && Math.abs(d.ext - (d.turn == null ? d.x0 : d.turn)) > 22) {
+      bellRite.dragged = true;
+      bellRing();
+    }
+    d.turn = d.ext;
+    d.ext = x;
+    d.dir = dir;
+  });
+  const bellRelease = () => {
+    const d = bellRite.drag;
+    bellRite.drag = null;
+    bellBody.classList.remove("is-held");
+    bellBody.style.removeProperty("--swing");
+    if (d && d.moved > 30 && Math.abs(d.ext - (d.turn == null ? d.x0 : d.turn)) > 22) {
+      bellRite.dragged = true; // 한 방향으로 크게 휘두르고 놓아도 한 번
+      bellRing();
+    }
+  };
+  bellBtn.addEventListener("pointerup", bellRelease);
+  bellBtn.addEventListener("pointercancel", bellRelease);
+  bellBtn.addEventListener("click", () => {
+    if (bellRite.dragged) return void (bellRite.dragged = false); // 끌어서 울린 뒤 따라오는 click은 세지 않는다
+    bellRing();
   });
   js("saju-gongsu-go", sajuRitual).addEventListener("click", () => {
     if (!sajuCalc) return;
@@ -5374,6 +5529,7 @@
         codeList.append(li);
       });
       show(js("code-kakao-row", codeDlg), Boolean(T.kakao.jsKey && T.kakao.sdkUrl));
+      syncKeepBox();
       show(js("code-double", codeDlg), codes.length > 1);
       codeStatus.textContent = "";
       show(codeStatus, false);
@@ -5381,6 +5537,130 @@
       if (codeDlg.showModal) codeDlg.showModal();
       else codeDlg.setAttribute("open", "");
     }
+    // ── (2026-10-28 운영자 결정) 열람 코드에 방 결과 담기(선택). 브라우저가 열람 코드로 만든 열쇠(HKDF → AES-GCM)로
+    //   이어가기 코드(결과 번호·주제 키뿐, 이름·생일 원문 없음)를 잠가 암호문만 함수 book(file "keep")에 보낸다. 서버는 코드 원문이 없어 풀 수 없다.
+    //   동의 표시는 이 탭 sessionStorage(KEEP_SES)에만. 만 14세 미만은 담지 않는다. 분석은 단계 이름만
+    const KEEP_SES = "strange-oracle-keep";
+    const KP = PAY.keep || {};
+    const keepOn = () => { try { return sessionStorage.getItem(KEEP_SES) === "1"; } catch (e) { return false; } };
+    const setKeepOn = (on) => { try { if (on) sessionStorage.setItem(KEEP_SES, "1"); else sessionStorage.removeItem(KEEP_SES); } catch (e) { /* 막힌 브라우저 */ } };
+    const keepYoung = () => Boolean(state.profile && state.profile.birth) && BookCore.ageOf(state.profile.birth) < 14;
+    const enc = new TextEncoder();
+    const b64u = (u8) => btoa(String.fromCharCode(...u8)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const unb64u = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+    async function keepKey(pass) {
+      const base = await crypto.subtle.importKey("raw", enc.encode(window.PayCode.Pass.normalize(pass)), "HKDF", false, ["deriveKey"]);
+      return crypto.subtle.deriveKey({ name: "HKDF", hash: "SHA-256", salt: enc.encode("strange-oracle/keep/v1"), info: enc.encode("aes-gcm-256") }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    }
+    async function seal(pass, text) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await keepKey(pass), enc.encode(text)));
+      const out = new Uint8Array(12 + ct.length);
+      out.set(iv);
+      out.set(ct, 12);
+      return b64u(out);
+    }
+    async function unseal(pass, c) {
+      const all = unb64u(c);
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, await keepKey(pass), all.slice(12));
+      return new TextDecoder().decode(pt);
+    }
+    // 함수 book keep: put 없음 = 읽기({ ok, data }), put "" = 지우기, put 암호문 = 쓰기
+    async function callKeep(pass, put) {
+      try {
+        const bodyObj = put === undefined ? { pass, file: "keep" } : { pass, file: "keep", put };
+        const res = await fetch(BOOK_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bodyObj), cache: "no-store", credentials: "omit" });
+        if (res.status !== 200) return { ok: false };
+        const j = await res.json();
+        return j && j.file === "keep" ? { ok: true, data: typeof j.data === "string" ? j.data : null } : { ok: false };
+      } catch (e) {
+        return { ok: false };
+      }
+    }
+    let keepTimer = 0;
+    let keepLast = "";
+    async function keepPush() {
+      const p = passNow();
+      if (!p || !keepOn() || keepYoung() || !filledRooms().length || !window.crypto || !crypto.subtle) return null;
+      let code;
+      try {
+        code = Resume.encode(resumeCodes());
+      } catch (e) {
+        return null; // 순서가 어긋난 옛 기록: 담지 않는다
+      }
+      if (code === keepLast) return true;
+      const r = await callKeep(p, await seal(p, code));
+      if (r.ok) keepLast = code;
+      return r.ok;
+    }
+    onKeep.saved = () => {
+      if (!keepOn()) return;
+      clearTimeout(keepTimer);
+      keepTimer = setTimeout(keepPush, 1500);
+    };
+    // 지나온 방이 없는 기기에서 열람 코드를 넣었을 때: 담아 둔 결과를 풀어 방문 기록으로. 성공하면 true
+    async function keepRestore(p) {
+      if (!window.crypto || !crypto.subtle) return false;
+      const r = await callKeep(p);
+      if (!r.ok || !r.data) return false;
+      let code;
+      try {
+        code = await unseal(p, r.data);
+      } catch (e) {
+        return false;
+      }
+      if ((await applyResume(code)) !== "ok") return false;
+      keepLast = code;
+      setKeepOn(true); // 이 코드에 담기로 한 사람이 다른 기기에서 이어 가는 것: 새로 지나는 방도 계속 담는다
+      track("so_pay", { step: "keep_load" });
+      return true;
+    }
+    // 코드 카드의 동의 칸
+    const keepBox = js("keep", codeDlg), keepAgree = js("keep-agree", codeDlg), keepStatus = js("keep-status", codeDlg);
+    const keepMsg = (t) => {
+      keepStatus.textContent = t || "";
+      show(keepStatus, Boolean(t));
+    };
+    const keepList = js("keep-detail", codeDlg);
+    keepList.textContent = "";
+    (KP.items || []).forEach((t) => keepList.append(Object.assign(document.createElement("li"), { textContent: t })));
+    function syncKeepBox() {
+      const young = keepYoung();
+      show(keepBox, Boolean(window.crypto && crypto.subtle));
+      keepAgree.checked = keepOn() && !young;
+      keepAgree.disabled = young;
+      keepMsg(young ? KP.under14 : keepOn() ? (filledRooms().length ? KP.saved : KP.waiting) : "");
+    }
+    keepAgree.addEventListener("change", async () => {
+      const p = passNow();
+      if (!p) return syncKeepBox();
+      keepAgree.disabled = true;
+      if (keepAgree.checked) {
+        setKeepOn(true);
+        keepLast = "";
+        keepMsg(KP.saving);
+        const ok = await keepPush();
+        track("so_pay", { step: "keep_on" });
+        keepMsg(ok === false ? KP.fail : filledRooms().length ? KP.saved : KP.waiting);
+        if (ok === false) {
+          setKeepOn(false);
+          keepAgree.checked = false;
+        }
+      } else {
+        keepMsg(KP.erasing);
+        const r = await callKeep(p, "");
+        if (r.ok) {
+          setKeepOn(false);
+          keepLast = "";
+          track("so_pay", { step: "keep_off" });
+          keepMsg(KP.erased);
+        } else {
+          keepAgree.checked = true;
+          keepMsg(KP.eraseFail);
+        }
+      }
+      keepAgree.disabled = keepYoung();
+    });
     // (2026-10-28) 열람 코드를 카카오톡으로 보내 두기. 본문에만 코드, 링크는 입구 주소(캠페인 값만). 분석에는 단계 이름만
     js("code-kakao", codeDlg).addEventListener("click", () => {
       const now = passNow();
@@ -5443,9 +5723,13 @@
       writePass(r.pass);
       window.BOOK_ARCH = res.data;
       track("so_pay", { step: "pass_ok" });
-      // 지나온 방이 없는 기기: 코드엔 결과가 담기지 않으니(3장) 빈 목차 대신 입구로 — 첫 문에서 생일을 넣으면 방마다 유료까지 바로 열린다
-      const fresh = !filledRooms().length;
-      toast(fresh ? PAY.pass.okFresh || PAY.pass.ok || "" : PAY.pass.ok || "");
+      // 지나온 방이 없는 기기: (2026-10-28) 이 코드에 담아 둔 결과가 있으면 풀어서 그대로 → 책 목차.
+      //   담아 둔 것이 없거나 풀지 못하면 빈 목차 대신 입구로 — 첫 문에서 생일을 넣으면 방마다 유료까지 바로 열린다
+      let fresh = !filledRooms().length;
+      if (fresh && (await keepRestore(r.pass))) {
+        fresh = false;
+        toast(PAY.keep.restored || PAY.pass.ok || "");
+      } else toast(fresh ? PAY.pass.okFresh || PAY.pass.ok || "" : PAY.pass.ok || "");
       go(fresh ? "hub" : "report");
       return true;
     };
@@ -5772,7 +6056,7 @@
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
     so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail", "consent", "logout", "erase"], mode: ["restore", "link", "forget", "login"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
-    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao", "keep_on", "keep_off", "keep_load"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };

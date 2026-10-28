@@ -62,7 +62,8 @@ function sog1(c) {
       document.querySelector('[data-js=saju-gender-opt][value=${gender}]').click(); })()`);
     await click("[data-js=saju-input-go]");
     const okR = await waitScreen("screen-saju-ritual", 20000);
-    await click("[data-js=saju-bell]");
+    // (2026-10-28) 방울 의식: 누를 때마다 한 글자 → 글자 수(8 또는 6)만큼 누른다
+    for (let i = 0; i < 8 && (await ev("document.querySelector('#screen-saju-ritual').dataset.stage")) === "rice"; i++) await click("[data-js=saju-bell]");
     await waitFor("document.querySelector('#screen-saju-ritual').dataset.stage === 'gongsu'", 6000);
     await click("[data-js=saju-gongsu-go]");
     return okR && (await waitScreen("screen-saju-result"));

@@ -197,6 +197,38 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   const toastTxt = await ev("document.querySelector('[data-js=toast]')?.textContent || ''");
   check("A13 입구 코드 칸 + 맞는 열람 코드 → 오류 없음·열람 표시 저장·지나온 방 없으니 입구에 남고 안내 한 줄(okFresh)", hk2 === "" && (await ss("strange-oracle-pass")) === goodPass && (await active()) === "screen-hub" && toastTxt === (await ev("TEXT.pay.pass.okFresh")), JSON.stringify({ hk2, toastTxt }));
 
+  // (2026-10-28 운영자 결정) 열람 코드에 방 결과 담기: 체크 처음 꺼짐 → 켜면 암호문만 저장 → 새 탭에서 코드만 넣으면 결과까지 → 끄면 즉시 지움
+  await skip(TEST, "rooms=3&to=book&paid=1", "screen-report");
+  const kpPass = await ss("strange-oracle-pass");
+  const kpRooms = await ev("StrangeOracle.filledRooms().join()");
+  await click("[data-js=book-show-code]");
+  await waitFor("!!document.querySelector('[data-js=pay-code-dialog]')?.open");
+  const kp0 = await ev("(() => { const k = document.querySelector('[data-js=keep]'); const a = k.querySelector('[data-js=keep-agree]'); const d = k.querySelector('details'); return { shown: k.offsetHeight > 0, off: !a.checked, near: !!d && a.closest('.keep') === d.closest('.keep'), items: d.querySelectorAll('li').length, closed: !d.open }; })()");
+  check("KP1 코드 카드: 결과 담기 칸 보임 · 체크 처음 꺼짐 · 같은 칸 안 '자세히 보기'(접힘)에 8항목", kp0.shown && kp0.off && kp0.near && kp0.items === 8 && kp0.closed, JSON.stringify(kp0));
+  await click("[data-js=keep-agree]");
+  await waitFor("document.querySelector('[data-js=keep-status]').textContent === TEXT.pay.keep.saved", 8000);
+  const dump1 = JSON.stringify(await storeDump());
+  const keepKeys = (dump1.match(/keep\/[0-9a-f]{64}/g) || []);
+  check("KP2 체크 켬 → 저장소에 keep/<해시> 1건, 코드 원문·결과 원문(이어가기 코드)·이름 없음, 동의 표시 sessionStorage", keepKeys.length >= 1 && !dump1.includes(kpPass) && !/SOG2/.test(dump1) && (await ss("strange-oracle-keep")) === "1", JSON.stringify({ keys: keepKeys.length }));
+  await click("[data-js=code-close]");
+  await ev("sessionStorage.clear()");
+  await b.goto(TEST + P);
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'");
+  await click("[data-js=resume-enter-toggle]");
+  await ev(`document.querySelector('[data-js=resume-input]').value = ${JSON.stringify(kpPass)}`);
+  await click("[data-js=resume-go]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-report'", 8000);
+  const kpToast = await ev("document.querySelector('[data-js=toast]')?.textContent || ''");
+  check("KP3 새 탭(지나온 방 없음)에서 입구 칸에 열람 코드만 → 담아 둔 결과를 풀어 같은 방들 + 책 목차 + 안내 한 줄", (await ev("StrangeOracle.filledRooms().join()")) === kpRooms && (await active()) === "screen-report" && kpToast === (await ev("TEXT.pay.keep.restored")), JSON.stringify({ kpRooms, now: await ev("StrangeOracle.filledRooms().join()"), kpToast }));
+  await click("[data-js=book-show-code]");
+  await waitFor("!!document.querySelector('[data-js=pay-code-dialog]')?.open");
+  check("KP4 불러온 탭: 체크가 켜진 채(계속 담김)", await ev("document.querySelector('[data-js=keep-agree]').checked"));
+  await click("[data-js=keep-agree]");
+  await waitFor("document.querySelector('[data-js=keep-status]').textContent === TEXT.pay.keep.erased", 8000);
+  const dump2 = JSON.stringify(await storeDump());
+  check("KP5 체크 끔 → 저장소에서 바로 지움, 동의 표시도 지움", !keepKeys.some((k) => dump2.includes(k)) && (await ss("strange-oracle-keep")) === null);
+  await click("[data-js=code-close]");
+
   // ═══ B. 이동 방식 ═══
   check("B0 결제 전(7방 마침) → 결제 전 화면", await toPay());
   const sdkB = sdkN();
@@ -428,7 +460,9 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   const stBodies = b.log.bodies.filter((x) => /\/api\/pay\/status/.test(x.url));
   check("I2 status 본문은 { r } 한 칸뿐", stBodies.length > 0 && stBodies.every((x) => { try { return Object.keys(JSON.parse(x.body)).join() === "r"; } catch (e) { return false; } }), `${stBodies.length}건`);
   const bkBodies = b.log.bodies.filter((x) => /\/api\/book/.test(x.url));
-  check("I3 book 본문은 pass·file 두 칸뿐", bkBodies.length > 0 && bkBodies.every((x) => { try { const o = JSON.parse(x.body); return Object.keys(o).sort().join() === "file,pass" && PAID.concat("arch").includes(o.file); } catch (e) { return false; } }), `${bkBodies.length}건`);
+  // (2026-10-28) keep(열람 코드에 결과 담기)만 put 한 칸 더: 암호문(base64url) 또는 ""(지우기). 이름·생일·결과 원문 없음
+  const bodyOk = (o) => (Object.keys(o).sort().join() === "file,pass" && PAID.concat("arch", "keep").includes(o.file)) || (o.file === "keep" && Object.keys(o).sort().join() === "file,pass,put" && /^([A-Za-z0-9_-]{24,300})?$/.test(o.put));
+  check("I3 book 본문은 pass·file 두 칸뿐 (keep 쓰기만 put 암호문 한 칸 더)", bkBodies.length > 0 && bkBodies.every((x) => { try { return bodyOk(JSON.parse(x.body)); } catch (e) { return false; } }), `${bkBodies.length}건`);
   const allBodies = b.log.bodies.map((x) => x.url + " " + x.body).join("\n");
   check("I4 시험 입력값(이름·생일·시각·결과 코드)이 모든 요청 URL·본문(결제창으로 간 값 포함)에 0건", !/테스트|%ED%85%8C|1995|14:37|"532"|code=532/.test(allBodies));
   check("I5 console에 R·코드 0건·localStorage 0·쿠키 0", !secrets.some((s) => b.log.console.join("\n").includes(s)) && (await ev("localStorage.length")) === 0 && (await ev("document.cookie")) === "");

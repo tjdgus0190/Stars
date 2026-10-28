@@ -265,6 +265,30 @@ test("다양성 실측 → out/book-variety.txt", () => {
     assert.strictEqual(ok.status, 200);
     assert.strictEqual(ok.json.file, "saju");
   });
+  test("함수 book (2026-10-28 keep): 열람 코드에 담아 둔 결과 암호문 쓰기·읽기·지우기, 1년 지나면 없음, 다른 칸·모양 400", async () => {
+    const store = new MemStore();
+    const a = paidRecord(store, "2001");
+    const C = "A".repeat(20) + "b_-9" + "x".repeat(40);
+    assert.strictEqual((await call({ pass: a.P, file: "keep" }, { store })).json.data, null, "처음엔 없음");
+    const w = await call({ pass: Pass.pretty(a.P), file: "keep", put: C }, { store });
+    assert.strictEqual(w.status, 200);
+    const key = Fn.keepKey(SECRET, a.P);
+    assert.ok(store.map.has(key) && !key.includes(a.P) && !store.map.get(key).includes(a.P), "키·값에 코드 원문 없음");
+    assert.deepStrictEqual(Object.keys(JSON.parse(store.map.get(key))).sort(), ["at", "c"], "값은 암호문·시각뿐");
+    assert.strictEqual((await call({ pass: a.P.toLowerCase(), file: "keep" }, { store })).json.data, C);
+    assert.strictEqual((await call({ pass: a.P, file: "keep" }, { store, now: Date.now() + Fn.KEEP_MS + 60000 })).json.data, null, "1년 지나면 없음");
+    assert.ok(!store.map.has(key), "읽을 때 지움");
+    await call({ pass: a.P, file: "keep", put: C }, { store });
+    assert.strictEqual((await call({ pass: a.P, file: "keep", put: "" }, { store })).status, 200);
+    assert.ok(!store.map.has(key), "put '' = 지우기");
+    for (const put of ["short", "가".repeat(30), "x".repeat(301), 5, null]) assert.strictEqual((await call({ pass: a.P, file: "keep", put }, { store })).status, 400, JSON.stringify(put));
+    assert.strictEqual((await call({ pass: a.P, file: "arch", put: C }, { store })).status, 400, "put은 keep에서만");
+    assert.strictEqual((await call({ pass: a.P, file: "keep", put: C, name: "x" }, { store })).status, 400);
+    assert.strictEqual((await call({ pass: Pass.make(), file: "keep", put: C }, { store: new MemStore() })).status, 401, "결제 안 된 코드");
+    const c = paidRecord(store, "2002", "cancelled");
+    assert.strictEqual((await call({ pass: c.P, file: "keep" }, { store })).status, 403);
+    assert.strictEqual((await call({ pass: CODE, file: "keep" }, { env: { PASS_MODE: "test", BOOK_PASS_HASHES: ENV.BOOK_PASS_HASHES } })).status, 503, "비밀값·저장소 없으면 keep만 503");
+  });
   test("함수 book: 허용 목록 밖 file 400, 두 칸뿐, 405", async () => {
     for (const file of ["../x", "book-ogham", "OGHAM", "ogham.js", "../../../etc/passwd", "", "open", "close", ["ogham"], null])
       assert.strictEqual((await call({ pass: CODE, file })).status, 400, JSON.stringify(file));
