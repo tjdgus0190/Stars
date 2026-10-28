@@ -768,10 +768,6 @@
         <p class="capture__meta" data-js="result-meta"></p>
       </div>
 
-      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
-      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
-      <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
-      <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
 
       <!-- (2026-10-25) 만신의 판정: 일간별 한 줄 + 일상 장면 세 줄 + 긍정 한 줄(data-saju.js stems[].verdict). 없으면(옛 data) 숨김 -->
       <section class="verdict" data-js="saju-verdict" aria-labelledby="saju-verdict-label" hidden>
@@ -868,6 +864,12 @@
           <span class="next-door__name" data-t="rooms.ogham.name">오검의 방</span>
         </button>
       </section>
+      <!-- (2026-10-28 운영자) 공유는 맨 아래로: 카카오톡 보내기(키가 없으면 빈 자리) · 이 카드 저장·공유 -->
+      <div class="result-share-end">
+        <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
+        <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
+        <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
+      </div>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph" viewBox="0 0 40 40"><use href="#icon-saju" /></svg></div>
     </section>
@@ -1034,10 +1036,6 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
-      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
-      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
-      <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
-      <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
         <span class="archetype-line__badge" aria-hidden="true">
@@ -1115,6 +1113,12 @@
           <span class="next-door__name" data-t="rooms.sibyl.name">시빌라 신탁의 방</span>
         </button>
       </section>
+      <!-- (2026-10-28 운영자) 공유는 맨 아래로: 카카오톡 보내기(키가 없으면 빈 자리) · 이 카드 저장·공유 -->
+      <div class="result-share-end">
+        <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
+        <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
+        <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
+      </div>
 
       <div class="page-end" aria-hidden="true"><span>ᛟ</span></div>
 
@@ -1373,10 +1377,6 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
-      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
-      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
-      <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
-      <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
         <span class="archetype-line__badge" aria-hidden="true">
@@ -1461,6 +1461,12 @@
           <span class="next-door__name" data-t="rooms.decan.name">데칸의 방</span>
         </button>
       </section>
+      <!-- (2026-10-28 운영자) 공유는 맨 아래로: 카카오톡 보내기(키가 없으면 빈 자리) · 이 카드 저장·공유 -->
+      <div class="result-share-end">
+        <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
+        <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
+        <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
+      </div>
 
       <div class="page-end" aria-hidden="true"><span>☾</span></div>
 
@@ -1605,10 +1611,6 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
-      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
-      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
-      <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
-      <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
         <span class="archetype-line__badge" aria-hidden="true">
@@ -1699,6 +1701,12 @@
           <span class="next-door__name" data-t="rooms.star.name">베다의 방</span>
         </button>
       </section>
+      <!-- (2026-10-28 운영자) 공유는 맨 아래로: 카카오톡 보내기(키가 없으면 빈 자리) · 이 카드 저장·공유 -->
+      <div class="result-share-end">
+        <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
+        <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
+        <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
+      </div>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></div>
 
@@ -1930,10 +1938,6 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
-      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
-      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
-      <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
-      <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
         <span class="archetype-line__badge" aria-hidden="true">
@@ -2018,6 +2022,12 @@
           <span class="next-door__name" data-t="rooms.tzolkin.name">촐킨의 방</span>
         </button>
       </section>
+      <!-- (2026-10-28 운영자) 공유는 맨 아래로: 카카오톡 보내기(키가 없으면 빈 자리) · 이 카드 저장·공유 -->
+      <div class="result-share-end">
+        <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
+        <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
+        <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
+      </div>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></div>
 
@@ -2194,10 +2204,6 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
-      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
-      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
-      <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
-      <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
         <span class="archetype-line__badge" aria-hidden="true">
@@ -2281,6 +2287,12 @@
           <span class="next-door__name" data-t="rooms.rune.name">룬의 방</span>
         </button>
       </section>
+      <!-- (2026-10-28 운영자) 공유는 맨 아래로: 카카오톡 보내기(키가 없으면 빈 자리) · 이 카드 저장·공유 -->
+      <div class="result-share-end">
+        <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
+        <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
+        <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
+      </div>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></div>
 
@@ -2419,10 +2431,6 @@
       </div>
 
       <!-- (8단계, U6) 주 공유는 카드 바로 아래 이것 하나 -->
-      <!-- (2026-10-25) 카카오톡 공유를 결과 카드 바로 아래 큰 노란 버튼으로. 키가 없으면 빈 자리(:empty로 숨김) -->
-      <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
-      <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
-      <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
 
       <aside class="archetype-line archetype-line--top" data-js="result-archetype">
         <span class="archetype-line__badge" aria-hidden="true">
@@ -2513,6 +2521,12 @@
           <span class="next-door__name" data-t="result.nextDoor.finaleName">나의 이야기</span>
         </button>
       </section>
+      <!-- (2026-10-28 운영자) 공유는 맨 아래로: 카카오톡 보내기(키가 없으면 빈 자리) · 이 카드 저장·공유 -->
+      <div class="result-share-end">
+        <div class="kakao-share" data-js="share-kakao-slot" data-variant="big"></div>
+        <button class="btn btn--secondary capture-share" type="button" data-js="result-share-top" data-t="result.shareTop">이 카드 저장 · 공유</button>
+        <p class="story-hint" data-t="result.storyHint">인스타 스토리에 딱 맞는 크기예요. 친구를 태그하면 서로 결과를 비교해 볼 수 있어요.</p>
+      </div>
 
       <div class="page-end" aria-hidden="true"><svg class="page-end__glyph page-end__glyph--icon" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></div>
 

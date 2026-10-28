@@ -5799,12 +5799,6 @@ s.was { margin-right: 2px; font-weight: 500; opacity: 0.62; text-decoration-thic
 .wax-seal__door { fill: none; stroke: oklch(0.9 0.09 85); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .room-rest__seal { display: flex; justify-content: center; margin: 0 0 var(--space-2); filter: drop-shadow(0 4px 10px oklch(0 0 0 / 0.5)); }
 .room-rest__owner { margin: var(--space-4) 0 0; text-align: center; font-family: var(--font-serif); font-size: var(--fs-sm); font-style: italic; line-height: 1.6; color: oklch(0.82 0.06 80); word-break: keep-all; }
-.room-peek { margin: var(--space-4) 0 0; padding: 16px 16px 12px; border-radius: 14px; border: 1px solid oklch(0.68 0.16 28 / 0.55);
-  background: linear-gradient(180deg, oklch(0.25 0.06 25 / 0.55), oklch(0.16 0.04 285 / 0.55)); }
-.room-peek__label { margin: 0; font-size: var(--fs-xs); letter-spacing: 0.06em; color: oklch(0.78 0.13 30); }
-.room-peek__line { margin: 8px 0 10px; font-family: var(--font-serif); font-size: 19px; font-weight: 700; line-height: 1.5; color: var(--c-text-strong, #fff); word-break: keep-all; }
-.room-peek .strike__blur { margin-top: 6px; }
-.room-peek__more { display: block; margin: 8px auto 0; min-height: var(--tap-min, 44px); color: oklch(0.86 0.09 85); }
 .pay-quick { position: relative; margin: var(--space-4) 0 0; padding: 22px 18px 18px; border-radius: 16px; border: 1px solid oklch(0.82 0.1 82 / 0.5);
   background: radial-gradient(120% 100% at 50% 0%, oklch(0.82 0.1 82 / 0.12), oklch(0.82 0.1 82 / 0.03) 70%); text-align: center; }
 .pay-quick__seal { display: flex; justify-content: center; margin: -4px 0 6px; }
@@ -5840,3 +5834,8 @@ s.was { margin-right: 2px; font-weight: 500; opacity: 0.62; text-decoration-thic
 .keep__more summary { min-height: 32px; display: flex; align-items: center; cursor: pointer; color: oklch(0.86 0.09 85); text-decoration: underline; text-underline-offset: 3px; }
 .keep__list { margin: 6px 0 0; padding-left: 1.1em; display: grid; gap: 4px; line-height: 1.55; word-break: keep-all; }
 .keep__status { margin: 8px 0 0 30px; font-size: var(--fs-xs); color: oklch(0.86 0.09 85); }
+
+/* (2026-10-28 운영자) 방 결과의 공유 묶음은 맨 아래(다음 문 뒤): 카카오톡 보내기 · 이 카드 저장·공유 */
+.result-share-end { margin: var(--space-6) 0 0; padding-top: var(--space-5); border-top: 1px solid oklch(0.82 0.1 82 / 0.18); }
+.result-share-end .kakao-share { margin-top: 0; }
+.screen:has(.result-share-end) .result-more [data-js="result-share"] { display: none; } /* 아래 [이 카드 저장 · 공유]와 같은 일이라 중간 글자 링크는 감춘다 */

@@ -3437,7 +3437,6 @@
   }
   function renderRest(scr) {
     renderRestBox(scr);
-    if (scr && scr.dataset.room) renderPeek(scr, scr.dataset.room, js("room-rest", scr));
     if (scr && screens[currentName] === scr) updateDock();
   }
   // (2026-10-27 운영자) 겹침: 이 방까지 지난 방들의 원형(방마다 무료로 보이는 원형)을 세어, 가장 많이 겹친 원형과 그 수. 브라우저 안 계산
@@ -3497,33 +3496,6 @@
     }
     return `<svg class="wax-seal" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="wax-seal__wax" d="M${pts.join("L")}Z"/><circle class="wax-seal__rim" cx="32" cy="32" r="21"/><path class="wax-seal__door" d="M25 43V31a7 7 0 0 1 14 0v12ZM21.5 43h21M32 24v19"/></svg>`;
   })();
-  // (2026-10-28) 결과 카드 바로 아래 잠긴 한 대목: 직격 첫 마디(공개 strikeTease) + 흐린 두 줄 + 아래 잠긴 칸으로. 잠기지 않았으면 지운다
-  function renderPeek(scr, room, box) {
-    const slot = js("share-kakao-slot", scr);
-    let peek = js("room-peek", scr);
-    const pe = box && box.dataset.state === "locked" ? restEntry(room) : null;
-    const tease = pe && typeof pe.strikeTease === "string" ? strip(pe.strikeTease) : "";
-    if (!tease || !slot || !RT.peek) {
-      if (peek) peek.remove();
-      return;
-    }
-    if (!peek) {
-      peek = rmk("section", "room-peek");
-      peek.dataset.js = "room-peek";
-      slot.after(peek);
-    }
-    peek.textContent = "";
-    peek.append(rmk("p", "room-peek__label", RT.peek.label || ""), rmk("p", "room-peek__line", tease));
-    for (let i = 0; i < 2; i++) {
-      const bar = rmk("span", "strike__blur");
-      bar.setAttribute("aria-hidden", "true");
-      peek.append(bar);
-    }
-    const more = rmk("button", "text-link room-peek__more", RT.peek.more || "");
-    more.type = "button";
-    more.addEventListener("click", () => box.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }));
-    peek.append(more);
-  }
   function renderRestBox(scr) {
     const room = scr && scr.dataset.room;
     if (!BOOK_ON || !CHAPTER_ORDER.includes(room) || !isDone(room)) return;
