@@ -5744,10 +5744,10 @@ s.was { margin-right: 2px; font-weight: 500; opacity: 0.62; text-decoration-thic
 .room-rest__buy s.was, .pay-buy s.was, .btn s.was { font-size: 0.8em; }
 
 /* ── (2026-10-28) 브랜드: 주인의 봉인 · 말끝 한 줄 / 결과 카드 아래 잠긴 한 대목 / 결제 화면 위쪽 요약 ── */
-.seal { width: 56px; height: 56px; display: block; }
-.seal__wax { fill: oklch(0.42 0.12 32); stroke: oklch(0.32 0.1 30); stroke-width: 1; }
-.seal__rim { fill: none; stroke: oklch(0.82 0.1 82 / 0.75); stroke-width: 1.4; }
-.seal__door { fill: none; stroke: oklch(0.9 0.09 85); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.wax-seal { width: 56px; height: 56px; display: block; }
+.wax-seal__wax { fill: oklch(0.42 0.12 32); stroke: oklch(0.32 0.1 30); stroke-width: 1; }
+.wax-seal__rim { fill: none; stroke: oklch(0.82 0.1 82 / 0.75); stroke-width: 1.4; }
+.wax-seal__door { fill: none; stroke: oklch(0.9 0.09 85); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .room-rest__seal { display: flex; justify-content: center; margin: 0 0 var(--space-2); filter: drop-shadow(0 4px 10px oklch(0 0 0 / 0.5)); }
 .room-rest__owner { margin: var(--space-4) 0 0; text-align: center; font-family: var(--font-serif); font-size: var(--fs-sm); font-style: italic; line-height: 1.6; color: oklch(0.82 0.06 80); word-break: keep-all; }
 .room-peek { margin: var(--space-4) 0 0; padding: 16px 16px 12px; border-radius: 14px; border: 1px solid oklch(0.68 0.16 28 / 0.55);

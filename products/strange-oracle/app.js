@@ -3289,7 +3289,7 @@
       const a = (i / 28) * Math.PI * 2, r = i % 2 ? 27.2 : 29.4;
       pts.push(`${(32 + r * Math.cos(a)).toFixed(1)} ${(32 + r * Math.sin(a)).toFixed(1)}`);
     }
-    return `<svg class="seal" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="seal__wax" d="M${pts.join("L")}Z"/><circle class="seal__rim" cx="32" cy="32" r="21"/><path class="seal__door" d="M25 43V31a7 7 0 0 1 14 0v12ZM21.5 43h21M32 24v19"/></svg>`;
+    return `<svg class="wax-seal" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="wax-seal__wax" d="M${pts.join("L")}Z"/><circle class="wax-seal__rim" cx="32" cy="32" r="21"/><path class="wax-seal__door" d="M25 43V31a7 7 0 0 1 14 0v12ZM21.5 43h21M32 24v19"/></svg>`;
   })();
   // (2026-10-28) 결과 카드 바로 아래 잠긴 한 대목: 직격 첫 마디(공개 strikeTease) + 흐린 두 줄 + 아래 잠긴 칸으로. 잠기지 않았으면 지운다
   function renderPeek(scr, room, box) {
