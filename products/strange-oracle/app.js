@@ -2482,7 +2482,7 @@
     sajuRitual.dataset.stage = "rung";
     sajuRitual.classList.add("is-awake");
     bellRite.drag = null;
-    bellBody.style.removeProperty("--swing");
+    bellBtn.classList.remove("is-held");
     if (T.saju.ritual.done) sajuGuideLine.textContent = strip(T.saju.ritual.done);
     show(js("saju-hour-unknown", sajuRitual), !sajuCalc.pillars.hour);
     if (!reduceMotion) {
@@ -2500,48 +2500,91 @@
       js("saju-gongsu-go", sajuRitual).focus({ preventScroll: true });
     }, reduceMotion ? 0 : 1500);
   }
-  // 끌어 흔들기: 방울이 손가락을 따라 기울고, 방향이 바뀔 때(직전 끝점에서 22px 넘게 움직인 뒤) 한 번 울린다
+  // 끌어 흔들기 (2026-10-28 고침): 방울이 손가락을 그대로 따라다니고(위치), 매달린 추처럼 움직임 반대로 출렁인다(각도·물리).
+  //   손을 놓으면 제자리로 돌아오며 몇 번 흔들리다 멈춘다. 가로나 세로로 방향이 바뀔 때(그 축으로 22px 넘게 움직인 뒤) 한 번 울린다(0.12초 간격)
+  const bp = { x: 0, y: 0, vx: 0, ang: 0, av: 0, tx: 0, ty: 0, raf: 0, t: 0 };
+  const BELL_MAX_X = 140, BELL_MAX_Y = 110;
+  function bellPaint() {
+    bellBody.style.translate = `${bp.x.toFixed(1)}px ${bp.y.toFixed(1)}px`;
+    bellBody.style.rotate = `${bp.ang.toFixed(1)}deg`;
+    bellBtn.style.setProperty("--bx", `${bp.x.toFixed(1)}px`);
+    bellBtn.style.setProperty("--by", `${bp.y.toFixed(1)}px`);
+  }
+  function bellTick() {
+    const held = Boolean(bellRite.drag);
+    const nx = held ? bp.tx : bp.x + (0 - bp.x) * 0.16, ny = held ? bp.ty : bp.y + (0 - bp.y) * 0.16; // 놓으면 용수철처럼 제자리로
+    const vx = nx - bp.x, ax = vx - bp.vx;
+    bp.x = nx;
+    bp.y = ny;
+    bp.vx = vx;
+    bp.av += -0.09 * bp.ang - 0.1 * bp.av - 2.2 * ax; // 매달린 방울: 손이 가속하는 반대쪽으로 출렁
+    bp.ang = Math.max(-75, Math.min(75, bp.ang + bp.av));
+    bellPaint();
+    const still = !held && Math.abs(bp.x) < 0.3 && Math.abs(bp.y) < 0.3 && Math.abs(bp.ang) < 0.2 && Math.abs(bp.av) < 0.05;
+    if (still) {
+      Object.assign(bp, { x: 0, y: 0, vx: 0, ang: 0, av: 0, raf: 0 });
+      bellBody.style.translate = bellBody.style.rotate = "";
+      bellBtn.style.removeProperty("--bx");
+      bellBtn.style.removeProperty("--by");
+      return;
+    }
+    bp.raf = requestAnimationFrame(bellTick);
+  }
+  const bellLoop = () => {
+    if (!bp.raf) bp.raf = requestAnimationFrame(bellTick);
+  };
   bellBtn.addEventListener("pointerdown", (e) => {
     if (sajuRitual.dataset.stage !== "rice" || reduceMotion) return;
-    bellRite.drag = { x0: e.clientX, last: e.clientX, ext: e.clientX, dir: 0, moved: 0 };
+    const ax = (v) => ({ ext: v, turn: v, dir: 0 });
+    bellRite.drag = { x0: e.clientX - bp.x, y0: e.clientY - bp.y, ax: { x: ax(e.clientX), y: ax(e.clientY) }, moved: 0, lx: e.clientX, ly: e.clientY };
     bellRite.dragged = false;
-    bellBody.classList.add("is-held");
+    bellBtn.classList.add("is-held");
     try {
       bellBtn.setPointerCapture(e.pointerId);
     } catch (err) {
       /* 캡처를 못 해도 움직임은 받는다 */
     }
+    bellLoop();
   });
+  function bellAxis(a, v) {
+    const step = v - a.last;
+    a.last = v;
+    const dir = Math.sign(step);
+    if (!dir) return false;
+    if (dir === a.dir || !a.dir) {
+      if (!a.dir || (dir > 0 ? v > a.ext : v < a.ext)) a.ext = v;
+      a.dir = dir;
+      return false;
+    }
+    const swung = Math.abs(a.ext - a.turn) > 22; // 직전 반환점에서 끝점까지 충분히 흔들었나
+    a.turn = a.ext;
+    a.ext = v;
+    a.dir = dir;
+    return swung;
+  }
   bellBtn.addEventListener("pointermove", (e) => {
     const d = bellRite.drag;
     if (!d) return;
-    const x = e.clientX, step = x - d.last;
-    d.last = x;
-    d.moved += Math.abs(step);
-    bellBody.style.setProperty("--swing", `${Math.max(-38, Math.min(38, (x - d.x0) * 0.7)).toFixed(1)}deg`);
-    const dir = Math.sign(step);
-    if (!dir) return;
-    if (dir === d.dir) {
-      if ((dir > 0 && x > d.ext) || (dir < 0 && x < d.ext)) d.ext = x;
-      return;
-    }
-    if (d.dir && Math.abs(d.ext - (d.turn == null ? d.x0 : d.turn)) > 22) {
+    d.moved += Math.abs(e.clientX - d.lx) + Math.abs(e.clientY - d.ly);
+    d.lx = e.clientX;
+    d.ly = e.clientY;
+    bp.tx = Math.max(-BELL_MAX_X, Math.min(BELL_MAX_X, e.clientX - d.x0));
+    bp.ty = Math.max(-BELL_MAX_Y, Math.min(BELL_MAX_Y, e.clientY - d.y0));
+    if (d.ax.x.last == null) d.ax.x.last = e.clientX;
+    if (d.ax.y.last == null) d.ax.y.last = e.clientY;
+    const hitX = bellAxis(d.ax.x, e.clientX), hitY = bellAxis(d.ax.y, e.clientY);
+    if ((hitX || hitY) && performance.now() - bp.t > 120) {
+      bp.t = performance.now();
       bellRite.dragged = true;
       bellRing();
     }
-    d.turn = d.ext;
-    d.ext = x;
-    d.dir = dir;
   });
   const bellRelease = () => {
     const d = bellRite.drag;
     bellRite.drag = null;
-    bellBody.classList.remove("is-held");
-    bellBody.style.removeProperty("--swing");
-    if (d && d.moved > 30 && Math.abs(d.ext - (d.turn == null ? d.x0 : d.turn)) > 22) {
-      bellRite.dragged = true; // 한 방향으로 크게 휘두르고 놓아도 한 번
-      bellRing();
-    }
+    bellBtn.classList.remove("is-held");
+    if (d && d.moved > 8) bellRite.dragged = true; // 끌기였으면 뒤따르는 click은 세지 않는다
+    bellLoop();
   };
   bellBtn.addEventListener("pointerup", bellRelease);
   bellBtn.addEventListener("pointercancel", bellRelease);

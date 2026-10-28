@@ -4634,12 +4634,13 @@ button.so-far__line:hover .so-far__room b, button.so-far__line:focus-visible .so
 .ritual--saju[data-stage="rung"] .bell__icon { animation: bell-shake 700ms var(--ease-out) 1; }
 .ritual--saju[data-stage="rung"] .bell__ring { animation: bell-ring 1.2s var(--ease-out) 2; }
 /* (2026-10-28) 방울 의식: 손가락을 따라 기우는 몸통(--swing), 울릴 때마다 흔들림·금빛 고리 두 겹, 열기(--heat)만큼 밝아진다 */
-.bell { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.bell { z-index: 4; touch-action: none; user-select: none; -webkit-user-select: none; } /* 잡고 끌면 화면이 스크롤되지 않고 방울이 손가락을 따라온다 */
 .ritual--saju .say--ritual .say__line.ritual__guide { min-height: 4.9em; } /* 만신의 말이 한 줄로 바뀌어도 방울이 손가락 아래에서 움직이지 않게 */
-.bell__body { display: grid; place-items: center; transform-origin: 50% 6%; rotate: var(--swing, 0deg); transition: rotate 380ms cubic-bezier(0.3, 1.6, 0.5, 1); }
-.bell__body.is-held { transition: rotate 60ms linear; }
+.bell__body { display: grid; place-items: center; transform-origin: 50% 6%; will-change: translate, rotate; } /* 위치·기울기는 JS(물리)가 translate·rotate로 */
+.bell__ring { translate: var(--bx, 0px) var(--by, 0px); }
+.bell.is-held { cursor: grabbing; }
 .ritual--saju .bell__icon { filter: drop-shadow(0 0 calc(8px + var(--heat, 0) * 22px) var(--accent-glow)) brightness(calc(1 + var(--heat, 0) * 0.35)); }
-.bell.is-hit .bell__icon { animation: bell-hit 560ms var(--ease-out) 1; }
+.bell.is-hit:not(.is-held) .bell__icon { animation: bell-hit 560ms var(--ease-out) 1; } /* 누를 때만. 잡고 흔들 땐 물리 출렁임이 대신한다 */
 .bell.is-hit .bell__ring { animation: bell-ring 900ms var(--ease-out) 1; border-color: oklch(0.88 0.13 85 / 0.9); border-width: 2px; }
 .bell.is-hit .bell__ring--2 { animation: bell-ring 1.3s var(--ease-out) 120ms 1 both; }
 @keyframes bell-hit { 15% { rotate: -24deg; scale: 1.12; } 40% { rotate: 18deg; } 65% { rotate: -9deg; } 85% { rotate: 4deg; } 100% { rotate: 0deg; scale: 1; } }
