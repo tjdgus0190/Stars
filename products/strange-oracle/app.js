@@ -538,7 +538,10 @@
       if (name === "saju-intro") sajuGateOpen();
       onScreen(name, next); // 화면 이벤트(GA4)
       if (name === "hub" || /-result$/.test(name)) prefetchNext();
-      if (/-result$/.test(name)) renderRest(next); // (22단계) 이 방의 나머지 이야기
+      if (/-result$/.test(name)) {
+        renderLink(next); // (2026-10-29 v6) 방 끝: 이번 결과 → 다음 전통의 시선 + 다음 방 미리보기
+        renderRest(next); // (22단계) 이 방의 나머지 이야기
+      }
       else updateDock(); // (2026-10-25) 방 결과가 아니면 떠 있는 결제 버튼을 숨긴다
     };
     currentName = name; // 전환 중에 다시 불려도 이전 화면 기준으로 기록하지 않게
@@ -1032,7 +1035,13 @@
   const pouch = js("rune-pouch");
   const cloth = js("rune-cloth");
   const stones = jsAll("rune-stone");
-  const setProgress = (p) => cast.style.setProperty("--progress", p.toFixed(3));
+  const runeStep = js("rune-step");
+  const RT_ = () => T.rune.ritual;
+  const setProgress = (p) => {
+    cast.style.setProperty("--progress", p.toFixed(3));
+    if (!rune.casting) runeStep.textContent = fill(rune.holding || p === 0 ? RT_().stepHold : RT_().stepPaused, { n: Math.round(p * 24) });
+  };
+  const stepFlip = () => (runeStep.textContent = rune.flipped < 3 ? fill(RT_().stepFlip, { k: rune.flipped }) : "");
 
   function nornHint(i) {
     const n = T.rune.norns[i];
@@ -1059,29 +1068,38 @@
   function tick(t) {
     const dt = rune.lastT ? t - rune.lastT : 16;
     rune.lastT = t;
-    rune.progress = Math.max(0, Math.min(1, rune.progress + (rune.holding ? dt / HOLD_MS : -dt / (HOLD_MS / 2))));
+    // (2026-10-29 v6) 손을 떼도 고리는 줄지 않는다(처음부터 다시 하지 않게). 누르는 동안만 찬다
+    rune.progress = Math.max(0, Math.min(1, rune.progress + (rune.holding ? dt / HOLD_MS : 0)));
     setProgress(rune.progress);
     if (rune.progress >= 1) return castStones();
-    if (rune.holding || rune.progress > 0) rune.raf = requestAnimationFrame(tick);
+    if (rune.holding) rune.raf = requestAnimationFrame(tick);
     else rune.lastT = 0;
   }
   function startHold(e) {
     if (rune.casting) return;
     e.preventDefault();
-    if (!rune.holding && rune.progress === 0) {
+    if (!rune.holding) {
       rune.lastT = 0;
+      cancelAnimationFrame(rune.raf);
       rune.raf = requestAnimationFrame(tick);
     }
     rune.holding = true;
+    try {
+      if (e.pointerId != null) pouch.setPointerCapture(e.pointerId); // 손가락이 조금 움직여도 누르기가 풀리지 않게
+    } catch (err) {
+      /* 캡처를 못 해도 누르기는 받는다 */
+    }
     pouch.classList.add("is-shaking");
     buzz(30);
   }
   function endHold() {
+    if (!rune.holding) return;
     rune.holding = false;
     pouch.classList.remove("is-shaking");
+    if (!rune.casting) setProgress(rune.progress);
   }
   pouch.addEventListener("pointerdown", startHold);
-  ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => pouch.addEventListener(ev, endHold));
+  ["pointerup", "pointercancel"].forEach((ev) => pouch.addEventListener(ev, endHold));
   pouch.addEventListener("contextmenu", (e) => e.preventDefault());
   pouch.addEventListener("keydown", (e) => {
     if ((e.key === " " || e.key === "Enter") && !e.repeat) startHold(e);
@@ -1115,6 +1133,7 @@
       cloth.classList.add("is-cast");
       stones[0].classList.add("is-next");
       nornHint(0);
+      stepFlip();
       stones[0].focus({ preventScroll: true });
     }, reduceMotion ? 150 : 700);
   }
@@ -1128,6 +1147,7 @@
     rune.flipped += 1;
     stones[rune.flipped]?.classList.add("is-next");
     nornHint(rune.flipped);
+    stepFlip();
     if (rune.flipped === 3) {
       waitResult(screens["rune-ritual"], waitMs("rune", reduceMotion ? 700 : 1600), () => {
         renderRune({ picks: rune.picks, topic: rune.topic }, true);
@@ -1191,6 +1211,85 @@
   // (7단계) 이야기 다리 + 다음 문: 다리 문구(bridges.<방>)와 문 목적지는 마크업에 고정. 여기서는 문 상태와 보조 링크 숫자만
   function renderPassage(scr) {
     js("result-next-door", scr).classList.remove("is-opening");
+  }
+  // ── (2026-10-29 기획 v6) 방 끝의 연결 + 다음 방 미리보기
+  //   연결 문구: 이번 방이 읽은 결과 이름을 짚고, 다음 전통의 시선(link.lensBy)으로 이어 준다. 결과끼리 증명·통합하지 않는다.
+  //     다음 결과를 브라우저에서 미리 셀 수 있으면 원형이 같을 때 '울림', 다를 때 '대조', 셀 수 없으면 '심화' 문형
+  //   미리보기: 다음 방 결과 카드의 첫 문장(key, 공개 데이터)을 한 줄. 문을 열면 같은 문장이 결과 카드에 그대로 나온다.
+  //     셀 수 없는 방(룬·시빌라는 그 자리에서 뽑음, 생일·이름이 없음, 후보가 둘 이상)은 '관점 예고'로 따로 표시한다
+  function predictRoom(room) {
+    const p = state.profile || {};
+    const b = p.birth;
+    try {
+      if (room === "ogham" && p.name && OGHAM) {
+        const r = Calc.ogham(p.name);
+        return r && OGHAM[r.index] ? OGHAM[r.index] : null;
+      }
+      if (room === "star" && b && NAKS && window.Astro) {
+        const c = Astro.birthChart(b.y, b.m, b.d, p.time);
+        return c.candidates.length > 1 ? null : NAKS[c.charts[0].nakshatra] || null;
+      }
+      if (room === "decan" && b && DECANS && window.Astro) {
+        const c = Calc.decan(b.y, b.m, b.d);
+        return !c || c.candidates.length > 1 ? null : DECANS[c.noon.index] || null;
+      }
+      if (room === "tzolkin" && b && TZ_SIGNS) {
+        const c = Calc.tzolkin(b.y, b.m, b.d);
+        return c ? TZ_SIGNS[c.sign] || null : null;
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
+  const firstLine = (html) => {
+    const t = strip(String(html || "")).trim();
+    const one = (t.match(/^.+?[.?!…](?=\s|$)/) || [t])[0];
+    return one.length > 40 ? one.slice(0, 36).trim() + "…" : one;
+  };
+  function resultNameOf(room, scr) {
+    if (room === "rune") {
+      const v = state.visits.rune;
+      const now = v && v.picks && RUNE_BY_CODE[v.picks[1]];
+      return now ? strip(now.name) : "";
+    }
+    return (js("result-title", scr) || {}).textContent || "";
+  }
+  function renderLink(scr) {
+    const room = scr && scr.dataset.room;
+    const L = T.link || {};
+    const i = CHAPTER_ORDER.indexOf(room);
+    const next = CHAPTER_ORDER[i + 1];
+    const passage = js("result-passage", scr);
+    const bridge = js("result-bridge", scr);
+    let card = js("next-peek", scr);
+    if (!passage || !bridge || i < 0) return;
+    if (!next || !L.lensBy) {
+      if (card) card.remove();
+      return; // 마지막 방(시빌라): 다음 방 예고 없이 완주(마크업의 마무리 다리 문장 그대로)
+    }
+    if (!card) {
+      card = rmk("div", "next-peek");
+      card.dataset.js = "next-peek";
+      js("result-next-door", scr).before(card);
+    }
+    const paint = () => {
+      const pred = predictRoom(next);
+      const cur = state.visits[room];
+      const vars = { room: T.rooms[room].name, result: resultNameOf(room, scr), next: T.rooms[next].name, lensBy: L.lensBy[next] || "", num: ROMAN[i + 1] };
+      const kind = !vars.result ? "plain" : !pred ? "deepen" : cur && pred.archetype === cur.archetype ? "echo" : "contrast";
+      bridge.textContent = strip(fill(L[kind] || L.plain || "", vars));
+      bridge.dataset.kind = kind;
+      card.textContent = "";
+      card.dataset.kind = pred ? "preview" : "teaser";
+      card.append(rmk("p", "next-peek__head", fill(pred ? L.previewHead : L.teaserHead, vars)));
+      if (pred) {
+        card.append(rmk("p", "next-peek__line", fill(L.quote || "“{line}”", { line: firstLine(pred.key) })));
+        card.append(rmk("p", "next-peek__sub", L.previewSub || ""));
+      } else card.append(rmk("p", "next-peek__line next-peek__line--teaser", (L.teaser && L.teaser[next]) || ""));
+    };
+    paint();
+    ensureRoom(next).then(paint, () => {}); // 다음 방 파일이 오면 실제 문장으로 다시
   }
   // 다음 문: 문짝이 열리며 그 안에서 다음 방의 상징이 떠오른다(8-3, 약 1.2초). 시빌라(Ⅵ)의 문은 수렴 결말(7-6, 650ms 뒤)
   function openNextDoor(btn) {
@@ -3325,7 +3424,7 @@
     const res = scr && /-result$/.test(currentName) ? scr : null;
     const door = res ? js("result-next-door", res) : null;
     const box = res ? js("room-rest", res) : null;
-    const locked = Boolean(box && box.dataset.state === "locked" && box.dataset.tier !== "mini" && payScr); // (2026-10-27) 작은 칸에서는 결제 모습으로 바뀌지 않는다
+    const locked = Boolean(box && box.dataset.state === "locked" && box.dataset.tier !== "mini" && payScr); // (2026-10-27) 첫 방 작은 칸에서는 결제 모습으로 바뀌지 않는다 (v6: 둘째 방부터는 작은 떠 있는 버튼으로 다시 열 수 있게)
     const on = Boolean(door);
     if (dockIO) dockIO.disconnect();
     dockIO = null;
@@ -3353,7 +3452,7 @@
     js("pay-dock-label", dock).textContent = RT.dock || "";
     setPriced(js("pay-dock-price", dock), RT.dockPrice || "");
     if (!("IntersectionObserver" in window)) return;
-    const buy = locked ? js("room-rest-buy", box) : null;
+    const buy = locked ? js("room-rest-buy", box) || js("room-rest-buy-mini", box) : null;
     const passage = js("result-passage", res);
     const vis = new Map();
     const seen = (el) => Boolean(el && vis.get(el));
@@ -3439,42 +3538,11 @@
     renderRestBox(scr);
     if (scr && screens[currentName] === scr) updateDock();
   }
-  // (2026-10-27 운영자) 겹침: 이 방까지 지난 방들의 원형(방마다 무료로 보이는 원형)을 세어, 가장 많이 겹친 원형과 그 수. 브라우저 안 계산
-  const KO_NUM = ["", "한", "두", "세", "네", "다섯", "여섯", "일곱"];
-  function overlapUpTo(room) {
-    const tags = [];
-    for (const r of CHAPTER_ORDER) {
-      const v = state.visits[r];
-      if (isDone(r) && v && v.archetype && T.archetypes[v.archetype]) tags.push([r, v.archetype]);
-      if (r === room) break;
-    }
-    if (!tags.length) return null;
-    const arch = tallyArchetype(tags);
-    return { arch, count: tags.filter(([, a]) => a === arch).length, rooms: tags.length };
-  }
-  // 결제를 크게 묻는 방: 지난 방을 차례로 보며 처음으로 같은 원형이 둘 이상 된 방. 세 방을 지나도 안 겹치면 세 번째 방. 아직 못 정했으면 null
-  function bigRoom() {
-    let k = 0;
-    for (const r of CHAPTER_ORDER) {
-      if (!isDone(r)) continue;
-      k += 1;
-      const o = overlapUpTo(r);
-      if ((o && o.count >= 2) || k >= 3) return r;
-    }
-    return null;
-  }
+  // (2026-10-29 기획 v6) 결제를 묻는 자리는 방 순서로 정한다: 첫 방 = 작은 칸(mini) / 둘째 방 = 상세 해석서 전체를 한 번 크게 제안(big) /
+  //   셋째~여섯째 = 작은 잠금 칸 + 떠 있는 버튼(again) / 일곱째 = 완주 + 원하면 여는 작은 칸(final). 어느 경우에도 다음 방은 막지 않는다
   function restTier(room) {
-    const big = bigRoom();
-    if (!big) return "mini";
-    const d = CHAPTER_ORDER.indexOf(room) - CHAPTER_ORDER.indexOf(big);
-    return d < 0 ? "mini" : d === 0 ? "big" : "again";
-  }
-  function overlapLine(ov) {
-    const o = RT.overlap;
-    const txt = ov.rooms === 1 ? fill(o.one, { arch: T.archetypes[ov.arch].name }) : ov.count >= 2 ? fill(o.match, { rooms: KO_NUM[ov.rooms] || ov.rooms, count: KO_NUM[ov.count] || ov.count, arch: T.archetypes[ov.arch].name }) : fill(o.none, { rooms: KO_NUM[ov.rooms] || ov.rooms });
-    const p = rmk("p", "room-rest__overlap", txt);
-    p.dataset.js = "room-rest-overlap";
-    return p;
+    const i = CHAPTER_ORDER.indexOf(room);
+    return i <= 0 ? "mini" : i === 1 ? "big" : i === CHAPTER_ORDER.length - 1 ? "final" : "again";
   }
   // (2026-10-27 운영자) 첫 계절의 값: 줄 그은 정가 + 지금 값 + 꼬리표, 그 아래 두 줄. 계절이 아니면 null
   function seasonBlock() {
@@ -3515,7 +3583,7 @@
     const n = comma(chapterChars(room));
     box.dataset.state = open && loaded ? "open" : open ? restState[room] || (free ? "free" : "loading") : "locked";
     const st = box.dataset.state;
-    box.append(rmk("h2", "room-rest__title", (st === "locked" && RT.titleLocked) || RT.title || ""));
+    box.append(rmk("h2", "room-rest__title", RT.title || ""));
     if (st === "open") {
       if (!free) box.append(rmk("p", "room-rest__note", RT.openNote || ""));
       return renderRestOpen(box, room);
@@ -3531,28 +3599,28 @@
       const price = comma(PAY.amount);
       const pe = restEntry(room);
       const tt = (x) => (x && x.title ? strip(x.title) : "");
-      const ov = overlapUpTo(room);
-      $(".room-rest__title", box).textContent = (tier === "mini" ? RT.title : RT.titleLocked) || RT.title || "";
+      $(".room-rest__title", box).textContent = (tier === "big" ? RT.titleOffer : RT.title) || RT.title || "";
+      const doorEl = js("result-next-door", scr);
+      const nextName = doorEl && doorEl.dataset.go !== "finale" ? doorName(doorEl) : "";
       { // (2026-10-28 브랜드) 주인의 봉인 + 안내자의 말끝 한 줄(주인은 얼굴 없이 흔적으로만)
         const sealBox = rmk("div", "room-rest__seal");
         sealBox.innerHTML = SEAL_SVG;
         $(".room-rest__title", box).before(sealBox);
         if (RT.owner && RT.owner[room]) box.append(rmk("p", "room-rest__owner", RT.owner[room]));
       }
-      if (tier === "big" && RT.big && ov) {
-        // 첫 겹침(또는 세 방째)의 큰 머리말: 실제로 센 수
+      if (tier === "big" && RT.offer) {
+        // 둘째 방의 상세 해석서 제안(단 한 번): 두 방을 지나왔다는 사실 + 다음 방의 새 관점 + 상품 범위 + 결제 없이 계속 갈 수 있다는 것
         const head = rmk("div", "room-rest__moment");
         head.dataset.js = "room-rest-moment";
-        head.append(rmk("p", "room-rest__moment-head", ov.count >= 2 ? fill(RT.big.match, { count: KO_NUM[ov.count] || ov.count }) : fill(RT.big.none, { rooms: KO_NUM[ov.rooms] || ov.rooms })));
-        head.append(rmk("p", "room-rest__moment-sub", (ov.count >= 2 ? RT.big.sub : RT.big.subNone || RT.big.sub) || ""));
+        head.append(rmk("p", "room-rest__moment-head", RT.offer.head || ""));
+        head.append(rmk("p", "room-rest__moment-sub", fill(RT.offer.sub || "", { next: nextName })));
         box.append(head);
       }
       if (SJ) {
         box.classList.add("room-rest--saju");
         box.append(rmk("p", "room-rest__cut", SJ.cut || ""));
         box.append(rmk("p", "room-rest__lead", fill(SJ.lead || RT.lockedLead, { n })));
-      } else box.append(rmk("p", "room-rest__lead", fill(tier === "again" ? RT.againLead : RT.lockedLead, { n, price })));
-      if (ov && RT.overlap && tier !== "big") box.append(overlapLine(ov));
+      } else box.append(rmk("p", "room-rest__lead", fill(tier === "again" ? RT.againLead : tier === "final" ? RT.finalLead : RT.lockedLead, { n, price })));
       const tease = pe && typeof pe.strikeTease === "string" && pe.strikeTease ? strip(pe.strikeTease) : "";
       if (tease) {
         const t = rmk("section", "strike strike--tease");
@@ -3586,10 +3654,10 @@
         }
         goPay("room");
       };
-      if (tier === "mini") {
-        // 작은 칸: 직언 맛보기 + "책에서 이어져요" 한 줄 + 작은 글자 링크(지금 바로 열고 싶은 사람만)
-        box.append(rmk("p", "room-rest__mini", RT.mini || ""));
-        const now = setPriced(rmk("button", "text-link room-rest__mini-buy"), RT.miniBuy || "");
+      if (tier !== "big") {
+        // 작은 칸(첫 방·셋째 방부터·마지막 방): 직언 맛보기 + 한 줄 + 작은 글자 링크(지금 바로 열고 싶은 사람만). 큰 제안을 되풀이하지 않는다
+        if (tier === "mini") box.append(rmk("p", "room-rest__mini", RT.mini || ""));
+        const now = setPriced(rmk("button", "text-link room-rest__mini-buy"), (tier === "mini" ? RT.miniBuy : RT.againBuy) || RT.miniBuy || "");
         now.type = "button";
         now.dataset.js = "room-rest-buy-mini";
         now.addEventListener("click", goBuy);
@@ -3658,7 +3726,7 @@
         const fin = door.dataset.go === "finale";
         const nx = rmk("div", "room-rest__next");
         nx.dataset.js = "room-rest-next";
-        if (tier !== "mini") nx.append(rmk("p", "room-rest__next-text", fin ? RT.freeNextFinale || "" : fill(RT.freeNext || "", { next: doorName(door) })));
+        if (tier === "big" || tier === "final") nx.append(rmk("p", "room-rest__next-text", fin ? RT.freeNextFinale || "" : fill(RT.freeNext || "", { next: doorName(door) })));
         nx.append(passage);
         box.append(nx);
       }

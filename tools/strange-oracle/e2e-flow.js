@@ -191,6 +191,21 @@ function paidSentences() {
   check("의식 건너뛰기 힌트 1초 뒤 보임", await waitFor("document.querySelector('#screen-decan-ritual [data-js=ritual-skip]').classList.contains('is-visible')", 2500));
   await click("#screen-decan-ritual");
   check("아무 데나 누르면 바로 결과(5.2초 기다리지 않음)", (await waitScreen("screen-decan-result", 1500)) && (!reduced ? Date.now() - t1 < 4000 : true), (Date.now() - t1) + "ms");
+  // (2026-10-29 기획 v6) 방 끝: 이번 결과 이름을 짚는 연결 문구 + 다음 방(촐킨) 실제 결과 첫 문장 미리보기 → 문을 열고 들어가면 같은 문장으로 시작
+  const lk = await ev("(() => { const s = document.querySelector('#screen-decan-result'); const b = s.querySelector('[data-js=result-bridge]'); const c = s.querySelector('[data-js=next-peek]'); return { kind: b.dataset.kind, bridge: b.textContent, title: s.querySelector('[data-js=result-title]').textContent, card: c ? c.dataset.kind : '', line: c ? (c.querySelector('.next-peek__line') || {}).textContent : '' }; })()");
+  check("v6 연결: 데칸 결과 이름을 짚고 다음 촐킨의 시선으로(대조·울림 문형), 미리보기 = 실제 결과", ["contrast", "echo"].includes(lk.kind) && lk.bridge.includes(lk.title) && lk.bridge.includes("촐킨") && lk.card === "preview" && lk.line.length > 4, JSON.stringify(lk));
+  await click("#screen-decan-result [data-js=result-next-door]");
+  await waitScreen("screen-tzolkin-intro", 4000);
+  await click("[data-js=tzolkin-intro-go]");
+  await waitScreen("screen-tzolkin-ritual", 3000);
+  await sleep(1200);
+  await click("#screen-tzolkin-ritual");
+  await waitScreen("screen-tzolkin-result", 8000);
+  const tzKey = await txt("#screen-tzolkin-result [data-js=result-key]");
+  const quoted = lk.line.replace(/^“|”$/g, "").replace(/…$/, "");
+  check("v6 미리보기와 실제 결과가 이어짐: 촐킨 결과 카드 첫 문장 = 데칸에서 본 미리보기", quoted.length > 4 && tzKey.startsWith(quoted), JSON.stringify({ quoted, tzKey }));
+  await ev("StrangeOracle.go('decan-result')");
+  await waitScreen("screen-decan-result", 4000);
   const lkD = await freeLeak("decan");
   check("D-4 확장: 데칸 무료 화면 유료 문장 0", lkD.length === 0, lkD.slice(0, 2).join(" | "));
   await click("#screen-decan-result [data-js=result-retry]");
@@ -453,10 +468,11 @@ function paidSentences() {
     await waitScreen("screen-" + room + "-result", 4000);
     const sc = "#screen-" + room + "-result";
     const sway = await txt(sc + " [data-js=result-archetype-sway]");
-    const br = await ev(`(() => { const e = document.querySelector('${sc} [data-js=result-bridge]'); const t = e.textContent.replace('[초안] ', ''); return { ok: t === TEXT.bridges['${room}'].replace('[초안] ', '') && [...t].length <= 45 && /\\?$/.test(t) && (t.match(/[.?!]/g) || []).length === 1, t }; })()`);
+    // (2026-10-29 기획 v6) 다리 = 이번 결과 이름을 짚고 다음 전통의 시선을 잇는 1~2문장(대조·울림·심화), 다음 방 이름 포함
+    const br = await ev(`(() => { const s = document.querySelector('${sc}'); const e = s.querySelector('[data-js=result-bridge]'); const t = e.textContent; const title = s.querySelector('[data-js=result-title]').textContent; return { ok: ['contrast', 'echo', 'deepen'].includes(e.dataset.kind) && [...t].length <= 120 && (${JSON.stringify(room)} === 'rune' || t.includes(title)), t }; })()`);
     const dead = await deadScan(sc);
     const hooks = await hookCount(sc);
-    check(`H3·H4 ${room} 결과: 원형 한 줄(남은 문 4) · 다리 = 질문 1문장 45자 이내 · 가격·'곧'·죽은 버튼 0 · 떡밥 ${hooks}개(≤3)`, sway === (await swayWant(4, arch3)) && br.ok && !dead.price && !dead.soon && dead.dead === 0 && hooks <= 3, sway + " / " + br.t);
+    check(`H3·H4 ${room} 결과: 원형 한 줄(남은 문 4) · 다리 = (v6) 이번 결과를 짚는 연결 120자 이내 · 가격·'곧'·죽은 버튼 0 · 떡밥 ${hooks}개(≤3)`, sway === (await swayWant(4, arch3)) && br.ok && !dead.price && !dead.soon && dead.dead === 0 && hooks <= 3, sway + " / " + br.t);
   }
   await seed(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
   await b.goto(BASE + "#story");

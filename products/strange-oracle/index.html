@@ -7,8 +7,8 @@
   <title>낯선 점술관 — 사주 · 오검 · 베다 · 데칸 · 촐킨 · 룬 · 시빌라 신탁</title>
   <meta name="description" content="한국 사주 명리, 켈트 오검, 인도 베다 점성술, 이집트 데칸, 마야 촐킨, 바이킹 룬, 로마 시빌라 신탁. 일곱 문화의 점술로 나를 읽어 보는 이야기." />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="낯선 점술관 — 사주 · 오검 · 베다 · 데칸 · 촐킨 · 룬 · 시빌라 신탁" />
-  <meta property="og:description" content="한국 사주 명리, 켈트 오검, 인도 베다 점성술, 이집트 데칸, 마야 촐킨, 바이킹 룬, 로마 시빌라 신탁. 일곱 문화의 점술로 나를 읽어 보는 이야기." />
+  <meta property="og:title" content="같은 나를, 일곱 점술이 다르게 읽는다면 — 낯선 점술관" />
+  <meta property="og:description" content="어느 방에선 곧게 선 큰 나무, 어느 방에선 먼저 부딪히는 사람. 내 결과는 일곱 방에서 어디서 닮고 어디서 갈릴까?" />
   <meta property="og:image" content="og-image.png" />
   <meta name="theme-color" content="#080717" />
   <!-- 파비콘 파일이 없어 브라우저가 /favicon.ico를 요청하고 404를 내지 않도록 빈 아이콘 지정 (개발 담당) -->
@@ -809,11 +809,14 @@
       <section class="reading reading--saju" data-js="result-reading" aria-labelledby="saju-reading-title">
         <h2 class="reading__title" id="saju-reading-title"><span class="reading__rule" aria-hidden="true"></span><span data-t="result.readingTitle">핵심 풀이</span><span class="reading__rule" aria-hidden="true"></span></h2>
         <div class="saju-module" data-js="saju-s1"><h3 class="saju-module__title" data-t="saju.result.s1Title">자네의 그릇</h3><div class="prose" data-js="saju-s1-body"><p></p></div></div>
+        <!-- (2026-10-29 기획 v6) 핵심 먼저: 그릇(S1)만 펼치고 기운·결·대운(S2~S4)은 접어 둔다(무료 그대로, 길이만 줄임) -->
+        <details class="saju-more" data-js="saju-more"><summary class="saju-more__toggle" data-t="saju.result.moreLabel">기운·결·대운 풀이 더 보기</summary>
         <div class="saju-module" data-js="saju-s2a"><h3 class="saju-module__title" data-t="saju.result.s2aTitle">넉넉한 기운</h3><div class="prose" data-js="saju-s2a-body"><p></p></div></div>
         <div class="saju-module" data-js="saju-s2b"><h3 class="saju-module__title" data-js="saju-s2b-title"></h3><div class="prose" data-js="saju-s2b-body"><p></p></div></div>
         <div class="saju-module" data-js="saju-s3"><h3 class="saju-module__title" data-t="saju.result.s3Title">앞선 결</h3><div class="prose" data-js="saju-s3-body"><p></p></div></div>
         <div class="saju-module" data-js="saju-s4"><h3 class="saju-module__title" data-t="saju.result.s4Title">대운 · 10년마다 바뀌는 계절</h3><div class="prose" data-js="saju-s4-body"><p></p></div></div>
         <p class="saju-module__ask is-hidden" data-js="saju-s4-ask"><span data-t="saju.result.s4Ask">성별을 넣으면 대운의 방향을 읽어 드려요</span> <button class="text-link" type="button" data-js="saju-s4-edit" data-t="saju.result.s4Edit">성별 넣기</button></p>
+        </details>
       </section>
 
       <aside class="archetype-line" data-js="result-archetype">
@@ -1002,6 +1005,8 @@
         </div>
       </div>
 
+      <!-- (2026-10-29 v6) 지금 단계·남은 양: ① 주머니(고리 n/24) → ② 돌 뒤집기(k/3) -->
+      <p class="rune-step" data-js="rune-step" aria-live="polite"></p>
       <p class="norn-hint" data-js="rune-norn-hint" aria-live="polite"></p>
     </section>
 
