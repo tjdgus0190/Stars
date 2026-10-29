@@ -538,7 +538,9 @@
       if (name === "saju-intro") sajuGateOpen();
       onScreen(name, next); // 화면 이벤트(GA4)
       if (name === "hub" || /-result$/.test(name)) prefetchNext();
+      if (/-intro$/.test(name)) renderPromise(next); // (2026-10-29 B) 문 앞에서 본 첫마디
       if (/-result$/.test(name)) {
+        renderEcho(next); // (2026-10-29 B) 그 첫마디로 시작하는 결과 카드
         renderLink(next); // (2026-10-29 v6) 방 끝: 이번 결과 → 다음 전통의 시선 + 다음 방 미리보기
         renderRest(next); // (22단계) 이 방의 나머지 이야기
       }
@@ -1255,6 +1257,84 @@
     }
     return (js("result-title", scr) || {}).textContent || "";
   }
+  // (2026-10-29 운영자 A·B·E) 다음 방으로 이어지는 재미: 방마다 미리 본 첫 문장(이 탭 메모리에만, 저장하지 않음)
+  const peekFor = {};
+  // 지나온 방의 결과 이름(모은 시선 줄). 방 파일이 아직 없으면 빈 값
+  function visitTitle(room) {
+    const v = state.visits[room];
+    if (!v) return "";
+    try {
+      if (room === "saju") return strip(SAJU.stems[Saju.decodeCode(v.code).S1].title);
+      if (room === "ogham") return strip(OGHAM[v.ogham].title);
+      if (room === "star") return strip(NAKS[v.nak].name);
+      if (room === "decan") return strip(DECANS[v.decan].title);
+      if (room === "tzolkin") return strip(`${v.number} ${TZ_SIGNS[v.sign].name}`);
+      if (room === "rune") return strip(RUNE_BY_CODE[v.picks[1]].name);
+      if (room === "sibyl") return strip(ORACLES[v.sors].title);
+    } catch (e) {
+      return "";
+    }
+    return "";
+  }
+  function renderCollect(scr, room) {
+    const L = T.link || {};
+    const passage = js("result-passage", scr);
+    if (!passage || !L.collectHead) return;
+    let box = js("collect", scr);
+    if (!box) {
+      box = rmk("section", "collect");
+      box.dataset.js = "collect";
+      passage.prepend(box);
+    }
+    box.textContent = "";
+    const n = CHAPTER_ORDER.filter(isDone).length;
+    box.append(rmk("p", "collect__head", fill(L.collectHead, { n })));
+    const ol = rmk("ol", "collect__list");
+    CHAPTER_ORDER.forEach((r, k) => {
+      const name = isDone(r) ? visitTitle(r) : "";
+      const li = rmk("li", "collect__item" + (r === room ? " is-here" : "") + (name ? "" : " is-empty"));
+      li.append(rmk("span", "collect__num", ROMAN[k]), rmk("span", "collect__name", name || L.collectEmpty || ""));
+      ol.append(li);
+    });
+    box.append(ol);
+  }
+  // 다음 방 시작 화면: 문 앞에서 본 첫 문장 카드(아직 그 방을 마치지 않았을 때만)
+  function renderPromise(scr) {
+    const room = scr && scr.dataset.room;
+    const L = T.link || {};
+    let card = js("promise", scr);
+    const line = peekFor[room];
+    if (!line || isDone(room) || !L.promiseHead) {
+      if (card) card.remove();
+      return;
+    }
+    if (!card) {
+      card = rmk("div", "promise");
+      card.dataset.js = "promise";
+      const head = $(".room-head", scr);
+      if (!head) return;
+      head.after(card);
+    }
+    card.textContent = "";
+    card.append(rmk("p", "promise__head", L.promiseHead), rmk("p", "promise__line", fill(L.quote || "“{line}”", { line })), rmk("p", "promise__sub", L.promiseSub || ""));
+  }
+  // 그 방 결과 카드: 미리 본 문장으로 시작하면 빛내고 한 줄 덧붙인다(한 번만)
+  function renderEcho(scr) {
+    const room = scr && scr.dataset.room;
+    const key = js("result-key", scr);
+    const old = js("key-echo", scr);
+    if (old) old.remove();
+    if (key) key.classList.remove("is-echo");
+    const line = peekFor[room];
+    if (!key || !line) return;
+    delete peekFor[room];
+    const want = line.replace(/…$/, "");
+    if (!key.textContent.trim().startsWith(want)) return;
+    key.classList.add("is-echo");
+    const note = rmk("p", "key-echo", (T.link && T.link.echoNote) || "");
+    note.dataset.js = "key-echo";
+    key.after(note);
+  }
   function renderLink(scr) {
     const room = scr && scr.dataset.room;
     const L = T.link || {};
@@ -1264,6 +1344,7 @@
     const bridge = js("result-bridge", scr);
     let card = js("next-peek", scr);
     if (!passage || !bridge || i < 0) return;
+    renderCollect(scr, room);
     if (!next || !L.lensBy) {
       if (card) card.remove();
       return; // 마지막 방(시빌라): 다음 방 예고 없이 완주(마크업의 마무리 다리 문장 그대로)
@@ -1284,9 +1365,15 @@
       card.dataset.kind = pred ? "preview" : "teaser";
       card.append(rmk("p", "next-peek__head", fill(pred ? L.previewHead : L.teaserHead, vars)));
       if (pred) {
-        card.append(rmk("p", "next-peek__line", fill(L.quote || "“{line}”", { line: firstLine(pred.key) })));
+        peekFor[next] = firstLine(pred.key);
+        card.append(rmk("p", "next-peek__line", fill(L.quote || "“{line}”", { line: peekFor[next] })));
         card.append(rmk("p", "next-peek__sub", L.previewSub || ""));
-      } else card.append(rmk("p", "next-peek__line next-peek__line--teaser", (L.teaser && L.teaser[next]) || ""));
+      } else {
+        delete peekFor[next];
+        card.append(rmk("p", "next-peek__line next-peek__line--teaser", (L.teaser && L.teaser[next]) || ""));
+      }
+      renderCollect(scr, room); // 방 파일이 늦게 와도 이름이 채워지게
+      if (screens[currentName] === scr) updateDock(); // 떠 있는 버튼 셋째 줄
     };
     paint();
     ensureRoom(next).then(paint, () => {}); // 다음 방 파일이 오면 실제 문장으로 다시
@@ -3432,6 +3519,7 @@
     dock.classList.remove("is-tucked");
     dock.dataset.mode = "next";
     body.classList.toggle("has-pay-dock", on);
+    body.classList.remove("has-dock-peek");
     if (!on) return;
     const room = res.dataset.room;
     dock.dataset.room = room;
@@ -3439,6 +3527,11 @@
     const ni = CHAPTER_ORDER.indexOf(door.dataset.room);
     js("pay-dock-next-label", dock).textContent = (fin ? RT.dockNextFinale : RT.dockNext) || "";
     js("pay-dock-next-name", dock).textContent = fill(RT.dockNextName || "{name} →", { num: ni >= 0 ? ROMAN[ni] : "", name: doorName(door) }).trim();
+    const dpk = js("pay-dock-next-peek", dock); // (2026-10-29 A) 다음 방이 처음 건넬 말 한 줄(미리 셀 수 있을 때만)
+    const pk = !fin && ni >= 0 ? peekFor[door.dataset.room] : "";
+    dpk.textContent = pk ? fill((T.link && T.link.dockPeek) || "“{line}”", { line: pk }) : "";
+    dpk.hidden = !pk;
+    body.classList.toggle("has-dock-peek", Boolean(pk));
     const rail = js("pay-dock-rail", dock); // 일곱 방 진행 점: 지난 방 · 지금 방 · 다음 문
     rail.textContent = "";
     CHAPTER_ORDER.forEach((r) => {

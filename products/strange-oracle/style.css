@@ -5854,3 +5854,27 @@ s.was { margin-right: 2px; font-weight: 500; opacity: 0.62; text-decoration-thic
 /* (2026-10-29 v6) 룬 의식 단계 줄 */
 .rune-step { margin: var(--space-3) auto 0; max-width: 320px; padding: 6px 12px; border-radius: 999px; border: 1px solid oklch(0.85 0.06 230 / 0.45); background: oklch(0.2 0.04 250 / 0.55); font-size: var(--fs-sm); color: oklch(0.92 0.04 230); text-align: center; font-variant-numeric: tabular-nums; }
 .rune-step:empty { display: none; }
+/* (2026-10-29 운영자 A) 떠 있는 '다음 문' 버튼 셋째 줄: 다음 방이 처음 건넬 말 */
+.pay-dock__next-peek { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-family: var(--font-serif); font-size: 12.5px; line-height: 1.35; color: oklch(0.9 0.07 85); opacity: 0.92; }
+.pay-dock__next-peek[hidden] { display: none; }
+body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--space-16) + 104px); }
+/* (2026-10-29 운영자 B) 다음 방 시작 화면: 문 앞에서 들은 첫마디 / 결과 카드: 그 말로 시작하면 빛남 */
+.promise { margin: var(--space-4) 0 0; padding: 14px 16px; border-radius: 14px; border: 1px solid oklch(0.82 0.1 82 / 0.45); background: oklch(0.15 0.04 285 / 0.62); text-align: left; animation: promise-in 700ms var(--ease-out, ease-out) both; }
+@keyframes promise-in { from { opacity: 0; transform: translateY(8px); } }
+.promise__head { margin: 0; font-size: var(--fs-xs); letter-spacing: 0.04em; color: oklch(0.86 0.09 85); }
+.promise__line { margin: 6px 0 0; font-family: var(--font-serif); font-size: 18px; font-weight: 700; line-height: 1.5; color: var(--c-text-strong, #fff); word-break: keep-all; }
+.promise__sub { margin: 6px 0 0; font-size: var(--fs-xs); color: var(--c-text-muted); }
+.capture__key.is-echo { animation: key-echo 2.4s var(--ease-out, ease-out) 0.4s both; border-radius: 10px; }
+@keyframes key-echo { 0% { box-shadow: 0 0 0 0 oklch(0.88 0.13 85 / 0); background: oklch(0.88 0.13 85 / 0); } 30% { box-shadow: 0 0 0 6px oklch(0.88 0.13 85 / 0.25), 0 0 34px oklch(0.88 0.13 85 / 0.45); background: oklch(0.88 0.13 85 / 0.12); } 100% { box-shadow: 0 0 0 0 oklch(0.88 0.13 85 / 0); background: oklch(0.88 0.13 85 / 0.05); } }
+.key-echo { margin: 8px 0 0; font-size: var(--fs-xs); letter-spacing: 0.04em; color: oklch(0.88 0.11 85); text-align: center; }
+.key-echo::before { content: "✦ "; }
+@media (prefers-reduced-motion: reduce) { .promise, .capture__key.is-echo { animation: none; } }
+/* (2026-10-29 운영자 E) 방 끝 '모은 시선' 줄: 지나온 방의 결과 이름, 남은 방은 빈자리 */
+.collect { margin: 0 0 var(--space-4); padding: 12px 14px; border-radius: 14px; border: 1px dashed oklch(0.82 0.1 82 / 0.35); text-align: left; }
+.collect__head { margin: 0 0 8px; font-size: var(--fs-xs); letter-spacing: 0.04em; color: oklch(0.86 0.09 85); }
+.collect__list { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.collect__item { display: inline-flex; align-items: baseline; gap: 5px; padding: 4px 9px; border-radius: 999px; border: 1px solid oklch(0.82 0.1 82 / 0.4); background: oklch(0.2 0.04 285 / 0.55); font-size: 12.5px; color: var(--c-text); max-width: 100%; }
+.collect__num { font-family: var(--font-latin); font-size: 11px; color: oklch(0.82 0.1 82); }
+.collect__name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.collect__item.is-here { border-color: oklch(0.88 0.12 85); box-shadow: 0 0 10px oklch(0.85 0.13 80 / 0.35); color: var(--c-text-strong, #fff); }
+.collect__item.is-empty { border-style: dashed; background: none; color: var(--c-text-muted); }
