@@ -190,7 +190,7 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   await kakaoLogin(7007);
   await waitFor("!!document.querySelector('[data-js=kakao-consent]')?.open", 6000);
   await click("[data-js=kakao-consent-no]");
-  await ev("StrangeOracle.go('star-result'); true");
+  await ev("StrangeOracle.go('ogham-result'); true"); // (2026-10-29 v6) 큰 결제 버튼은 둘째 방(오검)의 제안 칸
   await waitFor("!!document.querySelector('.screen.is-active [data-js=room-rest-buy]')", 8000);
   const nP = b.log.bodies.length;
   await click(".screen.is-active [data-js=room-rest-buy]");
@@ -215,7 +215,7 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
 
   // 먼저 결제(로그인 없이) → 나중에 입구에서 로그인 → 다른 기기에서 그 카카오로 열림
   await ev("sessionStorage.clear(); localStorage.clear(); true");
-  await b.goto(`${TEST}/__dev/skip?rooms=7&to=star-result`);
+  await b.goto(`${TEST}/__dev/skip?rooms=7&to=ogham-result`);
   await waitFor("!!document.querySelector('.screen.is-active [data-js=room-rest-buy]')", 8000);
   await click(".screen.is-active [data-js=room-rest-buy]");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
