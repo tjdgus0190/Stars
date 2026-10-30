@@ -75,10 +75,10 @@ node marketing/strange-oracle/render/sound-ad1.js --raw    # 정규화 전 float
 
 | 키 | 허용 값 |
 |---|---|
-| utm_source | `instagram` · `tiktok` · `x` · `google` |
-| utm_medium | `paid_social` · `organic` · `cpc` |
-| utm_campaign | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ad5_saju_only` · `ad6_untold` · `ad7_rooms` · `ig_profile` · `x_profile` · `gads_main` |
-| utm_content | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ad5_saju_only` · `ad6_untold` · `ad7_rooms` · `ig_profile` · `ig_story_book` · `x_profile` · `x_pinned` · `gads_main` |
+| utm_source | `instagram` · `tiktok` · `x` · `google` · (2026-10-30) `meta` · `facebook` · `fb` · `ig` · `threads` |
+| utm_medium | `paid_social` · `organic` · `cpc` · (2026-10-30) `paid` · `social` · `cpm` |
+| utm_campaign | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ad5_saju_only` · `ad6_untold` · `ad7_rooms` · `ig_profile` · `x_profile` · `gads_main` · (2026-10-30) `halloween` · `halloween_samhain` |
+| utm_content | `ad1_seven_doors` · `ad2_manshin` · `ad3_book` · `ad4_busted` · `ad5_saju_only` · `ad6_untold` · `ad7_rooms` · `halloween_samhain` · `ig_profile` · `ig_story_book` · `x_profile` · `x_pinned` · `gads_main` |
 
 예: `https://<제품 주소>/?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad1_seven_doors&utm_content=ad1_seven_doors`
 

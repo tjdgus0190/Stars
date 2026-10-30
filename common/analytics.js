@@ -7,6 +7,7 @@
 //   같은 키가 두 번이면 앞의 허용 값. utm_source가 없으면 query 없는 주소로 보낸다(방문은 기록). 무시 목록의 키(광고 플랫폼 클릭 ID)·모르는 키는 값을 읽지도 보내지도 않는다.
 // - 제품이 init에 넘긴 허용 목록(이벤트 → 속성 → 허용 값 목록) 밖의 이벤트·속성·값은 버린다 (6장을 코드로 강제).
 //   값은 목록 안의 문자열만 지나간다 → 이름·생일·질문·코드 같은 입력값은 구조적으로 실릴 수 없다.
+// - opts.internal === true이면 traffic_type=internal을 붙인다(GA4 데이터 필터 「내부 트래픽」으로 운영자 기기를 뺄 때). 다른 값은 무시.
 // - 자동 page_view 끔(send_page_view:false), config는 한 번만(화면 이동 때 다시 부르지 않음), page_location은 ?·# 뒤를 뺀 주소(+허용 utm만),
 //   구글 신호·광고 맞춤 신호 끔. GA4 '향상된 측정'은 운영자가 GA4 데이터 스트림 설정에서 꺼야 한다(코드만으로 막히는지 미확인).
 (function () {
@@ -78,6 +79,8 @@
       allow_google_signals: false,
       allow_ad_personalization_signals: false,
     });
+    // (2026-10-30) 운영자 기기: GA4 내부 트래픽 필터가 읽는 traffic_type=internal. 제품이 opts.internal === true로 넘길 때만
+    if (opts.internal === true) window.gtag("set", { traffic_type: "internal" });
     const s = document.createElement("script");
     s.async = true;
     s.src = `${GTAG_URL}?id=${encodeURIComponent(id)}`;

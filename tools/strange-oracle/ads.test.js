@@ -187,6 +187,18 @@ test("analytics: config 값 고정, 허용 목록 밖 이벤트·속성·값은 
   assert.strictEqual([...e.win.dataLayer].filter((a) => a[0] === "config").length, 1);
 });
 
+test("analytics (2026-10-30): internal === true일 때만 traffic_type=internal, 다른 값·기본은 붙이지 않음", () => {
+  const sets = (e) => [...e.win.dataLayer].map((a) => [...a]).filter((a) => a[0] === "set");
+  const on = env();
+  assert.strictEqual(on.win.Analytics.init({ ga4: "G-TEST12345", events: { so_visit: {} }, internal: true }), true);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(sets(on))), [["set", { traffic_type: "internal" }]]);
+  [undefined, false, "true", 1, "internal"].forEach((v) => {
+    const e = env();
+    e.win.Analytics.init({ ga4: "G-TEST12345", events: { so_visit: {} }, internal: v });
+    assert.strictEqual(sets(e).length, 0, String(v));
+  });
+});
+
 test("analytics: 모양이 틀린 측정 ID는 불러오지 않음", () => {
   const e = env();
   assert.strictEqual(e.win.Analytics.init({ ga4: "UA-12345-1", events: {} }), false);

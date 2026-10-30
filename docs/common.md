@@ -155,6 +155,7 @@ Analytics.track("so_result", { room: "rune", archetype: "warrior" }); // 보낸 
 - 값은 목록 안의 문자열만 지나간다 → 이름·생일·질문·코드 같은 입력값은 실릴 수 없다. 세부 결과 번호도 목록에 넣지 않는다.
   - (2026-10-28) 숫자 값도 목록에 **정확히** 있을 때만 지나간다(예: strange-oracle의 GA4 `purchase` `value: [4900, 9900]`, `currency: ["KRW"]`). 쓰는 제품: strange-oracle 하나(확인함). 결제번호·코드 같은 값은 여전히 넣지 않는다.
 - GA4 '향상된 측정'은 운영자가 데이터 스트림 설정에서 끈다(코드만으로 막히는지 미확인).
+- (2026-10-30) `internal: true`(정확히 true일 때만)를 넘기면 `gtag("set", { traffic_type: "internal" })`를 붙인다. GA4 관리 → 데이터 필터 「내부 트래픽」으로 운영자 기기를 뺄 때 쓴다. strange-oracle은 주소 끝 `#so-internal`로 한 번 열면 이 기기 localStorage `strange-oracle-internal`("1" 하나)에 표시하고, `#so-internal-off`로 지운다. 쓰는 제품: strange-oracle 하나(확인함). 시험: ads.test.js.
 - 빈 ID: gtag.js를 불러오지 않고 track은 null. 주소에 `?`가 있는 동안: init·track 모두 아무것도 안 함.
 - 캠페인 구분(utm, 2026-10-17): 제품은 시작할 때 `location.search`를 따로 받아 두고(`bootSearch`) 주소창의 query를 지운 뒤 init에 `utm.search`로 넘긴다.
   - 허용 키는 `utm_source`·`utm_medium`·`utm_campaign`·`utm_content` 넷뿐(부품에 고정). 값 목록(`utm.allow`)은 제품이 정한다(설정이므로 data.js가 아니라 app.js. strange-oracle은 `CAMPAIGN`). 값 모양은 소문자·숫자·밑줄 1~40자만.

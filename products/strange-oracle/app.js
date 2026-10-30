@@ -1381,6 +1381,9 @@
   // 다음 문: 문짝이 열리며 그 안에서 다음 방의 상징이 떠오른다(8-3, 약 1.2초). 시빌라(Ⅵ)의 문은 수렴 결말(7-6, 650ms 뒤)
   function openNextDoor(btn) {
     if (btn.classList.contains("is-opening")) return;
+    // (2026-10-30 기획 v8 측정) 결과 아래 문 버튼으로 넘어갈 때도 so_next(from=door). room = 떠나는 방
+    const leaving = btn.dataset.js === "result-next-door" ? roomOfScreen(currentName) : null;
+    if (CHAPTER_ORDER.includes(leaving)) track("so_next", { room: leaving, from: "door" });
     const to = btn.dataset.go;
     const room = to === "finale" ? nextRoom() : btn.dataset.room; // 마지막 문인데 비어 있는 장이 있으면 그 장부터
     if (CHAPTER_ORDER.includes(room)) return playSigil(room, btn, roomTarget(room), isDone(room), "is-opening");
@@ -6228,7 +6231,7 @@
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
     so_follow: { from: ["result", "story"] },
     purchase: { value: [Number(PAY.amount), Number(PAY.regular || PAY.amount)], currency: ["KRW"] }, // (2026-10-28) GA4 구매(매출 보고서용): 지금 판매 값·정가만 // (2026-10-27) 인스타그램 따라오기 링크 누름: 어느 화면에서인지만
-    so_next: { room: CHAPTER_ORDER, from: ["dock", "locked"] }, // (2026-10-27) 다음 방을 떠 있는 버튼·잠긴 칸 버튼으로 열었을 때(아래 문 버튼은 so_room_view로 충분)
+    so_next: { room: CHAPTER_ORDER, from: ["dock", "locked", "door"] }, // (2026-10-30 v8) door = 결과 아래 문 버튼. room은 떠나는 방 // (2026-10-27) 다음 방을 떠 있는 버튼·잠긴 칸 버튼으로 열었을 때(아래 문 버튼은 so_room_view로 충분)
     so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
@@ -6242,20 +6245,22 @@
   // 값을 더하려면 제안서와 marketing/strange-oracle/render/README.md 표도 함께 고친다. 사용자 입력값은 이 목록에 들어갈 수 없다(6장).
   const CAMPAIGN = {
     allow: {
-      utm_source: ["instagram", "tiktok", "kakao", "x", "google"],
-      utm_medium: ["paid_social", "organic", "share", "cpc"],
-      utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "x_profile", "gads_main", "kakao_share"],
-      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
+      utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads"], // (2026-10-30) 메타 광고 관리자에서 흔히 쓰는 값 더함
+      utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
+      utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "x_profile", "gads_main", "kakao_share", "halloween", "halloween_samhain"],
+      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
     },
     ignore: ["fbclid", "ttclid"],
   };
+  const INTERNAL_KEY = "strange-oracle-internal"; // (2026-10-30) 운영자 기기 표시 "1" 하나(localStorage). 입력값·코드 아님
+  let internalTraffic = false;
   const bootSearch = location.search; // 시작할 때 주소에서 지우기 전의 query (분석 부품에만 넘기고 다른 곳에 쓰지 않는다)
   let booted = false;
   let externalOn = false;
   function startExternal() {
     if (!booted || externalOn || location.search) return;
     externalOn = true;
-    if (Analytics.init({ ga4: T.analytics.ga4, title: T.meta.title, events: EVENTS, utm: { search: bootSearch, allow: CAMPAIGN.allow, ignore: CAMPAIGN.ignore } })) {
+    if (Analytics.init({ ga4: T.analytics.ga4, title: T.meta.title, events: EVENTS, internal: internalTraffic, utm: { search: bootSearch, allow: CAMPAIGN.allow, ignore: CAMPAIGN.ignore } })) {
       track("so_visit");
       if (currentName === "deeper") track("so_pay", { step: "view", from: "other" }); // (18-11)
     }
@@ -6461,6 +6466,26 @@
   applyText();
   // (16-2의 6) #join=<초대 ID>는 화면 이름으로 읽기 전에 가로챈다: 값을 꺼내 두고 → replaceState로 주소에서 해시를 지운 뒤 → 평소 입구.
   // 뒤로 가기 기록에도 남지 않는다. off면 해시만 지우고 값은 버린다. 모양(22자 base64url)이 틀리면 조용히 무시
+  // (2026-10-30 기획 v8 측정) 운영자 기기 표시: 주소 끝에 #so-internal 로 한 번 열면 이 기기의 GA4 이벤트에 traffic_type=internal이 붙는다
+  //   (GA4 관리 → 데이터 필터 「내부 트래픽」으로 빼기). #so-internal-off 로 끈다. 값은 "1" 하나뿐(입력값 아님, 6장), 해시는 바로 지운다.
+  if (/^#so-internal(-off)?$/.test(location.hash)) {
+    try {
+      if (location.hash === "#so-internal") window.localStorage.setItem(INTERNAL_KEY, "1");
+      else window.localStorage.removeItem(INTERNAL_KEY);
+    } catch (e) {
+      /* 저장 막힘 */
+    }
+    try {
+      history.replaceState(history.state, "", location.pathname + location.search);
+    } catch (e) {
+      /* 기록을 못 쓰는 환경 */
+    }
+  }
+  try {
+    internalTraffic = window.localStorage.getItem(INTERNAL_KEY) === "1";
+  } catch (e) {
+    internalTraffic = false;
+  }
   let mapJoinNow = false;
   if (/^#join=/.test(location.hash)) {
     const inv = location.hash.slice(6);
