@@ -147,6 +147,30 @@ const paidLine = (file, global, pick) => {
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-finale'", 6000);
   check("F4 결제한 탭 완주 화면: 책 칸 = '내 책 펴기'(결제 권유 문장 없음)", (await ev("document.querySelector('[data-js=finale-book-go]').textContent")) === "내 책 펴기" && (await ev("document.querySelector('.finale-book__lead').hidden")));
 
+  // 4c. (2026-10-31 운영자) 베다~시빌라: 결제 전 핵심 풀이는 조금만(다음 단락은 흐리게 끊김) + 조용한 [이 방의 이야기 더 읽기]. 만신·오검은 그대로
+  const cutOf = () => ev("(() => { const s = document.querySelector('.screen.is-active'); const m = s.querySelector('[data-js=free-more]'); return { teaser: s.querySelectorAll('[data-js=reading-body] > .is-teaser').length, cut: s.querySelectorAll('[data-js=reading-body] > .is-cut').length, btn: m ? m.querySelector('[data-js=free-more-btn]').innerText.trim() : '', note: m ? m.querySelector('.free-more__note').textContent : '', price: m ? /\d,\d{3}\s*원|결제/.test(m.innerText) : null }; })()");
+  for (const room of ["saju", "ogham"]) {
+    await skip(`${room}-result`);
+    const c = await cutOf();
+    check(`G0 ${room}(결제 전): 핵심 풀이 접지 않음 · 더 읽기 버튼 없음`, c.teaser === 0 && c.cut === 0 && !c.btn, JSON.stringify(c));
+  }
+  for (const room of ["star", "decan", "tzolkin", "rune", "sibyl"]) {
+    await skip(`${room}-result`);
+    const c = await cutOf();
+    check(`G1 ${room}(결제 전): 흐린 단락 ${room === "rune" ? "돌마다" : "1개"} · 나머지 접힘 · [이 방의 이야기 더 읽기] · 버튼 줄에 가격·'결제' 말 없음`, c.teaser === (room === "rune" ? 3 : 1) && c.cut >= 1 && c.btn === (await ev("TEXT.room.more.btn")) && c.price === false, JSON.stringify(c));
+  }
+  await skip("star-result");
+  await click(".screen.is-active [data-js=free-more-btn]");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper'");
+  check("G2 [더 읽기] → 결제 전 화면(가격·받는 것·환불은 여기서) · payroom=star", (await ev("document.querySelector('.screen.is-active').id")) === "screen-deeper" && (await ev("sessionStorage.getItem('strange-oracle-payroom')")) === "star");
+  await ev("(() => { const a = document.querySelector('[data-js=pay-agree]'); if (!a.checked) a.click(); })()");
+  await click("[data-js=pay-buy]");
+  await waitFor("location.pathname === '/__dev/payapp/checkout' && !!document.querySelector('[data-act]')", 8000);
+  await ev("document.querySelector('[data-act=complete]').click()");
+  const backStar = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-star-result' && document.querySelector('.screen.is-active [data-js=room-rest]')?.dataset.state === 'open'", 30000);
+  const cs = await cutOf();
+  check("G3 결제 뒤 베다 결과로 돌아옴 · 핵심 풀이 모두 펼침(흐림·접힘 0) · 더 읽기 버튼 없음 · 나머지 이야기 open", backStar && cs.teaser === 0 && cs.cut === 0 && !cs.btn, JSON.stringify(cs));
+
   // 5. 함수 book이 응답하지 않으면 그 칸만 안내 + [다시 불러오기], 나머지 화면은 그대로
   await b.send("Network.setBlockedURLs", { urls: ["*/api/book"] }); // 함수 book이 응답하지 않는 상태
   await skip("star-result", 1);

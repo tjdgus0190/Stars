@@ -5905,3 +5905,32 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 .faq__fold[open] > summary { margin-bottom: var(--space-4); }
 .faq__h { margin: 0; font: inherit; color: inherit; letter-spacing: inherit; }
 .hub .faq { margin-top: var(--space-8); padding-top: var(--space-4); }
+
+/* ═════════ (2026-10-31 운영자) 베다~시빌라: 결제 전 핵심 풀이는 조금만 + 조용한 [이 방의 이야기 더 읽기] ═════════ */
+.reading__body > .is-cut, .reading__close.is-cut { display: none !important; }
+.reading__body > .is-teaser {
+  position: relative; max-height: 4.9em; overflow: hidden; margin-bottom: 0;
+  -webkit-mask-image: linear-gradient(180deg, #000 18%, transparent 96%); mask-image: linear-gradient(180deg, #000 18%, transparent 96%);
+  user-select: none;
+}
+.free-more { display: grid; justify-items: center; gap: 12px; margin: 22px auto 6px; text-align: center; }
+.free-more__rule { display: block; width: 168px; height: 12px;
+  background:
+    linear-gradient(90deg, transparent, oklch(0.84 0.12 85 / 0.55)) left center / 70px 1px no-repeat,
+    linear-gradient(270deg, transparent, oklch(0.84 0.12 85 / 0.55)) right center / 70px 1px no-repeat,
+    radial-gradient(circle, oklch(0.86 0.12 85 / 0.9) 0 2.4px, transparent 3px) center / 12px 12px no-repeat; }
+.free-more__btn {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px 0 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid oklch(0.84 0.12 85 / 0.42);
+  background: linear-gradient(180deg, oklch(0.84 0.12 85 / 0.10), oklch(0.84 0.12 85 / 0.03));
+  color: oklch(0.93 0.04 85); font: inherit; font-size: 15.5px; font-weight: 600; letter-spacing: 0.01em;
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.06), 0 6px 22px oklch(0 0 0 / 0.25);
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.free-more__btn:hover { border-color: oklch(0.84 0.12 85 / 0.7); background: linear-gradient(180deg, oklch(0.84 0.12 85 / 0.16), oklch(0.84 0.12 85 / 0.05)); }
+.free-more__btn:active { transform: scale(0.98); }
+.free-more__btn:focus-visible { outline: 2px solid oklch(0.84 0.12 85 / 0.8); outline-offset: 3px; }
+.free-more__seal { display: inline-grid; width: 26px; height: 26px; flex: none; }
+.free-more__seal .wax-seal { width: 26px; height: 26px; }
+.free-more__note { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--c-text-muted); word-break: keep-all; }
+@media (prefers-reduced-motion: reduce) { .free-more__btn { transition: none; } }

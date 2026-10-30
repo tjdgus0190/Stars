@@ -1176,6 +1176,65 @@
     const c = js("reading-close", scr);
     c.innerHTML = close || "";
     show(c, Boolean(close));
+    freeCut(scr);
+  }
+  // ── (2026-10-31 운영자) 베다~시빌라(셋째 방부터)는 결제 전 핵심 풀이를 조금만: 첫머리·첫 단락은 그대로, 다음 단락은 두 줄쯤 흐려지며 끊기고
+  //   (룬은 돌마다 첫 줄 + 흐린 두 줄), 사실 목록·해석 안내·맺음 줄은 접는다. 그 아래 조용한 [이 방의 이야기 더 읽기] → 결제 전 화면.
+  //   만신·오검은 지금 분량 그대로. 결제한 탭이면 아무것도 접지 않는다. 흐린 단락은 공개 문장(유료 원본은 여전히 함수 book에서만).
+  const CUT_ROOMS = CHAPTER_ORDER.slice(2);
+  function freeCut(scr) {
+    const room = scr && scr.dataset.room;
+    const body = scr && js("reading-body", scr);
+    if (!body) return;
+    const old = js("free-more", scr);
+    if (old) old.remove();
+    [...body.children].forEach((el) => el.classList.remove("is-teaser", "is-cut"));
+    js("reading-close", scr)?.classList.remove("is-cut");
+    if (!BOOK_ON || !CUT_ROOMS.includes(room) || passNow() || !T.room.more) return;
+    let sec = 0, ps = 0, teased = false, any = false;
+    [...body.children].forEach((el) => {
+      if (el.tagName === "H3") {
+        sec++;
+        ps = 0;
+        teased = false;
+        return;
+      }
+      if (el.tagName === "P" && !el.classList.contains("restore-note")) {
+        ps++;
+        if (ps <= (sec === 0 ? 2 : 1)) return;
+        if (!teased) {
+          teased = true;
+          any = true;
+          return el.classList.add("is-teaser");
+        }
+      }
+      if (el.tagName !== "H3" && !(el.classList.contains("restore-note"))) {
+        el.classList.add("is-cut");
+        any = true;
+      }
+    });
+    js("reading-close", scr)?.classList.add("is-cut");
+    if (!any) return;
+    const M = T.room.more;
+    const box = rmk("div", "free-more");
+    box.dataset.js = "free-more";
+    const rule = rmk("span", "free-more__rule");
+    rule.setAttribute("aria-hidden", "true");
+    const btn = rmk("button", "free-more__btn", "");
+    btn.type = "button";
+    btn.dataset.js = "free-more-btn";
+    btn.innerHTML = `<span class="free-more__seal" aria-hidden="true">${SEAL_SVG}</span><span>${M.btn || ""}</span>`;
+    btn.addEventListener("click", () => {
+      try {
+        window.sessionStorage.setItem(PAYROOM_KEY, room); // 결제하면 이 방 결과로 돌아와 나머지가 바로 열린다
+      } catch (e) {
+        /* 저장 막힘: 돌아오면 책 목차로 */
+      }
+      track("so_book_offer_click", { placement: "room_more" });
+      goPay("room");
+    });
+    box.append(rule, btn, rmk("p", "free-more__note", M.note || ""));
+    (js("reading-close", scr) || body).after(box);
   }
   // (13단계) 방 결과의 책 한 줄: 결제 상태와 무관하게 떡밥(hook) + "책에서 이 방의 장 열기 →"(그 장 표지로). 옛 "여섯 문 끝…" 줄은 숨김
   function updateBookLines() {
@@ -3394,6 +3453,7 @@
     if (p) onAccount.pass(p); // (23단계) 로그인한 기기면 결제 코드를 계정에 연결
     if (/-result$/.test(currentName)) renderRest(screens[currentName]); // (22단계) 결제·코드 확인·폐기 → 방 결과의 나머지 칸 다시
     updateBookLines(); // (2026-10-30 v7) 책 장 링크는 산 사람에게만
+    CHAPTER_ORDER.forEach((r) => freeCut(screens[`${r}-result`])); // (2026-10-31) 결제·코드 확인 → 접은 풀이 펼치기(또는 다시 접기)
   };
   const passNow = () => readPass() || memPass;
   // 함수 book 부르기 → { ok, data } 또는 { kind: fail | wait | offline }. 본문은 pass·file 두 칸뿐, 응답은 저장하지 않는다(no-store)
@@ -6399,7 +6459,7 @@
     so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao", "keep_on", "keep_off", "keep_load"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale", "other"] },
     // (2026-10-30 기획 v7 작업 D) 오검 뒤 책 제안: 보임·자세히 보기·무료로 계속·닫기. placement·도착 방 이름만
     so_book_offer_view: { placement: ["after_ogham"], destination_room: CHAPTER_ORDER },
-    so_book_offer_click: { placement: ["after_ogham", "after_saju", "finale"] },
+    so_book_offer_click: { placement: ["after_ogham", "after_saju", "finale", "room_more"] }, // (2026-10-31) room_more = 베다~시빌라 핵심 풀이 아래 [더 읽기]
     so_book_offer_continue: { placement: ["after_ogham"], destination_room: CHAPTER_ORDER },
     so_book_offer_close: { placement: ["after_ogham"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
