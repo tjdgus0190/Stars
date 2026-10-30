@@ -560,8 +560,11 @@
   // 전환 타이머는 go()의 pending과 따로 둔다 (go가 부르는 순간 지워지면 안 됨)
   const sigil = js("sigil-rise");
   let sig = null;
+  // (2026-10-30 기획 v7 작업 D) 오검을 마치고 셋째 방으로 처음 갈 때 한 번, 책 제안. offerGate는 결제 부분이 켜질 때 채운다(결제 off면 null)
+  let offerGate = null;
   function playSigil(room, fromEl, target, flash, openCls = "is-entering") {
     if (sig) return;
+    if (offerGate && offerGate(room, () => playSigil(room, fromEl, target, flash, openCls))) return;
     const r = fromEl ? fromEl.getBoundingClientRect() : null;
     const fx = r && r.width ? r.left + r.width / 2 : innerWidth / 2;
     const fy = r && r.height ? r.top + r.height / 2 : innerHeight * 0.4;
@@ -1181,7 +1184,7 @@
       show(el, true);
       el.dataset.state = "open";
       show(js("book-line-note", el), false);
-      show(js("result-book-link", el), true);
+      show(js("result-book-link", el), Boolean(passNow())); // (2026-10-30 v7 작업 B) "책에서 이 장 펼치기"는 산 사람에게만(방마다 되풀이하는 책 안내를 걷음)
       js("book-line-link-label", el).textContent = T.room.bookLink;
     });
   }
@@ -3390,6 +3393,7 @@
     syncHubKakao();
     if (p) onAccount.pass(p); // (23단계) 로그인한 기기면 결제 코드를 계정에 연결
     if (/-result$/.test(currentName)) renderRest(screens[currentName]); // (22단계) 결제·코드 확인·폐기 → 방 결과의 나머지 칸 다시
+    updateBookLines(); // (2026-10-30 v7) 책 장 링크는 산 사람에게만
   };
   const passNow = () => readPass() || memPass;
   // 함수 book 부르기 → { ok, data } 또는 { kind: fail | wait | offline }. 본문은 pass·file 두 칸뿐, 응답은 저장하지 않는다(no-store)
@@ -3636,6 +3640,9 @@
   }
   // (2026-10-29 기획 v6) 결제를 묻는 자리는 방 순서로 정한다: 첫 방 = 작은 칸(mini) / 둘째 방 = 상세 해석서 전체를 한 번 크게 제안(big) /
   //   셋째~여섯째 = 작은 잠금 칸 + 떠 있는 버튼(again) / 일곱째 = 완주 + 원하면 여는 작은 칸(final). 어느 경우에도 다음 방은 막지 않는다
+  const ROOM_SALE = false; // (2026-10-30 v7) 방별 판매 칸 끔
+  // (2026-10-30 v8 운영자 결정) 만신 결과 끝 한 줄 책 링크(선택지 ②). 기본 false. 배포 뒤 14일 지표가 기준의 50% 미만이면 true로 바꾼다(data.js offer.sajuLink 문구)
+  const SAJU_BOOK_LINK = false;
   function restTier(room) {
     const i = CHAPTER_ORDER.indexOf(room);
     return i <= 0 ? "mini" : i === 1 ? "big" : i === CHAPTER_ORDER.length - 1 ? "final" : "again";
@@ -3679,6 +3686,24 @@
     const n = comma(chapterChars(room));
     box.dataset.state = open && loaded ? "open" : open ? restState[room] || (free ? "free" : "loading") : "locked";
     const st = box.dataset.state;
+    // (2026-10-30 기획 v7 작업 B) 방마다 되풀이하던 판매 칸(잠금·맛보기·흐린 막대·가격·결제 버튼)은 걷는다. 결제하지 않은 사람에게는 이 칸이 없다.
+    //   결제한 사람의 "이 방의 나머지 이야기"(open)는 그대로. 책 제안은 오검 → 셋째 방으로 갈 때 한 번(offerBook). 되돌리려면 ROOM_SALE = true
+    box.hidden = st === "locked" && !ROOM_SALE;
+    if (box.hidden && room === "saju" && SAJU_BOOK_LINK && payScr) {
+      // (v8 되돌리기 기준의 선택지 ②, 기본 꺼짐) 만신 결과 끝 한 줄 책 링크: 가격·잠금 표현 없이 책 안내 화면으로만
+      box.hidden = false;
+      box.dataset.state = "link";
+      const a = rmk("button", "text-link room-rest__saju-link", (T.offer && T.offer.sajuLink) || "");
+      a.type = "button";
+      a.dataset.js = "room-rest-saju-link";
+      a.addEventListener("click", () => {
+        track("so_book_offer_click", { placement: "after_saju" });
+        goPay("after_saju");
+      });
+      box.append(a);
+      return;
+    }
+    if (box.hidden) return;
     box.append(rmk("h2", "room-rest__title", RT.title || ""));
     if (st === "open") {
       if (!free) box.append(rmk("p", "room-rest__note", RT.openNote || ""));
@@ -5290,13 +5315,146 @@
   // (18-11) 결제 전 화면에 들어온 길: preview · toc · other
   let payFrom = "other";
   // (2026-10-21) hub·story·locked 길을 더함. 결제 전 화면으로 갔으면 true
-  const PAY_FROM = ["preview", "toc", "hub", "story", "locked", "room", "dock"]; // (22단계) room = 방 결과의 나머지 이야기 칸 · (2026-10-25) dock = 결과 화면 아래 떠 있는 버튼
+  const PAY_FROM = ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale"]; // (2026-10-30 v7) offer = 오검 뒤 책 제안 · after_saju = 만신 한 줄 링크(기본 꺼짐) · finale = 완주 화면 // (22단계) room = 방 결과의 나머지 이야기 칸 · (2026-10-25) dock = 결과 화면 아래 떠 있는 버튼
   function goPay(from) {
     if (!payScr) return false;
     payFrom = PAY_FROM.includes(from) ? from : "other";
-    if (from !== "room" && from !== "dock") takePayRoom(); // 다른 길로 왔으면 지난 방 기억은 지운다
+    if (from !== "room" && from !== "dock" && from !== "offer") takePayRoom(); // 다른 길로 왔으면 지난 방 기억은 지운다 (offer = 오검 뒤 책 제안: 결제하면 오검 결과로)
     go("deeper");
     return true;
+  }
+  // ═════════ (2026-10-30 기획 v7 작업 D) 오검 → 셋째 방 사이 책 제안 (한 번) ═════════
+  // 언제: 오검(둘째 방)을 마친 사람이 셋째 방을 처음 열 때(결과의 문·떠 있는 버튼·입구 주 버튼 어느 길이든). 결제한 사람·이미 본 사람은 건너뛴다.
+  // 무료로 계속 / 닫기 = 그대로 셋째 방으로(결제·로그인 요구 없음). 자세히 보기 = 결제 전 화면(가격·받는 것·환불 안내의 원본)
+  // 본 기록: 이 기기 localStorage OFFER_KEY("1" 하나, 입력값 아님 6장) + 메모리. 새로고침·뒤로 가기·이어가기·재방문에도 다시 뜨지 않는다
+  const OFFER_KEY = "strange-oracle-offer";
+  let finaleBookPaint = null; // (작업 E) 완주 화면 책 칸 다시 그리기(결제 켜짐일 때만)
+  let offerSeenMem = false;
+  const offerSeen = () => {
+    if (offerSeenMem) return true;
+    try {
+      return window.localStorage.getItem(OFFER_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  };
+  const markOffer = () => {
+    offerSeenMem = true;
+    try {
+      window.localStorage.setItem(OFFER_KEY, "1");
+    } catch (e) {
+      /* 저장 막힘: 이 화면에서만 */
+    }
+  };
+  function setupOffer() { // 결제 화면(payScr)이 만들어진 뒤 한 번 부른다
+    if (!payScr || !T.offer) return;
+    const O = T.offer;
+    const third = CHAPTER_ORDER[2];
+    const dlg = document.createElement("dialog");
+    dlg.className = "dialog book-offer";
+    dlg.dataset.js = "book-offer";
+    dlg.setAttribute("aria-labelledby", "book-offer-title");
+    const bd = rmk("div", "dialog__body");
+    const x = rmk("button", "book-offer__x", "×");
+    x.type = "button";
+    x.dataset.js = "book-offer-close";
+    x.setAttribute("aria-label", O.close || "");
+    const eb = rmk("p", "book-offer__eyebrow", O.eyebrow || "");
+    const h = rmk("h2", "dialog__title book-offer__title", PAY.title || "");
+    h.id = "book-offer-title";
+    const lead = rmk("p", "book-offer__lead", O.lead || "");
+    const q = PAY.quick || {};
+    const ul = rmk("ul", "book-offer__list");
+    (q.items || []).forEach((t) => ul.append(rmk("li", "", t)));
+    const price = setPriced(rmk("p", "book-offer__price"), "{price}원");
+    price.dataset.js = "book-offer-price";
+    const refund = rmk("p", "book-offer__refund", q.refund || "");
+    const acts = rmk("div", "dialog__actions");
+    const more = rmk("button", "btn btn--primary btn--block book-offer__more", O.detail || ""); // 결제 버튼과 같은 금빛
+    more.type = "button";
+    more.dataset.js = "book-offer-detail";
+    const cont = rmk("button", "btn btn--ghost btn--block", "");
+    cont.type = "button";
+    cont.dataset.js = "book-offer-continue";
+    acts.append(more, cont);
+    const note = rmk("p", "book-offer__note", O.note || "");
+    bd.append(x, eb, h, lead, ul, price);
+    const sb = seasonBlock();
+    if (sb) bd.append(sb);
+    bd.append(refund, acts, note);
+    dlg.append(bd);
+    document.body.append(dlg);
+    let after = null;
+    const shut = (how) => {
+      if (!dlg.open) return;
+      const fn = after;
+      after = null;
+      if (how === "continue") track("so_book_offer_continue", { placement: "after_ogham", destination_room: third });
+      if (how === "close") track("so_book_offer_close", { placement: "after_ogham" });
+      try {
+        dlg.close();
+      } catch (e) {
+        dlg.removeAttribute("open");
+      }
+      if (how === "detail") {
+        try {
+          window.sessionStorage.setItem(PAYROOM_KEY, CHAPTER_ORDER[1]); // 결제하면 오검 결과로 돌아와 나머지 이야기가 바로 열린다
+        } catch (e) {
+          /* 저장 막힘: 돌아오면 책 목차로 */
+        }
+        goPay("offer");
+      } else if (fn) fn();
+    };
+    x.addEventListener("click", () => shut("close"));
+    cont.addEventListener("click", () => shut("continue"));
+    more.addEventListener("click", () => {
+      track("so_book_offer_click", { placement: "after_ogham" });
+      shut("detail");
+    });
+    dlg.addEventListener("cancel", (e) => {
+      e.preventDefault(); // Esc = 닫기(무료로 계속과 같은 길)
+      shut("close");
+    });
+    // (2026-10-30 기획 v7 작업 E) 완주 화면: 완주 문장·나의 이야기 버튼 아래 조용한 책 칸 하나(강제 팝업 아님). 산 사람은 "내 책 펴기"
+    const fin = js("screen-finale");
+    const storyBtn = fin && js("finale-go-story", fin);
+    if (storyBtn) {
+      const fb = rmk("div", "finale-book");
+      fb.dataset.js = "finale-book";
+      const fl = rmk("p", "finale-book__lead", "");
+      const fbtn = rmk("button", "btn btn--ghost btn--block", "");
+      fbtn.type = "button";
+      fbtn.dataset.js = "finale-book-go";
+      fb.append(fl, fbtn);
+      storyBtn.after(fb);
+      fbtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (passNow()) return go("report");
+        track("so_book_offer_click", { placement: "finale" });
+        goPay("finale");
+      });
+      finaleBookPaint = () => {
+        const paid = Boolean(passNow());
+        fl.textContent = paid ? "" : O.finaleLead || "";
+        fl.hidden = paid;
+        fbtn.textContent = (paid ? O.finaleBtnPaid : O.finaleBtn) || "";
+      };
+      finaleBookPaint();
+    }
+    offerGate = (room, go3) => {
+      if (room !== third || !isDone(CHAPTER_ORDER[1]) || isDone(room) || passNow() || offerSeen() || dlg.open) return false;
+      markOffer();
+      after = go3;
+      cont.textContent = fill(O.cont || "", { next: (T.rooms[third] && T.rooms[third].name) || "" });
+      price.replaceWith(setPriced(price, "{price}원")); // 첫 계절 마감이 지났으면 지금 값으로
+      try {
+        dlg.showModal();
+      } catch (e) {
+        dlg.setAttribute("open", "");
+      }
+      track("so_book_offer_view", { placement: "after_ogham", destination_room: third });
+      return true;
+    };
   }
   // (2026-10-25) 떠 있는 결제 버튼: 방 결과 아래 결제 버튼과 같은 길(결제를 시작한 방 기억 → 결제 전 화면)
   {
@@ -5373,6 +5531,7 @@
     const codeDlg = js("pay-code-dialog");
     screens.deeper = payScr;
     screens.paycheck = checkScr;
+    setupOffer(); // (2026-10-30 v7 작업 D)
     screens.paypopup = popScr;
     [payScr, checkScr, popScr, codeDlg].forEach((el) => applyText(el));
     const tocTpl = js("pay-toc-tpl"); // 목차 "내 열람 코드 보기" 줄
@@ -6210,6 +6369,7 @@
     $$(".converge__card, .finale__lead, .finale .btn", finaleScr).forEach((el) => el.animate([{ opacity: 0 }, { opacity: 1 }], o));
   }
   enter.finale = () => {
+    if (finaleBookPaint) finaleBookPaint();
     finaleScr.classList.remove("is-running");
     void finaleScr.offsetWidth;
     finaleScr.classList.add("is-running");
@@ -6236,7 +6396,12 @@
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
     so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail", "consent", "logout", "erase"], mode: ["restore", "link", "forget", "login"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
-    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao", "keep_on", "keep_off", "keep_load"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "other"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao", "keep_on", "keep_off", "keep_load"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale", "other"] },
+    // (2026-10-30 기획 v7 작업 D) 오검 뒤 책 제안: 보임·자세히 보기·무료로 계속·닫기. placement·도착 방 이름만
+    so_book_offer_view: { placement: ["after_ogham"], destination_room: CHAPTER_ORDER },
+    so_book_offer_click: { placement: ["after_ogham", "after_saju", "finale"] },
+    so_book_offer_continue: { placement: ["after_ogham"], destination_room: CHAPTER_ORDER },
+    so_book_offer_close: { placement: ["after_ogham"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };

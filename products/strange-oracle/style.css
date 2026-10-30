@@ -5672,12 +5672,12 @@ body.is-scrolling .cosmos > * { animation-play-state: paused; }
 .room-rest__more { margin: var(--space-3) 0 0; font-size: var(--fs-sm); line-height: var(--lh-ui); color: var(--c-text); word-break: keep-all; }
 
 /* ── (2026-10-25) 결제 버튼: 금빛으로 크고 눈에 띄게 (방 결과 아래 · 결제 전 화면 · 떠 있는 버튼 같은 결) ── */
-.room-rest__buy, .pay-buy, .pay-dock__btn {
+.room-rest__buy, .pay-buy, .pay-dock__btn, .book-offer__more {
   min-height: 58px; border: 0; border-radius: 14px; font-size: 18px; font-weight: 800; letter-spacing: -0.01em;
   background: linear-gradient(100deg, oklch(0.74 0.12 70), oklch(0.88 0.11 88) 50%, oklch(0.76 0.13 66));
   color: oklch(0.2 0.04 60); box-shadow: 0 8px 28px oklch(0.75 0.13 70 / 0.42), inset 0 1px 0 oklch(1 0 0 / 0.5);
 }
-.room-rest__buy:hover, .pay-buy:not([aria-disabled="true"]):hover, .pay-dock__btn:hover { filter: brightness(1.06); }
+.room-rest__buy:hover, .pay-buy:not([aria-disabled="true"]):hover, .pay-dock__btn:hover, .book-offer__more:hover { filter: brightness(1.06); }
 .pay-buy[aria-disabled="true"] { filter: grayscale(0.6); }
 .room-rest__buy { margin-top: var(--space-3); }
 
@@ -5878,3 +5878,30 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 .collect__name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .collect__item.is-here { border-color: oklch(0.88 0.12 85); box-shadow: 0 0 10px oklch(0.85 0.13 80 / 0.35); color: var(--c-text-strong, #fff); }
 .collect__item.is-empty { border-style: dashed; background: none; color: var(--c-text-muted); }
+
+/* ═════════ (2026-10-30 기획 v7 작업 D) 오검 → 셋째 방 사이 책 제안 (한 번) ═════════ */
+.book-offer { max-height: calc(100dvh - 32px); overflow-y: auto; }
+.book-offer .dialog__body { position: relative; padding-top: var(--space-6); text-align: center; }
+.book-offer__x { position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; border: 0; background: none; color: var(--c-text-muted); font-size: 24px; line-height: 1; cursor: pointer; }
+.book-offer__eyebrow { margin: 0; font-size: var(--fs-xs, 12px); letter-spacing: 0.08em; color: var(--c-accent, #c9a45c); }
+.book-offer__title { margin: 0; }
+.book-offer__lead { margin: 0; font-size: var(--fs-sm); line-height: 1.6; color: var(--c-text); text-align: left; }
+.book-offer__list { margin: 0; padding: var(--space-3) var(--space-4); list-style: none; display: grid; gap: var(--space-1); text-align: left; font-size: var(--fs-sm); border: 1px solid oklch(0.84 0.12 85 / 0.35); border-radius: 10px; }
+.book-offer__list li::before { content: "✦"; margin-right: 6px; color: var(--c-accent, #c9a45c); }
+.book-offer__price { margin: var(--space-1) 0 0; font-size: var(--fs-lg); font-weight: 700; color: var(--c-text-strong); }
+.book-offer .season { margin-top: 0; }
+.book-offer__refund { margin: 0; font-size: var(--fs-xs, 12px); color: var(--c-text-muted); }
+.book-offer .dialog__actions { margin-top: var(--space-1); }
+.book-offer__note { margin: 0; font-size: var(--fs-xs, 12px); color: var(--c-text-muted); }
+.room-rest__saju-link { display: block; margin: var(--space-2) auto 0; }
+/* (작업 E) 완주 화면의 책 소개 한 칸 */
+.finale-book { margin: var(--space-5) auto 0; max-width: 360px; text-align: center; display: grid; gap: var(--space-2); }
+.finale-book__lead { margin: 0; font-size: var(--fs-sm); line-height: 1.6; color: var(--c-text); }
+/* (2026-10-30 v7 작업 A·F) 자주 묻는 것: 처음엔 접힘. 제목 줄을 누르면 펼친다 */
+.faq__fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; margin-bottom: 0; }
+.faq__fold > summary::-webkit-details-marker { display: none; }
+.faq__fold > summary::after { content: "▾"; font-size: 0.9em; color: var(--c-text-muted); transition: transform 0.2s; }
+.faq__fold[open] > summary::after { transform: rotate(180deg); }
+.faq__fold[open] > summary { margin-bottom: var(--space-4); }
+.faq__h { margin: 0; font: inherit; color: inherit; letter-spacing: inherit; }
+.hub .faq { margin-top: var(--space-8); padding-top: var(--space-4); }

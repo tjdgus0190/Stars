@@ -90,13 +90,20 @@ function paidSentences() {
   check("주 버튼 = 첫 번째 문 열기(Ⅰ 만신)", (await txt("[data-js=hub-cta-label]")) === (await ev("TEXT.hub.cta.first")) && (await ev("document.querySelector('[data-js=hub-cta]').dataset.room")) === "saju");
   check("지금까지의 이야기 = 0방이면 숨김", await has("[data-js=hub-sofar]", "is-hidden"));
   // 보이는 답 합계 300자 이상 (13단계: 5번 문답은 책 문답, 결제 문답 은퇴)
-  const faq = await ev("[...document.querySelectorAll('[data-js=hub-faq] dd')].filter(d => d.offsetHeight > 0).reduce((a, d) => a + d.textContent.replace('[초안] ', '').length, 0)");
-  check("자주 묻는 것: 펼친 채 보이는 답 합계 300자 이상", faq >= 300, String(faq));
+  // (2026-10-30 기획 v7 작업 A·F) 자주 묻는 것은 처음에 접힘(제목만), 누르면 펼침. 문답은 DOM에 그대로(소개 글 300자 이상, 운영 규칙 7장)
+  const faq = await ev("[...document.querySelectorAll('[data-js=hub-faq] .faq__item')].filter(i => getComputedStyle(i).display !== 'none').reduce((a, i) => a + i.querySelector('dd').textContent.replace('[초안] ', '').length, 0)");
+  const faqClosed = await ev("!document.querySelector('[data-js=faq-fold]').open && !document.querySelector('[data-js=hub-faq] dd').checkVisibility()");
+  await ev("document.querySelector('[data-js=faq-fold] > summary').click()");
+  const faqOpen = await ev("document.querySelector('[data-js=faq-fold]').open && document.querySelector('[data-js=hub-faq] dd').checkVisibility()");
+  await ev("document.querySelector('[data-js=faq-fold] > summary').click()");
+  const faqReclosed = await ev("!document.querySelector('[data-js=faq-fold]').open");
+  check("(v7) 자주 묻는 것: 처음엔 접힘(답 안 보임) · 누르면 펼침 · 다시 누르면 접힘 · 답 합계 300자 이상(DOM)", faqClosed && faqOpen && faqReclosed && faq >= 300, String(faq));
   // (14단계) 결제는 pay.mode에 따른다: off(배포판)면 가격·결제 말 0, test(시험 페이지)면 구매 문답이 보이는 것이 맞다 — off의 결제 DOM 0은 e2e-pay가 따로 본다
   const PAY_OFF = await ev("TEXT.pay.mode === 'off'");
   check("13단계: FAQ 결제 문답 훅 없음·가격 말 없음 (off일 때만)", !PAY_OFF || await ev("!document.querySelector('[data-js=hub-faq-paid]') && !/[0-9],[0-9]{3}\\s*원|결제/.test(document.querySelector('[data-js=hub-faq]').innerText)"));
   check("입구 광고 0개(14-2)", (await ev("document.querySelectorAll('#screen-hub [data-js=ad-slot], #screen-hub [data-ad]').length")) === 0);
-  check("첫 화면(스크롤 전)에 주 버튼·여정 칩 보임", await ev("(() => { const r = (s) => document.querySelector(s).getBoundingClientRect(); return r('[data-js=hub-cta]').bottom <= innerHeight && document.querySelector('.journey__chip').getBoundingClientRect().bottom <= innerHeight; })()"));
+  check("첫 화면(스크롤 전)에 주 버튼 보임", await ev("document.querySelector('[data-js=hub-cta]').getBoundingClientRect().bottom <= innerHeight"));
+  check("(v7 작업 A) 입구: 칩 줄·자물쇠 줄('밖으로 나가지 않아요')·'문은 순서대로 하나씩 열려요'·'중간에 멈춰도 괜찮아요' 없음", await ev("!document.querySelector('#screen-hub .hub-chips, #screen-hub .hub-privacy, #screen-hub .doors-note, #screen-hub .hub-assure') && !/밖으로 나가지 않아요|순서대로 하나씩 열려요|중간에 멈춰도 괜찮아요/.test(document.querySelector('#screen-hub').innerText)"));
   check("입구 전에는 저장소 비어 있음", (await store()) === "");
   const d0 = await doors();
   check("문 상태: Ⅰ만 is-next, Ⅱ~Ⅶ 잠김(aria-disabled)", d0 === "saju:is-next ogham:is-locked(aria) star:is-locked(aria) decan:is-locked(aria) tzolkin:is-locked(aria) rune:is-locked(aria) sibyl:is-locked(aria)", d0);
@@ -172,6 +179,10 @@ function paidSentences() {
   await click("[data-js=sofar-line][data-room=ogham]");
   check("지금까지 줄 → 결과 다시 보기(번쩍)", await waitScreen("screen-ogham-result", 3000));
   await click("#screen-ogham-result [data-js=result-next-door]");
+  // (2026-10-30 기획 v7 작업 D) 결제가 켜진 판이면 셋째 방으로 처음 갈 때 책 제안이 한 번 뜬다 → [무료로 계속]
+  const offerUp = await waitFor("!!document.querySelector('[data-js=book-offer]')?.open", 1500);
+  check("(v7) 오검 → 셋째 방 처음: 결제 켜짐이면 책 제안 한 번(무료로 계속 가능) · 꺼짐이면 없음", PAY_OFF ? !offerUp : offerUp);
+  if (offerUp) await click("[data-js=book-offer-continue]");
   check("다음 문 → 상징(별) → Ⅲ 베다의 방 시작", (await ev("document.querySelector('[data-js=sigil-rise]').dataset.room")) === "star" && (await waitScreen("screen-star-intro", 3000)));
   await click("[data-js=topbar-home]");
   check("입구 버튼 → 입구", await waitScreen("screen-hub", 3000));
@@ -331,7 +342,7 @@ function paidSentences() {
   check("10-1: 복사 버튼 → 클립보드 = 화면의 코드 + 복사 완료 한 줄", (await ev("window.__clip")) === code3 && !(await hiddenEl("[data-js=resume-copied]")));
   await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 800, deviceScaleFactor: 2, mobile: true });
   const leakHere = async () => { const st = await ev("JSON.stringify(Object.fromEntries(Object.keys(sessionStorage).map(k => [k, sessionStorage.getItem(k)]))) + '|' + JSON.stringify(Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))) + '|' + document.cookie + '|' + location.href + '|' + JSON.stringify(history.state)"); return CODES.filter((c) => st.includes(c)); };
-  check("10-1: 코드를 만드는 동안 요청 0건, 저장소·쿠키·주소·history에 코드 없음", b.log.requests.length === reqMake && (await leakHere()).length === 0 && (await ev("localStorage.length")) === 0 && (await ev("document.cookie")) === "");
+  check("10-1: 코드를 만드는 동안 요청 0건, 저장소·쿠키·주소·history에 코드 없음", b.log.requests.length === reqMake && (await leakHere()).length === 0 && (await ev("Object.keys(localStorage).filter((k) => k !== 'strange-oracle-offer').length")) === 0 && (await ev("document.cookie")) === "");
   await click("[data-js=topbar-home]").catch(() => {});
   await ev("StrangeOracle.go('story')");
   await waitScreen("screen-story", 3000);
@@ -503,7 +514,7 @@ function paidSentences() {
   const all = b.log.bodies.map((x) => x.url + " " + x.body).join("\n");
   check("요청 주소·본문에 이름 없음", !all.includes(NAME) && !all.includes(encodeURIComponent(NAME)));
   check("주소 해시에 입력값 없음(화면 이름만)", /^#?[a-z-]*$/.test(await ev("location.hash")));
-  check("localStorage·쿠키 0", (await ev("localStorage.length")) === 0 && (await ev("document.cookie")) === "");
+  check("localStorage·쿠키 0", (await ev("Object.keys(localStorage).filter((k) => k !== 'strange-oracle-offer').length")) === 0 && (await ev("document.cookie")) === "");
   const ext = b.log.requests.filter((r) => !r.includes("127.0.0.1:") && !r.includes("cdn.jsdelivr.net") && !r.startsWith("GET data:") && !r.startsWith("GET blob:") && !r.includes("about:blank"));
   // (19-5) GA4 gtag.js(googletagmanager, 시험 ID)는 부르되 cdp.js가 막는다 → 막힌 구글 요청은 외부 전송이 아니다
   const ga = ext.filter((r) => /^GET https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-TEST12345$/.test(r));

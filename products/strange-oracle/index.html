@@ -209,12 +209,7 @@
              요소 수는 그대로다(윗줄 1개 삭제, 칩 줄은 문 아래에서 위로 이동). 문구 길이는 design 10단계 표 -->
         <h1 class="logo" data-t="hub.logo">낯선 점술관</h1>
         <p class="hub-summary" data-t="intro.summary">만신의 사주에서 로마의 신탁까지, 일곱 점술로 받는 나의 이야기</p>
-        <ul class="journey__chips hub-chips">
-          <li class="journey__chip" data-t="hub.journey.chips.0">일곱 문화 점술</li>
-          <li class="journey__chip" data-t="hub.journey.chips.1">입력은 한 번만</li>
-          <li class="journey__chip" data-t="hub.journey.chips.2">나눠 봐도 돼요</li>
-        </ul>
-        <p class="hub-privacy"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 7V5.5a4 4 0 0 1 8 0V7M3 7h10v7H3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span data-t="intro.note">이름·생일 등을 넣어요. 밖으로 나가지 않아요</span></p>
+        <!-- (2026-10-30 기획 v7 작업 A) 칩 줄(일곱 문화 점술·…)과 자물쇠 줄("이름·생일 등을 넣어요…")은 첫 화면에서 걷었다. 입력값 보관 안내는 입력 화면(notice*)·FAQ에 그대로 -->
       </header>
 
       <!-- (8단계) 주 버튼 하나. 상태별 문구(JS): 처음 hub.cta.first / 진행 중 hub.cta.next("{num} {room} 열기") / 6/6 hub.cta.story.
@@ -263,7 +258,6 @@
       </button>
 
       <!-- (10단계 10-1 a) 완결 안내 한 줄: 여섯 문 아래에 있던 journey__end 줄을 문 바로 아래로 옮겨 문구만 바꾼다(요소 수 그대로, 키 hub.journey.end 유지) -->
-      <p class="journey__end hub-end hub-assure"><span class="journey__end-mark" aria-hidden="true">✦</span><span data-t="hub.journey.end">중간에 멈춰도 괜찮아요. 방 하나만 봐도 이야기 한 장이 완결돼요</span></p>
 
       <!-- pay:on -->
       <!-- (22단계, 운영자 2026-10-23) 입구 카카오 로그인: 카카오에 연결해 둔 책을 첫 화면에서 바로 다시 연다. auth.kakao가 "on"이 아니면 JS가 지운다.
@@ -319,7 +313,6 @@
       <!-- (8단계) 여정 한눈에. (결정 52) 칩 3개는 점으로 이은 한 줄로. 여섯 방 줄(journey-path)은 여섯 문과 겹쳐 10단계(10-6)에서 지웠다 -->
       <section class="journey" aria-labelledby="journey-title">
         <h2 class="visually-hidden" id="journey-title" data-t="hub.journey.title">여정 한눈에</h2>
-        <p class="doors-note" data-t="hub.journey.order">문은 순서대로 하나씩 열려요</p>
       </section>
 
       <!-- (7단계) 여섯 개의 고대 문. 순서 Ⅰ오검 → Ⅱ별 → Ⅲ데칸 → Ⅳ촐킨 → Ⅴ룬 → Ⅵ시빌라 (장 번호 = 진행 순서).
@@ -506,7 +499,9 @@
 
       <!-- (8단계) 자주 묻는 것: 소개 글(300자 이상)을 대신한다. 접지 않고 펼친 채 (글자 수가 접힌 칸에 숨지 않게) -->
       <section class="faq" aria-labelledby="faq-title">
-        <h2 class="faq__title" id="faq-title" data-t="hub.faq.title">자주 묻는 것</h2>
+        <!-- (2026-10-30 기획 v7 작업 A·F) 처음에는 접힘: 제목만 보이고 누르면 문답이 펼쳐진다 -->
+        <details class="faq__fold" data-js="faq-fold">
+        <summary class="faq__title" id="faq-title"><h2 class="faq__h" data-t="hub.faq.title">자주 묻는 것</h2></summary>
         <dl class="faq__list" data-js="hub-faq">
           <div class="faq__item"><dt data-t="hub.faq.items.0.q">무엇을 보나요?</dt><dd data-t="hub.faq.items.0.a">만신의 사주 명리, 켈트 오검, 베다 별자리, 이집트 데칸, 마야 촐킨, 북유럽 룬, 로마 신탁까지 일곱 문화의 점술로 당신의 타고난 그릇·뿌리·속마음·숨은 재능·다가올 순환·과거와 미래·오늘의 질문을 차례로 비춰 봐요.</dd></div>
           <div class="faq__item"><dt data-t="hub.faq.items.1.q">결과는 어떻게 읽나요?</dt><dd data-t="hub.faq.items.1.a">방마다 결과 이름과 핵심 풀이가 나와요. 이름은 그 점술이 본 당신의 한 모습이고, 풀이는 요즘의 마음이나 생활에 비춰 읽으면 돼요. 마음에 닿는 문장은 붙잡고, 맞지 않는 부분은 가볍게 넘겨도 괜찮아요. 일곱 조각은 여덟 원형 가운데 하나로 모여 나의 이야기 한 편이 되는데, 방을 하나 지날 때마다 앞선 원형이 바뀔 수 있어요. 정답을 맞히는 풀이가 아니라 지금의 나를 비춰 보는 이야기예요.</dd></div>
@@ -521,6 +516,7 @@
           <div class="faq__item"><dt data-t="hub.faq.map.1.q">지도 기록은 어떻게 지우나요?</dt><dd data-t="hub.faq.map.1.a">지도 주인은 지도 화면에서 친구 한 명이나 지도 전체를 바로 지워요. 친구는 참여할 때 받은 삭제 코드로 자기 기록을 지워요. 주인이 마지막으로 연 날부터 90일이 지나면 저절로 지워지고, 만든 날부터 1년을 넘겨 남지 않아요.</dd></div>
           <!-- /map:on -->
         </dl>
+        </details>
       </section>
 
       <!-- (12·14단계) 바닥글 줄: 지우기 안내 다음 줄. 쿠키 줄은 분석 ID가 있을 때만 hidden 해제 -->
