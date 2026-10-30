@@ -140,7 +140,22 @@ node --experimental-websocket marketing/strange-oracle/instagram/render-types.js
 ## "셋 중 하나" 캐러셀(화면 표기 "오늘의 신탁") (2026-10-27, 팔로워 모으기용)
 ```
 node --experimental-websocket marketing/strange-oracle/instagram/render-pick.js          # 네 묶음 → out/pick/<묶음>-NN.jpg
-node --experimental-websocket marketing/strange-oracle/instagram/render-pick.js rune     # 한 묶음만 (rune · sibyl · ogham · star)
+node --experimental-websocket marketing/strange-oracle/instagram/render-pick.js rune     # 한 묶음만 (rune · sibyl · ogham · star · tzolkin)
 ```
 - 장면 `pick.html?set=<묶음>&p=<쪽>` + `pick.js`(묶음마다 고른 셋과 "이번 주 한마디")·`pick.css`. 새 묶음은 `pick.js` SETS에 하나 더하면 된다.
 - 게시 문구는 `../sns.md` 「"골라 봐" 캐러셀 4편」.
+
+### 오늘의 기호 (촐킨, 2026-10-30, 매일 올리는 용)
+- 묶음 `tzolkin`: 칸 · 에브 · 킵, 답 쪽 상자 이름은 "오늘의 한마디"(묶음의 `word` 값). 날짜 없음.
+- 게시 문구:
+```
+오늘의 기호, 셋 중 하나
+
+260일을 도는 마야의 달력, 촐킨.
+돌에 새긴 문양 셋 중 먼저 눈이 간 번호를 골라 넘겨 보세요.
+몇 번이었는지 댓글로 남겨 주세요.
+
+내가 태어난 날의 이름은 프로필 링크에서.
+
+#낯선점술관 #오늘의신탁 #오늘의운세 #마야달력 #촐킨
+```

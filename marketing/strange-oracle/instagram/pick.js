@@ -47,6 +47,18 @@
       item: (c) => { const s = W.NAKSHATRAS.find((x) => x.code === c); return { icon: "star", name: s.name, lat: s.sanskrit, title: s.title, key: s.key }; },
       more: "내가 태어난 밤의 진짜 달의 집은",
     },
+    // (2026-10-30) 매일 올리는 "오늘의 기호": 촐킨 날 기호 셋. 한마디는 그 기호의 공개 key 문장에 맞춘 오늘 해 볼 일(8장 긍정 마무리)
+    tzolkin: {
+      room: "tzolkin", n: 4, name: "촐킨의 방", kind: "glyph", word: "오늘의 한마디",
+      ask: "돌에 새긴 문양<br />하나를 골라 보세요", sub: "260일을 도는 마야의 달력, 촐킨. 날마다 이름이 있어요",
+      picks: [
+        { code: "kan", word: "벌여 둔 일 가운데 하나는 오늘 내려놓아도 괜찮아요. 쉬는 것도 일의 한 부분이에요." },
+        { code: "eb", word: "혼자 돌아가는 길도 좋아요. 다만 오늘은 그 길 이야기를 한 사람에게 들려줘 보세요." },
+        { code: "kib", word: "오래 고르던 말 하나, 오늘은 다듬지 말고 그대로 건네 보세요." },
+      ],
+      item: (c) => { const t = W.TZOLKIN_SIGNS.find((x) => x.code === c); return { icon: "tzolkin", name: t.name, lat: t.latin, title: t.title, key: t.key }; },
+      more: "내가 태어난 날의 진짜 이름은",
+    },
   };
   const NUM = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ"];
   const CIR = ["①", "②", "③"];
@@ -77,7 +89,7 @@
     page.innerHTML = `${head}<p class="pick">${CIR[p - 1]}${JOSA[p - 1]} 골랐다면</p><div class="em">${mark(it)}</div>
       ${it.name ? `<p class="nm">${esc(it.name)}${it.lat ? `<span class="lat">${esc(it.lat)}</span>` : ""}${it.tree ? `<span class="lat">· ${esc(it.tree)}</span>` : ""}</p>` : ""}
       <p class="ti">${esc(it.title)}</p>${it.line ? `<p class="ln">“${esc(it.line)}”</p>` : ""}<p class="ky">${esc(it.key)}</p>
-      <div class="word"><span>이번 주 한마디</span><p>${esc(it.word)}</p></div>`;
+      <div class="word"><span>${S.word || "이번 주 한마디"}</span><p>${esc(it.word)}</p></div>`;
   } else {
     page.classList.add("pk-cta");
     page.innerHTML = `${head}<div class="mid"><p class="h ask2">몇 번을 골랐나요?</p><p class="sub2">댓글에 번호만 남겨 주세요 ${CIR.join(" ")}</p>
