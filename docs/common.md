@@ -186,3 +186,4 @@ CLAUDE.md 6장 예외. 지금은 strange-oracle의 app.js 안에만 있다(쓰�
 - **share-buttons.js** 카카오 설정에 `button`(버튼 이름), `imageWidth`·`imageHeight`, `content(slot)`(누른 자리에 맞춘 `{ title, description, imageUrl, url }`, 빠진 칸은 기본값)을 더할 수 있다. 안 넘기면 예전과 같다. 입력값은 넣지 않는다(6장).
 - **share-buttons.js** (2026-10-28) `ShareButtons.sendKakaoText(kakao, text, url, button)`: 글자만 보내는 카카오톡 메시지(text 템플릿, 200자까지). 받는 사람은 사용자가 카카오 화면에서 고른다. strange-oracle은 결제 직후 코드 카드에서 열람 코드를 자기에게 보낼 때 쓴다. 주소(url)에는 입력값·코드를 넣지 않는다. 기존 동작은 바뀌지 않는다.
 - **analytics.js** (2026-11-01) `internal: true`이면 `traffic_type=internal`을 `set`뿐 아니라 config 매개변수와 이벤트마다에도 붙인다(set만으로는 GA4 내부 트래픽 필터에 걸리지 않는 경우가 있었다). 일반 방문자에게는 붙지 않는다. 쓰는 제품: strange-oracle.
+- **analytics.js** (2026-11-01) utm 허용 목록에 `"#meta_id"`를 넣은 칸은 메타(인스타그램 앱 홍보 광고)가 자동으로 붙이는 숫자 광고 번호(6~24자리, 숫자만)도 받는다. 주소를 고칠 수 없는 광고를 구분하기 위해서다. 쓰는 제품: strange-oracle(utm_campaign·utm_content).

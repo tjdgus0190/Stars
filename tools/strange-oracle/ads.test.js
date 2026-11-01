@@ -292,3 +292,14 @@ test("analytics utm: init — 허용이면 page_location에 utm만, 거부면 qu
   e = env("?utm_source=instagram");
   assert.strictEqual(e.win.Analytics.init({ ga4: "G-TEST12345", events, utm: { search: "?utm_source=instagram", allow: UTM_ALLOW } }), false, "주소창에 query가 남아 있으면 여전히 시작하지 않음(제품이 먼저 지운다)");
 });
+
+test("analytics (2026-11-01): 목록에 #meta_id가 있으면 메타 숫자 광고 번호(6~24자리)만 받는다", () => {
+  const e = env();
+  const allow = { utm_source: ["ig"], utm_medium: ["paid"], utm_campaign: ["#meta_id", "ad7_rooms"], utm_content: ["ad7_rooms"] };
+  const c = e.win.Analytics.campaign;
+  assert.strictEqual(c("?utm_source=ig&utm_medium=paid&utm_campaign=120212345678901234&utm_content=120298765432109876", allow), "utm_source=ig&utm_medium=paid&utm_campaign=120212345678901234");
+  assert.strictEqual(c("?utm_source=ig&utm_campaign=12345", allow), "utm_source=ig", "5자리 이하는 받지 않음");
+  assert.strictEqual(c("?utm_source=ig&utm_campaign=1234567890123456789012345", allow), "utm_source=ig", "25자리 이상은 받지 않음");
+  assert.strictEqual(c("?utm_source=ig&utm_campaign=%23meta_id", allow), "utm_source=ig", "표지 글자 자체는 받지 않음");
+  assert.strictEqual(c("?utm_source=ig&utm_campaign=kim01012345678", allow), "utm_source=ig", "글자 섞인 값은 목록에 있어야만");
+});

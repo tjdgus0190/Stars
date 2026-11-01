@@ -6468,12 +6468,13 @@
   // (광고 측정, 제안서 strange-oracle-ads 8장 4번) 캠페인 구분: 광고 링크의 utm은 아래 값과 정확히 같을 때만 page_location에 남긴다.
   // (2026-10-26) 다른 query·목록 밖 값은 그 칸만 건너뛰고 허용 값만 남긴다(허용된 utm_source가 없으면 query 없는 주소로 기록). 클릭 ID(fbclid·ttclid)는 값을 보지 않고 버린다.
   // 값을 더하려면 제안서와 marketing/strange-oracle/render/README.md 표도 함께 고친다. 사용자 입력값은 이 목록에 들어갈 수 없다(6장).
+  // (2026-11-01) "#meta_id" = 인스타그램 앱 홍보 광고가 자동으로 붙이는 숫자 캠페인·광고 번호도 받는다(주소를 고칠 수 없는 광고 구분용)
   const CAMPAIGN = {
     allow: {
       utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads"], // (2026-10-30) 메타 광고 관리자에서 흔히 쓰는 값 더함
       utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
-      utm_campaign: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "x_profile", "gads_main", "kakao_share", "halloween", "halloween_samhain"],
-      utm_content: ["ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
+      utm_campaign: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "x_profile", "gads_main", "kakao_share", "halloween", "halloween_samhain"],
+      utm_content: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
     },
     ignore: ["fbclid", "ttclid"],
   };

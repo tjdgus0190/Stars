@@ -55,7 +55,9 @@
         continue;
       }
       const list = Object.prototype.hasOwnProperty.call(allow, k) ? allow[k] : null;
-      if (!Array.isArray(list) || !UTM_VALUE.test(v) || !list.includes(v)) continue;
+      // (2026-11-01) 목록에 "#meta_id"가 있으면 메타(인스타그램 홍보 광고)가 자동으로 붙이는 숫자 광고 번호(6~24자리)도 받는다. 숫자만이라 입력값이 실릴 수 없다
+      const metaId = list && list.includes("#meta_id") && /^[0-9]{6,24}$/.test(v);
+      if (!Array.isArray(list) || !UTM_VALUE.test(v) || !(list.includes(v) || metaId)) continue;
       got[k] = v;
     }
     if (!got.utm_source) return "";
