@@ -312,6 +312,11 @@
   // (11단계 H3) 흔들리는 원형 한 줄: 마친 방 1~5개일 때만. N = 6 − 지금 마친 방 수. 결제 상태와 무관
   function renderSway(el) {
     if (!el) return;
+    // (2026-11-01 운영자) 방 결과에서는 숨긴다: 방 끝 연결 문구·다음 방 미리보기가 같은 말("다음 방은?")을 하므로 한 번만. 입구 줄은 그대로
+    if (el.closest(".result")) {
+      el.textContent = "";
+      return show(el, false);
+    }
     const n = filledRooms().length;
     const a = currentArchetype();
     const on = Boolean(a) && n > 0 && n < CHAPTER_ORDER.length;

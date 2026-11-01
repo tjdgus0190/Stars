@@ -483,7 +483,7 @@ function paidSentences() {
     const br = await ev(`(() => { const s = document.querySelector('${sc}'); const e = s.querySelector('[data-js=result-bridge]'); const t = e.textContent; const title = s.querySelector('[data-js=result-title]').textContent; return { ok: ['contrast', 'echo', 'deepen'].includes(e.dataset.kind) && [...t].length <= 120 && (${JSON.stringify(room)} === 'rune' || t.includes(title)), t }; })()`);
     const dead = await deadScan(sc);
     const hooks = await hookCount(sc);
-    check(`H3·H4 ${room} 결과: 원형 한 줄(남은 문 4) · 다리 = (v6) 이번 결과를 짚는 연결 120자 이내 · 가격·'곧'·죽은 버튼 0 · 떡밥 ${hooks}개(≤3)`, sway === (await swayWant(4, arch3)) && br.ok && !dead.price && !dead.soon && dead.dead === 0 && hooks <= 3, sway + " / " + br.t);
+    check(`H3·H4 ${room} 결과: (2026-11-01) 원형 칸 아래 '다음 방이 굳힐까요' 줄 숨김(방 끝 연결과 중복) · 다리 = (v6) 이번 결과를 짚는 연결 120자 이내 · 가격·'곧'·죽은 버튼 0 · 떡밥 ${hooks}개(≤3)`, sway === "" && arch3 && br.ok && !dead.price && !dead.soon && dead.dead === 0 && hooks <= 3, sway + " / " + br.t);
   }
   await seed(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
   await b.goto(BASE + "#story");
