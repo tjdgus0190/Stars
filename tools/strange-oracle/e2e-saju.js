@@ -122,9 +122,9 @@ function sog1(c) {
   const res = await ev(`(() => { const s = document.querySelector('#screen-saju-result'); const t = s.innerText;
     return { undef: (t.match(/.{0,30}(undefined|NaN|\\{\\w+\\}).{0,10}/) || [''])[0], chars: [...s.querySelectorAll('[data-js=saju-wonguk] .wonguk__char b')].map(b => b.textContent).join(''),
       sum: [...s.querySelectorAll('[data-js=saju-ohaeng-count]')].reduce((a, b) => a + Number(b.textContent), 0), s4: !s.querySelector('[data-js=saju-s4]').classList.contains('is-hidden'),
-      s1: s.querySelector('[data-js=saju-s1-body]').textContent.length + (s.querySelector('[data-js=saju-s1-rest]') || { textContent: '' }).textContent.length, s1Open: s.querySelector('[data-js=saju-s1-body]').children.length, s1InFold: !!s.querySelector('[data-js=saju-more] [data-js=saju-s1-rest]'), s5: s.querySelector('[data-js=saju-s5]').textContent.length, title: s.querySelector('[data-js=result-title]').textContent,
+      s1: s.querySelector('[data-js=saju-s1-body]').textContent.length, folded: !!s.querySelector('details[data-js=saju-more]'), s5: s.querySelector('[data-js=saju-s5]').textContent.length, title: s.querySelector('[data-js=result-title]').textContent,
       next: s.querySelector('[data-js=result-next-door]').dataset.room, disc: !s.querySelector('[data-js=disclaimer-slot]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(s.textContent) }; })()`);
-  check("4·5: 결과 빈칸·undefined 0, 원국 8글자, 오행 합 8, 대운 단락, S1(첫 문단 + 접기 안 나머지)·S5 채움, 면책 문구 0(19-2)", !res.undef && res.chars.length === 8 && res.sum === 8 && res.s4 && res.s1 > 500 && res.s1Open === 1 && res.s1InFold && res.s5 > 50 && res.disc === true, JSON.stringify(res));
+  check("4·5: 결과 빈칸·undefined 0, 원국 8글자, 오행 합 8, 대운 단락, S1·S5 채움(2026-11-01 운영자: 접지 않고 모두 펼침), 면책 문구 0(19-2)", !res.undef && res.chars.length === 8 && res.sum === 8 && res.s4 && res.s1 > 500 && !res.folded && res.s5 > 50 && res.disc === true, JSON.stringify(res));
   check("떡밥: 다음 문 = Ⅱ 오검", res.next === "ogham");
   const st1 = await ev("JSON.parse(sessionStorage.getItem('strange-oracle'))");
   check("6장: visits.saju = 결과 코드·원형만, profile.gender = m", JSON.stringify(Object.keys(st1.visits.saju).sort()) === '["archetype","code"]' && st1.profile.gender === "m");

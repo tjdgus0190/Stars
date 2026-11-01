@@ -5845,12 +5845,6 @@ s.was { margin-right: 2px; font-weight: 500; opacity: 0.62; text-decoration-thic
 .next-peek__line { margin: 6px 0 0; font-family: var(--font-serif); font-size: 18px; font-weight: 700; line-height: 1.5; color: var(--c-text-strong, #fff); word-break: keep-all; }
 .next-peek__line--teaser { font-family: inherit; font-size: var(--fs-sm); font-weight: 400; color: var(--c-text); }
 .next-peek__sub { margin: 6px 0 0; font-size: var(--fs-xs); color: var(--c-text-muted); }
-/* (2026-10-29 v6) 만신의 방: 기운·결·대운 풀이 접기 */
-.saju-more { margin: var(--space-3) 0 0; }
-.saju-more__toggle { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--tap-min, 44px); cursor: pointer; list-style: none; color: oklch(0.86 0.09 85); font-size: var(--fs-sm); text-decoration: underline; text-underline-offset: 4px; }
-.saju-more__toggle::-webkit-details-marker { display: none; }
-.saju-more__toggle::after { content: "▾"; text-decoration: none; }
-.saju-more[open] .saju-more__toggle::after { content: "▴"; }
 /* (2026-10-29 v6) 룬 의식 단계 줄 */
 .rune-step { margin: var(--space-3) auto 0; max-width: 320px; padding: 6px 12px; border-radius: 999px; border: 1px solid oklch(0.85 0.06 230 / 0.45); background: oklch(0.2 0.04 250 / 0.55); font-size: var(--fs-sm); color: oklch(0.92 0.04 230); text-align: center; font-variant-numeric: tabular-nums; }
 .rune-step:empty { display: none; }
@@ -5937,4 +5931,3 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 /* (2026-11-01 운영자) 안내 줄이기: 비운 스토리 안내 줄 숨김 · 계절 꼬리표 옆 한 줄 */
 .story-hint:empty { display: none; }
 .season__price .season__line { margin-left: 8px; font-size: var(--fs-xs); color: var(--c-text-muted); }
-.saju-s1-rest { margin: var(--space-3) 0 0; }

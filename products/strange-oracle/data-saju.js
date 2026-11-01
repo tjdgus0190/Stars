@@ -187,8 +187,7 @@ window.SAJU = {
       "interpretNote": "일간·오행·십신의 뜻은 명리의 전통 개념에서 왔고, 성향 풀이는 이 점술관이 새로 쓴 이야기예요.",
       "retry": "다른 생일로 펼쳐 보기",
       "s2aTitle": "넉넉한 기운",
-      "s3Title": "앞선 결",
-      "moreLabel": "만신의 풀이 더 듣기"
+      "s3Title": "앞선 결"
     },
     "card": {
       "eyebrow": "낯선 점술관 · 만신의 방",

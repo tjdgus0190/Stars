@@ -2920,19 +2920,6 @@
 
     // 풀이 S1 → S2a → S2b → S3 → S4
     js("saju-s1-body", scr).innerHTML = sajuParas(st.body);
-    { // (2026-11-01 운영자) 그릇은 첫 문단만 보이고, 나머지 문단은 '만신의 풀이 더 듣기' 접기 맨 앞으로
-      const more = js("saju-more", scr);
-      let rest = js("saju-s1-rest", scr);
-      if (more && !rest) {
-        rest = rmk("div", "prose saju-s1-rest");
-        rest.dataset.js = "saju-s1-rest";
-        $("summary", more).after(rest);
-      }
-      if (rest) {
-        rest.textContent = "";
-        [...js("saju-s1-body", scr).children].slice(1).forEach((x) => rest.append(x));
-      }
-    }
     js("saju-s2a-body", scr).innerHTML = sajuParas(SAJU.elements.many[sel.S2a]);
     js("saju-s2b-body", scr).innerHTML = sajuParas(SAJU.elements[sel.S2b.kind][sel.S2b.element]);
     const H = R.headings || {};
