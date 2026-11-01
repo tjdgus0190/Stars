@@ -16,6 +16,14 @@
     const a = -Math.PI / 2 + (i / 27) * Math.PI * 2;
     return `<circle class="dot${i === on ? " on" : ""}" cx="${(cx + r * Math.cos(a)).toFixed(1)}" cy="${(cy + r * Math.sin(a)).toFixed(1)}" r="${i === on ? size * 1.6 : size}" />`;
   }).join("");
+  // 달의 모습: 밝은 부분만 그린다(k 0 = 그믐, 1 = 보름). left = 왼쪽이 밝음(기우는 달). 그믐은 흐린 테두리만
+  const phase = (cx, cy, r, k, left = false) => {
+    const f = (v) => v.toFixed(1), base = `<circle cx="${f(cx)}" cy="${f(cy)}" r="${r}" fill="oklch(0.17 0.03 285)" stroke="oklch(0.6 0.05 90 / 0.45)" stroke-width="2" />`;
+    if (k <= 0.02) return base;
+    if (k >= 0.98) return `${base}<circle class="moon" cx="${f(cx)}" cy="${f(cy)}" r="${r}" />`;
+    const s1 = left ? 0 : 1, ex = (r * Math.abs(2 * k - 1)).toFixed(1), s2 = (k > 0.5) === !left ? 1 : 0;
+    return `${base}<path class="moon" d="M${f(cx)} ${f(cy - r)}A${r} ${r} 0 0 ${s1} ${f(cx)} ${f(cy + r)}A${ex} ${r} 0 0 ${s2} ${f(cx)} ${f(cy - r)}Z" />`;
+  };
   const at = (cx, cy, r, i) => { const a = -Math.PI / 2 + (i / 27) * Math.PI * 2; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
 
   const ART = {
@@ -44,6 +52,23 @@
         <text class="num" x="${n1x.toFixed(1)}" y="${(n1y + 8).toFixed(1)}">1</text><text class="num" x="${n27x.toFixed(1)}" y="${(n27y + 8).toFixed(1)}">27</text>
         <text class="lbl" x="470" y="345">스물일곱 밤에</text><text class="lbl" x="470" y="385">한 바퀴</text>`;
     },
+    // 전설편: 달 둘레의 스물일곱 딸(빛 점)
+    daughters: () => `${stars(40, 940, 640)}${Array.from({ length: 27 }, (_, i) => { const [x, y] = at(470, 340, 230, i); return `<circle class="dot on" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" />`; }).join("")}${crescent(470, 340, 84)}
+      <text class="lbl" x="470" y="610">스물일곱 딸</text>`,
+    // 전설편: 넷째 집(로히니)만 밝고 나머지는 캄캄
+    favorite: () => {
+      const [rx, ry] = at(470, 340, 230, 3);
+      return `${stars(30, 940, 640)}${Array.from({ length: 27 }, (_, i) => { const [x, y] = at(470, 340, 230, i); return i === 3 ? "" : `<circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="10" opacity="0.35" />`; }).join("")}
+        <circle class="dot on" cx="${rx.toFixed(1)}" cy="${ry.toFixed(1)}" r="22" />${crescent(rx - 62, ry + 6, 34)}
+        <text class="lbl" x="${(rx + 82).toFixed(1)}" y="${(ry + 10).toFixed(1)}">로히니</text>
+        <text class="lbl" x="470" y="350">나머지 스물여섯 집은</text><text class="lbl" x="470" y="390">늘 캄캄</text>`;
+    },
+    // 전설편: 날마다 줄어드는 달(다섯 모습)
+    curse: () => `${stars(40, 940, 640)}${[1, 0.78, 0.55, 0.32, 0.12].map((k, i) => phase(150 + i * 160, 320, 64, k, true)).join("")}
+      <path class="gd" d="M120 450H820M800 436l20 14l-20 14" opacity="0.8" /><text class="lbl" x="470" y="510">날마다 조금씩</text>`,
+    // 전설편: 보름은 줄고 보름은 차고 (둘레 여덟 모습)
+    cycle: () => `${stars(40, 940, 640)}<circle class="gd" cx="470" cy="330" r="220" opacity="0.3" />${[0, 0.25, 0.5, 0.75, 1, 0.75, 0.5, 0.25].map((k, i) => { const a = Math.PI / 2 + (i / 8) * Math.PI * 2; return phase(470 + 220 * Math.cos(a), 330 + 220 * Math.sin(a), 38, k, i > 4); }).join("")}
+      <text class="lbl" x="470" y="320">보름은 줄고</text><text class="lbl" x="470" y="362">보름은 차오르고</text>`,
     // 4: 태어난 밤 달이 머문 집 + 결혼 날·궁합
     birth: () => {
       const [hx, hy] = at(330, 330, 200, 12);
@@ -63,28 +88,31 @@
 
   // ── 이야기 (한 편 = 한 방)
   const EP = {
+    // 1화 베다: 달과 스물일곱 아내 (시바 푸라나 등에 전하는 전설, 판본마다 조금씩 다름)
     star: {
-      n: 2, ep: 1, name: "베다의 방", guide: "베다", origin: "인도 · 베다 점성술",
-      cover: { hook: "달에게도<br />집이 있다면?", sub: "베다 점성술은 어디서 왔을까" },
+      n: 2, ep: 1, name: "베다의 방", guide: "베다", origin: "인도의 전설",
+      cover: { hook: "달에게 아내가<br />스물일곱?", sub: "달이 차고 기우는 이유, 인도의 전설", art: "cover" },
       scenes: [
-        { cap: "아주 먼 옛날 · 인도", art: "altar", say: "하나, 둘, 셋… 아주 먼 옛날, 인도의 사제들은 밤하늘을 셌어요. 제사를 올릴 <b>날과 때</b>를 하늘에 묻기 위해서요." },
-        { cap: "경전을 돕는 여섯 학문", art: "six", artArgs: ["소리", "운율", "문법", "낱말", "의례", "하늘의 때|조티샤"], say: "베다 경전을 돕는 학문이 여섯 있었어요. 소리, 운율, 문법, 낱말, 의례… 그리고 여섯째, 하늘의 때를 재는 <b>조티샤</b>." },
-        { cap: "하룻밤에 한 집씩", art: "ring", say: "달은 밤마다 한 집씩 옮겨 가요. 스물일곱 밤이면 하늘을 한 바퀴. 그 한 칸 한 칸이 <b>나크샤트라</b>, 달의 집이에요." },
-        { cap: "태어난 밤의 달", art: "birth", say: "그래서 저는 당신이 태어난 밤, 달이 <b>어느 집</b>에 머물렀는지부터 세어요. 인도에선 지금도 결혼 날과 궁합을 이 집으로 맞춰 보곤 해요." },
+        { cap: "신들의 시대", art: "daughters", say: "하나, 둘, 셋… 스물일곱. 신들의 조상 <b>닥샤</b>에게는 딸이 스물일곱 있었어요. 모두 달의 신 <b>찬드라</b>에게 시집을 갔죠." },
+        { cap: "가장 아끼던 아내", art: "favorite", say: "그런데 달은 넷째 아내 <b>로히니</b>만 바라봤어요. 밤이면 밤마다 로히니의 집에만 머물렀죠. 나머지 스물여섯 집은 늘 캄캄했어요." },
+        { cap: "아버지의 저주", art: "curse", say: "서운한 딸들은 아버지에게 돌아갔어요. 화가 난 닥샤는 달에게 저주를 내렸죠. <b>“네 빛이 날마다 줄어들 것이다.”</b>" },
+        { cap: "반쪽짜리 용서", art: "cycle", say: "달은 시바 신에게 빌었어요. 저주를 다 풀 수는 없어, 신은 이렇게 정했죠. <b>보름은 줄고, 보름은 다시 차오르라.</b> 그 뒤로 달은 스물일곱 아내의 집을 하룻밤씩 고루 찾아가요." },
       ],
       facts: {
-        rec: [
-          "조티샤는 베다를 돕는 여섯 학문(베당가) 가운데 하나예요.",
-          "가장 오래된 천문 문헌은 『베당가 조티샤』. 언제 쓰였는지는 학자마다 의견이 달라요.",
-          "달의 집 목록은 베다 문헌에 이미 나와요. 스물일곱, 때로는 스물여덟 칸이에요.",
-          "열두 별자리로 보는 점은 훗날 그리스 점성술과 만나며 더해졌다고 봐요.",
-        ],
+        title: "전설과 하늘",
+        storyLabel: "이렇게 전해요",
         story: [
-          "베다는 움직이지 않는 별을 기준으로 재요. 그래서 서양 별자리와 거의 한 칸쯤 어긋나요.",
-          "집마다의 성격 풀이는 전통에 이 점술관의 이야기를 더한 것이에요.",
+          "인도의 옛 이야기책 『시바 푸라나』 등에 전하는 전설이에요. 판본마다 조금씩 달라요.",
+          "달이 시바 신에게 빌었다는 자리가 지금의 구자라트 솜나트 사원이라고 전해요.",
+        ],
+        recLabel: "실제 하늘에서는",
+        rec: [
+          "달은 약 27.3일에 별들 사이를 한 바퀴 돌아요. 그래서 그 길을 스물일곱 칸, 나크샤트라로 나눴어요.",
+          "넷째 칸 로히니는 황소자리의 붉은 별 알데바란 근처예요.",
+          "베다의 방은 당신이 태어난 밤, 달이 머문 ‘아내의 집’을 찾아요.",
         ],
       },
-      cta: { ask: "당신이 태어난 밤,<br />달은 어느 집에?", sub: "생일과 태어난 시각으로 찾을 수 있어요", pill: "프로필 링크에서 세 번째 문 「베다의 방」", next: "다음 기록 · 시빌라의 예언서" },
+      cta: { ask: "당신이 태어난 밤,<br />달은 누구의 집에?", sub: "생일과 태어난 시각으로 찾을 수 있어요", pill: "프로필 링크에서 세 번째 문 「베다의 방」", next: "다음 기록 · 불타 버린 여섯 권의 예언서" },
     },
   };
 
@@ -112,9 +140,10 @@
       <div class="talk"><div class="who"><svg viewBox="0 0 48 64"><use href="#guide-${key}" /></svg><span>안내자 ${E.guide}</span></div><p class="bubble">${S.say}</p></div>`;
   } else if (p === total - 2) {
     page.classList.add("lr-facts");
-    page.innerHTML = `${head}${tag}<p class="ttl">기록과 이야기</p>
-      <div class="box rec"><span>기록으로 전하는 것</span><ul>${E.facts.rec.map((t) => `<li>${t}</li>`).join("")}</ul></div>
-      <div class="box story"><span>알아 두면 좋은 것 · 해석</span><ul>${E.facts.story.map((t) => `<li>${t}</li>`).join("")}</ul></div>`;
+    const F = E.facts;
+    page.innerHTML = `${head}${tag}<p class="ttl">${F.title || "기록과 이야기"}</p>
+      <div class="box story first"><span>${F.storyLabel || "알아 두면 좋은 것 · 해석"}</span><ul>${F.story.map((t) => `<li>${t}</li>`).join("")}</ul></div>
+      <div class="box rec last"><span>${F.recLabel || "기록으로 전하는 것"}</span><ul>${F.rec.map((t) => `<li>${t}</li>`).join("")}</ul></div>`;
   } else {
     page.classList.add("lr-cta");
     page.innerHTML = `${head}<svg class="art art-cta" viewBox="0 0 560 560">${ART.cover()}</svg>
