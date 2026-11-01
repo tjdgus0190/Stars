@@ -14,6 +14,7 @@
   const GTAG_URL = "https://www.googletagmanager.com/gtag/js";
   const FORMAT = /^G-[A-Z0-9]{4,16}$/;
   let schema = null; // init에 성공했을 때만
+  let internal = false; // (2026-11-01) 운영자 기기: 모든 이벤트에 traffic_type=internal
   const configured = (id) => typeof id === "string" && FORMAT.test(id.trim());
 
   // 허용 목록 정리: 들어온 속성 가운데 목록에 있고 값이 허용 값 목록 안에 있는 것만 남긴다
@@ -72,15 +73,17 @@
       window.dataLayer.push(arguments);
     };
     window.gtag("js", new Date());
-    window.gtag("config", id, {
+    internal = opts.internal === true;
+    window.gtag("config", id, Object.assign({
       send_page_view: false,
       page_location: window.location.origin + window.location.pathname + (utm ? "?" + utm : ""),
       page_title: String(opts.title || ""),
       allow_google_signals: false,
       allow_ad_personalization_signals: false,
-    });
+    }, internal ? { traffic_type: "internal" } : {}));
     // (2026-10-30) 운영자 기기: GA4 내부 트래픽 필터가 읽는 traffic_type=internal. 제품이 opts.internal === true로 넘길 때만
-    if (opts.internal === true) window.gtag("set", { traffic_type: "internal" });
+    // (2026-11-01) set만으로는 필터에 안 걸리는 경우가 있어 config와 이벤트마다에도 붙인다(구글 안내 방식: config 매개변수)
+    if (internal) window.gtag("set", { traffic_type: "internal" });
     const s = document.createElement("script");
     s.async = true;
     s.src = `${GTAG_URL}?id=${encodeURIComponent(id)}`;
@@ -93,7 +96,7 @@
     if (!schema || window.location.search || typeof window.gtag !== "function") return null;
     const p = clean(schema, name, props);
     if (!p) return null;
-    window.gtag("event", name, p);
+    window.gtag("event", name, internal ? Object.assign({}, p, { traffic_type: "internal" }) : p);
     return p;
   }
 

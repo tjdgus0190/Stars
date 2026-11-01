@@ -192,10 +192,18 @@ test("analytics (2026-10-30): internal === true일 때만 traffic_type=internal,
   const on = env();
   assert.strictEqual(on.win.Analytics.init({ ga4: "G-TEST12345", events: { so_visit: {} }, internal: true }), true);
   assert.deepStrictEqual(JSON.parse(JSON.stringify(sets(on))), [["set", { traffic_type: "internal" }]]);
+  // (2026-11-01) config 매개변수와 이벤트마다에도 붙는다
+  const cfg = [...on.win.dataLayer].map((a) => [...a]).find((a) => a[0] === "config");
+  assert.strictEqual(cfg[2].traffic_type, "internal");
+  on.win.Analytics.track("so_visit", {});
+  const evs = [...on.win.dataLayer].map((a) => [...a]).filter((a) => a[0] === "event");
+  assert.ok(evs.length && evs.every((a) => a[2].traffic_type === "internal"));
   [undefined, false, "true", 1, "internal"].forEach((v) => {
     const e = env();
     e.win.Analytics.init({ ga4: "G-TEST12345", events: { so_visit: {} }, internal: v });
     assert.strictEqual(sets(e).length, 0, String(v));
+    e.win.Analytics.track("so_visit", {});
+    assert.ok([...e.win.dataLayer].map((a) => [...a]).every((a) => !(a[2] && a[2].traffic_type)), "일반 방문자에는 traffic_type 없음 " + String(v));
   });
 });
 
