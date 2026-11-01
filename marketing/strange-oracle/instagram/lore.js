@@ -26,6 +26,9 @@
   };
   const at = (cx, cy, r, i) => { const a = -Math.PI / 2 + (i / 27) * Math.PI * 2; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
 
+  // 끝 장 팔로우 안내(모든 편 공통)
+  const FOLLOW = { head: "팔로우하고 다음 기록 받기", body: "일곱 점술에 숨은 전설을 하루 한 편씩 올려요" };
+
   const ART = {
     // 표지: 달의 집 스물일곱 고리 + 가운데 초승달 (viewBox 0 0 560 560)
     cover: () => `${stars(40, 560, 560)}<circle class="gd" cx="280" cy="280" r="222" opacity="0.35" />${ring(280, 280, 222, 4, 12)}${crescent(270, 280, 92)}`,
@@ -147,7 +150,7 @@
   } else {
     page.classList.add("lr-cta");
     page.innerHTML = `${head}<svg class="art art-cta" viewBox="0 0 560 560">${ART.cover()}</svg>
-      <div class="mid"><p class="ask">${E.cta.ask}</p><p class="sub">${E.cta.sub}</p><p class="pill">${E.cta.pill}</p><p class="nx">${E.cta.next}</p></div>${SEAL}`;
+      <div class="mid"><p class="ask">${E.cta.ask}</p><p class="sub">${E.cta.sub}</p><p class="pill">${E.cta.pill}</p><div class="follow"><b>${FOLLOW.head}</b><span>${FOLLOW.body}</span><span class="nx">${E.cta.next}</span></div></div>${SEAL}`;
   }
 
   // 안내자 실루엣은 제품 화면의 SVG를 그대로 가져다 쓴다(같은 그림)
