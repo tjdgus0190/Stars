@@ -1,0 +1,68 @@
+/* 「문 너머의 기록」 그림 이야기 캐러셀 (2026-11-01). ig2.css 위에 얹는다. 판 1080x1350, 방 색 = --acc */
+.lr { --shade: radial-gradient(ellipse 95% 75% at 50% 45%, oklch(0.07 0.03 285 / 0.45), oklch(0.05 0.03 285 / 0.86)); }
+.lr .tag { position: absolute; left: 0; right: 0; top: 118px; margin: 0; text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink); }
+.lr .tag i { font-style: normal; font-family: var(--font-latin); color: var(--acc); margin-right: 14px; }
+.lr .tag em { font-style: normal; color: var(--gold-dim); font-weight: 400; margin-left: 14px; }
+
+/* 그림 칸(만화 칸): 두꺼운 테 + 안쪽 그림 + 왼쪽 위 해설 상자 */
+.lr .panel { position: absolute; left: 70px; right: 70px; top: 190px; height: 640px; border-radius: 26px; overflow: hidden;
+  border: 4px solid color-mix(in oklch, var(--gold) 80%, transparent); background: radial-gradient(ellipse 90% 80% at 50% 40%, oklch(0.16 0.05 var(--h)), oklch(0.07 0.03 285));
+  box-shadow: 0 18px 50px oklch(0 0 0 / 0.6), inset 0 0 0 10px oklch(0.06 0.02 285 / 0.55); }
+.lr .panel svg.art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lr .cap { position: absolute; left: 26px; top: 24px; width: max-content; max-width: 80%; z-index: 2; margin: 0; padding: 10px 22px; border-radius: 10px; background: oklch(0.9 0.08 88); color: oklch(0.2 0.03 60); font-size: 28px; font-weight: 700; letter-spacing: 0.02em; box-shadow: 0 6px 16px oklch(0 0 0 / 0.5); }
+
+/* 안내자 + 말풍선 */
+.lr .talk { position: absolute; left: 60px; right: 60px; top: 870px; bottom: 80px; display: grid; grid-template-columns: 168px 1fr; gap: 26px; align-items: start; }
+.lr .who { display: grid; justify-items: center; gap: 8px; padding-top: 30px; }
+.lr .who svg { width: 150px; height: 200px; color: var(--acc); filter: drop-shadow(0 0 16px color-mix(in oklch, var(--acc) 60%, transparent)); }
+.lr .who span { font-size: 26px; color: var(--acc); letter-spacing: 0.08em; }
+.lr .bubble { position: relative; margin: 0; padding: 34px 38px; border-radius: 30px; background: oklch(0.97 0.012 90); color: oklch(0.2 0.03 285);
+  font-size: 36px; line-height: 1.58; word-break: keep-all; text-wrap: pretty; box-shadow: 0 14px 40px oklch(0 0 0 / 0.55); }
+.lr .bubble::before { content: ""; position: absolute; left: -26px; top: 70px; border: 16px solid transparent; border-right: 26px solid oklch(0.97 0.012 90); border-left: 0; }
+.lr .bubble b { color: oklch(0.42 0.14 var(--h)); }
+
+/* 표지 */
+.lr-cover .eyebrow2 { position: absolute; left: 0; right: 0; top: 130px; margin: 0; text-align: center; font-size: 30px; letter-spacing: 0.24em; color: var(--gold-dim); }
+.lr-cover .art-cover { position: absolute; left: 50%; top: 210px; width: 560px; height: 560px; margin-left: -280px; }
+.lr-cover .mid { position: absolute; left: 60px; right: 60px; top: 800px; text-align: center; }
+.lr-cover .tagline { margin: 0; font-size: 32px; color: var(--acc); letter-spacing: 0.06em; }
+.lr-cover .tagline i { font-style: normal; font-family: var(--font-latin); margin-right: 12px; }
+.lr-cover .hook { margin: 26px 0 0; font-family: var(--punch); font-weight: 900; font-size: 96px; line-height: 1.22; }
+.lr-cover .sub { margin: 34px 0 0; font-size: 36px; color: var(--ink-soft); }
+.lr-cover .foot { color: var(--acc); }
+
+/* 기록과 이야기 */
+.lr-facts .ttl { position: absolute; left: 0; right: 0; top: 190px; margin: 0; text-align: center; font-family: var(--punch); font-weight: 900; font-size: 64px; color: var(--gold); }
+.lr-facts .box { position: absolute; left: 80px; right: 80px; padding: 30px 38px 32px; border-radius: 22px; background: oklch(0.1 0.03 285 / 0.7); }
+.lr-facts .box.rec { top: 310px; border: 2px solid color-mix(in oklch, var(--gold) 70%, transparent); }
+.lr-facts .box.story { top: 920px; border: 2px dashed color-mix(in oklch, var(--acc) 70%, transparent); }
+.lr-facts .box span { display: block; font-size: 26px; letter-spacing: 0.12em; color: var(--gold); }
+.lr-facts .box.story span { color: var(--acc); }
+.lr-facts .box ul { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+.lr-facts .box li { position: relative; padding-left: 32px; font-size: 32px; line-height: 1.5; word-break: keep-all; text-wrap: pretty; }
+.lr-facts .box li::before { content: "✦"; position: absolute; left: 0; top: 2px; font-size: 22px; color: var(--gold); }
+.lr-facts .box.story li::before { content: "☾"; color: var(--acc); }
+
+/* 끝 */
+.lr-cta .art-cta { position: absolute; left: 50%; top: 190px; width: 300px; height: 300px; margin-left: -150px; }
+.lr-cta .mid { position: absolute; left: 70px; right: 70px; top: 540px; text-align: center; }
+.lr-cta .ask { margin: 0; font-family: var(--punch); font-weight: 900; font-size: 84px; line-height: 1.26; }
+.lr-cta .sub { margin: 40px 0 0; font-size: 34px; color: var(--ink-soft); }
+.lr-cta .pill { display: inline-block; margin: 80px 0 0; padding: 22px 40px; border-radius: 999px; border: 2px solid var(--gold); font-size: 32px; color: var(--gold); word-break: keep-all; }
+.lr-cta .nx { margin: 30px 0 0; font-size: 28px; color: var(--ink-soft); }
+.lr-cta .seal { position: absolute; left: 50%; bottom: 70px; width: 96px; height: 96px; margin-left: -48px; opacity: 0.95; }
+
+/* SVG 그림 공통 */
+.art .ln { fill: none; stroke: var(--acc); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.art .gd { fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.art .glow { filter: drop-shadow(0 0 10px var(--gold)); }
+.art .star { fill: oklch(0.95 0.04 90); }
+.art .moon { fill: oklch(0.95 0.05 90); filter: drop-shadow(0 0 22px oklch(0.92 0.08 90)); }
+.art .fire { fill: oklch(0.78 0.17 55); filter: drop-shadow(0 0 18px oklch(0.75 0.18 50)); }
+.art .fire2 { fill: oklch(0.9 0.14 85); }
+.art .stone { fill: oklch(0.32 0.04 60); stroke: oklch(0.55 0.06 70); stroke-width: 3; }
+.art .lbl { font-family: "Gowun Batang", serif; font-size: 30px; fill: var(--ink); text-anchor: middle; }
+.art .lbl.on { fill: oklch(0.2 0.03 285); font-weight: 700; }
+.art .num { font-family: "Cinzel", serif; font-size: 26px; fill: var(--gold); text-anchor: middle; }
+.art .dot { fill: oklch(0.2 0.04 285); stroke: var(--acc); stroke-width: 3; }
+.art .dot.on { fill: var(--gold); stroke: var(--gold); filter: drop-shadow(0 0 14px var(--gold)); }
