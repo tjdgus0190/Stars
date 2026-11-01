@@ -9,7 +9,7 @@ const { launch, sleep } = require("../../../tools/strange-oracle/cdp.js");
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const OUT = path.join(__dirname, "out", "lore");
 const PORT = 8798;
-const ROOMS = ["star"]; // 만든 편(lore.js EP)
+const ROOMS = ["star", "sibyl", "rune", "decan", "tzolkin", "ogham", "saju"]; // 만든 편(lore.js EP), 화 순서
 const pick = process.argv.slice(2).filter((x) => ROOMS.includes(x));
 
 (async () => {

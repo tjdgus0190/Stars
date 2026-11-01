@@ -68,6 +68,8 @@
 .art .fire2 { fill: oklch(0.9 0.14 85); }
 .art .stone { fill: oklch(0.32 0.04 60); stroke: oklch(0.55 0.06 70); stroke-width: 3; }
 .art .lbl { font-family: "Gowun Batang", serif; font-size: 30px; fill: var(--ink); text-anchor: middle; }
+.art .lbl.on-gold { fill: var(--gold); font-weight: 700; }
+.art .carve { fill: none; stroke: oklch(0.4 0.13 35); stroke-width: 9; stroke-linecap: round; filter: drop-shadow(0 0 8px var(--gold)); }
 .art .lbl.on { fill: oklch(0.2 0.03 285); font-weight: 700; }
 .art .num { font-family: "Cinzel", serif; font-size: 26px; fill: var(--gold); text-anchor: middle; }
 .art .dot { fill: oklch(0.2 0.04 285); stroke: var(--acc); stroke-width: 3; }
