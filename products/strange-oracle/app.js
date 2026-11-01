@@ -1346,7 +1346,7 @@
     if (!box) {
       box = rmk("section", "collect");
       box.dataset.js = "collect";
-      passage.prepend(box);
+      passage.append(box); // (2026-11-01) 문 뒤로: 문이 먼저 보이게
     }
     box.textContent = "";
     const n = CHAPTER_ORDER.filter(isDone).length;
@@ -2915,6 +2915,19 @@
 
     // 풀이 S1 → S2a → S2b → S3 → S4
     js("saju-s1-body", scr).innerHTML = sajuParas(st.body);
+    { // (2026-11-01 운영자) 그릇은 첫 문단만 보이고, 나머지 문단은 '만신의 풀이 더 듣기' 접기 맨 앞으로
+      const more = js("saju-more", scr);
+      let rest = js("saju-s1-rest", scr);
+      if (more && !rest) {
+        rest = rmk("div", "prose saju-s1-rest");
+        rest.dataset.js = "saju-s1-rest";
+        $("summary", more).after(rest);
+      }
+      if (rest) {
+        rest.textContent = "";
+        [...js("saju-s1-body", scr).children].slice(1).forEach((x) => rest.append(x));
+      }
+    }
     js("saju-s2a-body", scr).innerHTML = sajuParas(SAJU.elements.many[sel.S2a]);
     js("saju-s2b-body", scr).innerHTML = sajuParas(SAJU.elements[sel.S2b.kind][sel.S2b.element]);
     const H = R.headings || {};
@@ -3645,6 +3658,9 @@
   Object.values(screens).forEach((s) => {
     const p = js("result-passage", s);
     const m = $(".result-more", s);
+    // (2026-11-01 운영자) 다음 문을 핵심 풀이 바로 뒤로: 알고 계셨나요·맺음말·기준 줄·공유는 문 아래로 (만신은 원형 한 줄 뒤)
+    const core = s.dataset.room === "saju" ? js("result-archetype", s) : js("result-reading", s);
+    if (p && core && core.parentElement === p.parentElement && core.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING) core.after(p);
     if (p && m && p.compareDocumentPosition(m) & Node.DOCUMENT_POSITION_PRECEDING) p.after(m);
     if (p) {
       const home = document.createComment("result-passage");
@@ -3671,10 +3687,7 @@
     return a;
   }
   if (IG && T.follow) {
-    CHAPTER_ORDER.forEach((room) => {
-      const m = $(".result-more", screens[`${room}-result`]);
-      if (m) m.after(followLink("result"));
-    });
+    // (2026-11-01 운영자) 방마다 붙이던 인스타그램 줄은 걷고, 완주 뒤 나의 이야기에만
     const top = js("story-share-top");
     if (top) top.after(followLink("story"));
   }
@@ -3715,7 +3728,10 @@
     d.dataset.js = "season";
     const pr = rmk("p", "season__price");
     pr.append(rmk("span", "season__tag", S.label || "")); // 가격(줄 그은 정가 + 지금 값)은 버튼·가격 줄이 이미 보인다
-    d.append(pr, rmk("p", "season__line", fill(S.line || "", { price: comma(PAY.amount) })), rmk("p", "season__after", fill(S.after || "", { regular: comma(PAY.regular) })));
+    // (2026-11-01 운영자) 세 줄 → 꼬리표 옆 한 줄(언제까지). '돌아가는 값'은 줄 그은 정가가 이미 보여 준다
+    if (S.line) pr.append(rmk("span", "season__line", fill(S.line, { price: comma(PAY.amount) })));
+    d.append(pr);
+    if (S.after) d.append(rmk("p", "season__after", fill(S.after, { regular: comma(PAY.regular) })));
     return d;
   }
   // (2026-10-28 브랜드) 주인의 봉인: 밀랍(가장자리가 고르지 않은 원) + 문 문장. 주인의 유일한 서명
@@ -5441,7 +5457,9 @@
     bd.append(x, eb, h, lead, ul, price);
     const sb = seasonBlock();
     if (sb) bd.append(sb);
-    bd.append(refund, acts, note);
+    bd.append(acts); // (2026-11-01 운영자) 환불·"결제 없이" 줄은 결제 화면 버튼 아래 한 번만. 여기서는 [무료로 계속] 버튼이 그 말을 대신한다
+    void refund;
+    void note;
     dlg.append(bd);
     document.body.append(dlg);
     let after = null;

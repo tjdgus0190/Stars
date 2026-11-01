@@ -188,7 +188,7 @@ window.SAJU = {
       "retry": "다른 생일로 펼쳐 보기",
       "s2aTitle": "넉넉한 기운",
       "s3Title": "앞선 결",
-      "moreLabel": "기운·결·대운 풀이 더 보기"
+      "moreLabel": "만신의 풀이 더 듣기"
     },
     "card": {
       "eyebrow": "낯선 점술관 · 만신의 방",

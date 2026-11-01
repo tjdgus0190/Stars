@@ -5934,3 +5934,7 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 .free-more__seal .wax-seal { width: 26px; height: 26px; }
 .free-more__note { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--c-text-muted); word-break: keep-all; }
 @media (prefers-reduced-motion: reduce) { .free-more__btn { transition: none; } }
+/* (2026-11-01 운영자) 안내 줄이기: 비운 스토리 안내 줄 숨김 · 계절 꼬리표 옆 한 줄 */
+.story-hint:empty { display: none; }
+.season__price .season__line { margin-left: 8px; font-size: var(--fs-xs); color: var(--c-text-muted); }
+.saju-s1-rest { margin: var(--space-3) 0 0; }
