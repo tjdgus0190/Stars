@@ -5,3 +5,4 @@ node_modules/
 marketing/*/out/check/
 marketing/*/out/*.wav
 marketing/strange-oracle/instagram/out/v2/bg/
+marketing/*/instagram/out/*.zip
