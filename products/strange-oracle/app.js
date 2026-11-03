@@ -565,7 +565,7 @@
   // 전환 타이머는 go()의 pending과 따로 둔다 (go가 부르는 순간 지워지면 안 됨)
   const sigil = js("sigil-rise");
   let sig = null;
-  // (2026-10-30 기획 v7 작업 D) 오검을 마치고 셋째 방으로 처음 갈 때 한 번, 책 제안. offerGate는 결제 부분이 켜질 때 채운다(결제 off면 null)
+  // (2026-10-30 기획 v7 작업 D) 오검을 마치고 셋째 방으로 갈 때 책 제안(2026-11-03부터 갈 때마다, 결제 전·셋째 방 미완일 때). offerGate는 결제 부분이 켜질 때 채운다(결제 off면 null)
   let offerGate = null;
   function playSigil(room, fromEl, target, flash, openCls = "is-entering") {
     if (sig) return;
@@ -5391,36 +5391,20 @@
     go("deeper");
     return true;
   }
-  // ═════════ (2026-10-30 기획 v7 작업 D) 오검 → 셋째 방 사이 책 제안 (한 번) ═════════
-  // 언제: 오검(둘째 방)을 마친 사람이 셋째 방을 처음 열 때(결과의 문·떠 있는 버튼·입구 주 버튼 어느 길이든). 결제한 사람·이미 본 사람은 건너뛴다.
+  // ═════════ (2026-10-30 기획 v7 작업 D) 오검 → 셋째 방 사이 책 제안 ═════════
+  // 언제: 오검(둘째 방)을 마친 사람이 셋째 방을 열 때마다(결과의 문·떠 있는 버튼·입구 주 버튼 어느 길이든). 결제한 사람·이미 본 사람은 건너뛴다.
   // 무료로 계속 / 닫기 = 그대로 셋째 방으로(결제·로그인 요구 없음). 자세히 보기 = 결제 전 화면(가격·받는 것·환불 안내의 원본)
-  // 본 기록: 이 탭 sessionStorage OFFER_KEY("1" 하나, 입력값 아님 6장) + 메모리. 같은 방문(탭) 안에서는 새로고침·뒤로 가기에도 다시 뜨지 않고,
-  // (2026-11-03 운영자 결정) 다시 찾아온 방문(새 탭·다음 날)에는 오검 → 셋째 방에서 다시 한 번 뜬다. 결제한 사람에게는 뜨지 않는다.
-  // 예전(기기당 한 번) localStorage 기록은 처음 불릴 때 지운다.
+  // (2026-11-03 운영자 결정) 본 기록을 두지 않는다: 결제하지 않은 사람이 오검 → 셋째 방 문을 열 때마다 뜬다(새로 고침·뒤로 가기·재방문 모두).
+  // 결제하려다 [무료로 계속]을 잘못 누르고 뒤로 간 사람이 같은 문에서 다시 고를 수 있게. 결제한 사람·셋째 방을 이미 마친 사람에게는 뜨지 않는다.
+  // 예전에 남긴 본 기록(localStorage·sessionStorage OFFER_KEY)은 불러올 때 지운다.
   const OFFER_KEY = "strange-oracle-offer";
   let finaleBookPaint = null; // (작업 E) 완주 화면 책 칸 다시 그리기(결제 켜짐일 때만)
-  let offerSeenMem = false;
   try {
     window.localStorage.removeItem(OFFER_KEY);
+    window.sessionStorage.removeItem(OFFER_KEY);
   } catch (e) {
     /* 저장소 막힘: 지울 것도 없다 */
   }
-  const offerSeen = () => {
-    if (offerSeenMem) return true;
-    try {
-      return window.sessionStorage.getItem(OFFER_KEY) === "1";
-    } catch (e) {
-      return false;
-    }
-  };
-  const markOffer = () => {
-    offerSeenMem = true;
-    try {
-      window.sessionStorage.setItem(OFFER_KEY, "1");
-    } catch (e) {
-      /* 저장 막힘: 이 화면에서만 */
-    }
-  };
   function setupOffer() { // 결제 화면(payScr)이 만들어진 뒤 한 번 부른다
     if (!payScr || !T.offer) return;
     const O = T.offer;
@@ -5462,6 +5446,7 @@
     dlg.append(bd);
     document.body.append(dlg);
     let after = null;
+    let passOnce = false; // [무료로 계속]·닫기 뒤 이어서 여는 그 한 번은 다시 묻지 않는다
     const shut = (how) => {
       if (!dlg.open) return;
       const fn = after;
@@ -5480,7 +5465,11 @@
           /* 저장 막힘: 돌아오면 책 목차로 */
         }
         goPay("offer");
-      } else if (fn) fn();
+      } else if (fn) {
+        passOnce = true;
+        fn();
+        passOnce = false;
+      }
     };
     x.addEventListener("click", () => shut("close"));
     cont.addEventListener("click", () => shut("continue"));
@@ -5519,8 +5508,8 @@
       finaleBookPaint();
     }
     offerGate = (room, go3) => {
-      if (room !== third || !isDone(CHAPTER_ORDER[1]) || isDone(room) || passNow() || offerSeen() || dlg.open) return false;
-      markOffer();
+      if (passOnce) return false;
+      if (room !== third || !isDone(CHAPTER_ORDER[1]) || isDone(room) || passNow() || dlg.open) return false;
       after = go3;
       cont.textContent = fill(O.cont || "", { next: (T.rooms[third] && T.rooms[third].name) || "" });
       price.replaceWith(setPriced(price, "{price}원")); // 첫 계절 마감이 지났으면 지금 값으로

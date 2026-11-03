@@ -1,4 +1,4 @@
-// 22단계 e2e: 방 결과 아래 "이 방의 나머지 이야기"(결정 134). (2026-10-30 기획 v7) 결제 전 판매 칸 없음 · 오검 뒤 책 제안 한 번 · 완주 화면 책 칸. 모의 서버 test(가짜 페이앱), 실제 결제 0.
+// 22단계 e2e: 방 결과 아래 "이 방의 나머지 이야기"(결정 134). (2026-10-30 기획 v7) 결제 전 판매 칸 없음 · 오검 뒤 책 제안(결제 전이면 셋째 방 문을 열 때마다) · 완주 화면 책 칸. 모의 서버 test(가짜 페이앱), 실제 결제 0.
 // 준비: node tools/build-dist.js ; node tools/strange-oracle/mock-server.js --port 8788 --mode test
 // 실행: node tools/strange-oracle/e2e-rest.js   → 결과 tools/strange-oracle/out/e2e-rest.txt
 "use strict";
@@ -69,8 +69,7 @@ const paidLine = (file, global, pick) => {
   check("B2 결제 전 오검 화면에 유료 원본 문장 0 · 열린 직격 칸 없음 · 함수 book 요청 0", !ogStrike.some((t) => html.includes(t)) && !html.includes(ogLine.slice(0, 30)) && !(await ev("!!document.querySelector('.screen.is-active [data-js=room-strike]')")) && !b.log.bodies.slice(n1).some((x) => /\/api\/book/.test(x.url)));
 
   // 3. (v7 작업 D) 오검 → 셋째 방 문을 누르면 책 제안 한 번: 이름·받는 것·지금 값·무료로 계속. 자세히 보기 → 결제 → 오검 결과로 돌아와 나머지 open
-  await ev("sessionStorage.removeItem('strange-oracle-offer')");
-  await click(".screen.is-active [data-js=result-next-door]");
+    await click(".screen.is-active [data-js=result-next-door]");
   await waitFor("!!document.querySelector('[data-js=book-offer]')?.open", 3000);
   const of = await ev("(() => { const d = document.querySelector('[data-js=book-offer]'); return { open: d.open, title: d.querySelector('.book-offer__title').textContent, items: d.querySelectorAll('.book-offer__list li').length, price: d.querySelector('[data-js=book-offer-price]').textContent, cont: d.querySelector('[data-js=book-offer-continue]').textContent, active: document.querySelector('.screen.is-active').id }; })()");
   check("C0 (v7) 오검 문 → 책 제안(셋째 방으로 넘어가기 전): 상품명 = 결제 화면 이름 · 받는 것 3줄 · 지금 값 · '무료로 베다의 방 계속 둘러보기'", of.open && of.title === (await ev("TEXT.pay.title")) && of.items === 3 && of.price.includes(SALE.text + "원") && /무료로 베다의 방/.test(of.cont) && of.active === "screen-ogham-result", JSON.stringify(of));
@@ -89,34 +88,39 @@ const paidLine = (file, global, pick) => {
 
   // 3b. 제안은 한 번만 · 산 사람에게는 없음 · 무료로 계속 = 바로 셋째 방
   await skip("ogham-result", 1, 2);
-  await ev("sessionStorage.removeItem('strange-oracle-offer')");
-  await click(".screen.is-active [data-js=result-next-door]");
+    await click(".screen.is-active [data-js=result-next-door]");
   await waitFor("/^screen-star-(intro|result)$/.test(document.querySelector('.screen.is-active')?.id || '')", 6000);
   check("C4 결제한 탭: 오검 문 → 제안 없이 바로 베다의 방", !(await offerOpen()) && /^screen-star-intro$/.test(await ev("document.querySelector('.screen.is-active').id")));
   await skip("ogham-result", 0, 2);
-  await ev("sessionStorage.removeItem('strange-oracle-offer')");
-  await click(".screen.is-active [data-js=result-next-door]");
-  await waitFor("!!document.querySelector('[data-js=book-offer]')?.open", 3000);
+  const door = ".screen.is-active [data-js=result-next-door]";
+  const isOpen = "!!document.querySelector('[data-js=book-offer]')?.open";
+  const onStar = "document.querySelector('.screen.is-active')?.id === 'screen-star-intro'";
+  await click(door);
+  await waitFor(isOpen, 3000);
   await click("[data-js=book-offer-continue]");
-  const went = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-star-intro'", 6000);
-  // 같은 탭에서 새로 고침(/__dev/skip은 탭 기록을 지우므로 쓰지 않는다) → 입구 주 버튼으로 셋째 방
+  const went = await waitFor(onStar, 6000);
+  await sleep(300);
+  const noLoop = !(await offerOpen());
+  // (2026-11-03) 결제하려다 잘못 넘어가 뒤로 간 사람: 같은 문에서 다시 뜬다
+  await ev("history.back()");
+  const backOk = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-ogham-result'", 6000);
+  await sleep(400);
+  await click(door);
+  const afterBack = await waitFor(isOpen, 3000);
+  await click("[data-js=book-offer-continue]");
+  const went2 = await waitFor(onStar, 6000);
+  check("C5 [무료로 계속] → 결제·로그인 없이 바로 베다의 방(다시 묻지 않음) · 뒤로 가기 → 같은 문에서 제안 다시 뜸", went && noLoop && backOk && afterBack && went2, JSON.stringify({ went, noLoop, backOk, afterBack, went2 }));
+  // 새로 고침(같은 탭, /__dev/skip은 탭 기록을 지우므로 쓰지 않음) → 입구 주 버튼으로 셋째 방: 다시 뜸. 예전 본 기록(local·session)은 지워지고 막지 않는다
+  await ev("localStorage.setItem('strange-oracle-offer', '1'); sessionStorage.setItem('strange-oracle-offer', '1')");
   await b.goto((await ev("location.origin + location.pathname")) + "#hub");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'", 6000);
   await sleep(400);
   await click("[data-js=hub-cta]");
-  await sleep(500);
-  const again = await offerOpen();
-  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-star-intro'", 6000);
-  check("C5 [무료로 계속] → 결제·로그인 없이 베다의 방 · 같은 방문(탭)에서는 새로 고친 뒤 같은 길에서 제안 다시 안 뜸", went && !again && (await ev("document.querySelector('.screen.is-active').id")) === "screen-star-intro");
-  // 3c. (2026-11-03) 다시 찾아온 방문(새 탭 = sessionStorage 비어 있음)에는 다시 한 번 뜬다. 예전 기기 기록(localStorage)은 지워지고 막지 않는다
-  await ev("sessionStorage.removeItem('strange-oracle-offer'); localStorage.setItem('strange-oracle-offer', '1')");
-  await skip("ogham-result", 0, 2);
-  await click(".screen.is-active [data-js=result-next-door]");
-  const revisit = await waitFor("!!document.querySelector('[data-js=book-offer]')?.open", 3000);
-  const oldGone = (await ev("localStorage.getItem('strange-oracle-offer')")) === null;
-  const seenNow = (await ev("sessionStorage.getItem('strange-oracle-offer')")) === "1";
+  const reload = await waitFor(isOpen, 3000);
+  const oldGone = (await ev("localStorage.getItem('strange-oracle-offer') === null && sessionStorage.getItem('strange-oracle-offer') === null")) === true;
   await click("[data-js=book-offer-continue]");
-  check("C6 재방문(새 탭): 오검 문 → 제안 다시 한 번 · 예전 기기 기록 지워짐 · 이 탭에 본 기록", revisit && oldGone && seenNow, JSON.stringify({ revisit, oldGone, seenNow }));
+  const went3 = await waitFor(onStar, 6000);
+  check("C6 새로 고침 뒤 입구 주 버튼 → 제안 다시 뜸 · 예전 본 기록 지워짐 · [무료로 계속] → 베다의 방", reload && oldGone && went3, JSON.stringify({ reload, oldGone, went3 }));
 
   // 4. 결제한 탭: 만신·룬·시빌라 바로 열림
   const n0b = b.log.bodies.length;
