@@ -342,7 +342,7 @@ function paidSentences() {
   check("10-1: 복사 버튼 → 클립보드 = 화면의 코드 + 복사 완료 한 줄", (await ev("window.__clip")) === code3 && !(await hiddenEl("[data-js=resume-copied]")));
   await b.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 800, deviceScaleFactor: 2, mobile: true });
   const leakHere = async () => { const st = await ev("JSON.stringify(Object.fromEntries(Object.keys(sessionStorage).map(k => [k, sessionStorage.getItem(k)]))) + '|' + JSON.stringify(Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))) + '|' + document.cookie + '|' + location.href + '|' + JSON.stringify(history.state)"); return CODES.filter((c) => st.includes(c)); };
-  check("10-1: 코드를 만드는 동안 요청 0건, 저장소·쿠키·주소·history에 코드 없음", b.log.requests.length === reqMake && (await leakHere()).length === 0 && (await ev("Object.keys(localStorage).filter((k) => k !== 'strange-oracle-offer').length")) === 0 && (await ev("document.cookie")) === "");
+  check("10-1: 코드를 만드는 동안 요청 0건, 저장소·쿠키·주소·history에 코드 없음", b.log.requests.length === reqMake && (await leakHere()).length === 0 && (await ev("Object.keys(localStorage).length")) === 0 && (await ev("document.cookie")) === "");
   await click("[data-js=topbar-home]").catch(() => {});
   await ev("StrangeOracle.go('story')");
   await waitScreen("screen-story", 3000);
@@ -514,7 +514,7 @@ function paidSentences() {
   const all = b.log.bodies.map((x) => x.url + " " + x.body).join("\n");
   check("요청 주소·본문에 이름 없음", !all.includes(NAME) && !all.includes(encodeURIComponent(NAME)));
   check("주소 해시에 입력값 없음(화면 이름만)", /^#?[a-z-]*$/.test(await ev("location.hash")));
-  check("localStorage·쿠키 0", (await ev("Object.keys(localStorage).filter((k) => k !== 'strange-oracle-offer').length")) === 0 && (await ev("document.cookie")) === "");
+  check("localStorage·쿠키 0", (await ev("Object.keys(localStorage).length")) === 0 && (await ev("document.cookie")) === "");
   const ext = b.log.requests.filter((r) => !r.includes("127.0.0.1:") && !r.includes("cdn.jsdelivr.net") && !r.startsWith("GET data:") && !r.startsWith("GET blob:") && !r.includes("about:blank"));
   // (19-5) GA4 gtag.js(googletagmanager, 시험 ID)는 부르되 cdp.js가 막는다 → 막힌 구글 요청은 외부 전송이 아니다
   const ga = ext.filter((r) => /^GET https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-TEST12345$/.test(r));

@@ -5394,14 +5394,21 @@
   // ═════════ (2026-10-30 기획 v7 작업 D) 오검 → 셋째 방 사이 책 제안 (한 번) ═════════
   // 언제: 오검(둘째 방)을 마친 사람이 셋째 방을 처음 열 때(결과의 문·떠 있는 버튼·입구 주 버튼 어느 길이든). 결제한 사람·이미 본 사람은 건너뛴다.
   // 무료로 계속 / 닫기 = 그대로 셋째 방으로(결제·로그인 요구 없음). 자세히 보기 = 결제 전 화면(가격·받는 것·환불 안내의 원본)
-  // 본 기록: 이 기기 localStorage OFFER_KEY("1" 하나, 입력값 아님 6장) + 메모리. 새로고침·뒤로 가기·이어가기·재방문에도 다시 뜨지 않는다
+  // 본 기록: 이 탭 sessionStorage OFFER_KEY("1" 하나, 입력값 아님 6장) + 메모리. 같은 방문(탭) 안에서는 새로고침·뒤로 가기에도 다시 뜨지 않고,
+  // (2026-11-03 운영자 결정) 다시 찾아온 방문(새 탭·다음 날)에는 오검 → 셋째 방에서 다시 한 번 뜬다. 결제한 사람에게는 뜨지 않는다.
+  // 예전(기기당 한 번) localStorage 기록은 처음 불릴 때 지운다.
   const OFFER_KEY = "strange-oracle-offer";
   let finaleBookPaint = null; // (작업 E) 완주 화면 책 칸 다시 그리기(결제 켜짐일 때만)
   let offerSeenMem = false;
+  try {
+    window.localStorage.removeItem(OFFER_KEY);
+  } catch (e) {
+    /* 저장소 막힘: 지울 것도 없다 */
+  }
   const offerSeen = () => {
     if (offerSeenMem) return true;
     try {
-      return window.localStorage.getItem(OFFER_KEY) === "1";
+      return window.sessionStorage.getItem(OFFER_KEY) === "1";
     } catch (e) {
       return false;
     }
@@ -5409,7 +5416,7 @@
   const markOffer = () => {
     offerSeenMem = true;
     try {
-      window.localStorage.setItem(OFFER_KEY, "1");
+      window.sessionStorage.setItem(OFFER_KEY, "1");
     } catch (e) {
       /* 저장 막힘: 이 화면에서만 */
     }
