@@ -65,21 +65,53 @@
     const roomScr = screen("ny-room");
     const resScr = screen("ny-result");
 
+    // (2026-11-04) 새해 하늘: 우주 배경 위에 겹치는 새벽 층(새해 화면에서만 서서히 밝아진다)
+    const sky = mk("div", "ny-sky");
+    sky.setAttribute("aria-hidden", "true");
+    sky.innerHTML = '<div class="ny-sky__glow"></div><div class="ny-sky__sun"></div><div class="ny-sky__cloud ny-sky__cloud--a"></div><div class="ny-sky__cloud ny-sky__cloud--b"></div><div class="ny-sky__cloud ny-sky__cloud--c"></div><div class="ny-sky__motes"></div><div class="ny-sky__motes ny-sky__motes--b"></div>' +
+      '<svg class="ny-sky__ridge" viewBox="0 0 400 120" preserveAspectRatio="none"><path class="ny-sky__ridge-far" d="M0 120V66L34 54 70 64 112 34 150 58 196 26 240 56 284 40 326 60 368 42 400 52V120Z"/><path class="ny-sky__ridge-near" d="M0 120V90L48 74 96 88 146 66 196 88 248 70 300 92 352 76 400 88V120Z"/></svg>';
+    const cosmos = document.querySelector(".cosmos");
+    if (cosmos) cosmos.after(sky);
+    else document.body.prepend(sky);
+    // 탭을 넘길 때 비단이 스치듯 화면을 덮었다 걷힌다(나의 이야기 → 새해: 금빛·주홍, 되돌아갈 때: 남빛). 움직임 줄이기면 바로 바뀐다
+    let sweeping = false;
+    function sweep(toNy, then) {
+      if (C.reduceMotion || sweeping) return then();
+      sweeping = true;
+      const v = mk("div", "ny-veil " + (toNy ? "is-to-ny" : "is-to-story"));
+      v.setAttribute("aria-hidden", "true");
+      v.innerHTML = '<div class="ny-veil__silk"></div><div class="ny-veil__sheen"></div><div class="ny-veil__sparks"></div>';
+      document.body.append(v);
+      setTimeout(then, 650); // 비단이 화면을 다 덮은 가운데에서 바꾼다
+      setTimeout(() => {
+        v.remove();
+        sweeping = false;
+      }, 1450);
+    }
+
     // 하단 탭
     const tabbar = mk("nav", "ny-tabbar");
     tabbar.dataset.js = "ny-tabbar";
     tabbar.setAttribute("aria-label", N.tabs.aria);
-    const tabStory = mk("button", "ny-tabbar__tab", N.tabs.story);
-    const tabNy = mk("button", "ny-tabbar__tab ny-tabbar__tab--ny", N.tabs.ny);
+    const tabStory = mk("button", "ny-tabbar__tab");
+    const tabNy = mk("button", "ny-tabbar__tab ny-tabbar__tab--ny");
+    tabStory.innerHTML = '<svg class="ny-tabbar__ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3.5a8.5 8.5 0 1 0 5.5 15 7 7 0 1 1-5.5-15Z"/></svg>';
+    tabNy.innerHTML = '<svg class="ny-tabbar__ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17h16M7 17a5 5 0 0 1 10 0M12 6v3M5.6 9.6l2 2M18.4 9.6l-2 2M3 13h2.5M18.5 13H21"/></svg>';
+    tabStory.append(mk("span", "", N.tabs.story));
+    tabNy.append(mk("span", "", N.tabs.ny));
     [tabStory, tabNy].forEach((b) => (b.type = "button"));
     tabStory.dataset.js = "ny-tab-story";
     tabNy.dataset.js = "ny-tab-ny";
     tabbar.append(tabStory, tabNy);
     document.body.append(tabbar);
-    tabStory.addEventListener("click", () => C.go("hub"));
+    tabStory.addEventListener("click", () => {
+      if (!/^ny-/.test(C.current())) return C.go("hub");
+      sweep(false, () => C.go("hub", { instant: true }));
+    });
     tabNy.addEventListener("click", () => {
       C.track("so_ny", { step: "tab" });
-      C.go("ny-hub");
+      if (/^ny-/.test(C.current())) return C.go("ny-hub");
+      sweep(true, () => C.go("ny-hub", { instant: true }));
     });
     const TAB_ON = /^(hub|story|ny-hub|ny-room|ny-result)$/;
     function onScreen(name) {
@@ -87,6 +119,7 @@
       tabbar.classList.toggle("is-on", on);
       document.body.classList.toggle("has-ny-tabbar", on);
       const ny = /^ny-/.test(name);
+      document.body.classList.toggle("is-ny", ny);
       tabNy.classList.toggle("is-current", ny);
       tabStory.classList.toggle("is-current", !ny);
       tabNy.setAttribute("aria-current", ny ? "page" : "false");
@@ -107,14 +140,21 @@
         b.type = "button";
         b.dataset.room = room;
         b.dataset.js = "ny-door";
-        const ic = mk("span", "ny-door__icon");
-        ic.innerHTML = C.ROOM_ICON[room] || "";
-        const num = mk("span", "ny-door__num", ROMAN[i]);
+        // 문틀(아치) 안: 위 반달 창(방 표지) + 문 두 짝(판넬·손잡이) + 문 뒤 빛 + 문턱. 아래에 방 이름·읽는 법
+        const frame = mk("span", "ny-door__frame");
+        frame.setAttribute("aria-hidden", "true");
+        frame.innerHTML = '<span class="ny-door__light"></span><span class="ny-door__leaf ny-door__leaf--l"></span><span class="ny-door__leaf ny-door__leaf--r"></span>' +
+          `<span class="ny-door__fan"><span class="ny-door__icon">${C.ROOM_ICON[room] || ""}</span></span><span class="ny-door__plate">${ROMAN[i]}</span>`;
         const nm = mk("span", "ny-door__name", T.rooms[room].name);
         const by = mk("span", "ny-door__by", N.rooms[room].by);
-        b.append(num, ic, nm, by);
+        b.append(frame, mk("span", "ny-door__step"), nm, by);
         if (heard.has(room)) b.append(mk("span", "ny-door__heard", N.hub.heard));
-        b.addEventListener("click", () => openRoom(room));
+        b.addEventListener("click", () => {
+          if (b.classList.contains("is-opening")) return;
+          if (C.reduceMotion) return openRoom(room);
+          b.classList.add("is-opening"); // 두 짝이 열리고 빛이 쏟아진 뒤 들어간다
+          setTimeout(() => openRoom(room), 600);
+        });
         grid.append(b);
       });
       hubScr.append(head, grid);
