@@ -212,8 +212,8 @@ location.replace("${P}#${to}");
       log(404);
       return notFound(res);
     }
-    // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로). (2026-11-04) 새해 탭 ny.mode도 "test"로
-    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"').replace(SITE_RE, '$1""').replace(/(\bauth:\s*\{\s*kakao:\s*)"off"/, '$1"on"').replace(/(\bny:\s*\{\s*mode:\s*)"off"/, '$1"test"'))));
+    // test: 제품 data.js의 pay.mode만 응답에서 "test"로 (파일은 그대로). (2026-11-04) 새해 탭 ny.mode도 "test"로(--src일 때만: 새해 파일은 dist에 없다)
+    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"').replace(SITE_RE, '$1""').replace(/(\bauth:\s*\{\s*kakao:\s*)"off"/, '$1"on"').replace(/(\bny:\s*\{\s*mode:\s*)"off"/, SRC ? '$1"test"' : '$1"off"'))));
     // 19-5 (b): 모든 모드에서 data.js 응답의 GA4 측정 ID를 시험 ID로 (실제 ID로 localhost 방문이 나가지 않게, 파일은 그대로)
     if (/[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(GA4_RE, '$1"' + GA4_TEST + '"'));
     send(req, res, TYPES[path.extname(file)] || "application/octet-stream", data);
