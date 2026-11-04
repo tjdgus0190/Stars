@@ -157,6 +157,9 @@
   const onAccount = { saved: () => {}, pass: () => {}, clear: () => {} }; // (23단계) 카카오 계정 저장 고리(로그인·동의 상태는 그쪽에서 확인)
   // (18단계) BX = app-book.js mount 결과, storyBookHook = 나의 이야기 7/7 미리보기 카드
   let BX = null;
+  // (2026-11-04 시험판) 2027 신년운세 탭: data.js ny.mode가 test·live일 때만 app-ny.js를 받아 mount. off(배포판)면 탭·화면·파일 0
+  const NY_ON = Boolean(T.ny) && /^(test|live)$/.test(T.ny.mode);
+  let nyApi = null;
   let bookGo = "";
   let storyBookHook = null;
   const PASS_KEY = "strange-oracle-pass"; // 확인된 열람 코드(탭을 닫으면 사라짐). 이어가기 코드에는 넣지 않는다
@@ -280,11 +283,13 @@
       window.sessionStorage.removeItem("strange-oracle-payroom"); // (22단계) 결제를 시작한 방 이름
       window.sessionStorage.removeItem(PAYREQ_KEY); // (15-2) 결제 확인용 R도 지운다 → 이 탭에서 책이 자동으로 열리지 않음(확인 창 경고 줄)
       window.sessionStorage.removeItem("strange-oracle-keep"); // (2026-10-28) 열람 코드에 결과 담기 동의 표시(서버 암호문은 카드의 체크를 꺼서 지운다)
+      window.sessionStorage.removeItem("strange-oracle-ny"); // (2026-11-04) 새해 탭에서 새로 뽑은 돌·신탁 번호·고른 주제
       window.sessionStorage.removeItem(MAP_SES); // (16-2의 8) 지도 초대·참여 표시·삭제 코드도 늘 지운다(서버 기록 지우기는 대화 상자의 선택 칸)
     } catch (e) {
       /* 무시 */
     }
     if (onClearPay) onClearPay();
+    if (nyApi) nyApi.clear();
     onAccount.clear(); // (23단계) 이 기기 카카오 로그인도 푼다(계정에 저장한 기록은 입구 '저장한 기록 지우기'로)
     state = emptyState();
     Object.keys(editing).forEach((k) => (editing[k] = false));
@@ -542,9 +547,11 @@
       if (/-input$/.test(name)) syncNotice(next);
       if (name === "saju-intro") sajuGateOpen();
       onScreen(name, next); // 화면 이벤트(GA4)
-      if (name === "hub" || /-result$/.test(name)) prefetchNext();
+      if (nyApi) nyApi.onScreen(name); // (2026-11-04) 하단 탭(나의 이야기 / 2027 신년운세)
+      const roomResult = /-result$/.test(name) && !/^ny-/.test(name); // 새해 결과는 방 결과 꾸밈(연결·나머지 이야기)을 쓰지 않는다
+      if (name === "hub" || roomResult) prefetchNext();
       if (/-intro$/.test(name)) renderPromise(next); // (2026-10-29 B) 문 앞에서 본 첫마디
-      if (/-result$/.test(name)) {
+      if (roomResult) {
         renderEcho(next); // (2026-10-29 B) 그 첫마디로 시작하는 결과 카드
         renderLink(next); // (2026-10-29 v6) 방 끝: 이번 결과 → 다음 전통의 시선 + 다음 방 미리보기
         renderRest(next); // (22단계) 이 방의 나머지 이야기
@@ -3428,7 +3435,7 @@
   const PART0 = new Set(["open", "close"]); // 여는 글·닫는 글 (부 번호 없음)
   const PAID_IDS = new Set([...BOOK_ROOMS, "cross", "flow", "year", "yeon", "match", "deep"]); // (2026-10-25 운영자) 만신의 장도 유료: 방 결과까지 무료, "나머지 이야기"부터 결제
   const PAID_FILE = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, r])), { cross: "cross", flow: "flow", year: "year", yeon: "yeon", match: "match", deep: "arch" });
-  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { cross: "BOOK_CROSS", flow: "BOOK_FLOW", year: "BOOK_YEAR", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH" });
+  const PAID_GLOBAL = Object.assign(Object.fromEntries(BOOK_ROOMS.map((r) => [r, `BOOK_${r.toUpperCase()}`])), { cross: "BOOK_CROSS", flow: "BOOK_FLOW", year: "BOOK_YEAR", yeon: "BOOK_YEON", match: "BOOK_MATCH", arch: "BOOK_ARCH", ny: "BOOK_NY" });
   const FREE_FILE = "data-book-free.js";
   const SAMPLE_FILE = "data-book-sample.js";
   // (18-8) 관심사·(18-2) 새 장: app-book.js를 받은 뒤
@@ -3456,7 +3463,8 @@
     memPass = p || "";
     syncHubKakao();
     if (p) onAccount.pass(p); // (23단계) 로그인한 기기면 결제 코드를 계정에 연결
-    if (/-result$/.test(currentName)) renderRest(screens[currentName]); // (22단계) 결제·코드 확인·폐기 → 방 결과의 나머지 칸 다시
+    if (nyApi) nyApi.refresh(); // (2026-11-04) 새해 결과의 상세 칸 다시
+    if (/-result$/.test(currentName) && !/^ny-/.test(currentName)) renderRest(screens[currentName]); // (22단계) 결제·코드 확인·폐기 → 방 결과의 나머지 칸 다시
     updateBookLines(); // (2026-10-30 v7) 책 장 링크는 산 사람에게만
     CHAPTER_ORDER.forEach((r) => freeCut(screens[`${r}-result`])); // (2026-10-31) 결제·코드 확인 → 접은 풀이 펼치기(또는 다시 접기)
   };
@@ -5383,7 +5391,7 @@
   // (18-11) 결제 전 화면에 들어온 길: preview · toc · other
   let payFrom = "other";
   // (2026-10-21) hub·story·locked 길을 더함. 결제 전 화면으로 갔으면 true
-  const PAY_FROM = ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale"]; // (2026-10-30 v7) offer = 오검 뒤 책 제안 · after_saju = 만신 한 줄 링크(기본 꺼짐) · finale = 완주 화면 // (22단계) room = 방 결과의 나머지 이야기 칸 · (2026-10-25) dock = 결과 화면 아래 떠 있는 버튼
+  const PAY_FROM = ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale", "ny"]; // (2026-10-30 v7) offer = 오검 뒤 책 제안 · after_saju = 만신 한 줄 링크(기본 꺼짐) · finale = 완주 화면 // (22단계) room = 방 결과의 나머지 이야기 칸 · (2026-10-25) dock = 결과 화면 아래 떠 있는 버튼
   function goPay(from) {
     if (!payScr) return false;
     payFrom = PAY_FROM.includes(from) ? from : "other";
@@ -6462,13 +6470,15 @@
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
     so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail", "consent", "logout", "erase"], mode: ["restore", "link", "forget", "login"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
-    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao", "keep_on", "keep_off", "keep_load"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale", "other"] },
+    so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao", "keep_on", "keep_off", "keep_load"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale", "ny", "other"] },
     // (2026-10-30 기획 v7 작업 D) 오검 뒤 책 제안: 보임·자세히 보기·무료로 계속·닫기. placement·도착 방 이름만
     so_book_offer_view: { placement: ["after_ogham"], destination_room: CHAPTER_ORDER },
     so_book_offer_click: { placement: ["after_ogham", "after_saju", "finale", "room_more"] }, // (2026-10-31) room_more = 베다~시빌라 핵심 풀이 아래 [더 읽기]
     so_book_offer_continue: { placement: ["after_ogham"], destination_room: CHAPTER_ORDER },
     so_book_offer_close: { placement: ["after_ogham"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
+    // (2026-11-04 시험판) 2027 신년운세 탭: 단계 이름·방 이름만(생일·이름·주제·뽑은 돌·결과 번호 없음)
+    so_ny: { step: ["tab", "hub", "room", "result", "lock", "open"], room: CHAPTER_ORDER },
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
   // (광고 측정, 제안서 strange-oracle-ads 8장 4번) 캠페인 구분: 광고 링크의 utm은 아래 값과 정확히 같을 때만 page_location에 남긴다.
@@ -6781,6 +6791,18 @@
   }
   booted = true;
   startExternal();
+  if (NY_ON)
+    Promise.all([loadScript("data-ny.js"), loadScript("app-ny.js"), css("style-ny.css", 1)]).then(() => {
+      nyApi = window.NewYear.mount({
+        T, save, go, screens, enter, toast, track, passNow, goPay, loadPaid, ensureRooms, fill, isDone, ROOM_ICON, reduceMotion,
+        get state() {
+          return state;
+        },
+        current: () => currentName,
+      });
+      nyApi.onScreen(currentName);
+      if (/^ny-/.test(hash)) nyApi.hub(); // 새해 탭에서 새로 고침 → 새해 입구
+    }, () => {});
 
   // 테스트·점검용으로 바깥에서 읽을 수 있게 둔다 (입력값은 내보내지 않음)
   // render*는 저장 없이(fresh=false) 결과 틀만 다시 그린다

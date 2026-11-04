@@ -1,0 +1,137 @@
+/* 낯선 점술관 — 2027 신년운세 탭 「새해의 회랑」 (2026-11-04 시험판, ny.mode가 off가 아닐 때만 app.js가 받는다)
+   색: 새해 새벽의 주홍빛(정미년 丁 = 불). 문·카드는 방마다 제 강조색(data-room)을 그대로 쓴다. */
+[data-room="ny"] { --accent-h: 32; --accent-c-scale: 1.05; --room-h: 25; }
+
+.ny-screen.is-active {
+  background:
+    radial-gradient(ellipse 120% 40% at 50% 0%, oklch(0.6 0.12 40 / 0.16), transparent 70%);
+}
+.ny-eyebrow { margin: 0; font-size: var(--fs-sm); letter-spacing: 0.14em; color: var(--accent); }
+
+/* ── 하단 탭 */
+.ny-tabbar {
+  position: fixed; left: 50%; bottom: 0; z-index: 60; transform: translate(-50%, 110%);
+  display: grid; grid-template-columns: 1fr 1fr; width: min(480px, 100%);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--c-bg-deep);
+  border-top: 1px solid var(--c-line); transition: transform 220ms ease;
+}
+.ny-tabbar.is-on { transform: translate(-50%, 0); }
+.ny-tabbar__tab {
+  position: relative; min-height: 56px; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-serif); font-size: var(--fs-md); color: var(--c-text-muted);
+}
+.ny-tabbar__tab.is-current { color: var(--c-text-strong); font-weight: 700; }
+.ny-tabbar__tab.is-current::before {
+  content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent);
+}
+.ny-tabbar__tab--ny { --accent-h: 32; }
+.ny-tabbar__tab--ny.is-current { color: oklch(var(--accent-l) var(--accent-c) 32); }
+.ny-tabbar__tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+body.has-ny-tabbar #app { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+@media (prefers-reduced-motion: reduce) { .ny-tabbar { transition: none; } }
+
+/* ── 새해 입구 */
+.ny-hub__head { text-align: center; margin-bottom: var(--space-8); }
+.ny-hub__title { margin: var(--space-2) 0 var(--space-4); font-size: var(--fs-2xl); color: var(--c-text-strong); }
+.ny-hub__lead { margin: 0; font-size: var(--fs-read); line-height: var(--lh-body, 1.7); color: var(--c-text); }
+.ny-hub__note { margin: var(--space-3) 0 0; font-size: var(--fs-sm); color: var(--c-text-muted); }
+.ny-doors { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.ny-door {
+  position: relative; display: grid; justify-items: start; gap: var(--space-1); min-height: 132px; padding: var(--space-4);
+  text-align: left; cursor: pointer; border-radius: var(--radius-lg); border: 1px solid var(--accent-line);
+  background: linear-gradient(160deg, var(--accent-soft), transparent 70%), var(--c-surface-1); color: var(--c-text);
+  font-family: var(--font-serif); transition: transform 160ms ease, border-color 160ms ease;
+}
+.ny-door:last-child { grid-column: 1 / -1; }
+.ny-door:hover, .ny-door:focus-visible { border-color: var(--accent); transform: translateY(-2px); }
+.ny-door:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ny-door__num { font-family: var(--font-latin); font-size: var(--fs-sm); color: var(--accent); }
+.ny-door__icon { position: absolute; top: var(--space-4); right: var(--space-4); width: 30px; height: 30px; color: var(--accent); opacity: 0.85; }
+.ny-door__icon svg { width: 100%; height: 100%; fill: currentColor; }
+.ny-door__name { font-size: var(--fs-lg); font-weight: 700; color: var(--c-text-strong); }
+.ny-door__by { font-size: var(--fs-xs); line-height: 1.45; color: var(--c-text-muted); }
+.ny-door__heard { margin-top: var(--space-1); padding: 2px 8px; border-radius: var(--radius-pill); font-size: var(--fs-xs); background: var(--accent-soft); color: var(--accent); }
+
+/* ── 방 안 */
+.ny-room__head, .ny-res__head { text-align: center; margin-bottom: var(--space-6); }
+.ny-room__title { margin: var(--space-2) 0 0; font-size: var(--fs-2xl); color: var(--accent); }
+.ny-guide { display: flex; gap: var(--space-4); align-items: flex-start; margin-bottom: var(--space-6); }
+.ny-guide__fig { flex: none; width: 56px; height: 75px; color: var(--accent); fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 10px var(--accent-soft)); }
+.ny-guide__say {
+  position: relative; margin: 0; padding: var(--space-4); border-radius: var(--radius-lg);
+  background: var(--c-surface-1); border: 1px solid var(--accent-line); font-size: var(--fs-read); line-height: 1.7; color: var(--c-text-strong);
+}
+.ny-form { display: grid; gap: var(--space-4); }
+.ny-fields { display: grid; gap: var(--space-4); }
+.ny-fields[hidden] { display: none; }
+.ny-fields .field + .field { margin-top: 0; }
+.ny-check { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--fs-sm); color: var(--c-text-muted); }
+.ny-check input { width: 20px; height: 20px; accent-color: var(--accent); }
+.ny-saved { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--c-surface-2); }
+.ny-saved__label { font-size: var(--fs-sm); color: var(--c-text-muted); }
+.ny-saved__val { font-size: var(--fs-md); color: var(--c-text-strong); }
+.ny-notice { margin: 0; font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text-muted); }
+.ny-topics { border: 0; margin: 0; padding: 0; }
+.ny-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+.ny-chips .chip-toggle span { padding: 0 var(--space-4); }
+.ny-go { margin-top: var(--space-2); }
+
+/* 짧은 의식 */
+.ny-ritual {
+  position: fixed; inset: 0; z-index: 70; display: grid; place-content: center; justify-items: center; gap: var(--space-6);
+  background: var(--c-bg-deep); animation: ny-fade 300ms ease both;
+}
+.ny-ritual__orb { width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle, var(--accent), transparent 70%); animation: ny-pulse 1200ms ease-in-out infinite; }
+.ny-ritual__text { margin: 0; font-size: var(--fs-md); color: var(--c-text-strong); }
+@keyframes ny-fade { from { opacity: 0; } }
+@keyframes ny-pulse { 50% { transform: scale(1.25); opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) { .ny-ritual, .ny-ritual__orb { animation: none; } }
+
+/* ── 결과 */
+.ny-res__mark { margin: var(--space-2) 0 0; font-size: var(--fs-xl); line-height: 1.4; color: var(--c-text-strong); }
+.ny-res__note { margin: var(--space-2) 0 0; font-size: var(--fs-xs); color: var(--c-text-muted); }
+.ny-oracle { margin: 0 0 var(--space-5); padding: var(--space-4) var(--space-5); border-left: 3px solid var(--accent); font-size: var(--fs-lg); line-height: 1.6; color: var(--c-text-strong); background: var(--accent-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+.ny-card { margin-bottom: var(--space-5); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--c-surface-1); border: 1px solid var(--c-line); }
+.ny-card__head { margin: 0 0 var(--space-3); font-size: var(--fs-sm); letter-spacing: 0.08em; color: var(--accent); }
+.ny-theme { margin: 0; font-size: var(--fs-lg); line-height: 1.7; color: var(--c-text-strong); }
+.ny-sub { margin: var(--space-3) 0 0; font-size: var(--fs-md); line-height: 1.65; color: var(--c-text); }
+.ny-keys { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-4); }
+.ny-keys__head { width: 100%; font-size: var(--fs-xs); color: var(--c-text-muted); }
+.ny-key { padding: 4px 12px; border-radius: var(--radius-pill); border: 1px solid var(--accent-line); font-size: var(--fs-sm); color: var(--c-text-strong); }
+
+.ny-cal__grid { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.ny-cal__grid--months { grid-template-columns: repeat(3, 1fr); }
+.ny-cal__grid--seasons { grid-template-columns: repeat(2, 1fr); }
+.ny-cal__grid--halves { grid-template-columns: 1fr; }
+.ny-cal__item { display: grid; gap: 2px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--c-surface-2); font-size: var(--fs-xs); line-height: 1.4; }
+.ny-cal__item.is-bright { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+.ny-cal__label { color: var(--c-text-strong); font-weight: 700; }
+.ny-cal__sub { color: var(--c-text); }
+.ny-cal__tag { color: var(--c-text-muted); }
+.ny-cal__dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c-line-strong); }
+.is-bright .ny-cal__dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.is-rest .ny-cal__dot { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c-text-faint); }
+.ny-cal__legend { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: var(--space-3) 0 0; font-size: var(--fs-xs); color: var(--c-text-muted); }
+.ny-cal__lg { display: inline-flex; align-items: center; gap: 6px; }
+.ny-bright, .ny-days { margin: var(--space-4) 0 0; font-size: var(--fs-md); line-height: 1.6; color: var(--c-text-strong); }
+.ny-bright strong, .ny-days strong { color: var(--accent); }
+.ny-foot { margin: var(--space-3) 0 0; font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text-muted); }
+
+.ny-detail.is-locked { border-style: dashed; border-color: var(--accent-line); }
+.ny-lock__head { margin: 0 0 var(--space-3); font-size: var(--fs-lg); font-weight: 700; color: var(--c-text-strong); }
+.ny-lock__list { margin: 0 0 var(--space-5); padding-left: 1.2em; font-size: var(--fs-md); line-height: 1.8; color: var(--c-text); }
+.ny-lock__note { margin: var(--space-3) 0 0; font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text-muted); }
+.ny-wait { margin: 0; font-size: var(--fs-md); color: var(--c-text-muted); }
+.ny-sec + .ny-sec { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--c-line); }
+.ny-sec__head { margin: 0 0 var(--space-3); font-size: var(--fs-lg); color: var(--c-text-strong); }
+.ny-p { margin: 0; font-size: var(--fs-read); line-height: 1.8; color: var(--c-text); }
+.ny-p + .ny-p { margin-top: 0.9em; }
+.ny-areas { display: grid; gap: var(--space-3); margin: 0; }
+.ny-areas dt { font-size: var(--fs-sm); font-weight: 700; color: var(--accent); }
+.ny-areas dd { margin: 0 0 var(--space-2); font-size: var(--fs-read); line-height: 1.75; color: var(--c-text); }
+.ny-flow { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.ny-flow__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-1); font-size: var(--fs-md); color: var(--c-text-strong); }
+.ny-flow__tag { font-size: var(--fs-xs); color: var(--c-text-muted); }
+.ny-one { padding: var(--space-4); border-radius: var(--radius-md); background: var(--accent-soft); color: var(--c-text-strong); }
+.ny-acts { display: grid; gap: var(--space-3); margin-top: var(--space-6); }

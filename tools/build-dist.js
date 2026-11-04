@@ -48,6 +48,8 @@ const MapSec = PaySec.map; // (16단계) 지도 표지 map:on/off
 const MODES = {}; // slug → pay.mode
 const GA4 = {}; // slug → analytics.ga4 (19-5 ⑮)
 const MAP_MODES = {}; // slug → map.mode (16단계)
+const NY_MODES = {}; // slug → ny.mode (2026-11-04 2027 신년운세 탭, 시험판)
+const NY_FILES = ["app-ny.js", "data-ny.js", "style-ny.css"]; // ⑰ ny.mode off면 배포 폴더에 넣지 않는다
 const MAP_FILES = ["map.js", "data-map.js"]; // 지도 파일: map.mode off면 배포 폴더에 넣지 않는다(⑪)
 const BOOK_FILES = ["app-book.js", "style-book.css"]; // (18단계 결정 120) 책·미리보기·결제 전 화면 전용 코드·스타일: pay.mode off면 배포 폴더에 넣지 않는다(⑭)
 const MAP_WORDS = ["key_hash", "del_hash", "MAP_MODE", "ALLOWED_ORIGIN", "/__dev/map"]; // ⑫ 배포판 텍스트 0건
@@ -98,6 +100,10 @@ for (const slug of PRODUCTS) {
     const mapMode = T.map && T.map.mode ? String(T.map.mode) : "off";
     MAP_MODES[slug] = mapMode;
     if (mapMode !== "off") fails.push(`⑩ products/${slug}/data.js map.mode = "${mapMode}" (배포판은 "off"만)`);
+    // ⑰ (2026-11-04) 2027 신년운세 탭은 시험판: 배포판은 ny.mode "off"만(12월 오픈 때 운영자 결정으로 함께 푼다)
+    const nyMode = T.ny && T.ny.mode ? String(T.ny.mode) : "off";
+    NY_MODES[slug] = nyMode;
+    if (nyMode !== "off") fails.push(`⑰ products/${slug}/data.js ny.mode = "${nyMode}" (배포판은 "off"만)`);
     if (mapMode === "live") {
       if (!/^https:\/\//.test(String(T.map.api || ""))) fails.push(`⑬ live: products/${slug}/data.js map.api가 https://로 시작하지 않음`);
       if (!SITE[slug]) fails.push(`⑬ live: products/${slug}/data.js site.url이 비어 있음 (초대 링크 주소)`);
@@ -163,6 +169,11 @@ for (const slug of PRODUCTS) {
     const idx = fs.readFileSync(path.join(dst, "index.html"), "utf8");
     for (const id of MAP_IDS) if (idx.includes(`data-js="${id}`) || idx.includes(`id="${id}`)) fails.push(`⑪ off: public/products/${slug}/index.html에 지도 요소 ${id} 남음`);
     for (const n of MAP_FILES) if (fs.existsSync(path.join(dst, n))) fails.push(`⑪ off: public/products/${slug}/${n} 있음`);
+  }
+  // ⑰ 새해 탭이 꺼진 판: 새해 파일이 배포 폴더에 없다
+  if ((NY_MODES[slug] || "off") === "off") {
+    for (const n of NY_FILES) fs.rmSync(path.join(dst, n), { force: true });
+    for (const n of NY_FILES) if (fs.existsSync(path.join(dst, n))) fails.push(`⑰ off: public/products/${slug}/${n} 있음`);
   }
   // ⑭ (결정 120) 결제가 꺼진 판: 책 전용 파일이 배포 폴더에 없다(off는 책 화면이 없어 부르지 않는다)
   if (mode === "off") {
