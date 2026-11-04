@@ -147,7 +147,7 @@
           `<span class="ny-door__fan"><span class="ny-door__icon">${C.ROOM_ICON[room] || ""}</span></span><span class="ny-door__plate">${ROMAN[i]}</span>`;
         const nm = mk("span", "ny-door__name", T.rooms[room].name);
         const by = mk("span", "ny-door__by", N.rooms[room].by);
-        b.append(frame, mk("span", "ny-door__step"), nm, by);
+        b.append(frame, mk("span", "ny-door__step"), nm, mk("span", "ny-door__lens", N.rooms[room].lens), by);
         if (heard.has(room)) b.append(mk("span", "ny-door__heard", N.hub.heard));
         b.addEventListener("click", () => {
           if (b.classList.contains("is-opening")) return;
@@ -496,6 +496,9 @@
       const head = mk("header", "ny-res__head");
       head.dataset.room = M.room;
       head.append(mk("p", "ny-eyebrow", fill(N.result.eyebrow, { room: T.rooms[M.room].name })), mk("h1", "ny-res__mark", M.mark));
+      const lensLine = mk("p", "ny-res__lens");
+      lensLine.append(mk("span", "ny-res__lens-k", N.result.lensHead), mk("strong", "", N.rooms[M.room].lens));
+      head.append(lensLine, mk("p", "ny-res__lens-note", N.result.lensNote));
       if (M.note) head.append(mk("p", "ny-res__note", M.note));
       resScr.append(head);
       if (M.oracle) resScr.append(mk("blockquote", "ny-oracle", M.oracle));
@@ -514,7 +517,8 @@
       // 무료: 한눈에(이름표·빛남 표시) + 가장 빛나는 때
       const cal = mk("section", "ny-card ny-cal");
       cal.dataset.room = M.room;
-      cal.append(mk("h2", "ny-card__head", M.kind === "months" ? N.result.calHead : M.kind === "halves" ? N.result.halvesCalHead : N.result.seasonsCalHead));
+      const lens = N.rooms[M.room].lens;
+      cal.append(mk("h2", "ny-card__head", `${M.kind === "months" ? N.result.calHead : M.kind === "halves" ? N.result.halvesCalHead : N.result.seasonsCalHead} · ${lens}`));
       const grid = mk("ol", "ny-cal__grid ny-cal__grid--" + M.kind);
       M.items.forEach((it) => {
         const li = mk("li", "ny-cal__item is-" + it.tone);
@@ -534,7 +538,7 @@
       const bright = M.items.filter((x) => x.tone === "bright");
       if (bright.length) {
         const br = mk("p", "ny-bright");
-        br.append(mk("strong", "", N.result.brightHead + " "), document.createTextNode(bright.slice(0, 4).map((x) => x.label.replace(/ · .*$/, "")).join(" · ")));
+        br.append(mk("strong", "", fill(N.result.brightHead, { lens }) + " "), document.createTextNode(bright.slice(0, 4).map((x) => x.label.replace(/ · .*$/, "")).join(" · ")));
         cal.append(br);
       }
       if (M.days) {
@@ -620,13 +624,16 @@
       const M = model;
       if (B.year) sec(det, N.result.yearHead, paras(B.year[M.k.year]).map((t) => mk("p", "ny-p", t)));
       if (B.areas && M.k.areas != null && B.areas[M.k.areas]) {
+        // (2026-11-04) 방이 비추는 면에 맞는 갈래만(data.js ny.rooms.<방>.areas). 없으면(룬) 네 갈래 모두
         const A = B.areas[M.k.areas];
+        const R = N.rooms[M.room];
+        const pick = R.areas || ["work", "relation", "learn", "move"].map((k) => ({ k, label: N.result.areas[k] }));
         const dl = mk("dl", "ny-areas");
-        ["work", "relation", "learn", "move"].forEach((k) => {
+        pick.forEach(({ k, label }) => {
           if (!A[k]) return;
-          dl.append(mk("dt", "", N.result.areas[k]), mk("dd", "", A[k]));
+          dl.append(mk("dt", "", label), mk("dd", "", A[k]));
         });
-        sec(det, N.result.areasHead, [dl]);
+        sec(det, R.areas ? fill(N.result.lensAreasHead, { lens: R.lens }) : N.result.areasHead, [dl]);
       }
       const ol = mk("ol", "ny-flow");
       M.items.forEach((it) => {

@@ -170,6 +170,7 @@ body.has-ny-tabbar #app { padding-bottom: calc(72px + env(safe-area-inset-bottom
 }
 .ny-door__step { display: block; width: 92%; height: 6px; margin-top: -2px; border-radius: 2px; background: linear-gradient(180deg, var(--ny-gold-dim), oklch(0.32 0.05 50)); box-shadow: 0 4px 10px oklch(0 0 0 / 0.5); }
 .ny-door__name { margin-top: var(--space-2); font-size: var(--fs-lg); font-weight: 700; color: var(--c-text-strong); }
+.ny-door__lens { padding: 1px 10px; border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 700; color: oklch(0.2 0.04 60); background: linear-gradient(90deg, oklch(0.86 0.11 82), oklch(0.76 0.13 60)); }
 .ny-door__by { font-size: var(--fs-xs); line-height: 1.45; color: var(--c-text-muted); max-width: 16em; }
 .ny-door__heard { margin-top: 2px; padding: 2px 8px; border-radius: var(--radius-pill); font-size: var(--fs-xs); background: oklch(0.83 0.12 82 / 0.16); color: var(--ny-gold); }
 /* 다가가면 문이 살짝 벌어지고, 누르면 활짝 열리며 빛이 쏟아진다 */
@@ -224,6 +225,9 @@ body.has-ny-tabbar #app { padding-bottom: calc(72px + env(safe-area-inset-bottom
 
 /* ── 결과 */
 .ny-res__mark { margin: var(--space-2) 0 0; font-size: var(--fs-xl); line-height: 1.4; color: var(--c-text-strong); }
+.ny-res__lens { display: inline-flex; align-items: center; gap: var(--space-2); margin: var(--space-3) 0 0; padding: 4px 14px; border-radius: var(--radius-pill); border: 1px solid oklch(0.8 0.12 75 / 0.5); background: oklch(0.83 0.12 82 / 0.12); font-size: var(--fs-sm); color: var(--c-text-strong); }
+.ny-res__lens-k { color: var(--ny-gold); font-size: var(--fs-xs); }
+.ny-res__lens-note { max-width: 22em; margin: var(--space-2) auto 0; font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text-muted); }
 .ny-res__note { margin: var(--space-2) 0 0; font-size: var(--fs-xs); color: var(--c-text-muted); }
 .ny-oracle { margin: 0 0 var(--space-5); padding: var(--space-4) var(--space-5); border-left: 3px solid var(--accent); font-size: var(--fs-lg); line-height: 1.6; color: var(--c-text-strong); background: var(--accent-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
 .ny-card { margin-bottom: var(--space-5); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--c-surface-1); border: 1px solid var(--c-line); }
