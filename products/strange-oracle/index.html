@@ -3810,6 +3810,9 @@
       <!-- 8 열람 코드 넣기 (10-1 이어가기 칸 규칙: 제출 폼 아님, name 없음, autocomplete="off", console·주소·분석에 넣지 않음. 접두어 SOP).
            오류(JS 문구): pay.pass.errors.shape / receipt(SO1) / resume(SOG) / fail / offline / wait / cancelled(15단계 새) — 각 한 줄.
            paycheck 「찾지 못함」의 [열람 코드 넣기]는 이 칸을 펼친 채(pass-panel .is-hidden 해제, pass-input 포커스) 이 화면으로 온다 -->
+      <!-- (2026-11-06) 처음 사는 사람의 눈길을 빼앗지 않게 카카오 로그인·열람 코드 넣기는 접기 안으로. 코드 넣기 칸이 열려야 할 때(찾지 못함·오류)는 JS가 펼친다 -->
+      <details class="pay-owned" data-js="pay-owned">
+        <summary class="pay-owned__toggle" data-t="pay.ownedToggle">이미 산 분 · 열람 코드·카카오로 다시 열기</summary>
       <div class="pass-enter" data-js="pass-enter">
         <!-- (21단계) 카카오로 산 책 다시 열기: 카카오 디자인 가이드 색(#FEE500·검은 말풍선). auth.kakao가 "on"이 아니면 JS가 지운다 -->
         <div class="kakao-row" data-js="kakao-row">
@@ -3828,6 +3831,7 @@
           <p class="share-status is-hidden" data-js="pass-status" role="status"></p>
         </div>
       </div>
+      </details>
 
       <!-- 판매자 정보 줄 (15-4, 버튼 아래). 값은 운영자 몫(69번), 빈 값의 줄은 JS가 숨김. 신고번호 줄은 값이 생기면 JS가 .is-hidden 해제.
            legal 3종: 구매·환불 안내 / 이용약관 / 개인정보처리방침 (test·live의 결제 문단) -->

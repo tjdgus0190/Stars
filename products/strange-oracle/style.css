@@ -5931,3 +5931,32 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 /* (2026-11-01 운영자) 안내 줄이기: 비운 스토리 안내 줄 숨김 · 계절 꼬리표 옆 한 줄 */
 .story-hint:empty { display: none; }
 .season__price .season__line { margin-left: 8px; font-size: var(--fs-xs); color: var(--c-text-muted); }
+
+/* ═════════ (2026-11-06) 결제 화면 개선 1~4 ═════════ */
+/* 1. 읽던 이야기의 다음 장(방 결과의 [더 읽기]로 왔을 때 맨 위) — 방 강조색 */
+.pay-context { margin: var(--space-4) 0 0; padding: 18px 18px 16px; border-radius: 16px; text-align: left;
+  border: 1px solid var(--accent-line); background: linear-gradient(160deg, var(--accent-soft), transparent 70%), oklch(0.16 0.04 285 / 0.75); }
+.pay-context[hidden] { display: none; }
+.pay-context__eyebrow { margin: 0; font-size: 12.5px; letter-spacing: 0.06em; color: var(--accent); }
+.pay-context__head { margin: 6px 0 12px; font-size: var(--fs-lg); line-height: 1.4; color: var(--c-text-strong); }
+.pay-context__list, .free-more__next { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.pay-context__list li, .free-more__next li { display: flex; align-items: baseline; gap: 10px; font-size: var(--fs-md); line-height: 1.45; color: var(--c-text-strong); word-break: keep-all; }
+.pay-context__list-num, .free-more__next-num { flex: none; min-width: 1.6em; font-family: var(--font-latin); font-size: 13px; color: var(--accent); }
+.pay-context__tail { margin: 12px 0 0; font-size: 13px; line-height: 1.55; color: var(--c-text-muted); word-break: keep-all; }
+/* 2. [더 읽기] 위 다음 장 제목 */
+.free-more__next-head { margin: 4px 0 0; font-size: 12.5px; letter-spacing: 0.08em; color: var(--accent); }
+.free-more__next { width: min(100%, 300px); padding: 12px 16px; border-radius: 12px; border: 1px dashed var(--accent-line); background: oklch(0.16 0.04 285 / 0.5); text-align: left; }
+.free-more__next li { font-size: 15px; }
+/* 3. 이미 산 분 접기 */
+.pay-owned { margin-top: var(--space-6); text-align: center; }
+.pay-owned__toggle { display: inline-block; cursor: pointer; list-style: none; font-size: var(--fs-sm); color: var(--c-text-muted); text-decoration: underline; text-underline-offset: 3px; }
+.pay-owned__toggle::-webkit-details-marker { display: none; }
+.pay-owned__toggle::after { content: " ▾"; }
+.pay-owned[open] > .pay-owned__toggle::after { content: " ▴"; }
+.pay-owned > .pass-enter { margin-top: var(--space-4); }
+/* 4. 결제 버튼은 처음부터 켜진 모습, 체크 전 누르면 체크 칸을 짚는다 */
+.pay-agree.is-nudge { animation: pay-nudge 520ms ease; border-radius: 10px; box-shadow: 0 0 0 2px var(--accent); }
+@keyframes pay-nudge { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+.pay-agree__nudge { margin: 6px 0 0; font-size: 13px; font-weight: 700; color: var(--accent); }
+.pay-agree__nudge[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .pay-agree.is-nudge { animation: none; } }

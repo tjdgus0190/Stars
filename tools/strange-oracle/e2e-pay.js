@@ -120,10 +120,10 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
     const y = (el) => el.getBoundingClientRect().top + scrollY;
     const secs = [...s.querySelectorAll('.pay-sec')].map(y);
     const buyY = y(s.querySelector('[data-js=pay-buy]'));
-    const order = [y(s.querySelector('[data-js=pay-quick]')), y(s.querySelector('[data-js=pay-agree]')), buyY, y(s.querySelector('[data-js=pay-more]')), y(s.querySelector('[data-js=pass-toggle]')), y(s.querySelector('[data-js=pay-seller]'))]; // (2026-10-28) 요약 → 동의 → 책 열기 → 자세한 안내 1~5(접기) → 코드 넣기 → 판매자
+    const order = [y(s.querySelector('[data-js=pay-quick]')), y(s.querySelector('[data-js=pay-agree]')), buyY, y(s.querySelector('[data-js=pay-more]')), y(s.querySelector('[data-js=pay-owned]')), y(s.querySelector('[data-js=pay-seller]'))]; // (2026-10-28) 요약 → 동의 → 책 열기 → 자세한 안내 1~5(접기) → 코드 넣기 → 판매자. (2026-11-06) 코드 넣기·카카오는 '이미 산 분' 접기 안(접힌 채)
     const inMore = [...s.querySelectorAll('.pay-sec')].every((x) => x.closest('[data-js=pay-more]'));
     return { n: secs.length, inMore, closed: !s.querySelector('[data-js=pay-more]').open, quick: s.querySelectorAll('[data-js=pay-quick-items] li').length, sorted: order.every((v, i) => i === 0 || v > order[i - 1]), items: s.querySelectorAll('[data-js=pay-chapters] li').length,
-      band: s.querySelector('[data-js=pay-test-band]').offsetHeight > 0, buyOff: s.querySelector('[data-js=pay-buy]').getAttribute('aria-disabled') === 'true',
+      band: s.querySelector('[data-js=pay-test-band]').offsetHeight > 0, buyOff: s.querySelector('[data-js=pay-buy]').getAttribute('aria-disabled') === 'true', ownedClosed: !s.querySelector('[data-js=pay-owned]').open, kakaoInOwned: !!s.querySelector('[data-js=pay-owned] [data-js=kakao-row], [data-js=pay-owned] [data-js=pass-toggle]'),
       empty: !s.querySelector('[data-js=pay-store-empty]').classList.contains('is-hidden'), wide: document.documentElement.scrollWidth <= 360,
       seller: s.querySelectorAll('.pay-seller__row:not(.is-hidden)').length, legal: s.querySelectorAll('.pay-seller__legal a').length,
       tag: s.querySelector('[data-js=pay-buy]').tagName, href: s.querySelector('[data-js=pay-buy]').hasAttribute('href'),
@@ -135,7 +135,12 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   const cxName = await ev("TEXT.book.parts.cross"), rmLast = await ev("TEXT.topbar.room.replace('{num}', 'Ⅶ').replace('{name}', TEXT.rooms.sibyl.name)");
   check("18-9 받는 것: 새 장 줄은 방 장 바로 뒤·시기별 흐름 앞, 그 줄 하나만 .pay-list__item--new + 알약 · 2027년의 흐름은 시기별 흐름 다음, 인연의 장은 그 다음(20단계)", lay.names.indexOf(cxName) === 7 && lay.names.indexOf(await ev("TEXT.book.parts.timeline")) === 8 && lay.names.indexOf(await ev("TEXT.book.parts.year")) === 9 && lay.names.indexOf(await ev("TEXT.book.parts.yeon")) === 10 && lay.news.length === 1 && lay.news[0].split("|")[0] === cxName && lay.news[0].split("|")[1].length > 0, JSON.stringify({ names: lay.names, news: lay.news, rmLast }));
   check("A3 판매자 정보 줄 = 값이 있는 칸 + 결제대행(2026-10-22: 빈 연락처·신고 줄은 숨김)·legal 3종 링크·결제 버튼은 <button>(href 없음)·옛 칸 2개 없음", lay.seller === (await ev("['name', 'phone', 'email', 'address', 'reg'].filter((k) => TEXT.pay.seller[k]).length + 1")) && lay.legal === 3 && lay.tag === "BUTTON" && !lay.href && !lay.old);
-  check("A4 동의 전 비활성·시험 띠·userid(모의 값) 있으면 '판매 준비 중' 숨김·가로 넘침 0", lay.buyOff && lay.band && !lay.empty && lay.wide);
+  // (2026-11-06) 결제 버튼은 동의 전에도 켜진 모습. 체크 없이 누르면 결제창을 열지 않고 체크 칸 아래 안내 한 줄
+  const reqBeforeNudge = b.log.requests.length;
+  await ev("document.querySelector('#screen-deeper [data-js=pay-buy]').click()");
+  await sleep(400);
+  const nudge = await ev("(() => { const n = document.querySelector('#screen-deeper .pay-agree__nudge'); return { shown: !!n && !n.hidden, text: n ? n.textContent : '', active: document.querySelector('.screen.is-active').id, pay: !!document.querySelector('[data-js=pay-agree]').checked }; })()");
+  check("A4 (2026-11-06) 동의 전에도 결제 버튼 켜진 모습 · 체크 없이 누르면 결제창 안 열림 + 체크 칸 안내 한 줄 · 카카오·코드 넣기는 '이미 산 분' 접기 안(접힌 채) · 시험 띠 · '판매 준비 중' 숨김 · 가로 넘침 0", !lay.buyOff && nudge.shown && nudge.active === "screen-deeper" && !b.log.requests.slice(reqBeforeNudge).some((u) => /payapp|\/api\/pay/.test(String(u.url || u))) && lay.ownedClosed && lay.kakaoInOwned && lay.band && !lay.empty && lay.wide, JSON.stringify(nudge));
   // K. (15단계 QA 1차 필수 1) test: 판매자 정보 줄 legal 링크 3개가 200이고 결제 문단이 주석 밖에 보인다
   const legalHrefs = await ev(`[...document.querySelectorAll('#screen-deeper .pay-seller__legal a')].map((a) => a.href)`);
   const legalRes = [];

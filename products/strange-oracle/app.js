@@ -1246,7 +1246,10 @@
       track("so_book_offer_click", { placement: "room_more" });
       goPay("room");
     });
-    box.append(rule, btn, rmk("p", "free-more__note", M.note || ""));
+    box.append(rule);
+    const nl = M.nextHead ? nextList(room, "free-more__next") : null;
+    if (nl) box.append(rmk("p", "free-more__next-head", M.nextHead), nl);
+    box.append(btn, rmk("p", "free-more__note", M.note || ""));
     (js("reading-close", scr) || body).after(box);
   }
   // (13단계) 방 결과의 책 한 줄: 결제 상태와 무관하게 떡밥(hook) + "책에서 이 방의 장 열기 →"(그 장 표지로). 옛 "여섯 문 끝…" 줄은 숨김
@@ -3708,6 +3711,23 @@
     }
     return null;
   }
+  // (2026-11-06) 이 사람의 이 방 다음 장 제목(공개 data의 title): Ⅱ 사건·Ⅲ 그림자·Ⅳ 다음(룬은 지금·그림자·다음). 결제 화면·[더 읽기] 위에 보인다
+  function nextTitles(room) {
+    const pe = restEntry(room);
+    if (!pe) return [];
+    return ["event", "now", "shadow", "advice"].filter((k) => pe[k] && pe[k].title).slice(0, 3).map((k, i) => ({ num: ROMAN[i + 1], title: strip(pe[k].title) }));
+  }
+  function nextList(room, cls) {
+    const list = nextTitles(room);
+    if (!list.length) return null;
+    const ul = rmk("ul", cls);
+    list.forEach((x) => {
+      const li = rmk("li", "");
+      li.append(rmk("span", cls + "-num", x.num), rmk("span", cls + "-title", `「${x.title}」`));
+      ul.append(li);
+    });
+    return ul;
+  }
   function renderRest(scr) {
     renderRestBox(scr);
     if (scr && screens[currentName] === scr) updateDock();
@@ -5629,8 +5649,20 @@
     const PA = PAY.payapp || {};
     const pass = { input: js("pass-input", payScr), err: js("pass-error", payScr), status: js("pass-status", payScr), panel: js("pass-panel", payScr), toggle: js("pass-toggle", payScr), go: js("pass-go", payScr) };
     const agree = js("pay-agree", payScr), buy = js("pay-buy", payScr), act = js("pay-act", payScr);
-    const syncBuy = () => buy.setAttribute("aria-disabled", String(!PA.userid || !agree.checked));
+    const syncBuy = () => {
+      buy.setAttribute("aria-disabled", String(!PA.userid)); // (2026-11-06) 동의 체크 전에도 켜진 모습. 누르면 체크 칸을 짚어 준다
+      buy.classList.toggle("is-waiting-agree", !agree.checked);
+      if (agree.checked && agreeNudge) agreeNudge.hidden = true;
+    };
+    const agreeBox = agree.closest(".pay-agree");
+    const agreeNudge = rmk("p", "pay-agree__nudge", PAY.agreeNudge || "");
+    agreeNudge.hidden = true;
+    agreeNudge.setAttribute("role", "alert");
+    if (agreeBox) agreeBox.after(agreeNudge);
+    const owned = js("pay-owned", payScr);
+    const openOwned = () => owned && (owned.open = true);
     const passMsg = (kind) => {
+      if (kind && js("pay-owned", payScr)) js("pay-owned", payScr).open = true; // 오류 줄이 접기 안에 묻히지 않게
       pass.err.dataset.kind = kind || "";
       pass.err.textContent = kind ? PAY.pass.errors[kind] || "" : "";
       show(pass.err, Boolean(kind)); // 문구 칸이 비어 있어도 자리는 보인다
@@ -5645,6 +5677,30 @@
     ["paycheck-contact", "paycheck-contact-late", "paycheck-contact-noreq"].forEach((n) => show(js(n, checkScr), Boolean(PAY.contact)));
 
     enter.deeper = () => {
+      { // (2026-11-06) 방 결과의 [더 읽기]·떠 있는 버튼으로 왔으면 맨 위에 읽던 이야기의 다음 장 제목(공개 문구) — 일반 상품 소개보다 먼저
+        let ctx = js("pay-context", payScr);
+        if (!ctx) {
+          ctx = rmk("section", "pay-context");
+          ctx.dataset.js = "pay-context";
+          js("pay-quick", payScr).before(ctx);
+        }
+        ctx.textContent = "";
+        let room = "";
+        try {
+          room = window.sessionStorage.getItem(PAYROOM_KEY) || "";
+        } catch (e) {
+          room = "";
+        }
+        const PC = PAY.context || {};
+        const pe = /^(room|dock)$/.test(payFrom) && CHAPTER_ORDER.includes(room) && isDone(room) ? restEntry(room) : null;
+        const nl = pe ? nextList(room, "pay-context__list") : null;
+        ctx.hidden = !nl;
+        if (nl) {
+          ctx.dataset.room = room;
+          ctx.append(rmk("p", "pay-context__eyebrow", `${PC.eyebrow || ""} · ${T.rooms[room].name}`), rmk("h2", "pay-context__head", fill(PC.head || "", { name: pe.name || strip(pe.title || "") })), nl, rmk("p", "pay-context__tail", PC.tail || ""));
+        }
+      }
+      if (js("pay-owned", payScr)) js("pay-owned", payScr).open = js("pass-toggle", payScr).getAttribute("aria-expanded") === "true"; // 코드 넣기 칸을 펼친 채 오면(찾지 못함 → 열람 코드 넣기) 접기도 펼친 채
       BX.payList(payScr, payFrom); // (18단계) 받는 것 목록(목차와 같은 순서)·미리보기로 돌아가기
       setPriced(js("pay-price", payScr), PAY.price.text || "");
       { // (2026-10-28) 위쪽 요약: 받는 것 세 줄 · 분량 · 가격(첫 계절이면 줄 그은 정가) · 7일 환불. 자세한 1~5는 아래 접기
@@ -5775,6 +5831,18 @@
     }
     buy.addEventListener("click", () => {
       if (buy.getAttribute("aria-disabled") === "true" || passNow()) return;
+      if (!agree.checked) {
+        // (2026-11-06) 동의 체크 전: 결제창을 열지 않고 체크 칸을 짚어 준다(전자상거래 고지 확인 절차는 그대로)
+        agreeNudge.hidden = false;
+        if (agreeBox) {
+          agreeBox.classList.remove("is-nudge");
+          void agreeBox.offsetWidth;
+          agreeBox.classList.add("is-nudge");
+          agreeBox.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+        }
+        agree.focus({ preventScroll: true });
+        return;
+      }
       // (2026-10-27) 화면을 연 채 첫 계절이 끝났으면 지금 값으로 다시 그린다(결제창에 지난 값이 가지 않게)
       if (PAY.regular && !seasonOn()) {
         toast(PAY.season.ended || "");
@@ -5908,6 +5976,7 @@
     js("paycheck-to-pass", checkScr).addEventListener("click", () => {
       go("deeper");
       pass.toggle.setAttribute("aria-expanded", "true");
+      openOwned(); // (2026-11-06) 접기 안의 코드 넣기 칸
       show(pass.panel, true);
       setTimeout(() => pass.input.focus(), 400);
     });
