@@ -283,7 +283,8 @@
       window.sessionStorage.removeItem("strange-oracle-payroom"); // (22단계) 결제를 시작한 방 이름
       window.sessionStorage.removeItem(PAYREQ_KEY); // (15-2) 결제 확인용 R도 지운다 → 이 탭에서 책이 자동으로 열리지 않음(확인 창 경고 줄)
       window.sessionStorage.removeItem("strange-oracle-keep"); // (2026-10-28) 열람 코드에 결과 담기 동의 표시(서버 암호문은 카드의 체크를 꺼서 지운다)
-      window.sessionStorage.removeItem("strange-oracle-ny"); // (2026-11-04) 새해 탭에서 새로 뽑은 돌·신탁 번호·고른 주제
+      window.sessionStorage.removeItem("strange-oracle-ny");
+      window.sessionStorage.removeItem("strange-oracle-payfrom"); // (2026-11-06) 결제 화면에 들어온 길 이름 // (2026-11-04) 새해 탭에서 새로 뽑은 돌·신탁 번호·고른 주제
       window.sessionStorage.removeItem(MAP_SES); // (16-2의 8) 지도 초대·참여 표시·삭제 코드도 늘 지운다(서버 기록 지우기는 대화 상자의 선택 칸)
     } catch (e) {
       /* 무시 */
@@ -5390,6 +5391,17 @@
   let kakaoBoot = null; // (21단계) #kakao-… 복귀 처리(시작 때 부름). 카카오 꺼짐·결제 off면 null
   // (18-11) 결제 전 화면에 들어온 길: preview · toc · other
   let payFrom = "other";
+  // (2026-11-06 운영자) 결제 화면에 들어온 길을 결제 시작·완료 이벤트에도 붙인다. 결제창에서 돌아오면 새로 열리므로 이 탭 sessionStorage에 이름 하나만 둔다(입력값 아님, '내 정보 지우기'로 지움)
+  const PAYFROM_KEY = "strange-oracle-payfrom";
+  let payEntry = "other";
+  const readPayEntry = () => {
+    try {
+      const v = window.sessionStorage.getItem(PAYFROM_KEY) || "";
+      return PAY_FROM.includes(v) ? v : "other";
+    } catch (e) {
+      return "other";
+    }
+  };
   // (2026-10-21) hub·story·locked 길을 더함. 결제 전 화면으로 갔으면 true
   const PAY_FROM = ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale", "ny"]; // (2026-10-30 v7) offer = 오검 뒤 책 제안 · after_saju = 만신 한 줄 링크(기본 꺼짐) · finale = 완주 화면 // (22단계) room = 방 결과의 나머지 이야기 칸 · (2026-10-25) dock = 결과 화면 아래 떠 있는 버튼
   function goPay(from) {
@@ -5656,6 +5668,7 @@
       show(pass.status, false);
       window.scrollTo(0, 0);
       track("so_pay", { step: "view", from: payFrom }); // (18-11) 들어온 길
+      payEntry = payFrom;
       payFrom = "other";
     };
     leave.deeper = () => {
@@ -5768,7 +5781,12 @@
         setTimeout(() => location.reload(), 1600);
         return;
       }
-      track("so_pay", { step: "start" });
+      try {
+        window.sessionStorage.setItem(PAYFROM_KEY, payEntry);
+      } catch (e) {
+        /* 저장 막힘: 완료 이벤트에는 other */
+      }
+      track("so_pay", { step: "start", from: payEntry });
       startPay(newReq()); // 누를 때마다 새 R → 저장한 뒤에야 SDK
     });
     js("paycheck-sdk-retry", checkScr).addEventListener("click", () => startPay(readReq()[0] || newReq()));
@@ -5902,7 +5920,12 @@
       const fresh = codes.filter((c, i) => codes.indexOf(c) === i);
       issued = fresh.concat(issued.filter((c) => !fresh.includes(c)));
       writePass(fresh[0]);
-      track("so_pay", { step: "done" });
+      track("so_pay", { step: "done", from: readPayEntry() });
+      try {
+        window.sessionStorage.removeItem(PAYFROM_KEY);
+      } catch (e) {
+        /* 무시 */
+      }
       track("purchase", { value: Number(PAY.amount), currency: "KRW" }); // (2026-10-28) GA4 권장 구매 이벤트: 금액·통화만(결제번호·코드 없음, 6장)
       coverNext = null;
       const back = takePayRoom(); // (22단계) 방에서 결제를 시작했으면 그 방 결과로(나머지 이야기가 바로 열림)
