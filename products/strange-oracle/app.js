@@ -6207,6 +6207,7 @@
       const open = pass.toggle.getAttribute("aria-expanded") !== "true";
       pass.toggle.setAttribute("aria-expanded", String(open));
       show(pass.panel, open);
+      if (open) openOwned(); // (2026-11-06) 코드 넣기 칸을 열면 '이미 산 분' 접기도 펼친다
       if (open) pass.input.focus();
     });
     let passBusy = false;
