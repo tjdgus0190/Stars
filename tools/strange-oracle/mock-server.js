@@ -18,6 +18,7 @@
 //   /__dev/skip?rooms=3         → 새 순서(14-1)의 앞 세 방(만신·오검·별)만 마친 상태
 //   /__dev/skip?legacy=1        → 옛 상태: 13단계 순서 오검~룬(5방) 마침, 만신 미완 (rooms=N이면 옛 순서 앞 N개, 최대 6)
 //   /__dev/skip?paid=1          → (test) 시험 열람 상태: sessionStorage strange-oracle-pass에 모의 코드. paid=0(기본)은 결제 전
+//   /__dev/skip?nyfree=0        → 신년운세 무료 두 방 기록(localStorage strange-oracle-ny-free)을 지우고 시작
 //   /__dev/skip?nypaid=1        → (test) 2027 신년운세를 산 상태: sessionStorage strange-oracle-pass-ny에 모의 SNY 코드(책 paid와 따로)
 //   /__dev/skip?to=book         → 책 목차로 도착 (to=hub 등 다른 화면도 가능, 기본 story)
 //   예: /__dev/skip?rooms=7&paid=1&to=book  → 일곱 방 마침 + 결제한 상태로 책 12장이 모두 열림 (결정 89 "별도 시험 페이지")
@@ -153,6 +154,7 @@ const server = http.createServer((req, res) => {
     const to = toQ === "book" ? "report" : /^[a-z-]+$/.test(toQ) ? toQ : "story";
     const paid = url.searchParams.get("paid") === "1" && MODE === "test";
     const nypaid = url.searchParams.get("nypaid") === "1" && MODE === "test";
+    const nyfree = url.searchParams.get("nyfree") === "0"; // (2026-11-12) 신년운세 무료 두 방 기록(이 기기 localStorage)을 지우고 시작
     const join = /^[A-Za-z0-9_-]{22}$/.test(url.searchParams.get("join") || "") ? url.searchParams.get("join") : "";
     const bm = (url.searchParams.get("birth") || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
     const birth = bm ? `{ y: ${Number(bm[1])}, m: ${Number(bm[2])}, d: ${Number(bm[3])} }` : "{ y: 1995, m: 3, d: 25 }";
@@ -172,6 +174,7 @@ sessionStorage.clear();
 sessionStorage.setItem("strange-oracle", JSON.stringify({ profile: { name: "테스트", birth: ${birth}, time: { h: 14, m: 37 } }, visits: v }));
 ${paid ? `sessionStorage.setItem("strange-oracle-pass", ${JSON.stringify(MOCK_PASS)});` : ""}
 ${nypaid ? `sessionStorage.setItem("strange-oracle-pass-ny", ${JSON.stringify(MOCK_PASS_NY)});` : ""}
+${nyfree ? `localStorage.removeItem("strange-oracle-ny-free");` : ""}
 ${join ? `sessionStorage.setItem("strange-oracle-map", ${JSON.stringify(JSON.stringify({ join }))});` : ""}
 location.replace("${P}#${to}");
 </script>`;
