@@ -19,6 +19,10 @@
   const stage = document.querySelector(".stage");
   const add = (el) => (stage.insertBefore(el, stage.querySelector(".safe-guide")), el);
 
+  // ── 배경 일출: 첫 불꽃부터 해가 지평선 아래에서 오르고(끝 화면까지), 새벽빛이 번지며 별이 옅어진다
+  anim(stage.querySelector(".dawn9__glow"), [`dawn9 10s ease-in-out ${T.fw0}s both`]);
+  anim(stage.querySelector(".dawn9__sun"), [`sunrise9 11s cubic-bezier(0.35, 0.1, 0.35, 1) ${T.fw0}s both`]);
+  anim(stage.querySelector(".sky9"), [`sky-drift 15s linear 0s both`, `stars-fade 9s ease-in ${T.fw0 + 1}s forwards`]);
   // ── 0~2.3 자정: 2026 → 2027 (끝자리가 한 칸 굴러감) → 작아지며 사라지고, 위에 "일곱 개의 점술이 말하는 나의 2027년"
   const year = $("div", "year", `<span>202</span><span class="d"><span class="wheel"><span>6</span><span>7</span></span></span>`);
   anim(year.querySelector(".wheel"), [`roll 0.6s cubic-bezier(0.6, 0, 0.2, 1.15) ${T.roll}s both`]);
@@ -100,11 +104,11 @@
   // ── 12.6~15 끝
   const end = $("div", "end9");
   end.append($("p", "eb", "SEVEN ORACLES · 2027"), $("p", "logo logo9", "낯선 점술관"), $("p", "main", "일곱 점술이 말하는<br><em>2027 신년운세</em>"));
-  const free = anim($("p", "free", "처음 고르는 두 방은 무료"), [`rise9 0.45s var(--soft) ${T.end + 0.8}s both`]);
-  const cta = anim($("p", "cta", "일곱 점술의 2027 듣기"), [`rise9 0.45s var(--soft) ${T.end + 1.15}s both`]);
+  // (2026-11-12 운영자) "처음 고르는 두 방은 무료" 문구는 넣지 않는다
+  const cta = anim($("p", "cta", "일곱 점술의 2027 듣기"), [`rise9 0.45s var(--soft) ${T.end + 0.9}s both`]);
   const dots = $("div", "dots");
   ORACLES.forEach((o, i) => { const d = $("i"); d.style.setProperty("--h", o.h); anim(d, [`starin 0.35s var(--soft) ${T.end + 0.4 + i * 0.08}s both`]); dots.append(d); });
-  end.append(free, cta, dots);
+  end.append(cta, dots);
   anim(end.querySelector(".logo9"), [`logo-shimmer 1.6s ease-in-out ${T.end + 0.5}s both`]);
   add(anim(end, [`fade9 0.5s ease-out ${T.end}s both`]));
 })();

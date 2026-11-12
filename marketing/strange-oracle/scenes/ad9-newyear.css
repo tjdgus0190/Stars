@@ -60,7 +60,7 @@
 .say9 .nm { margin-top: 14px; font: 900 74px/1.15 "Noto Serif KR", var(--font-serif); color: var(--ink-hi); text-shadow: 0 0 30px oklch(0.72 0.14 var(--h) / 0.7), 0 3px 12px oklch(0.1 0.04 280); white-space: nowrap; }
 .say9 .ln { margin-top: 22px; font: 700 46px/1.38 "Noto Serif KR", var(--font-serif); color: oklch(0.93 0.04 var(--h)); word-break: keep-all; text-shadow: 0 2px 10px oklch(0.1 0.04 280); }
 @keyframes say9 { 0% { opacity: 0; transform: translateY(18px); } 16% { opacity: 1; transform: none; } 84% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
-.count9 { position: absolute; left: 0; right: 0; top: 1190px; text-align: center; font: 700 34px var(--font-latin); letter-spacing: 0.3em; color: oklch(0.8 0.06 85); opacity: 0; }
+.count9 { position: absolute; left: 0; right: 0; top: 1000px; text-align: center; font: 700 34px var(--font-latin); letter-spacing: 0.3em; color: oklch(0.8 0.06 85); opacity: 0; }
 .count9 b { display: inline-block; min-width: 0.8em; color: var(--ink-hi); }
 .count9 .n { position: absolute; left: 0; right: 0; opacity: 0; }
 
@@ -80,7 +80,22 @@
 .end9 .main em { font-style: normal; color: oklch(0.88 0.1 85); }
 .end9 .free { position: absolute; top: 890px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 12px 34px; border-radius: 999px; border: 2px solid oklch(0.88 0.08 85 / 0.7);
   font: 700 42px "Noto Serif KR", var(--font-serif); color: oklch(0.92 0.06 88); background: oklch(0.2 0.05 285 / 0.7); }
-.end9 .cta { position: absolute; top: 1020px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 26px 58px; border-radius: 999px;
+.end9 .cta { position: absolute; top: 900px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 26px 58px; border-radius: 999px;
   font: 800 48px "Noto Serif KR", var(--font-serif); color: oklch(0.2 0.04 60); background: linear-gradient(100deg, oklch(0.78 0.11 75), oklch(0.93 0.08 90) 50%, oklch(0.8 0.12 70)); box-shadow: 0 0 50px oklch(0.8 0.12 75 / 0.5); }
-.end9 .dots { position: absolute; top: 1185px; left: 0; right: 0; display: flex; justify-content: center; gap: 24px; }
+.end9 .dots { position: absolute; top: 1070px; left: 0; right: 0; display: flex; justify-content: center; gap: 24px; }
 .end9 .dots i { width: 16px; height: 16px; border-radius: 50%; background: oklch(0.88 0.12 var(--h)); box-shadow: 0 0 14px oklch(0.8 0.13 var(--h)); opacity: 0; }
+
+/* (2026-11-12 운영자) 일출: 불꽃이 터지는 동안(2.3~12.6초) 지평선 아래에서 해가 오르고, 새벽빛이 아래에서 번지며 별이 옅어진다.
+   밤에 봐도 눈부시지 않게 해는 낮은 금빛, 하늘은 남보라 → 장밋빛 → 살구빛까지만 */
+.dawn9 { position: absolute; inset: 0; pointer-events: none; }
+.dawn9__glow { position: absolute; inset: 0; opacity: 0;
+  background: linear-gradient(180deg, transparent 30%, oklch(0.32 0.07 330 / 0.55) 52%, oklch(0.5 0.12 30 / 0.75) 70%, oklch(0.66 0.12 55 / 0.85) 82%, oklch(0.74 0.11 70) 90%); }
+@keyframes dawn9 { from { opacity: 0; } to { opacity: 1; } }
+.dawn9__sun { position: absolute; left: 50%; top: 1420px; width: 340px; height: 340px; margin-left: -170px; border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.93 0.07 85) 0 36%, oklch(0.84 0.11 66) 50%, oklch(0.75 0.13 50 / 0) 70%);
+  box-shadow: 0 0 160px 60px oklch(0.75 0.13 55 / 0.35); opacity: 0.0; }
+@keyframes sunrise9 { 0% { opacity: 0.2; transform: translateY(0); } 25% { opacity: 0.9; } 100% { opacity: 1; transform: translateY(-330px); } }
+.dawn9__land { position: absolute; left: 0; right: 0; top: 1330px; bottom: 0;
+  background: linear-gradient(180deg, oklch(0.2 0.05 300), oklch(0.13 0.035 285) 40%);
+  clip-path: polygon(0 6%, 9% 2%, 18% 7%, 30% 0, 41% 6%, 52% 3%, 63% 8%, 74% 1%, 86% 6%, 100% 2%, 100% 100%, 0 100%); }
+@keyframes stars-fade { to { opacity: 0.35; } }
