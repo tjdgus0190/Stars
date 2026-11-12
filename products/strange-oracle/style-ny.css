@@ -475,3 +475,10 @@ body.is-ny #sky { opacity: 0.45; transition: opacity 1100ms ease; }
 .ny-kakao__help { margin: var(--space-2) 0 0; font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text-muted); }
 .ny-kakao__on { margin: 0; display: inline-block; padding: 4px 12px; border-radius: var(--radius-pill); font-size: var(--fs-xs); color: var(--c-text); background: oklch(0.88 0.17 98 / 0.12); border: 1px solid oklch(0.88 0.17 98 / 0.4); }
 .ny-kakao--pay { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px dashed var(--c-line); max-width: none; }
+
+/* (2026-11-12 운영자) 나의 2027년 나누기 */
+.ny-share { text-align: center; }
+.ny-share__lead { margin: 0 0 var(--space-4); font-size: var(--fs-md); color: var(--c-text); }
+.ny-share__btns { display: grid; gap: var(--space-3); justify-items: stretch; }
+.ny-share__kakao { width: 100%; }
+.ny-share__link { justify-self: center; }

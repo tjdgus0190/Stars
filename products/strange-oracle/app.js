@@ -6727,7 +6727,7 @@
     so_book_offer_close: { placement: ["after_ogham"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     // (2026-11-04 시험판) 2027 신년운세 탭: 단계 이름·방 이름만(생일·이름·주제·뽑은 돌·결과 번호 없음)
-    so_ny: { step: ["tab", "hub", "room", "result", "lock", "open", "free", "gate", "pay_view", "more", "kakao"], room: CHAPTER_ORDER }, // (2026-11-12) free = 무료 방으로 고름 · gate = 셋째 문에서 결제 안내 · pay_view = 신년운세 결제 화면 · more = 결과 끝 [남은 방 모두 열기]
+    so_ny: { step: ["tab", "hub", "room", "result", "lock", "open", "free", "gate", "pay_view", "more", "kakao", "share_kakao", "share_image", "share_link"], room: CHAPTER_ORDER }, // (2026-11-12) free = 무료 방으로 고름 · gate = 셋째 문에서 결제 안내 · pay_view = 신년운세 결제 화면 · more = 결과 끝 [남은 방 모두 열기]
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
   // (광고 측정, 제안서 strange-oracle-ads 8장 4번) 캠페인 구분: 광고 링크의 utm은 아래 값과 정확히 같을 때만 page_location에 남긴다.
@@ -6739,7 +6739,7 @@
       utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads"], // (2026-10-30) 메타 광고 관리자에서 흔히 쓰는 값 더함
       utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
       utm_campaign: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "ig_profile", "x_profile", "gads_main", "kakao_share", "halloween", "halloween_samhain"], // (2026-11-12) ad9_newyear = 9안 「새해의 문」(신년운세)
-      utm_content: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
+      utm_content: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_ny", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
     },
     ignore: ["fbclid", "ttclid"],
   };
@@ -7050,6 +7050,16 @@
         openPass: (value, msg, btn) => (nyOpenPass ? nyOpenPass(value, msg, btn) : Promise.resolve(false)),
         showCode: () => openNyCode && openNyCode(),
         kakao: () => kakaoNy, // (2026-11-12) null이면 카카오 로그인 줄을 그리지 않는다
+        // (2026-11-12 운영자) 결과 공유: 카카오톡 카드 · 이미지 카드(1080x1920) · 링크 복사. 보내는 것은 방 이름·결과 이름·공개 문장·주소뿐(입력값 0)
+        share: {
+          kakaoOn: Boolean(T.kakao.jsKey && T.kakao.sdkUrl),
+          kakao: (c) => ShareButtons.sendKakaoFeed({ jsKey: T.kakao.jsKey, sdkUrl: T.kakao.sdkUrl, integrity: T.kakao.integrity, imageWidth: 1200, imageHeight: 600 }, Object.assign({ url: `${SITE_URL}?utm_source=kakao&utm_medium=share&utm_campaign=kakao_share&utm_content=kakao_ny#ny-hub` }, c)),
+          link: `${SITE_URL}#ny-hub`,
+          copy: (u) => ShareButtons.copyText(u),
+          card: (btn, build) => shareCard(btn, build),
+          theme: (room) => CARD_THEME[room],
+          image: (room) => new URL(`share/kakao-${room}.jpg`, SITE_URL).href,
+        },
         get state() {
           return state;
         },

@@ -63,6 +63,7 @@ const paidStrings = [];
     const reqs = freeReqs(nb);
     check(`1-3 ${room}(무료 ${i}/2): 결과 · ${CAL[room]}칸 · 무료 표시 · 상세 ${r.secs}칸이 열림(유료 문장 ${has}) · 잠금 없음`, ok && r.cal === CAL[room] && new RegExp(i + "/2").test(await ev("document.querySelector('[data-js=ny-free-tag]')?.textContent || ''")) && r.secs >= 2 && has > 0 && !r.lock);
     check(`1-4 ${room}: 함수 book에 { file:"ny-free", room, k } 세 칸만(코드·입력값 없음)`, reqs.length === 1 && Object.keys(reqs[0]).sort().join() === "file,k,room" && reqs[0].file === "ny-free" && reqs[0].room === room && Object.keys(reqs[0].k).every((x) => ["year", "areas", "one", "seasons"].includes(x)), JSON.stringify(reqs));
+    if (i === "1") check("1-5b 결과에 '나의 2027년 나누기'(카카오톡·이미지·링크 복사) · 공유 칸 글자에 입력값 없음", await ev("(() => { const b = document.querySelector('#screen-ny-result [data-js=ny-share]'); return !!b && !!b.querySelector('[data-js=ny-share-image]') && !!b.querySelector('[data-js=ny-share-link]') && !/1995|테스트/.test(b.textContent); })()"));
     check(`1-5 ${room}: 결과 끝 안내 = ${i === "1" ? "무료로 한 방 더" : "[남은 방 모두 열기 · 4,900원]"}`, i === "1" ? (await ev("!!document.querySelector('[data-js=ny-more]') && !document.querySelector('[data-js=ny-more-btn]')")) : /4,900원/.test(await ev("document.querySelector('[data-js=ny-more-btn]')?.textContent || ''")));
     await click("[data-js=ny-back]");
     await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-ny-hub'");

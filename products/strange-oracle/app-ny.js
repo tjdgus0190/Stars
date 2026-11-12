@@ -735,6 +735,8 @@
       det.append(mk("h2", "ny-card__head ny-detail__title", N.result.detailHead));
       resScr.append(det);
       paintDetail(det);
+      // (2026-11-12 운영자) 나의 2027년 나누기: 카카오톡 · 이미지 카드 · 링크 복사 (방 이름·결과 이름·공개 문장·주소만, 입력값 0)
+      resScr.append(shareBox(M));
       // 결제 전: 결과 끝 다음 안내(무료 한 방 더 / 남은 방 모두 열기)
       if (!paid()) {
         const more = mk("section", "ny-card ny-more");
@@ -827,6 +829,63 @@
         r.addEventListener("click", () => paintDetail(det));
         det.append(r);
       });
+    }
+    const plain = (t) => String(t || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+    const firstLine = (t, n = 70) => { const p = plain(t); const m = p.match(/^.+?[.!?。](\s|$)/); const f = m ? m[0].trim() : p; return f.length > n ? f.slice(0, n - 1) + "…" : f; };
+    const markParts = (M) => {
+      const p = plain(M.mark).split(" · ");
+      return p.length > 1 ? { title: p.slice(1).join(" · "), sub: p[0] } : { title: p[0], sub: "" };
+    };
+    function shareBox(M) {
+      const SH = C.share || {};
+      const ST = N.share || {};
+      const roomName = T.rooms[M.room].name;
+      const brightTxt = M.items.filter((x) => x.tone === "bright").slice(0, 4).map((x) => x.label.replace(/ · .*$/, "")).join(" · ");
+      const box = mk("section", "ny-card ny-share");
+      box.dataset.js = "ny-share";
+      box.dataset.room = M.room;
+      box.append(mk("h2", "ny-card__head", ST.head), mk("p", "ny-share__lead", ST.lead));
+      const btns = mk("div", "ny-share__btns");
+      if (SH.kakaoOn) {
+        const kb = mk("button", "btn-kakao btn-kakao--share ny-share__kakao");
+        kb.type = "button";
+        kb.dataset.js = "ny-share-kakao";
+        kb.innerHTML = KAKAO_SYM;
+        kb.append(mk("span", "", ST.kakao));
+        kb.addEventListener("click", () => {
+          C.track("so_ny", { step: "share_kakao", room: M.room });
+          SH.kakao({ title: fill(ST.kakaoTitle, { room: roomName, mark: plain(M.mark) }), description: firstLine(M.theme), imageUrl: SH.image(M.room), button: ST.kakaoBtn }).catch(() => C.toast(T.toast.shareFail || ""));
+        });
+        btns.append(kb);
+      }
+      const ib = mk("button", "btn btn--secondary btn--block ny-share__image", ST.image);
+      ib.type = "button";
+      ib.dataset.js = "ny-share-image";
+      ib.addEventListener("click", () => {
+        C.track("so_ny", { step: "share_image", room: M.room });
+        SH.card(ib, () => ({
+          file: fill(ST.file, { room: M.room }),
+          text: fill(ST.text, { room: roomName }),
+          opts: {
+            theme: SH.theme(M.room), eyebrow: fill(ST.cardEyebrow, { room: roomName }), seed: 2027 + ROOMS.indexOf(M.room),
+            // 결과 이름이 "별무리 · 이름"처럼 길면 제목은 뒤쪽 이름만, 앞쪽은 부제(비추는 면과 함께)
+            title: markParts(M).title, subtitle: [markParts(M).sub, fill(ST.cardLens, { lens: N.rooms[M.room].lens })].filter(Boolean).join(" · "),
+            lines: [firstLine(M.theme, 120)].concat(brightTxt ? [fill(ST.cardBright, { when: brightTxt })] : []),
+            cta: ST.cardCta,
+          },
+        }));
+      });
+      const lb = mk("button", "btn btn--text btn--small ny-share__link", ST.link);
+      lb.type = "button";
+      lb.dataset.js = "ny-share-link";
+      lb.addEventListener("click", async () => {
+        C.track("so_ny", { step: "share_link", room: M.room });
+        const ok = await SH.copy(SH.link);
+        C.toast(ok ? ST.copied : ST.copyFail || T.toast.shareFail || "");
+      });
+      btns.append(ib, lb);
+      box.append(btns);
+      return box;
     }
     const freeCache = {}; // 무료 조각(메모리만)
     const paras = (v) => (Array.isArray(v) ? v : [v]).filter(Boolean);

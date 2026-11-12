@@ -140,5 +140,8 @@
     return { url };
   }
 
-  window.ShareButtons = { init, siteUrl, displayUrl, copyText, reset, sendKakaoText };
+  // (2026-11-12) 화면이 직접 만든 버튼에서 보내는 카카오톡 카드(feed). k = init의 kakao 설정, c = { title, description, imageUrl, url, button }
+  //   (기존 동작은 그대로. 쓰는 제품: strange-oracle 새해의 회랑 결과 공유)
+  const sendKakaoFeed = (k, c) => sendKakao(Object.assign({}, k, c || {}), (c && c.url) || k.url);
+  window.ShareButtons = { init, siteUrl, displayUrl, copyText, reset, sendKakaoText, sendKakaoFeed };
 })();
