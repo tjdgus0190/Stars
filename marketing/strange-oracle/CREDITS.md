@@ -23,3 +23,5 @@
 | 8안 장면(`scenes/ad8-profile.html`·`ad8-profile.css`·`ad8-profile.js`, 2026-10-27) | 성운 배경(자체 3D 렌더 그림)·빛줄기·문장을 CSS로 직접 그림. 격자 칸은 자체 제작 인스타그램 캐러셀 표지(`instagram/out/types`·`pick`). 글꼴은 위와 같음 | 자체 제작 |
 | 소리(8안 소리판 `out/ad8-profile-ko-sound.mp4`) | 직접 합성(`render/sound-ad8.js`, 2026-10-27). 사인·노이즈·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
 | 소리(7안 소리판 `out/ad7-season-ko-sound.mp4`) | 직접 합성(`render/sound-ad7.js`, 2026-10-27). 사인·노이즈·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
+| 9안 글꼴(`scenes/ad9-newyear.html`, 2026-11-12) | Nanum Brush Script 400 — @fontsource/nanum-brush-script 5.2.5, Song Myung 400 — @fontsource/song-myung 5.2.5, jsdelivr에서 버전 고정(SRI sha384). 붓글씨 제목·명조 자막 | SIL Open Font License 1.1 |
+| 9안 장면·소리(`scenes/ad9-newyear.*`, `render/sound-ad9.js`) | 한지 무늬·달력·해돋이·낙관을 CSS·인라인 SVG로 직접 그림. 소리는 뜯는 현(카플러스-스트롱)·풍경·종이·나무 소리를 스크립트가 계산, ffmpeg loudnorm. 그림 파일·외부 음원·AI 생성물 없음 | 자체 제작 |

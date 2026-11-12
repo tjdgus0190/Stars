@@ -1,92 +1,107 @@
-/* 광고 9안 「새해의 문」 (2026-11-12). reel/reel.css 위에 얹는다. 15초.
-   제품 새해의 회랑(style-ny.css)의 결: 남빛 밤 → 아래에서 번지는 낮은 새벽빛, 산 능선, 금빛 아치 문. 밤에 봐도 눈부시지 않게 밝기는 한 단계 낮춘다 */
-.bg { animation: bg-zoom 15s linear 0s both; filter: saturate(1) brightness(0.62); }
-.tint { opacity: 0.7; }
-.rays { opacity: 0.18; }
+/* 광고 9안 「새해 첫 장」 (2026-11-12). common.css 위에 얹는다(밤 테마 무대 배경은 덮어씀). 15초 · 1080x1920 · 30fps
+   결: 한지 빛 바탕 · 먹 글씨 · 붉은 낙관 · 첫 해돋이. 흔들림·번쩍임·색 갈라짐·내리꽂기 없음. 바탕은 순백이 아니라 낮춘 상아빛(밤에 봐도 눈부시지 않게) */
+.a9 {
+  --paper: oklch(0.9 0.028 82); --paper-edge: oklch(0.8 0.035 75); --ink: oklch(0.24 0.02 50); --ink-soft: oklch(0.42 0.025 55);
+  --seal: oklch(0.52 0.17 28); --seal-soft: oklch(0.52 0.17 28 / 0.12);
+  --brush: "Nanum Brush Script", "Song Myung", serif; --myeong: "Song Myung", "Noto Serif KR", serif;
+  --soft: cubic-bezier(0.25, 0.8, 0.3, 1);
+  background: var(--paper);
+}
+/* 한지: 가운데가 조금 밝고 가장자리가 따뜻하게 어두운 종이 + 고정 섬유 무늬(무작위 없음) */
+.paper { position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(97deg, oklch(0.6 0.03 70 / 0.05) 0 1px, transparent 1px 23px),
+    repeating-linear-gradient(8deg, oklch(0.6 0.03 70 / 0.04) 0 1px, transparent 1px 37px),
+    radial-gradient(ellipse 80% 60% at 50% 42%, oklch(0.93 0.022 85), var(--paper) 55%, var(--paper-edge)); }
+.grain { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: 0.5;
+  background:
+    radial-gradient(circle, oklch(0.55 0.03 60 / 0.25) 0 1px, transparent 1.6px) 13px 7px / 53px 61px,
+    radial-gradient(circle, oklch(0.55 0.03 60 / 0.18) 0 1px, transparent 1.6px) 31px 29px / 71px 47px; }
 
-/* 새벽: 아래에서 서서히 차오르는 빛(0~3초) · 해가 능선 위로 조금 오른다 */
-.a9-dawn { position: absolute; inset: 0; opacity: 0;
-  background: linear-gradient(180deg, transparent 38%, oklch(0.32 0.08 330 / 0.55) 58%, oklch(0.48 0.13 40 / 0.7) 74%, oklch(0.62 0.13 62 / 0.75) 86%);
-  animation: in-fade 3s ease-out 0s both; }
-.a9-sun { position: absolute; left: 50%; top: 1240px; width: 300px; height: 300px; margin-left: -150px; border-radius: 50%;
-  background: radial-gradient(circle, oklch(0.9 0.09 82) 0 38%, oklch(0.78 0.13 66 / 0.6) 52%, transparent 70%);
-  box-shadow: 0 0 140px 40px oklch(0.7 0.13 55 / 0.35); opacity: 0;
-  animation: a9-sunrise 6s cubic-bezier(0.2, 0.6, 0.3, 1) 0.2s both; }
-@keyframes a9-sunrise { from { opacity: 0; transform: translateY(160px); } 30% { opacity: 0.9; } to { opacity: 0.95; transform: translateY(-20px); } }
-.a9-ridge { position: absolute; left: 0; top: 1300px; width: 1080px; height: 420px; }
-.a9-ridge .far { fill: oklch(0.22 0.05 330); }
-.a9-ridge .near { fill: oklch(0.14 0.04 300); }
-.stage::after { content: ""; position: absolute; left: 0; right: 0; top: 1716px; bottom: 0; background: oklch(0.14 0.04 300); }
+/* 붓 쓰기: 왼쪽에서 오른쪽으로 먹이 번지듯 드러난다(가면 위치만 움직임) */
+.wipe { -webkit-mask-image: linear-gradient(90deg, #000 44%, transparent 56%); mask-image: linear-gradient(90deg, #000 44%, transparent 56%);
+  -webkit-mask-size: 230% 100%; mask-size: 230% 100%; -webkit-mask-position: 100% 0; mask-position: 100% 0; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+@keyframes brush { to { -webkit-mask-position: 0% 0; mask-position: 0% 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out { to { opacity: 0; } }
+@keyframes drift-out { to { opacity: 0; transform: translateY(-30px); } }
 
-/* 자막 위치 */
-.a9-hook { top: 520px; }
-.a9-cap { top: 300px; font-size: 76px; }
+/* 글자 */
+.cap { position: absolute; left: 140px; width: 800px; text-align: center; word-break: keep-all; color: var(--ink); }
+.cap--brush { font: 400 132px/1.12 var(--brush); }
+.cap--brush em { font-style: normal; color: var(--seal); }
+.cap--line { font: 400 64px/1.42 var(--myeong); }
+.cap--line b { font-weight: 400; color: var(--seal); }
+.cap span { display: block; }
 
-/* 일곱 문: 4 + 3 */
-.a9-doors { position: absolute; left: 0; right: 0; top: 0; height: 1920px; opacity: 0; }
-.a9-door { position: absolute; width: 190px; display: grid; justify-items: center; }
-.a9-door .fr { position: relative; width: 158px; height: 214px; border-radius: 50% 50% 8px 8px / 40% 40% 8px 8px; overflow: hidden;
-  border: 5px solid oklch(0.66 0.1 70); box-shadow: 0 0 0 2px oklch(0.3 0.06 40), 0 14px 30px #000;
-  background: radial-gradient(ellipse 80% 60% at 50% 70%, oklch(0.86 0.1 82), oklch(0.7 0.13 60) 45%, oklch(0.3 0.08 40) 80%); }
-.a9-door .lf { position: absolute; top: 0; bottom: 0; width: 50%; background: linear-gradient(180deg, oklch(0.3 0.06 var(--dh)), oklch(0.2 0.05 var(--dh)));
-  box-shadow: inset 0 0 0 3px oklch(0.45 0.07 var(--dh) / 0.7); }
-.a9-door .lf.l { left: 0; transform-origin: 0 50%; border-right: 1px solid oklch(0.5 0.06 var(--dh)); }
-.a9-door .lf.r { right: 0; transform-origin: 100% 50%; }
-.a9-door .ic { position: absolute; left: 50%; top: 22px; width: 64px; height: 64px; margin-left: -32px; z-index: 2; }
-.a9-door .ic svg { width: 100%; height: 100%; fill: none; stroke: oklch(0.9 0.08 85); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 8px oklch(0.84 0.12 80)); }
-.a9-door .nm { margin-top: 18px; font: 900 40px "Noto Serif KR", var(--font-serif); color: #fff; text-shadow: 0 3px 10px #000; white-space: nowrap; }
-.a9-door .ln { margin-top: 8px; padding: 4px 16px; border-radius: 999px; font: 800 28px "Noto Serif KR", var(--font-serif); white-space: nowrap;
-  color: oklch(0.2 0.04 60); background: linear-gradient(90deg, oklch(0.86 0.11 82), oklch(0.76 0.13 60)); opacity: 0; }
-/* 차례로 불이 켜진다: 문이 반쯤 벌어지고 빛이 새어 나온다 */
-@keyframes a9-lit { 0% { transform: scale(1); } 35% { transform: scale(1.12); } 100% { transform: scale(1.04); } }
-@keyframes a9-glow { from { box-shadow: 0 0 0 2px oklch(0.3 0.06 40), 0 14px 30px #000; border-color: oklch(0.66 0.1 70); }
-  to { box-shadow: 0 0 0 2px oklch(0.3 0.06 40), 0 0 60px oklch(0.8 0.13 70 / 0.75), 0 14px 30px #000; border-color: oklch(0.86 0.11 82); } }
-@keyframes a9-ajar-l { to { transform: perspective(500px) rotateY(-38deg); } }
-@keyframes a9-ajar-r { to { transform: perspective(500px) rotateY(38deg); } }
-@keyframes a9-pill { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+/* ── A. 탁상 달력: 위로 넘어가는 한 장 ── */
+.cal { position: absolute; left: 50%; top: 660px; width: 600px; height: 570px; margin-left: -310px; perspective: 2200px; }
+.cal__stand { position: absolute; left: -18px; right: -18px; top: -30px; height: 44px; border-radius: 10px; background: linear-gradient(180deg, oklch(0.36 0.03 50), oklch(0.26 0.025 45)); box-shadow: 0 10px 20px oklch(0.3 0.03 50 / 0.35); z-index: 5; }
+.cal__stand::before { content: ""; position: absolute; left: 60px; right: 60px; top: 30px; height: 26px;
+  background: repeating-linear-gradient(90deg, oklch(0.72 0.02 80) 0 8px, transparent 8px 38px); border-radius: 4px; }
+.cal__page { position: absolute; inset: 0; border-radius: 6px 6px 14px 14px; background: oklch(0.97 0.012 85); box-shadow: 0 22px 40px oklch(0.35 0.04 50 / 0.28), inset 0 0 0 2px oklch(0.85 0.02 80);
+  display: grid; justify-items: center; align-content: start; padding-top: 54px; backface-visibility: hidden; transform-origin: 50% 0; }
+.cal__page .y { font: 400 46px var(--myeong); letter-spacing: 0.3em; color: var(--ink-soft); }
+.cal__page .d { font: 700 280px/1 "Noto Serif KR", var(--myeong); color: var(--ink); margin-top: 6px; letter-spacing: -0.04em; }
+.cal__page .m { margin-top: 14px; font: 400 50px var(--myeong); color: var(--ink); }
+.cal__page .s { margin-top: 10px; font: 400 38px var(--myeong); color: var(--ink-soft); }
+.cal__page.is-new .d { color: var(--seal); }
+.cal__page.is-new .seal-mini { position: absolute; right: 54px; bottom: 50px; width: 96px; height: 96px; border: 5px solid var(--seal); border-radius: 10px;
+  display: grid; place-items: center; font: 700 44px/1 "Noto Serif KR", serif; color: var(--seal); rotate: -6deg; opacity: 0; }
+@keyframes flip-up { 0% { transform: rotateX(0deg); } 100% { transform: rotateX(178deg); } }
+@keyframes page-shade { 0% { filter: brightness(1); } 60% { filter: brightness(0.82); } 100% { filter: brightness(0.7); opacity: 0; } }
+@keyframes stamp { 0% { opacity: 0; transform: scale(1.6); } 55% { opacity: 1; transform: scale(0.94); } 100% { opacity: 1; transform: scale(1); } }
 
-/* 문 하나가 크게: 활짝 열리고 화면으로 다가온다(빨려 들어감) */
-.a9-big { position: absolute; left: 50%; top: 560px; width: 440px; margin-left: -220px; opacity: 0; transform-origin: 50% 46%; }
-.a9-big .fr { position: relative; width: 440px; height: 600px; border-radius: 50% 50% 14px 14px / 40% 40% 14px 14px; overflow: hidden;
-  border: 10px solid oklch(0.8 0.11 78); box-shadow: 0 0 0 4px oklch(0.3 0.06 40), 0 0 90px oklch(0.78 0.13 66 / 0.6), 0 30px 60px #000;
-  background: radial-gradient(ellipse 75% 60% at 50% 62%, oklch(0.92 0.07 85), oklch(0.78 0.12 66) 40%, oklch(0.45 0.1 40) 78%); }
-.a9-big .lf { position: absolute; top: 0; bottom: 0; width: 50%; background: linear-gradient(180deg, oklch(0.3 0.08 18), oklch(0.18 0.06 18)); box-shadow: inset 0 0 0 6px oklch(0.48 0.09 18 / 0.7); }
-.a9-big .lf::after { content: ""; position: absolute; top: 52%; width: 22px; height: 22px; border-radius: 50%; background: oklch(0.85 0.1 82); box-shadow: 0 0 14px oklch(0.85 0.12 80); }
-.a9-big .lf.l { left: 0; transform-origin: 0 50%; }
-.a9-big .lf.l::after { right: 18px; }
-.a9-big .lf.r { right: 0; transform-origin: 100% 50%; }
-.a9-big .lf.r::after { left: 18px; }
-@keyframes a9-open-l { to { transform: perspective(900px) rotateY(-84deg); } }
-@keyframes a9-open-r { to { transform: perspective(900px) rotateY(84deg); } }
-@keyframes a9-plunge { 0% { transform: scale(1); } 100% { transform: scale(7.5); } }
-/* 빛 줄기·티끌: 가운데에서 바깥으로 스친다 */
-.a9-streaks { position: absolute; left: 50%; top: 860px; width: 2600px; height: 2600px; margin: -1300px 0 0 -1300px; opacity: 0; mix-blend-mode: screen;
-  background: repeating-conic-gradient(from 7deg, oklch(0.9 0.07 82 / 0.5) 0deg 1.4deg, transparent 1.4deg 11deg);
-  -webkit-mask: radial-gradient(circle, transparent 6%, #000 22%, transparent 60%); mask: radial-gradient(circle, transparent 6%, #000 22%, transparent 60%); }
-@keyframes a9-streak { 0% { opacity: 0; transform: scale(0.4) rotate(0deg); } 40% { opacity: 0.85; } 100% { opacity: 0; transform: scale(1.5) rotate(8deg); } }
-.a9-warm { position: absolute; inset: 0; opacity: 0; background: radial-gradient(circle at 50% 46%, oklch(0.9 0.07 82), oklch(0.66 0.12 60 / 0.85) 45%, oklch(0.3 0.08 330 / 0.9) 90%); }
-@keyframes a9-warm { 0% { opacity: 0; } 45% { opacity: 0.88; } 100% { opacity: 0; } }
+/* ── B. 첫 해돋이: 바다 수평선, 하늘이 남빛에서 복숭아빛으로 ── */
+.sea { position: absolute; inset: 0; opacity: 0; overflow: hidden; }
+.sea__sky { position: absolute; inset: 0 0 760px 0; background: linear-gradient(180deg, oklch(0.36 0.06 265), oklch(0.5 0.07 300) 55%, oklch(0.72 0.09 45) 92%, oklch(0.8 0.09 70)); }
+.sea__sky2 { position: absolute; inset: 0 0 760px 0; background: linear-gradient(180deg, oklch(0.6 0.07 240), oklch(0.76 0.07 40) 70%, oklch(0.86 0.07 80)); opacity: 0; }
+.sea__sun { position: absolute; left: 50%; top: 1060px; width: 230px; height: 230px; margin-left: -115px; border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.94 0.07 85) 0 40%, oklch(0.84 0.11 60) 62%, oklch(0.8 0.12 50 / 0) 72%); box-shadow: 0 0 120px 40px oklch(0.82 0.11 60 / 0.4); }
+.sea__water { position: absolute; left: 0; right: 0; top: 1160px; bottom: 0; background: linear-gradient(180deg, oklch(0.48 0.07 250), oklch(0.3 0.06 260) 60%, oklch(0.22 0.05 265)); }
+.sea__glint { position: absolute; left: 50%; top: 1162px; width: 300px; height: 520px; margin-left: -150px; opacity: 0;
+  background: repeating-linear-gradient(180deg, oklch(0.92 0.08 80 / 0.75) 0 6px, transparent 6px 26px);
+  -webkit-mask-image: radial-gradient(ellipse 50% 100% at 50% 0, #000 30%, transparent 75%); mask-image: radial-gradient(ellipse 50% 100% at 50% 0, #000 30%, transparent 75%); }
+@keyframes sunrise { from { transform: translateY(120px); } to { transform: translateY(-190px); } }
+@keyframes sky-warm { to { opacity: 1; } }
+@keyframes glint { 0% { opacity: 0; background-position: 0 0; } 30% { opacity: 1; } 100% { opacity: 1; background-position: 0 52px; } }
+.sea .cap { color: oklch(0.97 0.015 85); text-shadow: 0 2px 14px oklch(0.25 0.05 270 / 0.6); }
+.sea .cap b { color: oklch(0.9 0.1 75); }
 
-/* 열두 달 */
-.a9-cal { position: absolute; left: 50%; top: 560px; width: 800px; margin-left: -400px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; opacity: 0; }
-.a9-cal b { position: relative; height: 150px; border-radius: 22px; display: grid; place-items: center; align-content: center; gap: 10px;
-  border: 2px solid oklch(0.6 0.05 300 / 0.6); background: oklch(0.16 0.04 300 / 0.82); font: 800 42px "Noto Serif KR", var(--font-serif); color: oklch(0.88 0.02 90); opacity: 0; }
-.a9-cal b i { width: 26px; height: 26px; border-radius: 50%; background: oklch(0.6 0.04 280); }
-.a9-cal b.rest i { background: oklch(0.45 0.05 260); }
-@keyframes a9-cell { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: none; } }
-@keyframes a9-bright { 0% { } 40% { transform: scale(1.14); } 100% { transform: scale(1.05); border-color: oklch(0.86 0.11 82); color: #fff;
-  background: radial-gradient(circle at 50% 40%, oklch(0.5 0.1 60 / 0.9), oklch(0.2 0.05 330 / 0.9)); box-shadow: 0 0 46px oklch(0.8 0.13 70 / 0.65); } }
-@keyframes a9-bright-dot { to { background: oklch(0.92 0.1 85); box-shadow: 0 0 20px oklch(0.9 0.12 82); } }
-@keyframes a9-rest { to { opacity: 0.5; } }
-.a9-legend { position: absolute; left: 0; right: 0; top: 1130px; display: flex; justify-content: center; gap: 40px; font: 700 36px var(--font-serif); color: oklch(0.9 0.03 90); opacity: 0; text-shadow: 0 2px 8px #000; }
-.a9-legend span { display: inline-flex; align-items: center; gap: 12px; }
-.a9-legend i { width: 22px; height: 22px; border-radius: 50%; background: oklch(0.92 0.1 85); box-shadow: 0 0 16px oklch(0.9 0.12 82); }
-.a9-legend span + span i { background: oklch(0.45 0.05 260); box-shadow: none; }
+/* ── C. 열두 장: 달력 낱장이 한 장씩 놓이고, 빛나는 달에 낙관이 찍힌다 ── */
+.months { position: absolute; left: 160px; top: 510px; width: 760px; display: grid; grid-template-columns: repeat(3, 240px); gap: 18px 20px; }
+.mcard { position: relative; height: 162px; border-radius: 8px; background: oklch(0.97 0.012 85); box-shadow: 0 10px 22px oklch(0.35 0.04 50 / 0.22), inset 0 0 0 2px oklch(0.86 0.02 80);
+  display: grid; justify-items: center; align-content: start; padding-top: 16px; opacity: 0; }
+.mcard::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 12px; border-radius: 8px 8px 0 0; background: oklch(0.35 0.03 50); }
+.mcard .n { font: 700 62px/1 "Noto Serif KR", var(--myeong); color: var(--ink); margin-top: 8px; }
+.mcard .n small { font-size: 32px; margin-left: 2px; }
+.mcard .tag { margin-top: 10px; padding: 0 10px; white-space: nowrap; text-align: center; font: 400 30px/1.25 var(--myeong); color: var(--ink-soft); word-break: keep-all; }
+.mcard .mark { position: absolute; right: -14px; top: -18px; width: 84px; height: 84px; border-radius: 12px; border: 5px solid var(--seal); background: oklch(0.97 0.012 85 / 0.6);
+  display: grid; place-items: center; font: 400 58px/1 var(--brush); color: var(--seal); rotate: 8deg; opacity: 0; }
+.mcard .mark.rest { border-color: oklch(0.55 0.02 260); color: oklch(0.5 0.02 260); width: 70px; height: 70px; font-size: 46px; rotate: -6deg; }
+@keyframes deal { from { opacity: 0; transform: translate(80px, -40px) rotate(9deg); } to { opacity: 1; transform: none; } }
+@keyframes glow-card { to { box-shadow: 0 10px 22px oklch(0.35 0.04 50 / 0.22), inset 0 0 0 3px var(--seal), 0 0 0 6px var(--seal-soft); } }
+@keyframes dim-card { to { opacity: 0.62; } }
 
-/* 끝 */
-.a9-end .end__eyebrow { top: 470px; font-family: "Noto Serif KR", var(--font-serif); letter-spacing: 0.2em; color: var(--gold); }
-.a9-end .end__logo { top: 520px; font-size: 140px; }
-.a9-end .end__lead { top: 720px; font-size: 64px; font-weight: 900; color: #fff; }
-.a9-end .a9-free { position: absolute; top: 850px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 12px 34px; border-radius: 999px;
-  font: 800 44px "Noto Serif KR", var(--font-serif); color: oklch(0.2 0.04 150); background: oklch(0.82 0.1 150); box-shadow: 0 0 40px oklch(0.75 0.12 150 / 0.45); }
-.a9-end .end__cta { top: 990px; font-size: 50px; padding: 28px 60px; }
+/* ── D. 일곱 낙관: 방마다 붉은 둥근 도장 ── */
+.seals { position: absolute; left: 0; right: 0; top: 0; height: 1920px; }
+.sealr { position: absolute; width: 190px; display: grid; justify-items: center; }
+.sealr .ring { width: 160px; height: 160px; border-radius: 50%; border: 6px solid var(--seal); display: grid; place-items: center; background: var(--seal-soft); opacity: 0; }
+.sealr svg { width: 92px; height: 92px; fill: none; stroke: var(--seal); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.sealr .nm { margin-top: 14px; font: 400 44px var(--myeong); color: var(--ink); opacity: 0; }
+.sealr .ln { margin-top: 2px; font: 400 30px var(--myeong); color: var(--ink-soft); opacity: 0; white-space: nowrap; }
+
+/* ── E. 끝: 연하장 ── */
+.endc { position: absolute; inset: 0; opacity: 0; }
+.endc .yr { position: absolute; top: 380px; left: 0; right: 0; text-align: center; font: 400 48px var(--myeong); letter-spacing: 0.32em; color: var(--ink-soft); }
+.endc .title { position: absolute; top: 450px; left: 0; right: 0; text-align: center; font: 400 210px/1.05 var(--brush); color: var(--ink); }
+.endc .title em { font-style: normal; color: var(--seal); }
+.endc .brand { position: absolute; top: 720px; left: 0; right: 0; text-align: center; font: 400 56px var(--myeong); color: var(--ink); }
+.endc .brand i { font-style: normal; color: var(--ink-soft); margin: 0 14px; }
+.endc .free { position: absolute; top: 850px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 14px 36px; border: 5px solid var(--seal); border-radius: 12px;
+  font: 400 50px var(--myeong); color: var(--seal); background: var(--seal-soft); rotate: -2deg; opacity: 0; }
+.endc .cta { position: absolute; top: 1010px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 26px 64px; border-radius: 999px;
+  font: 400 54px var(--myeong); color: oklch(0.97 0.012 85); background: var(--ink); box-shadow: 0 14px 30px oklch(0.3 0.03 50 / 0.3); opacity: 0; }
+.endc .cta::after { content: " →"; color: oklch(0.85 0.09 70); }
+.endc .sun { position: absolute; left: 50%; top: 1180px; width: 160px; height: 160px; margin-left: -80px; border-radius: 50%; background: var(--seal); opacity: 0.0; }
