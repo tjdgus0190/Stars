@@ -217,11 +217,10 @@ body.has-ny-tabbar #app { padding-bottom: calc(72px + env(safe-area-inset-bottom
   position: fixed; inset: 0; z-index: 70; display: grid; place-content: center; justify-items: center; gap: var(--space-6);
   background: var(--c-bg-deep); animation: ny-fade 300ms ease both;
 }
-.ny-ritual__orb { width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle, var(--accent), transparent 70%); animation: ny-pulse 1200ms ease-in-out infinite; }
 .ny-ritual__text { margin: 0; font-size: var(--fs-md); color: var(--c-text-strong); }
 @keyframes ny-fade { from { opacity: 0; } }
 @keyframes ny-pulse { 50% { transform: scale(1.25); opacity: 0.6; } }
-@media (prefers-reduced-motion: reduce) { .ny-ritual, .ny-ritual__orb { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ny-ritual { animation: none; } }
 
 /* ── 결과 */
 .ny-res__mark { margin: var(--space-2) 0 0; font-size: var(--fs-xl); line-height: 1.4; color: var(--c-text-strong); }
@@ -342,13 +341,6 @@ body.is-ny #sky { opacity: 0.45; transition: opacity 1100ms ease; }
 .ny-hub__free.is-done { color: var(--c-text); }
 .ny-hub__free.is-paid { color: oklch(0.86 0.09 150); background: oklch(0.7 0.1 150 / 0.1); border-color: oklch(0.7 0.1 150 / 0.3); }
 .ny-hub__code { margin-top: var(--space-2); }
-.ny-door__badge { margin-top: 2px; padding: 2px 8px; border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 700; }
-.ny-door__badge.is-free { color: oklch(0.2 0.04 150); background: oklch(0.82 0.1 150); }
-.ny-door__badge.is-lock { color: var(--ny-gold); background: oklch(0.2 0.03 60); border: 1px solid var(--ny-gold-dim); }
-/* 잠긴 문: 문은 그대로 보이되 빛이 꺼진 채, 작은 자물쇠 */
-.ny-door.is-locked .ny-door__frame { filter: saturate(0.55) brightness(0.78); }
-.ny-door.is-locked .ny-door__fan::after { content: ""; position: absolute; right: 8%; bottom: 6%; width: 14px; height: 12px; border-radius: 2px; background: var(--ny-gold-dim); box-shadow: 0 -6px 0 -2px transparent; }
-.ny-door.is-locked .ny-door__fan::before { content: ""; position: absolute; right: calc(8% + 3px); bottom: calc(6% + 9px); width: 8px; height: 8px; border: 2px solid var(--ny-gold-dim); border-bottom: 0; border-radius: 6px 6px 0 0; }
 .ny-res__free { display: inline-block; margin: var(--space-3) 0 0; padding: 2px 10px; border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 700; color: oklch(0.2 0.04 150); background: oklch(0.82 0.1 150); }
 .ny-more { text-align: center; border-color: oklch(0.83 0.12 82 / 0.35); background: linear-gradient(180deg, oklch(0.83 0.12 82 / 0.07), transparent 70%), var(--c-surface-1); }
 .ny-more .ny-p { margin-bottom: var(--space-4); }
@@ -374,3 +366,112 @@ body.is-ny #sky { opacity: 0.45; transition: opacity 1100ms ease; }
 .ny-pay__seller-list dd { margin: 0; color: var(--c-text); word-break: break-all; }
 .ny-pay__owned { margin-bottom: var(--space-4); }
 .ny-pay__owned .receipt-open__row { margin-top: var(--space-3); }
+
+/* ── (2026-11-12 운영자) 문 상태: 들어 본 방은 문이 열린 채, 잠긴 방은 사슬과 자물쇠. 무료·가격 표시는 두지 않는다 ── */
+.ny-door.is-open .ny-door__leaf--l { transform: rotateY(-62deg); }
+.ny-door.is-open .ny-door__leaf--r { transform: rotateY(62deg); }
+.ny-door.is-open .ny-door__light { opacity: 1; }
+.ny-door.is-open .ny-door__frame { box-shadow: 0 0 0 1.5px oklch(0.3 0.06 40), 0 0 0 4px var(--ny-gold), 0 10px 26px oklch(0.05 0.03 300 / 0.6), 0 0 42px var(--accent); }
+@media (hover: hover) {
+  .ny-door.is-open:hover .ny-door__leaf--l { transform: rotateY(-70deg); }
+  .ny-door.is-open:hover .ny-door__leaf--r { transform: rotateY(70deg); }
+  .ny-door.is-locked:hover .ny-door__leaf--l, .ny-door.is-locked:hover .ny-door__leaf--r { transform: none; }
+}
+.ny-door.is-locked .ny-door__light { opacity: 0.12; }
+.ny-door.is-locked .ny-door__leaf { filter: saturate(0.5) brightness(0.7); }
+.ny-door.is-locked .ny-door__icon { opacity: 0.45; filter: none; }
+.ny-door.is-locked .ny-door__name, .ny-door.is-locked .ny-door__by { opacity: 0.72; }
+.ny-door__lock { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.ny-door__chain { position: absolute; left: -10%; right: -10%; top: 60%; height: 7px; border-radius: 4px;
+  background: repeating-linear-gradient(90deg, oklch(0.62 0.05 75) 0 9px, oklch(0.38 0.04 60) 9px 11px, oklch(0.55 0.05 70) 11px 18px, oklch(0.32 0.03 60) 18px 20px);
+  box-shadow: 0 2px 4px oklch(0 0 0 / 0.5); }
+.ny-door__chain--a { transform: rotate(-24deg); }
+.ny-door__chain--b { transform: rotate(24deg); }
+.ny-door__padlock { position: absolute; left: 50%; top: 60%; width: 30px; height: 37px; margin: -16px 0 0 -15px; transform-origin: 50% 0; }
+.ny-door__padlock path { stroke: oklch(0.72 0.07 78); stroke-width: 2.6; stroke-linecap: round; }
+.ny-door__padlock rect { fill: oklch(0.6 0.07 75); stroke: oklch(0.82 0.08 82); stroke-width: 1.2; }
+.ny-door__padlock .kh { stroke: oklch(0.25 0.03 60); stroke-width: 2.4; }
+.ny-door.is-rattle .ny-door__padlock { animation: ny-rattle 460ms ease-in-out; }
+.ny-door.is-rattle .ny-door__chain { animation: ny-chain 460ms ease-in-out; }
+@keyframes ny-rattle { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(-16deg); } 35% { transform: rotate(13deg); } 55% { transform: rotate(-9deg); } 75% { transform: rotate(5deg); } }
+@keyframes ny-chain { 20% { translate: -3px 1px; } 45% { translate: 3px -1px; } 70% { translate: -1px 0; } }
+
+/* ── (2026-11-12 운영자) 의식 연출 약 1.4초: 문구에 맞는 움직임. 색은 방의 accent ── */
+.ny-rit { position: relative; width: 200px; height: 200px; display: grid; place-items: center; color: var(--accent); }
+.ny-rit svg { width: 100%; height: 100%; overflow: visible; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 8px var(--accent)); }
+/* 만신: 방울이 흔들리며 울린다(열두 번) + 소리 물결 */
+.rit-bells { width: 150px !important; transform-origin: 50% 4%; animation: rit-swing 117ms ease-in-out 12 alternate; }
+.rit-bells .bl circle { fill: oklch(0.82 0.1 80 / 0.25); stroke: oklch(0.86 0.1 82); }
+.rit-bells .bl { transform-box: fill-box; transform-origin: 50% 0; animation: rit-jingle 117ms ease-in-out 12 alternate-reverse; }
+.rit-bells .rb { stroke: var(--accent); opacity: 0.8; }
+@keyframes rit-swing { from { transform: rotate(-11deg); } to { transform: rotate(11deg); } }
+@keyframes rit-jingle { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+.rit-wave { position: absolute; left: 50%; top: 52%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; animation: rit-wave 700ms ease-out infinite; }
+.rit-wave.w2 { animation-delay: 230ms; }
+.rit-wave.w3 { animation-delay: 460ms; }
+@keyframes rit-wave { 0% { opacity: 0.8; transform: scale(0.6); } 100% { opacity: 0; transform: scale(1.9); } }
+/* 오검: 나무 결 위에 줄기를 긋고 네 절기의 눈금을 하나씩 새긴다 + 나뭇조각 */
+.rit-tree { width: 130px !important; }
+.rit-tree .grain path { stroke: oklch(0.6 0.05 70 / 0.35); stroke-width: 1.6; }
+.rit-tree .stem { stroke-dasharray: 180; stroke-dashoffset: 180; animation: rit-draw 280ms ease-out 40ms forwards; stroke-width: 3.4; }
+.rit-tree .nt { stroke-dasharray: 26; stroke-dashoffset: 26; animation: rit-draw 140ms ease-out var(--d) forwards; stroke-width: 3.2; }
+.rit-tree .chip { fill: oklch(0.8 0.08 75); stroke: none; opacity: 0; animation: rit-chip 380ms ease-out var(--d) forwards; }
+@keyframes rit-draw { to { stroke-dashoffset: 0; } }
+@keyframes rit-chip { 0% { opacity: 1; transform: translate(0, 0); } 100% { opacity: 0; transform: translate(var(--x), -14px); } }
+/* 베다: 보름달이 둥근 길을 돌며 집(점)을 하나씩 짚는다 */
+.rit-ring, .rit-orbit { position: absolute; inset: 0; }
+.rit-ring i { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: oklch(0.5 0.05 var(--accent-h)); transform: rotate(var(--r)) translateY(-84px);
+  animation: rit-lit 260ms ease-out var(--d) forwards; }
+@keyframes rit-lit { 50% { scale: 1.8; } to { background: var(--accent); box-shadow: 0 0 12px var(--accent); scale: 1; } }
+.rit-orbit { animation: rit-orbit 1140ms linear forwards; }
+.rit-orbit b { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; transform: translateY(-84px);
+  background: radial-gradient(circle at 40% 35%, oklch(0.98 0.02 90), oklch(0.86 0.04 var(--accent-h))); box-shadow: 0 0 22px oklch(0.92 0.05 90), 0 0 50px var(--accent); }
+@keyframes rit-orbit { from { transform: rotate(-8deg); } to { transform: rotate(345deg); } }
+/* 데칸: 태양이 지평선 위 둥근 길로 별무리를 건너간다 */
+.rit-arc, .rit-sunarm { position: absolute; left: 0; right: 0; top: 0; height: 200px; }
+.rit-arc i { position: absolute; left: 50%; top: 170px; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: oklch(0.6 0.05 var(--accent-h)); transform: rotate(var(--r)) translateY(-120px);
+  box-shadow: 9px 4px 0 -1px oklch(0.6 0.05 var(--accent-h)), -7px 6px 0 -2px oklch(0.6 0.05 var(--accent-h)); animation: rit-starlit 300ms ease-out var(--d) forwards; }
+@keyframes rit-starlit { to { background: oklch(0.95 0.08 85); box-shadow: 9px 4px 0 -1px oklch(0.92 0.08 85), -7px 6px 0 -2px oklch(0.92 0.08 85), 0 0 14px var(--accent); } }
+.rit-sunarm { transform-origin: 50% 170px; animation: rit-sun 1200ms cubic-bezier(.4, 0, .4, 1) forwards; }
+.rit-sunarm b { position: absolute; left: 50%; top: 170px; width: 38px; height: 38px; margin: -19px; border-radius: 50%; transform: translateY(-120px);
+  background: radial-gradient(circle, oklch(0.97 0.06 90) 30%, var(--accent) 70%); box-shadow: 0 0 30px var(--accent), 0 0 60px oklch(0.85 0.12 80 / 0.6); }
+@keyframes rit-sun { from { transform: rotate(-74deg); } to { transform: rotate(74deg); } }
+.rit-horizon { position: absolute; left: 10px; right: 10px; top: 172px; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+/* 촐킨: 13톱니와 20톱니 두 바퀴가 맞물려 돈다(260일) */
+.rit-gear { position: absolute; border-radius: 50%; background: repeating-conic-gradient(var(--accent) 0 var(--t), transparent var(--t) calc(var(--t) * 2));
+  -webkit-mask: radial-gradient(circle, transparent 54%, #000 55% 74%, transparent 75%), radial-gradient(circle, #000 0 66%, transparent 67%); mask: radial-gradient(circle, transparent 54%, #000 55% 74%, transparent 75%); filter: drop-shadow(0 0 6px var(--accent)); }
+.rit-gear i { position: absolute; inset: 22%; border-radius: 50%; border: 3px solid var(--accent); }
+.rit-gear.big { --t: 9deg; width: 150px; height: 150px; left: 4px; top: 25px; animation: rit-spin 1400ms linear forwards; }
+.rit-gear.small { --t: 13.846deg; width: 100px; height: 100px; left: 144px; top: 50px; animation: rit-spin-r 1400ms linear forwards; }
+@keyframes rit-spin { to { transform: rotate(234deg); } }
+@keyframes rit-spin-r { to { transform: rotate(-360deg); } }
+/* 룬: 주머니가 흔들리고 안의 돌 셋이 부딪힌다 + 작은 불티 */
+.rit-pouch { width: 170px !important; transform-origin: 50% 35%; animation: rit-pouch 230ms ease-in-out 6 alternate; }
+.rit-pouch .bag { fill: oklch(0.3 0.04 var(--accent-h) / 0.6); }
+.rit-pouch .stn ellipse { fill: oklch(0.42 0.02 240); stroke: oklch(0.8 0.05 230); }
+.rit-pouch .stn path { stroke: oklch(0.92 0.08 220); stroke-width: 2.6; }
+.rit-pouch .stn { transform-box: fill-box; transform-origin: 50% 50%; animation: rit-clack 175ms ease-in-out 8 alternate; }
+.rit-pouch .s2 { animation-delay: 60ms; animation-direction: alternate-reverse; }
+.rit-pouch .s3 { animation-delay: 110ms; }
+.rit-pouch .spk { fill: oklch(0.95 0.06 220); stroke: none; opacity: 0; animation: rit-spark 220ms ease-out var(--d); }
+@keyframes rit-pouch { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+@keyframes rit-clack { from { transform: translate(-3px, 2px) rotate(-8deg); } to { transform: translate(3px, -3px) rotate(8deg); } }
+@keyframes rit-spark { 0% { opacity: 1; transform: scale(0.4); } 100% { opacity: 0; transform: scale(2.2); } }
+/* 시빌라: 동굴 입구에서 낮은 울림이 번지고 안개가 오른다 */
+.rit-cave { width: 180px !important; position: relative; z-index: 1; }
+.rit-cave .rock { fill: oklch(0.24 0.03 var(--accent-h)); stroke: oklch(0.55 0.06 var(--accent-h)); }
+.rit-cave .mouth { fill: oklch(0.08 0.02 300); stroke: var(--accent); }
+.rit-cave .mist { stroke: oklch(0.85 0.04 var(--accent-h) / 0.7); stroke-width: 2; opacity: 0; animation: rit-mist 900ms ease-out var(--d) forwards; }
+@keyframes rit-mist { 0% { opacity: 0; transform: translateY(8px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-34px); } }
+.rit-echo { position: absolute; left: 50%; top: 66%; width: 70px; height: 50px; margin: -25px 0 0 -35px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; animation: rit-echo 900ms ease-out infinite; }
+.rit-echo.e2 { animation-delay: 300ms; }
+.rit-echo.e3 { animation-delay: 600ms; }
+@keyframes rit-echo { 0% { opacity: 0.9; transform: scale(0.6); } 100% { opacity: 0; transform: scale(3.2, 2.6); } }
+@media (prefers-reduced-motion: reduce) { .ny-rit, .ny-rit * { animation: none !important; } .ny-door.is-rattle * { animation: none !important; } }
+
+/* (2026-11-12 운영자) 새해의 회랑 카카오 로그인 줄 — 버튼 모양은 제품 공통 .btn-kakao(카카오 가이드 색) */
+.ny-kakao { margin: var(--space-4) auto 0; max-width: 340px; text-align: center; }
+.ny-kakao__btn { width: 100%; }
+.ny-kakao__help { margin: var(--space-2) 0 0; font-size: var(--fs-xs); line-height: 1.6; color: var(--c-text-muted); }
+.ny-kakao__on { margin: 0; display: inline-block; padding: 4px 12px; border-radius: var(--radius-pill); font-size: var(--fs-xs); color: var(--c-text); background: oklch(0.88 0.17 98 / 0.12); border: 1px solid oklch(0.88 0.17 98 / 0.4); }
+.ny-kakao--pay { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px dashed var(--c-line); max-width: none; }

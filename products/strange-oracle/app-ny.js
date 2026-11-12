@@ -165,6 +165,35 @@
       tabStory.setAttribute("aria-current", ny ? "false" : "page");
     }
 
+    // (2026-11-12 운영자) 카카오 로그인 줄: 로그인해 두면 산 신년운세가 카카오 계정에 저장돼 코드 없이 다시 열린다
+    const KAKAO_SYM = '<svg class="btn-kakao__sym" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.2C6.6 3.2 2.3 6.6 2.3 10.8c0 2.7 1.8 5.1 4.6 6.5l-1 3.6c-.1.3.3.6.6.4l4.3-2.8c.4 0 .8.1 1.2.1 5.4 0 9.7-3.4 9.7-7.8S17.4 3.2 12 3.2Z"/></svg>';
+    function kakaoRow(where) {
+      const K = C.kakao && C.kakao();
+      const KT = N.kakao || {};
+      const row = mk("div", "ny-kakao ny-kakao--" + where);
+      row.dataset.js = "ny-kakao";
+      if (!K) {
+        row.hidden = true;
+        return row;
+      }
+      if (K.logged()) {
+        row.classList.add("is-on");
+        row.append(mk("p", "ny-kakao__on", paid() ? KT.onPaid : KT.on));
+        return row;
+      }
+      const btn = mk("button", "btn-kakao ny-kakao__btn");
+      btn.type = "button";
+      btn.dataset.js = "ny-kakao-btn";
+      btn.innerHTML = KAKAO_SYM;
+      btn.append(mk("span", "", where === "pay" ? KT.btnPay : KT.btn));
+      btn.addEventListener("click", () => {
+        C.track("so_ny", { step: "kakao" });
+        K.login();
+      });
+      row.append(btn, mk("p", "ny-kakao__help", where === "pay" ? KT.helpPay : KT.help));
+      return row;
+    }
+
     // ───────── 새해 입구: 일곱 문 ─────────
     function renderHub() {
       hubScr.textContent = "";
@@ -179,6 +208,7 @@
       st.dataset.js = "ny-free-state";
       st.textContent = paid() ? N.hub.paidNote : fr.length >= FREE_MAX ? N.hub.freeDone : fr.length ? fill(N.hub.freeLeft, { n: FREE_MAX - fr.length }) : N.hub.freeNote;
       head.append(st);
+      head.append(kakaoRow("hub"));
       if (paid()) {
         const sc = mk("button", "btn btn--text btn--small ny-hub__code", N.hub.showCode);
         sc.type = "button";
@@ -200,18 +230,32 @@
         const nm = mk("span", "ny-door__name", T.rooms[room].name);
         const by = mk("span", "ny-door__by", N.rooms[room].by);
         b.append(frame, mk("span", "ny-door__step"), nm, mk("span", "ny-door__lens", N.rooms[room].lens), by);
-        if (heard.has(room)) b.append(mk("span", "ny-door__heard", N.hub.heard));
-        if (!paid()) {
-          if (isFree(room)) b.append(mk("span", "ny-door__badge is-free", N.hub.badgeFree));
-          else if (fr.length >= FREE_MAX) {
-            b.classList.add("is-locked");
-            b.dataset.lock = "1";
-            b.append(mk("span", "ny-door__badge is-lock", N.hub.badgeLock));
-          }
+        // (2026-11-12 운영자) 무료·가격 표시는 두지 않는다. 들어 본 방(무료로 고른 방·이 탭에서 들은 방)은 문이 열린 채로,
+        //   무료 두 방을 다 고른 뒤의 나머지 방은 사슬과 자물쇠로 잠긴 모양. 잠긴 문을 누르면 자물쇠가 덜컥 흔들린 뒤 결제 안내
+        if ((!paid() && isFree(room)) || heard.has(room)) {
+          b.classList.add("is-open");
+          b.dataset.open = "1";
+        }
+        if (!paid() && !isFree(room) && fr.length >= FREE_MAX) {
+          b.classList.add("is-locked");
+          b.dataset.lock = "1";
+          const lock = mk("span", "ny-door__lock");
+          lock.setAttribute("aria-hidden", "true");
+          lock.innerHTML = '<span class="ny-door__chain ny-door__chain--a"></span><span class="ny-door__chain ny-door__chain--b"></span><svg class="ny-door__padlock" viewBox="0 0 24 30"><path d="M6.5 13V9a5.5 5.5 0 0 1 11 0v4" fill="none"/><rect x="3" y="13" width="18" height="14" rx="3"/><path class="kh" d="M12 18.5v4"/></svg>';
+          frame.append(lock);
+          b.setAttribute("aria-label", `${T.rooms[room].name} · ${N.hub.lockedAria || ""}`);
         }
         b.addEventListener("click", () => {
-          if (b.classList.contains("is-opening")) return;
-          if (!canEnter(room)) return gate(room); // 셋째 방: 문을 열지 않고 결제 안내
+          if (b.classList.contains("is-opening") || b.classList.contains("is-rattle")) return;
+          if (!canEnter(room)) {
+            // 셋째 방: 문을 열지 않고, 자물쇠가 덜컥 흔들린 뒤 결제 안내
+            if (C.reduceMotion) return gate(room);
+            b.classList.add("is-rattle");
+            return setTimeout(() => {
+              b.classList.remove("is-rattle");
+              gate(room);
+            }, 480);
+          }
           if (C.reduceMotion) return openRoom(room);
           C.ensureRooms([room]).catch(() => {}); // 빨려 들어가는 동안 방 파일을 미리 받는다
           b.classList.add("is-opening"); // 두 짝이 열리고 빛이 쏟아진 뒤
@@ -444,16 +488,42 @@
       renderRoom();
       C.track("so_ny", { step: "room", room: cur });
     };
+    // 의식 연출 그림(CSS 애니메이션만, 무작위 없음)
+    const rep = (n, f) => Array.from({ length: n }, (_, i) => f(i)).join("");
+    const RIT = {
+      saju: () => '<span class="rit-wave"></span><span class="rit-wave w2"></span><span class="rit-wave w3"></span>' +
+        '<svg class="rit-bells" viewBox="0 0 120 160"><path class="st" d="M60 6v34M30 44h60M38 44v28M60 44v52M82 44v28"/>' +
+        '<g class="bl"><circle cx="38" cy="84" r="13"/><path d="M28 88h20"/></g><g class="bl b2"><circle cx="82" cy="84" r="13"/><path d="M72 88h20"/></g><g class="bl b3"><circle cx="60" cy="108" r="14"/><path d="M49 112h22"/></g>' +
+        '<path class="rb" d="M52 128c-3 8 0 14-3 22M60 128v24M68 128c3 8 0 14 3 22"/></svg>',
+      ogham: () => '<svg class="rit-tree" viewBox="0 0 120 200"><g class="grain"><path d="M18 10c8 40-6 80 4 120s-4 50 0 60"/><path d="M100 8c-6 44 8 84-2 124s6 46 0 60"/><path d="M36 4c6 50-4 110 2 190"/><path d="M84 6c-4 60 6 120-2 188"/></g>' +
+        '<path class="stem" d="M60 14V186"/>' +
+        rep(4, (g) => rep(g + 1, (k) => `<path class="nt" style="--d:${0.3 + g * 0.24 + k * 0.06}s" d="M${g % 2 ? 60 : 36} ${40 + g * 38 + k * 9}h24"/>`)) +
+        rep(6, (k) => `<circle class="chip" style="--d:${0.35 + k * 0.17}s;--x:${k % 2 ? 14 : -14}px" cx="60" cy="${44 + k * 24}" r="2.2"/>`) + "</svg>",
+      star: () => '<div class="rit-ring">' + rep(12, (k) => `<i style="--r:${k * 30}deg;--d:${k * 0.095}s"></i>`) + '</div><div class="rit-orbit"><b></b></div>',
+      decan: () => '<div class="rit-arc">' + rep(9, (k) => `<i style="--r:${-64 + k * 16}deg;--d:${0.1 + k * 0.12}s"></i>`) + '</div><div class="rit-sunarm"><b></b></div><span class="rit-horizon"></span>',
+      tzolkin: () => '<span class="rit-gear big"><i></i></span><span class="rit-gear small"><i></i></span><span class="rit-count"></span>',
+      rune: () => '<svg class="rit-pouch" viewBox="0 0 140 160"><path class="bag" d="M30 58c-14 26-14 70 10 86h60c24-16 24-60 10-86z"/><path class="neck" d="M38 58c10-8 54-8 64 0M42 50c6 4 12 6 28 6s22-2 28-6"/>' +
+        '<g class="stn s1"><ellipse cx="54" cy="104" rx="15" ry="18"/><path d="M50 94v20M50 98l9-5"/></g><g class="stn s2"><ellipse cx="86" cy="100" rx="14" ry="17"/><path d="M82 92l8 8-8 8"/></g><g class="stn s3"><ellipse cx="70" cy="126" rx="15" ry="13"/><path d="M64 126h12M70 120v12"/></g>' +
+        rep(4, (k) => `<circle class="spk" style="--d:${0.15 + k * 0.28}s" cx="${62 + (k % 2) * 16}" cy="${108 + (k % 3) * 6}" r="2.4"/>`) + "</svg>",
+      sibyl: () => '<span class="rit-echo"></span><span class="rit-echo e2"></span><span class="rit-echo e3"></span>' +
+        '<svg class="rit-cave" viewBox="0 0 160 140"><path class="rock" d="M8 132c6-60 30-112 72-112s66 52 72 112z"/><path class="mouth" d="M48 132c2-34 14-62 32-62s30 28 32 62z"/>' +
+        rep(4, (k) => `<path class="mist" style="--d:${k * 0.3}s" d="M${70 + k * 6} 118c-6-10 6-16 0-26"/>`) + "</svg>",
+    };
     function ritual(room) {
       return new Promise((res) => {
+        // (2026-11-12 운영자) 방마다 의식 문구에 맞는 연출 약 1.4초: 방울이 흔들림 · 나무에 눈금이 새겨짐 · 보름달이 집을 짚음 · 태양이 별무리를 건넘 ·
+        //   두 톱니바퀴가 맞물려 돎 · 주머니 속 돌이 부딪힘 · 동굴의 낮은 울림이 퍼짐
         const ov = mk("div", "ny-ritual");
         ov.dataset.room = room;
-        ov.append(mk("span", "ny-ritual__orb"), mk("p", "ny-ritual__text", N.ritual[room] || ""));
-        roomScr.append(ov);
+        const stage = mk("div", "ny-rit ny-rit--" + room);
+        stage.setAttribute("aria-hidden", "true");
+        stage.innerHTML = RIT[room] ? RIT[room]() : "";
+        ov.append(stage, mk("p", "ny-ritual__text", N.ritual[room] || ""));
+        document.body.append(ov); // 화면 전환 중인 방 화면 안이 아니라 맨 위에(화면 전체를 덮게)
         setTimeout(() => {
           ov.remove();
           res();
-        }, C.reduceMotion ? 200 : 1500);
+        }, C.reduceMotion ? 200 : 1400);
       });
     }
 
@@ -908,7 +978,7 @@
           }
           if (!C.startPay()) C.toast(T.toast.loadFail || "");
         });
-        act.append(lab, nudge, buy, mk("p", "pay-safe", NP.safe));
+        act.append(lab, nudge, buy, mk("p", "pay-safe", NP.safe), kakaoRow("pay"));
       }
       payScr.append(act);
       // 결제 방법·판매자 · 환불 (책과 같은 판매자·결제대행, 환불은 이 상품 문장)

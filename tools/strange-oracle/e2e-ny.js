@@ -42,7 +42,7 @@ const paidStrings = [];
     return { theme: (s.querySelector('.ny-theme') || {}).textContent || '', cal: s.querySelectorAll('.ny-cal__item').length, bright: s.querySelectorAll('.ny-cal__item.is-bright').length,
       lock: !!s.querySelector('[data-js=ny-lock-btn]'), secs: s.querySelectorAll('.ny-sec').length, html: s.innerHTML, mark: (s.querySelector('.ny-res__mark') || {}).textContent || '' }; })()`);
 
-  const doorInfo = () => ev(`[...document.querySelectorAll('#screen-ny-hub [data-js=ny-door]')].map((d) => ({ room: d.dataset.room, lock: d.dataset.lock === '1', free: !!d.querySelector('.ny-door__badge.is-free') }))`);
+  const doorInfo = () => ev(`[...document.querySelectorAll('#screen-ny-hub [data-js=ny-door]')].map((d) => ({ room: d.dataset.room, lock: d.dataset.lock === '1', free: d.dataset.open === '1', chain: !!d.querySelector('.ny-door__padlock') }))`);
   const freeReqs = (from) => b.log.bodies.slice(from).filter((x) => /\/api\/book/.test(x.url)).map((x) => { try { return JSON.parse(x.body); } catch (e) { return {}; } });
 
   // 1. 결제 전(2026-11-12 운영자 결정: 신년운세는 책과 따로 파는 상품): 처음 고른 두 방은 상세까지 무료, 셋째 문부터 결제 안내
@@ -68,10 +68,11 @@ const paidStrings = [];
     await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-ny-hub'");
   }
   const d1 = await doorInfo();
-  check("1-6 무료 두 방을 고른 뒤: 만신·오검 문은 '무료', 나머지 다섯 문은 잠김(4,900원)", d1.filter((d) => d.free).map((d) => d.room).sort().join() === "ogham,saju" && d1.filter((d) => d.lock).length === 5 && /4,900원/.test(await ev("document.querySelector('#screen-ny-hub [data-js=ny-door][data-room=star]').textContent")));
+  check("1-6 무료 두 방을 고른 뒤: 만신·오검 문은 열린 채, 나머지 다섯 문은 사슬·자물쇠로 잠김 · 문에 '무료'·가격 글자 없음", d1.filter((d) => d.free).map((d) => d.room).sort().join() === "ogham,saju" && d1.filter((d) => d.lock && d.chain).length === 5 && !/무료|4,900/.test(await ev("[...document.querySelectorAll('#screen-ny-hub [data-js=ny-door]')].map((d) => d.textContent).join(' ')")));
   check("1-7 이 기기 localStorage에는 고른 방 이름 두 개뿐(입력값 없음)", (await ev("localStorage.getItem('strange-oracle-ny-free')")) === '["saju","ogham"]' && !(await ev("JSON.stringify(localStorage).includes('1995') || JSON.stringify(localStorage).includes('테스트')")));
+  check("1-7b 새해의 회랑 첫 화면에 카카오 로그인 버튼", await ev("!!document.querySelector('#screen-ny-hub [data-js=ny-kakao-btn]')"));
   await click("#screen-ny-hub [data-js=ny-door][data-room=star]");
-  check("1-8 셋째 문(베다) → 방이 아니라 신년운세 결제 전 화면", await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-ny-pay'", 6000));
+  check("1-8 셋째 문(베다) → 방이 아니라 신년운세 결제 전 화면(누를 때 안내)", await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-ny-pay'", 6000));
   const payTxt = await ev("document.querySelector('#screen-ny-pay').textContent");
   check("1-9 결제 전 화면(7장): 받는 것·분량·가격 4,900원·책과 다른 상품·7일 환불·판매자·결제대행·동의 칸·SNY 코드 칸", /열리는 것/.test(payTxt) && /분량/.test(payTxt) && /4,900원/.test(payTxt) && /다른 상품/.test(payTxt) && /7일/.test(payTxt) && /SHA Studio/.test(payTxt) && /페이앱/.test(payTxt) && (await ev("!!document.querySelector('[data-js=ny-pay-agree]') && !document.querySelector('[data-js=ny-pay-agree]').checked")) && /SNY/.test(payTxt) && !/책을 산 분께/.test(payTxt));
   const sdkBefore = b.log.bodies.length;
@@ -172,6 +173,26 @@ const paidStrings = [];
   check("5-3 결제 뒤 멈췄던 방(촐킨) 안으로", await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-ny-room' && document.querySelector('#screen-ny-room').dataset.nyRoom === 'tzolkin'", 8000), await active());
   const st5 = await (await fetch(`${TEST}/__dev/pay-store`)).text();
   check("5-4 결제 기록 저장소에 이름·생일·결과 0건", !/1995|테스트/.test(st5));
+
+  // 6. (2026-11-12) 새해의 회랑에서 카카오 로그인 → 산 신년운세가 계정에 저장 → 다른 기기처럼(탭 저장소 비움) 로그인만으로 다시 열림
+  await ev("location.hash = 'ny-hub'; true");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-ny-hub'", 6000);
+  await click("#screen-ny-hub [data-js=ny-door][data-room=saju]");
+  await sleep(200);
+  await b.goto(`${TEST}/products/strange-oracle/#ny-hub`);
+  await waitFor("!!document.querySelector('#screen-ny-hub [data-js=ny-kakao]')", 8000);
+  const hadBtn = await ev("!!document.querySelector('#screen-ny-hub [data-js=ny-kakao-btn]')");
+  await click("#screen-ny-hub [data-js=ny-kakao-btn]");
+  const atKakao = await waitFor("location.pathname === '/__dev/kakao/authorize'", 8000);
+  if (atKakao) await ev("document.querySelector('[data-act=agree]').click()");
+  const backNy = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-ny-hub' && document.querySelector('#screen-ny-hub [data-js=ny-kakao]')?.classList.contains('is-on')", 12000);
+  await ev("(() => { const d = document.querySelector('[data-js=kakao-consent]'); if (d && d.open) document.querySelector('[data-js=kakao-consent-no]').click(); return true; })()");
+  check("6-1 회랑의 [카카오 로그인] → 가짜 카카오 동의 → 회랑으로 돌아와 '카카오로 로그인됨'", hadBtn && atKakao && backNy, await active());
+  await sleep(800);
+  await ev("sessionStorage.clear(); localStorage.removeItem('strange-oracle-ny-free'); true");
+  await b.goto(`${TEST}/products/strange-oracle/#ny-hub`);
+  const restored = await waitFor("(sessionStorage.getItem('strange-oracle-pass-ny') || '').startsWith('SNY') && document.querySelectorAll('#screen-ny-hub [data-js=ny-door][data-lock]').length === 0", 12000);
+  check("6-2 탭 저장소를 비운 뒤(다른 기기처럼) 로그인만으로 신년운세가 다시 열림(SNY 칸, 잠긴 문 0) · 책 칸은 비어 있음", restored && (await ev("sessionStorage.getItem('strange-oracle-pass')")) === null);
 
   if (b.log.bad.length) console.log("400 이상 응답:", JSON.stringify(b.log.bad.slice(0, 6)));
   const errs = b.log.errors.filter((e) => !/favicon/.test(e));

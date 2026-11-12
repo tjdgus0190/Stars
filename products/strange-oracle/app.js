@@ -5451,6 +5451,8 @@
   let nyPayStart = null; // (2026-11-12) 신년운세 결제 시작(결제 화면 설정 안에서 채움). off면 null
   let nyOpenPass = null; // (2026-11-12) 신년운세 결제 화면의 코드 넣기 → 같은 확인 길
   let openNyCode = null; // (2026-11-12) 신년운세 코드 카드 열기
+  let kakaoNy = null; // (2026-11-12 운영자) 새해의 회랑 카카오 로그인 { logged(), login() } — 카카오가 꺼져 있으면 null
+  let nyGoHub = false; // 새해의 회랑에서 카카오 로그인을 시작했으면, 돌아와서 새해 탭을 붙인 뒤 회랑으로
   // (2026-11-12) 결제창에 연 상품: book(책) | ny(2027 신년운세). 결제창에서 돌아와도 이어지게 이 탭 sessionStorage에 이름 하나만(입력값 아님)
   const PAYPROD_KEY = "strange-oracle-payprod";
   const readPayProd = () => {
@@ -6397,12 +6399,12 @@
     const kakaoEls = [js("kakao-row", payScr), js("kakao-link", codeDlg), js("hub-kakao")];
     if (AUTH.kakao !== "on") kakaoEls.forEach((el) => el && el.remove());
     else {
-      const kakaoStart = (mode) => {
+      const kakaoStart = (mode, fromNy) => {
         const b = new Uint8Array(16);
         window.crypto.getRandomValues(b);
         const st = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
         try {
-          window.sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode, from: currentName === "hub" ? "hub" : "pay", prod: mode === "link" && cardProd === "ny" ? "ny" : "book" })); // from: 돌아올 화면(입구·결제 전) · prod: 연결할 코드의 상품(2026-11-12)
+          window.sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode, from: fromNy ? "ny" : currentName === "hub" ? "hub" : "pay", prod: mode === "link" && cardProd === "ny" ? "ny" : "book" })); // from: 돌아올 화면(입구·결제 전) · prod: 연결할 코드의 상품(2026-11-12)
         } catch (e) {
           return toast(AUTH.msg.error || "");
         }
@@ -6560,7 +6562,11 @@
         }
         const link = js("kakao-link", codeDlg);
         if (link) show(link, !lg); // 로그인한 기기는 결제 코드가 자동으로 연결된다
+        if (nyApi) nyApi.refresh(); // (2026-11-12) 새해의 회랑 카카오 줄도
       };
+      // (2026-11-12 운영자) 새해의 회랑 첫 화면·신년운세 결제 화면의 카카오 로그인: 로그인해 두면 신년운세 코드(SNY)가 계정에 저장되고(onAccount.pass),
+      //   다른 기기에서도 로그인만으로 다시 열린다(applyAccount가 SNY를 신년운세 칸에). 코드는 여전히 카드로 보여 준다(로그인 없이도 쓸 수 있게)
+      kakaoNy = { logged: () => Boolean(readLogin()), login: () => kakaoStart("login", true) };
       syncHubKakao();
       // 로그인 결과 반영: 저장한 진행이 이 탭보다 많으면 불러와 다시 시작, 아니면 이 탭 진행을 올림. 처음이면 동의 묻기
       const AUTH_NOTE = "strange-oracle-authnote"; // 다시 시작한 뒤 띄울 안내 이름(한 번)
@@ -6623,7 +6629,8 @@
           saved = null;
         }
         const mode = saved && saved.mode;
-        const home = saved && saved.from === "hub" ? "hub" : "deeper"; // (22단계) 입구에서 시작했으면 입구로
+        const home = saved && (saved.from === "hub" || saved.from === "ny") ? "hub" : "deeper"; // (22단계) 입구에서 시작했으면 입구로
+        if (saved && saved.from === "ny") nyGoHub = true; // (2026-11-12) 새해의 회랑에서 시작 → 새해 탭을 붙인 뒤 회랑으로
         if (!m || !saved || saved.s !== m[2]) {
           track("so_auth", { step: "fail", mode: ["restore", "link", "forget", "login"].includes(mode) ? mode : "restore" });
           return { first: home, after: () => toast(AUTH.msg.error || "") };
@@ -6720,7 +6727,7 @@
     so_book_offer_close: { placement: ["after_ogham"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     // (2026-11-04 시험판) 2027 신년운세 탭: 단계 이름·방 이름만(생일·이름·주제·뽑은 돌·결과 번호 없음)
-    so_ny: { step: ["tab", "hub", "room", "result", "lock", "open", "free", "gate", "pay_view", "more"], room: CHAPTER_ORDER }, // (2026-11-12) free = 무료 방으로 고름 · gate = 셋째 문에서 결제 안내 · pay_view = 신년운세 결제 화면 · more = 결과 끝 [남은 방 모두 열기]
+    so_ny: { step: ["tab", "hub", "room", "result", "lock", "open", "free", "gate", "pay_view", "more", "kakao"], room: CHAPTER_ORDER }, // (2026-11-12) free = 무료 방으로 고름 · gate = 셋째 문에서 결제 안내 · pay_view = 신년운세 결제 화면 · more = 결과 끝 [남은 방 모두 열기]
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
   // (광고 측정, 제안서 strange-oracle-ads 8장 4번) 캠페인 구분: 광고 링크의 utm은 아래 값과 정확히 같을 때만 page_location에 남긴다.
@@ -7042,6 +7049,7 @@
         startPay: () => (nyPayStart ? (nyPayStart(), true) : false),
         openPass: (value, msg, btn) => (nyOpenPass ? nyOpenPass(value, msg, btn) : Promise.resolve(false)),
         showCode: () => openNyCode && openNyCode(),
+        kakao: () => kakaoNy, // (2026-11-12) null이면 카카오 로그인 줄을 그리지 않는다
         get state() {
           return state;
         },
@@ -7051,7 +7059,10 @@
       if (nyAfterPay) {
         nyAfterPay = false;
         nyApi.afterPaid();
-      } else if (/^ny-/.test(hash)) nyApi.hub(); // 새해 탭에서 새로 고침 → 새해 입구
+      } else if (/^ny-/.test(hash) || nyGoHub) {
+        nyGoHub = false;
+        nyApi.hub(); // 새해 탭에서 새로 고침·카카오 로그인에서 돌아옴 → 새해 입구
+      }
     }, () => {});
 
   // 테스트·점검용으로 바깥에서 읽을 수 있게 둔다 (입력값은 내보내지 않음)
