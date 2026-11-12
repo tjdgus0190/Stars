@@ -7058,6 +7058,7 @@
           copy: (u) => ShareButtons.copyText(u),
           card: (btn, build) => shareCard(btn, build),
           theme: (room) => CARD_THEME[room],
+          font: FONTS.serif,
           image: (room) => new URL(`share/kakao-${room}.jpg`, SITE_URL).href,
         },
         get state() {

@@ -836,6 +836,158 @@
       const p = plain(M.mark).split(" · ");
       return p.length > 1 ? { title: p.slice(1).join(" · "), sub: p[0] } : { title: p[0], sub: "" };
     };
+    // (2026-11-12 운영자 "월별 신년운세 느낌, 한 해의 요점 한마디 + 아래는 표·그래프") 공유 카드 그림:
+    //   나의 2027년 한마디(열쇠 낱말) → 결과 이름·비추는 면 → 열두 달(절기·반년) 막대그래프(빛남·고름·쉼) + 흐름 선 → 범례 → 가장 빛나는 때
+    function drawYearCard(ctx, o, M, serif) {
+      const ST = N.share || {};
+      const th = o.theme, cx = o.x, y0 = o.y;
+      const keys = (M.keys || []).map(plain).filter(Boolean);
+      const fit = (text, weight, size, maxW) => {
+        let s2 = size;
+        do ctx.font = `${weight} ${s2}px ${serif}`;
+        while (ctx.measureText(text).width > maxW && (s2 -= 4) > 28);
+        return s2;
+      };
+      ctx.textAlign = "center";
+      ctx.fillStyle = th.muted;
+      ctx.font = `500 36px ${serif}`;
+      ctx.fillText(ST.cardOne || "", cx, y0 + 40);
+      const big = keys[0] ? `\u201C${keys[0]}\u201D` : markParts(M).title;
+      fit(big, 700, 128, 900);
+      ctx.save();
+      ctx.fillStyle = th.text;
+      ctx.shadowColor = th.accent;
+      ctx.shadowBlur = 40;
+      ctx.fillText(big, cx, y0 + 200);
+      ctx.restore();
+      if (keys.length > 1) {
+        ctx.fillStyle = th.accent;
+        fit(keys.slice(1).join("  ·  "), 500, 46, 860);
+        ctx.fillText(keys.slice(1).join("  ·  "), cx, y0 + 272);
+      }
+      const mp = markParts(M);
+      const who = [mp.title, N.rooms[M.room].lens].filter(Boolean).join(" · ");
+      ctx.fillStyle = th.muted;
+      fit(who, 500, 36, 860);
+      ctx.fillText(who, cx, y0 + 334);
+      // 나눔선
+      ctx.strokeStyle = th.accent;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 300, y0 + 372);
+      ctx.lineTo(cx + 300, y0 + 372);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      // 그래프 제목
+      ctx.fillStyle = th.accent;
+      ctx.font = `700 40px ${serif}`;
+      ctx.fillText(M.kind === "months" ? ST.chartMonths : M.kind === "halves" ? ST.chartHalves : ST.chartSeasons, cx, y0 + 432);
+      // 막대그래프
+      const items = M.items;
+      const n = items.length;
+      const left = cx - 420, width = 840, base = y0 + 830, maxH = 300;
+      const slot = width / n, bw = Math.min(120, slot * 0.58);
+      const val = { bright: 1, steady: 0.6, rest: 0.3 };
+      const tops = [];
+      // 바닥 눈금선
+      ctx.strokeStyle = th.muted;
+      ctx.globalAlpha = 0.25;
+      ctx.lineWidth = 1.5;
+      [0.3, 0.6, 1].forEach((v) => {
+        ctx.beginPath();
+        ctx.setLineDash([6, 8]);
+        ctx.moveTo(left, base - v * maxH);
+        ctx.lineTo(left + width, base - v * maxH);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+      items.forEach((it, i) => {
+        const v = val[it.tone] || 0.6;
+        const x = left + slot * i + (slot - bw) / 2, h = v * maxH, top = base - h;
+        tops.push([x + bw / 2, top]);
+        const g = ctx.createLinearGradient(0, top, 0, base);
+        if (it.tone === "bright") {
+          g.addColorStop(0, "#fff1c4");
+          g.addColorStop(0.35, "#f2c867");
+          g.addColorStop(1, "rgba(242,200,103,0.25)");
+        } else if (it.tone === "rest") {
+          g.addColorStop(0, "rgba(140,150,200,0.75)");
+          g.addColorStop(1, "rgba(140,150,200,0.12)");
+        } else {
+          g.addColorStop(0, th.accent);
+          g.addColorStop(1, "rgba(255,255,255,0.06)");
+        }
+        ctx.save();
+        if (it.tone === "bright") {
+          ctx.shadowColor = "#f2c867";
+          ctx.shadowBlur = 30;
+        }
+        ctx.globalAlpha = it.tone === "steady" ? 0.7 : 1;
+        ctx.fillStyle = g;
+        const r = Math.min(14, bw / 2);
+        ctx.beginPath();
+        ctx.moveTo(x, base);
+        ctx.lineTo(x, top + r);
+        ctx.quadraticCurveTo(x, top, x + r, top);
+        ctx.lineTo(x + bw - r, top);
+        ctx.quadraticCurveTo(x + bw, top, x + bw, top + r);
+        ctx.lineTo(x + bw, base);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        if (it.tone === "bright") {
+          ctx.fillStyle = "#fff1c4";
+          ctx.font = `700 ${n > 6 ? 34 : 44}px ${serif}`;
+          ctx.fillText("\u2605", x + bw / 2, top - 16);
+        }
+        // 아래 이름표: "2월 · 임인월" → "2월", "1월 무렵 · …" → "1월", "임볼크 · 2월 1일부터" → "임볼크"
+        const main = it.label.split(" · ")[0];
+        const short = (main.match(/\d+월/) || [main])[0];
+        ctx.fillStyle = it.tone === "bright" ? th.text : th.muted;
+        fit(short, it.tone === "bright" ? 700 : 500, n > 6 ? 30 : 36, slot - 6);
+        ctx.fillText(short, x + bw / 2, base + 46);
+      });
+      // 흐름 선(막대 꼭대기를 잇는 부드러운 선)
+      ctx.save();
+      ctx.strokeStyle = th.text;
+      ctx.globalAlpha = 0.55;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      tops.forEach(([x, y], i) => {
+        if (!i) return ctx.moveTo(x, y - 6);
+        const [px, py] = tops[i - 1];
+        const mx = (px + x) / 2;
+        ctx.bezierCurveTo(mx, py - 6, mx, y - 6, x, y - 6);
+      });
+      ctx.stroke();
+      ctx.restore();
+      // 범례
+      const lg = [["#f2c867", N.result.legend.bright], [th.accent, N.result.legend.steady], ["rgba(140,150,200,0.85)", N.result.legend.rest]];
+      ctx.font = `500 30px ${serif}`;
+      const parts = lg.map(([, t]) => ctx.measureText(t).width + 34);
+      let lx = cx - (parts.reduce((a, b) => a + b, 0) + 40 * (parts.length - 1)) / 2;
+      lg.forEach(([c, t], i) => {
+        ctx.fillStyle = c;
+        ctx.beginPath();
+        ctx.arc(lx + 10, y0 + 930, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = th.muted;
+        ctx.textAlign = "left";
+        ctx.fillText(t, lx + 30, y0 + 940);
+        lx += parts[i] + 40;
+      });
+      ctx.textAlign = "center";
+      // 가장 빛나는 때
+      const bright = items.filter((x) => x.tone === "bright").slice(0, 4).map((x) => { const m = x.label.split(" · ")[0]; return (m.match(/\d+월/) || [m])[0]; });
+      if (bright.length) {
+        const line = fill(ST.cardBright, { when: bright.join(" · ") });
+        ctx.fillStyle = th.text;
+        fit(line, 700, 46, 880);
+        ctx.fillText(line, cx, y0 + 1020);
+      }
+    }
     function shareBox(M) {
       const SH = C.share || {};
       const ST = N.share || {};
@@ -868,9 +1020,8 @@
           text: fill(ST.text, { room: roomName }),
           opts: {
             theme: SH.theme(M.room), eyebrow: fill(ST.cardEyebrow, { room: roomName }), seed: 2027 + ROOMS.indexOf(M.room),
-            // 결과 이름이 "별무리 · 이름"처럼 길면 제목은 뒤쪽 이름만, 앞쪽은 부제(비추는 면과 함께)
-            title: markParts(M).title, subtitle: [markParts(M).sub, fill(ST.cardLens, { lens: N.rooms[M.room].lens })].filter(Boolean).join(" · "),
-            lines: [firstLine(M.theme, 120)].concat(brightTxt ? [fill(ST.cardBright, { when: brightTxt })] : []),
+            art: { height: 1040, draw: (ctx, o) => drawYearCard(ctx, o, M, SH.font || "serif") },
+            title: "", lines: [],
             cta: ST.cardCta,
           },
         }));

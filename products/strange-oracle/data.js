@@ -78,7 +78,11 @@ window.TEXT = {
       text: "낯선 점술관 2027 신년운세 · {room}이 말한 나의 2027년",
       cardEyebrow: "2027 신년운세 · {room}",
       cardLens: "{lens}",
-      cardBright: "빛나는 때 · {when}",
+      cardBright: "가장 빛나는 때 · {when}",
+      cardOne: "나의 2027년 한마디",
+      chartMonths: "2027 · 열두 달 흐름",
+      chartSeasons: "2027 · 네 절기 흐름",
+      chartHalves: "2027 · 한 해의 흐름",
       cardCta: "너의 2027년은?",
     },
     // (2026-11-12 운영자) 새해의 회랑 카카오 로그인: 코드 대신 카카오 계정으로 저장(3장 카카오 로그인 예외와 같은 저장 — 회원번호 해시·코드 암호문뿐)
