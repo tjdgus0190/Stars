@@ -6731,8 +6731,8 @@
     allow: {
       utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads"], // (2026-10-30) 메타 광고 관리자에서 흔히 쓰는 값 더함
       utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
-      utm_campaign: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ig_profile", "x_profile", "gads_main", "kakao_share", "halloween", "halloween_samhain"],
-      utm_content: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
+      utm_campaign: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "ig_profile", "x_profile", "gads_main", "kakao_share", "halloween", "halloween_samhain"], // (2026-11-12) ad9_newyear = 9안 「새해의 문」(신년운세)
+      utm_content: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
     },
     ignore: ["fbclid", "ttclid"],
   };
