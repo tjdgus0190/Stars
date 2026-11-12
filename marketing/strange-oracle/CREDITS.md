@@ -24,3 +24,4 @@
 | 소리(8안 소리판 `out/ad8-profile-ko-sound.mp4`) | 직접 합성(`render/sound-ad8.js`, 2026-10-27). 사인·노이즈·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
 | 소리(7안 소리판 `out/ad7-season-ko-sound.mp4`) | 직접 합성(`render/sound-ad7.js`, 2026-10-27). 사인·노이즈·간단한 잔향, ffmpeg loudnorm. 외부 음원·샘플 없음 | 자체 제작 |
 | 9안 장면·소리(`scenes/ad9-newyear.*`, `render/sound-ad9.js`, 2026-11-12) | 밤하늘(별·은하수 띠)·새해 불꽃·별자리를 CSS·인라인 SVG로 직접 그림. 성운 사진·그림 파일·AI 생성물 없음. 글꼴은 위 Noto Serif KR·Gowun Batang·Cinzel(같은 판·SRI). 소리는 첼레스타·합창 화음·불꽃 소리·초침을 스크립트가 계산, ffmpeg loudnorm. 외부 음원 없음 | 자체 제작 |
+| 전설 릴스 1화 장면·소리(`scenes/legend-sibyl.html`·`scenes/legend/`, `render/sound-legend.js`, 2026-11-12) | 화로·불꽃·불티·두루마리·두건 쓴 노파 그림자·신전을 CSS·인라인 SVG로 직접 그림. 사진·그림 파일·AI 생성물 없음. 글꼴은 위 Noto Serif KR·Gowun Batang·Cinzel(같은 판·SRI). 소리는 현악 지속음·불 소리·동전·종·뜯는 소리를 스크립트가 계산, ffmpeg loudnorm. 외부 음원 없음 | 자체 제작 |
