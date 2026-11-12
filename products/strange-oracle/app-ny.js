@@ -838,6 +838,7 @@
     };
     // (2026-11-12 운영자 "월별 신년운세 느낌, 한 해의 요점 한마디 + 아래는 표·그래프") 공유 카드 그림:
     //   나의 2027년 한마디(열쇠 낱말) → 결과 이름·비추는 면 → 열두 달(절기·반년) 막대그래프(빛남·고름·쉼) + 흐름 선 → 범례 → 가장 빛나는 때
+    const cardItems = (M) => (M.kind === "halves" ? M.items.filter((x) => x.half !== 0) : M.items);
     function drawYearCard(ctx, o, M, serif) {
       const ST = N.share || {};
       const th = o.theme, cx = o.x, y0 = o.y;
@@ -883,8 +884,8 @@
       ctx.fillStyle = th.accent;
       ctx.font = `700 40px ${serif}`;
       ctx.fillText(M.kind === "months" ? ST.chartMonths : M.kind === "halves" ? ST.chartHalves : ST.chartSeasons, cx, y0 + 432);
-      // 막대그래프
-      const items = M.items;
+      // 막대그래프 (룬: "한 해의 열쇠"는 막대가 아니라 위 한마디로 보이므로 두 반년만 — 운영자 2026-11-12)
+      const items = cardItems(M);
       const n = items.length;
       const left = cx - 420, width = 840, base = y0 + 830, maxH = 300;
       const slot = width / n, bw = Math.min(120, slot * 0.58);
@@ -992,7 +993,7 @@
       const SH = C.share || {};
       const ST = N.share || {};
       const roomName = T.rooms[M.room].name;
-      const brightTxt = M.items.filter((x) => x.tone === "bright").slice(0, 4).map((x) => x.label.replace(/ · .*$/, "")).join(" · ");
+      const brightTxt = cardItems(M).filter((x) => x.tone === "bright").slice(0, 4).map((x) => x.label.replace(/ · .*$/, "")).join(" · ");
       const box = mk("section", "ny-card ny-share");
       box.dataset.js = "ny-share";
       box.dataset.room = M.room;
