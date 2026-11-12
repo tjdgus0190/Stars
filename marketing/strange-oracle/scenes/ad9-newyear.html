@@ -3,27 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=1080, height=1920" />
-  <title>광고 9안 「새해 첫 장」 (15초, 한국판)</title>
-  <!-- 글꼴: jsdelivr fontsource 판 고정 + SRI. 9안만 붓글씨(Nanum Brush Script)·명조(Song Myung) — 다른 광고(Gowun Batang·Noto Serif KR 900)와 결을 다르게 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/nanum-brush-script@5.2.5/400.css" integrity="sha384-SJoMCjD1+f11cJEgZxmelpHuXp8vZeExfsknructMkYghXF6LEQa2IHQ/zAEg1O8" crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/song-myung@5.2.5/400.css" integrity="sha384-oufUolb0v29e5XegI0yGYqq8RF+qrzOA5ZBwkCShuG+yNhHXH5eVLSoOI+iEZMc4" crossorigin="anonymous" />
+  <title>광고 9안 「일곱 점술이 말하는 2027」 (15초, 한국판)</title>
+  <!-- 글꼴: 다른 장면과 같은 jsdelivr fontsource 판 고정 + SRI -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/700.css" integrity="sha384-EIZic2kT4Iyqg6Rn2tm4B7Ql9xDJWopYmx3ry1RafjC/gfDHItTLBMXp6jrmkxla" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/700.css" integrity="sha384-LXacqt3WHgv2kABrVAfRqRh7wRqX5H060k/lYSUdYfX+vONJfNDiOITwd8LJv+EV" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/900.css" integrity="sha384-ooIXEUf5zNTP6iR7nXHfVaimYiliyT2VNoP9xlOV2oDtqPxNA/KjJt+5FWUwFxQd" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.3.0/700.css" integrity="sha384-O/oLJBLGGldMs7HxAYRnSN50LYc4P4P3qiJbqSV358VWDpuJKiErXj9iWy8+R3LZ" crossorigin="anonymous" />
   <link rel="stylesheet" href="common.css" />
   <link rel="stylesheet" href="ad9-newyear.css" />
 </head>
 <body>
-<!-- 광고 9안 「새해 첫 장」 (2026-11-12 운영자: "다른 광고와 같은 소리·같은 연출이라 진부하다, 신년운세는 새해 분위기에 맞게 포맷을 바꿔"):
-     밤하늘·내리꽂는 글자·흔들림·번쩍임·쿵/휙 효과음을 쓰지 않는다. 한지 빛 바탕 + 붓글씨 + 달력 넘기기 + 첫 해돋이 + 붉은 낙관, 소리는 뜯는 현(가야금 결)·풍경.
-     0 달력 넘기기 · 3.0 첫 해돋이 · 6.2 열두 장 · 10.4 일곱 낙관 · 12.6 끝 (storyboard.md 「9안」). 착지 strange-oracle.com/2027 -->
+<!-- 광고 9안 「일곱 점술이 말하는 2027」 (2026-11-12 운영자):
+     1차 「새해의 문」(금빛 문·내리꽂는 글자·쿵/휙) → "다른 광고와 같은 소리·연출이라 진부" / 2차 「새해 첫 장」(한지·붓글씨·낙관) → "너무 동양적, 세계 점술이니 피하고 밤하늘로,
+     일곱 개의 점술이 말하는 신년운세가 가장 메인". 그래서: 밤하늘 · 자정에 2026→2027 · 새해 불꽃 일곱 발이 일곱 꼭짓점에서 터지며 점술마다(나라·이름·2027년 한 줄) 말함
+     · 일곱 별이 이어져 별자리 · 가운데 2027. 흔들림·번쩍임·내리꽂기 없음. 착지 strange-oracle.com/2027 (storyboard.md 「9안」) -->
 <main class="stage a9" data-duration="15" data-fps="30">
-  <div class="paper"></div>
-  <div class="sea">
-    <div class="sea__sky"></div>
-    <div class="sea__sun"></div>
-    <div class="sea__water"></div>
-    <div class="sea__glint"></div>
+  <div class="sky9">
+    <div class="sky9__band"></div>
+    <div class="sky9__stars s1"></div>
+    <div class="sky9__stars s2"></div>
+    <div class="sky9__stars s3"></div>
+    <div class="sky9__horizon"></div>
   </div>
-  <div class="grain"></div>
   <div class="safe-guide" id="safe"><i></i><i></i><i></i><i></i></div>
 </main>
 <script src="ad9-newyear.js"></script>

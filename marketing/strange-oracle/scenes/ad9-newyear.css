@@ -1,107 +1,86 @@
-/* 광고 9안 「새해 첫 장」 (2026-11-12). common.css 위에 얹는다(밤 테마 무대 배경은 덮어씀). 15초 · 1080x1920 · 30fps
-   결: 한지 빛 바탕 · 먹 글씨 · 붉은 낙관 · 첫 해돋이. 흔들림·번쩍임·색 갈라짐·내리꽂기 없음. 바탕은 순백이 아니라 낮춘 상아빛(밤에 봐도 눈부시지 않게) */
-.a9 {
-  --paper: oklch(0.9 0.028 82); --paper-edge: oklch(0.8 0.035 75); --ink: oklch(0.24 0.02 50); --ink-soft: oklch(0.42 0.025 55);
-  --seal: oklch(0.52 0.17 28); --seal-soft: oklch(0.52 0.17 28 / 0.12);
-  --brush: "Nanum Brush Script", "Song Myung", serif; --myeong: "Song Myung", "Noto Serif KR", serif;
-  --soft: cubic-bezier(0.25, 0.8, 0.3, 1);
-  background: var(--paper);
-}
-/* 한지: 가운데가 조금 밝고 가장자리가 따뜻하게 어두운 종이 + 고정 섬유 무늬(무작위 없음) */
-.paper { position: absolute; inset: 0;
-  background:
-    repeating-linear-gradient(97deg, oklch(0.6 0.03 70 / 0.05) 0 1px, transparent 1px 23px),
-    repeating-linear-gradient(8deg, oklch(0.6 0.03 70 / 0.04) 0 1px, transparent 1px 37px),
-    radial-gradient(ellipse 80% 60% at 50% 42%, oklch(0.93 0.022 85), var(--paper) 55%, var(--paper-edge)); }
-.grain { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: 0.5;
-  background:
-    radial-gradient(circle, oklch(0.55 0.03 60 / 0.25) 0 1px, transparent 1.6px) 13px 7px / 53px 61px,
-    radial-gradient(circle, oklch(0.55 0.03 60 / 0.18) 0 1px, transparent 1.6px) 31px 29px / 71px 47px; }
-
-/* 붓 쓰기: 왼쪽에서 오른쪽으로 먹이 번지듯 드러난다(가면 위치만 움직임) */
-.wipe { -webkit-mask-image: linear-gradient(90deg, #000 44%, transparent 56%); mask-image: linear-gradient(90deg, #000 44%, transparent 56%);
-  -webkit-mask-size: 230% 100%; mask-size: 230% 100%; -webkit-mask-position: 100% 0; mask-position: 100% 0; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
-@keyframes brush { to { -webkit-mask-position: 0% 0; mask-position: 0% 0; } }
-@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fade-out { to { opacity: 0; } }
-@keyframes drift-out { to { opacity: 0; transform: translateY(-30px); } }
+/* 광고 9안 「일곱 점술이 말하는 2027」 (2026-11-12). common.css 위에 얹는다. 15초 · 1080x1920 · 30fps
+   밤하늘(CSS로 그린 별 세 겹 + 은하수 띠, 성운 사진 배경은 쓰지 않음) · 새해 불꽃 일곱 발 · 별자리. 흔들림·번쩍임·색 갈라짐·내리꽂기 없음 */
+.a9 { --soft: cubic-bezier(0.22, 0.9, 0.3, 1); --ink-hi: oklch(0.97 0.012 90);
+  background: linear-gradient(180deg, oklch(0.13 0.04 275), oklch(0.17 0.05 280) 50%, oklch(0.2 0.06 295) 80%, oklch(0.24 0.06 310)); }
+.sky9 { position: absolute; inset: -80px; animation: sky-drift 15s linear 0s both; }
+@keyframes sky-drift { from { transform: translateY(40px) rotate(-1.5deg); } to { transform: translateY(-40px) rotate(1.5deg); } }
+.sky9__band { position: absolute; inset: 0; opacity: 0.55; mix-blend-mode: screen;
+  background: linear-gradient(125deg, transparent 30%, oklch(0.42 0.06 280 / 0.5) 42%, oklch(0.55 0.05 300 / 0.35) 48%, oklch(0.42 0.06 260 / 0.45) 55%, transparent 68%); }
+.sky9__stars { position: absolute; inset: 0; }
+.sky9__stars.s1 { background:
+  radial-gradient(circle, oklch(0.97 0.02 90) 0 1.4px, transparent 2.2px) 23px 41px / 131px 149px,
+  radial-gradient(circle, oklch(0.92 0.04 250) 0 1.1px, transparent 1.9px) 77px 9px / 97px 113px; opacity: 0.75; }
+.sky9__stars.s2 { background:
+  radial-gradient(circle, oklch(0.98 0.03 85) 0 2.2px, transparent 3.4px) 61px 107px / 263px 241px,
+  radial-gradient(circle, oklch(0.95 0.03 300) 0 1.8px, transparent 2.8px) 151px 37px / 317px 283px; animation: twinkle9 3.6s ease-in-out 0s infinite; }
+.sky9__stars.s3 { background: radial-gradient(circle, oklch(0.99 0.02 90) 0 3px, transparent 5px) 211px 173px / 449px 397px; filter: drop-shadow(0 0 6px oklch(0.9 0.06 90)); animation: twinkle9 5.2s ease-in-out 1.3s infinite; }
+@keyframes twinkle9 { 50% { opacity: 0.35; } }
+.sky9__horizon { position: absolute; left: 0; right: 0; bottom: 0; height: 900px; background: radial-gradient(ellipse 80% 70% at 50% 100%, oklch(0.4 0.09 320 / 0.55), transparent 70%); }
 
 /* 글자 */
-.cap { position: absolute; left: 140px; width: 800px; text-align: center; word-break: keep-all; color: var(--ink); }
-.cap--brush { font: 400 132px/1.12 var(--brush); }
-.cap--brush em { font-style: normal; color: var(--seal); }
-.cap--line { font: 400 64px/1.42 var(--myeong); }
-.cap--line b { font-weight: 400; color: var(--seal); }
-.cap span { display: block; }
+.cap9 { position: absolute; left: 140px; width: 800px; text-align: center; word-break: keep-all; opacity: 0;
+  font: 900 70px/1.3 "Noto Serif KR", var(--font-serif); color: var(--ink-hi); text-shadow: 0 3px 16px oklch(0.1 0.04 280); }
+.cap9 em { font-style: normal; color: oklch(0.88 0.1 85); text-shadow: 0 0 26px oklch(0.8 0.12 75 / 0.6), 0 3px 12px oklch(0.1 0.04 280); }
+@keyframes rise9 { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes sink9 { to { opacity: 0; transform: translateY(-18px); } }
+@keyframes fade9 { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeout9 { to { opacity: 0; } }
 
-/* ── A. 탁상 달력: 위로 넘어가는 한 장 ── */
-.cal { position: absolute; left: 50%; top: 660px; width: 600px; height: 570px; margin-left: -310px; perspective: 2200px; }
-.cal__stand { position: absolute; left: -18px; right: -18px; top: -30px; height: 44px; border-radius: 10px; background: linear-gradient(180deg, oklch(0.36 0.03 50), oklch(0.26 0.025 45)); box-shadow: 0 10px 20px oklch(0.3 0.03 50 / 0.35); z-index: 5; }
-.cal__stand::before { content: ""; position: absolute; left: 60px; right: 60px; top: 30px; height: 26px;
-  background: repeating-linear-gradient(90deg, oklch(0.72 0.02 80) 0 8px, transparent 8px 38px); border-radius: 4px; }
-.cal__page { position: absolute; inset: 0; border-radius: 6px 6px 14px 14px; background: oklch(0.97 0.012 85); box-shadow: 0 22px 40px oklch(0.35 0.04 50 / 0.28), inset 0 0 0 2px oklch(0.85 0.02 80);
-  display: grid; justify-items: center; align-content: start; padding-top: 54px; backface-visibility: hidden; transform-origin: 50% 0; }
-.cal__page .y { font: 400 46px var(--myeong); letter-spacing: 0.3em; color: var(--ink-soft); }
-.cal__page .d { font: 700 280px/1 "Noto Serif KR", var(--myeong); color: var(--ink); margin-top: 6px; letter-spacing: -0.04em; }
-.cal__page .m { margin-top: 14px; font: 400 50px var(--myeong); color: var(--ink); }
-.cal__page .s { margin-top: 10px; font: 400 38px var(--myeong); color: var(--ink-soft); }
-.cal__page.is-new .d { color: var(--seal); }
-.cal__page.is-new .seal-mini { position: absolute; right: 54px; bottom: 50px; width: 96px; height: 96px; border: 5px solid var(--seal); border-radius: 10px;
-  display: grid; place-items: center; font: 700 44px/1 "Noto Serif KR", serif; color: var(--seal); rotate: -6deg; opacity: 0; }
-@keyframes flip-up { 0% { transform: rotateX(0deg); } 100% { transform: rotateX(178deg); } }
-@keyframes page-shade { 0% { filter: brightness(1); } 60% { filter: brightness(0.82); } 100% { filter: brightness(0.7); opacity: 0; } }
-@keyframes stamp { 0% { opacity: 0; transform: scale(1.6); } 55% { opacity: 1; transform: scale(0.94); } 100% { opacity: 1; transform: scale(1); } }
+/* 2026 → 2027 (끝자리 바퀴가 한 칸 굴러간다) */
+.year { position: absolute; left: 0; right: 0; top: 690px; display: flex; justify-content: center; font: 700 230px/1 var(--font-latin); color: var(--ink-hi); letter-spacing: 0.02em; opacity: 0; }
+.year .d { display: inline-block; height: 230px; overflow: hidden; }
+.year .wheel { display: flex; flex-direction: column; }
+.year .wheel span { height: 230px; display: block; }
+@keyframes roll { to { transform: translateY(-230px); } }
+@keyframes glowup { 0% { text-shadow: 0 0 20px oklch(0.85 0.08 85 / 0.4); } 45% { text-shadow: 0 0 50px oklch(0.92 0.09 88), 0 0 140px oklch(0.8 0.13 75 / 0.8); } 100% { text-shadow: 0 0 34px oklch(0.88 0.09 85 / 0.7), 0 0 100px oklch(0.75 0.12 300 / 0.55); } }
+@keyframes yearaway { to { opacity: 0; transform: scale(0.55) translateY(60px); } }
 
-/* ── B. 첫 해돋이: 바다 수평선, 하늘이 남빛에서 복숭아빛으로 ── */
-.sea { position: absolute; inset: 0; opacity: 0; overflow: hidden; }
-.sea__sky { position: absolute; inset: 0 0 760px 0; background: linear-gradient(180deg, oklch(0.36 0.06 265), oklch(0.5 0.07 300) 55%, oklch(0.72 0.09 45) 92%, oklch(0.8 0.09 70)); }
-.sea__sky2 { position: absolute; inset: 0 0 760px 0; background: linear-gradient(180deg, oklch(0.6 0.07 240), oklch(0.76 0.07 40) 70%, oklch(0.86 0.07 80)); opacity: 0; }
-.sea__sun { position: absolute; left: 50%; top: 1060px; width: 230px; height: 230px; margin-left: -115px; border-radius: 50%;
-  background: radial-gradient(circle, oklch(0.94 0.07 85) 0 40%, oklch(0.84 0.11 60) 62%, oklch(0.8 0.12 50 / 0) 72%); box-shadow: 0 0 120px 40px oklch(0.82 0.11 60 / 0.4); }
-.sea__water { position: absolute; left: 0; right: 0; top: 1160px; bottom: 0; background: linear-gradient(180deg, oklch(0.48 0.07 250), oklch(0.3 0.06 260) 60%, oklch(0.22 0.05 265)); }
-.sea__glint { position: absolute; left: 50%; top: 1162px; width: 300px; height: 520px; margin-left: -150px; opacity: 0;
-  background: repeating-linear-gradient(180deg, oklch(0.92 0.08 80 / 0.75) 0 6px, transparent 6px 26px);
-  -webkit-mask-image: radial-gradient(ellipse 50% 100% at 50% 0, #000 30%, transparent 75%); mask-image: radial-gradient(ellipse 50% 100% at 50% 0, #000 30%, transparent 75%); }
-@keyframes sunrise { from { transform: translateY(120px); } to { transform: translateY(-190px); } }
-@keyframes sky-warm { to { opacity: 1; } }
-@keyframes glint { 0% { opacity: 0; background-position: 0 0; } 30% { opacity: 1; } 100% { opacity: 1; background-position: 0 52px; } }
-.sea .cap { color: oklch(0.97 0.015 85); text-shadow: 0 2px 14px oklch(0.25 0.05 270 / 0.6); }
-.sea .cap b { color: oklch(0.9 0.1 75); }
+/* 새해 불꽃: 아래에서 꼬리가 오르고(trail) 꼭짓점에서 터진다(불티가 바깥으로, 묶음이 살짝 아래로 처짐) */
+.fw { position: absolute; width: 0; height: 0; --c: oklch(0.82 0.15 var(--h)); --c2: oklch(0.95 0.07 var(--h)); }
+.fw .trail { position: absolute; left: -3px; top: 0; width: 6px; height: 260px; border-radius: 3px; background: linear-gradient(180deg, var(--c2), transparent); opacity: 0; }
+@keyframes trail { 0% { opacity: 0; transform: translateY(var(--rise)); } 15% { opacity: 1; } 88% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(0) scaleY(0.2); } }
+.fw .burst { position: absolute; left: 0; top: 0; }
+@keyframes droop { from { transform: translateY(0); } to { transform: translateY(70px); } }
+.fw .ray { position: absolute; left: 0; top: 0; width: 0; height: 0; transform: rotate(var(--a)); }
+.fw .spark { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--c2); box-shadow: 0 0 10px var(--c), 0 0 22px var(--c); opacity: 0; }
+.fw .spark.t { width: 7px; height: 7px; left: -3.5px; top: -3.5px; background: var(--c); }
+@keyframes spark { 0% { opacity: 0; transform: translateX(0) scale(1.4); } 8% { opacity: 1; } 65% { opacity: 0.9; } 100% { opacity: 0; transform: translateX(var(--r)) scale(0.3); } }
+.fw .core { position: absolute; left: -70px; top: -70px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, var(--c2), oklch(0.8 0.13 var(--h) / 0.4) 40%, transparent 70%); opacity: 0; }
+@keyframes core { 0% { opacity: 0; transform: scale(0.3); } 20% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.8); } }
+/* 터진 자리에 남는 별 */
+.fw .star { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%; background: var(--c2); box-shadow: 0 0 16px var(--c), 0 0 40px var(--c); opacity: 0; }
+.fw .star::before, .fw .star::after { content: ""; position: absolute; left: 50%; top: 50%; width: 70px; height: 2px; margin: -1px 0 0 -35px; background: linear-gradient(90deg, transparent, var(--c2), transparent); }
+.fw .star::after { transform: rotate(90deg); }
+@keyframes starin { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; transform: scale(1); } }
+.fw .lbl { position: absolute; left: -120px; width: 240px; text-align: center; font: 700 34px "Noto Serif KR", var(--font-serif); color: var(--c2); text-shadow: 0 2px 8px oklch(0.1 0.04 280); opacity: 0; white-space: nowrap; }
 
-/* ── C. 열두 장: 달력 낱장이 한 장씩 놓이고, 빛나는 달에 낙관이 찍힌다 ── */
-.months { position: absolute; left: 160px; top: 510px; width: 760px; display: grid; grid-template-columns: repeat(3, 240px); gap: 18px 20px; }
-.mcard { position: relative; height: 162px; border-radius: 8px; background: oklch(0.97 0.012 85); box-shadow: 0 10px 22px oklch(0.35 0.04 50 / 0.22), inset 0 0 0 2px oklch(0.86 0.02 80);
-  display: grid; justify-items: center; align-content: start; padding-top: 16px; opacity: 0; }
-.mcard::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 12px; border-radius: 8px 8px 0 0; background: oklch(0.35 0.03 50); }
-.mcard .n { font: 700 62px/1 "Noto Serif KR", var(--myeong); color: var(--ink); margin-top: 8px; }
-.mcard .n small { font-size: 32px; margin-left: 2px; }
-.mcard .tag { margin-top: 10px; padding: 0 10px; white-space: nowrap; text-align: center; font: 400 30px/1.25 var(--myeong); color: var(--ink-soft); word-break: keep-all; }
-.mcard .mark { position: absolute; right: -14px; top: -18px; width: 84px; height: 84px; border-radius: 12px; border: 5px solid var(--seal); background: oklch(0.97 0.012 85 / 0.6);
-  display: grid; place-items: center; font: 400 58px/1 var(--brush); color: var(--seal); rotate: 8deg; opacity: 0; }
-.mcard .mark.rest { border-color: oklch(0.55 0.02 260); color: oklch(0.5 0.02 260); width: 70px; height: 70px; font-size: 46px; rotate: -6deg; }
-@keyframes deal { from { opacity: 0; transform: translate(80px, -40px) rotate(9deg); } to { opacity: 1; transform: none; } }
-@keyframes glow-card { to { box-shadow: 0 10px 22px oklch(0.35 0.04 50 / 0.22), inset 0 0 0 3px var(--seal), 0 0 0 6px var(--seal-soft); } }
-@keyframes dim-card { to { opacity: 0.62; } }
+/* 점술이 말하는 칸: 별자리 가운데 */
+.say9 { position: absolute; left: 250px; width: 580px; top: 680px; text-align: center; opacity: 0; --c: oklch(0.84 0.13 var(--h)); }
+.say9 .og { font: 700 30px var(--font-latin); letter-spacing: 0.22em; color: var(--c); }
+.say9 .nm { margin-top: 14px; font: 900 74px/1.15 "Noto Serif KR", var(--font-serif); color: var(--ink-hi); text-shadow: 0 0 30px oklch(0.72 0.14 var(--h) / 0.7), 0 3px 12px oklch(0.1 0.04 280); white-space: nowrap; }
+.say9 .ln { margin-top: 22px; font: 700 46px/1.38 "Noto Serif KR", var(--font-serif); color: oklch(0.93 0.04 var(--h)); word-break: keep-all; text-shadow: 0 2px 10px oklch(0.1 0.04 280); }
+@keyframes say9 { 0% { opacity: 0; transform: translateY(18px); } 16% { opacity: 1; transform: none; } 84% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+.count9 { position: absolute; left: 0; right: 0; top: 1190px; text-align: center; font: 700 34px var(--font-latin); letter-spacing: 0.3em; color: oklch(0.8 0.06 85); opacity: 0; }
+.count9 b { display: inline-block; min-width: 0.8em; color: var(--ink-hi); }
+.count9 .n { position: absolute; left: 0; right: 0; opacity: 0; }
 
-/* ── D. 일곱 낙관: 방마다 붉은 둥근 도장 ── */
-.seals { position: absolute; left: 0; right: 0; top: 0; height: 1920px; }
-.sealr { position: absolute; width: 190px; display: grid; justify-items: center; }
-.sealr .ring { width: 160px; height: 160px; border-radius: 50%; border: 6px solid var(--seal); display: grid; place-items: center; background: var(--seal-soft); opacity: 0; }
-.sealr svg { width: 92px; height: 92px; fill: none; stroke: var(--seal); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.sealr .nm { margin-top: 14px; font: 400 44px var(--myeong); color: var(--ink); opacity: 0; }
-.sealr .ln { margin-top: 2px; font: 400 30px var(--myeong); color: var(--ink-soft); opacity: 0; white-space: nowrap; }
+/* 별자리 선 */
+.const9 { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+.const9 path { fill: none; stroke: oklch(0.88 0.07 85 / 0.8); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2400; stroke-dashoffset: 2400; filter: drop-shadow(0 0 8px oklch(0.85 0.1 80)); }
+.const9 path.in { stroke: oklch(0.8 0.08 300 / 0.5); stroke-width: 2; stroke-dasharray: 5000; stroke-dashoffset: 5000; }
+@keyframes draw9 { to { stroke-dashoffset: 0; } }
+.mid9 { position: absolute; left: 0; right: 0; top: 735px; text-align: center; font: 700 170px/1 var(--font-latin); color: var(--ink-hi); opacity: 0;
+  text-shadow: 0 0 40px oklch(0.88 0.09 85 / 0.8), 0 0 120px oklch(0.75 0.12 300 / 0.6); }
 
-/* ── E. 끝: 연하장 ── */
-.endc { position: absolute; inset: 0; opacity: 0; }
-.endc .yr { position: absolute; top: 380px; left: 0; right: 0; text-align: center; font: 400 48px var(--myeong); letter-spacing: 0.32em; color: var(--ink-soft); }
-.endc .title { position: absolute; top: 450px; left: 0; right: 0; text-align: center; font: 400 210px/1.05 var(--brush); color: var(--ink); }
-.endc .title em { font-style: normal; color: var(--seal); }
-.endc .brand { position: absolute; top: 720px; left: 0; right: 0; text-align: center; font: 400 56px var(--myeong); color: var(--ink); }
-.endc .brand i { font-style: normal; color: var(--ink-soft); margin: 0 14px; }
-.endc .free { position: absolute; top: 850px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 14px 36px; border: 5px solid var(--seal); border-radius: 12px;
-  font: 400 50px var(--myeong); color: var(--seal); background: var(--seal-soft); rotate: -2deg; opacity: 0; }
-.endc .cta { position: absolute; top: 1010px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 26px 64px; border-radius: 999px;
-  font: 400 54px var(--myeong); color: oklch(0.97 0.012 85); background: var(--ink); box-shadow: 0 14px 30px oklch(0.3 0.03 50 / 0.3); opacity: 0; }
-.endc .cta::after { content: " →"; color: oklch(0.85 0.09 70); }
-.endc .sun { position: absolute; left: 50%; top: 1180px; width: 160px; height: 160px; margin-left: -80px; border-radius: 50%; background: var(--seal); opacity: 0.0; }
+/* 끝 */
+.end9 { position: absolute; inset: 0; opacity: 0; }
+.end9 .eb { position: absolute; top: 420px; left: 0; right: 0; text-align: center; font: 700 30px var(--font-latin); letter-spacing: 0.34em; color: oklch(0.8 0.08 85); }
+.end9 .logo9 { position: absolute; top: 470px; left: 0; right: 0; font-size: 130px; }
+.end9 .main { position: absolute; top: 660px; left: 140px; width: 800px; text-align: center; font: 900 72px/1.28 "Noto Serif KR", var(--font-serif); color: var(--ink-hi); text-shadow: 0 3px 14px #000; }
+.end9 .main em { font-style: normal; color: oklch(0.88 0.1 85); }
+.end9 .free { position: absolute; top: 890px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 12px 34px; border-radius: 999px; border: 2px solid oklch(0.88 0.08 85 / 0.7);
+  font: 700 42px "Noto Serif KR", var(--font-serif); color: oklch(0.92 0.06 88); background: oklch(0.2 0.05 285 / 0.7); }
+.end9 .cta { position: absolute; top: 1020px; left: 50%; translate: -50% 0; white-space: nowrap; padding: 26px 58px; border-radius: 999px;
+  font: 800 48px "Noto Serif KR", var(--font-serif); color: oklch(0.2 0.04 60); background: linear-gradient(100deg, oklch(0.78 0.11 75), oklch(0.93 0.08 90) 50%, oklch(0.8 0.12 70)); box-shadow: 0 0 50px oklch(0.8 0.12 75 / 0.5); }
+.end9 .dots { position: absolute; top: 1185px; left: 0; right: 0; display: flex; justify-content: center; gap: 24px; }
+.end9 .dots i { width: 16px; height: 16px; border-radius: 50%; background: oklch(0.88 0.12 var(--h)); box-shadow: 0 0 14px oklch(0.8 0.13 var(--h)); opacity: 0; }
