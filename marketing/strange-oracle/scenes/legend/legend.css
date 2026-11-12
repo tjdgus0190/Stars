@@ -1,29 +1,11 @@
 /* 전설 릴스 「문 너머의 기록」 공통 (2026-11-12). 1080x1920, 모든 움직임은 CSS 애니메이션(렌더 도구가 currentTime으로 프레임을 고른다).
    자리: 위 안전선 270 아래 · 자막 칸 y 330~700 · 그림 칸 y 700~1240 · 1248 아래는 릴스 화면 글자가 덮으므로 비운다.
-   무작위 값 없음(불티·불꽃 크기는 번호로 계산). 무서운 그림·피·죽음 장면 없음. */
-.lg { --fire1: oklch(0.93 0.13 95); --fire2: oklch(0.8 0.17 65); --fire3: oklch(0.62 0.2 38); --ink: oklch(0.13 0.03 30);
+   무작위 값 없음(불티 크기는 번호로 계산). 무서운 그림·피·죽음 장면 없음. 편마다 legend-<편>.css에서 배경·색을 바꾼다. */
+.lg { --fire1: oklch(0.93 0.13 95);
   background:
     radial-gradient(ellipse 80% 45% at 50% 62%, oklch(0.25 0.06 40 / 0.85), transparent 70%),
     linear-gradient(180deg, oklch(0.1 0.02 300), oklch(0.15 0.035 330) 50%, oklch(0.09 0.02 30)); }
 .lg .world { position: absolute; inset: 0; transform-origin: 50% 58%; }
-
-/* ── 화로의 빛 */
-.lg .glow { position: absolute; left: 50%; top: 1130px; width: 1500px; height: 1500px; margin: -750px 0 0 -750px; border-radius: 50%;
-  background: radial-gradient(circle, oklch(0.62 0.17 50 / 0.55), oklch(0.45 0.14 40 / 0.22) 35%, transparent 65%); mix-blend-mode: screen; }
-
-/* ── 화로 */
-.lg .brazier { position: absolute; left: 540px; top: 1100px; width: 0; height: 0; }
-.lg .bowl { position: absolute; left: -175px; top: 0; width: 350px; height: 120px;
-  clip-path: polygon(0 0, 100% 0, 84% 78%, 62% 100%, 38% 100%, 16% 78%);
-  background: linear-gradient(180deg, oklch(0.7 0.09 70), oklch(0.42 0.06 55) 40%, oklch(0.22 0.03 45)); }
-.lg .bowl::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 14px; background: oklch(0.83 0.1 80); opacity: 0.8; }
-.lg .brazier::after { content: ""; position: absolute; left: -26px; top: 118px; width: 52px; height: 120px; background: linear-gradient(90deg, oklch(0.25 0.03 45), oklch(0.4 0.05 60), oklch(0.22 0.03 45)); }
-.lg .flames { position: absolute; left: 0; top: 10px; width: 0; height: 0; transform-origin: 0 0; }
-.lg .flames i { position: absolute; bottom: 0; border-radius: 50% 50% 46% 46% / 64% 64% 36% 36%; transform-origin: 50% 100%; mix-blend-mode: screen;
-  background: radial-gradient(ellipse 55% 70% at 50% 78%, var(--fire1), var(--fire2) 38%, oklch(0.6 0.2 38 / 0.6) 62%, transparent 74%); }
-@keyframes flick { 0% { transform: translateX(0) scale(1, 1) skewX(0deg); } 25% { transform: translateX(-6px) scale(0.92, 1.08) skewX(-4deg); } 50% { transform: translateX(4px) scale(1.05, 0.94) skewX(3deg); } 75% { transform: translateX(-3px) scale(0.96, 1.1) skewX(-2deg); } 100% { transform: translateX(0) scale(1, 1) skewX(0deg); } }
-@keyframes flare { 0% { transform: scale(1); } 22% { transform: scale(1.9, 2.3); } 100% { transform: scale(1); } }
-@keyframes glowflare { 0% { opacity: 1; transform: scale(1); } 22% { opacity: 1; transform: scale(1.35); filter: brightness(1.8); } 100% { opacity: 1; transform: scale(1); } }
 
 /* ── 불티 */
 .lg .embers { position: absolute; inset: 0; pointer-events: none; }
@@ -31,57 +13,15 @@
   box-shadow: 0 0 12px 3px oklch(0.75 0.18 55 / 0.9); opacity: 0; }
 @keyframes ember { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: 1; } 70% { opacity: 0.9; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
 
-/* ── 두루마리 */
-.lg .scrolls { position: absolute; inset: 0; }
-.lg .scroll { position: absolute; width: 74px; height: 176px; margin: -88px 0 0 -37px; transform-origin: 50% 50%; }
-.lg .scroll .pp { position: absolute; left: 6px; right: 6px; top: 14px; bottom: 14px; border-radius: 3px;
-  background: repeating-linear-gradient(180deg, transparent 0 15px, oklch(0.55 0.05 60 / 0.55) 15px 18px), linear-gradient(90deg, oklch(0.74 0.06 75), oklch(0.9 0.05 85) 45%, oklch(0.78 0.06 78)); }
-.lg .scroll .rod { position: absolute; left: 0; right: 0; height: 18px; border-radius: 9px; background: linear-gradient(180deg, oklch(0.55 0.08 55), oklch(0.32 0.05 45)); }
-.lg .scroll .rod.t { top: 0; } .lg .scroll .rod.b { bottom: 0; }
-.lg .scroll .seal { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px; border-radius: 50%; background: oklch(0.48 0.16 25); box-shadow: inset 0 0 0 3px oklch(0.38 0.13 25); }
-.lg .scroll.gold .pp { box-shadow: 0 0 40px 10px oklch(0.84 0.12 85 / 0.0); }
-@keyframes scroll-in { from { opacity: 0; transform: translateY(40px) scale(0.6); } to { opacity: 1; transform: none; } }
-@keyframes toss { 0% { transform: none; opacity: 1; } 35% { transform: translate(calc(var(--dx) * 0.35), -150px) rotate(90deg) scale(0.95); opacity: 1; }
-  85% { transform: translate(var(--dx), var(--dy)) rotate(260deg) scale(0.45); opacity: 1; filter: brightness(1.4) sepia(1) saturate(3); }
-  100% { transform: translate(var(--dx), var(--dy)) rotate(290deg) scale(0.2); opacity: 0; } }
-@keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
-@keyframes goldglow { 0% { filter: none; } 30% { filter: drop-shadow(0 0 30px oklch(0.88 0.14 85)) brightness(1.25); } 100% { filter: drop-shadow(0 0 18px oklch(0.84 0.12 85 / 0.8)) brightness(1.1); } }
-@keyframes totemple { from { transform: none; } to { transform: translate(var(--tx), var(--ty)) scale(0.62); } }
-@keyframes burnaway { 0% { opacity: 1; filter: drop-shadow(0 0 18px oklch(0.84 0.12 85 / 0.8)); } 50% { opacity: 1; filter: brightness(1.6) sepia(1) saturate(4) hue-rotate(-20deg); } 100% { opacity: 0; filter: brightness(0.3); transform: translate(var(--tx), calc(var(--ty) - 80px)) scale(0.5); } }
-
-/* ── 노파(두건 쓴 그림자) */
-.lg .figure { position: absolute; left: 24px; top: 800px; width: 270px; height: 432px; opacity: 0; }
-.lg .figure svg { width: 100%; height: 100%; overflow: visible; }
-.lg .figure .body { fill: oklch(0.08 0.02 320); stroke: oklch(0.65 0.13 50 / 0.75); stroke-width: 3; }
-.lg .figure .eye { fill: oklch(0.88 0.12 85); opacity: 0; }
-@keyframes fig-in { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: none; } }
-@keyframes eyes { 0%, 100% { opacity: 0; } 30%, 80% { opacity: 1; } }
-@keyframes rim { to { filter: drop-shadow(0 0 22px oklch(0.84 0.12 85)); } }
-
-/* ── 신전 */
-.lg .temple { position: absolute; left: 90px; top: 640px; width: 900px; height: 620px; opacity: 0; }
-.lg .temple svg { width: 100%; height: 100%; }
-.lg .temple path, .lg .temple rect { fill: none; stroke: oklch(0.8 0.09 80 / 0.75); stroke-width: 4; }
-@keyframes temple-in { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
-
 /* ── 뒤의 큰 숫자 */
 .lg .bignum { position: absolute; left: 0; right: 0; top: 520px; height: 760px; }
 .lg .bignum b { position: absolute; inset: 0; text-align: center; font: 900 760px/760px var(--font-latin); color: oklch(0.75 0.13 55 / 0.11); opacity: 0; }
-
-/* ── 큰불(기원전 83년) */
-.lg .inferno { position: absolute; left: -60px; right: -60px; bottom: 0; height: 0; mix-blend-mode: screen;
-  background: linear-gradient(0deg, oklch(0.9 0.14 90 / 0.95), oklch(0.75 0.18 60 / 0.85) 25%, oklch(0.55 0.2 35 / 0.6) 55%, transparent); }
-.lg .inferno i { position: absolute; bottom: 100%; width: 320px; height: 300px; border-radius: 50% 50% 40% 40% / 70% 70% 30% 30%; transform-origin: 50% 100%;
-  background: radial-gradient(ellipse 50% 70% at 50% 85%, oklch(0.75 0.18 60 / 0.85), oklch(0.55 0.2 35 / 0.5) 55%, transparent 72%); margin-bottom: -150px; }
-.lg .inferno i:nth-child(1) { left: 0; } .lg .inferno i:nth-child(2) { left: 380px; width: 420px; height: 380px; } .lg .inferno i:nth-child(3) { right: 0; }
-@keyframes rise-fire { 0% { height: 0; } 100% { height: 1450px; } }
-@keyframes fall-fire { from { height: 1450px; opacity: 1; } to { height: 380px; opacity: 0.55; } }
 
 /* ── 번쩍 */
 .lg + .flash, .lg .flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 60%, oklch(0.9 0.12 75 / 0.75), transparent 70%); mix-blend-mode: screen; }
 @keyframes flashes { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
 
-/* ── 계기판: 예언서 N권 · 값 */
+/* ── 계기판: 줄거나 쌓이는 숫자 칩(편마다 쓸 때만) */
 .lg .hud { position: absolute; left: 0; right: 0; top: 935px; display: flex; justify-content: center; gap: 28px; }
 .lg .pill { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px 30px; border-radius: 999px; border: 2px solid oklch(0.84 0.1 85 / 0.6);
   background: oklch(0.12 0.03 320 / 0.75); font: 700 40px/1 var(--font-serif); color: var(--c-text-strong); opacity: 0; }

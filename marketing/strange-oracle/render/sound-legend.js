@@ -1,22 +1,24 @@
-// 전설 릴스 「문 너머의 기록」 소리판 (2026-11-12). 1화 「예언서를 불태운 노파」(legend-sibyl).
-//   광고들(쿵·휙·종·오르골)과 다른 결: 낮은 현악 같은 지속음(D 단조) · 계속 타닥이는 화롯불 · 두루마리가 날아갈 때 바람 → 불길이 치솟는 숨소리
-//   · 값을 말할 때 동전 · "처음 그대로"에서 심장 박동처럼 낮은 두드림과 오르는 긴장 → 한 박자 침묵 → "샀어요"에 묵직한 한 방(D 장조로 풀림)
-//   · "시빌라"에 맑은 종 · 큰불의 굉음 · 질문의 9·6·3에 뜯는 소리 셋. 외부 음원 없음(씨앗 고정).
-// 실행(저장소 루트): node marketing/strange-oracle/render/sound-legend.js [sibyl] → ../out/legend-sibyl-ko-sound.mp4
-// 시점은 scenes/legend/legend-sibyl.js의 T와 같다.
+// 전설 릴스 「문 너머의 기록」 소리판 (2026-11-12). 광고들(쿵·휙·종·오르골)과 다른 결로 편마다 짠다. 외부 음원 없음(씨앗 고정).
+//   rune 「세 여인이 새기는 운명」: 숲 바람 · E 도리아 현악 지속음 · 세 여인이 켜질 때 낮은/가운데/높은 종 · 나무에 글자를 새기는 끌 소리 셋
+//     · "신들조차 바꿀 수 없었다" 묵직한 한 방 → 고요 → 샘물이 흘러 나무에 닿는 물소리 → 잎이 켜지며 종 아르페지오와 장조 화음 · 질문의 셋에 뜯는 소리
+// 실행(저장소 루트): node marketing/strange-oracle/render/sound-legend.js rune → ../out/legend-rune-ko-sound.mp4
+// 시점은 scenes/legend/legend-<편>.js의 T와 같다.
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
-const EP = process.argv[2] || "sibyl";
-if (EP !== "sibyl") throw new Error("아직 sibyl 편만 있다");
-const T = { b1: 2.9, b2: 5.0, b3: 7.6, b4: 9.4, toss1: 10.0, b5: 12.0, b6: 14.0, toss2: 14.4, b7: 16.2, b8: 18.8, buy: 19.3, b9: 21.4, b10: 23.6, b11: 25.9, fire: 26.5, q: 28.6, brand: 30.2, dur: 32 };
+const EP = process.argv[2] || "rune";
+const TT = {
+  rune: { b1: 2.9, b2: 5.2, w1: 7.6, w2: 9.6, w3: 11.6, b6: 13.8, b7: 16.4, b8: 18.8, b9: 21.0, pour: 21.4, b10: 23.4, b11: 25.8, q: 28.4, brand: 30.2, dur: 32 },
+};
+if (!TT[EP]) throw new Error(`알 수 없는 편: ${EP} (rune)`);
+const T = TT[EP];
 const VIDEO = `legend-${EP}-ko`;
 const OUT = path.resolve(__dirname, "..", "out");
 const SR = 48000, DUR = T.dur, N = SR * DUR;
 const L = new Float32Array(N), R = new Float32Array(N), VL = new Float32Array(N), VR = new Float32Array(N);
-let seed = 830000083;
+let seed = 2410000003;
 const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296) * 2 - 1;
 const S = (t) => Math.floor(t * SR);
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -129,34 +131,55 @@ function riser(t0, t1, amp) {
   }
 }
 
-// ── 배치
-// 지속음: 처음부터 D 단조(D2·A2·F3), 셋째 거절 뒤 긴장(B♭), "처음 그대로"에서 서서히 커짐, 침묵, 산 순간 D 장조, 큰불에 다시 단조, 질문은 열린 화음
-const chord = (t) => (t < T.b6 ? [38, 45, 53, 57] : t < T.buy ? [34, 46, 50, 53] : t < T.b11 ? [38, 45, 54, 57] : t < T.q ? [38, 45, 53, 58] : [38, 45, 52, 57]);
-strings((t) => (0.35 + 0.25 * smooth(T.b4, T.b5, t) + 0.5 * smooth(T.b7, T.b8 + 0.4, t)) * (1 - smooth(T.b8 + 0.35, T.b8 + 0.45, t) * (1 - smooth(T.buy - 0.02, T.buy + 0.4, t))) * (1 - 0.4 * smooth(T.q, T.q + 1.5, t)) * (1 - smooth(DUR - 0.8, DUR, t)) * Math.min(1, t / 0.05 + 0.4), chord, 0.06);
-fire((t) => {
-  let v = 0.35;
-  [T.toss1 + 0.5, T.toss2 + 0.5].forEach((b) => { if (t > b) v += 0.9 * Math.exp(-(t - b) / 0.9); });
-  v *= 1 - 0.75 * smooth(T.b10, T.b10 + 1, t);
-  v += 1.6 * smooth(T.fire, T.fire + 1.2, t) * (1 - 0.7 * smooth(T.q, T.q + 1.5, t));
-  v *= 1 - 0.8 * smooth(T.b8 + 0.35, T.b8 + 0.4, t) * (1 - smooth(T.buy, T.buy + 0.3, t));
-  return v * (1 - smooth(DUR - 0.8, DUR, t));
-});
-boom(0.02, 0.5, 60); // 첫 프레임에 무게
-[0, 1, 2].forEach((k) => whoosh(T.toss1 + k * 0.07, 0.75, 0.35, -0.6 + k * 0.3, 0));
-flare(T.toss1 + 0.5, 1.8, 0.7);
-[0, 1, 2].forEach((k) => whoosh(T.toss2 + k * 0.07, 0.75, 0.35, 0.6 - k * 0.3, 0));
-flare(T.toss2 + 0.5, 1.8, 0.75);
-coin(T.b2 + 1.0, 0.5, 0.4); coin(T.b2 + 1.12, 0.35, 0.45);
-coin(T.b5 + 0.3, 0.5, 0.4); coin(T.b7 + 0.6, 0.55, 0.4); coin(T.b7 + 0.72, 0.35, 0.45);
-for (let t = T.b7 + 0.2, k = 0; t < T.b8 + 0.3; t += 0.62 - k * 0.03, k++) { thump(t, 0.5 + k * 0.05); thump(t + 0.16, 0.3 + k * 0.03); }
-riser(T.b7 + 0.5, T.b8 + 0.38, 0.28);
-boom(T.buy, 0.95, 52);
-[62, 66, 69, 74].forEach((m, k) => bell(T.buy + 0.05 + k * 0.04, mtof(m), 0.05, (k - 1.5) * 0.3));
-bell(T.b9 + 0.25, mtof(81), 0.12, 0.2); bell(T.b9 + 0.55, mtof(76), 0.08, -0.25);
-whoosh(T.fire - 0.4, 0.9, 0.3, -0.2, 0.2);
-boom(T.fire, 0.8, 45); flare(T.fire + 0.05, 3.5, 1.0);
-[69, 66, 62].forEach((m, k) => pluck(T.q + 0.5 + k * 0.18, mtof(m), 0.35, (k - 1) * 0.4));
-bell(T.brand, mtof(86), 0.06, 0);
+// ── 바람: 아주 낮은 잡음이 천천히 숨 쉬듯. level(t)
+function wind(level) {
+  let a = 0, b = 0;
+  for (let i = 0; i < N; i++) {
+    const t = i / SR, lv = level(t), n = rnd();
+    const w = 0.004 + 0.01 * (0.5 + 0.5 * Math.sin(t * 0.7) * Math.sin(t * 0.23 + 1));
+    a += (n - a) * w; b += (a - b) * 0.2;
+    L[i] += b * 6 * lv; R[i] += (a * 6 - b * 2) * lv * 0.8;
+  }
+}
+// ── 물: 흐르는 소리(띠 통과 잡음 + 방울 소리)
+function water(t0, dur, amp) {
+  let b1 = 0, b2 = 0;
+  for (let i = 0; i < dur * SR; i++) {
+    const t = i / SR, x = t / dur, f = 900 + 500 * Math.sin(t * 23) + 300 * Math.sin(t * 57), w = 2 * Math.sin(Math.PI * f / SR), n = rnd();
+    b1 += w * (n - b1 - b2 * 0.3); b2 += w * b1;
+    put(S(t0) + i, b2 * amp * Math.sin(Math.PI * Math.min(1, x * 1.4)) ** 0.7, Math.sin(t * 3) * 0.3, 0.4);
+    if (Math.abs(rnd()) > 0.9993) drop(S(t0) + i, amp * 0.6, rnd() * 0.6);
+  }
+}
+function drop(i0, amp, pan) { let ph = 0; for (let i = 0; i < 0.08 * SR; i++) { const t = i / SR, f = 700 + 1800 * (t / 0.08); ph += (2 * Math.PI * f) / SR; put(i0 + i, Math.sin(ph) * Math.exp(-t / 0.02) * amp, pan, 0.5); } }
+// ── 끌로 나무에 새기는 소리: 나무 두드림(짧은 낮은 울림) + 긁는 잡음
+function chisel(t0, amp, pan) {
+  let ph = 0;
+  for (let i = 0; i < 0.25 * SR; i++) { const t = i / SR; ph += (2 * Math.PI * (180 + 60 * Math.exp(-t * 40))) / SR; put(S(t0) + i, (Math.sin(ph) * 0.8 + Math.sin(ph * 2.7) * 0.3) * Math.exp(-t / 0.05) * amp, pan, 0.3); }
+  let hp = 0, prev = 0;
+  for (let i = 0; i < 0.3 * SR; i++) { const t = i / SR, n = rnd(); hp = n - prev; prev = n; put(S(t0 + 0.05) + i, hp * amp * 0.35 * Math.sin(Math.PI * t / 0.3), pan, 0.2); }
+}
+
+// ── 배치 (rune)
+// 지속음: E 도리아(E2·B2·D3·F#3), 신도 못 바꾼다에서 어둡게(C), 고요, 물이 닿으면 E 장조로 밝게, 질문은 열린 화음
+const chord = (t) => (t < T.b7 ? [40, 47, 50, 54] : t < T.b9 ? [36, 43, 52, 55] : t < T.q ? [40, 47, 56, 59] : [40, 47, 54, 59]);
+strings((t) => (0.4 + 0.2 * smooth(T.b1, T.b1 + 1.5, t) + 0.3 * smooth(T.b6, T.b7, t)) * (1 - 0.75 * smooth(T.b8, T.b8 + 0.8, t) * (1 - smooth(T.pour + 0.6, T.pour + 1.6, t))) * (1 - 0.4 * smooth(T.q, T.q + 1.5, t)) * (1 - smooth(DUR - 0.8, DUR, t)) * Math.min(1, t / 0.05 + 0.4), chord, 0.055);
+wind((t) => (0.5 + 0.4 * smooth(T.b1, T.b1 + 1, t) * (1 - smooth(T.b1 + 2, T.b2 + 1, t)) + 0.4 * smooth(T.b8, T.b8 + 1, t) * (1 - smooth(T.pour, T.pour + 1, t))) * (1 - smooth(DUR - 0.8, DUR, t)));
+
+boom(0.02, 0.45, 58); chisel(0.05, 0.5, 0); bell(0.12, mtof(83), 0.06, 0.1);
+whoosh(T.b1 - 0.2, 1.6, 0.3, -0.3, 0.3); boom(T.b1 + 0.3, 0.35, 45);
+[[T.w1, 52, -0.5], [T.w2, 59, 0], [T.w3, 64, 0.5]].forEach(([t, m, pan]) => { bell(t + 0.05, mtof(m), 0.12, pan); pluck(t + 0.05, mtof(m - 12), 0.25, pan); });
+bell(T.b6 + 0.3, mtof(83), 0.07, 0);
+[1, 2, 3].forEach((k) => { chisel(T.b6 + 0.1 + k * 0.5, 0.7, (k - 2) * 0.3); bell(T.b6 + 0.4 + k * 0.5, mtof([76, 79, 83][k - 1]), 0.05, (k - 2) * 0.3); });
+boom(T.b7 + 0.35, 0.85, 48);
+for (let t = T.b8 + 0.3, k = 0; k < 4; t += 0.7, k++) drop(S(t), 0.2, (k % 2 ? 0.3 : -0.3));
+water(T.pour - 0.1, 2.2, 0.5);
+[0, 0.12].forEach((d, k) => drop(S(T.pour + 0.85 + d), 0.4, k ? 0.3 : -0.3));
+boom(T.pour + 0.9, 0.5, 52);
+[64, 68, 71, 76, 80, 83, 88].forEach((m, k) => bell(T.pour + 1.0 + k * 0.17, mtof(m), 0.06, Math.sin(k * 1.7) * 0.6));
+bell(T.b11 + 0.5, mtof(76), 0.07, -0.2); bell(T.b11 + 0.9, mtof(83), 0.05, 0.2);
+[52, 59, 64].forEach((m, k) => pluck(T.q + 0.5 + k * 0.18, mtof(m + 12), 0.35, (k - 1) * 0.4));
+bell(T.brand, mtof(88), 0.06, 0);
 
 // ── 잔향(슈뢰더) → 부드러운 제한 → WAV → 영상에 붙임(-14 LUFS)
 function reverb(inp, combs, aps, fb = 0.82, damp = 0.3) {

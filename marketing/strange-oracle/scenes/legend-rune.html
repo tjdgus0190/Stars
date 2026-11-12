@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=1080, height=1920" />
-  <title>전설 릴스 1화 「예언서를 불태운 노파」 (32초, 한국판)</title>
+  <title>전설 릴스 1화 「세 여인이 새기는 운명」 (32초, 한국판)</title>
   <!-- 글꼴: 다른 장면과 같은 jsdelivr fontsource 판 고정 + SRI -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/700.css" integrity="sha384-EIZic2kT4Iyqg6Rn2tm4B7Ql9xDJWopYmx3ry1RafjC/gfDHItTLBMXp6jrmkxla" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/700.css" integrity="sha384-LXacqt3WHgv2kABrVAfRqRh7wRqX5H060k/lYSUdYfX+vONJfNDiOITwd8LJv+EV" crossorigin="anonymous" />
@@ -11,27 +11,24 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.3.0/700.css" integrity="sha384-O/oLJBLGGldMs7HxAYRnSN50LYc4P4P3qiJbqSV358VWDpuJKiErXj9iWy8+R3LZ" crossorigin="anonymous" />
   <link rel="stylesheet" href="common.css" />
   <link rel="stylesheet" href="legend/legend.css" />
+  <link rel="stylesheet" href="legend/legend-rune.css" />
 </head>
 <body>
-<!-- 전설 릴스 「문 너머의 기록」 1화 (2026-11-12): 광고 없이 도달을 노리는 이야기형 릴스. 첫 프레임부터 불과 결론("불태웠다")을 보여 주고,
-     9 → 6 → 3 숫자가 줄어드는 긴장으로 끝까지 보게 하고, "몇 권째에 샀을까?"로 댓글을 부른다. 끝의 큰불이 첫 장면의 불로 이어져 다시 보게 된다.
-     줄거리: 로마 왕과 쿠마이의 무녀(시빌라 예언서 전설). 왕 이름은 판본마다 달라 쓰지 않는다. 기원전 83년 신전 화재는 "전해요"로 (storyboard.md 「전설 릴스」) -->
-<main class="stage lg" data-room="sibyl" data-duration="32" data-fps="30">
+<!-- 전설 릴스 「문 너머의 기록」 (2026-11-12): 캐러셀(오딘이 나무에 매달린 이야기)과 다른 전설 — 세계수 뿌리의 샘가에 사는 세 노른.
+     첫 프레임부터 나무에 빛나는 글자와 결론 문장. 세 여인이 하나씩 켜지고(과거·지금·앞으로) → 아이마다 몫을 새김 → 신도 못 바꿈 → 반전: 날마다 샘물을 부어
+     나무를 살림 → "셋 중 한 명만 만날 수 있다면?"(댓글). 근거: 『고 에다』 「무녀의 예언」 20절, 『산문 에다』 「귈피의 속임」 15·16장 (storyboard.md 「전설 릴스」) -->
+<main class="stage lg norn" data-room="rune" data-duration="32" data-fps="30">
   <div class="world">
-    <div class="glow"></div>
-    <div class="temple"></div>
-    <div class="bignum"></div>
-    <div class="figure"></div>
-    <div class="scrolls"></div>
-    <div class="brazier"><div class="flames"></div><div class="bowl"></div></div>
+    <div class="sky"></div>
+    <div class="tree"></div>
+    <div class="well"></div>
+    <div class="women"></div>
     <div class="embers"></div>
-    <div class="inferno"><i></i><i></i><i></i></div>
   </div>
   <div class="flash"></div>
-  <div class="hud"></div>
   <div class="caps"></div>
   <div class="safe-guide" id="safe"><i></i><i></i><i></i><i></i></div>
 </main>
-<script src="legend/legend-sibyl.js"></script>
+<script src="legend/legend-rune.js"></script>
 </body>
 </html>
