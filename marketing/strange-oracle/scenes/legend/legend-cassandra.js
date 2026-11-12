@@ -41,7 +41,7 @@
   Paint.shots(stage.querySelector(".paint"), [
     Object.assign({}, M, { t0: 0, t1: T.b1, a: [0.5, 0.5, 1.3], b: [...EYE, 1.75], cy: 0.56, grade: ENG }),
     Object.assign({}, L, { t0: T.b1, t1: T.b2, a: [0.5, 0.3, 1.45], b: [0.5, 0.36, 1.08], grade: ENG, cut: "flash" }),
-    Object.assign({}, A, { t0: T.b2, t1: T.b4, a: [0.42, 0.4, 1.0], b: [0.2, 0.19, 1.75], grade: "saturate(1.15) contrast(1.12) brightness(0.95)", cut: "whip" }),
+    Object.assign({}, A, { t0: T.b2, t1: T.b4, a: [0.42, 0.4, 1.05], b: [0.21, 0.19, 2.8], cy: 0.55, grade: "saturate(1.15) contrast(1.12) brightness(0.95)", cut: "whip" }),
     Object.assign({}, M, { t0: T.b4, t1: T.b6, a: [...EYE, 2.0], b: [...EYE, 3.3], cy: 0.56, grade: ENG, cut: "flash", ease: "cubic-bezier(0.4, 0, 0.2, 1)" }),
     Object.assign({}, H, { t0: T.b6, t1: T.b8, a: [0.8, 0.55, 1.2], b: [0.3, 0.3, 1.2], grade: ENG, cut: "whip" }),
     Object.assign({}, H, { t0: T.b8, t1: T.b9, a: [0.27, 0.17, 2.1], b: [0.27, 0.15, 2.8], grade: ENG + " brightness(0.8)", cut: "flash" }),
