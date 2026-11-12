@@ -57,7 +57,7 @@
   anim(face, [`stare ${T.b1}s cubic-bezier(0.2, 0.7, 0.3, 1) 0s both`, `face-away 0.8s var(--ease-in-out) ${T.b6}s forwards`, `face-back 0.9s var(--ease-out) ${T.b10}s forwards`, `dim 0.6s ease-in ${T.b11}s forwards`]);
 
   // ── 화면 깨짐(1.1초): 한 점에서 뻗는 금
-  const C = [600, 760];
+  const C = [540, 1020]; // 그녀의 두 눈 사이에서 금이 뻗는다
   const crackPaths = [];
   for (let k = 0; k < 11; k++) {
     const a = (k / 11) * Math.PI * 2 + 0.3;
@@ -88,9 +88,10 @@
   show(city, T.b6, T.b10 + 0.6, "show 0.5s ease-out");
   city.querySelectorAll(".tw").forEach((t, k) => anim(t, [`${k % 2 ? "fall-r" : "fall-l"} 0.9s cubic-bezier(0.5, 0, 0.8, 0.6) ${T.b9 + 0.1 + k * 0.15}s forwards`]));
   const horse = stage.querySelector(".horse");
-  horse.innerHTML = `<svg viewBox="0 0 420 540"><path class="hb" d="M300 40l40-20 30 40-10 90h-50v120H90l-30 50v40h300v-40l-30-50V170Z" />
-    <path class="hb" d="M60 300h300v60H60Z" /><rect class="inner" x="150" y="190" width="120" height="100" /><path class="door" d="M150 190h120v100H150Z" />
-    <path class="hb" d="M90 360v110M150 360v110M270 360v110M330 360v110" stroke-width="22" /><circle class="wheel" cx="110" cy="490" r="30" /><circle class="wheel" cx="310" cy="490" r="30" /></svg>`;
+  horse.innerHTML = `<svg viewBox="0 0 420 540"><path class="hb" d="M120 250C100 200 84 160 74 122L42 138L26 120L58 72L70 36L86 62L106 58L120 100C136 150 152 190 172 218L338 218C372 224 384 262 372 302L362 332L334 332L332 446L306 446L300 338L192 338L186 446L160 446L152 332L132 332L126 446L100 446L104 320C98 298 104 270 120 250Z" />
+    <path class="hb" d="M366 236C402 256 414 306 398 360" fill="none" stroke-width="10" /><circle cx="70" cy="92" r="6" fill="oklch(0.85 0.12 80)" />
+    <rect class="inner" x="200" y="238" width="100" height="78" /><path class="door" d="M200 238h100v78H200Z" />
+    <path class="hb" d="M60 446H392V478H60Z" /><circle class="wheel" cx="110" cy="500" r="28" /><circle class="wheel" cx="340" cy="500" r="28" /></svg>`;
   anim(horse, [`roll-in 1.0s cubic-bezier(0.2, 0.8, 0.3, 1) ${T.b6 + 0.3}s both`, `hide 0.5s ease-in ${T.b10}s forwards`]);
   anim(horse.querySelector(".door"), [`door 0.6s cubic-bezier(0.5, 0, 0.3, 1) ${T.b8 + 0.3}s forwards`]);
   anim(horse.querySelector(".inner"), [`show 0.3s ease-out ${T.b8 + 0.3}s both`]);
@@ -148,6 +149,6 @@
   [["믿는다", ""], ["비웃는다", "no"]].forEach(([t, c], k) => ask.append(anim($("b", c, t), [`pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3) ${T.q + 0.5 + k * 0.2}s both`])));
   stage.append(ask);
   stage.append(anim($("p", "askline", "맞는 말만 하는데 아무도 안 믿어 주는<br>친구가 있다면 태그해 주세요"), [`cap-in 0.5s var(--ease-out) ${T.q + 1.2}s both`]));
-  const brand = $("div", "brand", `<p>문 너머의 기록 · <b>낯선 점술관</b></p><p>다음 전설 — 바람이 불면 사라지는 예언</p>`);
+  const brand = $("div", "brand", `<p>문 너머의 기록 · <b>낯선 점술관</b></p><p>다음 전설 — 마야가 예언한 '세상이 끝나는 날'</p>`);
   stage.append(anim(brand, [`cap-in 0.6s var(--ease-out) ${T.brand}s both`]));
 })();
