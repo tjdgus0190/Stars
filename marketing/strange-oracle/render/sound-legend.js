@@ -138,7 +138,7 @@ function wind(level) {
     const t = i / SR, lv = level(t), n = rnd();
     const w = 0.004 + 0.01 * (0.5 + 0.5 * Math.sin(t * 0.7) * Math.sin(t * 0.23 + 1));
     a += (n - a) * w; b += (a - b) * 0.2;
-    L[i] += b * 6 * lv; R[i] += (a * 6 - b * 2) * lv * 0.8;
+    L[i] += b * 1.3 * lv; R[i] += (a * 1.3 - b * 0.4) * lv * 0.8;
   }
 }
 // ── 물: 흐르는 소리(띠 통과 잡음 + 방울 소리)
