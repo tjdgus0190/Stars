@@ -1,7 +1,7 @@
 // 전설 릴스 「아무도 믿지 않은 예언」(카산드라) 조립 (2026-11-12). 32초. 모든 움직임은 CSS 애니메이션의 시작 시각으로만 정한다. 무작위 값 없음.
 // 근거: 아폴론이 예언의 힘을 주었으나 카산드라가 거절하자 아무도 믿지 않게 하는 저주를 내림(아폴로도로스 『비블리오테케』 3.12.5, 아이스킬로스 『아가멤논』 1202~1212행),
 //       목마를 들이지 말라고 경고했으나 트로이 사람들이 믿지 않음(베르길리우스 『아이네이스』 2권 246~247행). "카산드라"는 오늘날 옳은 경고를 해도 믿어 주지 않는 사람을 가리키는 말로 쓰인다.
-// 화면에 피·죽음 없음(성벽 탑이 넘어지는 실루엣까지). 비웃는 댓글은 지어낸 트로이 사람들의 말(실존 인물·특정 집단 아님).
+// 그림: 메트로폴리탄 미술관 공개 작품(CC0)만. 화면에 피·죽음 없음. 비웃는 댓글은 지어낸 트로이 사람들의 말(실존 인물·특정 집단 아님).
 (function () {
   const T = { h2: 1.1, b1: 2.6, b2: 4.4, b3: 6.4, b4: 8.2, curse: 10.0, b6: 12.2, b7: 14.6, b8: 17.0, b9: 19.0, b10: 21.4, b11: 23.6, q: 26.6, brand: 29.8, dur: 32 };
   const CAPS = [
@@ -33,31 +33,33 @@
   anim(stage.querySelector(".flash"), WHITE.map((t) => `flashes 0.45s ease-out ${t}s`));
   anim(stage.querySelector(".redflash"), RED.map((t) => `flashes 0.7s ease-out ${t}s`));
 
-  // ── 별
-  const sky = stage.querySelector(".sky");
-  for (let k = 0; k < 80; k++) {
-    const s = $("i");
-    Object.assign(s.style, { left: ((k * 389) % 1080) + "px", top: ((k * 211) % 1250) + "px" });
-    anim(s, [`tw ${2 + (k % 5) * 0.7}s ease-in-out ${-(k % 7) * 0.5}s infinite`]);
-    sky.append(s);
-  }
-
-  // ── 카산드라의 얼굴: 0초부터 큰 눈으로 노려봄 → 저주 때 눈이 붉게 → 목마 장면에서 성벽 위로 작아짐 → "전부 알고 있었어요"에 다시 크게
-  const face = stage.querySelector(".face");
-  const almond = (cx, cy) => `M${cx - 70} ${cy}Q${cx} ${cy - 46} ${cx + 70} ${cy}Q${cx} ${cy + 46} ${cx - 70} ${cy}Z`;
-  face.innerHTML = `<svg viewBox="0 0 640 760"><path class="hood" d="M320 20C190 20 110 120 104 250C100 330 120 380 108 440C70 560 40 660 20 760H620C600 660 570 560 532 440C520 380 540 330 536 250C530 120 450 20 320 20Z" />
-    <path class="skin" d="M190 300C190 420 250 500 320 500C390 500 450 420 450 300C450 200 395 140 320 140C245 140 190 200 190 300Z" />
-    <g class="eyes"><path class="eye" d="${almond(250, 320)}" /><path class="eye" d="${almond(390, 320)}" /><circle class="pupil" cx="250" cy="320" r="17" /><circle class="pupil" cx="390" cy="320" r="17" />
-    <path class="eye r" d="${almond(250, 320)}" /><path class="eye r" d="${almond(390, 320)}" /></g></svg>`;
-  const eyes = face.querySelector(".eyes");
-  eyes.style.transformBox = "fill-box";
-  eyes.style.transformOrigin = "50% 50%";
-  anim(eyes, [`blink 0.22s ease-in-out 1.9s`, `blink 0.22s ease-in-out ${T.b4 + 0.6}s`, `blink 0.22s ease-in-out ${T.b10 + 1.2}s`]);
-  face.querySelectorAll(".eye.r").forEach((e) => anim(e, [`show 0.25s ease-out ${T.curse}s both`, `hide 0.6s ease-in ${T.b10}s forwards`]));
-  anim(face, [`stare ${T.b1}s cubic-bezier(0.2, 0.7, 0.3, 1) 0s both`, `face-away 0.8s var(--ease-in-out) ${T.b6}s forwards`, `face-back 0.9s var(--ease-out) ${T.b10}s forwards`, `dim 0.6s ease-in ${T.b11}s forwards`]);
+  // ── 명화 장면(메트로폴리탄 미술관 CC0, art/). 카메라는 그림 안의 비율 좌표 [fx, fy, 배율]로 시작→끝
+  const ENG = "sepia(0.55) contrast(1.3) brightness(0.92)"; // 동판화를 오래된 금빛 종이처럼
+  const M = { img: "legend/art/cassandra-mortimer.jpg", w: 2001, h: 2200 }, L = { img: "legend/art/cassandra-legat.jpg", w: 1689, h: 2200 };
+  const H = { img: "legend/art/horse-bonasone.jpg", w: 2200, h: 1402 }, A = { img: "legend/art/apollo-lairesse.jpg", w: 2091, h: 2200 }, F = { img: "legend/art/fleet-lorrain.jpg", w: 2200, h: 1528 };
+  const EYE = [0.51, 0.47];
+  Paint.shots(stage.querySelector(".paint"), [
+    Object.assign({}, M, { t0: 0, t1: T.b1, a: [0.5, 0.5, 1.3], b: [...EYE, 1.75], cy: 0.56, grade: ENG }),
+    Object.assign({}, L, { t0: T.b1, t1: T.b2, a: [0.5, 0.3, 1.45], b: [0.5, 0.36, 1.08], grade: ENG, cut: "flash" }),
+    Object.assign({}, A, { t0: T.b2, t1: T.b4, a: [0.42, 0.4, 1.0], b: [0.2, 0.19, 1.75], grade: "saturate(1.15) contrast(1.12) brightness(0.95)", cut: "whip" }),
+    Object.assign({}, M, { t0: T.b4, t1: T.b6, a: [...EYE, 2.0], b: [...EYE, 3.3], cy: 0.56, grade: ENG, cut: "flash", ease: "cubic-bezier(0.4, 0, 0.2, 1)" }),
+    Object.assign({}, H, { t0: T.b6, t1: T.b8, a: [0.8, 0.55, 1.2], b: [0.3, 0.3, 1.2], grade: ENG, cut: "whip" }),
+    Object.assign({}, H, { t0: T.b8, t1: T.b9, a: [0.27, 0.17, 2.1], b: [0.27, 0.15, 2.8], grade: ENG + " brightness(0.8)", cut: "flash" }),
+    Object.assign({}, F, { t0: T.b9, t1: T.b10, a: [0.55, 0.55, 1.05], b: [0.6, 0.62, 1.45], grade: "sepia(0.35) saturate(1.7) hue-rotate(-18deg) contrast(1.35) brightness(0.72)", cut: "flash" }),
+    Object.assign({}, M, { t0: T.b10, t1: T.b11, a: [...EYE, 1.5], b: [...EYE, 2.2], cy: 0.56, grade: ENG }),
+    Object.assign({}, L, { t0: T.b11, t1: T.q, a: [0.5, 0.4, 1.1], b: [0.5, 0.45, 1.25], grade: ENG + " brightness(0.55)" }),
+    Object.assign({}, M, { t0: T.q, t1: null, a: [0.5, 0.5, 1.15], b: [0.5, 0.5, 1.3], grade: ENG + " brightness(0.42) blur(3px)" }),
+  ]);
+  // 색 겹: 아폴론·"처음부터"는 금빛, 저주·문이 열림·무너짐은 붉게
+  const gold = stage.querySelector(".tint.gold"), red = stage.querySelector(".tint.red");
+  gold.style.setProperty("--o", 0.7);
+  anim(gold, [`tint-on 0.6s ease-out ${T.b2}s both`, `tint-off 0.3s ease-in ${T.b4}s forwards`, `tint-on 0.6s ease-out ${T.b10}s`, `tint-off 0.4s ease-in ${T.b11}s forwards`]);
+  red.style.setProperty("--o", 0.9);
+  anim(red, [`tint-on 0.15s ease-out ${T.curse}s both`, `tint-off 0.3s ease-in ${T.b6}s forwards`, `tint-on 0.3s ease-out ${T.b8 + 0.3}s`, `tint-off 0.5s ease-in ${T.b10}s forwards`]);
+  anim(stage.querySelector(".leak"), [T.b2, T.b6, T.b10].map((t) => `leak 0.9s ease-out ${t - 0.2}s`));
 
   // ── 화면 깨짐(1.1초): 한 점에서 뻗는 금
-  const C = [540, 1020]; // 그녀의 두 눈 사이에서 금이 뻗는다
+  const C = [540, 1075]; // 그녀의 두 눈 사이에서 금이 뻗는다
   const crackPaths = [];
   for (let k = 0; k < 11; k++) {
     const a = (k / 11) * Math.PI * 2 + 0.3;
@@ -75,27 +77,7 @@
   crack.querySelectorAll("path").forEach((p, k) => anim(p, [`crack 0.28s cubic-bezier(0.1, 0.9, 0.3, 1) ${T.h2 + (k % 4) * 0.02}s forwards`]));
   anim(crack, [`hide 0.4s ease-in ${T.b1 - 0.2}s forwards`]);
 
-  // ── 아폴론의 해(선물) → 저주의 붉은 고리
-  const [sun, sunR] = stage.querySelectorAll(".sun");
-  anim(sun, [`sun-in 0.8s var(--ease-out) ${T.b2}s both`, `hide 0.3s ease-in ${T.curse}s forwards`]);
-  anim(sunR, [`show 0.2s ease-out ${T.curse}s both`, `hide 0.5s ease-in ${T.b6}s forwards`]);
-  stage.querySelectorAll(".sun .rays").forEach((r) => anim(r, [`spin 14s linear 0s infinite`]));
-
-  // ── 트로이 성벽(탑 다섯) · 목마
-  const city = stage.querySelector(".city");
-  const towers = [[60, 120], [250, 80], [470, 150], [700, 90], [900, 130]];
-  city.innerHTML = `<svg viewBox="0 0 1080 300"><path class="wall" d="M0 300V150H1080V300Z" />${towers.map(([x, h], k) => `<path class="wall tw t${k}" d="M${x} 152V${150 - h}h20v-26h24v26h22v-26h24v26h20V152Z" />`).join("")}</svg>`;
-  show(city, T.b6, T.b10 + 0.6, "show 0.5s ease-out");
-  city.querySelectorAll(".tw").forEach((t, k) => anim(t, [`${k % 2 ? "fall-r" : "fall-l"} 0.9s cubic-bezier(0.5, 0, 0.8, 0.6) ${T.b9 + 0.1 + k * 0.15}s forwards`]));
-  const horse = stage.querySelector(".horse");
-  horse.innerHTML = `<svg viewBox="0 0 420 540"><path class="hb" d="M120 250C100 200 84 160 74 122L42 138L26 120L58 72L70 36L86 62L106 58L120 100C136 150 152 190 172 218L338 218C372 224 384 262 372 302L362 332L334 332L332 446L306 446L300 338L192 338L186 446L160 446L152 332L132 332L126 446L100 446L104 320C98 298 104 270 120 250Z" />
-    <path class="hb" d="M366 236C402 256 414 306 398 360" fill="none" stroke-width="10" /><circle cx="70" cy="92" r="6" fill="oklch(0.85 0.12 80)" />
-    <rect class="inner" x="200" y="238" width="100" height="78" /><path class="door" d="M200 238h100v78H200Z" />
-    <path class="hb" d="M60 446H392V478H60Z" /><circle class="wheel" cx="110" cy="500" r="28" /><circle class="wheel" cx="340" cy="500" r="28" /></svg>`;
-  anim(horse, [`roll-in 1.0s cubic-bezier(0.2, 0.8, 0.3, 1) ${T.b6 + 0.3}s both`, `hide 0.5s ease-in ${T.b10}s forwards`]);
-  anim(horse.querySelector(".door"), [`door 0.6s cubic-bezier(0.5, 0, 0.3, 1) ${T.b8 + 0.3}s forwards`]);
-  anim(horse.querySelector(".inner"), [`show 0.3s ease-out ${T.b8 + 0.3}s both`]);
-  anim(stage.querySelector(".burn"), [`skyred 1.2s ease-out ${T.b8 + 0.4}s both`, `hide 1s ease-in ${T.b11}s forwards`]);
+  anim(stage.querySelector(".burn"), [`skyred 1.0s ease-out ${T.b9}s both`, `hide 1s ease-in ${T.b10}s forwards`]);
 
   // ── 비웃는 댓글이 쏟아짐
   const BUB = [

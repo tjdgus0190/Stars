@@ -12,23 +12,24 @@
   <link rel="stylesheet" href="common.css" />
   <link rel="stylesheet" href="legend/legend.css" />
   <link rel="stylesheet" href="legend/legend-cassandra.css" />
+  <link rel="stylesheet" href="legend/paint.css" />
 </head>
 <body>
 <!-- 전설 릴스 (2026-11-12, 운영자 "재미 부족, 첫 장면부터 재밌게, 더 자극적으로"): 카산드라 — 예언이 다 맞았지만 아무도 믿지 않은 트로이 공주.
      첫 프레임 = 노려보는 큰 눈 + 「그녀의 예언은 전부 맞았다」, 1.1초에 화면이 깨지며 「그런데 아무도 안 믿었다」. 아폴론의 선물 → 거절 → 저주 → 목마 경고 → 비웃는 댓글 → 문이 열림 → 하룻밤에 무너짐
-     → 사전 카드("카산드라" = 맞는 말을 해도 아무도 믿지 않는 사람) → 「당신이라면 믿었을까?」 + 친구 태그. 근거: 아이스킬로스 『아가멤논』, 아폴로도로스 『비블리오테케』 3.12.5, 베르길리우스 『아이네이스』 2권 -->
+     → 사전 카드("카산드라" = 맞는 말을 해도 아무도 믿지 않는 사람) → 「당신이라면 믿었을까?」 + 친구 태그. 그림(2026-11-12 운영자 "그래픽이 아쉬움" → 명화로): 메트로폴리탄 미술관 공개 작품(CC0) 모티머 「카산드라」·레가트 「광란의 카산드라」·레레스 「아폴론과 아우로라」·보나소네 「목마를 끌어들이는 트로이 사람들」·로랭 「함대에 불을 놓는 트로이 여인들」(legend/art/, CREDITS.md). 근거: 아이스킬로스 『아가멤논』, 아폴로도로스 『비블리오테케』 3.12.5, 베르길리우스 『아이네이스』 2권 -->
 <main class="stage lg cass" data-room="sibyl" data-duration="32" data-fps="30">
   <div class="world">
-    <div class="sky"></div>
+    <div class="paint"></div>
+    <div class="tint gold"></div>
+    <div class="tint red"></div>
     <div class="burn"></div>
-    <div class="sun"><div class="rays"></div></div>
-    <div class="sun cursed"><div class="rays"></div></div>
-    <div class="city"></div>
-    <div class="horse"></div>
-    <div class="face"></div>
+    <div class="grade"></div>
     <div class="embers"></div>
     <div class="bubbles"></div>
   </div>
+  <div class="grain"></div>
+  <div class="leak"></div>
   <div class="flash"></div>
   <div class="redflash"></div>
   <div class="crack"></div>
@@ -36,6 +37,7 @@
   <div class="caps"></div>
   <div class="safe-guide" id="safe"><i></i><i></i><i></i><i></i></div>
 </main>
+<script src="legend/paint.js"></script>
 <script src="legend/legend-cassandra.js"></script>
 </body>
 </html>
