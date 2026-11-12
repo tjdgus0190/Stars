@@ -1,0 +1,95 @@
+/* 전설 릴스 「아무도 믿지 않은 예언」(카산드라) 전용 (2026-11-12). 공통 자막·질문·끝 줄은 legend.css.
+   운영자: "재미 부족, 첫 장면부터 재밌게, 더 자극적으로" → 첫 프레임에 노려보는 눈 + 결론, 1.1초에 화면이 깨지는 한 방, 장면을 1.8~2.4초마다 바꿈,
+   비웃는 댓글이 쏟아지는 장면, 사전 카드, 친구 태그. 피·죽음 장면 없음(도시가 무너지는 실루엣까지만). */
+.lg.cass { background:
+    radial-gradient(ellipse 80% 45% at 50% 60%, oklch(0.24 0.07 20 / 0.8), transparent 70%),
+    linear-gradient(180deg, oklch(0.07 0.02 300), oklch(0.12 0.04 320) 55%, oklch(0.07 0.02 20)); }
+.cass .cap em { color: oklch(0.88 0.14 80); }
+.cass .cap em.red, .cass .cap.hook em.red { color: oklch(0.68 0.23 25); }
+.cass .cap.hook { font-size: 92px; }
+.cass .cap.hook em { color: oklch(0.9 0.15 85); }
+.cass .cap.h2 { top: 250px; font-size: 92px; line-height: 1.25; }
+.cass .eyebrow { color: oklch(0.8 0.08 60); }
+
+/* 별 */
+.cass .sky i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: oklch(0.95 0.02 60); }
+@keyframes tw { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.85; } }
+
+/* 카산드라의 얼굴(두건 그림자, 큰 눈) */
+.cass .face { position: absolute; left: 540px; top: 700px; width: 640px; height: 760px; margin-left: -320px; transform-origin: 50% 30%; }
+.cass .face svg { width: 100%; height: 100%; overflow: visible; }
+.cass .face .hood { fill: oklch(0.07 0.02 320); stroke: oklch(0.7 0.12 60 / 0.6); stroke-width: 4; }
+.cass .face .skin { fill: oklch(0.04 0.01 320); }
+.cass .face .eye { fill: oklch(0.93 0.14 85); filter: drop-shadow(0 0 18px oklch(0.88 0.16 80)); }
+.cass .face .eye.r { fill: oklch(0.66 0.24 25); filter: drop-shadow(0 0 22px oklch(0.6 0.25 25)); opacity: 0; }
+.cass .face .pupil { fill: oklch(0.12 0.02 40); }
+@keyframes stare { 0% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes blink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.08); } }
+@keyframes face-away { to { transform: translate(-300px, 160px) scale(0.42); } }
+@keyframes face-back { from { transform: translate(-300px, 160px) scale(0.42); } to { transform: scale(1.05); } }
+@keyframes show { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hide { from { opacity: 1; } to { opacity: 0; } }
+
+/* 화면 깨짐 */
+.cass .crack { position: absolute; inset: 0; pointer-events: none; }
+.cass .crack svg { width: 100%; height: 100%; }
+.cass .crack path { fill: none; stroke: oklch(0.97 0.02 90 / 0.85); stroke-width: 3; stroke-dasharray: 1400; stroke-dashoffset: 1400; filter: drop-shadow(0 0 4px oklch(1 0 0 / 0.6)); }
+@keyframes crack { to { stroke-dashoffset: 0; } }
+
+/* 아폴론(해) → 저주(붉은 고리) */
+.cass .sun { position: absolute; left: 540px; top: 900px; width: 420px; height: 420px; margin: -210px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, oklch(0.98 0.06 95), oklch(0.9 0.15 85) 35%, oklch(0.75 0.17 65 / 0.6) 55%, transparent 70%); }
+.cass .sun .rays { position: absolute; inset: -160px; background: repeating-conic-gradient(oklch(0.9 0.14 85 / 0.35) 0 4deg, transparent 4deg 15deg); border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, transparent 30%, #000 36%, transparent 70%); mask: radial-gradient(circle, transparent 30%, #000 36%, transparent 70%); }
+.cass .sun.cursed { background: radial-gradient(circle, oklch(0.05 0.01 20) 42%, oklch(0.62 0.24 25) 47%, oklch(0.5 0.22 25 / 0.5) 55%, transparent 68%); }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes sun-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
+
+/* 붉은 저주 번쩍 + 색 갈라짐 */
+.cass .redflash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 55%, oklch(0.6 0.25 25 / 0.75), oklch(0.3 0.15 25 / 0.5) 60%, transparent); mix-blend-mode: screen; }
+@keyframes glitch { 0%, 100% { text-shadow: 0 4px 24px oklch(0.05 0.02 300 / 0.95); transform: none; }
+  20% { text-shadow: -8px 0 oklch(0.65 0.25 25), 8px 0 oklch(0.7 0.15 200); transform: translateX(6px) skewX(-6deg); }
+  40% { text-shadow: 6px 0 oklch(0.65 0.25 25), -6px 0 oklch(0.7 0.15 200); transform: translateX(-8px); }
+  60% { text-shadow: -3px 0 oklch(0.65 0.25 25), 3px 0 oklch(0.7 0.15 200); transform: translateX(3px) skewX(4deg); } }
+
+/* 트로이 성벽과 목마 */
+.cass .city { position: absolute; left: 0; right: 0; top: 960px; height: 300px; opacity: 0; }
+.cass .city svg { width: 100%; height: 100%; overflow: visible; }
+.cass .city .wall { fill: oklch(0.13 0.03 300); stroke: oklch(0.55 0.08 60 / 0.6); stroke-width: 3; }
+.cass .city .tw { transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes fall-l { to { transform: translate(-40px, 160px) rotate(-24deg); opacity: 0.2; } }
+@keyframes fall-r { to { transform: translate(40px, 170px) rotate(22deg); opacity: 0.2; } }
+.cass .horse { position: absolute; left: 600px; top: 700px; width: 420px; height: 540px; opacity: 0; }
+.cass .horse svg { width: 100%; height: 100%; overflow: visible; }
+.cass .horse .hb { fill: oklch(0.32 0.06 55); stroke: oklch(0.7 0.1 70); stroke-width: 4; }
+.cass .horse .door { fill: oklch(0.08 0.02 30); stroke: oklch(0.7 0.1 70); stroke-width: 3; transform-box: fill-box; transform-origin: 0 50%; }
+.cass .horse .inner { fill: oklch(0.68 0.22 30); filter: drop-shadow(0 0 30px oklch(0.6 0.24 28)); opacity: 0; }
+.cass .horse .wheel { fill: oklch(0.2 0.03 55); stroke: oklch(0.7 0.1 70); stroke-width: 3; }
+@keyframes roll-in { from { opacity: 1; transform: translateX(560px); } to { opacity: 1; transform: none; } }
+@keyframes door { to { transform: scaleX(-1); } }
+@keyframes skyred { to { opacity: 1; } }
+.cass .burn { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse 90% 40% at 50% 85%, oklch(0.55 0.22 30 / 0.85), oklch(0.35 0.15 25 / 0.45) 50%, transparent 75%); mix-blend-mode: screen; }
+
+/* 비웃는 댓글 */
+.cass .bubbles { position: absolute; inset: 0; pointer-events: none; }
+.cass .bub { position: absolute; display: flex; align-items: center; gap: 16px; padding: 16px 26px 16px 16px; border-radius: 40px; background: oklch(0.96 0.01 90 / 0.94);
+  box-shadow: 0 10px 30px oklch(0 0 0 / 0.5); font: 700 36px/1.2 var(--font-serif); color: oklch(0.2 0.02 300); white-space: nowrap; opacity: 0; }
+.cass .bub i { width: 56px; height: 56px; border-radius: 50%; flex: none; background: var(--av); }
+.cass .bub small { display: block; font: 700 24px/1 var(--font-serif); color: oklch(0.5 0.03 300); margin-bottom: 6px; }
+@keyframes bub-in { 0% { opacity: 0; transform: translateY(40px) scale(0.7); } 70% { opacity: 1; transform: translateY(-6px) scale(1.03); } 100% { opacity: 1; transform: none; } }
+@keyframes bub-out { to { opacity: 0; transform: translateY(-30px); } }
+
+/* 사전 카드 */
+.cass .dict { position: absolute; left: 140px; width: 800px; top: 800px; padding: 38px 44px; border-radius: 26px; border: 2px solid oklch(0.85 0.1 80 / 0.7);
+  background: oklch(0.12 0.03 310 / 0.92); box-shadow: 0 0 60px oklch(0.6 0.15 60 / 0.3); opacity: 0; }
+.cass .dict h3 { margin: 0 0 14px; font: 900 64px/1.1 var(--font-serif); color: oklch(0.92 0.13 85); }
+.cass .dict h3 span { font: 700 30px/1 var(--font-latin); letter-spacing: 0.1em; color: oklch(0.75 0.06 70); margin-left: 16px; }
+.cass .dict p { font: 700 40px/1.45 var(--font-serif); color: var(--c-text-strong); }
+.cass .dict p b { color: oklch(0.68 0.23 25); }
+
+/* 질문 칩(두 개) */
+.cass .ask { top: 720px; }
+.cass .ask b { width: 260px; height: 150px; border-radius: 30px; font-size: 60px; }
+.cass .ask b.no { border-color: oklch(0.68 0.23 25 / 0.9); color: oklch(0.75 0.2 25); box-shadow: 0 0 40px oklch(0.6 0.22 25 / 0.45); }
+.cass .askline { top: 920px; font-size: 44px; }
+.cass .brand { top: 1060px; }

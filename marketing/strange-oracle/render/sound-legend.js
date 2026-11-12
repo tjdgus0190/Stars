@@ -1,4 +1,6 @@
 // 전설 릴스 「문 너머의 기록」 소리판 (2026-11-12). 광고들(쿵·휙·종·오르골)과 다른 결로 편마다 짠다. 외부 음원 없음(씨앗 고정).
+//   cassandra 「아무도 믿지 않은 예언」: 첫 프레임 큰 한 방 · 1.1초 유리 깨짐 · 아폴론의 반짝이는 화음 · 거절에 내려꽂는 휙 · 째깍째깍 → 저주의 깊은 하강음과 끊기는 잡음
+//     · 목마가 굴러오는 우르릉 · 댓글이 뜰 때마다 알림 같은 '똑' · 문이 열리는 삐걱 · 무너지는 굉음 · 심장 박동 · 질문 칩 둘에 뜯는 소리
 //   rune 「세 여인이 새기는 운명」: 숲 바람 · E 도리아 현악 지속음 · 세 여인이 켜질 때 낮은/가운데/높은 종 · 나무에 글자를 새기는 끌 소리 셋
 //     · "신들조차 바꿀 수 없었다" 묵직한 한 방 → 고요 → 샘물이 흘러 나무에 닿는 물소리 → 잎이 켜지며 종 아르페지오와 장조 화음 · 질문의 셋에 뜯는 소리
 // 실행(저장소 루트): node marketing/strange-oracle/render/sound-legend.js rune → ../out/legend-rune-ko-sound.mp4
@@ -8,11 +10,12 @@ const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
-const EP = process.argv[2] || "rune";
+const EP = process.argv[2] || "cassandra";
 const TT = {
+  cassandra: { h2: 1.1, b1: 2.6, b2: 4.4, b3: 6.4, b4: 8.2, curse: 10.0, b6: 12.2, b7: 14.6, b8: 17.0, b9: 19.0, b10: 21.4, b11: 23.6, q: 26.6, brand: 29.8, dur: 32 },
   rune: { b1: 2.9, b2: 5.2, w1: 7.6, w2: 9.6, w3: 11.6, b6: 13.8, b7: 16.4, b8: 18.8, b9: 21.0, pour: 21.4, b10: 23.4, b11: 25.8, q: 28.4, brand: 30.2, dur: 32 },
 };
-if (!TT[EP]) throw new Error(`알 수 없는 편: ${EP} (rune)`);
+if (!TT[EP]) throw new Error(`알 수 없는 편: ${EP} (cassandra | rune)`);
 const T = TT[EP];
 const VIDEO = `legend-${EP}-ko`;
 const OUT = path.resolve(__dirname, "..", "out");
@@ -160,7 +163,52 @@ function chisel(t0, amp, pan) {
   for (let i = 0; i < 0.3 * SR; i++) { const t = i / SR, n = rnd(); hp = n - prev; prev = n; put(S(t0 + 0.05) + i, hp * amp * 0.35 * Math.sin(Math.PI * t / 0.3), pan, 0.2); }
 }
 
-// ── 배치 (rune)
+// ── 유리 깨짐: 짧은 고음 잡음 여러 겹 + 비배음 높은 울림
+function shatter(t0, amp) {
+  for (let k = 0; k < 26; k++) {
+    const st = S(t0 + (k < 6 ? k * 0.006 : 0.03 + Math.abs(rnd()) * 0.5)), len = Math.floor(SR * (0.01 + Math.abs(rnd()) * 0.05)), a = amp * (k < 6 ? 1 : 0.35 * (1 - k / 30)), pan = rnd() * 0.8;
+    let hp = 0, prev = 0;
+    for (let i = 0; i < len; i++) { const n = rnd(); hp = n - prev; prev = n; put(st + i, hp * a * Math.exp(-i / (len * 0.35)), pan, 0.4); }
+    const f = 3000 + Math.abs(rnd()) * 5000;
+    for (let i = 0; i < 0.25 * SR; i++) { const t = i / SR; put(st + i, Math.sin(2 * Math.PI * f * t) * a * 0.12 * Math.exp(-t * 18), pan, 0.5); }
+  }
+}
+// ── 알림 같은 '똑'(두 음)
+function blip(t0, amp, pan) { [[1320, 0], [1760, 0.06]].forEach(([f, d]) => { for (let i = 0; i < 0.12 * SR; i++) { const t = i / SR; put(S(t0 + d) + i, Math.sin(2 * Math.PI * f * t) * Math.exp(-t * 35) * amp, pan, 0.25); } }); }
+// ── 삐걱: 낮게 떨리는 톱니음이 천천히 내려감
+function creak(t0, dur, amp) {
+  let ph = 0, lp = 0;
+  for (let i = 0; i < dur * SR; i++) { const t = i / SR, f = 90 - 30 * (t / dur) + 8 * Math.sin(t * 40); ph = (ph + f / SR) % 1; const g = (Math.sin(t * 2 * Math.PI * 23) > 0.2 ? 1 : 0.3); lp += ((ph * 2 - 1) * g - lp) * 0.15; put(S(t0) + i, lp * amp * Math.sin(Math.PI * t / dur), 0.2, 0.4); }
+}
+// ── 우르릉: 아주 낮은 잡음
+function rumble(t0, dur, amp) { let a = 0, b = 0; for (let i = 0; i < dur * SR; i++) { const t = i / SR, n = rnd(); a += (n - a) * 0.008; b += (a - b) * 0.05; put(S(t0) + i, b * 14 * amp * Math.sin(Math.PI * Math.min(1, t / dur)) ** 0.5, rnd() * 0.1, 0.3); } }
+// ── 째깍
+function tick(t0, amp) { for (let i = 0; i < 0.03 * SR; i++) { const t = i / SR; put(S(t0) + i, Math.sin(2 * Math.PI * 2400 * t) * Math.exp(-t * 300) * amp, 0, 0.1); } }
+
+// ── 배치
+if (EP === "cassandra") {
+  // 지속음: A 단조(A1·E2·C3·E3) → 아폴론 장면은 A 장조 → 저주부터 B♭ 섞인 어둠 → 무너짐 → 질문은 열린 화음
+  const chord = (t) => (t < T.b2 ? [33, 40, 48, 52] : t < T.curse ? [33, 40, 49, 52, 57] : t < T.b10 ? [34, 41, 46, 49] : t < T.q ? [33, 40, 48, 52] : [33, 40, 47, 52]);
+  strings((t) => (0.35 + 0.3 * smooth(T.b1, T.b2, t) + 0.4 * smooth(T.curse, T.curse + 0.5, t) * (1 - smooth(T.b10, T.b10 + 0.6, t))) * (1 - 0.6 * smooth(T.b10, T.b10 + 0.3, t) * (1 - smooth(T.b11, T.b11 + 1, t))) * (1 - 0.4 * smooth(T.q, T.q + 1.5, t)) * (1 - smooth(DUR - 0.8, DUR, t)) * Math.min(1, t / 0.02 + 0.5), chord, 0.06);
+  boom(0.0, 0.9, 50); whoosh(0.0, 0.5, 0.25, 0.4, -0.2);
+  shatter(T.h2, 0.9); boom(T.h2, 0.6, 62);
+  riser(T.b1 + 0.6, T.b2, 0.15);
+  [69, 73, 76, 81, 85, 88].forEach((m, k) => bell(T.b2 + 0.05 + k * 0.09, mtof(m), 0.05, Math.sin(k * 1.9) * 0.6));
+  whoosh(T.b3 + 0.05, 0.4, 0.4, 0.5, -0.5); boom(T.b3 + 0.35, 0.8, 55);
+  for (let k = 0; k < 7; k++) tick(T.b4 + 0.2 + k * 0.25, 0.25 + k * 0.03);
+  riser(T.b4 + 0.4, T.curse, 0.3);
+  boom(T.curse, 1.0, 40); for (let k = 0; k < 6; k++) crack(S(T.curse + 0.05 + k * 0.09), 0.5, (k % 2 ? 0.6 : -0.6));
+  rumble(T.b6 + 0.2, 1.4, 0.8); boom(T.b6 + 0.35, 0.5, 58);
+  for (let k = 0; k < 5; k++) blip(T.b7 + 0.25 + k * 0.32, 0.25, [-0.5, 0.4, -0.6, 0.3, -0.2][k]);
+  creak(T.b8 + 0.05, 0.7, 0.6); boom(T.b8 + 0.35, 0.8, 45);
+  rumble(T.b9, 2.4, 1.3); boom(T.b9 + 0.1, 1.0, 38); boom(T.b9 + 0.7, 0.8, 44); shatter(T.b9 + 0.2, 0.25);
+  for (let t = T.b10 + 0.3, k = 0; k < 3; t += 0.75, k++) { thump(t, 0.5); thump(t + 0.17, 0.3); }
+  bell(T.b10 + 0.3, mtof(81), 0.08, 0);
+  blip(T.b11 + 0.45, 0.3, 0); bell(T.b11 + 0.5, mtof(76), 0.05, 0.2);
+  [64, 57].forEach((m, k) => pluck(T.q + 0.5 + k * 0.2, mtof(m + 12), 0.4, k ? 0.4 : -0.4));
+  bell(T.brand, mtof(81), 0.06, 0);
+}
+if (EP === "rune") {
 // 지속음: E 도리아(E2·B2·D3·F#3), 신도 못 바꾼다에서 어둡게(C), 고요, 물이 닿으면 E 장조로 밝게, 질문은 열린 화음
 const chord = (t) => (t < T.b7 ? [40, 47, 50, 54] : t < T.b9 ? [36, 43, 52, 55] : t < T.q ? [40, 47, 56, 59] : [40, 47, 54, 59]);
 strings((t) => (0.4 + 0.2 * smooth(T.b1, T.b1 + 1.5, t) + 0.3 * smooth(T.b6, T.b7, t)) * (1 - 0.75 * smooth(T.b8, T.b8 + 0.8, t) * (1 - smooth(T.pour + 0.6, T.pour + 1.6, t))) * (1 - 0.4 * smooth(T.q, T.q + 1.5, t)) * (1 - smooth(DUR - 0.8, DUR, t)) * Math.min(1, t / 0.05 + 0.4), chord, 0.055);
@@ -180,6 +228,7 @@ boom(T.pour + 0.9, 0.5, 52);
 bell(T.b11 + 0.5, mtof(76), 0.07, -0.2); bell(T.b11 + 0.9, mtof(83), 0.05, 0.2);
 [52, 59, 64].forEach((m, k) => pluck(T.q + 0.5 + k * 0.18, mtof(m + 12), 0.35, (k - 1) * 0.4));
 bell(T.brand, mtof(88), 0.06, 0);
+}
 
 // ── 잔향(슈뢰더) → 부드러운 제한 → WAV → 영상에 붙임(-14 LUFS)
 function reverb(inp, combs, aps, fb = 0.82, damp = 0.3) {

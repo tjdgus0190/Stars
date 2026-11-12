@@ -29,6 +29,7 @@ const ADS = {
   ad8: { scene: "ad8-profile.html", out: "ad8-profile-ko.mp4", frames: 450 }, // (2026-10-27) 8안 「일곱 문의 점술관」 프로필 유입 15초
   ad7: { scene: "ad7-season.html", out: "ad7-season-ko.mp4", frames: 450 }, // (2026-10-27) 7안 「첫 계절의 값」 15초
   ad9: { scene: "ad9-newyear.html", out: "ad9-newyear-ko.mp4", frames: 450 }, // (2026-11-12) 9안 「새해의 문」 2027 신년운세 15초
+  "legend-cassandra": { scene: "legend-cassandra.html", out: "legend-cassandra-ko.mp4", frames: 960 }, // (2026-11-12) 전설 릴스 「아무도 믿지 않은 예언」 32초
   "legend-rune": { scene: "legend-rune.html", out: "legend-rune-ko.mp4", frames: 960 }, // (2026-11-12) 전설 릴스 「세 여인이 새기는 운명」 32초
   "reel-saju": { scene: "reel-room.html?room=saju", out: "reel-saju-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
   "reel-ogham": { scene: "reel-room.html?room=ogham", out: "reel-ogham-ko.mp4", frames: 750 }, // (2026-10-26) 방 소개 릴스 25초
