@@ -682,7 +682,7 @@
       }
       // 나가기
       const acts = mk("div", "ny-acts");
-      const back = mk("button", "btn btn--primary btn--block", N.result.back);
+      const back = mk("button", "btn btn--block " + (resScr.querySelector("[data-js=ny-more-btn]") ? "btn--secondary" : "btn--primary"), N.result.back); // 결제 안내 버튼이 있으면 한 단계 낮춘다
       back.type = "button";
       back.dataset.js = "ny-back";
       back.addEventListener("click", () => C.go("ny-hub"));
