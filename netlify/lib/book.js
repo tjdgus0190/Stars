@@ -43,7 +43,64 @@ const PAID_REL = path.join("products", "strange-oracle", "api", "_paid", "book")
 
 const normalize = (s) => String(s || "").toUpperCase().replace(/[\s-]+/g, "");
 const hashOf = (code) => crypto.createHash("sha256").update(normalize(code)).digest("hex");
-const SHAPE = /^SOP[0-9A-HJKMNP-TV-Z]{13}$/; // SOP + 무작위 12자 + 검사 1자 (Crockford Base32, 검사 글자 계산은 paycode.js Pass)
+const SHAPE = /^S(?:OP|NY)[0-9A-HJKMNP-TV-Z]{13}$/; // SOP(책)·SNY(2027 신년운세) + 무작위 12자 + 검사 1자 (Crockford Base32, 검사 글자 계산은 paycode.js Pass)
+// (2026-11-12 운영자 결정) 책과 신년운세는 따로 파는 상품: file "ny"는 SNY 코드로만, 그 밖의 장·keep은 SOP 코드로만 연다.
+//   수동 코드도 같다(BOOK_PASS_HASHES = 책 SOP, NY_PASS_HASHES = 신년운세 SNY. make-pass.js --ny).
+const productOf = (code) => (/^SNY/.test(normalize(code)) ? "ny" : "book");
+const productFor = (file) => (file === "ny" ? "ny" : "book");
+// (2026-11-12) 신년운세 무료 두 방: 열람 코드 없이 { file: "ny-free", room, k } — 한 방·한 결과 번호의 상세 풀이 조각만 준다.
+//   k는 브라우저가 계산한 결과 번호(입력값 아님): year·areas·one(정수 0~39 또는 시빌라 주제), seasons(오검 정수 0~3 또는 시빌라 주제).
+//   몇 번째 방인지(두 방 제한)는 이 기기의 브라우저가 센다. 서버는 IP별 10분 FREE_MAX회까지만(메모리 Map 키로만, 저장 안 함).
+const NY_ROOMS = Object.freeze(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]);
+const NY_TOPICS = Object.freeze(["exam", "love", "work", "relation", "self"]);
+const FREE_MAX = 40;
+const K_KEYS = ["year", "areas", "one", "seasons"];
+const kOk = (k) => {
+  if (!k || typeof k !== "object" || Array.isArray(k)) return false;
+  const ks = Object.keys(k);
+  if (!ks.length || ks.some((x) => !K_KEYS.includes(x))) return false;
+  return ks.every((x) => (Number.isInteger(k[x]) && k[x] >= 0 && k[x] < 40) || NY_TOPICS.includes(k[x]));
+};
+// 한 방 판에서 이 결과 번호의 칸만 고른다. 결과마다 다른 칸(year·areas·one·full·오검/시빌라 seasons)은 그 번호 하나만, 달·반년 문장 묶음(months·summer·winter·day)은 그대로
+function nySlice(roomData, k) {
+  const out = {};
+  const pick = (name, idx) => {
+    const v = roomData[name];
+    if (v == null || idx == null) return;
+    const one = Array.isArray(v) ? v[idx] : v[String(idx)];
+    if (one != null) out[name] = { [String(idx)]: one };
+  };
+  pick("year", k.year);
+  pick("areas", k.areas);
+  pick("one", k.one);
+  pick("full", k.year);
+  if (roomData.seasons) {
+    if (Array.isArray(roomData.seasons) || NY_TOPICS.includes(k.seasons)) pick("seasons", k.seasons);
+  }
+  ["months", "summer", "winter", "day"].forEach((n) => {
+    if (roomData[n] != null) out[n] = roomData[n];
+  });
+  return out;
+}
+const freeHits = new Map(); // ip → { n, since }
+function freeOver(ip, now) {
+  let f = freeHits.get(ip);
+  if (!f || now - f.since > WINDOW_MS) {
+    f = { n: 0, since: now };
+    freeHits.set(ip, f);
+  }
+  if (freeHits.size > 5000) for (const [k2, v] of freeHits) if (now - v.since > WINDOW_MS) freeHits.delete(k2);
+  return ++f.n > FREE_MAX;
+}
+const nyCache = {};
+function readNy(dir) {
+  if (!nyCache[dir]) {
+    const w = {};
+    vm.runInNewContext(fs.readFileSync(path.join(dir, "book-ny.js"), "utf8"), { window: w });
+    nyCache[dir] = w.BOOK_NY || {};
+  }
+  return nyCache[dir];
+}
 
 // 유료 폴더 찾기: Netlify 함수 묶음 안 상대 경로(included_files는 저장소 기준 경로를 유지) — 실제 위치는 미확인이라 후보를 차례로 본다
 function paidDir() {
@@ -102,6 +159,19 @@ async function handle(req, env, dir, now = Date.now(), store = null) {
   }
   if (!b || typeof b !== "object" || Array.isArray(b)) return send(400, { error: "bad" });
   const keys = Object.keys(b).sort();
+  if (b.file === "ny-free") {
+    // 무료 두 방 조각: 열람 코드를 받지 않는다(본문 세 칸 { file, room, k }뿐)
+    if (keys.join() !== "file,k,room" || !NY_ROOMS.includes(b.room) || !kOk(b.k)) return send(400, { error: "bad" });
+    if (freeOver(ip, now)) return send(429, { error: "wait" });
+    if (!dir) return send(500, { error: "server" });
+    try {
+      const room = readNy(dir)[b.room];
+      if (!room) return send(500, { error: "server" });
+      return send(200, { file: "ny-free", room: b.room, data: nySlice(room, b.k) });
+    } catch (e) {
+      return send(500, { error: "server" });
+    }
+  }
   const keepPut = b.file === "keep" && keys.length === 3 && keys.join() === "file,pass,put";
   if (!keepPut && (keys.length !== 2 || keys[0] !== "file" || keys[1] !== "pass")) return send(400, { error: "bad" }); // 두 칸뿐 (keep 쓰기만 put 한 칸 더)
   if (keepPut && (typeof b.put !== "string" || (b.put !== "" && !KEEP_RE.test(b.put)))) return send(400, { error: "bad" });
@@ -112,7 +182,9 @@ async function handle(req, env, dir, now = Date.now(), store = null) {
     addFail(ip, now);
     return send(401, { error: "pass" });
   }
-  const valid = String(env.BOOK_PASS_HASHES || "").split(",").map((s) => s.trim().toLowerCase()).filter((s) => /^[0-9a-f]{64}$/.test(s));
+  // 상품이 다른 코드(책 코드로 신년운세, 신년운세 코드로 책)는 확인하지 않고 거절한다. 틀린 시도로 세지 않는다(진짜 코드일 수 있음)
+  if (productOf(b.pass) !== productFor(b.file)) return send(403, { error: "product" });
+  const valid = String((productOf(b.pass) === "ny" ? env.NY_PASS_HASHES : env.BOOK_PASS_HASHES) || "").split(",").map((s) => s.trim().toLowerCase()).filter((s) => /^[0-9a-f]{64}$/.test(s));
   const h = hashOf(b.pass);
   if (!valid.some((v) => v.length === h.length && crypto.timingSafeEqual(Buffer.from(v), Buffer.from(h)))) {
     if (!store || !Pay.secretOk(env.PASS_SECRET)) {
@@ -165,4 +237,4 @@ async function respond(req, context, openStore, env = process.env) {
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
-module.exports = { respond, handle, normalize, hashOf, keepKey, ALLOW, FILES, KEEP_MS, KEEP_MAX, _fails: fails };
+module.exports = { respond, handle, normalize, hashOf, keepKey, nySlice, ALLOW, FILES, KEEP_MS, KEEP_MAX, FREE_MAX, _fails: fails, _freeHits: freeHits };

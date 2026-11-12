@@ -250,7 +250,7 @@ test("다양성 실측 → out/book-variety.txt", () => {
   test("함수 book: 수동 코드(BOOK_PASS_HASHES) + 허용 file → 200, no-store, 저장소를 읽지 않음", async () => {
     const store = new MemStore();
     store.failRead = true; // 읽으면 503이 날 상태에서도 수동 코드는 통과
-    for (const file of Fn.ALLOW) {
+    for (const file of Fn.ALLOW.filter((f) => f !== "ny")) {
       const r = await call({ pass: Pass.pretty(CODE).toLowerCase(), file }, { store });
       assert.strictEqual(r.status, 200, file);
       assert.strictEqual(r.headers["Cache-Control"], "no-store");
@@ -384,5 +384,92 @@ test("다양성 실측 → out/book-variety.txt", () => {
     codes.forEach((c, i) => assert.strictEqual(Fn.hashOf(c), hashes[i]));
     assert.ok(out.includes(`BOOK_PASS_HASHES=${hashes.join(",")}`));
     assert.strictEqual(execFileSync("git", ["status", "--porcelain"], { cwd: ROOT, encoding: "utf8" }), before);
+  });
+
+  // ── (2026-11-12 운영자 결정) 책과 2027 신년운세는 따로 파는 상품
+  test("함수 book (상품 분리): 책 코드(SOP)로 ny는 403 product, 신년운세 코드(SNY)로 책 장·keep은 403 product — 저장소를 읽지 않고 틀린 시도로 세지 않음", async () => {
+    const NYC = Pass.make("ny");
+    assert.match(NYC, /^SNY[0-9A-HJKMNP-TV-Z]{13}$/);
+    const env = Object.assign({}, ENV, { NY_PASS_HASHES: Fn.hashOf(NYC) });
+    const store = new MemStore();
+    store.failRead = true;
+    const ip = "10.9.9.1";
+    for (let i = 0; i < 12; i++) assert.deepStrictEqual([(await call({ pass: CODE, file: "ny" }, { env, store, ip })).status, (await call({ pass: CODE, file: "ny" }, { env, store, ip })).json.error], [403, "product"]);
+    for (const file of Fn.ALLOW.filter((f) => f !== "ny").concat("keep")) {
+      const r = await call({ pass: Pass.pretty(NYC), file }, { env, store, ip: "10.9.9.2" });
+      assert.deepStrictEqual([r.status, r.json.error], [403, "product"], file);
+    }
+    assert.strictEqual(store.log.length, 0);
+    const ok = await call({ pass: Pass.pretty(NYC).toLowerCase(), file: "ny" }, { env, store, ip });
+    assert.strictEqual(ok.status, 200, "429로 막히지 않음(상품 다름은 틀린 시도 아님) · 수동 신년운세 코드 NY_PASS_HASHES로 열림");
+    assert.ok(ok.json.data.saju && ok.json.data.sibyl);
+    // 신년운세 해시를 BOOK_PASS_HASHES에 넣어도 신년운세로만(책 목록과 섞이지 않음)
+    const env2 = Object.assign({}, ENV, { BOOK_PASS_HASHES: Fn.hashOf(NYC) });
+    assert.strictEqual((await call({ pass: NYC, file: "ny" }, { env: env2 })).status, 401);
+  });
+  test("함수 book (상품 분리): 결제 기록 — 신년운세 결제(SNY)는 ny만, 책 결제(SOP)는 ny 빼고", async () => {
+    const store = new MemStore();
+    const r = crypto.randomBytes(16).toString("hex");
+    const mk = (prod, mul) => {
+      const P = Pay.passOf(SECRET, r, prod);
+      const ph = Pay.hashOfPass(SECRET, P);
+      store.map.set("mul/" + mul, JSON.stringify({ ph, state: "paid", at: new Date().toISOString() }));
+      store.map.set("pass/" + ph, JSON.stringify({ mul_no: mul, state: "paid", at: new Date().toISOString() }));
+      return P;
+    };
+    const NYP = mk("ny", "m-ny-1");
+    assert.match(NYP, /^SNY/);
+    assert.strictEqual((await call({ pass: NYP, file: "ny" }, { store })).status, 200);
+    assert.strictEqual((await call({ pass: NYP, file: "saju" }, { store })).status, 403);
+    const BP = mk("book", "m-book-1");
+    assert.strictEqual((await call({ pass: BP, file: "saju" }, { store })).status, 200);
+    assert.strictEqual((await call({ pass: BP, file: "ny" }, { store })).json.error, "product");
+  });
+  test("함수 book (무료 두 방): ny-free — 코드 없이 한 방·한 결과 번호의 조각만, 칸·값 모양 엄격, IP 10분 40회", async () => {
+    const W2 = {};
+    vm.runInNewContext(fs.readFileSync(path.join(PAIDDIR, "book-ny.js"), "utf8"), { window: W2 });
+    const NY = plain(W2.BOOK_NY);
+    const r = await call({ file: "ny-free", room: "decan", k: { year: 3, areas: 3, one: 3 } });
+    assert.strictEqual(r.status, 200);
+    assert.strictEqual(r.headers["Cache-Control"], "no-store");
+    const d = r.json.data;
+    assert.deepStrictEqual(Object.keys(d.year), ["3"]);
+    assert.deepStrictEqual(d.year["3"], NY.decan.year[3]);
+    assert.deepStrictEqual(d.one, { 3: NY.decan.one[3] });
+    assert.deepStrictEqual(d.months, NY.decan.months, "달 문장 묶음은 그대로");
+    assert.ok(!JSON.stringify(d).includes(JSON.stringify(NY.decan.year[4]).slice(1, 30)), "다른 결과의 한 해 풀이 없음");
+    const sj = (await call({ file: "ny-free", room: "saju", k: { year: 1, areas: 1, one: 1 } })).json.data;
+    assert.deepStrictEqual(Object.keys(sj.full), ["1"], "만신 새 구조 완성본도 그 일간 하나만");
+    const sb = (await call({ file: "ny-free", room: "sibyl", k: { year: 5, one: "love", seasons: "love" } })).json.data;
+    assert.deepStrictEqual(Object.keys(sb.seasons), ["love"]);
+    assert.deepStrictEqual(sb.one, { love: NY.sibyl.one.love });
+    const og = (await call({ file: "ny-free", room: "ogham", k: { year: 2, areas: 1, one: 2, seasons: 1 } })).json.data;
+    assert.deepStrictEqual(og.seasons, { 1: NY.ogham.seasons[1] });
+    // 모양
+    for (const b of [{ file: "ny-free", room: "x", k: { year: 1 } }, { file: "ny-free", room: "saju", k: { year: 99 } }, { file: "ny-free", room: "saju", k: { year: 1, name: 1 } }, { file: "ny-free", room: "saju", k: { year: "../a" } }, { file: "ny-free", room: "saju", k: {} }, { file: "ny-free", room: "saju", k: [1] }, { file: "ny-free", room: "saju", k: { year: 1 }, pass: "SOP" }, { file: "ny-free", room: "saju" }])
+      assert.strictEqual((await call(b)).status, 400, JSON.stringify(b));
+    const ip = "10.7.7.7";
+    for (let i = 0; i < Fn.FREE_MAX; i++) assert.strictEqual((await call({ file: "ny-free", room: "rune", k: { year: i % 24, areas: 0, one: 0 } }, { ip })).status, 200);
+    assert.strictEqual((await call({ file: "ny-free", room: "rune", k: { year: 1 } }, { ip })).status, 429);
+    assert.strictEqual((await call({ file: "ny-free", room: "rune", k: { year: 1 } }, { ip, now: Date.now() + 11 * 60 * 1000 })).status, 200, "10분 뒤 풀림");
+    assert.strictEqual((await call({ file: "ny-free", room: "rune", k: { year: 1 } }, { env: { PASS_MODE: "" } })).status, 503);
+  });
+  test("열람 코드 모양 (상품 분리): SNY도 같은 검사, 상품 판별, 헷갈리는 글자 정규화", () => {
+    for (let i = 0; i < 100; i++) {
+      const c = Pass.make("ny");
+      assert.match(c, /^SNY[0-9A-HJKMNP-TV-Z]{13}$/);
+      assert.strictEqual(Pass.normalize(Pass.pretty(c).toLowerCase()), c);
+      assert.strictEqual(Pass.product(c), "ny");
+      assert.strictEqual(Pass.product(Pass.make()), "book");
+      assert.ok(Pass.looksPass(Pass.pretty(c)));
+    }
+    assert.strictEqual(Pay.productOfPass(Pay.passOf(SECRET, "a".repeat(32), "ny")), "ny");
+    assert.strictEqual(Pass.normalize(Pay.passOf(SECRET, "a".repeat(32), "ny")), Pay.passOf(SECRET, "a".repeat(32), "ny"), "서버가 만든 SNY 코드는 브라우저 검사를 통과");
+  });
+  test("make-pass --ny: SNY 코드와 NY_PASS_HASHES 줄", () => {
+    const out = execFileSync(process.execPath, [path.join(__dirname, "make-pass.js"), "1", "--ny"], { encoding: "utf8" });
+    const c = (out.match(/코드 1: (SNY-\S+)/) || [])[1];
+    assert.ok(c);
+    assert.ok(out.includes(`NY_PASS_HASHES=${Fn.hashOf(c)}`));
   });
 }

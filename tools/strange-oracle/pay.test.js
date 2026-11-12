@@ -535,3 +535,49 @@ test("(2026-10-27 운영자) 첫 계절의 값: 마감 전·24시간 여유 안�
   assert.strictEqual(w.TEXT.pay.season.amount, S.price);
   assert.strictEqual(Date.parse(w.TEXT.pay.season.until), S.until);
 });
+
+// ── (2026-11-12 운영자 결정) 2027 신년운세 = 책과 따로 파는 상품: so-ny-1 · 4,900원 고정 · 코드 SNY
+const nyNotice = (state, mul, r, over = {}) => notice(state, mul, r, Object.assign({ goodname: "낯선 점술관 2027 신년운세", price: "4900", var2: "so-ny-1" }, over));
+const nyP = (r) => Pay.passOf(ENV.PASS_SECRET, r, "ny");
+test("신년운세 결제: so-ny-1 · 4,900원 → SNY 코드, status가 SNY를 돌려주고, 함수 book은 ny만 연다(책 장은 403)", async () => {
+  const store = new MemStore();
+  const r = newR(), mul = newMul();
+  assert.strictEqual((await fb(store, nyNotice(1, mul, r))).body, "SUCCESS");
+  assert.strictEqual((await fb(store, nyNotice(4, mul, r))).body, "SUCCESS");
+  const P = nyP(r);
+  assert.match(P, /^SNY/);
+  assert.notStrictEqual(P.slice(3), P_of(r).slice(3), "같은 R이라도 책 코드와 몸통이 다름");
+  assert.deepStrictEqual(keys(store), ["mul/" + mul, "pass/" + Pay.hashOfPass(ENV.PASS_SECRET, P)].sort());
+  assert.deepStrictEqual(Object.keys(val(store, "mul/" + mul)).sort(), ["at", "ph", "state"], "기록 칸은 책과 같음(상품 칸 없음)");
+  const st = await status(store, r);
+  assert.deepStrictEqual(st.json, { state: "paid", pass: P });
+  const env = { PASS_MODE: "test", BOOK_PASS_HASHES: "", PASS_SECRET: ENV.PASS_SECRET };
+  const ny = await Book.handle({ method: "POST", body: JSON.stringify({ pass: P, file: "ny" }), ip: "10.4.0.1" }, env, PAIDDIR, Date.now(), store);
+  assert.strictEqual(ny.status, 200);
+  assert.strictEqual((await book(store, P)).status, 403, "신년운세 코드로 책은 열리지 않음");
+  // 책 결제는 그대로 SOP, 신년운세는 안 열림
+  const r2 = newR(), mul2 = newMul();
+  await paidOk(store, mul2, r2);
+  assert.match((await status(store, r2)).json.pass, /^SOP/);
+  const nb = await Book.handle({ method: "POST", body: JSON.stringify({ pass: P_of(r2), file: "ny" }), ip: "10.4.0.2" }, env, PAIDDIR, Date.now(), store);
+  assert.strictEqual(JSON.parse(nb.body).error, "product");
+});
+test("신년운세 결제: 값은 4,900원만(9,900·100원·첫 계절 마감 뒤에도 4,900 고정), 꼬리표가 다르면 400, 취소는 SNY 기록을 닫음", async () => {
+  const store = new MemStore();
+  for (const price of ["9900", "100", "4901"]) assert.strictEqual((await fb(store, nyNotice(4, newMul(), newR(), { price }))).status, 400, price);
+  assert.strictEqual((await fb(store, nyNotice(4, newMul(), newR(), { var2: "so-ny-2" }))).status, 400);
+  assert.strictEqual(keys(store).length, 0);
+  const late = Pay.SEASON.until + Pay.SEASON.graceMs + 86400000;
+  const r = newR(), mul = newMul();
+  assert.strictEqual((await Pay.handle({ method: "POST", route: "feedback", body: nyNotice(4, mul, r), ip: "payapp" }, ENV, store, late)).body, "SUCCESS", "첫 계절이 끝나도 신년운세는 4,900원");
+  assert.strictEqual((await fb(store, notice(4, newMul(), newR(), { price: "4900" }), ENV)).status, 200, "책 4,900원은 첫 계절 안이라 그대로");
+  assert.strictEqual((await fb(store, nyNotice(9, mul, r))).body, "SUCCESS");
+  assert.strictEqual((await status(store, r)).json.state, "cancelled");
+  assert.strictEqual(val(store, "pass/" + Pay.hashOfPass(ENV.PASS_SECRET, nyP(r))).state, "cancelled");
+  // 먼저 온 취소(var1 있음): 묘비 ph가 SNY 해시
+  const r3 = newR(), mul3 = newMul();
+  await fb(store, nyNotice(9, mul3, r3));
+  assert.strictEqual(val(store, "mul/" + mul3).ph, Pay.hashOfPass(ENV.PASS_SECRET, nyP(r3)));
+  await fb(store, nyNotice(4, mul3, r3));
+  assert.notStrictEqual((await status(store, r3)).json.state, "paid");
+});

@@ -7,7 +7,7 @@
 //   pass/<ph>       { mul_no, state, at }   status·book이 코드로 찾음 (완료 표지)
 //   cancel/<mul_no> { mul_no, state, at }   취소 표지. 취소 통보만 쓴다(결제완료 경로는 절대 쓰지 않음)
 //   R 원문·R의 해시·P 원문·휴대폰 번호·카드 정보·IP·linkkey·linkval·입력값·결과 코드는 두지 않는다.
-// 열람 코드 P = "SOP" + HMAC-SHA256(PASS_SECRET, "pass:" + R)의 앞 60비트(Crockford Base32 12자) + 검사 1자 (paycode.js Pass와 같은 모양)
+// 열람 코드 P = "SOP"(책) | "SNY"(2027 신년운세) + HMAC-SHA256(PASS_SECRET, "pass:" | "pass-ny:" + R)의 앞 60비트(Crockford Base32 12자) + 검사 1자 (paycode.js Pass와 같은 모양)
 // 코드 해시 ph = HMAC-SHA256(PASS_SECRET, "hash:" + normalize(P)) hex — 저장소가 새도 코드를 오프라인 대입할 수 없다.
 // 503(로그 없음): PASS_MODE가 test·live가 아님 / PAYAPP_USERID·LINKKEY·LINKVAL 중 빈 칸 / PASS_SECRET 32바이트 미만.
 // 비밀값 비교는 양쪽 SHA-256 뒤 timingSafeEqual. 요청 본문·머리·IP를 console에 찍지 않는다(예외: PAY_DEBUG_FIELDS=1일 때 칸 이름과 참·거짓만).
@@ -23,6 +23,16 @@ const PRICE = 9900;
 const SEASON = { price: 4900, until: Date.parse("2026-11-30T23:59:59+09:00"), graceMs: 24 * 60 * 60 * 1000 };
 const priceOk = (n, now) => n === PRICE || (n === SEASON.price && now <= SEASON.until + SEASON.graceMs);
 const TAG = "so-book-1";
+// (2026-11-12 운영자 결정) 2027 신년운세는 책과 따로 파는 상품: 4,900원 고정, 꼬리표 so-ny-1, 열람 코드 SNY-….
+//   책 코드(SOP)로는 신년운세가 열리지 않고, 신년운세 코드(SNY)로는 책이 열리지 않는다(함수 book이 접두로 가른다).
+//   기록 모양은 그대로(결제번호·상태·코드 해시·시각). 상품은 코드 접두로 알 수 있어 따로 적지 않는다.
+const TAG_NY = "so-ny-1";
+const NY_PRICE = 4900;
+const PRODUCTS = Object.freeze({
+  book: { tag: TAG, prefix: "SOP", salt: "pass:", price: (n, now) => priceOk(n, now) },
+  ny: { tag: TAG_NY, prefix: "SNY", salt: "pass-ny:", price: (n) => n === NY_PRICE },
+});
+const productOfTag = (t) => (t === TAG ? "book" : t === TAG_NY ? "ny" : null);
 const R_RE = /^[0-9a-f]{32}$/;
 const MUL_RE = /^[0-9A-Za-z_-]{1,40}$/; // 키 이름에 들어가므로 모양을 좁힌다
 const CANCEL_STATES = new Set(["8", "32", "9", "64", "70", "71"]); // 요청취소·승인취소·부분취소
@@ -43,9 +53,10 @@ function checkChar(body) {
   for (let i = 0; i < body.length; i++) s += (2 * i + 1) * ALPHA.indexOf(body[i]);
   return ALPHA[s % 32];
 }
-// R → P (결정적, 결제 1건 = R 1개 = 코드 1개)
-function passOf(secret, r) {
-  const d = crypto.createHmac("sha256", secret).update("pass:" + r).digest();
+// R → P (결정적, 결제 1건 = R 1개 = 코드 1개). prod "ny"면 다른 소금·접두(SNY)라 같은 R이라도 책 코드와 겹치지 않는다
+function passOf(secret, r, prod = "book") {
+  const D = PRODUCTS[prod] || PRODUCTS.book;
+  const d = crypto.createHmac("sha256", secret).update(D.salt + r).digest();
   let body = "";
   let acc = 0;
   let bits = 0;
@@ -58,7 +69,7 @@ function passOf(secret, r) {
     }
     acc &= (1 << bits) - 1;
   }
-  return "SOP" + body + checkChar(body);
+  return D.prefix + body + checkChar(body);
 }
 const hashOfPass = (secret, p) => crypto.createHmac("sha256", secret).update("hash:" + normalize(p)).digest("hex");
 
@@ -100,9 +111,9 @@ async function settleCancelled(store, mul, ph, at) {
 }
 
 // 결제완료(4). 쓰는 키는 mul/·pass/뿐 (cancel/ 0건, 합격 27)
-async function onPaid(store, secret, mul, r, now) {
+async function onPaid(store, secret, mul, r, now, prod = "book") {
   const at = iso(now);
-  const ph = hashOfPass(secret, passOf(secret, r)); // ①
+  const ph = hashOfPass(secret, passOf(secret, r, prod)); // ①
   const M = "mul/" + mul;
   const PK = "pass/" + ph;
   const C = "cancel/" + mul;
@@ -134,12 +145,12 @@ async function onPaid(store, secret, mul, r, now) {
 }
 
 // 취소(8·32·9·64·70·71): cancel/ → mul/ → pass/ 순서. 금액·var1 모양은 보지 않는다(B-1). r은 올바른 모양일 때만 넘어온다
-async function onCancel(store, secret, mul, r, now) {
+async function onCancel(store, secret, mul, r, now, prod = "book") {
   const at = iso(now);
   const M = "mul/" + mul;
   await store.set("cancel/" + mul, { mul_no: mul, state: "cancelled", at }, { onlyIfNew: true }); // ① 이미 있으면 그대로
   const m = await store.get(M); // ②
-  const ph = (m && m.ph) || (r ? hashOfPass(secret, passOf(secret, r)) : null);
+  const ph = (m && m.ph) || (r ? hashOfPass(secret, passOf(secret, r, prod)) : null);
   // ③ 있으면 cancelled로, ④ 없으면(먼저 온 취소, B-2) 묘비 { ph | null, cancelled }
   if (!m || m.state !== "cancelled" || (m.ph == null && ph)) await store.set(M, { ph: ph || null, state: "cancelled", at });
   if (!ph) return;
@@ -162,7 +173,7 @@ async function feedback(req, env, store, now) {
   const f = new URLSearchParams(raw);
   if (env.PAY_DEBUG_FIELDS === "1") {
     // 실결제 시험 G7 ⑦ 전용: 칸 이름과 기대값 일치 여부(참·거짓)만. 값은 남기지 않는다
-    console.log("pay-debug " + JSON.stringify({ fields: [...new Set(f.keys())].sort(), state: /^\d{1,3}$/.test(f.get("pay_state") || "") ? f.get("pay_state") : "?", priceOk: priceOk(Number(f.get("price")), now), tagOk: f.get("var2") === TAG }));
+    console.log("pay-debug " + JSON.stringify({ fields: [...new Set(f.keys())].sort(), state: /^\d{1,3}$/.test(f.get("pay_state") || "") ? f.get("pay_state") : "?", priceOk: priceOk(Number(f.get("price")), now) || Number(f.get("price")) === NY_PRICE, tagOk: f.get("var2") === TAG, tagNy: f.get("var2") === TAG_NY }));
   }
   const a = same(f.get("userid"), env.PAYAPP_USERID);
   const b = same(f.get("linkkey"), env.PAYAPP_LINKKEY);
@@ -172,13 +183,15 @@ async function feedback(req, env, store, now) {
   const state = String(f.get("pay_state") || "");
   const mul = String(f.get("mul_no") || "");
   const r = String(f.get("var1") || "");
+  // 상품은 var2(꼬리표)로 가른다: so-book-1 = 책, so-ny-1 = 신년운세. 가격도 그 상품 값이어야 한다
+  const prod = productOfTag(f.get("var2"));
   if (state === "1" || state === "4") {
     const price = String(f.get("price") || "");
-    if (!/^\d{1,9}$/.test(price) || !priceOk(Number(price), now) || f.get("var2") !== TAG || !R_RE.test(r)) return text(400, "FAIL");
+    if (!prod || !/^\d{1,9}$/.test(price) || !PRODUCTS[prod].price(Number(price), now) || !R_RE.test(r)) return text(400, "FAIL");
     if (state === "1") return text(200, "SUCCESS");
     if (!MUL_RE.test(mul)) return text(400, "FAIL");
     try {
-      await onPaid(store, env.PASS_SECRET, mul, r, now);
+      await onPaid(store, env.PASS_SECRET, mul, r, now, prod);
     } catch (e) {
       return text(500, "FAIL"); // checkretry=y → 페이앱이 다시 보낸다
     }
@@ -187,7 +200,7 @@ async function feedback(req, env, store, now) {
   if (CANCEL_STATES.has(state)) {
     if (!MUL_RE.test(mul)) return text(400, "FAIL");
     try {
-      await onCancel(store, env.PASS_SECRET, mul, R_RE.test(r) ? r : null, now);
+      await onCancel(store, env.PASS_SECRET, mul, R_RE.test(r) ? r : null, now, prod || "book"); // 꼬리표가 없으면 책으로 본다(mul/ 기록이 있으면 그 해시를 쓴다)
     } catch (e) {
       return text(500, "FAIL");
     }
@@ -215,15 +228,20 @@ async function status(req, env, store, now) {
     h.bad++;
     return json(400, { error: "bad" });
   }
-  const P = passOf(env.PASS_SECRET, b.r);
-  let st;
-  try {
-    st = await passState(store, env.PASS_SECRET, P);
-  } catch (e) {
-    return json(503, { error: "store" }); // pending으로 바꾸지 않는다(검수 E)
+  // R 하나로 두 상품의 코드를 모두 본다(브라우저는 어느 상품인지 보내지 않는다 — 본문은 { r } 한 칸 그대로)
+  let anyCancelled = false;
+  for (const prod of ["book", "ny"]) {
+    const P = passOf(env.PASS_SECRET, b.r, prod);
+    let st;
+    try {
+      st = await passState(store, env.PASS_SECRET, P);
+    } catch (e) {
+      return json(503, { error: "store" }); // pending으로 바꾸지 않는다(검수 E)
+    }
+    if (st === "paid") return json(200, { state: "paid", pass: P });
+    if (st === "cancelled") anyCancelled = true;
   }
-  if (st === "paid") return json(200, { state: "paid", pass: P });
-  if (st === "cancelled") return json(200, { state: "cancelled" });
+  if (anyCancelled) return json(200, { state: "cancelled" });
   return json(200, { state: "pending" });
 }
 
@@ -269,4 +287,5 @@ async function respond(req, context, openStore, env = process.env) {
 }
 
 const _reset = () => hits.clear();
-module.exports = { respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, STORE_NAME, PRICE, SEASON, priceOk, TAG, CANCEL_STATES, _hits: hits, _reset };
+const productOfPass = (p) => (/^SNY/.test(normalize(p)) ? "ny" : "book");
+module.exports = { respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, productOfPass, STORE_NAME, PRICE, SEASON, priceOk, TAG, TAG_NY, NY_PRICE, PRODUCTS, CANCEL_STATES, _hits: hits, _reset };

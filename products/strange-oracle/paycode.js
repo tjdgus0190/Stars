@@ -227,11 +227,15 @@
   // ── (14단계 14-4) 열람 코드 SOP: "SOP" + 무작위 12자(Crockford Base32, 약 60비트) + 검사 1자 = 16자. 화면 표기 SOP-XXXX-XXXX-XXXXX.
   //   브라우저는 모양만 본다(서버 요청 전에 SO1·SOG·모양 틀림을 걸러 냄). 진짜인지는 함수 book이 해시로 확인한다.
   //   코드 원문은 저장소에 쓰지 않는다: 운영자가 tools/strange-oracle/make-pass.js로 만든다.
-  const P_PREFIX = "SOP", P_LEN = 16;
+  //   (2026-11-12) 2027 신년운세는 따로 파는 상품이라 코드 머리가 SNY(SNY-XXXX-XXXX-XXXXX). 몸통·검사 글자 계산은 같다.
+  const P_PREFIX = "SOP", P_PREFIX_NY = "SNY", P_LEN = 16;
   function passNormalize(input) {
     let s = String(input || "").toUpperCase().replace(/[^0-9A-Z]/g, "");
-    if (!/^S[O0]P/.test(s)) return "";
-    s = P_PREFIX + s.slice(3).replace(/O/g, "0").replace(/[IL]/g, "1");
+    let head;
+    if (/^S[O0]P/.test(s)) head = P_PREFIX;
+    else if (/^SNY/.test(s)) head = P_PREFIX_NY;
+    else return "";
+    s = head + s.slice(3).replace(/O/g, "0").replace(/[IL]/g, "1");
     if (s.length !== P_LEN || [...s.slice(3)].some((c) => val(c) < 0)) return "";
     return checkChar(s.slice(3, P_LEN - 1)) === s[P_LEN - 1] ? s : "";
   }
@@ -242,13 +246,15 @@
     const pass = passNormalize(input);
     return pass ? { pass } : { error: "shape" };
   }
-  const looksPass = (input) => /^S[O0]P/.test(String(input || "").toUpperCase().replace(/[^0-9A-Z]/g, ""));
-  function passMake() {
+  const looksPass = (input) => /^S(?:[O0]P|NY)/.test(String(input || "").toUpperCase().replace(/[^0-9A-Z]/g, ""));
+  // 코드가 어느 상품인지: "ny"(SNY) | "book"(SOP)
+  const passProduct = (p) => (/^SNY/.test(String(p || "").toUpperCase().replace(/[^0-9A-Z]/g, "")) ? "ny" : "book");
+  function passMake(prod) {
     const body = randomChars(P_LEN - 4);
-    return P_PREFIX + body + checkChar(body);
+    return (prod === "ny" ? P_PREFIX_NY : P_PREFIX) + body + checkChar(body);
   }
   const passPretty = (s) => `${s.slice(0, 3)}-${s.slice(3, 7)}-${s.slice(7, 11)}-${s.slice(11)}`;
-  const Pass = { normalize: passNormalize, check: passCheck, looksPass, make: passMake, pretty: passPretty, PREFIX: P_PREFIX, LEN: P_LEN };
+  const Pass = { normalize: passNormalize, check: passCheck, looksPass, product: passProduct, make: passMake, pretty: passPretty, PREFIX: P_PREFIX, PREFIX_NY: P_PREFIX_NY, LEN: P_LEN };
 
   const api = { encode, decode, normalize, groups, pretty, roomsOf, ARCHETYPES, ROOMS, CHAPTER_ORDER, LEGACY_ORDER, FIELDS, LEN, Resume, Pass };
   if (typeof module === "object" && module.exports) module.exports = api;

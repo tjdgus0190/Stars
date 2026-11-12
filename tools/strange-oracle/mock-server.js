@@ -18,6 +18,7 @@
 //   /__dev/skip?rooms=3         → 새 순서(14-1)의 앞 세 방(만신·오검·별)만 마친 상태
 //   /__dev/skip?legacy=1        → 옛 상태: 13단계 순서 오검~룬(5방) 마침, 만신 미완 (rooms=N이면 옛 순서 앞 N개, 최대 6)
 //   /__dev/skip?paid=1          → (test) 시험 열람 상태: sessionStorage strange-oracle-pass에 모의 코드. paid=0(기본)은 결제 전
+//   /__dev/skip?nypaid=1        → (test) 2027 신년운세를 산 상태: sessionStorage strange-oracle-pass-ny에 모의 SNY 코드(책 paid와 따로)
 //   /__dev/skip?to=book         → 책 목차로 도착 (to=hub 등 다른 화면도 가능, 기본 story)
 //   예: /__dev/skip?rooms=7&paid=1&to=book  → 일곱 방 마침 + 결제한 상태로 책 12장이 모두 열림 (결정 89 "별도 시험 페이지")
 //   시험용 가짜 프로필(이름 "테스트", 1995-03-25 14:37)을 이 탭의 sessionStorage에만 넣는다
@@ -62,8 +63,9 @@ if (!fs.existsSync(STATIC)) {
   process.exit(1);
 }
 const MOCK_PASS = PayCode.Pass.make(); // 시작할 때마다 새로
+const MOCK_PASS_NY = PayCode.Pass.make("ny"); // (2026-11-12) 2027 신년운세 시험 코드(SNY) — 책과 따로
 const PAYMOCK = MODE === "test" ? require("./mock-pay.js").createPayMock({ port: PORT }) : null;
-const ENV = { PASS_MODE: MODE === "test" ? "test" : "", BOOK_PASS_HASHES: MODE === "test" ? Book.hashOf(MOCK_PASS) : "" };
+const ENV = { PASS_MODE: MODE === "test" ? "test" : "", BOOK_PASS_HASHES: MODE === "test" ? Book.hashOf(MOCK_PASS) : "", NY_PASS_HASHES: MODE === "test" ? Book.hashOf(MOCK_PASS_NY) : "" };
 const MAPMOCK = require("./mock-map.js").createMapMock({ port: PORT, mode: MODE });
 const bookEnv = () => (PAYMOCK ? Object.assign({}, ENV, { PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET }) : ENV);
 
@@ -150,6 +152,7 @@ const server = http.createServer((req, res) => {
     const toQ = url.searchParams.get("to") || "";
     const to = toQ === "book" ? "report" : /^[a-z-]+$/.test(toQ) ? toQ : "story";
     const paid = url.searchParams.get("paid") === "1" && MODE === "test";
+    const nypaid = url.searchParams.get("nypaid") === "1" && MODE === "test";
     const join = /^[A-Za-z0-9_-]{22}$/.test(url.searchParams.get("join") || "") ? url.searchParams.get("join") : "";
     const bm = (url.searchParams.get("birth") || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
     const birth = bm ? `{ y: ${Number(bm[1])}, m: ${Number(bm[2])}, d: ${Number(bm[3])} }` : "{ y: 1995, m: 3, d: 25 }";
@@ -168,6 +171,7 @@ if (R.indexOf("sibyl") > -1) v.sibyl = { sors: 12, topic: "love", archetype: ORA
 sessionStorage.clear();
 sessionStorage.setItem("strange-oracle", JSON.stringify({ profile: { name: "테스트", birth: ${birth}, time: { h: 14, m: 37 } }, visits: v }));
 ${paid ? `sessionStorage.setItem("strange-oracle-pass", ${JSON.stringify(MOCK_PASS)});` : ""}
+${nypaid ? `sessionStorage.setItem("strange-oracle-pass-ny", ${JSON.stringify(MOCK_PASS_NY)});` : ""}
 ${join ? `sessionStorage.setItem("strange-oracle-map", ${JSON.stringify(JSON.stringify({ join }))});` : ""}
 location.replace("${P}#${to}");
 </script>`;
@@ -223,6 +227,6 @@ server.listen(PORT, HOST, () => {
   console.log(`모의 서버 (${SRC ? "원본 폴더" : "dist"} · mode=${MODE})`);
   console.log(`  정적: ${STATIC}`);
   console.log(`  열기: http://127.0.0.1:${PORT}/products/strange-oracle/`);
-  if (MODE === "test") console.log(`  모의 열람 코드(이 실행에서만 유효): ${PayCode.Pass.pretty(MOCK_PASS)}`);
+  if (MODE === "test") console.log(`  모의 열람 코드(이 실행에서만 유효): ${PayCode.Pass.pretty(MOCK_PASS)} · 신년운세 ${PayCode.Pass.pretty(MOCK_PASS_NY)}`);
 });
 module.exports = server;
