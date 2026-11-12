@@ -274,3 +274,65 @@ body.has-ny-tabbar #app { padding-bottom: calc(72px + env(safe-area-inset-bottom
 .ny-one { padding: var(--space-4); border-radius: var(--radius-md); background: var(--accent-soft); color: var(--c-text-strong); }
 .ny-acts { display: grid; gap: var(--space-3); margin-top: var(--space-6); }
 body.is-ny #sky { opacity: 0.45; transition: opacity 1100ms ease; }
+
+/* ═════ (2026-11-12) 문 안으로 빨려 들어가기 — 새해 첫새벽의 상쾌한 빛 ═════ */
+.ny-plunge { position: fixed; inset: 0; z-index: 95; overflow: hidden; pointer-events: auto; cursor: pointer; }
+.ny-plunge > * { position: fixed; pointer-events: none; }
+.ny-plunge__dim { inset: 0; background: oklch(0.12 0.04 300 / 0); animation: ny-p-dim 900ms ease forwards; }
+@keyframes ny-p-dim { to { background: oklch(0.12 0.04 300 / 0.55); } }
+.ny-plunge__portal { /* 문 너머의 방 빛: 화면 가운데로 다가오며 커진다 */
+  border-radius: 50% 50% 6px 6px / 34% 34% 6px 6px; transform-origin: 50% 50%;
+  background: radial-gradient(ellipse 70% 62% at 50% 58%, oklch(1 0 0), oklch(0.95 0.06 var(--accent-h)) 22%, var(--accent) 48%, oklch(0.32 0.09 var(--accent-h)) 85%);
+  box-shadow: 0 0 40px var(--accent), 0 0 120px oklch(0.95 0.04 180 / 0.5);
+}
+.ny-plunge__streaks { /* 가운데에서 바깥으로 스치는 새벽 공기 줄기 */
+  inset: -20%; opacity: 0; transform-origin: var(--cx) var(--cy);
+  background: repeating-conic-gradient(from 0deg at var(--cx) var(--cy), transparent 0deg 3.4deg, oklch(0.98 0.03 190 / 0.55) 3.4deg 3.8deg, transparent 3.8deg 7.6deg, oklch(0.95 0.07 85 / 0.4) 7.6deg 7.9deg, transparent 7.9deg 11deg);
+  -webkit-mask-image: radial-gradient(circle at var(--cx) var(--cy), transparent 4%, #000 22%, #000 48%, transparent 78%);
+  mask-image: radial-gradient(circle at var(--cx) var(--cy), transparent 4%, #000 22%, #000 48%, transparent 78%);
+  animation: ny-p-warp 1000ms cubic-bezier(.5, 0, .3, 1) 120ms forwards;
+}
+@keyframes ny-p-warp { 0% { opacity: 0; transform: scale(0.5) rotate(0deg); } 40% { opacity: 1; } 100% { opacity: 0.9; transform: scale(2.2) rotate(8deg); } }
+.ny-plunge__motes { inset: 0; }
+.ny-plunge__motes span { /* 서리 같은 흰 빛 티끌·금빛 티끌 */
+  position: absolute; left: var(--cx); top: var(--cy); width: calc(4px * var(--s)); height: calc(4px * var(--s)); margin: -2px 0 0 -2px; border-radius: 50%;
+  background: oklch(0.99 0.02 190); box-shadow: 0 0 8px oklch(0.95 0.06 190), 0 0 2px #fff; opacity: 0;
+  animation: ny-p-mote 820ms cubic-bezier(.6, 0, .9, .6) var(--d) forwards;
+}
+.ny-plunge__motes span:nth-child(3n) { background: oklch(0.92 0.12 85); box-shadow: 0 0 8px oklch(0.88 0.13 75); }
+@keyframes ny-p-mote { 0% { opacity: 0; transform: translate(0, 0) scale(0.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(2.4); } }
+.ny-plunge__flash { /* 하얀 새벽빛이 번지는 순간 방이 바뀐다 */
+  inset: 0; opacity: 0;
+  background: radial-gradient(circle at 50% 50%, oklch(1 0 0), oklch(0.97 0.03 190) 45%, oklch(0.93 0.06 var(--accent-h)) 100%);
+  animation: ny-p-flash 860ms ease-in forwards;
+}
+@keyframes ny-p-flash { 0%, 55% { opacity: 0; } 100% { opacity: 1; } }
+.ny-plunge.is-out { pointer-events: none; animation: ny-p-out 620ms ease-out forwards; }
+.ny-plunge.is-out .ny-plunge__flash { animation: none; opacity: 1; }
+@keyframes ny-p-out { to { opacity: 0; } }
+
+/* 방에 도착: 안내자·문구가 차례로 떠오른다 */
+#screen-ny-room.is-active > * { animation: ny-arrive 700ms cubic-bezier(.2, .7, .2, 1) both; }
+#screen-ny-room.is-active > *:nth-child(2) { animation-delay: 120ms; }
+#screen-ny-room.is-active > *:nth-child(3) { animation-delay: 240ms; }
+@keyframes ny-arrive { from { opacity: 0; transform: translateY(14px) scale(0.98); filter: blur(3px); } }
+@media (prefers-reduced-motion: reduce) { #screen-ny-room.is-active > * { animation: none; } }
+
+/* ═════ (2026-11-12 시안) 새 구조 완성본 ═════ */
+.ny-hook { display: flex; gap: var(--space-3); align-items: flex-start; margin: 0 0 var(--space-5); }
+.ny-hook__fig { flex: none; width: 44px; height: 59px; color: var(--accent); fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ny-hook__body { flex: 1; padding: var(--space-3) var(--space-4); border-radius: 4px 16px 16px 16px; background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.ny-hook__by { margin: 0 0 4px; font-size: var(--fs-xs); color: var(--accent); }
+.ny-hook__say { margin: 0; font-size: var(--fs-lg); line-height: 1.6; color: var(--c-text-strong); word-break: keep-all; }
+.ny-fortunes { display: grid; gap: var(--space-3); }
+.ny-fortune { padding: var(--space-4); border-radius: var(--radius-md); background: var(--c-surface-2); border-left: 3px solid var(--ny-gold); }
+.ny-fortune--love { border-left-color: oklch(0.72 0.14 10); }
+.ny-fortune--health { border-left-color: oklch(0.75 0.11 160); }
+.ny-fortune__head { margin: 0 0 6px; font-size: var(--fs-md); color: var(--c-text-strong); }
+.ny-fortune__head::before { content: "◆ "; color: var(--ny-gold); }
+.ny-fortune--love .ny-fortune__head::before { content: "♥ "; color: oklch(0.72 0.14 10); }
+.ny-fortune--health .ny-fortune__head::before { content: "✦ "; color: oklch(0.75 0.11 160); }
+.ny-lucky { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin: 0; }
+.ny-lucky__item { padding: var(--space-3) var(--space-2); border-radius: var(--radius-md); text-align: center; background: oklch(0.83 0.12 82 / 0.1); border: 1px solid oklch(0.83 0.12 82 / 0.35); }
+.ny-lucky__item dt { font-size: var(--fs-xs); color: var(--ny-gold); }
+.ny-lucky__item dd { margin: 4px 0 0; font-size: var(--fs-md); font-weight: 700; color: var(--c-text-strong); word-break: keep-all; }

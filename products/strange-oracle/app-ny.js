@@ -152,8 +152,9 @@
         b.addEventListener("click", () => {
           if (b.classList.contains("is-opening")) return;
           if (C.reduceMotion) return openRoom(room);
-          b.classList.add("is-opening"); // 두 짝이 열리고 빛이 쏟아진 뒤 들어간다
-          setTimeout(() => openRoom(room), 600);
+          C.ensureRooms([room]).catch(() => {}); // 빨려 들어가는 동안 방 파일을 미리 받는다
+          b.classList.add("is-opening"); // 두 짝이 열리고 빛이 쏟아진 뒤
+          setTimeout(() => plunge(b, room), 380); // 문 안으로 빨려 들어간다
         });
         grid.append(b);
       });
@@ -165,9 +166,50 @@
     };
 
     // ───────── 방 안: 안내자 첫마디 + 필요한 입력 ─────────
-    function openRoom(room) {
+    function openRoom(room, instant) {
       cur = room;
-      C.ensureRooms([room]).then(() => C.go("ny-room"), () => C.toast(T.toast.loadFail || ""));
+      C.ensureRooms([room]).then(() => C.go("ny-room", { instant: Boolean(instant) }), () => C.toast(T.toast.loadFail || ""));
+    }
+    // (2026-11-12) 문 안으로 빨려 들어가는 연출(약 1.4초): 문 안쪽 빛(포털)이 화면 가운데로 다가오며 화면을 덮고, 새벽 공기 같은 빛 줄기와 티끌이
+    //   가운데에서 바깥으로 스쳐 지나간다 → 하얀 새벽빛이 번진 순간 방 안으로 바뀌고 빛이 걷힌다. 누르면 바로 넘어간다
+    function plunge(door, room) {
+      const fr = door.querySelector(".ny-door__frame").getBoundingClientRect();
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const cx = fr.left + fr.width / 2, cy = fr.top + fr.height / 2;
+      const ov = mk("div", "ny-plunge");
+      ov.dataset.room = room;
+      ov.setAttribute("aria-hidden", "true");
+      ov.style.setProperty("--cx", cx + "px");
+      ov.style.setProperty("--cy", cy + "px");
+      const portal = mk("div", "ny-plunge__portal");
+      Object.assign(portal.style, { left: fr.left + "px", top: fr.top + "px", width: fr.width + "px", height: fr.height + "px" });
+      const motes = mk("div", "ny-plunge__motes");
+      for (let i = 0; i < 34; i++) {
+        const sp = mk("span");
+        const a = Math.random() * Math.PI * 2, d = 45 + Math.random() * 70;
+        sp.style.setProperty("--x", (Math.cos(a) * d).toFixed(1) + "vmax");
+        sp.style.setProperty("--y", (Math.sin(a) * d).toFixed(1) + "vmax");
+        sp.style.setProperty("--d", Math.round(Math.random() * 380) + "ms");
+        sp.style.setProperty("--s", (0.6 + Math.random() * 1.4).toFixed(2));
+        motes.append(sp);
+      }
+      ov.append(mk("div", "ny-plunge__dim"), portal, mk("div", "ny-plunge__streaks"), motes, mk("div", "ny-plunge__flash"));
+      document.body.append(ov);
+      const scale = Math.max(vw / fr.width, vh / fr.height) * 2.4;
+      if (portal.animate)
+        portal.animate([{ transform: "translate(0, 0) scale(1)", filter: "brightness(1)" }, { transform: `translate(${(vw / 2 - cx).toFixed(1)}px, ${(vh / 2 - cy).toFixed(1)}px) scale(${scale.toFixed(2)})`, filter: "brightness(1.6)" }],
+          { duration: 950, easing: "cubic-bezier(.55, 0, .25, 1)", fill: "forwards" });
+      let done = false;
+      const enterNow = () => {
+        if (done) return;
+        done = true;
+        openRoom(room, true);
+        ov.classList.add("is-out");
+        setTimeout(() => ov.remove(), 650);
+        door.classList.remove("is-opening");
+      };
+      ov.addEventListener("click", enterNow);
+      setTimeout(enterNow, 860);
     }
     const pad = (n) => String(n).padStart(2, "0");
     function renderRoom() {
@@ -620,8 +662,54 @@
       nodes.forEach((n) => s.append(n));
       det.append(s);
     }
+    // (2026-11-12 시안) 새 구조 완성본: 첫마디 · 지난해 · 한 해의 결 · 재물·연애·건강 · 열두 달 · 마음 쓰일 일 · 한 가지 · 행운 표식
+    function renderFull(det, F) {
+      const M = model, L = N.result.full;
+      const hook = mk("div", "ny-hook");
+      hook.dataset.room = M.room;
+      hook.innerHTML = `<svg class="ny-hook__fig" viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${M.room}" /></svg>`;
+      const hb = mk("div", "ny-hook__body");
+      hb.append(mk("p", "ny-hook__by", fill(L.hookBy, { guide: T.rooms[M.room].short || "" })), mk("p", "ny-hook__say", F.hook || ""));
+      hook.append(hb);
+      det.append(hook);
+      if (F.past) sec(det, L.pastHead[M.room] || L.pastHead.def, paras(F.past).map((t) => mk("p", "ny-p", t)));
+      if (F.year) sec(det, N.result.yearHead, paras(F.year).map((t) => mk("p", "ny-p", t)));
+      const g = mk("div", "ny-fortunes");
+      ["wealth", "love", "health"].forEach((k) => {
+        if (!F[k]) return;
+        const c = mk("article", "ny-fortune ny-fortune--" + k);
+        c.append(mk("h4", "ny-fortune__head", L[k]), mk("p", "ny-p", F[k]));
+        g.append(c);
+      });
+      if (g.children.length) sec(det, L.fortunesHead, [g]);
+      const ol = mk("ol", "ny-flow");
+      M.items.forEach((it, i) => {
+        const t = F.months && F.months[i];
+        if (!t) return;
+        const li = mk("li", "ny-flow__item is-" + it.tone);
+        const h = mk("p", "ny-flow__head");
+        h.append(mk("span", "ny-cal__dot"), mk("strong", "", it.label));
+        if (it.tag) h.append(mk("span", "ny-flow__tag", it.tag));
+        li.append(h, mk("p", "ny-p", t));
+        ol.append(li);
+      });
+      if (ol.children.length) sec(det, N.result.monthsHead, [ol]);
+      if (F.worry) sec(det, L.worryHead, [mk("p", "ny-p", F.worry)]);
+      if (F.one) sec(det, N.result.oneHead, [mk("p", "ny-p ny-one", F.one)]);
+      if (F.lucky) {
+        const dl = mk("dl", "ny-lucky");
+        ["color", "month", "word"].forEach((k) => {
+          if (!F.lucky[k]) return;
+          const d = mk("div", "ny-lucky__item");
+          d.append(mk("dt", "", L.lucky[k]), mk("dd", "", F.lucky[k]));
+          dl.append(d);
+        });
+        sec(det, L.luckyHead, [dl]);
+      }
+    }
     function renderPaid(det, B) {
       const M = model;
+      if (B.full && B.full[String(M.k.year)]) return renderFull(det, B.full[String(M.k.year)]);
       if (B.year) sec(det, N.result.yearHead, paras(B.year[M.k.year]).map((t) => mk("p", "ny-p", t)));
       if (B.areas && M.k.areas != null && B.areas[M.k.areas]) {
         // (2026-11-04) 방이 비추는 면에 맞는 갈래만(data.js ny.rooms.<방>.areas). 없으면(룬) 네 갈래 모두

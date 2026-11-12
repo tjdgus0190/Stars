@@ -106,6 +106,16 @@ window.TEXT = {
       seasonsHead: "절기마다",
       halvesHead: "반년마다",
       oneHead: "이 해를 위한 한 가지",
+      // (2026-11-12 시안) 새 구조 완성본(유료 원본 <방>.full)이 있는 판의 머리들
+      full: {
+        hookBy: "{guide}의 첫마디",
+        pastHead: { saju: "지난해, 병오년의 자네", def: "지난해를 돌아보면" },
+        fortunesHead: "재물 · 연애 · 건강",
+        wealth: "재물운", love: "연애운", health: "건강운",
+        worryHead: "올해 마음 쓰일 일",
+        luckyHead: "올해의 행운 표식",
+        lucky: { color: "색", month: "달", word: "낱말" },
+      },
       dayHead: "2027년, 당신의 날이 돌아오는 날",
       dayNone: "2027년에는 당신의 날이 한 번도 돌아오지 않아요. 그 대신 가장 가까운 날을 적어 둘게요.",
       lockHead: "상세 풀이는 책을 산 분께 열려요",
