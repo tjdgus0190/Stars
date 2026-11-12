@@ -96,12 +96,15 @@ async function launch({ port = 9333, reduced = false, width = 360, height = 800,
     else if (msg.method) listeners.forEach((l) => l(msg));
   };
   const send = (method, params = {}) => new Promise((res, rej) => { const i = ++id; waiters.set(i, { res, rej }); ws.send(JSON.stringify({ id: i, method, params })); });
-  const log = { console: [], errors: [], requests: [], bodies: [] };
+  const log = { console: [], errors: [], requests: [], bodies: [], bad: [] }; // bad: 400 이상 응답(주소·상태·보낸 본문) — 시험 실패 원인 찾기용
+  const sentBody = new Map();
   listeners.push((m) => {
     if (m.method === "Runtime.consoleAPICalled") log.console.push(`${m.params.type}: ${m.params.args.map((a) => a.value ?? a.description).join(" ")}`);
     if (m.method === "Runtime.exceptionThrown") log.errors.push(m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text);
     if (m.method === "Log.entryAdded" && m.params.entry.level === "error") log.errors.push(`[log] ${m.params.entry.text} ${m.params.entry.url || ""}`);
     if (m.method === "Network.requestWillBeSent") { log.requests.push(m.params.request.method + " " + m.params.request.url); log.bodies.push({ url: m.params.request.url, body: m.params.request.postData || "" }); }
+    if (m.method === "Network.requestWillBeSent") { sentBody.set(m.params.requestId, m.params.request.postData || ""); if (sentBody.size > 2000) sentBody.clear(); }
+    if (m.method === "Network.responseReceived" && m.params.response.status >= 400) log.bad.push({ url: m.params.response.url, status: m.params.response.status, body: sentBody.get(m.params.requestId) || "" });
   });
   await send("Runtime.enable");
   await send("Log.enable");

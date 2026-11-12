@@ -29,5 +29,13 @@
   status = 301
   force = true
 
+# (2026-11-12 운영자 결정) 2027 신년운세 광고 착지 주소: strange-oracle.com/2027 → 새해의 회랑(#ny-hub). query(utm_…)는 그대로 넘어간다.
+#   신년운세 탭이 꺼진 동안(data.js ny.mode "off")은 입구가 그냥 열린다. 주소 뒤 #이 Netlify 이동에서 그대로 붙는지는 미확인 — 운영자가 배포 뒤 한 번 열어 확인
+[[redirects]]
+  from = "/2027"
+  to = "/products/strange-oracle/#ny-hub"
+  status = 302
+  force = true
+
 # 로직은 netlify/lib/(CommonJS)에 있고 모의 서버·단위 시험이 그대로 부른다.
 # 환경 변수 PASS_MODE·PAYAPP_USERID·PAYAPP_LINKKEY·PAYAPP_LINKVAL·PASS_SECRET(32바이트 이상) 중 하나라도 없으면 함수는 503(안전).

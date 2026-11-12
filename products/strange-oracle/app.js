@@ -163,6 +163,7 @@
   let bookGo = "";
   let storyBookHook = null;
   const PASS_KEY = "strange-oracle-pass"; // 확인된 열람 코드(탭을 닫으면 사라짐). 이어가기 코드에는 넣지 않는다
+  const NYPASS_KEY = "strange-oracle-pass-ny"; // (2026-11-12 운영자 결정) 2027 신년운세 열람 코드(SNY) — 책과 따로 파는 상품이라 따로 둔다
   // (15단계 15-2) 결제 확인용 무작위 값 R(128비트, 소문자 16진수 32자). 결제할 때마다 새로, 최근 3개까지 새것부터. 입력값에 준해 다룬다(console·분석·URL·localStorage 금지)
   const PAYREQ_KEY = "strange-oracle-payreq";
   // (16단계 16-8) 친구 궁합 지도: data.js map.mode. off(배포판) = 지도 DOM·지도 파일·지도 요청 0. test(시험 페이지)·live = 결말·나의 이야기에 지도 카드
@@ -280,6 +281,8 @@
       window.sessionStorage.removeItem("strange-oracle-bookmark"); // (13단계) 이어 읽기 장 id·쪽 번호
       window.sessionStorage.removeItem("strange-oracle-receipt"); // 12단계까지의 영수증 코드 칸
       window.sessionStorage.removeItem(PASS_KEY); // (14-4) 열람 코드도 "내 정보 지우기"로 함께 지운다
+      window.sessionStorage.removeItem(NYPASS_KEY); // (2026-11-12) 신년운세 열람 코드
+      window.sessionStorage.removeItem("strange-oracle-payprod"); // (2026-11-12) 결제창에 연 상품 이름
       window.sessionStorage.removeItem("strange-oracle-payroom"); // (22단계) 결제를 시작한 방 이름
       window.sessionStorage.removeItem(PAYREQ_KEY); // (15-2) 결제 확인용 R도 지운다 → 이 탭에서 책이 자동으로 열리지 않음(확인 창 경고 줄)
       window.sessionStorage.removeItem("strange-oracle-keep"); // (2026-10-28) 열람 코드에 결과 담기 동의 표시(서버 암호문은 카드의 체크를 꺼서 지운다)
@@ -3467,12 +3470,36 @@
     memPass = p || "";
     syncHubKakao();
     if (p) onAccount.pass(p); // (23단계) 로그인한 기기면 결제 코드를 계정에 연결
-    if (nyApi) nyApi.refresh(); // (2026-11-04) 새해 결과의 상세 칸 다시
     if (/-result$/.test(currentName) && !/^ny-/.test(currentName)) renderRest(screens[currentName]); // (22단계) 결제·코드 확인·폐기 → 방 결과의 나머지 칸 다시
     updateBookLines(); // (2026-10-30 v7) 책 장 링크는 산 사람에게만
     CHAPTER_ORDER.forEach((r) => freeCut(screens[`${r}-result`])); // (2026-10-31) 결제·코드 확인 → 접은 풀이 펼치기(또는 다시 접기)
   };
   const passNow = () => readPass() || memPass;
+  // (2026-11-12) 2027 신년운세 열람 코드(SNY): 책 코드와 같은 규칙(이 탭 sessionStorage), 다른 칸
+  let memNyPass = "";
+  const readNyPass = () => {
+    try {
+      const p = window.PayCode.Pass.normalize(window.sessionStorage.getItem(NYPASS_KEY) || "");
+      return window.PayCode.Pass.product(p) === "ny" ? p : "";
+    } catch (e) {
+      return "";
+    }
+  };
+  const writeNyPass = (p) => {
+    try {
+      if (p) window.sessionStorage.setItem(NYPASS_KEY, p);
+      else window.sessionStorage.removeItem(NYPASS_KEY);
+    } catch (e) {
+      /* 저장이 막힌 브라우저: 이 화면에서만 */
+    }
+    memNyPass = p || "";
+    if (p) onAccount.pass(p); // 로그인한 기기면 계정에 연결(서버는 결제 확인된 코드만 받음)
+    if (nyApi) nyApi.refresh(); // 새해 입구·결과 다시
+  };
+  const nyPassNow = () => readNyPass() || memNyPass;
+  const passOfProd = (prod) => (prod === "ny" ? nyPassNow() : passNow());
+  // 코드 접두로 상품을 갈라 제자리에 둔다(SOP = 책, SNY = 신년운세)
+  const takePass = (p) => (window.PayCode.Pass.product(p) === "ny" ? writeNyPass(p) : writePass(p));
   // 함수 book 부르기 → { ok, data } 또는 { kind: fail | wait | offline }. 본문은 pass·file 두 칸뿐, 응답은 저장하지 않는다(no-store)
   async function callBook(pass, file) {
     try {
@@ -3490,14 +3517,26 @@
       return { kind: "offline" };
     }
   }
+  // (2026-11-12) 신년운세 무료 두 방: 코드 없이 { file: "ny-free", room, k } — k는 결과 번호(입력값 아님). 응답은 저장하지 않는다
+  async function callNyFree(room, k) {
+    try {
+      const r = await fetch(BOOK_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file: "ny-free", room, k }), cache: "no-store", credentials: "omit" });
+      if (r.status !== 200) throw new Error(String(r.status));
+      const j = await r.json();
+      if (!j || j.file !== "ny-free" || j.room !== room || !j.data) throw new Error("shape");
+      return j.data;
+    } catch (e) {
+      throw new Error("free");
+    }
+  }
   const paidLoading = {};
   function loadPaid(file) {
     if (window[PAID_GLOBAL[file]]) return Promise.resolve();
     if (!paidLoading[file])
-      paidLoading[file] = callBook(passNow(), file).then((r) => {
+      paidLoading[file] = callBook(file === "ny" ? nyPassNow() : passNow(), file).then((r) => {
         delete paidLoading[file];
         if (!r.ok) {
-          if (r.kind === "fail" || r.kind === "cancelled") writePass(""); // 코드가 더는 통하지 않음(폐기·취소) → 결제 전 상태로. 503은 지우지 않음
+          if (r.kind === "fail" || r.kind === "cancelled") (file === "ny" ? writeNyPass : writePass)(""); // 코드가 더는 통하지 않음(폐기·취소) → 결제 전 상태로. 503은 지우지 않음
           if (r.kind === "cancelled") toast(PAY.pass.errors.cancelled || "");
           throw new Error(r.kind);
         }
@@ -5408,6 +5447,26 @@
   //  함수 status로는 { r } 한 칸만, 팝업의 postMessage에는 { type }만 보낸다. 분석 이벤트는 단계 이름뿐.
   let payScr = null;
   let payReturn = null; // #paid 복귀 처리(시작 때 부름). off면 null
+  let nyAfterPay = false; // (2026-11-12) 결제 확인이 새해 탭을 붙이기 전에 끝났으면, 붙인 뒤에 신년운세 화면으로
+  let nyPayStart = null; // (2026-11-12) 신년운세 결제 시작(결제 화면 설정 안에서 채움). off면 null
+  let nyOpenPass = null; // (2026-11-12) 신년운세 결제 화면의 코드 넣기 → 같은 확인 길
+  let openNyCode = null; // (2026-11-12) 신년운세 코드 카드 열기
+  // (2026-11-12) 결제창에 연 상품: book(책) | ny(2027 신년운세). 결제창에서 돌아와도 이어지게 이 탭 sessionStorage에 이름 하나만(입력값 아님)
+  const PAYPROD_KEY = "strange-oracle-payprod";
+  const readPayProd = () => {
+    try {
+      return window.sessionStorage.getItem(PAYPROD_KEY) === "ny" ? "ny" : "book";
+    } catch (e) {
+      return "book";
+    }
+  };
+  const writePayProd = (prod) => {
+    try {
+      window.sessionStorage.setItem(PAYPROD_KEY, prod === "ny" ? "ny" : "book");
+    } catch (e) {
+      /* 저장 막힘: 책으로 */
+    }
+  };
   let kakaoBoot = null; // (21단계) #kakao-… 복귀 처리(시작 때 부름). 카카오 꺼짐·결제 off면 null
   // (18-11) 결제 전 화면에 들어온 길: preview · toc · other
   let payFrom = "other";
@@ -5814,14 +5873,33 @@
       const o = siteOrigin();
       P.setDefault("userid", PA.userid);
       P.setDefault("shopname", PA.shopname || "");
-      const v = { goodname: PA.goodname, price: String(PAY.amount), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return`, var1: r, var2: PA.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y", redirectpay: "1" }; // (2026-10-22) redirectpay 1 = 결제요청 문자 대신 결제수단 화면으로 바로 이동(페이앱 JS 전용)
+      const NP = (T.ny && T.ny.pay) || {};
+      const ny = readPayProd() === "ny" && NP.tag;
+      const v = { goodname: ny ? NP.goodname : PA.goodname, price: String(ny ? NP.amount : PAY.amount), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return`, var1: r, var2: ny ? NP.tag : PA.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y", redirectpay: "1" }; // (2026-10-22) redirectpay 1 = 결제요청 문자 대신 결제수단 화면으로 바로 이동(페이앱 JS 전용)
       Object.keys(v).forEach((k) => P.setParam(k, v[k]));
       // (2026-10-22) 결제창을 팝업이 아니라 이 탭에서 연다. SDK를 버튼 뒤에 받으므로(3장) 팝업은 사용자 동작이 끊겨 모바일·인앱 브라우저에서 막히기 쉽다.
       //   같은 탭이면 returnurl → /api/pay/return → #paid로 돌아오고, 이 탭의 sessionStorage(R)가 그대로 남는다(15-2 이동 방식)
       if (typeof P.setTarget === "function") P.setTarget("_self");
       P.payrequest();
     }
+    // (2026-11-12) 결제 확인 화면의 몇 줄은 상품마다("책이 열려요" / "신년운세가 열려요")
+    const checkLines = [...checkScr.querySelectorAll("[data-t]")].filter((el) => ["pay.wait", "pay.pass.errors.cancelled", "pay.check.title"].includes(el.dataset.t));
+    checkLines.forEach((el) => (el.dataset.bookText = el.textContent));
+    const syncCheckText = () => {
+      const NC = (T.ny && T.ny.pay && T.ny.pay.check) || {};
+      const ny = readPayProd() === "ny";
+      checkScr.dataset.product = ny ? "ny" : "book";
+      checkLines.forEach((el) => {
+        const k = { "pay.wait": "wait", "pay.pass.errors.cancelled": "cancelled", "pay.check.title": "title" }[el.dataset.t];
+        el.textContent = ny && NC[k] ? NC[k] : el.dataset.bookText;
+      });
+    };
+    enter.paycheck = ((prev) => () => {
+      syncCheckText();
+      if (prev) prev();
+    })(enter.paycheck);
     function startPay(r) {
+      syncCheckText();
       setCheck("wait");
       if (currentName !== "paycheck") go("paycheck");
       loadSdk().then(
@@ -5855,8 +5933,21 @@
         /* 저장 막힘: 완료 이벤트에는 other */
       }
       track("so_pay", { step: "start", from: payEntry });
+      writePayProd("book");
       startPay(newReq()); // 누를 때마다 새 R → 저장한 뒤에야 SDK
     });
+    // (2026-11-12) 신년운세(별도 상품) 결제: 새해 결제 화면(app-ny.js)의 동의·버튼이 부른다. 같은 결제창·같은 확인 길, 상품 값만 다르다
+    nyPayStart = () => {
+      if (nyPassNow()) return;
+      try {
+        window.sessionStorage.setItem(PAYFROM_KEY, "ny");
+      } catch (e) {
+        /* 저장 막힘 */
+      }
+      track("so_pay", { step: "start", from: "ny" });
+      writePayProd("ny");
+      startPay(newReq());
+    };
     js("paycheck-sdk-retry", checkScr).addEventListener("click", () => startPay(readReq()[0] || newReq()));
 
     // ── 상태 묻기 (15-2 묻기 규칙): 한 회차 30초, 2초마다 가장 새 R 하나(약 15회) + 나머지 R(최대 2개)은 회차 끝(또는 [다시 확인] 때) 한 번씩 → 최대 17회.
@@ -5988,27 +6079,56 @@
       stopRound();
       const fresh = codes.filter((c, i) => codes.indexOf(c) === i);
       issued = fresh.concat(issued.filter((c) => !fresh.includes(c)));
-      writePass(fresh[0]);
+      // (2026-11-12) 상품마다 제자리에: SOP = 책, SNY = 신년운세. 이번에 연 상품(PAYPROD_KEY)의 코드가 왔으면 그 상품 화면으로
+      const isNy = (c) => window.PayCode.Pass.product(c) === "ny";
+      const bookCode = fresh.find((c) => !isNy(c)), nyCode = fresh.find(isNy);
+      const prod = nyCode && (readPayProd() === "ny" || !bookCode) ? "ny" : "book";
+      if (bookCode) writePass(bookCode);
+      if (nyCode) writeNyPass(nyCode);
       track("so_pay", { step: "done", from: readPayEntry() });
       try {
         window.sessionStorage.removeItem(PAYFROM_KEY);
       } catch (e) {
         /* 무시 */
       }
-      track("purchase", { value: Number(PAY.amount), currency: "KRW" }); // (2026-10-28) GA4 권장 구매 이벤트: 금액·통화만(결제번호·코드 없음, 6장)
+      track("purchase", { value: Number(prod === "ny" ? T.ny.pay.amount : PAY.amount), currency: "KRW" }); // (2026-10-28) GA4 권장 구매 이벤트: 금액·통화만(결제번호·코드 없음, 6장)
+      if (prod === "ny") {
+        takePayRoom();
+        if (nyApi) nyApi.afterPaid();
+        else {
+          nyAfterPay = true;
+          go("hub");
+        }
+        return openCodeCard("ny");
+      }
       coverNext = null;
       const back = takePayRoom(); // (22단계) 방에서 결제를 시작했으면 그 방 결과로(나머지 이야기가 바로 열림)
       if (back) ensureRoom(back).then(() => go(roomTarget(back)), () => go("report"));
       else go("report");
-      openCodeCard();
+      openCodeCard("book");
     }
     // ── 코드 카드 (15-5)
     const codeList = js("code-list", codeDlg);
     const codeTpl = js("code-item", codeDlg).cloneNode(true);
     const codeStatus = js("code-status", codeDlg);
-    function openCodeCard() {
-      const now = passNow();
-      const codes = (now ? [now] : []).concat(issued.filter((c) => c !== now));
+    // (2026-11-12) 코드 카드는 상품 하나씩: 책 코드와 신년운세 코드를 한 카드에 섞지 않는다(두 번 결제 안내가 잘못 뜨지 않게)
+    let cardProd = "book";
+    const NYI = (T.ny && T.ny.pay && T.ny.pay.issued) || {};
+    const cardLines = [...codeDlg.querySelectorAll("[data-t]")].filter((el) => ["pay.issued.body", "pay.issued.close", "pay.issued.title"].includes(el.dataset.t));
+    cardLines.forEach((el) => (el.dataset.bookText = el.textContent));
+    const cardCodes = () => {
+      const now = passOfProd(cardProd);
+      const same = (c) => (window.PayCode.Pass.product(c) === "ny") === (cardProd === "ny");
+      return (now ? [now] : []).concat(issued.filter((c) => c !== now && same(c)));
+    };
+    function openCodeCard(prod) {
+      cardProd = prod === "ny" ? "ny" : "book";
+      cardLines.forEach((el) => {
+        const k = el.dataset.t.split(".").pop();
+        el.textContent = cardProd === "ny" && NYI[k] ? NYI[k] : el.dataset.bookText;
+      });
+      const now = passOfProd(cardProd);
+      const codes = cardCodes();
       if (!codes.length) return;
       codeList.textContent = "";
       codes.forEach((c) => {
@@ -6035,6 +6155,7 @@
       });
       show(js("code-kakao-row", codeDlg), Boolean(T.kakao.jsKey && T.kakao.sdkUrl));
       syncKeepBox();
+      if (cardProd === "ny") show(keepBox, false); // 결과 담기는 책 코드에만
       show(js("code-double", codeDlg), codes.length > 1);
       codeStatus.textContent = "";
       show(codeStatus, false);
@@ -6168,16 +6289,16 @@
     });
     // (2026-10-28) 열람 코드를 카카오톡으로 보내 두기. 본문에만 코드, 링크는 입구 주소(캠페인 값만). 분석에는 단계 이름만
     js("code-kakao", codeDlg).addEventListener("click", () => {
-      const now = passNow();
-      const codes = (now ? [now] : []).concat(issued.filter((c) => c !== now)).map((c) => window.PayCode.Pass.pretty(c));
+      const codes = cardCodes().map((c) => window.PayCode.Pass.pretty(c));
       if (!codes.length) return;
       track("so_pay", { step: "code_kakao" });
-      ShareButtons.sendKakaoText(T.kakao, fill(PAY.issued.kakaoText || "", { code: codes.join("\n") }), kakaoLink("code"), PAY.issued.kakaoButton).catch(() => toast(T.toast.shareFail));
+      ShareButtons.sendKakaoText(T.kakao, fill((cardProd === "ny" && NYI.kakaoText) || PAY.issued.kakaoText || "", { code: codes.join("\n") }), kakaoLink("code"), PAY.issued.kakaoButton).catch(() => toast(T.toast.shareFail));
     });
     js("code-close", codeDlg).addEventListener("click", () => (codeDlg.close ? codeDlg.close() : codeDlg.removeAttribute("open")));
-    js("pay-opened-code", payScr).addEventListener("click", openCodeCard);
+    js("pay-opened-code", payScr).addEventListener("click", () => openCodeCard("book"));
+    openNyCode = () => openCodeCard("ny");
     const showCodeBtn = js("book-show-code");
-    if (showCodeBtn) showCodeBtn.addEventListener("click", openCodeCard);
+    if (showCodeBtn) showCodeBtn.addEventListener("click", () => openCodeCard("book"));
     onClearPay = () => {
       stopRound();
       issued = [];
@@ -6216,15 +6337,26 @@
       if (passBusy) return false;
       const r = window.PayCode.Pass.check(value);
       if (r.error) return msg(r.error), false; // receipt(SO1) · resume(SOG) · shape — 서버에 묻지 않는다
+      // (2026-11-12) 신년운세 코드(SNY)는 어느 칸에 넣어도 신년운세로 연다(책과 다른 상품, 책은 열리지 않음)
+      const ny = window.PayCode.Pass.product(r.pass) === "ny";
+      if (ny && !nyApi) return msg("nyOff"), false;
       passBusy = true;
       if (goBtn) goBtn.disabled = true;
       msg("");
-      const res = await callBook(r.pass, "arch");
+      const res = await callBook(r.pass, ny ? "ny" : "arch");
       passBusy = false;
       if (goBtn) goBtn.disabled = false;
       if (!res.ok) {
         track("so_pay", { step: "pass_fail" });
         return msg(res.kind), false; // fail · wait · offline · cancelled(15-3)
+      }
+      if (ny) {
+        writeNyPass(r.pass);
+        window.BOOK_NY = res.data;
+        track("so_pay", { step: "pass_ok" });
+        toast((T.ny.pay && T.ny.pay.opened) || PAY.pass.ok || "");
+        nyApi.afterPaid();
+        return true;
       }
       writePass(r.pass);
       window.BOOK_ARCH = res.data;
@@ -6245,6 +6377,12 @@
     passFromHub = async (value, msg) => {
       if (await openPass(value, msg, js("resume-go"))) closeResume();
     };
+    // (2026-11-12) 신년운세 결제 화면의 코드 칸: 책 코드(SOP)는 서버에 묻지 않고 "책 코드예요" 안내
+    nyOpenPass = (value, msg, goBtn) => {
+      const r = window.PayCode.Pass.check(value);
+      if (!r.error && window.PayCode.Pass.product(r.pass) !== "ny") return msg("book"), Promise.resolve(false);
+      return openPass(value, msg, goBtn);
+    };
     pass.go.addEventListener("click", submit);
     pass.input.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
@@ -6264,7 +6402,7 @@
         window.crypto.getRandomValues(b);
         const st = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
         try {
-          window.sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode, from: currentName === "hub" ? "hub" : "pay" })); // from: 돌아올 화면(입구·결제 전)
+          window.sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode, from: currentName === "hub" ? "hub" : "pay", prod: mode === "link" && cardProd === "ny" ? "ny" : "book" })); // from: 돌아올 화면(입구·결제 전) · prod: 연결할 코드의 상품(2026-11-12)
         } catch (e) {
           return toast(AUTH.msg.error || "");
         }
@@ -6273,7 +6411,7 @@
       };
       js("kakao-restore", payScr).addEventListener("click", () => kakaoStart("restore"));
       js("kakao-forget", payScr).addEventListener("click", () => window.confirm(AUTH.forgetConfirm || "") && kakaoStart("forget"));
-      js("kakao-link-btn", codeDlg).addEventListener("click", () => passNow() && kakaoStart("link"));
+      js("kakao-link-btn", codeDlg).addEventListener("click", () => passOfProd(cardProd) && kakaoStart("link"));
       // ── (23단계, 결정 135 — 운영 규칙 3장·6장 예외 4) 로그인 유지·진행 저장.
       //   로그인 표 sid(무작위 32자, 입력값 아님)만 이 기기 localStorage(LOGIN_KEY)에 30일. 이름·생년월일·태어난 시각·성별·방 결과는
       //   저장 동의(consent true)와 만 14세 이상일 때만 함수 auth(save)로 보내고, 서버는 암호문으로만 둔다. 궁합 상대·질문 글은 보내지 않는다.
@@ -6428,10 +6566,15 @@
       const AUTH_NOTE = "strange-oracle-authnote"; // 다시 시작한 뒤 띄울 안내 이름(한 번)
       const AUTH_ONCE = "strange-oracle-authonce"; // 이 탭에서 계정 진행을 이미 불러왔음
       function applyAccount(j, fresh) {
-        const gotBook = Boolean(j.passes && j.passes[0] && !passNow());
-        if (gotBook) writePass(window.PayCode.Pass.normalize(j.passes[0]));
+        // (2026-11-12) 계정에 연결된 코드는 상품마다 갈라 둔다(SOP = 책, SNY = 신년운세)
+        const list = (j.passes || []).map((x) => window.PayCode.Pass.normalize(x)).filter(Boolean);
+        const accBook = list.find((x) => window.PayCode.Pass.product(x) !== "ny"), accNy = list.find((x) => window.PayCode.Pass.product(x) === "ny");
+        const gotBook = Boolean(accBook && !passNow());
+        if (gotBook) writePass(accBook);
         // 먼저 결제하고 나중에 로그인한 기기: 이 기기의 결제 코드를 계정에 붙인다(서버가 결제 확인된 코드만 받음)
-        else if (passNow() && !(j.passes || []).includes(passNow())) onAccount.pass(passNow());
+        else if (passNow() && !list.includes(passNow())) onAccount.pass(passNow());
+        if (accNy && !nyPassNow()) writeNyPass(accNy);
+        else if (nyPassNow() && !list.includes(nyPassNow())) onAccount.pass(nyPassNow());
         const d = j.data;
         const theirs = d && d.v ? Object.keys(d.v).length : 0;
         let once = false;
@@ -6486,11 +6629,12 @@
           return { first: home, after: () => toast(AUTH.msg.error || "") };
         }
         const body = { t: m[1], s: m[2] };
-        if (mode === "link" && passNow()) body.pass = passNow();
+        const linkProd = saved.prod === "ny" ? "ny" : "book";
+        if (mode === "link" && passOfProd(linkProd)) body.pass = passOfProd(linkProd);
         if (mode === "forget") body.forget = true;
         if (mode === "login") body.login = true; // (23단계) 로그인 유지 표 받기
         return {
-          first: mode === "link" ? "report" : home,
+          first: mode === "link" ? (linkProd === "ny" ? "hub" : "report") : home,
           after: async () => {
             let res = null;
             try {
@@ -6508,9 +6652,14 @@
               return applyAccount(res, true);
             }
             if (res.state === "found" && res.passes && res.passes[0]) {
-              writePass(window.PayCode.Pass.normalize(res.passes[0]));
+              // (2026-11-12) 책 코드·신년운세 코드를 상품마다 제자리에. 책이 있으면 책 목차로, 신년운세만 있으면 새해 입구로
+              const list = res.passes.map((x) => window.PayCode.Pass.normalize(x)).filter(Boolean);
+              const b = list.find((x) => window.PayCode.Pass.product(x) !== "ny"), n = list.find((x) => window.PayCode.Pass.product(x) === "ny");
+              if (b) writePass(b);
+              if (n) writeNyPass(n);
               toast(AUTH.msg.found || "");
-              return go("report");
+              if (!b && n && nyApi) return nyApi.afterPaid();
+              return go(b ? "report" : "hub");
             }
             toast((home === "hub" && res.state === "none" ? AUTH.msg.noneHub : AUTH.msg[res.state] || AUTH.msg.error) || "");
           },
@@ -6557,7 +6706,7 @@
     so_story: { step: ["3of6", "6of6"] },
     so_share: { room: CHAPTER_ORDER, method: ["image", "link", "kakao"] },
     so_follow: { from: ["result", "story"] },
-    purchase: { value: [Number(PAY.amount), Number(PAY.regular || PAY.amount)], currency: ["KRW"] }, // (2026-10-28) GA4 구매(매출 보고서용): 지금 판매 값·정가만 // (2026-10-27) 인스타그램 따라오기 링크 누름: 어느 화면에서인지만
+    purchase: { value: [Number(PAY.amount), Number(PAY.regular || PAY.amount), Number((T.ny && T.ny.pay && T.ny.pay.amount) || PAY.amount)], currency: ["KRW"] }, // (2026-10-28) GA4 구매(매출 보고서용): 지금 판매 값·정가만 // (2026-10-27) 인스타그램 따라오기 링크 누름: 어느 화면에서인지만
     so_next: { room: CHAPTER_ORDER, from: ["dock", "locked", "door"] }, // (2026-10-30 v8) door = 결과 아래 문 버튼. room은 떠나는 방 // (2026-10-27) 다음 방을 떠 있는 버튼·잠긴 칸 버튼으로 열었을 때(아래 문 버튼은 so_room_view로 충분)
     so_tab: { tab: ["share", "story", "book", "map"] }, // (19-4) 입구 바로 가기 누름: 칸 이름만
     so_resume: { step: ["made", "used", "failed"] },
@@ -6571,7 +6720,7 @@
     so_book_offer_close: { placement: ["after_ogham"] }, // (15단계) 결제 단계 이름만. R·열람 코드·결제번호·결과 코드 없음 (off에서는 부르지 않음)
     // (16-6) 친구 지도: 행동 이름만, 매개변수 없음(별명·아이콘·원형·초대 ID·키·점수 0). 나이 막힘은 이벤트가 없다
     // (2026-11-04 시험판) 2027 신년운세 탭: 단계 이름·방 이름만(생일·이름·주제·뽑은 돌·결과 번호 없음)
-    so_ny: { step: ["tab", "hub", "room", "result", "lock", "open"], room: CHAPTER_ORDER },
+    so_ny: { step: ["tab", "hub", "room", "result", "lock", "open", "free", "gate", "pay_view", "more"], room: CHAPTER_ORDER }, // (2026-11-12) free = 무료 방으로 고름 · gate = 셋째 문에서 결제 안내 · pay_view = 신년운세 결제 화면 · more = 결과 끝 [남은 방 모두 열기]
     map_create: {}, map_join: {}, map_view: {}, map_leave: {}, map_erase: {}, map_forget: {}, map_down: {},
   };
   // (광고 측정, 제안서 strange-oracle-ads 8장 4번) 캠페인 구분: 광고 링크의 utm은 아래 값과 정확히 같을 때만 page_location에 남긴다.
@@ -6887,14 +7036,22 @@
   if (NY_ON)
     Promise.all([loadScript("data-ny.js"), loadScript("app-ny.js"), css("style-ny.css", 1)]).then(() => {
       nyApi = window.NewYear.mount({
-        T, save, go, screens, enter, toast, track, passNow, goPay, loadPaid, ensureRooms, fill, isDone, ROOM_ICON, reduceMotion,
+        T, save, go, screens, enter, toast, track, loadPaid, ensureRooms, fill, isDone, ROOM_ICON, reduceMotion,
+        // (2026-11-12 운영자 결정) 신년운세는 책과 따로 파는 상품: 신년운세 코드(SNY)만 보고, 결제는 신년운세 값으로
+        passNow: nyPassNow, nyFree: callNyFree, payMode: PAY_MODE, applyText,
+        startPay: () => (nyPayStart ? (nyPayStart(), true) : false),
+        openPass: (value, msg, btn) => (nyOpenPass ? nyOpenPass(value, msg, btn) : Promise.resolve(false)),
+        showCode: () => openNyCode && openNyCode(),
         get state() {
           return state;
         },
         current: () => currentName,
       });
       nyApi.onScreen(currentName);
-      if (/^ny-/.test(hash)) nyApi.hub(); // 새해 탭에서 새로 고침 → 새해 입구
+      if (nyAfterPay) {
+        nyAfterPay = false;
+        nyApi.afterPaid();
+      } else if (/^ny-/.test(hash)) nyApi.hub(); // 새해 탭에서 새로 고침 → 새해 입구
     }, () => {});
 
   // 테스트·점검용으로 바깥에서 읽을 수 있게 둔다 (입력값은 내보내지 않음)

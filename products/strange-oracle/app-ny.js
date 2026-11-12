@@ -1,7 +1,10 @@
 // 낯선 점술관 — 2027 신년운세 탭 「새해의 회랑」 (2026-11-04 운영자 결정, 시험판. data.js ny.mode가 "off"가 아닐 때만 app.js가 받는다)
 // 나의 이야기와 따로 떨어진 탭: 일곱 문 가운데 듣고 싶은 방을 골라 들어갔다 나온다(다음 방으로 잇지 않는다).
 // 무료: 한 해의 결·열쇠 낱말·열두 달(절기·반년) 이름표와 빛남 표시(data-ny.js + 이 파일의 계산). 유료: 문장(api/_paid/book/book-ny.js, 함수 book file "ny"로만).
-// 개인정보(6장): 생년월일·시각·이름은 나의 이야기와 같은 state.profile(sessionStorage, 이 탭)에만. 서버로 보내는 값은 { pass, file:"ny" }뿐.
+// (2026-11-12 운영자 결정) 신년운세는 책과 따로 파는 상품(4,900원, 코드 SNY). 처음 고른 두 방은 상세 풀이까지 무료(함수 book "ny-free": 그 방·그 결과 번호 조각만),
+//   셋째 방부터는 문 앞에서 결제 안내(ny-pay) → 한 번 결제로 남은 방 모두. 책 코드(SOP)로는 열리지 않는다.
+//   고른 무료 방 이름(입력값 아님, 최대 2개)은 이 기기 localStorage "strange-oracle-ny-free"에 둔다(다음 방문에도 같은 두 방).
+// 개인정보(6장): 생년월일·시각·이름은 나의 이야기와 같은 state.profile(sessionStorage, 이 탭)에만. 서버로 보내는 값은 { pass, file:"ny" } 또는 { file:"ny-free", room, k(결과 번호) }뿐.
 //   이 탭에서 새로 뽑은 룬 세 개·고른 시빌라 주제와 신탁 번호(입력값 아님)는 sessionStorage "strange-oracle-ny"에 두고 "내 정보 지우기"로 지운다.
 (function () {
   "use strict";
@@ -10,6 +13,8 @@
   const ROMAN = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ"];
   const BIRTH_ROOMS = ["saju", "star", "decan", "tzolkin"];
   const TIME_ROOMS = ["saju", "star"];
+  const FREE_KEY = "strange-oracle-ny-free";
+  const FREE_MAX = 2;
 
   function mount(C) {
     const T = C.T;
@@ -26,6 +31,38 @@
     let model = null; // 지금 결과(메모리만)
     const heard = new Set(); // 이 탭에서 결과를 본 방(메모리)
     let drawn = readSes();
+    // ── 무료 두 방(이 기기). 결제한 탭(C.passNow() = 신년운세 코드)은 모두 열림
+    function readFree() {
+      try {
+        const v = JSON.parse(window.localStorage.getItem(FREE_KEY) || "[]");
+        return Array.isArray(v) ? v.filter((r, i) => ROOMS.includes(r) && v.indexOf(r) === i).slice(0, FREE_MAX) : [];
+      } catch (e) {
+        return memFree.slice();
+      }
+    }
+    let memFree = [];
+    function addFree(room) {
+      const v = readFree();
+      if (v.includes(room) || v.length >= FREE_MAX) return;
+      v.push(room);
+      memFree = v;
+      try {
+        window.localStorage.setItem(FREE_KEY, JSON.stringify(v));
+      } catch (e) {
+        /* 저장 막힘: 이 화면에서만 */
+      }
+      C.track("so_ny", { step: "free", room });
+    }
+    const paid = () => Boolean(C.passNow());
+    const isFree = (room) => readFree().includes(room);
+    const canEnter = (room) => paid() || isFree(room) || readFree().length < FREE_MAX;
+    // 셋째 문(또는 결과 끝 [남은 방 모두 열기]) → 신년운세 결제 화면. 고른 방 이름은 결제 뒤 그 방으로 가려고 이 탭에만
+    function gate(room, step) {
+      drawn.pending = ROOMS.includes(room) ? room : null;
+      writeSes();
+      C.track("so_ny", room ? { step: step || "gate", room } : { step: step || "gate" });
+      C.go("ny-pay");
+    }
 
     function readSes() {
       try {
@@ -64,6 +101,8 @@
     const hubScr = screen("ny-hub");
     const roomScr = screen("ny-room");
     const resScr = screen("ny-result");
+    const payScr = screen("ny-pay");
+    payScr.classList.add("ny-pay");
 
     // (2026-11-04) 새해 하늘: 우주 배경 위에 겹치는 새벽 층(새해 화면에서만 서서히 밝아진다)
     const sky = mk("div", "ny-sky");
@@ -134,6 +173,19 @@
       const lead = mk("p", "ny-hub__lead");
       lead.innerHTML = N.hub.lead;
       head.append(lead, mk("p", "ny-hub__note", N.hub.note));
+      // 무료 두 방 · 결제 상태 한 줄
+      const fr = readFree();
+      const st = mk("p", "ny-hub__free" + (paid() ? " is-paid" : fr.length >= FREE_MAX ? " is-done" : ""));
+      st.dataset.js = "ny-free-state";
+      st.textContent = paid() ? N.hub.paidNote : fr.length >= FREE_MAX ? N.hub.freeDone : fr.length ? fill(N.hub.freeLeft, { n: FREE_MAX - fr.length }) : N.hub.freeNote;
+      head.append(st);
+      if (paid()) {
+        const sc = mk("button", "btn btn--text btn--small ny-hub__code", N.hub.showCode);
+        sc.type = "button";
+        sc.dataset.js = "ny-show-code";
+        sc.addEventListener("click", () => C.showCode());
+        head.append(sc);
+      }
       const grid = mk("div", "ny-doors");
       ROOMS.forEach((room, i) => {
         const b = mk("button", "ny-door");
@@ -149,8 +201,17 @@
         const by = mk("span", "ny-door__by", N.rooms[room].by);
         b.append(frame, mk("span", "ny-door__step"), nm, mk("span", "ny-door__lens", N.rooms[room].lens), by);
         if (heard.has(room)) b.append(mk("span", "ny-door__heard", N.hub.heard));
+        if (!paid()) {
+          if (isFree(room)) b.append(mk("span", "ny-door__badge is-free", N.hub.badgeFree));
+          else if (fr.length >= FREE_MAX) {
+            b.classList.add("is-locked");
+            b.dataset.lock = "1";
+            b.append(mk("span", "ny-door__badge is-lock", N.hub.badgeLock));
+          }
+        }
         b.addEventListener("click", () => {
           if (b.classList.contains("is-opening")) return;
+          if (!canEnter(room)) return gate(room); // 셋째 방: 문을 열지 않고 결제 안내
           if (C.reduceMotion) return openRoom(room);
           C.ensureRooms([room]).catch(() => {}); // 빨려 들어가는 동안 방 파일을 미리 받는다
           b.classList.add("is-opening"); // 두 짝이 열리고 빛이 쏟아진 뒤
@@ -167,6 +228,7 @@
 
     // ───────── 방 안: 안내자 첫마디 + 필요한 입력 ─────────
     function openRoom(room, instant) {
+      if (!canEnter(room)) return gate(room);
       cur = room;
       C.ensureRooms([room]).then(() => C.go("ny-room", { instant: Boolean(instant) }), () => C.toast(T.toast.loadFail || ""));
     }
@@ -367,6 +429,7 @@
           go.disabled = false;
           model = m;
           heard.add(room);
+          if (!paid()) addFree(room); // 결과까지 들은 방만 무료 두 방으로 센다(문만 열고 나간 방은 세지 않음)
           C.go("ny-result");
         }, () => {
           go.disabled = false;
@@ -542,6 +605,11 @@
       lensLine.append(mk("span", "ny-res__lens-k", N.result.lensHead), mk("strong", "", N.rooms[M.room].lens));
       head.append(lensLine, mk("p", "ny-res__lens-note", N.result.lensNote));
       if (M.note) head.append(mk("p", "ny-res__note", M.note));
+      if (!paid() && isFree(M.room)) {
+        const ft = mk("p", "ny-res__free", fill(N.result.freeTag, { n: readFree().indexOf(M.room) + 1 }));
+        ft.dataset.js = "ny-free-tag";
+        head.append(ft);
+      }
       resScr.append(head);
       if (M.oracle) resScr.append(mk("blockquote", "ny-oracle", M.oracle));
       // 무료: 한 해의 결 · 열쇠 낱말
@@ -597,6 +665,21 @@
       det.append(mk("h2", "ny-card__head ny-detail__title", N.result.detailHead));
       resScr.append(det);
       paintDetail(det);
+      // 결제 전: 결과 끝 다음 안내(무료 한 방 더 / 남은 방 모두 열기)
+      if (!paid()) {
+        const more = mk("section", "ny-card ny-more");
+        more.dataset.js = "ny-more";
+        if (readFree().length < FREE_MAX) more.append(mk("h2", "ny-card__head", N.result.moreOneHead), mk("p", "ny-p", N.result.moreOneBody));
+        else {
+          more.append(mk("h2", "ny-card__head", N.result.moreHead), mk("p", "ny-p", N.result.moreBody));
+          const mb = mk("button", "btn btn--primary btn--block", N.result.moreBtn);
+          mb.type = "button";
+          mb.dataset.js = "ny-more-btn";
+          mb.addEventListener("click", () => gate(null, "more"));
+          more.append(mb);
+        }
+        resScr.append(more);
+      }
       // 나가기
       const acts = mk("div", "ny-acts");
       const back = mk("button", "btn btn--primary btn--block", N.result.back);
@@ -621,7 +704,27 @@
     function paintDetail(det) {
       const M = model;
       [...det.children].slice(1).forEach((n) => n.remove());
-      if (!C.passNow()) {
+      if (!paid() && isFree(M.room)) {
+        // 무료로 고른 방: 그 방·그 결과 번호의 상세 풀이 조각만 받는다(코드 없음)
+        det.classList.remove("is-locked");
+        const wait = mk("p", "ny-wait", N.result.loading);
+        det.append(wait);
+        const key = M.room + "|" + JSON.stringify(M.k);
+        (freeCache[key] ? Promise.resolve(freeCache[key]) : C.nyFree(M.room, M.k)).then((data) => {
+          freeCache[key] = data;
+          if (model !== M) return;
+          wait.remove();
+          renderPaid(det, data);
+        }).catch(() => {
+          wait.textContent = N.result.fail;
+          const r = mk("button", "btn btn--secondary btn--small", N.result.retry);
+          r.type = "button";
+          r.addEventListener("click", () => paintDetail(det));
+          det.append(r);
+        });
+        return;
+      }
+      if (!paid()) {
         det.classList.add("is-locked");
         const box = mk("div", "ny-lock");
         box.append(mk("p", "ny-lock__head", N.result.lockHead));
@@ -632,7 +735,7 @@
         btn.dataset.js = "ny-lock-btn";
         btn.addEventListener("click", () => {
           C.track("so_ny", { step: "lock", room: M.room });
-          C.goPay("ny");
+          gate(M.room);
         });
         box.append(ul, btn, mk("p", "ny-lock__note", N.result.lockNote));
         det.append(box);
@@ -655,6 +758,7 @@
         det.append(r);
       });
     }
+    const freeCache = {}; // 무료 조각(메모리만)
     const paras = (v) => (Array.isArray(v) ? v : [v]).filter(Boolean);
     function sec(det, title, nodes) {
       const s = mk("section", "ny-sec");
@@ -743,10 +847,153 @@
       if (B.one && B.one[M.k.one]) sec(det, N.result.oneHead, [mk("p", "ny-p ny-one", B.one[M.k.one])]);
     }
 
-    // 결제 확인·코드 입력 뒤 같은 화면에 돌아오면 상세를 다시 그린다
+    // ───────── 신년운세 결제 전 화면 (7장: 받는 것·분량·가격·결제 방법·판매자·환불을 결제 전에) ─────────
+    //   책 결제 화면과 따로 그린다(다른 상품). 결제창·결제 확인 길(paycheck)·코드 카드는 app.js의 것을 상품 값만 바꿔 같이 쓴다
+    const NP = N.pay || {};
+    const PT = T.pay || {};
+    function renderPay() {
+      payScr.textContent = "";
+      if (C.payMode === "test") {
+        const band = mk("p", "pay-band");
+        band.setAttribute("role", "note");
+        band.append(mk("span", "pay-band__dot"), mk("span", "", PT.testBand || ""));
+        payScr.append(band);
+      }
+      const head = mk("header", "ny-pay__head");
+      head.append(mk("p", "ny-eyebrow", NP.eyebrow), mk("h1", "ny-pay__title", NP.title), mk("p", "ny-pay__lead", readFree().length ? NP.lead : NP.leadFresh));
+      payScr.append(head);
+      const box = mk("section", "ny-card ny-pay__what");
+      box.append(mk("h2", "ny-card__head", NP.whatHead));
+      const ul = mk("ul", "ny-pay__list");
+      (NP.what || []).forEach((t) => ul.append(mk("li", "", t)));
+      box.append(ul, mk("p", "ny-pay__vol", NP.volume), mk("p", "ny-pay__sep", NP.separate));
+      const pr = mk("p", "ny-pay__price");
+      pr.append(mk("span", "ny-pay__price-k", NP.priceHead), mk("strong", "", NP.price));
+      box.append(pr);
+      payScr.append(box);
+      const act = mk("div", "ny-pay__act");
+      act.dataset.js = "ny-pay-act";
+      if (paid()) {
+        act.append(mk("p", "ny-pay__opened", NP.openedHere));
+        const sc = mk("button", "btn btn--secondary btn--block", N.hub.showCode);
+        sc.type = "button";
+        sc.addEventListener("click", () => C.showCode());
+        act.append(sc);
+      } else {
+        const lab = mk("label", "check pay-agree ny-pay__agree");
+        const agree = mk("input");
+        agree.type = "checkbox";
+        agree.dataset.js = "ny-pay-agree";
+        lab.append(agree, mk("span", "", NP.agree));
+        const nudge = mk("p", "pay-agree__nudge", PT.agreeNudge || "");
+        nudge.hidden = true;
+        nudge.setAttribute("role", "alert");
+        const buy = mk("button", "btn btn--primary btn--block pay-buy", NP.buy);
+        buy.type = "button";
+        buy.dataset.js = "ny-pay-buy";
+        const sync = () => {
+          buy.classList.toggle("is-waiting-agree", !agree.checked);
+          if (agree.checked) nudge.hidden = true;
+        };
+        agree.addEventListener("change", sync);
+        sync();
+        buy.addEventListener("click", () => {
+          if (!agree.checked) {
+            nudge.hidden = false;
+            lab.classList.remove("is-nudge");
+            void lab.offsetWidth;
+            lab.classList.add("is-nudge");
+            agree.focus({ preventScroll: true });
+            return;
+          }
+          if (!C.startPay()) C.toast(T.toast.loadFail || "");
+        });
+        act.append(lab, nudge, buy, mk("p", "pay-safe", NP.safe));
+      }
+      payScr.append(act);
+      // 결제 방법·판매자 · 환불 (책과 같은 판매자·결제대행, 환불은 이 상품 문장)
+      const more = mk("section", "ny-card ny-pay__terms");
+      more.append(mk("h2", "ny-card__head", (PT.method && PT.method.title) || ""), mk("p", "ny-p", (PT.method && PT.method.body) || ""), mk("p", "ny-pay__seller", (PT.method && PT.method.seller) || ""));
+      if (PT.method && PT.method.phone) more.append(mk("p", "ny-pay__note", PT.method.phone));
+      more.append(mk("h2", "ny-card__head", NP.refundHead), mk("p", "ny-p", NP.refund));
+      const rl = mk("a", "text-link", NP.refundLink);
+      rl.href = "legal/refund.html";
+      more.append(rl);
+      const S = PT.seller || {}, L = S.labels || {};
+      const dl = mk("dl", "ny-pay__seller-list");
+      [["name", S.name], ["phone", S.phone], ["email", S.email], ["address", S.address], ["reg", S.reg], ["pg", S.pg]].forEach(([k, v]) => {
+        if (!v) return;
+        const d = mk("div", "");
+        d.append(mk("dt", "", L[k] || ""), mk("dd", "", v));
+        dl.append(d);
+      });
+      more.append(dl);
+      payScr.append(more);
+      // 이미 산 분: 신년운세 코드(SNY) 넣기
+      if (!paid()) {
+        const own = mk("details", "pay-owned ny-pay__owned");
+        own.dataset.js = "ny-pay-owned";
+        own.append(mk("summary", "pay-owned__toggle", NP.owned));
+        const row = mk("div", "receipt-open__row");
+        const inp = mk("input", "input receipt-open__input");
+        inp.type = "text";
+        inp.autocomplete = "off";
+        inp.setAttribute("autocapitalize", "characters");
+        inp.setAttribute("autocorrect", "off");
+        inp.spellcheck = false;
+        inp.maxLength = 40;
+        inp.placeholder = NP.placeholder;
+        inp.dataset.js = "ny-pass-input";
+        inp.setAttribute("aria-label", NP.owned);
+        const goBtn = mk("button", "btn btn--secondary receipt-open__go", NP.go);
+        goBtn.type = "button";
+        goBtn.dataset.js = "ny-pass-go";
+        row.append(inp, goBtn);
+        const help = mk("p", "receipt-open__how", NP.help);
+        const err = mk("p", "field__error");
+        err.dataset.js = "ny-pass-error";
+        err.setAttribute("role", "alert");
+        err.hidden = true;
+        const msg = (kind) => {
+          err.dataset.kind = kind || "";
+          err.textContent = kind ? (NP.errors && NP.errors[kind]) || (PT.pass && PT.pass.errors && PT.pass.errors[kind]) || "" : "";
+          err.hidden = !kind;
+        };
+        const submit = () => C.openPass(inp.value, msg, goBtn).then((ok) => ok && (inp.value = ""));
+        goBtn.addEventListener("click", submit);
+        inp.addEventListener("keydown", (e) => {
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          submit();
+        });
+        own.append(row, help, err);
+        payScr.append(own);
+      }
+      const back = mk("button", "text-link pay-back", "← " + NP.back);
+      back.type = "button";
+      back.dataset.js = "ny-pay-back";
+      back.addEventListener("click", () => C.go("ny-hub"));
+      payScr.append(back);
+    }
+    C.enter["ny-pay"] = () => {
+      renderPay();
+      C.track("so_ny", { step: "pay_view" });
+    };
+    // 결제 완료·코드 확인 뒤: 문 앞에서 멈췄던 방이 있으면 그 방으로, 아니면 회랑으로
+    function afterPaid() {
+      const room = drawn.pending;
+      drawn.pending = null;
+      writeSes();
+      if (ROOMS.includes(room)) return openRoom(room);
+      C.go("ny-hub");
+    }
+
+    // 결제 확인·코드 입력 뒤 같은 화면에 돌아오면 다시 그린다
     function refresh() {
-      const det = resScr.querySelector("[data-js=ny-detail]");
-      if (det && model && C.current() === "ny-result") paintDetail(det);
+      const now = C.current();
+      if (now === "ny-hub") renderHub();
+      else if (now === "ny-pay") renderPay();
+      else if (now === "ny-result" && model) renderResult();
     }
     function clear() {
       drawn = {};
@@ -759,7 +1006,7 @@
         /* 무시 */
       }
     }
-    return { onScreen, refresh, clear, hub: () => C.go("ny-hub", { replace: true }) };
+    return { onScreen, refresh, clear, afterPaid, hub: () => C.go("ny-hub", { replace: true }) };
   }
   window.NewYear = { mount };
 })();

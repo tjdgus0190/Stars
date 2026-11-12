@@ -336,3 +336,41 @@ body.is-ny #sky { opacity: 0.45; transition: opacity 1100ms ease; }
 .ny-lucky__item { padding: var(--space-3) var(--space-2); border-radius: var(--radius-md); text-align: center; background: oklch(0.83 0.12 82 / 0.1); border: 1px solid oklch(0.83 0.12 82 / 0.35); }
 .ny-lucky__item dt { font-size: var(--fs-xs); color: var(--ny-gold); }
 .ny-lucky__item dd { margin: 4px 0 0; font-size: var(--fs-md); font-weight: 700; color: var(--c-text-strong); word-break: keep-all; }
+
+/* ── (2026-11-12 운영자 결정) 신년운세 = 따로 파는 상품: 무료 두 방 표시 · 셋째 문의 잠금 · 결과 끝 안내 · 결제 전 화면 ── */
+.ny-hub__free { margin: var(--space-3) auto 0; padding: 6px 14px; width: fit-content; max-width: 100%; border-radius: var(--radius-pill); font-size: var(--fs-sm); color: var(--ny-gold); background: oklch(0.83 0.12 82 / 0.1); border: 1px solid oklch(0.83 0.12 82 / 0.3); }
+.ny-hub__free.is-done { color: var(--c-text); }
+.ny-hub__free.is-paid { color: oklch(0.86 0.09 150); background: oklch(0.7 0.1 150 / 0.1); border-color: oklch(0.7 0.1 150 / 0.3); }
+.ny-hub__code { margin-top: var(--space-2); }
+.ny-door__badge { margin-top: 2px; padding: 2px 8px; border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 700; }
+.ny-door__badge.is-free { color: oklch(0.2 0.04 150); background: oklch(0.82 0.1 150); }
+.ny-door__badge.is-lock { color: var(--ny-gold); background: oklch(0.2 0.03 60); border: 1px solid var(--ny-gold-dim); }
+/* 잠긴 문: 문은 그대로 보이되 빛이 꺼진 채, 작은 자물쇠 */
+.ny-door.is-locked .ny-door__frame { filter: saturate(0.55) brightness(0.78); }
+.ny-door.is-locked .ny-door__fan::after { content: ""; position: absolute; right: 8%; bottom: 6%; width: 14px; height: 12px; border-radius: 2px; background: var(--ny-gold-dim); box-shadow: 0 -6px 0 -2px transparent; }
+.ny-door.is-locked .ny-door__fan::before { content: ""; position: absolute; right: calc(8% + 3px); bottom: calc(6% + 9px); width: 8px; height: 8px; border: 2px solid var(--ny-gold-dim); border-bottom: 0; border-radius: 6px 6px 0 0; }
+.ny-res__free { display: inline-block; margin: var(--space-3) 0 0; padding: 2px 10px; border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 700; color: oklch(0.2 0.04 150); background: oklch(0.82 0.1 150); }
+.ny-more { text-align: center; border-color: oklch(0.83 0.12 82 / 0.35); background: linear-gradient(180deg, oklch(0.83 0.12 82 / 0.07), transparent 70%), var(--c-surface-1); }
+.ny-more .ny-p { margin-bottom: var(--space-4); }
+
+.ny-pay__head { text-align: center; padding: var(--space-6) 0 var(--space-5); }
+.ny-pay__title { margin: var(--space-2) 0 var(--space-3); font-size: var(--fs-2xl); line-height: 1.35; color: var(--c-text-strong); }
+.ny-pay__lead { margin: 0 auto; max-width: 24em; font-size: var(--fs-md); line-height: var(--lh-read); color: var(--c-text); }
+.ny-pay__list { margin: 0 0 var(--space-4); padding-left: 1.2em; font-size: var(--fs-md); line-height: 1.75; color: var(--c-text); }
+.ny-pay__list li + li { margin-top: var(--space-2); }
+.ny-pay__vol { margin: 0 0 var(--space-2); font-size: var(--fs-sm); color: var(--c-text-muted); }
+.ny-pay__sep { margin: 0 0 var(--space-4); padding: var(--space-3); border-radius: var(--radius-md); font-size: var(--fs-sm); line-height: 1.6; color: var(--c-text); background: var(--c-surface-2); }
+.ny-pay__price { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); margin: 0; padding-top: var(--space-3); border-top: 1px solid var(--c-line); }
+.ny-pay__price-k { font-size: var(--fs-sm); color: var(--c-text-muted); }
+.ny-pay__price strong { font-size: var(--fs-lg); color: var(--ny-gold); }
+.ny-pay__act { display: grid; gap: var(--space-3); margin: 0 0 var(--space-5); }
+.ny-pay__opened { margin: 0; text-align: center; color: oklch(0.86 0.09 150); }
+.ny-pay__terms .ny-card__head + .ny-p { margin-top: 0; }
+.ny-pay__terms .ny-card__head:not(:first-child) { margin-top: var(--space-5); }
+.ny-pay__seller, .ny-pay__note { margin: var(--space-2) 0 0; font-size: var(--fs-sm); color: var(--c-text-muted); }
+.ny-pay__seller-list { display: grid; gap: 4px; margin: var(--space-5) 0 0; padding-top: var(--space-3); border-top: 1px solid var(--c-line); font-size: var(--fs-xs); }
+.ny-pay__seller-list div { display: flex; gap: var(--space-3); }
+.ny-pay__seller-list dt { min-width: 6em; color: var(--c-text-muted); }
+.ny-pay__seller-list dd { margin: 0; color: var(--c-text); word-break: break-all; }
+.ny-pay__owned { margin-bottom: var(--space-4); }
+.ny-pay__owned .receipt-open__row { margin-top: var(--space-3); }
