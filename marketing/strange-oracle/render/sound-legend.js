@@ -190,8 +190,8 @@ if (EP === "cassandra") {
   // 지속음: A 단조(A1·E2·C3·E3) → 아폴론 장면은 A 장조 → 저주부터 B♭ 섞인 어둠 → 무너짐 → 질문은 열린 화음
   const chord = (t) => (t < T.b2 ? [33, 40, 48, 52] : t < T.curse ? [33, 40, 49, 52, 57] : t < T.b10 ? [34, 41, 46, 49] : t < T.q ? [33, 40, 48, 52] : [33, 40, 47, 52]);
   strings((t) => (0.35 + 0.3 * smooth(T.b1, T.b2, t) + 0.4 * smooth(T.curse, T.curse + 0.5, t) * (1 - smooth(T.b10, T.b10 + 0.6, t))) * (1 - 0.6 * smooth(T.b10, T.b10 + 0.3, t) * (1 - smooth(T.b11, T.b11 + 1, t))) * (1 - 0.4 * smooth(T.q, T.q + 1.5, t)) * (1 - smooth(DUR - 0.8, DUR, t)) * Math.min(1, t / 0.02 + 0.5), chord, 0.06);
-  boom(0.0, 0.9, 50); whoosh(0.0, 0.5, 0.25, 0.4, -0.2);
-  shatter(T.h2, 0.9); boom(T.h2, 0.6, 62);
+  boom(0.0, 1.4, 50); whoosh(0.0, 0.5, 0.35, 0.4, -0.2);
+  shatter(T.h2, 1.7); boom(T.h2, 1.2, 62);
   riser(T.b1 + 0.6, T.b2, 0.15);
   [69, 73, 76, 81, 85, 88].forEach((m, k) => bell(T.b2 + 0.05 + k * 0.09, mtof(m), 0.05, Math.sin(k * 1.9) * 0.6));
   whoosh(T.b3 + 0.05, 0.4, 0.4, 0.5, -0.5); boom(T.b3 + 0.35, 0.8, 55);
