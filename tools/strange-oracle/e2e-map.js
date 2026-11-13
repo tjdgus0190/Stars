@@ -98,6 +98,8 @@ async function browser(port, ga) {
 const card = (where = "story") => `[data-js=map-slot-${where}] [data-js=map-card]`;
 const cardState = (b, where = "story") => b.ev(`document.querySelector(${JSON.stringify(card(where))})?.dataset.state`);
 
+// (v1-C) 별가루 장부(strange-oracle-dust, 입력값 없음·방침 제2조의2)는 입구에서 늘 생기므로 지도 칸 검사에서 뺀다
+const LS_NO_MAP = "Object.keys(localStorage).filter((k) => k !== 'strange-oracle-dust').length";
 const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStorage 전체를 남겨 6장 검사에서 입력값을 찾는다
 (async () => {
   await sw("limits=reset&down=0&slow=0&clock=0&cap=default");
@@ -161,7 +163,7 @@ const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStor
     await A.click("[data-js=map-key-close]");
     check("1 지도 화면(친구 0명 empty)", await A.waitFor("document.querySelector('#screen-map')?.dataset.state === 'empty' && document.querySelector('.screen.is-active')?.id === 'screen-map'"));
     lsSnaps.push(await A.ev("JSON.stringify(localStorage)"));
-    check("1 localStorage는 strange-oracle-mapkey 하나 = SOM 키", await A.ev(`Object.keys(localStorage).join() === 'strange-oracle-mapkey' && localStorage.getItem('strange-oracle-mapkey') === ${JSON.stringify(ownerKey)}`));
+    check("1 localStorage는 strange-oracle-mapkey 하나 = SOM 키", await A.ev(`Object.keys(localStorage).filter((k) => k !== 'strange-oracle-dust').join() === 'strange-oracle-mapkey' && localStorage.getItem('strange-oracle-mapkey') === ${JSON.stringify(ownerKey)}`));
 
     // ── 2·9. 친구: #join= → 초대 띠 → 3/7 참여 불가 → 7/7 → 동의(별명 막기) → 결과·삭제 코드
     await B.goto(TEST + P);
@@ -191,7 +193,7 @@ const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStor
     const delCode = await B.text("[data-js=map-del-value]");
     const friendScore = await B.text("#screen-map-friend [data-js=map-match-score]");
     check("2 삭제 코드 SOD · 점수 40~99", /^SOD(-[0-9A-Z]{1,4}){7}$/.test(delCode) && +friendScore >= 40 && +friendScore <= 99, friendScore);
-    check("2 삭제 코드는 sessionStorage del에만, localStorage 0", (await B.ev("JSON.parse(sessionStorage.getItem('strange-oracle-map')||'{}').del")) === delCode && (await B.ev("localStorage.length")) === 0);
+    check("2 삭제 코드는 sessionStorage del에만, localStorage 0", (await B.ev("JSON.parse(sessionStorage.getItem('strange-oracle-map')||'{}').del")) === delCode && (await B.ev(LS_NO_MAP)) === 0);
     lsSnaps.push(await B.ev("JSON.stringify(localStorage)"));
     check("2 (19-2) 친구 카드 화면에 면책 자리·문구 0", (await B.ev("!document.querySelector('[data-js=map-friend-disclaimer]') && !/재미로 보는 콘텐츠|중요한 결정의 근거/.test(document.querySelector('#screen-map-friend').textContent)")) === true);
 
@@ -255,7 +257,7 @@ const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStor
     check("4 열람 키 바꾸기 → 옛 키 404 · localStorage 교체", newKey !== ownerKey && (await keyOf()) === newKey && (await B.api("view", { key: ownerKey })).status === 404 && (await B.api("view", { key: newKey })).status === 200);
     await A.click("[data-js=map-forget]");
     await A.confirmOk();
-    check("4 이 기기에서 지도 잊기 → localStorage 0", (await A.ev("localStorage.length")) === 0);
+    check("4 이 기기에서 지도 잊기 → localStorage 0", (await A.ev(LS_NO_MAP)) === 0);
     // 지워진 지도의 삭제 코드 → "찾지 못했어요"
     const m2 = await B.api("create", { nick: "지울지도", icon: "i07", main: "warrior", sub: "warrior" });
     const f2 = await B.api("join", { invite: m2.data.invite, nick: "지울친구", icon: "i08", main: "lover", sub: "lover" });
