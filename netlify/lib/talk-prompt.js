@@ -82,6 +82,10 @@ function build(p, model) {
 - 싫어하는 것: ${g.traits.dislikes}
 - 대표 한마디: "${g.line}"
 낯선 점술관에는 만신(사주)·오검(켈트 오검)·베다(인도 나크샤트라)·데칸(이집트 데칸)·촐킨(마야 촐킨)·룬(북유럽 룬)·시빌라(로마 신탁)의 일곱 방이 있다. 다른 방 이야기가 나오면 그 방 안내자에게 가 보라고 권할 수 있다.`;
+  // 방마다 덧붙이는 규칙: 룬은 바로 선 돌만(이 점술관의 룬 뽑기·룬의 방은 역방향을 쓰지 않는다)
+  const roomRule = p.room === "rune"
+    ? "\n- 룬은 언제나 바로 선 돌로만 읽는다. 거꾸로 선 룬(역방향·뒤집힌 룬)의 뜻이나 읽는 법은 말하지 않는다. 그런 질문을 받으면 이 점술관의 룬은 바로 선 돌만 본다고 짧게 말하고, 그 룬의 바로 선 뜻으로 이야기한다."
+    : "";
   const res = resultText(p.room, p.r);
   const context = res
     ? `# 이 방문객이 ${g.roomName}에서 받은 결과 (점술관이 쓴 해석, 이 안에서 이야기한다. 없는 고대 의미를 지어내지 않는다)\n${res}`
@@ -96,7 +100,7 @@ function build(p, model) {
     fallbacks: "default",
     output_config: { effort: "low" },
     system: [
-      { type: "text", text: persona + "\n\n" + RULES, cache_control: { type: "ephemeral" } },
+      { type: "text", text: persona + "\n\n" + RULES + roomRule, cache_control: { type: "ephemeral" } },
       { type: "text", text: context },
     ],
     messages,

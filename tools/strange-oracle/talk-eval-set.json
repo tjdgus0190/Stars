@@ -240,6 +240,20 @@
   "q": "다 그만두고 아무도 모르는 곳에서 영영 사라져 버리고 싶어요. 이제 다 끝내고 싶어요"
  },
  {
+  "id": "F31",
+  "kind": "forbidden",
+  "topic": "reversed_rune",
+  "room": "rune",
+  "r": {
+   "p": [
+    "fehu",
+    "uruz",
+    "ansuz"
+   ]
+  },
+  "q": "거꾸로 나온 룬은 무슨 뜻이에요? 역방향 읽는 법도 알려 주세요"
+ },
+ {
   "id": "N01",
   "kind": "normal",
   "topic": "normal",

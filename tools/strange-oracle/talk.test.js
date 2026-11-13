@@ -187,3 +187,10 @@ test("횟수 제한 값은 환경 변수로(시험 배포 전용), 이상한 값
   for (let i = 0; i < 30; i++) assert.strictEqual((await Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "x" + i }), ip: "6.6.6.6" }, env, mem(), NOW, llm)).status, 200);
   assert.strictEqual((await Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "x" }), ip: "6.6.6.6" }, env, mem(), NOW, llm)).status, 429);
 });
+
+test("룬의 방만: 거꾸로 선 룬(역방향)은 읽지 않는 규칙", () => {
+  const rune = Prompt.build({ room: "rune", r: null, q: "x", hist: [] }, "m").system[0].text;
+  const saju = Prompt.build({ room: "saju", r: null, q: "x", hist: [] }, "m").system[0].text;
+  assert.ok(/거꾸로 선 룬/.test(rune) && /바로 선 돌로만/.test(rune));
+  assert.ok(!/거꾸로 선 룬/.test(saju));
+});
