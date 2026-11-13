@@ -95,7 +95,7 @@
   });
   if (E.h2) {
     const h2 = $("p", "cap h2", E.h2.html);
-    Object.assign(h2.style, { top: "0px", fontSize: (E.h2.size || 80) + "px", lineHeight: "1.3" });
+    Object.assign(h2.style, { top: "0px", fontSize: (E.h2.size || 80) + "px", lineHeight: "104px" }); // 첫 문장(80px·1.3)과 같은 줄 간격이어야 넷째 줄에 정확히 놓인다
     anim(h2, [`cap-in 0.3s var(--ease-out) ${E.h2.t}s both`, `cap-out 0.35s ease-in ${T.b1 - 0.35}s forwards`]);
     h2.querySelectorAll("em").forEach((m) => anim(m, [`word-hit 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) ${E.h2.t + 0.05}s both`]));
     caps.append(h2);
