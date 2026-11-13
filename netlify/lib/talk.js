@@ -54,6 +54,9 @@ function modelOf(v) {
   if (/^(opus|sonnet|haiku|fable)-/.test(m)) m = "claude-" + m;
   return /^claude-[a-z0-9-]{3,40}$/.test(m) ? m : DEFAULT_MODEL;
 }
+// 횟수 제한 값: 기본 10분 12번·하루 무료 4번. 시험 배포(Netlify 배포 문맥 "Branch deploys")에서만 TALK_RATE_10MIN·TALK_FREE_PER_DAY로 늘린다(1~1000)
+const envInt = (v, def) => { const n = Number(v); return Number.isInteger(n) && n >= 1 && n <= 1000 ? n : def; };
+const limits = (env) => ({ window: envInt(env.TALK_RATE_10MIN, MAX_WINDOW), free: envInt(env.TALK_FREE_PER_DAY, FREE_PER_DAY) });
 const evalKeyOk = (env, got) => {
   const k = String(env.TALK_EVAL_KEY || "");
   if (k.length < 32 || typeof got !== "string" || !got) return false;
@@ -121,10 +124,11 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   // (시험 전용) TALK_EVAL_KEY(32자 이상)와 같은 x-talk-eval-key 머리가 오면 IP 횟수 제한만 건너뛴다(월 비용 상한은 그대로). 운영자가 시험 배포에만 넣는다
   const evalOk = evalKeyOk(env, req.evalKey);
   const h = evalOk ? { n: 0, free: 0 } : slot(String(req.ip || "unknown"), now);
-  if (h.n >= MAX_WINDOW) return json(429, { error: "rate" }, { "Retry-After": "600" });
+  const LIM = limits(env);
+  if (h.n >= LIM.window) return json(429, { error: "rate" }, { "Retry-After": "600" });
   const p = parse(req.body);
   if (!p) return json(400, { error: "bad" });
-  if (!p.sid && h.free >= FREE_PER_DAY) return json(429, { error: "rate" }, { "Retry-After": "600" }); // 무료 몫만 하루 상한
+  if (!p.sid && h.free >= LIM.free) return json(429, { error: "rate" }, { "Retry-After": "600" }); // 무료 몫만 하루 상한
   h.n++;
 
   // 위기 신호: 모델을 부르지 않고 정해진 안내(상담 전화)를 돌려준다. 횟수·별가루를 쓰지 않는다
@@ -191,4 +195,4 @@ async function respond(req, context, openStore, env = process.env, openPay = nul
 }
 
 const _reset = () => hits.clear();
-module.exports = { TALK_COST, modelOf, respond, handle, parse, validR, costOf, envOk, storeFrom, STORE_NAME, ROOMS, R_SHAPE, MAX_Q, FREE_PER_DAY, DEFAULT_MODEL, _reset };
+module.exports = { limits, TALK_COST, modelOf, respond, handle, parse, validR, costOf, envOk, storeFrom, STORE_NAME, ROOMS, R_SHAPE, MAX_Q, FREE_PER_DAY, DEFAULT_MODEL, _reset };

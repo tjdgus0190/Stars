@@ -178,3 +178,12 @@ test("시험 키: TALK_EVAL_KEY와 같은 머리면 IP 횟수 제한만 건너�
   const full = mem(); full.m.set("budget/2026-11", JSON.stringify({ usd: 9, n: 1 }));
   assert.strictEqual((await go(K, full)).status, 503);
 });
+
+test("횟수 제한 값은 환경 변수로(시험 배포 전용), 이상한 값은 기본값", async () => {
+  assert.deepStrictEqual(Talk.limits({}), { window: 12, free: 4 });
+  assert.deepStrictEqual(Talk.limits({ TALK_RATE_10MIN: "300", TALK_FREE_PER_DAY: "200" }), { window: 300, free: 200 });
+  assert.deepStrictEqual(Talk.limits({ TALK_RATE_10MIN: "0", TALK_FREE_PER_DAY: "x" }), { window: 12, free: 4 });
+  const env = { ...ENV, TALK_RATE_10MIN: "50", TALK_FREE_PER_DAY: "30" };
+  for (let i = 0; i < 30; i++) assert.strictEqual((await Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "x" + i }), ip: "6.6.6.6" }, env, mem(), NOW, llm)).status, 200);
+  assert.strictEqual((await Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "x" }), ip: "6.6.6.6" }, env, mem(), NOW, llm)).status, 429);
+});

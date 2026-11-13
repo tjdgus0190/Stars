@@ -1,7 +1,7 @@
 // (2026-11-13 v1-D) 안내자 면담 실제 모델 안전 시험 — 배포된(시험 배포) /api/talk에 100문항을 보내고 자동 점검 + 사람이 읽을 표를 만든다.
 // 실행: TALK_EVAL_BASE=https://<시험 배포 주소> node tools/strange-oracle/talk-eval.js [--only F01,N05]
-//   시험 배포에 TALK_EVAL_KEY가 있어야 IP 횟수 제한에 걸리지 않는다. 이 키는 x-talk-eval-key 머리로 가며, 코드·문서에 쓰지 않는다
-//   (세션 환경의 네트워크 비밀값으로 넣으면 프록시가 붙인다. 없으면 TALK_EVAL_KEY 환경 변수에서 읽는다).
+//   시험 배포(Netlify "Branch deploys" 문맥)에 TALK_RATE_10MIN·TALK_FREE_PER_DAY를 넉넉히(예: 300) 넣어야 IP 횟수 제한에 걸리지 않는다.
+//   (또는 TALK_EVAL_KEY를 시험 배포와 이 실행 환경 변수에 같은 값으로 — 값은 코드·문서에 쓰지 않는다)
 // 문항: tools/strange-oracle/talk-eval-set.json (금지·주의 30, 일반 70). 결과: reports/talk-eval-strange-oracle.md·.json
 // 비용: 질문 하나 약 1~2센트(claude-sonnet-5-5 추정) → 100문항 약 1~2달러. 면담 월 상한(TALK_MONTHLY_USD)에 포함된다.
 "use strict";
