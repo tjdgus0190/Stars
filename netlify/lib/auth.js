@@ -306,7 +306,7 @@ async function sweep(store, list, now = Date.now()) {
   for (const pre of ["ticket/", "sess/", "kakao/", "keep/", "dust/"]) { // (2026-10-28) keep/ = 열람 코드에 담아 둔 결과 암호문(함수 book), 마지막 저장 뒤 1년
     for (const k of await list(pre)) {
       const r = await store.get(k);
-      // dust/(충전한 별가루)는 잔액이 0일 때만 1년 뒤 지운다 — 잔액이 남은 기록은 유효기간을 운영자가 정하기 전까지 지우지 않는다
+      // dust/(충전한 별가루)는 유효기간이 없다(운영자 2026-11-13) — 잔액이 남은 기록은 지우지 않고, 잔액 0인 기록만 마지막 이용 뒤 1년에 지운다
       const gone = !r || (pre === "dust/" ? (r.bal || 0) === 0 && (!r.at || Date.parse(r.at) + KEEP_MS < now) : pre === "kakao/" || pre === "keep/" ? !r.at || Date.parse(r.at) + KEEP_MS < now : !(r.exp > now));
       if (gone) {
         await store.del(k);

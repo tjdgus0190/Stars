@@ -165,3 +165,16 @@ test("TALK_MODEL 값 정리: claude- 없이 적어도 받고, 이상한 값은 �
   assert.strictEqual(Talk.modelOf(""), "claude-opus-5-5");
   assert.strictEqual(Talk.modelOf("rm -rf"), "claude-opus-5-5");
 });
+
+test("시험 키: TALK_EVAL_KEY와 같은 머리면 IP 횟수 제한만 건너뜀(짧은 키·틀린 키는 무시, 월 상한은 그대로)", async () => {
+  const K = "e".repeat(40);
+  const env = { ...ENV, TALK_EVAL_KEY: K };
+  const go = (key, store) => Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "x" }), ip: "5.5.5.5", evalKey: key }, env, store || mem(), NOW, llm);
+  for (let i = 0; i < 20; i++) assert.strictEqual((await go(K)).status, 200);
+  for (let i = 0; i < 4; i++) await go("wrong");
+  assert.strictEqual((await go("wrong")).status, 429);
+  const short = await Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "x" }), ip: "5.5.5.5", evalKey: "abc" }, { ...ENV, TALK_EVAL_KEY: "abc" }, mem(), NOW, llm);
+  assert.strictEqual(short.status, 429);
+  const full = mem(); full.m.set("budget/2026-11", JSON.stringify({ usd: 9, n: 1 }));
+  assert.strictEqual((await go(K, full)).status, 503);
+});

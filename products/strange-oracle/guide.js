@@ -299,8 +299,7 @@
           const PAY = T.pay || {}, PA = PAY.payapp || {};
           if (PAY.mode !== "live" && PAY.mode !== "test") throw new Error("off");
           await loadSdk(PA.sdk);
-          let o = location.origin;
-          try { if (PAY.mode === "live" && T.site && T.site.url) o = new URL(T.site.url).origin; } catch (e) { o = location.origin; }
+          const o = location.origin; // 결제 통보·복귀는 이 페이지를 내준 배포의 함수로(시험 배포에서도 새 상품을 아는 함수가 받게)
           const P = window.PayApp;
           P.setDefault("userid", PA.userid);
           P.setDefault("shopname", PA.shopname || "");

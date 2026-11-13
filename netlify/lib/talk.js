@@ -54,6 +54,12 @@ function modelOf(v) {
   if (/^(opus|sonnet|haiku|fable)-/.test(m)) m = "claude-" + m;
   return /^claude-[a-z0-9-]{3,40}$/.test(m) ? m : DEFAULT_MODEL;
 }
+const evalKeyOk = (env, got) => {
+  const k = String(env.TALK_EVAL_KEY || "");
+  if (k.length < 32 || typeof got !== "string" || !got) return false;
+  const c = require("crypto"), H = (x) => c.createHash("sha256").update(x).digest();
+  return c.timingSafeEqual(H(k), H(got));
+};
 const isInt = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
 function validR(room, r) {
   if (r == null) return true;
@@ -112,7 +118,9 @@ function costOf(model, u) {
 async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   if (!envOk(env || {})) return json(503, { error: "off" });
   if (req.method !== "POST") return json(405, { error: "method" }, { Allow: "POST" });
-  const h = slot(String(req.ip || "unknown"), now);
+  // (시험 전용) TALK_EVAL_KEY(32자 이상)와 같은 x-talk-eval-key 머리가 오면 IP 횟수 제한만 건너뛴다(월 비용 상한은 그대로). 운영자가 시험 배포에만 넣는다
+  const evalOk = evalKeyOk(env, req.evalKey);
+  const h = evalOk ? { n: 0, free: 0 } : slot(String(req.ip || "unknown"), now);
   if (h.n >= MAX_WINDOW) return json(429, { error: "rate" }, { "Retry-After": "600" });
   const p = parse(req.body);
   if (!p) return json(400, { error: "bad" });
@@ -178,7 +186,7 @@ function storeFrom(openStore) {
 // Netlify Functions v2 요청 → handle
 async function respond(req, context, openStore, env = process.env, openPay = null) {
   const body = req.method === "POST" ? await req.text() : "";
-  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown") }, env, storeFrom(openStore), Date.now(), anthropicLlm, openPay ? require("./pay.js").storeFrom(openPay) : null);
+  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown"), evalKey: req.headers.get("x-talk-eval-key") || "" }, env, storeFrom(openStore), Date.now(), anthropicLlm, openPay ? require("./pay.js").storeFrom(openPay) : null);
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
