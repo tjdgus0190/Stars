@@ -22,13 +22,8 @@
 # (2026-10-22) 함수는 새 형식(Functions v2, netlify/functions/*.mjs)이고 주소를 각 파일의 config.path로 정한다:
 #   book.mjs → /api/book, pay.mjs → /api/pay/feedback·status·return. 옛 [[redirects]](→ /.netlify/functions/…)는 지웠다.
 #   옛 Lambda 호환 형식은 Blobs strong 읽기에 필요한 값을 주지 않아 결제 확인이 503("store")이었다.
-# (22단계, 운영자 2026-10-23) 사이트 주소(/)로 오면 서버에서 바로 입구로 보낸다. 루트 index.html(흰 화면 + 링크)은 이 설정이 없을 때만 쓰이는 예비.
-#   주소 뒤 ?utm_… 같은 query는 Netlify가 그대로 넘긴다.
-[[redirects]]
-  from = "/"
-  to = "/products/strange-oracle/"
-  status = 301
-  force = true
+# (2026-11-13 운영자 v1-F) 사이트 주소(/)는 처음 화면(로비: 일곱 개의 문·오늘의 신탁·면담·도감·별가루)을 보여 준다 — 아래 gen-guide 칸의 "/" 200 rewrite.
+#   (22단계 2026-10-23의 "/ → 입구 301"은 이 결정으로 바뀌었다. 광고 착지 /products/strange-oracle/?utm_…는 그대로 입구)
 
 # (2026-11-12 운영자 결정) 2027 신년운세 광고 착지 주소: strange-oracle.com/2027 → 새해의 회랑(#ny-hub). query(utm_…)는 그대로 넘어간다.
 #   신년운세 탭이 꺼진 동안(data.js ny.mode "off")은 입구가 그냥 열린다. 주소 뒤 #이 Netlify 이동에서 그대로 붙는지는 미확인 — 운영자가 배포 뒤 한 번 열어 확인
@@ -41,6 +36,11 @@
 # (2026-11-13 운영자 결정: 짧은 주소) 안내 페이지·무료 도구. 파일은 products/strange-oracle/guide/<이름>/index.html(tools/strange-oracle/gen-guide.js가 만듦)이고
 #   주소창은 짧은 주소 그대로(200 rewrite). canonical·sitemap도 짧은 주소를 쓴다. 끝 / 없는 주소는 / 붙은 주소로 보낸다.
 # >>> gen-guide 짧은 주소 (tools/strange-oracle/gen-guide.js가 쓴다. 손으로 고치지 말 것)
+[[redirects]]
+  from = "/"
+  to = "/products/strange-oracle/guide/home/index.html"
+  status = 200
+  force = true
 [[redirects]]
   from = "/saju/"
   to = "/products/strange-oracle/guide/saju/index.html"

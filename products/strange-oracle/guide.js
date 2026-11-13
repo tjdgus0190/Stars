@@ -38,6 +38,22 @@
   document.addEventListener("click", (e) => { if (e.target.closest("[data-js=to-room]")) track("so_guide_cta", { page: CONF.page }); });
 
 
+  // ── (v1-F) 처음 화면: 오늘의 신탁 카드에 오늘 담당 안내자(그림·실루엣·이름)
+  if (CONF.kind === "home") {
+    const D = window.Dust, X = window.DEX, card = $("[data-js=home-today]");
+    if (D && X && card && G.home) {
+      const room = D.guideOf(), g = X.guides.find((x) => x.room === room);
+      if (g) {
+        card.style.setProperty("--art", `url('/products/strange-oracle/img/dex/dex-${room}.webp')`);
+        const u = card.querySelector("use");
+        if (u) u.setAttribute("href", "#guide-" + room);
+        const sub = $("[data-js=home-today-sub]", card);
+        if (sub) sub.textContent = fill(G.home.features.today.sub, { name: g.name });
+      }
+    }
+    return;
+  }
+
   // ───────── (v1-C) 점술관의 하루: 오늘의 신탁 · 안내자 도감 · 별가루 ─────────
   // 별가루 계산·저장은 stardust.js(window.Dust). 이 기기 localStorage에 번호·이름만 둔다(입력값 없음)
   if (CONF.kind === "app") {
@@ -71,66 +87,154 @@
       return paidBal;
     };
 
+
+    // ── (v1-F) 안내자 그림(아치 문 + 실루엣 + 방 명화)·방 데이터 불러오기
+    const DEXG = () => (window.DEX && window.DEX.guides) || [];
+    const guide = (room) => DEXG().find((g) => g.room === room);
+    const IMG = (room) => `/products/strange-oracle/img/dex/dex-${room}.webp`;
+    const arch = (room, cls = "") => `<span class="garch ${cls}" style="--art:url('${IMG(room)}')"><svg viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${room}" /></svg></span>`;
+    const ROOM_DATA = {
+      saju: ["data-saju.js", () => window.SAJU && window.SAJU.stems],
+      ogham: ["data-ogham.js", () => window.OGHAM],
+      star: ["data-stars.js", () => window.NAKSHATRAS],
+      decan: ["data-decans.js", () => window.DECANS],
+      tzolkin: ["data-tzolkin.js", () => window.TZOLKIN_SIGNS],
+      rune: ["data-runes.js", () => window.RUNES],
+      sibyl: ["data-oracles.js", () => window.ORACLES],
+    };
+    const loading = {};
+    const loadRoom = (room) => loading[room] || (loading[room] = new Promise((ok, no) => {
+      const [file, get] = ROOM_DATA[room];
+      if (get()) return ok(get());
+      const sc = document.createElement("script");
+      sc.src = "/products/strange-oracle/" + file;
+      sc.onload = () => (get() ? ok(get()) : no(new Error("data")));
+      sc.onerror = () => { delete loading[room]; no(new Error("data")); };
+      document.head.append(sc);
+    }));
+    // 방 항목 하나 → 화면 조각 (무료 칸만: 제목·핵심 문장·기호)
+    const itemView = (room, list, i) => {
+      const x = list[i] || {};
+      const kw = Array.isArray(x.keywords) ? x.keywords.slice(0, 3) : x.keyword ? [x.keyword] : [];
+      const act = x.advice && x.advice.title ? x.advice.title : "";
+      const base = { kw, act, key: x.key };
+      if (room === "saju") return Object.assign(base, { mark: x.hanja, name: x.name, sub: x.title });
+      if (room === "ogham") return Object.assign(base, { mark: x.glyph, name: `${x.name} · ${x.latin}`, sub: x.title, rune: true });
+      if (room === "star") return Object.assign(base, { mark: i + 1, name: x.name, sub: x.title, num: true });
+      if (room === "decan") return Object.assign(base, { mark: i + 1, name: `${x.sign} ${G.ui.decanPart.replace("{n}", x.part)}`, sub: x.title, num: true });
+      if (room === "tzolkin") return Object.assign(base, { mark: i + 1, name: x.name, sub: x.title, num: true });
+      if (room === "rune") return Object.assign(base, { mark: x.glyph, name: `${x.name} · ${x.latin}`, sub: x.keyword, kw: [], rune: true });
+      return Object.assign(base, { quote: x.line, name: x.title });
+    };
+    const ACT = (P && P.app && P.app.act) || "";
+    const readCard = (room, v, head) => `<article class="gread" style="--art:url('${IMG(room)}')">${head ? `<small class="gread__head">${esc(head)}</small>` : ""}
+      ${v.quote ? `<blockquote class="gscroll">${esc(v.quote)}</blockquote>` : `<span class="gread__mark${v.num ? " num" : ""}${v.rune ? " rune" : ""}">${esc(v.mark)}</span>`}
+      <b>${esc(v.name)}</b>${v.sub ? `<em>${esc(v.sub)}</em>` : ""}${v.kw.length ? `<span class="gread__kw">${v.kw.map((k) => `<i>${esc(k)}</i>`).join("")}</span>` : ""}<p>${esc(v.key)}</p>${v.act && ACT ? `<p class="gread__act"><small>${esc(ACT)}</small>${esc(v.act)}</p>` : ""}</article>`;
+
     if (CONF.page === "today") {
-      const A = P.app, OR = window.ORACLES;
-      const pick = () => window.Calc.pickOracle(OR.length);
+      const A = P.app;
+      const pick = (room) => window.Calc.pickOracle((ROOM_DATA[room][1]() || []).length || 1);
+      const [, mm, dd] = D.kstDay().split("-").map(Number);
+      const nextRoom = D.TODAY_ORDER[(D.TODAY_ORDER.indexOf(D.guideOf()) + 1) % 7];
+      let busy = false, msg = "";
       const draw = () => {
-        const st = D.state();
-        const o = st.oracle && st.oracle.day === D.kstDay() ? st.oracle : null;
-        const [, mm, dd] = D.kstDay().split("-").map(Number);
-        const head = fill(A.head, { date: fill(A.dateFmt, { m: mm, d: dd }) });
-        const left = 7 - (st.run % 7); // 이레를 채운 날은 다음 이레까지 7
-        const streak = `<p class="gnote gcenter">${esc(fill(A.streak, { n: st.run || 1 }))} · ${esc(fill(A.streakNext, { left }))}</p>`;
-        if (!o) {
-          box.innerHTML = `<div class="gtoday"><div class="gtoday__scroll is-closed" aria-hidden="true"></div><button class="gbtn" type="button" data-js="today-open">${esc(A.open)}</button>${streak}</div>`;
-          return;
+        const room = D.guideOf(), g = guide(room), st = D.state();
+        const o = st.oracle && st.oracle.day === D.kstDay() && st.oracle.room === room ? st.oracle : null;
+        let h = `<section class="gtoday-hero" style="--art:url('${IMG(room)}')">${arch(room, "garch--lg")}
+          <p class="gchip">${esc(A.chip)} · ${esc(fill(A.dateFmt, { m: mm, d: dd }))}</p><h2>${esc(g.name)}</h2><p class="gtoday-hero__epi">${esc(g.epithet)}</p>
+          <p class="gtoday-hero__intro">${esc(g.today.intro)}</p>`;
+        if (!o) h += `<button class="gbtn" type="button" data-js="today-open"${busy ? " disabled" : ""}>${esc(g.today.open)}</button><small class="gnote gcenter">${esc(A.reward)}</small>`;
+        h += `</section>`;
+        if (o) {
+          const list = ROOM_DATA[room][1]();
+          if (list) h += readCard(room, itemView(room, list, o.idx), fill(A.receivedHead, { name: g.name }));
+          const others = D.TODAY_ORDER.filter((r) => r !== room);
+          const got = o.extra || [];
+          const need = (COST.extra || 0) - st.bal;
+          h += got.map((x) => { const l = ROOM_DATA[x.room][1](); return l ? readCard(x.room, itemView(x.room, l, x.idx), fill(A.receivedHead, { name: guide(x.room).name })) : ""; }).join("");
+          h += `<section class="gothers"><h2>${esc(A.othersHead)}</h2><p class="gnote">${esc(fill(A.othersNote, { cost: COST.extra }))}${need > 0 ? " · " + esc(fill(A.othersShort, { need })) : ""}</p>
+            <ul class="gpickrow">${others.map((r) => { const done = got.some((x) => x.room === r); return `<li><button type="button" data-js="today-extra" data-room="${r}"${done || need > 0 || busy ? " disabled" : ""}${done ? ' aria-pressed="true"' : ""}>${arch(r, "garch--sm")}<span>${esc(guide(r).name)}</span></button></li>`; }).join("")}</ul></section>`;
+          h += `<p class="gnote gcenter">${esc(fill(A.tomorrow, { name: guide(nextRoom).name }))}</p><div class="gactions"><a class="gbtn ghost" href="${ROOM_URL}" data-js="to-room">${esc(fill(A.toRoom, { room: g.roomName }))}</a></div>`;
         }
-        const x = OR[o.idx];
-        const more = o.more.map((i) => `<blockquote class="gscroll gscroll--more"><small>${esc(A.moreHead)}</small>${esc(OR[i].line)}</blockquote>`).join("");
-        const need = (COST.more || 0) - st.bal;
-        box.innerHTML = `<div class="gtoday"><h2>${esc(head)}</h2><blockquote class="gscroll">${esc(x.line)}</blockquote><div class="gdm"><b>${esc(x.title)}</b><p style="margin-top:8px !important">${esc(x.key)}</p></div>${more}
-          <div class="gactions"><button class="gbtn ghost" type="button" data-js="today-more"${need > 0 ? " disabled" : ""}>${esc(fill(A.more, { cost: COST.more }))}</button></div>${need > 0 ? `<p class="gnote gcenter">${esc(fill(A.moreShort, { need }))}</p>` : ""}
-          ${streak}<p class="gnote gcenter">${esc(A.tomorrow)}</p><div class="gactions"><a class="gbtn" href="${ROOM_URL}" data-js="to-room">${esc(A.toRoom)}</a></div></div>`;
+        if (msg) h += `<p class="gerror" role="alert">${esc(msg)}</p>`;
+        box.innerHTML = h;
       };
-      box.addEventListener("click", (e) => {
-        if (e.target.closest("[data-js=today-open]")) { D.oracleToday(pick); D.earn("oracle"); draw(); track("so_tool_result", { tool: "today" }); }
-        else if (e.target.closest("[data-js=today-more]")) { if (D.oracleMore(pick, COST.more)) draw(); }
+      box.addEventListener("click", async (e) => {
+        const openB = e.target.closest("[data-js=today-open]"), ex = e.target.closest("[data-js=today-extra]");
+        if ((!openB && !ex) || busy) return;
+        busy = true; msg = "";
+        try {
+          if (openB) {
+            const room = D.guideOf();
+            await loadRoom(room);
+            D.oracleToday(pick);
+            D.earn("oracle");
+            track("so_tool_result", { tool: "today" });
+          } else {
+            const room = ex.dataset.room;
+            await loadRoom(room);
+            D.oracleExtra(room, pick, COST.extra);
+          }
+        } catch (x) { msg = A.fail; }
+        busy = false;
+        draw();
       });
-      document.addEventListener("dust:change", () => { if (!box.querySelector("[data-js=today-open]")) draw(); });
+      document.addEventListener("dust:change", () => { if (!busy) draw(); });
+      // 이미 받은 날이면 그 방 파일들을 불러와 다시 그린다
+      const st0 = D.state();
+      if (st0.oracle && st0.oracle.day === D.kstDay() && st0.oracle.room) {
+        Promise.all([st0.oracle.room].concat((st0.oracle.extra || []).map((x) => x.room)).map((r) => loadRoom(r).catch(() => null))).then(draw);
+      }
       draw();
     }
 
     if (CONF.page === "dex") {
       const X = window.DEX, U = X.ui;
+      let openRoom = null;
       const draw = () => {
         const st = D.state();
-        const cards = X.guides.map((g) => {
-          const has = st.cards.includes(g.room), open = st.open.includes(g.room);
-          const art = `<div class="gcard__art" style="--h:${g.art.hue};background-image:url('/products/strange-oracle/img/dex/${g.art.img}')"><svg class="gcard__fig" viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${g.room}" /></svg></div>`;
-          if (!has) return `<li class="gcard is-locked">${art}<div class="gcard__body"><small>${esc(g.roomName)}</small><b>${esc(U.locked)}</b><p>${esc(fill(U.lockedHint, { room: g.roomName }))}</p><a class="gbtn ghost" href="${ROOM_URL}" data-js="to-room">${esc(fill(U.toRoom, { room: g.roomName }))}</a></div></li>`;
-          const tr = Object.entries(U.traitHeads).map(([k, h]) => `<dt>${esc(h)}</dt><dd>${esc(g.traits[k])}</dd>`).join("");
-          const need = (COST.story || 0) - st.bal;
-          const secret = open
-            ? `<div class="gcard__secret"><h3>${esc(U.secretHead)}</h3><p>${esc(g.secret)}</p></div>`
-            : `<div class="gcard__secret is-shut"><h3>${esc(U.secretHead)}</h3><button class="gbtn ghost" type="button" data-js="dex-open" data-room="${g.room}"${need > 0 ? " disabled" : ""}>${esc(fill(U.secretOpen, { cost: COST.story }))}</button>${need > 0 ? `<p class="gnote">${esc(fill(U.secretShort, { need }))}</p>` : ""}</div>`;
-          return `<li class="gcard">${art}<div class="gcard__body"><small>${esc(g.roomName)} · ${esc(g.place)}</small><b>${esc(g.name)}</b><em>${esc(g.epithet)}</em><q>${esc(g.line)}</q><dl class="gkv">${tr}</dl>${secret}</div></li>`;
-        }).join("");
         const all = st.cards.length === X.guides.length;
-        box.innerHTML = `<p class="gdex-count">${esc(fill(U.count, { n: st.cards.length }))}</p>
-          <div class="gseal${all ? " is-open" : ""}"><b>${esc(U.sealHead)}</b><p>${esc(all ? U.sealText : U.sealHint)}</p></div><ul class="gcards">${cards}</ul>`;
+        const cards = X.guides.map((g) => {
+          const has = st.cards.includes(g.room);
+          return `<li><button type="button" class="gdexcard${has ? "" : " is-locked"}" data-js="dex-card" data-room="${g.room}">${arch(g.room, "garch--md")}<small>${esc(g.roomName)}</small><b>${esc(has ? g.name : U.locked)}</b>${has ? `<span>${esc(g.epithet)}</span>` : `<span>${esc(fill(U.lockedHint, { room: g.roomName }))}</span>`}</button></li>`;
+        }).join("");
+        let h = `<div class="gseal${all ? " is-open" : ""}"><b>${esc(U.sealHead)} · ${esc(fill(U.count, { n: st.cards.length }))}</b><p>${esc(all ? U.sealText : U.sealHint)}</p></div><ul class="gdexgrid">${cards}</ul>`;
+        if (openRoom) {
+          const g = guide(openRoom), has = st.cards.includes(g.room), open = st.open.includes(g.room), need = (COST.story || 0) - st.bal;
+          const tr = Object.entries(U.traitHeads).map(([k, hd]) => `<dt>${esc(hd)}</dt><dd>${esc(g.traits[k])}</dd>`).join("");
+          h += `<div class="gsheet" role="dialog" aria-modal="true" aria-label="${esc(g.name)}"><div class="gsheet__scrim" data-js="dex-close"></div><div class="gsheet__body" style="--art:url('${IMG(g.room)}')">
+            <button class="gsheet__x" type="button" data-js="dex-close" aria-label="닫기">×</button>${arch(g.room, "garch--lg")}
+            <small class="gchip">${esc(g.roomName)} · ${esc(g.place)}</small><h2>${esc(has ? g.name : U.locked)}</h2>`;
+          if (has) {
+            h += `<p class="gtoday-hero__epi">${esc(g.epithet)}</p><q class="gline">${esc(g.line)}</q><dl class="gkv">${tr}</dl>
+              <div class="gcard__secret${open ? "" : " is-shut"}"><h3>${esc(U.secretHead)}</h3>${open ? `<p>${esc(g.secret)}</p>` : `<button class="gbtn ghost" type="button" data-js="dex-open" data-room="${g.room}"${need > 0 ? " disabled" : ""}>${esc(fill(U.secretOpen, { cost: COST.story }))}</button>${need > 0 ? `<p class="gnote">${esc(fill(U.secretShort, { need }))}</p>` : ""}`}</div>`;
+          } else {
+            h += `<p class="gnote gcenter">${esc(fill(U.lockedHint, { room: g.roomName }))}</p><div class="gactions"><a class="gbtn" href="${ROOM_URL}" data-js="to-room">${esc(fill(U.toRoom, { room: g.roomName }))}</a></div>`;
+          }
+          h += `</div></div>`;
+        }
+        box.innerHTML = h;
+        document.documentElement.classList.toggle("sheet-open", Boolean(openRoom));
       };
-      box.addEventListener("click", (e) => { const b = e.target.closest("[data-js=dex-open]"); if (b && D.openStory(b.dataset.room, COST.story)) draw(); });
+      box.addEventListener("click", (e) => {
+        const c = e.target.closest("[data-js=dex-card]");
+        if (c) { openRoom = c.dataset.room; return draw(); }
+        if (e.target.closest("[data-js=dex-close]")) { openRoom = null; return draw(); }
+        const b = e.target.closest("[data-js=dex-open]");
+        if (b && D.openStory(b.dataset.room, COST.story)) draw();
+      });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && openRoom) { openRoom = null; draw(); } });
       document.addEventListener("dust:change", draw);
       draw();
     }
 
-
-    // ── 안내자와 면담 (v1-D). talkMode "off"면 아무것도 보내지 않는다.
-    //   보내는 것: 방 이름 · 그 방 결과 번호(이 탭 sessionStorage의 방 기록에서 번호만) · 질문 글 · 앞선 문답 3개. 이름·생일은 보내지 않는다
+    // ── 안내자와 면담 (v1-D 함수 · v1-F 방 화면). talkMode "off"면 아무것도 보내지 않는다.
+    //   보내는 것: 방 이름 · 그 방 결과 번호(이 탭 sessionStorage의 방 기록에서 번호만) · 질문 글 · 앞선 문답 3개(· 충전분이면 로그인 표). 이름·생일은 보내지 않는다
     //   문답은 이 화면 메모리에만 두고 저장하지 않는다
     if (CONF.page === "talk") {
       const A = P.app, X = window.DEX, E = A.errors, COSTQ = COST.talk || 10;
       const on = P.talkMode === "test" || P.talkMode === "live";
+      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       let visits = {};
       try { visits = (JSON.parse(sessionStorage.getItem("strange-oracle") || "null") || {}).visits || {}; } catch (e) { visits = {}; }
       const I = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
@@ -146,41 +250,64 @@
         if (room === "sibyl" && I(v.sors, 0, 31)) return { i: v.sors };
         return null;
       };
-      let cur = null; // 고른 안내자
-      let hist = []; // [{ q, a }]
-      let busy = false;
-      const fig = (room) => `<svg viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${room}" /></svg>`;
-      const pickHtml = () => `<h2>${esc(A.pick)}</h2><ul class="gtalk-pick">${X.guides.map((g) => `<li><button type="button" data-js="talk-pick" data-room="${g.room}"${cur && cur.room === g.room ? ' aria-pressed="true"' : ""}>${fig(g.room)}<b>${esc(g.name)}</b><small>${esc(g.roomName)}</small></button></li>`).join("")}</ul>`;
-      const draw = () => {
-        if (!on) { box.innerHTML = pickHtml() + `<p class="gnote gcenter gtalk-closed">${esc(A.closed)}</p>`; return; }
-        if (!cur) { box.innerHTML = pickHtml(); return; }
-        const r = resultOf(cur.room);
+      let cur = null; // 고른 안내자(방 안에 있을 때)
+      const hists = {}; // 방마다 [{ q, a }] — 메모리만
+      let busy = false, entering = false;
+      const lobby = () => `<p class="gnote gcenter">${esc(on ? A.pick : A.closed)}</p><ul class="gdoorpick">${X.guides.map((g) => `<li><button type="button" data-js="talk-pick" data-room="${g.room}">${arch(g.room, "garch--door")}<b>${esc(g.name)}</b><small>${esc(g.roomName)}</small></button></li>`).join("")}</ul>`;
+      const balLine = () => { const st = D.state(); return paidBal != null ? fill(A.balancePaid, { n: st.bal, p: paidBal }) : fill(A.balance, { n: st.bal }); };
+      const say = (who, text, extra = "") => `<div class="gsay gsay--${who}${extra}">${who === "guide" ? arch(cur.room, "garch--xs") : ""}<p>${esc(text)}</p></div>`;
+      const room = () => {
+        const g = cur, r = resultOf(g.room), hist = hists[g.room] || [];
         const st = D.state(), usePaid = st.bal < COSTQ && paidBal != null && paidBal >= COSTQ, need = usePaid ? 0 : COSTQ - st.bal;
-        const log = hist.map((h) => `<div class="gsay gsay--me"><small>${esc(A.you)}</small><p>${esc(h.q)}</p></div><div class="gsay gsay--guide">${fig(cur.room)}<small>${esc(cur.name)}</small><p>${esc(h.a)}</p></div>`).join("");
-        box.innerHTML = pickHtml() + `<div class="gtalk">
-          <div class="gsay gsay--guide">${fig(cur.room)}<small>${esc(cur.name)}</small><p>${esc(cur.line)}</p></div>
-          <p class="gnote gcenter">${esc(fill(r ? A.known : A.unknown, { room: cur.roomName }))}${r ? "" : ` <a href="/products/strange-oracle/" data-js="to-room">${esc(fill(A.toRoom, { room: cur.roomName }))}</a>`}</p>
-          <div data-js="talk-log">${log}</div>
-          <form class="gform gtalk-form" data-js="talk-form" novalidate autocomplete="off">
-            <label class="gfield gfield--wide"><textarea name="q" rows="3" maxlength="300" placeholder="${esc(A.placeholder)}" aria-label="${esc(A.placeholder)}"></textarea></label>
-            <p class="gnote">${esc(A.privacy)} <span data-js="talk-count">${esc(fill(A.count, { n: 0 }))}</span></p>
+        return `<div class="groom${entering ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}')">
+          <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b><small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span></header>
+          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${r ? "" : `<p class="groom__note">${esc(fill(A.unknown, { room: g.roomName }))} <a href="${ROOM_URL}" data-js="to-room">${esc(fill(A.toRoom, { room: g.roomName }))}</a></p>`}${r ? `<p class="groom__note">${esc(fill(A.known, { room: g.roomName }))}</p>` : ""}
+            ${hist.map((h) => say("me", h.q) + say("guide", h.a)).join("")}</div>
+          <form class="groom__bar" data-js="talk-form" novalidate autocomplete="off">
+            <p class="groom__meta"><span>${esc(balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}</p>
             <p class="gerror" data-js="talk-error" role="alert" hidden></p>
-            <button class="gbtn" type="submit"${need > 0 || busy ? " disabled" : ""}>${esc(fill(A.ask, { cost: COSTQ }))}</button>
-            <p class="gnote gcenter">${esc(paidBal != null ? fill(A.balancePaid, { n: st.bal, p: paidBal }) : fill(A.balance, { n: st.bal }))}${need > 0 ? " · " + esc(fill(A.short, { need })) : ""}</p>
+            <div class="groom__row"><textarea name="q" rows="1" maxlength="300" placeholder="${esc(A.placeholder)}" aria-label="${esc(A.placeholder)}"></textarea><button type="submit" class="groom__send"${need > 0 || busy ? " disabled" : ""} aria-label="${esc(fill(A.ask, { cost: COSTQ }))}"><span>✦${COSTQ}</span></button></div>
           </form></div>`;
       };
+      const draw = () => {
+        box.innerHTML = lobby() + (on && cur ? room() : "");
+        entering = false;
+        document.documentElement.classList.toggle("room-open", Boolean(on && cur));
+        const log = box.querySelector("[data-js=talk-log]");
+        if (log) log.scrollTop = log.scrollHeight;
+      };
+      // 방 안의 잔액 줄·보내기 버튼만 새로 (대화는 그대로 두어 깜빡이지 않게)
+      const refresh = () => {
+        if (busy || !cur) return;
+        const bar = box.querySelector(".groom__bar");
+        if (!bar) return;
+        const st = D.state(), usePaid = st.bal < COSTQ && paidBal != null && paidBal >= COSTQ, need = usePaid ? 0 : COSTQ - st.bal;
+        bar.querySelector(".groom__meta").innerHTML = `<span>${esc(balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}`;
+        bar.querySelector(".groom__send").disabled = need > 0;
+      };
       const err = (m) => { const e = box.querySelector("[data-js=talk-error]"); if (e) { e.textContent = m; e.hidden = !m; } };
+      // 글자가 이어 나오는 답 (움직임 줄이기면 한 번에)
+      const typeOut = (el, text) => new Promise((ok) => {
+        if (reduce) { el.textContent = text; return ok(); }
+        let i = 0;
+        const step = () => { i = Math.min(text.length, i + 2); el.textContent = text.slice(0, i); const log = box.querySelector("[data-js=talk-log]"); if (log) log.scrollTop = log.scrollHeight; if (i < text.length) setTimeout(step, 22); else ok(); };
+        step();
+      });
       box.addEventListener("click", (e) => {
         const b = e.target.closest("[data-js=talk-pick]");
-        if (!b || busy) return;
-        const g = X.guides.find((x) => x.room === b.dataset.room);
-        if (!g || (cur && cur.room === g.room)) return;
-        cur = g;
-        hist = [];
-        draw();
-        if (on) { const t = box.querySelector("textarea"); if (t) t.focus({ preventScroll: true }); }
+        if (b && !busy) {
+          if (!on) return;
+          cur = X.guides.find((x) => x.room === b.dataset.room) || null;
+          entering = true;
+          draw();
+          const t = box.querySelector(".groom textarea"); if (t) t.focus({ preventScroll: true });
+          return;
+        }
+        if (e.target.closest("[data-js=talk-leave]") && !busy) { cur = null; draw(); }
       });
-      box.addEventListener("input", (e) => { if (e.target.name === "q") { const c = box.querySelector("[data-js=talk-count]"); if (c) c.textContent = fill(A.count, { n: e.target.value.length }); } });
+      box.addEventListener("input", (e) => { if (e.target.name === "q") { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; } });
+      box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && cur && !busy) { cur = null; draw(); } });
       box.addEventListener("submit", async (e) => {
         if (!e.target.closest("[data-js=talk-form]")) return;
         e.preventDefault();
@@ -193,54 +320,56 @@
         const lg = readLogin();
         const paid = D.state().bal < COSTQ && lg && paidBal != null && paidBal >= COSTQ;
         if (!paid && !D.spend(COSTQ)) { busy = false; draw(); return; }
-        const room = cur.room;
+        const g = cur, roomName = g.room, hist = hists[roomName] || (hists[roomName] = []);
         const logBox = box.querySelector("[data-js=talk-log]");
-        logBox.insertAdjacentHTML("beforeend", `<div class="gsay gsay--me"><small>${esc(A.you)}</small><p>${esc(q)}</p></div><div class="gsay gsay--guide is-wait" data-js="talk-wait">${fig(room)}<small>${esc(cur.name)}</small><p>${esc(A.waiting)}</p></div>`);
+        logBox.insertAdjacentHTML("beforeend", say("me", q, " is-new") + `<div class="gsay gsay--guide is-wait is-new" data-js="talk-wait">${arch(roomName, "garch--xs")}<p><span class="gdots" aria-label="${esc(fill(A.typing, { name: g.name }))}"><i></i><i></i><i></i></span></p></div>`);
+        logBox.scrollTop = logBox.scrollHeight;
         e.target.querySelector("button[type=submit]").disabled = true;
-        ta.value = "";
+        ta.value = ""; ta.style.height = "auto";
         let res = null, data = null;
         try {
-          const body = { room, r: resultOf(room), q, hist: hist.slice(-3) };
+          const body = { room: roomName, r: resultOf(roomName), q, hist: hist.slice(-3) };
           if (paid) body.sid = lg.sid;
           res = await fetch("/api/talk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
           data = await res.json();
         } catch (x) { res = null; }
-        busy = false;
-        if (cur.room !== room) return; // 그새 다른 안내자를 골랐다
+        const wait = box.querySelector("[data-js=talk-wait]");
         if (res && res.ok && data && typeof data.a === "string") {
           if (!paid && (data.crisis || data.declined)) D.refund(COSTQ); // 위기 안내·답하지 못한 물음은 별가루를 쓰지 않는다
           if (paid && Number.isInteger(data.paid)) paidBal = data.paid;
-          hist.push({ q, a: data.a.slice(0, 600) });
-          track("so_talk", { room, step: "answer" });
-          draw();
+          const a = data.a.slice(0, 600);
+          hist.push({ q, a });
+          track("so_talk", { room: roomName, step: "answer" });
+          if (wait) { wait.classList.remove("is-wait"); wait.removeAttribute("data-js"); await typeOut(wait.querySelector("p"), a); }
+          busy = false;
+          refresh();
         } else {
+          busy = false;
           if (!paid) D.refund(COSTQ);
           const code = data && data.error;
           if (code === "session") { dropLogin(); paidBal = null; }
           if (code === "dust") await loadPaid();
           draw();
           err(code === "session" ? A.sessionEnd : code === "off" ? E.off : code === "budget" ? E.budget : code === "rate" ? E.rate : E.fail);
-          const t = box.querySelector("textarea"); if (t) t.value = q;
+          const t = box.querySelector(".groom textarea"); if (t) t.value = q;
         }
-        const last = box.querySelectorAll(".gsay");
-        if (last.length) last[last.length - 1].scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
-      loadPaid().then(() => { if (!busy) { const t = box.querySelector("textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector("textarea"); if (t2) t2.value = keep; } });
-      document.addEventListener("dust:change", () => { if (!busy && cur) { const t = box.querySelector("textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector("textarea"); if (t2) t2.value = keep; } });
+      loadPaid().then(refresh);
+      document.addEventListener("dust:change", refresh);
       draw();
     }
 
     if (CONF.page === "stardust") {
       const A = P.app;
+      // (v1-F) 한 장짜리: 잔액 카드 → 모으는 법·쓰는 곳(짧은 두 칸) → 충전 → 지우기
       const draw = () => {
         const st = D.state();
-        const uses = A.uses.map((u) => `<li><span>${esc(u.label)}</span><b>${esc(u.amt)}</b></li>`).join("");
-        const ways = A.ways.map((w) => `<li><span>${esc(w.label)}<small>${esc(w.note)}</small></span><b>${esc(w.amt)}</b></li>`).join("");
-        box.innerHTML = `<div class="gdust"><small>${esc(A.balance)}</small><b><i aria-hidden="true">✦</i> ${st.bal}</b><p>${esc(fill(A.today, { got: st.got, cap: st.cap }))}</p><i class="gdust__bar"><u style="width:${Math.round((st.got / st.cap) * 100)}%"></u></i></div>
-          <h2>${esc(A.waysHead)}</h2><ul class="grows">${ways}</ul><p class="gnote">${esc(A.capNote)}</p>
-          <h2>${esc(A.usesHead)}</h2><ul class="grows">${uses}</ul>
+        const mini = (head, list, sign) => `<section class="gmini"><h2>${esc(head)}</h2><ul>${list.map((x) => `<li><span>${esc(x.label)}${x.note ? `<small>${esc(x.note)}</small>` : ""}</span><b>${sign}${esc(String(x.amt).replace(/^\+/, ""))}</b></li>`).join("")}</ul></section>`;
+        box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><i aria-hidden="true">✦</i> <span data-js="dust-total">${st.bal + (paidBal || 0)}</span></b>
+            <p><span>${esc(A.free)} ${st.bal}</span>${paidBal != null ? `<span>${esc(A.paid)} ${paidBal}</span>` : ""}</p></div>
+          <div class="gminis">${mini(A.waysHead, A.ways, "+")}${mini(A.usesHead, A.uses, "−")}</div>
           <div data-js="dust-shop"></div>
-          <div class="gactions"><button class="gbtn ghost" type="button" data-js="dust-clear">${esc(A.clear)}</button></div><p class="gnote gcenter" data-js="dust-cleared" hidden>${esc(A.cleared)}</p>`;
+          <p class="gcenter"><button class="glink" type="button" data-js="dust-clear">${esc(A.clear)}</button></p><p class="gnote gcenter" data-js="dust-cleared" hidden>${esc(A.cleared)}</p>`;
         drawShop();
       };
       // ── 충전 (운영 규칙 7장): 결제 전에 받는 것·가격·환불·판매자를 보이고, 동의 체크 뒤에만 결제창
@@ -255,18 +384,18 @@
         const el = box.querySelector("[data-js=dust-shop]");
         if (!el || !shopOn) return;
         const lg = readLogin();
-        let h = `<h2>${esc(S.head)}</h2><p class="gnote">${esc(S.lead)}</p>`;
+        let h = `<section class="gshop"><h2>${esc(S.head)}</h2><p class="gnote">${esc(S.lead)}</p>`;
         if (!lg) {
-          h += `<div class="gactions"><button class="gbtn" type="button" data-js="dust-login">${esc(S.login)}</button></div><p class="gnote gcenter">${esc(S.loginNote)}</p>`;
+          h += `<div class="gactions"><button class="gbtn gbtn--kakao" type="button" data-js="dust-login">${esc(S.login)}</button></div><p class="gnote gcenter">${esc(S.loginNote)}</p>`;
         } else {
-          h += `<div class="gdust gdust--paid"><small>${esc(S.paidWhere)}</small><b><i aria-hidden="true">✦</i> ${paidBal == null ? "…" : paidBal}</b><p>${esc(fill(S.paidBal, { n: paidBal == null ? "…" : paidBal }))}</p></div>
-            <ul class="gpacks">${S.packs.map((k) => `<li><button type="button" data-js="dust-pack" data-prod="${k.prod}"${pick === k.prod ? ' aria-pressed="true"' : ""}><b>${esc(fill(S.pack, { n: k.n }))}</b><small>${esc(fill(S.packTalk, { q: Math.floor(k.n / COST.talk || k.n / 10) }))}</small><span>${esc(fill(S.price, { price: won(k.price) }))}</span></button></li>`).join("")}</ul>
-            <ul class="gsources">${S.terms.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
-            <p class="gnote"><a href="/products/strange-oracle/legal/terms.html#s2-4">${esc(S.termsLink)}</a></p>
+          const k = S.packs.find((x) => x.prod === pick);
+          h += `<ul class="gpacks">${S.packs.map((x) => `<li><button type="button" data-js="dust-pack" data-prod="${x.prod}" aria-pressed="${pick === x.prod}"><b><i aria-hidden="true">✦</i> ${x.n}</b><small>${esc(fill(S.packTalk, { q: Math.floor(x.n / (COST.talk || 10)) }))}</small><span>${esc(fill(S.price, { price: won(x.price) }))}</span></button></li>`).join("")}</ul>
+            <p class="gsummary">${esc(S.summary)}</p>
+            <details class="gfold"><summary>${esc(S.more)}</summary><ul class="gsources">${S.terms.map((t) => `<li>${esc(t)}</li>`).join("")}</ul><p class="gnote"><a href="/products/strange-oracle/legal/terms.html#s2-4">${esc(S.termsLink)}</a></p></details>
             <label class="gcheck"><input type="checkbox" data-js="dust-agree" />${esc(S.agree)}</label>
-            <div class="gactions"><button class="gbtn" type="button" data-js="dust-buy"${shopBusy ? " disabled" : ""}>${esc(pick ? fill(S.buy, { price: won(S.packs.find((k) => k.prod === pick).price), n: S.packs.find((k) => k.prod === pick).n }) : S.pick)}</button></div>`;
+            <div class="gactions"><button class="gbtn" type="button" data-js="dust-buy"${shopBusy ? " disabled" : ""}>${esc(k ? fill(S.buy, { price: won(k.price), n: k.n }) : S.pick)}</button></div>`;
         }
-        h += `<p class="gnote gcenter" data-js="dust-msg" role="status">${esc(shopMsg)}</p>${showRetry ? `<div class="gactions"><button class="gbtn ghost" type="button" data-js="dust-retry">${esc(S.retry)}</button></div>` : ""}`;
+        h += `<p class="gnote gcenter" data-js="dust-msg" role="status">${esc(shopMsg)}</p>${showRetry ? `<div class="gactions"><button class="gbtn ghost" type="button" data-js="dust-retry">${esc(S.retry)}</button></div>` : ""}</section>`;
         el.innerHTML = h;
       }
       const say = (m, retry) => { shopMsg = m || ""; showRetry = Boolean(retry); drawShop(); };
@@ -334,6 +463,7 @@
         if (c.status === 200 && c.j) {
           writePend(null);
           paidBal = c.j.bal;
+          draw();
           if (c.j.state === "credited") track("so_dust", { step: "done" });
           return say(c.j.state === "already" ? S.already : fill(S.credited, { n: c.j.n }));
         }
@@ -345,7 +475,7 @@
         const t = e.target;
         if (t.closest("[data-js=dust-login]")) return kakaoLogin();
         const pk = t.closest("[data-js=dust-pack]");
-        if (pk) { pick = pk.dataset.prod; shopMsg = ""; return drawShop(); }
+        if (pk) { const ag = box.querySelector("[data-js=dust-agree]"); const keep = ag && ag.checked; pick = pk.dataset.prod; shopMsg = ""; drawShop(); const ag2 = box.querySelector("[data-js=dust-agree]"); if (ag2) ag2.checked = keep; return; }
         if (t.closest("[data-js=dust-retry]")) return settle();
         if (t.closest("[data-js=dust-buy]")) {
           if (!pick) return say(S.pick);
@@ -353,7 +483,7 @@
           return startBuy();
         }
       });
-      if (shopOn) loadPaid().then(() => { drawShop(); if (location.hash === "#paid" || readPend()) settle(); if (/^#(paid|login)$/.test(location.hash)) history.replaceState(null, "", location.pathname); });
+      if (shopOn) loadPaid().then(() => { draw(); if (location.hash === "#paid" || readPend()) settle(); if (/^#(paid|login)$/.test(location.hash)) history.replaceState(null, "", location.pathname); });
       box.addEventListener("click", (e) => {
         if (!e.target.closest("[data-js=dust-clear]")) return;
         if (!window.confirm(A.clearAsk)) return;

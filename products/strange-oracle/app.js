@@ -6758,7 +6758,7 @@
     }
   }
   function track(name, props) {
-    if (name === "so_share" && window.Dust) window.Dust.earn("share"); // (v1-C) 별가루: 공유 하루 2번까지
+    // (v1-F) 결과 나누기는 별가루를 주지 않는다(운영자 2026-11-13)
     if (externalOn) Analytics.track(name, props);
   }
   const storySent = new Set();

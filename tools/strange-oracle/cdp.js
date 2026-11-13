@@ -150,5 +150,5 @@ async function launch({ port = 9333, reduced = false, width = 360, height = 800,
   return { send, evaluate, goto, shot, close, log, sleep, on: (fn) => listeners.push(fn) };
 }
 // (2026-11-13 v1-C) 입구의 localStorage에는 별가루 장부(strange-oracle-dust) 하나만 있어도 된다. 장부 칸은 정해진 이름뿐(입력값 칸 없음)
-const LS_ONLY_DUST = "(() => { const ks = Object.keys(localStorage).filter((k) => k !== 'strange-oracle-dust'); const d = localStorage.getItem('strange-oracle-dust'); if (!d) return ks.length === 0; const o = JSON.parse(d); return ks.length === 0 && Object.keys(o).sort().join() === 'bal,cards,day,first,got,n,open,oracle,rooms,run,seen,v'; })()";
+const LS_ONLY_DUST = "(() => { const ks = Object.keys(localStorage).filter((k) => k !== 'strange-oracle-dust'); const d = localStorage.getItem('strange-oracle-dust'); if (!d) return ks.length === 0; const o = JSON.parse(d); return ks.length === 0 && Object.keys(o).sort().join() === 'bal,cards,day,first,got,n,open,oracle,rooms,v'; })()";
 module.exports = { LS_ONLY_DUST, launch, sleep, googleCount: () => ({ blocked: G.blocked, leaked: G.leaked.length + G.pending.size, targets: G.targets, extra: G.extra }) };

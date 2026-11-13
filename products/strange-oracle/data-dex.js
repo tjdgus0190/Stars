@@ -6,6 +6,7 @@
 //   traits        성격·말버릇·좋아하는 것·싫어하는 것 (카드를 얻으면 보인다)
 //   line          대표 한마디
 //   secret        숨은 이야기 (별가루로 펼친다, 250자 이하)
+//   today         오늘의 신탁을 건넬 때 첫 줄(intro)과 버튼 이름(open) — 담당 안내자는 날마다 바뀐다(stardust.js TODAY_ORDER)
 window.DEX = {
   ui: {
     count: "모은 카드 {n} / 7",
@@ -15,7 +16,7 @@ window.DEX = {
     traitHeads: { personality: "성격", tone: "말버릇", likes: "좋아하는 것", dislikes: "싫어하는 것" },
     secretHead: "숨은 이야기",
     secretOpen: "별가루 {cost}로 숨은 이야기 펼치기",
-    secretShort: "별가루가 {need} 모자라요. 오늘의 신탁과 무료 도구로 모을 수 있어요.",
+    secretShort: "별가루가 {need} 모자라요. 매일 오늘의 신탁으로 모을 수 있어요.",
     sealDone: "일곱 안내자를 모두 만났어요. 금빛 봉인이 열렸어요.",
     sealHint: "일곱 장을 모두 모으면 금빛 봉인이 열려요.",
     sealHead: "금빛 봉인",
@@ -24,6 +25,7 @@ window.DEX = {
   guides: [
     {
       room: "saju",
+      today: { intro: "만신이 쌀 위에 오늘의 글자 하나를 올려놓았어요.", open: "방울 흔들기" },
       roomName: "만신의 방",
       name: "만신",
       epithet: "쌀 위에 여덟 글자를 펼치는 무당",
@@ -40,6 +42,7 @@ window.DEX = {
     },
     {
       room: "ogham",
+      today: { intro: "오검이 오늘의 나무 결 하나를 골라 새겨 두었어요.", open: "나무 결 읽기" },
       roomName: "오검의 방",
       name: "오검",
       epithet: "자작나무 숲의 필경사",
@@ -56,6 +59,7 @@ window.DEX = {
     },
     {
       room: "star",
+      today: { intro: "베다가 오늘 밤 머물 달의 집 하나를 세어 두었어요.", open: "달의 집 세기" },
       roomName: "베다의 방",
       name: "베다",
       epithet: "달의 집을 세는 별지기",
@@ -72,6 +76,7 @@ window.DEX = {
     },
     {
       room: "decan",
+      today: { intro: "데칸의 별시계 그림자가 오늘의 눈금 하나를 가리켜요.", open: "눈금 읽기" },
       roomName: "데칸의 방",
       name: "데칸",
       epithet: "알렉산드리아의 별시계지기",
@@ -88,6 +93,7 @@ window.DEX = {
     },
     {
       room: "tzolkin",
+      today: { intro: "촐킨이 돌 제단 위에 오늘의 날 이름 하나를 놓았어요.", open: "날 이름 보기" },
       roomName: "촐킨의 방",
       name: "촐킨",
       epithet: "260일을 지키는 날지기",
@@ -104,6 +110,7 @@ window.DEX = {
     },
     {
       room: "rune",
+      today: { intro: "룬이 바람에게 오늘의 돌 하나를 맡겨 두었어.", open: "돌 꺼내기" },
       roomName: "룬의 방",
       name: "룬",
       epithet: "바닷바람 속의 돌 고르는 이",
@@ -120,6 +127,7 @@ window.DEX = {
     },
     {
       room: "sibyl",
+      today: { intro: "시빌라의 동굴에서 오늘의 두루마리 하나가 울려요…", open: "두루마리 펼치기" },
       roomName: "시빌라 신탁의 방",
       name: "시빌라",
       epithet: "동굴의 울림을 전하는 무녀",

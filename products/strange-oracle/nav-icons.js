@@ -1,0 +1,26 @@
+// 메뉴·아래 탭 바·첫 화면 카드의 선 아이콘 (2026-11-13 v1-F). 직접 그린 24×24 선 그림(stroke=currentColor). 문구 없음.
+// nav.js(입구·페이지)와 tools/strange-oracle/gen-guide.js(정적 HTML)가 같은 값을 쓴다.
+window.NAV_ICONS = {
+  home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>',
+  door: '<path d="M6 21V10a6 6 0 0 1 12 0v11M4 21h16M12 4v17M10 14h.01M14 14h.01"/>',
+  scroll: '<path d="M7 4h11a2 2 0 0 1 0 4H7M7 4a2 2 0 0 0 0 4v10a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V8M10 12h6M10 16h4"/>',
+  chat: '<path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-5 4v-4H6a2 2 0 0 1-2-2z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM4 5v16M18 19v2H6M9 7h6M9 10.5h4"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>',
+  menu: '<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>',
+  saju: '<path d="M5 4h14v16H5zM5 9h14M5 14.5h14M12 4v16"/>',
+  moon: '<path d="M19 14.5A7.5 7.5 0 1 1 9.5 5 6 6 0 0 0 19 14.5z"/>',
+  rune: '<path d="M8 3v18M8 4l7 4-7 4M8 12l8 8"/>',
+  tree: '<path d="M12 21v-7M12 14l-4-3M12 11l4-3M12 3a6 6 0 0 1 6 6c0 3-2.5 5-6 5s-6-2-6-5a6 6 0 0 1 6-6z"/>',
+  pyramid: '<path d="M3 20h18L12 4zM12 4v16M7.5 12h9"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  temple: '<path d="M3 9l9-5 9 5zM5 9v9M9.5 9v9M14.5 9v9M19 9v9M3 21h18M4 18h16"/>',
+  calendar: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',
+  feather: '<path d="M20 4c-7 0-12 5-13 12l-3 4M20 4c0 7-5 12-12 13M8 13h5"/>',
+  doc: '<path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h5"/>',
+  lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  camera: '<rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="4"/><path d="M8 6l1.5-2h5L16 6"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  back: '<path d="M15 5l-7 7 7 7"/>',
+  send: '<path d="M4 12l16-8-6 16-3-6zM11 14l9-10"/>',
+};

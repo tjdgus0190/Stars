@@ -31,9 +31,9 @@ const TOOL_SCRIPTS = {
   sibyl: ["data-oracles.js", "calc.js"],
 };
 // (v1-C) 점술관의 하루 페이지(오늘의 신탁·도감·별가루) — guide.js가 화면을 그린다
-const APP_SCRIPTS = { today: ["data-oracles.js", "calc.js"], dex: ["data-dex.js"], talk: ["data-dex.js"], stardust: [] };
+const APP_SCRIPTS = { today: ["data-dex.js", "calc.js"], dex: ["data-dex.js"], talk: ["data-dex.js"], stardust: [] }; // today: 방 데이터는 guide.js가 그날 안내자 것만 불러온다
 // 페이지 폴더 = 짧은 주소 이름 (/name-ogham/ → guide/name-ogham/)
-const slugOf = (d) => d.path.replace(/^\/|\/$/g, "");
+const slugOf = (d) => d.path.replace(/^\/|\/$/g, "") || "home"; // 처음 화면(/)은 guide/home/
 // 입구 index.html의 오검·마야 숫자 획(<symbol>)을 그대로 옮겨 쓴다 (모양의 원본은 하나)
 const sprite = (prefix) => {
   const html = fs.readFileSync(path.join(P, "index.html"), "utf8");
@@ -45,6 +45,8 @@ const sprite = (prefix) => {
 function build() {
   const { GUIDE: G } = load("data-guide.js");
   const { NAV: N } = load("data-nav.js");
+  const { NAV_ICONS: ICONS } = load("nav-icons.js");
+  const ico = (name) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ICONS.door}</svg>`;
   const { TEXT } = load("data.js");
   const { SAJU } = load("data-saju.js");
   const { NAKSHATRAS } = load("data-stars.js");
@@ -59,11 +61,14 @@ function build() {
   const entry = (name) => G.pages[name] || G.tools[name] || (G.apps || {})[name] || L.list[name] || (name === "legends" ? L.hub : null);
   const hrefOf = (name) => { const e = entry(name); if (!e) throw new Error("모르는 관련 링크: " + name); return e.path; };
 
+  // 전체 메뉴(☰ 시트, 아이콘 칸) — 입구는 nav.js가 같은 모양으로 그린다
   const sidenav = (current) => `<aside class="sidenav" id="sidenav" aria-label="${esc(N.open)}">
-  <div class="sidenav__head"><a class="sidenav__brand" href="${PB}"><b>${esc(N.brand)}</b><small>${esc(N.brandSub)}</small></a><button class="sidenav__close" type="button" data-nav="close" aria-label="${esc(N.close)}">×</button></div>
-${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"><h2>${esc(g.head)}</h2><ul>${g.items.map((it) => `<li><a href="${esc(it.href)}"${it.ext ? ' target="_blank" rel="noopener"' : ""}${it.href === current ? ' aria-current="page"' : ""}>${esc(it.label)}${it.ext ? '<span class="ext">↗</span>' : ""}${it.note ? `<small>${esc(it.note)}</small>` : ""}</a>${it.disclose ? `<!-- ai-notice --><p class="sidenav__notice">${esc(it.disclose)}</p><!-- /ai-notice -->` : ""}</li>`).join("")}</ul></nav>`).join("\n")}
+  <div class="sidenav__head"><a class="sidenav__brand" href="${esc(N.home)}"><b>${esc(N.brand)}</b><small>${esc(N.brandSub)}</small></a><button class="sidenav__close" type="button" data-nav="close" aria-label="${esc(N.close)}">${ico("close")}</button></div>
+${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"><h2>${esc(g.head)}</h2><ul class="sidenav__tiles">${g.items.map((it) => `<li><a href="${esc(it.href)}" title="${esc(it.label)}"${it.ext ? ' target="_blank" rel="noopener"' : ""}${it.href === current ? ' aria-current="page"' : ""}>${ico(it.icon)}<span>${esc(it.short || it.label)}</span></a></li>`).join("")}</ul>${g.items.filter((it) => it.disclose).map((it) => `<!-- ai-notice --><p class="sidenav__notice">${esc(it.disclose)}</p><!-- /ai-notice -->`).join("")}</nav>`).join("\n")}
 </aside>
 <div class="sidenav-scrim" data-nav="close"></div>`;
+  // 아래 탭 바
+  const tabbar = (current) => `<nav class="tabbar" aria-label="${esc(N.menuHead)}">${N.tabs.map((t) => `<a href="${esc(t.href)}"${t.href === current ? ' aria-current="page"' : ""}>${ico(t.icon)}<span>${esc(t.label)}</span></a>`).join("")}</nav>`;
 
   const table = (kind) => {
     if (kind === "stems") return `<ul class="gtable">${SAJU.stems.map((s) => `<li><span class="g-mark">${esc(s.hanja)}</span><div><b>${esc(s.name)}<small>${esc(s.title)}</small></b><span>${esc(s.keywords.join(" · "))}</span></div></li>`).join("")}</ul>`;
@@ -100,20 +105,40 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
 
   const page = (name, d, kind) => {
     const url = ORIGIN + d.path;
-    const ld = kind === "app"
+    const ld = kind === "home"
+      ? [{ "@context": "https://schema.org", "@type": "WebSite", name: N.brand, alternateName: N.brandSub, url, description: d.description, inLanguage: "ko" }]
+      : kind === "app"
       ? [{ "@context": "https://schema.org", "@type": "WebPage", name: d.h1, url, description: d.description, inLanguage: "ko", publisher: { "@type": "Organization", name: N.brand } }, Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))]
       : kind === "legend" || kind === "legends"
       ? [{ "@context": "https://schema.org", "@type": "Article", headline: d.h1, description: d.description, inLanguage: "ko", mainEntityOfPage: url, publisher: { "@type": "Organization", name: N.brand } }].concat(d.faq ? [Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))] : [])
       : kind === "tool"
       ? [{ "@context": "https://schema.org", "@type": "WebApplication", name: d.h1, url, description: d.description, applicationCategory: "LifestyleApplication", operatingSystem: "Web", inLanguage: "ko", offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" }, publisher: { "@type": "Organization", name: N.brand } }, Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))]
       : [{ "@context": "https://schema.org", "@type": "Article", headline: d.h1, description: d.description, inLanguage: "ko", mainEntityOfPage: url, publisher: { "@type": "Organization", name: N.brand } }, Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))];
-    const fonts = FONTS.concat(name === "rune" || name === "runeDraw" ? [RUNIC] : []);
-    const scripts = ["/common/analytics.js", `${PB}data-nav.js`, `${PB}stardust.js`, `${PB}nav.js`, `${PB}data-guide.js`]
-      .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : kind === "app" ? (APP_SCRIPTS[name] || []).map((f) => PB + f) : kind === "legend" || kind === "legends" ? [`${PB}data-legends.js`] : [])
+    const fonts = FONTS.concat(name === "rune" || name === "runeDraw" || name === "today" ? [RUNIC] : []);
+    const scripts = ["/common/analytics.js", `${PB}data-nav.js`, `${PB}nav-icons.js`, `${PB}stardust.js`, `${PB}nav.js`, `${PB}data-guide.js`]
+      .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : kind === "app" ? (APP_SCRIPTS[name] || []).map((f) => PB + f) : kind === "home" ? [`${PB}data-dex.js`] : kind === "legend" || kind === "legends" ? [`${PB}data-legends.js`] : [])
       .concat([`${PB}guide.js`]);
-    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : kind === "app" && (name === "dex" || name === "talk") ? sprite("guide") : "";
+    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : (kind === "app" && ["dex", "talk", "today"].includes(name)) || kind === "home" ? sprite("guide") : "";
     const cta = (c) => `<div class="gcta"><h2>${esc(c.head)}</h2><p>${esc(c.body)}</p><a class="gbtn" href="${PB}" data-js="to-room">${esc(c.btn)}</a></div>`;
-    const body = kind === "legend"
+    const ARCH_ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
+    const DEX_IMG = (room) => `${PB}img/dex/dex-${room}.webp`;
+    const F = d.features || {};
+    const chipList = (items) => `<ul class="gchips">${items.map((it) => `<li><a href="${esc(it.href)}">${ico(it.icon)}<span>${esc(it.short || it.label)}</span></a></li>`).join("")}</ul>`;
+    const group = (head) => (N.groups.find((g) => g.head === head) || { items: [] }).items;
+    const body = kind === "home"
+      ? `<section class="ghero"><p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.lead)}</p></section>
+<a class="gfeat gfeat--doors" href="${esc(N.doors)}"><span class="gdoors" aria-hidden="true">${ARCH_ROOMS.map((r) => `<i style="background-image:url('${DEX_IMG(r)}')"><svg viewBox="0 0 48 64"><use href="#guide-${r}" /></svg></i>`).join("")}</span><span class="gfeat__txt">${F.doors.badge ? `<em>${esc(F.doors.badge)}</em>` : ""}<b>${esc(F.doors.title)}</b><span>${esc(F.doors.sub)}</span></span><span class="gfeat__go">${esc(F.doors.cta)} ${ico("back")}</span></a>
+<div class="gfeats">
+  <a class="gfeat" href="/today/" data-js="home-today" style="--art:url('${DEX_IMG("saju")}')"><span class="gfeat__art"><svg viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-saju" /></svg></span><span class="gfeat__txt">${F.today.badge ? `<em>${esc(F.today.badge)}</em>` : ""}<b>${esc(F.today.title)}</b><span data-js="home-today-sub">${esc(F.today.subNone)}</span></span></a>
+  <a class="gfeat" href="/talk/" style="--art:url('${DEX_IMG("sibyl")}')"><span class="gfeat__art">${ico("chat")}</span><span class="gfeat__txt">${F.talk.badge ? `<em>${esc(F.talk.badge)}</em>` : ""}<b>${esc(F.talk.title)}</b><span>${esc(F.talk.sub)}</span></span></a>
+  <a class="gfeat" href="/dex/" style="--art:url('${DEX_IMG("ogham")}')"><span class="gfeat__art">${ico("book")}</span><span class="gfeat__txt"><b>${esc(F.dex.title)}</b><span>${esc(F.dex.sub)}</span></span></a>
+  <a class="gfeat" href="/stardust/" style="--art:url('${DEX_IMG("rune")}')"><span class="gfeat__art">${ico("spark")}</span><span class="gfeat__txt"><b>${esc(F.stardust.title)}</b><span>${esc(F.stardust.sub)}</span></span></a>
+</div>
+<section class="gsec"><h2>${esc(d.toolsHead)}</h2>${chipList(group("직접 계산해 보기"))}</section>
+<section class="gsec"><h2>${esc(d.guidesHead)}</h2>${chipList(group("점술 알아보기"))}</section>
+<section class="gsec"><h2>${esc(d.legendsHead)}</h2><ul class="gstrip">${Object.values(L.list).map((x) => `<li><a href="${x.path}" style="--art:url('${DEX_IMG(({ oracle: "sibyl", rune: "rune", ogham: "ogham", vedic: "star", egypt: "decan", maya: "tzolkin", saju: "saju" })[x.guide] || "saju")}')"><small>${esc(x.note)}</small><b>${esc(x.label)}</b></a></li>`).join("")}</ul><p class="gmore"><a href="${L.hub.path}">${esc(d.legendsMore)} →</a></p></section>
+<section class="gsec gabout"><h2>${esc(d.aboutHead)}</h2>${d.about.map((p) => `<p>${esc(p)}</p>`).join("")}</section>`
+      : kind === "legend"
       ? `<p class="geyebrow">${esc(L.ui.roomBadge.replace("{room}", d.room))}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.hook)}</p>
 <article class="gstory">${d.story.map((p) => `<p>${esc(p)}</p>`).join("")}</article>
 <section><h2>${esc(d.tie.head)}</h2>${d.tie.body.map((p) => `<p>${esc(p)}</p>`).join("")}<a class="gtool-link" href="${hrefOf(d.guide)}">${esc(L.ui.guideLink.replace("{label}", (navItem(hrefOf(d.guide)) || {}).label || d.guide))}</a></section>
@@ -154,7 +179,7 @@ ${related(d.related)}`;
   <title>${esc(d.title)}</title>
   <meta name="description" content="${esc(d.description)}" />
   <link rel="canonical" href="${url}" />
-  <meta property="og:type" content="${kind === "tool" || kind === "app" || kind === "legends" ? "website" : "article"}" />
+  <meta property="og:type" content="${["tool", "app", "legends", "home"].includes(kind) ? "website" : "article"}" />
   <meta property="og:site_name" content="${esc(N.brand)}" />
   <meta property="og:locale" content="ko_KR" />
   <meta property="og:title" content="${esc(d.title)}" />
@@ -173,13 +198,14 @@ ${fonts.map(([f, sri]) => `  <link rel="stylesheet" href="https://cdn.jsdelivr.n
   <script>window.GUIDE_PAGE = ${JSON.stringify({ page: name, kind, ga4: GA4 })};</script>
 ${scripts.map((s) => `  <script defer src="${s}"></script>`).join("\n")}
 </head>
-<body>
-${sprites}<header class="gtop"><div class="gtop__inner"><button class="nav-toggle" type="button" data-nav="open" aria-label="${esc(N.open)}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button><a class="gtop__brand" href="${PB}">${esc(N.brand)}</a><a class="gtop__go" href="${PB}" data-js="to-room">${esc(G.ui.toEntrance)}</a></div></header>
+<body class="has-tabbar page-${kind} page-${esc(name)}">
+${sprites}<header class="gtop"><div class="gtop__inner"><button class="nav-toggle" type="button" data-nav="open" aria-label="${esc(N.open)}">${ico("menu")}</button><a class="gtop__brand" href="${esc(N.home)}">${esc(N.brand)}</a><span data-js="dust-slot"></span></div></header>
 ${sidenav(d.path)}
 <main class="gpage">
 ${body}
 ${foot()}
 </main>
+${tabbar(d.path)}
 </body>
 </html>
 `;
@@ -188,7 +214,7 @@ ${foot()}
   const files = [];
   const urls = [];
   const rewrites = [];
-  for (const [kind, group] of [["page", G.pages], ["tool", G.tools], ["app", G.apps || {}], ["legends", { legends: L.hub }], ["legend", L.list]]) {
+  for (const [kind, group] of [["home", { home: G.home }], ["page", G.pages], ["tool", G.tools], ["app", G.apps || {}], ["legends", { legends: L.hub }], ["legend", L.list]]) {
     for (const [name, d] of Object.entries(group)) {
       if (kind === "tool" && !TOOL_SCRIPTS[name]) throw new Error("TOOL_SCRIPTS에 없는 도구: " + name);
       if (kind === "app" && !APP_SCRIPTS[name]) throw new Error("APP_SCRIPTS에 없는 페이지: " + name);
@@ -221,7 +247,7 @@ function tomlWith(block) {
 function routes() {
   const { GUIDE: G } = load("data-guide.js");
   const { LEGENDS: L } = load("data-legends.js");
-  return Object.values(G.pages).concat(Object.values(G.tools), Object.values(G.apps || {}), [L.hub], Object.values(L.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]);
+  return [G.home].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {}), [L.hub], Object.values(L.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]);
 }
 
 module.exports = { build, routes };
