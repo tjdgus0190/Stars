@@ -47,3 +47,9 @@
 - 운영자: CLAUDE.md 3·6·7장·⑯ 예외 반영, ANTHROPIC_API_KEY·TALK_MONTHLY_USD=1000·TALK_MODE=live·TALK_MODEL=sonnet-5-5 설정, 유료 별가루는 카카오 계정에만.
 - 에이전트: talkMode "live", 고지(사이드바 한 줄·약관 제2조의5·방침 제4조의7), 별가루 충전(50·120·300, 페이앱, 카카오 계정 dust/<uh>), 면담에서 충전분 차감.
 - 남은 확인: 충전 별가루의 유효기간(지금은 잔액이 남아 있는 동안 지우지 않음), 실제 모델 안전 시험(100문항, 비용 약 1달러 미만 추정), 방침·약관 개정 공지일.
+
+## 시험 배포 (운영자 2026-11-13 설정)
+- Netlify Branch deploys: `claude/payapp-payment-review-ezunf0` → https://claude-payapp-payment-review-ezunf0--glowing-semolina-5a4e78.netlify.app/
+- 시험 배포 문맥에만: TALK_RATE_10MIN=300, TALK_FREE_PER_DAY=300 (실제 사이트는 기본 12·4)
+- 시험 배포의 결제는 페이앱 live 그대로(실제 결제) → 페이앱에서 환불. 카카오 로그인은 카카오 콘솔에 시험 주소 Redirect URI를 더해야 함
+- 안전 시험: `TALK_EVAL_BASE=<시험 주소> node tools/strange-oracle/talk-eval.js` → reports/talk-eval-strange-oracle.md
