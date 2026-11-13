@@ -225,6 +225,15 @@ let count = 0;
   fs.writeFileSync(path.join(PUBLIC, "robots.txt"), `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${g.origin}/sitemap.xml\n`);
   count += 2;
 }
+// ⑲ (2026-11-13 v1-D) 안내자 면담: 공개 화면의 talkMode가 "off"가 아니면, 운영자가 CLAUDE.md에 면담 예외(3장·6장, specs/claude-md-v1-exceptions.md)를
+//    붙여 넣은 뒤여야 한다. 아니면 질문 글을 서버로 보내는 화면이 배포되지 않게 빌드를 멈춘다.
+{
+  const g = fs.readFileSync(path.join(ROOT, "products", "strange-oracle", "data-guide.js"), "utf8");
+  const mode = (g.match(/\btalkMode:\s*"(\w+)"/) || [])[1];
+  const rules = fs.readFileSync(path.join(ROOT, "CLAUDE.md"), "utf8");
+  if (mode !== "off" && !/안내자 면담/.test(rules)) fails.push(`⑲ data-guide.js talkMode "${mode}" — CLAUDE.md에 안내자 면담 예외가 없음. 운영자가 specs/claude-md-v1-exceptions.md를 붙인 뒤에 켤 것`);
+  if (mode !== "off" && mode !== "live") fails.push(`⑲ data-guide.js talkMode는 배포판에서 "off" 또는 "live"만 (지금 "${mode}")`);
+}
 console.log(`dist/ 생성 완료 — 파일 ${count}개`);
 
 // 중간 공유본 점검: 아직 [초안]이 남은 파일을 알려 준다 (정식 배포 전에는 0이어야 한다)
