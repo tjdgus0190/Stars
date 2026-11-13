@@ -51,3 +51,20 @@
 .sib .stone .moon3 { fill: oklch(0.94 0.04 90); }
 @keyframes spin-r { to { transform: rotate(-360deg); } }
 @keyframes dk-on { to { fill: oklch(0.95 0.12 85); filter: drop-shadow(0 0 6px oklch(0.9 0.15 80)); } }
+/* 촐킨 편: 반딧불이·깃털·날 바퀴·해와 달 */
+.sib .stone .fly { fill: oklch(0.95 0.15 110); filter: drop-shadow(0 0 10px oklch(0.9 0.18 110)); opacity: 0.4; }
+@keyframes fly-glow { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+.sib .stone .feather { fill: oklch(0.6 0.22 28); filter: drop-shadow(0 0 16px oklch(0.65 0.22 30)); }
+.sib .stone .d20 { fill: oklch(0.7 0.1 60); }
+.sib .stone .d13 { fill: oklch(0.75 0.1 160); }
+.sib .stone .g20, .sib .stone .g13 { transform-box: view-box; transform-origin: 280px 260px; }
+.sib .stone.wheel2 { opacity: 0; }
+.sib .sunmoon { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.sib .sunmoon i { position: absolute; width: 240px; height: 240px; border-radius: 50%; }
+.sib .sunmoon .s { left: 150px; top: 900px; background: radial-gradient(circle, oklch(0.97 0.08 90), oklch(0.85 0.17 70) 45%, oklch(0.7 0.18 50 / 0.4) 65%, transparent 72%); }
+.sib .sunmoon .m { left: 690px; top: 900px; background: radial-gradient(circle, oklch(0.97 0.02 250), oklch(0.85 0.03 250) 45%, oklch(0.6 0.05 250 / 0.35) 65%, transparent 72%); }
+@keyframes rise-s { from { transform: translateY(260px) scale(0.6); opacity: 0; } to { transform: translateY(-80px); opacity: 1; } }
+@keyframes rise-m { from { transform: translateY(260px) scale(0.6); opacity: 0; } to { transform: translateY(-160px); opacity: 1; } }
+/* 만신 편: 여의주 */
+.sib .stone .swirl { transform-box: view-box; transform-origin: 280px 260px; }
+.sib .stone .flame { stroke: oklch(0.9 0.15 80); stroke-width: 10; stroke-linecap: round; filter: drop-shadow(0 0 12px oklch(0.85 0.16 75)); opacity: 0.4; }
