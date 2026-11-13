@@ -157,7 +157,9 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
     // 원인 구분용: 모델 API의 상태 번호와 오류 종류 이름만(메시지 본문·키·질문은 넣지 않는다)
     const st = Number(e && e.status) || 0;
     const ty = String((e && e.error && e.error.error && e.error.error.type) || (e && e.name) || "").replace(/[^A-Za-z_]/g, "").slice(0, 40);
-    return json(502, { error: "upstream", status: st, type: ty });
+    // 상태 번호가 없으면(요청 전 실패) 오류 첫머리 120자도 — 키 모양 글자는 지운다
+    const why = st ? undefined : String((e && e.message) || "").replace(/sk-[A-Za-z0-9_-]+/g, "[key]").slice(0, 120);
+    return json(502, { error: "upstream", status: st, type: ty, why });
   }
   if (!uh) h.free++;
   try { await store.set(key, { usd: Math.round((b.usd + costOf(model, msg && msg.usage)) * 1e6) / 1e6, n: b.n + 1 }); } catch (e) { /* 기록 실패는 답을 막지 않는다(다음 요청이 다시 읽는다) */ }
