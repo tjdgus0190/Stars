@@ -1,0 +1,63 @@
+/* 사이드바(메뉴) — 입구와 안내·도구 페이지 공통 (2026-11-13). 문구는 data-nav.js, 동작은 nav.js.
+   폭 1180px 미만: 왼쪽 위 ☰ 버튼으로 여닫는 서랍. 1180px 이상: 왼쪽에 늘 펼쳐 둔다(가운데 480px 본문과 겹치지 않음). */
+.nav-toggle {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: var(--tap-min, 44px); min-height: var(--tap-min, 44px); padding: 0 10px;
+  border: 1px solid oklch(0.58 0.05 285 / 0.6); border-radius: var(--radius-pill, 999px);
+  background: oklch(0.2 0.04 285 / 0.6); color: var(--c-text-strong, #f3efe6);
+  font-family: var(--font-sans, system-ui); font-size: 0.8125rem; font-weight: 700; cursor: pointer;
+}
+.nav-toggle svg { width: 18px; height: 18px; }
+.nav-toggle:focus-visible, .sidenav a:focus-visible, .sidenav__close:focus-visible { outline: 2px solid oklch(0.84 0.1 85); outline-offset: 2px; }
+
+/* 입구 위 띠에 끼울 때: 메뉴 버튼 · 입구 · 장 이름 · 끝 */
+.topbar__inner.has-nav { grid-template-columns: auto auto 1fr auto; }
+.topbar__inner.has-nav .nav-toggle { grid-column: 1; }
+.topbar__inner.has-nav .topbar__home, .topbar__inner.has-nav .topbar__back { grid-column: 2; }
+.topbar__inner.has-nav .topbar__chapter { grid-column: 3; }
+.topbar__inner.has-nav .topbar__end, .topbar__inner.has-nav .topbar__clear { grid-column: 4; }
+
+.sidenav-scrim { position: fixed; inset: 0; z-index: 70; background: oklch(0.08 0.03 285 / 0.6); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+.sidenav {
+  position: fixed; top: 0; bottom: 0; left: 0; z-index: 71; width: min(300px, 86vw);
+  display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain;
+  padding: 18px 16px calc(24px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, oklch(0.16 0.045 285), oklch(0.12 0.035 285));
+  border-right: 1px solid oklch(0.45 0.05 75 / 0.45);
+  box-shadow: 8px 0 32px oklch(0.05 0.02 285 / 0.6);
+  transform: translateX(-104%); transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: var(--font-serif, serif); color: var(--c-text, #ece6da);
+}
+.sidenav[hidden] { display: flex; } /* 닫힘은 transform으로(화면 읽기 프로그램에는 aria-hidden·inert로 숨긴다) */
+html.nav-open .sidenav { transform: none; }
+html.nav-open .sidenav-scrim { opacity: 1; pointer-events: auto; }
+html.nav-open { overflow: hidden; }
+
+.sidenav__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 14px; border-bottom: 1px solid oklch(0.45 0.05 75 / 0.35); }
+.sidenav__brand { display: block; text-decoration: none; }
+.sidenav__brand b { display: block; font-size: 1.25rem; letter-spacing: 0.04em; color: oklch(0.88 0.1 85); }
+.sidenav__brand small { display: block; margin-top: 2px; font-family: var(--font-latin, serif); font-size: 0.6875rem; letter-spacing: 0.3em; color: oklch(0.75 0.06 75); }
+.sidenav__close { min-width: 40px; min-height: 40px; border: 0; border-radius: 50%; background: transparent; color: var(--c-text-muted, #c9c2d8); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.sidenav__group { margin-top: 18px; }
+.sidenav__group h2 { margin: 0 4px 6px; font-family: var(--font-sans, system-ui); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; color: oklch(0.75 0.06 75); }
+.sidenav__group ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.sidenav__group a {
+  display: block; padding: 10px 12px; border-radius: 10px; text-decoration: none; color: var(--c-text-strong, #f5f1ea);
+  font-size: 0.9375rem; line-height: 1.35;
+}
+.sidenav__group a small { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--c-text-faint, #b4adc4); }
+.sidenav__group a:hover { background: oklch(0.26 0.05 285 / 0.7); }
+.sidenav__group a[aria-current="page"] { background: oklch(0.3 0.06 75 / 0.45); box-shadow: inset 3px 0 0 oklch(0.84 0.1 85); }
+.sidenav__group a .ext { margin-left: 4px; font-size: 0.75rem; color: var(--c-text-faint, #b4adc4); }
+
+/* 넓은 화면: 늘 펼친 사이드바 */
+@media (min-width: 1180px) {
+  .sidenav { transform: none; box-shadow: none; }
+  .sidenav__close, .nav-toggle, .sidenav-scrim { display: none !important; }
+  html.nav-open { overflow: auto; }
+  .topbar__inner.has-nav { grid-template-columns: auto 1fr auto; }
+  .topbar__inner.has-nav .topbar__home, .topbar__inner.has-nav .topbar__back { grid-column: 1; }
+  .topbar__inner.has-nav .topbar__chapter { grid-column: 2; }
+  .topbar__inner.has-nav .topbar__end, .topbar__inner.has-nav .topbar__clear { grid-column: 3; }
+}
+@media (prefers-reduced-motion: reduce) { .sidenav, .sidenav-scrim { transition: none; } }

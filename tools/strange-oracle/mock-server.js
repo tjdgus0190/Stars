@@ -208,6 +208,10 @@ location.replace("${P}#${to}");
     send(req, res, TYPES[path.extname(mapFile[1])], fs.readFileSync(path.join(PRODUCT, mapFile[1])));
     return log(200);
   }
+  // (2026-11-13) 짧은 주소(netlify.toml의 200 rewrite와 같은 규칙): /saju/ → guide/saju/index.html
+  const shortPage = rel.match(/^\/(saju|vedic|rune|manse|nakshatra)(\/?)$/);
+  if (shortPage && !shortPage[2]) return res.writeHead(301, { Location: rel + "/" + url.search }).end();
+  if (shortPage) rel = `/products/strange-oracle/guide/${shortPage[1]}/index.html`;
   let file = path.join(STATIC, rel);
   if (!file.startsWith(STATIC)) return res.writeHead(403).end();
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {

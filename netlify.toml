@@ -37,5 +37,58 @@
   status = 302
   force = true
 
+# (2026-11-13 운영자 결정: 짧은 주소) 안내 페이지·무료 도구. 파일은 products/strange-oracle/guide/<이름>/index.html(tools/strange-oracle/gen-guide.js가 만듦)이고
+#   주소창은 짧은 주소 그대로(200 rewrite). canonical·sitemap도 짧은 주소를 쓴다. 끝 / 없는 주소는 / 붙은 주소로 보낸다.
+[[redirects]]
+  from = "/saju"
+  to = "/saju/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/saju/"
+  to = "/products/strange-oracle/guide/saju/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/vedic"
+  to = "/vedic/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/vedic/"
+  to = "/products/strange-oracle/guide/vedic/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/rune"
+  to = "/rune/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/rune/"
+  to = "/products/strange-oracle/guide/rune/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/manse"
+  to = "/manse/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/manse/"
+  to = "/products/strange-oracle/guide/manse/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/nakshatra"
+  to = "/nakshatra/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/nakshatra/"
+  to = "/products/strange-oracle/guide/nakshatra/index.html"
+  status = 200
+  force = true
+
 # 로직은 netlify/lib/(CommonJS)에 있고 모의 서버·단위 시험이 그대로 부른다.
 # 환경 변수 PASS_MODE·PAYAPP_USERID·PAYAPP_LINKKEY·PAYAPP_LINKVAL·PASS_SECRET(32바이트 이상) 중 하나라도 없으면 함수는 503(안전).

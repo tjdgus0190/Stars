@@ -210,6 +210,21 @@ let count = 0;
 (function walk(d) {
   for (const e of fs.readdirSync(d, { withFileTypes: true })) e.isDirectory() ? walk(path.join(d, e.name)) : count++;
 })(DIST);
+// ⑱ (2026-11-13) 안내 페이지·무료 도구(guide/)는 data-guide.js에서 만든 정적 HTML이 최신이어야 하고, 사이트 맨 위에 sitemap.xml·robots.txt를 둔다
+{
+  const Gen = require("./strange-oracle/gen-guide.js");
+  const g = Gen.build();
+  for (const f of g.files) {
+    const cur = fs.existsSync(f.path) ? fs.readFileSync(f.path, "utf8") : null;
+    if (cur !== f.html) fails.push(`⑱ ${path.relative(ROOT, f.path)}가 data-guide.js와 다름 — node tools/strange-oracle/gen-guide.js를 돌릴 것`);
+  }
+  const home = `${g.origin}/products/strange-oracle/`;
+  const legal = ["legal/terms.html", "legal/privacy.html"].map((r) => home + r);
+  const urls = [home].concat(g.urls, legal);
+  fs.writeFileSync(path.join(PUBLIC, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}\n</urlset>\n`);
+  fs.writeFileSync(path.join(PUBLIC, "robots.txt"), `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${g.origin}/sitemap.xml\n`);
+  count += 2;
+}
 console.log(`dist/ 생성 완료 — 파일 ${count}개`);
 
 // 중간 공유본 점검: 아직 [초안]이 남은 파일을 알려 준다 (정식 배포 전에는 0이어야 한다)
