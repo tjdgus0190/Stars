@@ -134,7 +134,7 @@ const server = http.createServer((req, res) => {
     let body = "";
     req.on("data", (c) => { if (body.length < 9000) body += c; });
     req.on("end", async () => {
-      const r = await Talk.handle({ method: req.method, body, ip: req.socket.remoteAddress }, TALK_ENV, talkStore, Date.now(), fakeLlm);
+      const r = await Talk.handle({ method: req.method, body, ip: req.socket.remoteAddress }, TALK_ENV, talkStore, Date.now(), fakeLlm, PAYMOCK ? PAYMOCK.store : null); // (v1-D) 충전한 별가루·카카오 세션은 결제 모의 저장소
       res.writeHead(r.status, r.headers).end(r.body);
       log(r.status);
     });

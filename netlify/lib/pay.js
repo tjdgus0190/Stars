@@ -28,11 +28,17 @@ const TAG = "so-book-1";
 //   기록 모양은 그대로(결제번호·상태·코드 해시·시각). 상품은 코드 접두로 알 수 있어 따로 적지 않는다.
 const TAG_NY = "so-ny-1";
 const NY_PRICE = 4900;
+// (2026-11-13 운영자 결정, CLAUDE.md 7장 재화) 별가루 충전 3종: 50 = 2,900원 · 120 = 5,900원 · 300 = 12,900원. 결제 코드 SDA·SDB·SDC는
+//   카카오 계정에 한 번만 충전하는 데 쓰고(netlify/lib/dust.js), 책·신년운세를 열지 않는다(함수 book이 접두로 가른다)
+const DUST_PRICES = Object.freeze({ dust50: 2900, dust120: 5900, dust300: 12900 });
 const PRODUCTS = Object.freeze({
   book: { tag: TAG, prefix: "SOP", salt: "pass:", price: (n, now) => priceOk(n, now) },
   ny: { tag: TAG_NY, prefix: "SNY", salt: "pass-ny:", price: (n) => n === NY_PRICE },
+  dust50: { tag: "so-dust50-1", prefix: "SDA", salt: "pass-dust50:", price: (n) => n === DUST_PRICES.dust50 },
+  dust120: { tag: "so-dust120-1", prefix: "SDB", salt: "pass-dust120:", price: (n) => n === DUST_PRICES.dust120 },
+  dust300: { tag: "so-dust300-1", prefix: "SDC", salt: "pass-dust300:", price: (n) => n === DUST_PRICES.dust300 },
 });
-const productOfTag = (t) => (t === TAG ? "book" : t === TAG_NY ? "ny" : null);
+const productOfTag = (t) => Object.keys(PRODUCTS).find((k) => PRODUCTS[k].tag === t) || null;
 const R_RE = /^[0-9a-f]{32}$/;
 const MUL_RE = /^[0-9A-Za-z_-]{1,40}$/; // 키 이름에 들어가므로 모양을 좁힌다
 const CANCEL_STATES = new Set(["8", "32", "9", "64", "70", "71"]); // 요청취소·승인취소·부분취소
@@ -156,6 +162,8 @@ async function onCancel(store, secret, mul, r, now, prod = "book") {
   if (!ph) return;
   const pr = await store.get("pass/" + ph);
   if (pr && pr.mul_no === mul && pr.state !== "cancelled") await store.set("pass/" + ph, { mul_no: mul, state: "cancelled", at });
+  // (v1-D) 별가루 충전 코드였으면 충전한 양을 되돌린다(충전 전이면 아무 일 없음)
+  await require("./dust.js").refund(store, ph, now);
 }
 
 // 코드 P의 결제 상태: "paid" | "cancelled" | null (기록 없음). 읽기 실패는 throw. 함수 book도 쓴다
@@ -228,9 +236,9 @@ async function status(req, env, store, now) {
     h.bad++;
     return json(400, { error: "bad" });
   }
-  // R 하나로 두 상품의 코드를 모두 본다(브라우저는 어느 상품인지 보내지 않는다 — 본문은 { r } 한 칸 그대로)
+  // R 하나로 모든 상품의 코드를 본다(브라우저는 어느 상품인지 보내지 않는다 — 본문은 { r } 한 칸 그대로)
   let anyCancelled = false;
-  for (const prod of ["book", "ny"]) {
+  for (const prod of Object.keys(PRODUCTS)) {
     const P = passOf(env.PASS_SECRET, b.r, prod);
     let st;
     try {
@@ -249,6 +257,8 @@ function back(req, env) {
   if (req.method !== "GET" && req.method !== "POST") return text(405, "");
   const site = String(env.SITE_URL || "");
   // (2026-10-25 도메인 이전) 주소(origin)는 붙이지 않고 경로만 → 이용자가 결제를 시작한 주소(Netlify 주소·strange-oracle.com)로 돌아가 그 탭의 sessionStorage가 이어진다
+  // (v1-D) 별가루 충전은 별가루 페이지로 돌아간다(고정 경로, 다른 값은 받지 않음)
+  if (req.to === "dust") return { status: 303, headers: Object.assign({}, H_TEXT, { Location: "/stardust/#paid" }), body: "" };
   const to = /^https?:\/\/[^\s#?"'<>]+\/$/.test(site) ? new URL(site).pathname + "#paid" : RETURN_FALLBACK;
   return { status: 303, headers: Object.assign({}, H_TEXT, { Location: to }), body: "" }; // R·결제 값을 붙이지 않는다
 }
@@ -282,10 +292,11 @@ function storeFrom(openStore) {
 async function respond(req, context, openStore, env = process.env) {
   const route = (new URL(req.url).pathname.match(/\/(feedback|status|return)\/?$/) || [])[1] || "";
   const body = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
-  const r = await handle({ method: req.method, route, body, ip: String((context && context.ip) || "unknown") }, env, storeFrom(openStore), Date.now());
+  const to = new URL(req.url).searchParams.get("to") === "dust" ? "dust" : "";
+  const r = await handle({ method: req.method, route, body, to, ip: String((context && context.ip) || "unknown") }, env, storeFrom(openStore), Date.now());
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
 const _reset = () => hits.clear();
-const productOfPass = (p) => (/^SNY/.test(normalize(p)) ? "ny" : "book");
-module.exports = { respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, productOfPass, STORE_NAME, PRICE, SEASON, priceOk, TAG, TAG_NY, NY_PRICE, PRODUCTS, CANCEL_STATES, _hits: hits, _reset };
+const productOfPass = (p) => { const n = normalize(p); return Object.keys(PRODUCTS).find((k) => n.startsWith(PRODUCTS[k].prefix)) || "book"; };
+module.exports = { DUST_PRICES, productOfTag, respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, productOfPass, STORE_NAME, PRICE, SEASON, priceOk, TAG, TAG_NY, NY_PRICE, PRODUCTS, CANCEL_STATES, _hits: hits, _reset };

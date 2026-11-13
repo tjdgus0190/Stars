@@ -1,11 +1,11 @@
 // 낯선 점술관 — 함수 talk: 안내자 면담 (2026-11-13, 정식판 v1-D · specs/proposal-strange-oracle-v1.md 2장·8장).
-// 길: POST /api/talk  JSON { room, r, q, hist }
+// 길: POST /api/talk  JSON { room, r, q, hist, sid? }   sid = 카카오 로그인 표 → 충전한 별가루(계정)에서 10 차감(netlify/lib/dust.js). 없으면 무료 몫(이 기기, 서버는 하루 질문 수만 셈)
 //   room  일곱 방 이름
 //   r     그 방 결과 번호만 (방마다 모양이 정해짐, 아래 R_SHAPE). 없으면 null — 결과 없이 묻기
 //   q     질문 글 (1~300자)
 //   hist  앞선 문답 최대 3개 [{ q, a }] (각 300자·600자 이하) — 서버에 남기지 않는다
 //   이름·생년월일·태어난 시각·성별은 받지 않는다(모양 검사에서 모르는 칸이 있으면 400).
-// 답: 200 { a } | 400 { error: "bad" } | 429 { error: "rate" } | 503 { error: "off" | "budget" } | 502 { error: "upstream" }
+// 답: 200 { a, declined?, paid?(남은 충전 별가루) } | 401 { error: "session" } | 402 { error: "dust" } | 400 { error: "bad" } | 429 { error: "rate" } | 503 { error: "off" | "budget" } | 502 { error: "upstream" }
 //
 // 켜는 조건 (하나라도 빠지면 503 off, 로그 없음):
 //   TALK_MODE = "test" | "live",  ANTHROPIC_API_KEY,  TALK_MONTHLY_USD > 0 (월 비용 상한, 미국 달러)
@@ -17,6 +17,8 @@
 // 핵심 handle(req, env, store, now, llm)을 모의 서버·단위 시험이 그대로 부른다(llm을 가짜로 바꿔 끼운다).
 "use strict";
 const Prompt = require("./talk-prompt.js");
+const Dust = require("./dust.js");
+const TALK_COST = 10; // 질문 하나 = 별가루 10 (화면 data-nav.js cost.talk와 같은 값)
 
 const STORE_NAME = "strange-oracle-talk";
 const ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
@@ -67,13 +69,14 @@ function parse(body) {
   let o;
   try { o = JSON.parse(body); } catch (e) { return null; }
   if (!o || typeof o !== "object" || Array.isArray(o)) return null;
-  const allowed = ["room", "r", "q", "hist"];
+  const allowed = ["room", "r", "q", "hist", "sid"];
   if (!Object.keys(o).every((k) => allowed.includes(k))) return null; // 모르는 칸(이름·생일 등)은 받지 않는다
   if (!ROOMS.includes(o.room) || !validR(o.room, o.r === undefined ? null : o.r) || !okText(o.q, MAX_Q)) return null;
   const hist = o.hist === undefined ? [] : o.hist;
   if (!Array.isArray(hist) || hist.length > MAX_HIST) return null;
   if (!hist.every((h) => h && typeof h === "object" && Object.keys(h).every((k) => k === "q" || k === "a") && okText(h.q, MAX_Q) && okText(h.a, MAX_A))) return null;
-  return { room: o.room, r: o.r == null ? null : o.r, q: o.q.trim(), hist };
+  if (o.sid !== undefined && !/^[0-9a-f]{32}$/.test(String(o.sid))) return null; // 로그인 표(무작위 값) — 충전한 별가루로 묻기
+  return { room: o.room, r: o.r == null ? null : o.r, q: o.q.trim(), hist, sid: o.sid || null };
 }
 
 function envOk(env) {
@@ -106,13 +109,14 @@ function costOf(model, u) {
 }
 
 // 핵심. req = { method, body, ip }, store = { get(key), set(key, value) }, llm(params) → API 응답(Message) 모양
-async function handle(req, env, store, now = Date.now(), llm) {
+async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   if (!envOk(env || {})) return json(503, { error: "off" });
   if (req.method !== "POST") return json(405, { error: "method" }, { Allow: "POST" });
   const h = slot(String(req.ip || "unknown"), now);
-  if (h.n >= MAX_WINDOW || h.free >= FREE_PER_DAY) return json(429, { error: "rate" }, { "Retry-After": "600" });
+  if (h.n >= MAX_WINDOW) return json(429, { error: "rate" }, { "Retry-After": "600" });
   const p = parse(req.body);
   if (!p) return json(400, { error: "bad" });
+  if (!p.sid && h.free >= FREE_PER_DAY) return json(429, { error: "rate" }, { "Retry-After": "600" }); // 무료 몫만 하루 상한
   h.n++;
 
   // 위기 신호: 모델을 부르지 않고 정해진 안내(상담 전화)를 돌려준다. 횟수·별가루를 쓰지 않는다
@@ -123,14 +127,31 @@ async function handle(req, env, store, now = Date.now(), llm) {
   try { b = (await store.get(key)) || { usd: 0, n: 0 }; } catch (e) { return json(503, { error: "store" }); }
   if (b.usd >= Number(env.TALK_MONTHLY_USD)) return json(503, { error: "budget" });
 
+  // 충전한 별가루로 묻기: 로그인 표 → 계정 → 잔액 10 이상 (차감은 답을 받은 뒤)
+  let uh = null;
+  if (p.sid) {
+    if (!payStore) return json(503, { error: "store" });
+    try {
+      uh = await require("./auth.js").sessionOf(payStore, p.sid, now);
+      if (!uh) return json(401, { error: "session" });
+      if ((await Dust.balanceOf(payStore, uh)) < TALK_COST) return json(402, { error: "dust" });
+    } catch (e) { return json(503, { error: "store" }); }
+  }
+
   const model = modelOf(env.TALK_MODEL);
   const params = Prompt.build(p, model);
   let msg;
   try { msg = await llm(params, env); } catch (e) { return json(502, { error: "upstream" }); }
-  h.free++;
+  if (!uh) h.free++;
   try { await store.set(key, { usd: Math.round((b.usd + costOf(model, msg && msg.usage)) * 1e6) / 1e6, n: b.n + 1 }); } catch (e) { /* 기록 실패는 답을 막지 않는다(다음 요청이 다시 읽는다) */ }
   const text = Prompt.textOf(msg);
-  if (!text) return json(200, { a: Prompt.declineReply(p.room) });
+  if (!text) return json(200, { a: Prompt.declineReply(p.room), declined: true }); // 답하지 못한 물음은 별가루를 쓰지 않는다
+  if (uh) {
+    let left = false;
+    try { left = await Dust.spend(payStore, uh, TALK_COST, now); } catch (e) { left = false; }
+    if (left === false) return json(200, { a: text, paid: null }); // 그새 잔액이 모자라졌으면 이번 답은 그대로 준다(다음부터 402)
+    return json(200, { a: text, paid: left });
+  }
   return json(200, { a: text });
 }
 
@@ -155,11 +176,11 @@ function storeFrom(openStore) {
 }
 
 // Netlify Functions v2 요청 → handle
-async function respond(req, context, openStore, env = process.env) {
+async function respond(req, context, openStore, env = process.env, openPay = null) {
   const body = req.method === "POST" ? await req.text() : "";
-  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown") }, env, storeFrom(openStore), Date.now(), anthropicLlm);
+  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown") }, env, storeFrom(openStore), Date.now(), anthropicLlm, openPay ? require("./pay.js").storeFrom(openPay) : null);
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
 const _reset = () => hits.clear();
-module.exports = { modelOf, respond, handle, parse, validR, costOf, envOk, storeFrom, STORE_NAME, ROOMS, R_SHAPE, MAX_Q, FREE_PER_DAY, DEFAULT_MODEL, _reset };
+module.exports = { TALK_COST, modelOf, respond, handle, parse, validR, costOf, envOk, storeFrom, STORE_NAME, ROOMS, R_SHAPE, MAX_Q, FREE_PER_DAY, DEFAULT_MODEL, _reset };

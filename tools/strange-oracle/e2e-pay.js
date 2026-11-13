@@ -15,7 +15,7 @@
 //  I. 개인정보: 입력값·R·P가 URL·console·localStorage·쿠키에 0, status 본문 { r }뿐, book 본문 pass·file뿐
 //  J. off: 결제·책 요소 DOM 0(새 요소 포함), payapp·/api/pay 요청 0, #paid·#report·#deeper → 막다른 곳 없음
 "use strict";
-const { launch, googleCount } = require("./cdp.js");
+const { launch, googleCount, LS_ONLY_DUST } = require("./cdp.js");
 const fs = require("fs");
 const path = require("path");
 const SALE = require("./sale-price.js"); // (2026-10-27) 지금 판매 값(첫 계절 4,900원)
@@ -470,7 +470,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("I3 book 본문은 pass·file 두 칸뿐 (keep 쓰기만 put 암호문 한 칸 더)", bkBodies.length > 0 && bkBodies.every((x) => { try { return bodyOk(JSON.parse(x.body)); } catch (e) { return false; } }), `${bkBodies.length}건`);
   const allBodies = b.log.bodies.map((x) => x.url + " " + x.body).join("\n");
   check("I4 시험 입력값(이름·생일·시각·결과 코드)이 모든 요청 URL·본문(결제창으로 간 값 포함)에 0건", !/테스트|%ED%85%8C|1995|14:37|"532"|code=532/.test(allBodies));
-  check("I5 console에 R·코드 0건·localStorage 0·쿠키 0", !secrets.some((s) => b.log.console.join("\n").includes(s)) && (await ev("localStorage.length")) === 0 && (await ev("document.cookie")) === "");
+  check("I5 console에 R·코드 0건·localStorage는 별가루 장부뿐·쿠키 0", !secrets.some((s) => b.log.console.join("\n").includes(s)) && (await ev(LS_ONLY_DUST)) === true && (await ev("document.cookie")) === "");
   // (19-5) GA4 ID가 차서 gtag.js를 부른다 → 모의 서버가 G-TEST12345로 바꿔 내보내고, cdp.js가 구글 요청을 모두 막는다. dataLayer에 입력값 0
   const dl = await ev("JSON.stringify(window.dataLayer || [])");
   const gc = googleCount();

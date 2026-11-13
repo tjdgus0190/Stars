@@ -29,7 +29,7 @@
   if (A && CONF.ga4) {
     const search = location.search;
     if (search) history.replaceState(null, "", location.pathname + location.hash);
-    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
+    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] }, so_dust: { step: ["start", "done"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
     if (on) A.track("so_guide_view", { page: CONF.page });
     const cookie = $("[data-js=cookie-line]");
     if (cookie && A.configured(CONF.ga4)) cookie.hidden = false;
@@ -46,6 +46,30 @@
     const P = G.apps[CONF.page];
     if (!D || !box) return;
     const ROOM_URL = "/products/strange-oracle/";
+
+    // ── (v1-D) 카카오 로그인 표·충전한 별가루 (입구 app.js와 같은 저장 키). 로그인 표는 무작위 값(입력값 아님)
+    const LOGIN_KEY = "strange-oracle-login", KAKAO_KEY = "strange-oracle-kakao";
+    const readLogin = () => { try { const x = JSON.parse(localStorage.getItem(LOGIN_KEY) || "null"); return x && /^[0-9a-f]{32}$/.test(x.sid) && x.exp > Date.now() ? x : null; } catch (e) { return null; } };
+    const dropLogin = () => { try { localStorage.removeItem(LOGIN_KEY); } catch (e) { /* 무시 */ } };
+    const hex32 = () => { const b = new Uint8Array(16); crypto.getRandomValues(b); return [...b].map((x) => x.toString(16).padStart(2, "0")).join(""); };
+    const post = async (url, body) => {
+      try { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" }); let j = null; try { j = await r.json(); } catch (e) { j = null; } return { status: r.status, j }; } catch (e) { return { status: 0, j: null }; }
+    };
+    // 카카오 로그인 시작: 돌아오면 입구가 표를 받아(로그인 유지) 이 별가루 페이지로 다시 보낸다
+    const kakaoLogin = () => {
+      const st = hex32();
+      try { sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode: "login", from: "stardust", prod: "book" })); } catch (e) { return; }
+      location.href = "/api/auth/kakao/start?state=" + st;
+    };
+    let paidBal = null; // 충전한 별가루(서버 값, 화면 메모리만)
+    const loadPaid = async () => {
+      const lg = readLogin();
+      if (!lg) { paidBal = null; return null; }
+      const r = await post("/api/auth/dust", { sid: lg.sid });
+      if (r.status === 401) { dropLogin(); paidBal = null; return null; }
+      paidBal = r.status === 200 && r.j && Number.isInteger(r.j.bal) ? r.j.bal : null;
+      return paidBal;
+    };
 
     if (CONF.page === "today") {
       const A = P.app, OR = window.ORACLES;
@@ -131,7 +155,7 @@
         if (!on) { box.innerHTML = pickHtml() + `<p class="gnote gcenter gtalk-closed">${esc(A.closed)}</p>`; return; }
         if (!cur) { box.innerHTML = pickHtml(); return; }
         const r = resultOf(cur.room);
-        const st = D.state(), need = COSTQ - st.bal;
+        const st = D.state(), usePaid = st.bal < COSTQ && paidBal != null && paidBal >= COSTQ, need = usePaid ? 0 : COSTQ - st.bal;
         const log = hist.map((h) => `<div class="gsay gsay--me"><small>${esc(A.you)}</small><p>${esc(h.q)}</p></div><div class="gsay gsay--guide">${fig(cur.room)}<small>${esc(cur.name)}</small><p>${esc(h.a)}</p></div>`).join("");
         box.innerHTML = pickHtml() + `<div class="gtalk">
           <div class="gsay gsay--guide">${fig(cur.room)}<small>${esc(cur.name)}</small><p>${esc(cur.line)}</p></div>
@@ -142,7 +166,7 @@
             <p class="gnote">${esc(A.privacy)} <span data-js="talk-count">${esc(fill(A.count, { n: 0 }))}</span></p>
             <p class="gerror" data-js="talk-error" role="alert" hidden></p>
             <button class="gbtn" type="submit"${need > 0 || busy ? " disabled" : ""}>${esc(fill(A.ask, { cost: COSTQ }))}</button>
-            <p class="gnote gcenter">${esc(fill(A.balance, { n: st.bal }))}${need > 0 ? " · " + esc(fill(A.short, { need })) : ""}</p>
+            <p class="gnote gcenter">${esc(paidBal != null ? fill(A.balancePaid, { n: st.bal, p: paidBal }) : fill(A.balance, { n: st.bal }))}${need > 0 ? " · " + esc(fill(A.short, { need })) : ""}</p>
           </form></div>`;
       };
       const err = (m) => { const e = box.querySelector("[data-js=talk-error]"); if (e) { e.textContent = m; e.hidden = !m; } };
@@ -165,7 +189,10 @@
         if (!q) return err(E.empty);
         if (q.length > 300) return err(E.long);
         busy = true; // 먼저 잠근다(별가루가 바뀌며 화면을 다시 그리지 않게)
-        if (!D.spend(COSTQ)) { busy = false; draw(); return; }
+        // 무료로 모은 별가루를 먼저 쓰고, 모자라면 카카오 계정의 충전한 별가루(서버가 차감)
+        const lg = readLogin();
+        const paid = D.state().bal < COSTQ && lg && paidBal != null && paidBal >= COSTQ;
+        if (!paid && !D.spend(COSTQ)) { busy = false; draw(); return; }
         const room = cur.room;
         const logBox = box.querySelector("[data-js=talk-log]");
         logBox.insertAdjacentHTML("beforeend", `<div class="gsay gsay--me"><small>${esc(A.you)}</small><p>${esc(q)}</p></div><div class="gsay gsay--guide is-wait" data-js="talk-wait">${fig(room)}<small>${esc(cur.name)}</small><p>${esc(A.waiting)}</p></div>`);
@@ -173,26 +200,32 @@
         ta.value = "";
         let res = null, data = null;
         try {
-          res = await fetch("/api/talk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ room, r: resultOf(room), q, hist: hist.slice(-3) }) });
+          const body = { room, r: resultOf(room), q, hist: hist.slice(-3) };
+          if (paid) body.sid = lg.sid;
+          res = await fetch("/api/talk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
           data = await res.json();
         } catch (x) { res = null; }
         busy = false;
         if (cur.room !== room) return; // 그새 다른 안내자를 골랐다
         if (res && res.ok && data && typeof data.a === "string") {
-          if (data.crisis) D.refund(COSTQ); // 위기 안내는 별가루를 쓰지 않는다
+          if (!paid && (data.crisis || data.declined)) D.refund(COSTQ); // 위기 안내·답하지 못한 물음은 별가루를 쓰지 않는다
+          if (paid && Number.isInteger(data.paid)) paidBal = data.paid;
           hist.push({ q, a: data.a.slice(0, 600) });
           track("so_talk", { room, step: "answer" });
           draw();
         } else {
-          D.refund(COSTQ);
+          if (!paid) D.refund(COSTQ);
           const code = data && data.error;
+          if (code === "session") { dropLogin(); paidBal = null; }
+          if (code === "dust") await loadPaid();
           draw();
-          ta && err(code === "off" ? E.off : code === "budget" ? E.budget : code === "rate" ? E.rate : E.fail);
+          err(code === "session" ? A.sessionEnd : code === "off" ? E.off : code === "budget" ? E.budget : code === "rate" ? E.rate : E.fail);
           const t = box.querySelector("textarea"); if (t) t.value = q;
         }
         const last = box.querySelectorAll(".gsay");
         if (last.length) last[last.length - 1].scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
+      loadPaid().then(() => { if (!busy) { const t = box.querySelector("textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector("textarea"); if (t2) t2.value = keep; } });
       document.addEventListener("dust:change", () => { if (!busy && cur) { const t = box.querySelector("textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector("textarea"); if (t2) t2.value = keep; } });
       draw();
     }
@@ -206,8 +239,122 @@
         box.innerHTML = `<div class="gdust"><small>${esc(A.balance)}</small><b><i aria-hidden="true">✦</i> ${st.bal}</b><p>${esc(fill(A.today, { got: st.got, cap: st.cap }))}</p><i class="gdust__bar"><u style="width:${Math.round((st.got / st.cap) * 100)}%"></u></i></div>
           <h2>${esc(A.waysHead)}</h2><ul class="grows">${ways}</ul><p class="gnote">${esc(A.capNote)}</p>
           <h2>${esc(A.usesHead)}</h2><ul class="grows">${uses}</ul>
+          <div data-js="dust-shop"></div>
           <div class="gactions"><button class="gbtn ghost" type="button" data-js="dust-clear">${esc(A.clear)}</button></div><p class="gnote gcenter" data-js="dust-cleared" hidden>${esc(A.cleared)}</p>`;
+        drawShop();
       };
+      // ── 충전 (운영 규칙 7장): 결제 전에 받는 것·가격·환불·판매자를 보이고, 동의 체크 뒤에만 결제창
+      const S = A.shop || {};
+      const shopOn = A.shopMode === "live" || A.shopMode === "test";
+      const PEND_KEY = "strange-oracle-dustpay"; // 이 탭 sessionStorage: 결제 요청 번호 R(무작위)·상품·받은 결제 코드
+      const readPend = () => { try { const x = JSON.parse(sessionStorage.getItem(PEND_KEY) || "null"); return x && /^[0-9a-f]{32}$/.test(x.r) && S.packs.some((k) => k.prod === x.prod) ? x : null; } catch (e) { return null; } };
+      const writePend = (x) => { try { if (x) sessionStorage.setItem(PEND_KEY, JSON.stringify(x)); else sessionStorage.removeItem(PEND_KEY); } catch (e) { /* 무시 */ } };
+      let pick = null, shopMsg = "", shopBusy = false, showRetry = false;
+      const won = (n) => Number(n).toLocaleString("ko-KR");
+      function drawShop() {
+        const el = box.querySelector("[data-js=dust-shop]");
+        if (!el || !shopOn) return;
+        const lg = readLogin();
+        let h = `<h2>${esc(S.head)}</h2><p class="gnote">${esc(S.lead)}</p>`;
+        if (!lg) {
+          h += `<div class="gactions"><button class="gbtn" type="button" data-js="dust-login">${esc(S.login)}</button></div><p class="gnote gcenter">${esc(S.loginNote)}</p>`;
+        } else {
+          h += `<div class="gdust gdust--paid"><small>${esc(S.paidWhere)}</small><b><i aria-hidden="true">✦</i> ${paidBal == null ? "…" : paidBal}</b><p>${esc(fill(S.paidBal, { n: paidBal == null ? "…" : paidBal }))}</p></div>
+            <ul class="gpacks">${S.packs.map((k) => `<li><button type="button" data-js="dust-pack" data-prod="${k.prod}"${pick === k.prod ? ' aria-pressed="true"' : ""}><b>${esc(fill(S.pack, { n: k.n }))}</b><small>${esc(fill(S.packTalk, { q: Math.floor(k.n / COST.talk || k.n / 10) }))}</small><span>${esc(fill(S.price, { price: won(k.price) }))}</span></button></li>`).join("")}</ul>
+            <ul class="gsources">${S.terms.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
+            <p class="gnote"><a href="/products/strange-oracle/legal/terms.html#s2-4">${esc(S.termsLink)}</a></p>
+            <label class="gcheck"><input type="checkbox" data-js="dust-agree" />${esc(S.agree)}</label>
+            <div class="gactions"><button class="gbtn" type="button" data-js="dust-buy"${shopBusy ? " disabled" : ""}>${esc(pick ? fill(S.buy, { price: won(S.packs.find((k) => k.prod === pick).price), n: S.packs.find((k) => k.prod === pick).n }) : S.pick)}</button></div>`;
+        }
+        h += `<p class="gnote gcenter" data-js="dust-msg" role="status">${esc(shopMsg)}</p>${showRetry ? `<div class="gactions"><button class="gbtn ghost" type="button" data-js="dust-retry">${esc(S.retry)}</button></div>` : ""}`;
+        el.innerHTML = h;
+      }
+      const say = (m, retry) => { shopMsg = m || ""; showRetry = Boolean(retry); drawShop(); };
+      // 결제창 설정은 입구와 같은 data.js(결제대행 아이디·SDK 주소)에서 — 누를 때만 받는다
+      let cfg = null;
+      const loadCfg = () => cfg || (cfg = new Promise((ok, no) => {
+        if (window.TEXT) return ok(window.TEXT);
+        const sc = document.createElement("script");
+        sc.src = "/products/strange-oracle/data.js";
+        sc.onload = () => (window.TEXT ? ok(window.TEXT) : no(new Error("cfg")));
+        sc.onerror = () => { cfg = null; no(new Error("cfg")); };
+        document.head.append(sc);
+      }));
+      const loadSdk = (src) => new Promise((ok, no) => {
+        if (window.PayApp) return ok();
+        const sc = document.createElement("script");
+        sc.src = src;
+        sc.onload = () => (window.PayApp ? ok() : no(new Error("sdk")));
+        sc.onerror = () => no(new Error("sdk"));
+        document.head.append(sc);
+      });
+      async function startBuy() {
+        const k = S.packs.find((x) => x.prod === pick);
+        if (!k || shopBusy) return;
+        shopBusy = true;
+        const r = hex32();
+        writePend({ r, prod: k.prod }); // 결제창을 열기 전에 저장(돌아와서 이 번호로 확인)
+        try {
+          const T = await loadCfg();
+          const PAY = T.pay || {}, PA = PAY.payapp || {};
+          if (PAY.mode !== "live" && PAY.mode !== "test") throw new Error("off");
+          await loadSdk(PA.sdk);
+          let o = location.origin;
+          try { if (PAY.mode === "live" && T.site && T.site.url) o = new URL(T.site.url).origin; } catch (e) { o = location.origin; }
+          const P = window.PayApp;
+          P.setDefault("userid", PA.userid);
+          P.setDefault("shopname", PA.shopname || "");
+          const v = { goodname: k.goodname, price: String(k.price), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return?to=dust`, var1: r, var2: k.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y", redirectpay: "1" };
+          Object.keys(v).forEach((x) => P.setParam(x, v[x]));
+          if (typeof P.setTarget === "function") P.setTarget("_self");
+          track("so_dust", { step: "start" });
+          P.payrequest();
+        } catch (e) {
+          shopBusy = false;
+          writePend(null);
+          say(e && e.message === "off" ? S.off : S.sdkFail);
+        }
+      }
+      // 돌아와서: R로 결제 확인(2초마다 30초) → 결제 코드 → 카카오 계정에 충전(한 번만)
+      async function settle() {
+        const pend = readPend();
+        if (!pend) return;
+        const lg = readLogin();
+        if (!lg) return say(S.session);
+        say(S.waiting);
+        let code = pend.pass || null;
+        for (let i = 0; !code && i < 15; i++) {
+          const r = await post("/api/pay/status", { r: pend.r });
+          if (r.status === 200 && r.j && r.j.state === "paid" && r.j.pass) { code = r.j.pass; break; }
+          if (r.status === 200 && r.j && r.j.state === "cancelled") { writePend(null); return say(S.cancelled); }
+          await new Promise((ok) => setTimeout(ok, 2000));
+        }
+        if (!code) return say(S.late, true);
+        writePend({ r: pend.r, prod: pend.prod, pass: code });
+        const c = await post("/api/auth/dust", { sid: lg.sid, pass: code });
+        if (c.status === 200 && c.j) {
+          writePend(null);
+          paidBal = c.j.bal;
+          if (c.j.state === "credited") track("so_dust", { step: "done" });
+          return say(c.j.state === "already" ? S.already : fill(S.credited, { n: c.j.n }));
+        }
+        if (c.status === 401) { dropLogin(); return say(S.session); }
+        if (c.status === 409) { writePend(null); return say(S.used); }
+        say(S.late, true);
+      }
+      box.addEventListener("click", (e) => {
+        const t = e.target;
+        if (t.closest("[data-js=dust-login]")) return kakaoLogin();
+        const pk = t.closest("[data-js=dust-pack]");
+        if (pk) { pick = pk.dataset.prod; shopMsg = ""; return drawShop(); }
+        if (t.closest("[data-js=dust-retry]")) return settle();
+        if (t.closest("[data-js=dust-buy]")) {
+          if (!pick) return say(S.pick);
+          if (!box.querySelector("[data-js=dust-agree]").checked) return say(S.agreeNudge);
+          return startBuy();
+        }
+      });
+      if (shopOn) loadPaid().then(() => { drawShop(); if (location.hash === "#paid" || readPend()) settle(); if (/^#(paid|login)$/.test(location.hash)) history.replaceState(null, "", location.pathname); });
       box.addEventListener("click", (e) => {
         if (!e.target.closest("[data-js=dust-clear]")) return;
         if (!window.confirm(A.clearAsk)) return;

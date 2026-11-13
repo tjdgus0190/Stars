@@ -3,6 +3,7 @@
 import { getStore } from "@netlify/blobs";
 import Talk from "../lib/talk.js";
 
-export default (req, context) => Talk.respond(req, context, () => getStore({ name: Talk.STORE_NAME, consistency: "strong" }));
+// 두 번째 저장소: 카카오 세션·충전한 별가루(결제 기록과 같은 저장소)
+export default (req, context) => Talk.respond(req, context, () => getStore({ name: Talk.STORE_NAME, consistency: "strong" }), process.env, () => getStore({ name: "strange-oracle-pay", consistency: "strong" }));
 
 export const config = { path: "/api/talk" };

@@ -288,6 +288,40 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   check("면담: 실패하면 별가루 돌려줌 · 오류 안내 · 쓴 질문은 칸에 남김 · 앞선 문답 1개 함께 보냄", k2.bal === k1.bal && /돌려드렸어요/.test(k2.err) && k2.kept === "__fail 두 번째 질문" && sent2.length === 2 && sent2[1].hist.length === 1, JSON.stringify(k2));
   await ev("sessionStorage.removeItem('strange-oracle'); true");
 
+  // ── 8. (v1-D) 별가루 충전(카카오 계정) — 모의 카카오·모의 결제창. 로그인 → 50 결제 → 계정에 50 → 면담은 무료 몫이 없으면 충전분에서 10
+  await ev("localStorage.removeItem('strange-oracle-login'); sessionStorage.removeItem('strange-oracle-dustpay'); true");
+  await b.goto(`${TEST}/stardust/`);
+  await waitFor("!!document.querySelector('[data-js=dust-login]')", 8000);
+  await ev("document.querySelector('[data-js=dust-login]').click(); true");
+  await waitFor("location.pathname === '/__dev/kakao/authorize'", 8000);
+  await ev("document.querySelector('[data-field=kid]').value = '424242'; document.querySelector('[data-act=agree]').click(); true");
+  const backIn = await waitFor("location.pathname === '/stardust/' && !!document.querySelector('[data-js=dust-pack]')", 15000);
+  const lg = await ev("JSON.parse(localStorage.getItem('strange-oracle-login') || 'null')");
+  check("충전: 별가루 페이지에서 카카오 로그인 → 별가루 페이지로 돌아와 충전 칸(세 가지) · 로그인 표만 이 기기에", backIn && lg && /^[0-9a-f]{32}$/.test(lg.sid) && (await ev("document.querySelectorAll('[data-js=dust-pack]').length")) === 3, JSON.stringify(lg && Object.keys(lg)));
+  await ev("document.querySelector('[data-js=dust-pack][data-prod=dust50]').click(); document.querySelector('[data-js=dust-buy]').click(); true");
+  await sleep(200);
+  const nudge = await ev("({ msg: document.querySelector('[data-js=dust-msg]').textContent, path: location.pathname })");
+  check("충전: 동의 체크 전에는 결제창을 열지 않음", /체크/.test(nudge.msg) && nudge.path === "/stardust/", JSON.stringify(nudge));
+  await ev("document.querySelector('[data-js=dust-agree]').checked = true; document.querySelector('[data-js=dust-buy]').click(); true");
+  await waitFor("location.pathname === '/__dev/payapp/checkout'", 15000);
+  const co = await ev("({ good: document.querySelector('[data-field=goodname]').textContent, price: document.querySelector('[data-field=price]').textContent })");
+  await ev("document.querySelector('[data-act=complete]').click(); true");
+  const credited = await waitFor("location.pathname === '/stardust/' && /50/.test(document.querySelector('[data-js=dust-msg]')?.textContent || '') && /들어왔어요/.test(document.querySelector('[data-js=dust-msg]').textContent)", 20000);
+  const after = await ev("({ msg: document.querySelector('[data-js=dust-msg]').textContent, paid: document.querySelector('.gdust--paid b')?.textContent, pend: sessionStorage.getItem('strange-oracle-dustpay'), hash: location.hash })");
+  check("충전: 결제창 상품·금액(별가루 50 · 2,900원) → 결제 → 별가루 페이지에서 확인·계정에 50", /별가루 50/.test(co.good) && /2,?900/.test(co.price) && credited && /50/.test(after.paid || "") && after.pend === null && after.hash === "", JSON.stringify({ co, after }));
+  // 면담: 무료 몫을 0으로 만든 뒤 → 충전분에서 10
+  await ev("(() => { const s = Dust.state(); Dust.spend(s.bal); return true; })()");
+  await b.goto(`${TEST}/talk/`);
+  await waitFor("!!document.querySelector('[data-js=talk-pick]')");
+  await ev("document.querySelector('[data-js=talk-pick][data-room=rune]').click(); true");
+  await waitFor("/충전한 별가루 50/.test(document.querySelector('.gtalk-form')?.textContent || '')", 8000);
+  await ev("(() => { const t = document.querySelector('[data-js=talk-form] textarea'); t.value = '충전분으로 묻기'; document.querySelector('[data-js=talk-form] button[type=submit]').click(); return true; })()");
+  await waitFor("document.querySelectorAll('[data-js=talk-log] .gsay--guide:not(.is-wait)').length === 1", 8000);
+  const tk2 = await ev("({ txt: document.querySelector('.gtalk-form').textContent, free: Dust.state().bal })");
+  const sentPaid = b.log.bodies.filter((x) => x.url.endsWith("/api/talk")).map((x) => JSON.parse(x.body)).pop();
+  check("면담: 무료 별가루가 없으면 카카오 계정의 충전분 10을 씀(표만 보냄) · 남은 충전분 40 표시", /충전한 별가루 40/.test(tk2.txt) && tk2.free === 0 && sentPaid && sentPaid.sid === lg.sid && Object.keys(sentPaid).sort().join() === "hist,q,r,room,sid", JSON.stringify({ t: tk2.txt.slice(-40), keys: sentPaid && Object.keys(sentPaid) }));
+  await ev("localStorage.removeItem('strange-oracle-login'); true");
+
   // ── 5. 입구(index.html): 사이드바 버튼·링크
   await b.goto(`${TEST}/products/strange-oracle/`);
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub' && !!document.querySelector('.topbar__inner .nav-toggle')", 10000);

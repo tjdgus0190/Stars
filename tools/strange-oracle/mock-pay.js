@@ -57,7 +57,7 @@ function createPayMock({ port }) {
     store.failRead = sw.store === "fail-read";
     store.failWrite = sw.store === "fail-write";
   };
-  const callPay = (route, method, body, ip) => Pay.handle({ method, route, body, ip }, payEnv(), store);
+  const callPay = (route, method, body, ip, to = "") => Pay.handle({ method, route, body, ip, to }, payEnv(), store);
 
   // test 모드 data.js 응답 변환: SDK 주소 → 가짜 SDK, 어떤 userid든 → 모의 값(19-6: 실제 판매자 ID를 모의 결제창에 넘기지 않음) (파일은 고치지 않음, pay.mode와 같은 방식)
   const transformDataJs = (t) =>
@@ -156,7 +156,7 @@ ${script}</body></html>`;
   const returnTo = (s, host) => {
     try {
       const u = new URL(String(s.returnurl || ""), `http://${host}`);
-      if (u.host === host && u.pathname === "/api/pay/return") return u.pathname;
+      if (u.host === host && u.pathname === "/api/pay/return") return u.pathname + (u.searchParams.get("to") === "dust" ? "?to=dust" : ""); // (v1-D) 별가루 충전은 별가루 페이지로
     } catch (e) {}
     return "/api/pay/return";
   };
@@ -167,7 +167,7 @@ ${script}</body></html>`;
   function route(req, res, rel, url, log) {
     if (rel.startsWith("/api/pay/")) {
       readBody(req).then(async (body) => {
-        const r = await callPay(rel.slice("/api/pay/".length), req.method, body, req.socket.remoteAddress);
+        const r = await callPay(rel.slice("/api/pay/".length), req.method, body, req.socket.remoteAddress, url.searchParams.get("to") === "dust" ? "dust" : "");
         res.writeHead(r.status, r.headers).end(r.body);
         log(r.status);
       });

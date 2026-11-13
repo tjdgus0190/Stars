@@ -12,13 +12,17 @@
 //   POST /api/auth/me     { sid }              → { passes, data }   (data = 저장한 진행·입력값, 없으면 null)
 //   POST /api/auth/save   { sid, data?, pass? } → data(동의한 이용자의 이름·생년월일·태어난 시각·성별 + 방 결과 코드)를 AES-256-GCM으로 덮어쓰고, pass(결제 확인된 코드)는 연결
 //   POST /api/auth/logout { sid }              → 세션만 지움
-//   POST /api/auth/erase  { sid }              → 그 카카오의 기록(kakao/<uh>) 전체와 세션을 지움
+//   POST /api/auth/erase  { sid }              → 그 카카오의 기록(kakao/<uh>)·충전한 별가루(dust/<uh>) 전체와 세션을 지움
+//   POST /api/auth/dust   { sid, pass? }       → (v1-D) 충전한 별가루 잔액 / 별가루 결제 코드(SDA·SDB·SDC)를 이 계정에 한 번만 충전 (netlify/lib/dust.js)
 //   보관: 마지막 저장·로그인 뒤 1년(KEEP_MS). 읽을 때 지난 기록은 지우고, 함수 auth-sweep이 하루 한 번 ticket/·sess/·kakao/의 지난 것을 지운다.
 //   data 모양(서버가 검사): { p: { name(1~10자), birth{y,m,d}, time{h,m}|null, gender m|f|x }, v: { 방: { 숫자·짧은 글자 칸 } } }, JSON 4KB 이하. 상대(궁합) 정보·질문 글은 받지 않는다.
 // 503(로그 없음): PASS_MODE가 test·live가 아님 / KAKAO_REST_KEY 빈 칸 / PASS_SECRET 32바이트 미만 / SITE_URL 모양 틀림.
 "use strict";
 const crypto = require("crypto");
 const Pay = require("./pay.js");
+const Dust = require("./dust.js");
+// 카카오에 "연결"하는 코드는 책(SOP)·신년운세(SNY)만. 별가루 충전 코드(SDA·SDB·SDC)는 /api/auth/dust로 충전만 한다
+const linkable = (p) => ["book", "ny"].includes(Pay.productOfPass(p)) && /^S(OP|NY)/.test(p);
 
 const HEX32 = /^[0-9a-f]{32}$/;
 const TICKET_MS = 2 * 60 * 1000;
@@ -139,7 +143,7 @@ async function claim(body, env, store, now) {
     let linked = false;
     if (b.pass) {
       const p = Pay.normalize(b.pass);
-      if ((await Pay.passState(store, env.PASS_SECRET, p)) !== "paid") return json(403, { error: "pass" });
+      if (!linkable(p) || (await Pay.passState(store, env.PASS_SECRET, p)) !== "paid") return json(403, { error: "pass" });
       if (!passes.includes(p)) {
         passes = [p].concat(passes).slice(0, MAX_LINKS);
         rec.enc = passes.map((x) => seal(env.PASS_SECRET, x));
@@ -251,7 +255,23 @@ async function account(path, body, env, store, now) {
       await store.del("sess/" + sha(b.sid));
       return json(200, { state: "out" });
     }
+    // (v1-D) 충전한 별가루: { sid } → 잔액, { sid, pass } → 결제 확인된 별가루 코드를 이 계정에 한 번만 충전
+    if (path === "dust") {
+      if (b.data != null) return json(400, { error: "bad" });
+      if (b.pass != null) {
+        if (typeof b.pass !== "string") return json(400, { error: "bad" });
+        const p = Pay.normalize(b.pass);
+        const prod = Pay.productOfPass(p);
+        if (!Dust.PACKS[prod] || !/^SD[ABC]/.test(p)) return json(400, { error: "pass" });
+        if ((await Pay.passState(store, env.PASS_SECRET, p)) !== "paid") return json(403, { error: "pass" });
+        const c = await Dust.credit(store, uh, Pay.hashOfPass(env.PASS_SECRET, p), prod, now);
+        if (!c.ok) return json(409, { error: "used" }); // 다른 계정에 이미 충전한 코드
+        return json(200, { state: c.already ? "already" : "credited", bal: c.bal, n: Dust.PACKS[prod] });
+      }
+      return json(200, { state: "bal", bal: await Dust.balanceOf(store, uh) });
+    }
     if (path === "erase") {
+      await Dust.erase(store, uh); // 충전한 별가루도 함께 지운다(지우기 전 화면에서 알림)
       await store.del(K);
       await store.del("sess/" + sha(b.sid));
       return json(200, { state: "erased" });
@@ -267,7 +287,7 @@ async function account(path, body, env, store, now) {
       if (b.pass != null) {
         if (typeof b.pass !== "string") return json(400, { error: "bad" });
         const p = Pay.normalize(b.pass);
-        if ((await Pay.passState(store, env.PASS_SECRET, p)) !== "paid") return json(403, { error: "pass" });
+        if (!linkable(p) || (await Pay.passState(store, env.PASS_SECRET, p)) !== "paid") return json(403, { error: "pass" });
         if (!passes.includes(p)) passes = [p].concat(passes).slice(0, MAX_LINKS);
         rec.enc = passes.map((x) => seal(env.PASS_SECRET, x));
       }
@@ -283,10 +303,11 @@ async function account(path, body, env, store, now) {
 // 하루 한 번(함수 auth-sweep): 지난 표·세션·1년 지난 기록 지우기. list = 저장소의 prefix 목록 함수(키 배열)
 async function sweep(store, list, now = Date.now()) {
   let n = 0;
-  for (const pre of ["ticket/", "sess/", "kakao/", "keep/"]) { // (2026-10-28) keep/ = 열람 코드에 담아 둔 결과 암호문(함수 book), 마지막 저장 뒤 1년
+  for (const pre of ["ticket/", "sess/", "kakao/", "keep/", "dust/"]) { // (2026-10-28) keep/ = 열람 코드에 담아 둔 결과 암호문(함수 book), 마지막 저장 뒤 1년
     for (const k of await list(pre)) {
       const r = await store.get(k);
-      const gone = !r || (pre === "kakao/" || pre === "keep/" ? !r.at || Date.parse(r.at) + KEEP_MS < now : !(r.exp > now));
+      // dust/(충전한 별가루)는 잔액이 0일 때만 1년 뒤 지운다 — 잔액이 남은 기록은 유효기간을 운영자가 정하기 전까지 지우지 않는다
+      const gone = !r || (pre === "dust/" ? (r.bal || 0) === 0 && (!r.at || Date.parse(r.at) + KEEP_MS < now) : pre === "kakao/" || pre === "keep/" ? !r.at || Date.parse(r.at) + KEEP_MS < now : !(r.exp > now));
       if (gone) {
         await store.del(k);
         n++;
@@ -304,7 +325,7 @@ async function handle(req, env, store, kakao, now = Date.now()) {
   if (p.endsWith("/api/auth/kakao/start") && req.method === "GET") return start(url, env);
   if (p.endsWith("/api/auth/kakao/callback") && req.method === "GET") return callback(url, env, store, kakao || realKakao(env, globalThis.fetch), now);
   if (p.endsWith("/api/auth/claim") && req.method === "POST") return claim(req.body, env, store, now);
-  const m = /\/api\/auth\/(me|save|logout|erase)$/.exec(p);
+  const m = /\/api\/auth\/(me|save|logout|erase|dust)$/.exec(p);
   if (m && req.method === "POST") return account(m[1], req.body, env, store, now);
   return json(404, { error: "route" });
 }
@@ -316,4 +337,4 @@ async function respond(req, context, openStore, env = process.env, kakao = null)
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
-module.exports = { respond, handle, realKakao, seal, open, envOk, redirectUri, sweep, dataOk, TICKET_MS, MAX_LINKS, SESSION_MS, KEEP_MS };
+module.exports = { sessionOf, respond, handle, realKakao, seal, open, envOk, redirectUri, sweep, dataOk, TICKET_MS, MAX_LINKS, SESSION_MS, KEEP_MS };
