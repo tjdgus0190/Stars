@@ -18,9 +18,12 @@ const TT = {
   cassandra: { h2: 1.2, b1: 3.6, b2: 6.2, b3: 9.4, b4: 12.0, curse: 14.6, b6: 17.6, b7: 20.8, b8: 24.4, b9: 27.2, b10: 30.2, b11: 33.0, q: 36.6, end: 41.0, dur: 47 }, // 2026-11-13 느리게 + 끝 화면
   rune: { b1: 2.9, b2: 5.2, w1: 7.6, w2: 9.6, w3: 11.6, b6: 13.8, b7: 16.4, b8: 18.8, b9: 21.0, pour: 21.4, b10: 23.4, b11: 25.8, q: 28.4, brand: 30.2, dur: 32 },
 };
-if (!TT[EP]) throw new Error(`알 수 없는 편: ${EP} (sibyl | cassandra | rune)`);
-const T = TT[EP];
-const VIDEO = `legend-${EP}-ko`;
+// 공용 틀 편(scenes/legend/ep/<편>.js)은 그 설정 파일에서 시각표와 소리 목록을 읽는다
+const EPFILE = path.resolve(__dirname, "..", "scenes", "legend", "ep", `${EP}.js`);
+const EPCONF = !TT[EP] && fs.existsSync(EPFILE) ? require(EPFILE) : null;
+if (!TT[EP] && !EPCONF) throw new Error(`알 수 없는 편: ${EP} (sibyl | cassandra | rune | scenes/legend/ep/의 편)`);
+const T = TT[EP] || EPCONF.T;
+const VIDEO = EPCONF ? `legend-ep-${EP}-ko` : `legend-${EP}-ko`;
 const OUT = path.resolve(__dirname, "..", "out");
 const SR = 48000, DUR = T.dur, N = SR * DUR;
 const L = new Float32Array(N), R = new Float32Array(N), VL = new Float32Array(N), VR = new Float32Array(N);
@@ -189,6 +192,44 @@ function rumble(t0, dur, amp) { let a = 0, b = 0; for (let i = 0; i < dur * SR; 
 function tick(t0, amp) { for (let i = 0; i < 0.03 * SR; i++) { const t = i / SR; put(S(t0) + i, Math.sin(2 * Math.PI * 2400 * t) * Math.exp(-t * 300) * amp, 0, 0.1); } }
 
 // ── 배치
+if (EPCONF) {
+  // 공용 틀: 화음 진행·긴장 구간·소리 목록은 설정 파일(E.sound)에서. 첫 한 방·1.2초 한 방·질문·끝 화면 소리는 모든 편 공통
+  const SD = EPCONF.sound || {};
+  const CH = SD.chords || [[0, [38, 45, 50, 53]]];
+  const chord = (t) => { let c = CH[0][1]; for (const [a, n] of CH) if (t >= a) c = n; return c; };
+  const tense = (t) => (SD.tense || []).reduce((m, [a, b]) => Math.max(m, smooth(a, a + 0.8, t) * (1 - smooth(b, b + 0.4, t))), 0);
+  strings((t) => (0.42 + 0.25 * smooth(T.b1, T.b2, t) + 0.4 * tense(t)) * (1 - 0.4 * smooth(T.q, T.q + 1.5, t)) * (1 - smooth(DUR - 0.8, DUR, t)) * Math.min(1, t / 0.02 + 0.5), chord, 0.06);
+  boom(0.0, 1.3, 50); bell(0.05, mtof(SD.key || 74), 0.08, 0);
+  if (EPCONF.h2) { whoosh(EPCONF.h2.t - 0.2, 0.4, 0.4, -0.4, 0.4); boom(EPCONF.h2.t, 1.1, 46); }
+  const winds = [], fires = [];
+  for (const [k, t, ...a] of SD.sfx || []) {
+    if (k === "boom") boom(t, a[0] ?? 0.8, a[1] ?? 50);
+    else if (k === "bell") bell(t, mtof(a[0]), a[1] ?? 0.06, a[2] ?? 0);
+    else if (k === "arp") a[0].forEach((m, j) => bell(t + j * (a[1] ?? 0.1), mtof(m), a[2] ?? 0.05, Math.sin(j * 1.7) * 0.5));
+    else if (k === "whoosh") whoosh(t, a[0] ?? 0.5, a[1] ?? 0.3, -0.4, 0.4);
+    else if (k === "shatter") shatter(t, a[0] ?? 1.2);
+    else if (k === "creak") creak(t, a[0] ?? 0.7, a[1] ?? 0.6);
+    else if (k === "water") water(t, a[0] ?? 2, a[1] ?? 0.4);
+    else if (k === "thump") thump(t, a[0] ?? 0.5);
+    else if (k === "drums") for (let j = 0; j < (a[0] ?? 8); j++) thump(t + j * (a[1] ?? 0.3), j % 2 ? 0.35 : 0.6);
+    else if (k === "blip") blip(t, a[0] ?? 0.25, a[1] ?? 0);
+    else if (k === "riser") riser(t, a[0], a[1] ?? 0.25);
+    else if (k === "pluck") pluck(t, mtof(a[0]), a[1] ?? 0.35, a[2] ?? 0);
+    else if (k === "tick") for (let j = 0; j < (a[0] ?? 6); j++) tick(t + j * 0.25, 0.22 + j * 0.02);
+    else if (k === "chisel") chisel(t, a[0] ?? 0.7, a[1] ?? 0);
+    else if (k === "drop") drop(S(t), a[0] ?? 0.3, a[1] ?? 0);
+    else if (k === "wind") winds.push([t, a[0], a[1] ?? 0.8]);
+    else if (k === "fire") fires.push([t, a[0], a[1] ?? 0.7]);
+    else throw new Error("모르는 소리: " + k);
+  }
+  const win = (list) => (t) => list.reduce((m, [a, b, l]) => m + (t > a && t < b ? l * Math.sin(Math.PI * (t - a) / (b - a)) : 0), 0);
+  if (winds.length) wind(win(winds));
+  if (fires.length) fire(win(fires));
+  [64, 57].forEach((m, k) => pluck(T.q + 0.6 + k * 0.3, mtof(m + 12), 0.4, k ? 0.4 : -0.4));
+  bell(T.end + 0.6, mtof(76), 0.07, 0); boom(T.end + 1.1, 0.7, 55);
+  [69, 73, 76, 81, 85].forEach((m, k) => bell(T.end + 1.15 + k * 0.08, mtof(m), 0.05, (k - 2) * 0.3));
+  bell(T.end + 2.8, mtof(88), 0.05, 0);
+}
 if (EP === "sibyl") {
   // 지속음: D 단조 → 신탁 문장에서 열림 → 배가 멈추면 어둡게 → 움직이면 D 장조 → 질문은 열린 화음
   const chord = (t) => (t < T.b4 ? [38, 45, 50, 53] : t < T.b7 ? [38, 45, 50, 53, 57] : t < T.b9 + 2.0 ? [34, 41, 50, 53] : t < T.q ? [38, 45, 54, 57] : [38, 45, 52, 57]);

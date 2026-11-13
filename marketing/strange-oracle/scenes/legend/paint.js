@@ -40,7 +40,7 @@
     document.head.append(st);
     // 렌더 도구가 그림을 모두 불러온 뒤 찍게(render.js가 window.__ready3d를 기다린다)
     const urls = [...new Set(list.map((s) => s.img))];
-    window.__ready3d = Promise.all(urls.map((u) => new Promise((ok) => { const im = new Image(); im.onload = () => (im.decode ? im.decode().then(ok, ok) : ok()); im.onerror = ok; im.src = u; })));
+    window.__paintReady = window.__ready3d = Promise.all(urls.map((u) => new Promise((ok) => { const im = new Image(); im.onload = () => (im.decode ? im.decode().then(ok, ok) : ok()); im.onerror = ok; im.src = u; })));
   }
   window.Paint = { shots, cam };
 })();

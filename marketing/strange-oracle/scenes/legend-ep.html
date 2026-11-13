@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1080, height=1920" />
+  <title>전설 릴스 (공용 틀, 한국판)</title>
+  <!-- 글꼴: 다른 장면과 같은 jsdelivr fontsource 판 고정 + SRI -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/700.css" integrity="sha384-EIZic2kT4Iyqg6Rn2tm4B7Ql9xDJWopYmx3ry1RafjC/gfDHItTLBMXp6jrmkxla" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/700.css" integrity="sha384-LXacqt3WHgv2kABrVAfRqRh7wRqX5H060k/lYSUdYfX+vONJfNDiOITwd8LJv+EV" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/900.css" integrity="sha384-ooIXEUf5zNTP6iR7nXHfVaimYiliyT2VNoP9xlOV2oDtqPxNA/KjJt+5FWUwFxQd" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.3.0/700.css" integrity="sha384-O/oLJBLGGldMs7HxAYRnSN50LYc4P4P3qiJbqSV358VWDpuJKiErXj9iWy8+R3LZ" crossorigin="anonymous" />
+  <link rel="stylesheet" href="common.css" />
+  <link rel="stylesheet" href="legend/legend.css" />
+  <link rel="stylesheet" href="legend/legend-cassandra.css" />
+  <link rel="stylesheet" href="legend/paint.css" />
+  <link rel="stylesheet" href="legend/legend-sibyl.css" />
+</head>
+<body>
+<!-- 전설 릴스 공용 틀 (2026-11-13): legend-ep.html?ep=<편>. 편 설정은 legend/ep/<편>.js(window.EPISODE, 소리 스크립트도 같은 파일을 읽음), 조립은 legend/episode.js.
+     기준: 그 방의 점술이 직접 사건을 일으키는 전설(storyboard.md 「전설 고르는 기준」). 그림은 CC0 공개 작품(CREDITS.md). -->
+<main class="stage lg cass sib" data-duration="51" data-fps="30">
+  <div class="world">
+    <div class="paint"></div>
+    <div class="tint gold"></div>
+    <div class="tint red"></div>
+    <div class="burn"></div>
+    <div class="grade"></div>
+    <div class="meteors"></div>
+    <div class="stone"></div>
+    <div class="embers"></div>
+    <div class="bubbles"></div>
+  </div>
+  <div class="grain"></div>
+  <div class="leak"></div>
+  <div class="flash"></div>
+  <div class="redflash"></div>
+  <div class="crack"></div>
+  <div class="caps"></div>
+  <div class="safe-guide" id="safe"><i></i><i></i><i></i><i></i></div>
+</main>
+<script>
+  // 편 설정을 먼저 불러온 뒤 조립(주소의 ?ep= 값은 영문 소문자만 받는다)
+  (function () {
+    const ep = (new URLSearchParams(location.search).get("ep") || "").replace(/[^a-z]/g, "");
+    const st = document.querySelector(".stage");
+    const load = (src) => new Promise((ok) => { const s = document.createElement("script"); s.src = src; s.onload = ok; document.body.append(s); });
+    window.__ready3d = load(`legend/ep/${ep}.js`).then(() => {
+      st.dataset.room = window.EPISODE.room;
+      st.dataset.duration = String(window.EPISODE.T.dur);
+      return load("legend/paint.js");
+    }).then(() => load("legend/episode.js")).then(() => window.__paintReady);
+  })();
+</script>
+</body>
+</html>

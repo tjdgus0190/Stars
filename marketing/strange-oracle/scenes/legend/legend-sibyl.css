@@ -24,3 +24,9 @@
   background: radial-gradient(ellipse 60% 40% at 50% 50%, oklch(0.9 0.12 85 / 0.7), transparent 70%); }
 @keyframes heave { 0% { opacity: 0; transform: scaleX(0.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: scaleX(1.6); } }
 .sib .ask b { width: 380px; height: 150px; font-size: 46px; }
+/* 공용 틀 편: 뿔잔의 룬(새기기 → 붉게) · 깨짐 */
+.sib .stone .hr { fill: none; stroke: oklch(0.92 0.14 85); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 160; stroke-dashoffset: 160; filter: drop-shadow(0 0 8px oklch(0.85 0.15 80)); }
+@keyframes carve-h { to { stroke-dashoffset: 0; } }
+@keyframes redden { to { stroke: oklch(0.62 0.23 25); filter: drop-shadow(0 0 14px oklch(0.6 0.24 25)); } }
+@keyframes burst { 0% { transform: none; opacity: 1; filter: brightness(1); } 30% { transform: scale(1.12) rotate(-3deg); filter: brightness(2); } 100% { transform: scale(1.5) rotate(6deg); opacity: 0; filter: brightness(3) blur(8px); } }
+.sib .stone .og { fill: none; stroke: oklch(0.9 0.13 150); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 400; stroke-dashoffset: 400; filter: drop-shadow(0 0 10px oklch(0.8 0.15 150)); }
