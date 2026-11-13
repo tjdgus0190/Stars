@@ -15,6 +15,7 @@
 // 형식: 핵심 로직(이 파일, CommonJS). 실제 함수는 netlify/functions/pay.mjs(Functions v2)가 respond()를 부른다.
 "use strict";
 const crypto = require("crypto");
+const Dust = require("./dust.js"); // 별가루 충전 코드 취소 시 회수(dust.js는 pay.js를 부르지 않는다)
 
 const STORE_NAME = "strange-oracle-pay";
 const PRICE = 9900;
@@ -163,7 +164,7 @@ async function onCancel(store, secret, mul, r, now, prod = "book") {
   const pr = await store.get("pass/" + ph);
   if (pr && pr.mul_no === mul && pr.state !== "cancelled") await store.set("pass/" + ph, { mul_no: mul, state: "cancelled", at });
   // (v1-D) 별가루 충전 코드였으면 충전한 양을 되돌린다(충전 전이면 아무 일 없음)
-  await require("./dust.js").refund(store, ph, now);
+  await Dust.refund(store, ph, now);
 }
 
 // 코드 P의 결제 상태: "paid" | "cancelled" | null (기록 없음). 읽기 실패는 throw. 함수 book도 쓴다

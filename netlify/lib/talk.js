@@ -18,6 +18,8 @@
 "use strict";
 const Prompt = require("./talk-prompt.js");
 const Dust = require("./dust.js");
+const Auth = require("./auth.js");
+const Pay = require("./pay.js"); // 카카오 세션 확인(sessionOf) — 함수 묶음에 들어가도록 맨 위에서 부른다
 const TALK_COST = 10; // 질문 하나 = 별가루 10 (화면 data-nav.js cost.talk와 같은 값)
 
 const STORE_NAME = "strange-oracle-talk";
@@ -144,7 +146,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   if (p.sid) {
     if (!payStore) return json(503, { error: "store" });
     try {
-      uh = await require("./auth.js").sessionOf(payStore, p.sid, now);
+      uh = await Auth.sessionOf(payStore, p.sid, now);
       if (!uh) return json(401, { error: "session" });
       if ((await Dust.balanceOf(payStore, uh)) < TALK_COST) return json(402, { error: "dust" });
     } catch (e) { return json(503, { error: "store" }); }
@@ -175,15 +177,12 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
 }
 
 // 실제 모델 호출 (Anthropic 공식 SDK). 함수 인스턴스마다 클라이언트 하나
+// SDK 클래스는 함수 파일(netlify/functions/talk.mjs)이 import로 넘긴다 — 함수 안 require는 Netlify 묶음에 안 들어간다(시험 배포에서 확인)
 let client = null;
-async function anthropicLlm(params, env) {
-  if (!client) {
-    const A = require("@anthropic-ai/sdk");
-    const Anthropic = A.default || A.Anthropic || A;
-    client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: 60 * 1000, maxRetries: 1 });
-  }
+const anthropicLlmWith = (Anthropic) => async (params, env) => {
+  if (!client) client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: 60 * 1000, maxRetries: 1 });
   return client.beta.messages.create(params);
-}
+};
 
 function storeFrom(openStore) {
   let s = null;
@@ -195,9 +194,9 @@ function storeFrom(openStore) {
 }
 
 // Netlify Functions v2 요청 → handle
-async function respond(req, context, openStore, env = process.env, openPay = null) {
+async function respond(req, context, openStore, env = process.env, openPay = null, Anthropic = null) {
   const body = req.method === "POST" ? await req.text() : "";
-  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown"), evalKey: req.headers.get("x-talk-eval-key") || "" }, env, storeFrom(openStore), Date.now(), anthropicLlm, openPay ? require("./pay.js").storeFrom(openPay) : null);
+  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown"), evalKey: req.headers.get("x-talk-eval-key") || "" }, env, storeFrom(openStore), Date.now(), Anthropic ? anthropicLlmWith(Anthropic) : async () => { throw new Error("sdk"); }, openPay ? Pay.storeFrom(openPay) : null);
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
