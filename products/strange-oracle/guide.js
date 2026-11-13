@@ -11,13 +11,25 @@
   const PAGES = Object.keys(G.pages).concat(Object.keys(G.tools), Object.keys(G.apps || {}), LG ? ["legends"].concat(Object.keys(LG.list)) : []);
   const TOOLS = Object.keys(G.tools);
 
+  // ── (v1-E) 콘텐츠별 바깥 광고: 착지 주소마다 캠페인 이름 c_<짧은 주소>(예: /rune-draw/ → c_rune_draw, /legends/rune-poisoned-horn/ → c_legends_rune_poisoned_horn)
+  //   목록은 marketing/strange-oracle/ads-v1-landing.md와 같다. 값은 소문자·숫자·밑줄만(common/analytics.js가 모양을 다시 본다)
+  const slugOf = (p) => "c_" + String(p).replace(/^\/|\/$/g, "").replace(/[\/-]/g, "_");
+  const landPaths = [].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {})).map((d) => d.path)
+    .concat(window.LEGENDS ? [window.LEGENDS.hub.path].concat(Object.values(window.LEGENDS.list).map((d) => d.path)) : ["/legends/"]);
+  const LAND = ["#meta_id"].concat(landPaths.map(slugOf), ["reel_sibyl", "reel_rune", "reel_ogham", "reel_star", "reel_decan", "reel_tzolkin", "reel_saju", "ig_profile", "x_profile", "gads_main"]);
+  const CAMPAIGN = {
+    utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads", "naver", "youtube"],
+    utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
+    utm_campaign: LAND,
+    utm_content: LAND,
+  };
   // ── 분석(허용 목록 밖은 버림). query는 시작할 때 지운다(입력값은 애초에 주소에 없다)
   const A = window.Analytics;
   let on = false;
   if (A && CONF.ga4) {
     const search = location.search;
     if (search) history.replaceState(null, "", location.pathname + location.hash);
-    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] } }, utm: { search, allow: {}, ignore: [] } });
+    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
     if (on) A.track("so_guide_view", { page: CONF.page });
     const cookie = $("[data-js=cookie-line]");
     if (cookie && A.configured(CONF.ga4)) cookie.hidden = false;

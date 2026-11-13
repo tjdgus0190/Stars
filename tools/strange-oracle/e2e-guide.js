@@ -57,6 +57,18 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
     else legendBad.push(href + " " + JSON.stringify(li));
   }
   check("전설 기록 일곱 편: 짧은 주소·canonical·이야기 400자 이상·출처·FAQ·점술 안내 링크·방 버튼·Article·목록으로", legendOk === 7, legendBad.join(" | ") || "7편");
+  // ── 1c. (v1-E) 콘텐츠별 광고 착지: 허용 utm만 page_location에 · 모르는 값·다른 키는 버림 · 주소창에서 지움
+  for (const [path, camp] of [["/rune-draw/", "c_rune_draw"], ["/legends/rune-poisoned-horn/", "c_legends_rune_poisoned_horn"], ["/today/", "c_today"]]) {
+    await b.goto(`${TEST}${path}?utm_source=instagram&utm_medium=paid_social&utm_campaign=${camp}&utm_content=reel_rune&name=%ED%99%8D%EA%B8%B8%EB%8F%99&fbclid=abc`);
+    await waitFor("(window.dataLayer || []).some((a) => a[0] === 'config')", 8000);
+    const u = await ev("({ loc: ((window.dataLayer || []).find((a) => a[0] === 'config') || [])[2]?.page_location, href: location.href })");
+    check(`광고 착지 ${path}: page_location = 주소 + 허용 utm(c_…·reel_…)만 · 이름·클릭 ID 버림 · 주소창 query 지움`, u.loc === `${TEST}${path}?utm_source=instagram&utm_medium=paid_social&utm_campaign=${camp}&utm_content=reel_rune` && u.href === `${TEST}${path}`, `${u.loc} · ${u.href}`);
+  }
+  await b.goto(`${TEST}/manse/?utm_source=instagram&utm_campaign=not_listed`);
+  await waitFor("(window.dataLayer || []).some((a) => a[0] === 'config')", 8000);
+  const u2 = await ev("((window.dataLayer || []).find((a) => a[0] === 'config') || [])[2]?.page_location");
+  check("광고 착지: 목록에 없는 캠페인 값은 버림(출처만)", u2 === `${TEST}/manse/?utm_source=instagram`, u2);
+
   // 사이드바 여닫기(좁은 화면)
   await ev("document.querySelector('[data-nav=open]').click()");
   await sleep(350);
