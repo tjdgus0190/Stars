@@ -7,7 +7,8 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const fill = (s, o) => String(s).replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? "" : o[k]));
-  const PAGES = Object.keys(G.pages).concat(Object.keys(G.tools));
+  const LG = window.LEGENDS; // 전설 기록 페이지에만 있다
+  const PAGES = Object.keys(G.pages).concat(Object.keys(G.tools), LG ? ["legends"].concat(Object.keys(LG.list)) : []);
   const TOOLS = Object.keys(G.tools);
 
   // ── 분석(허용 목록 밖은 버림). query는 시작할 때 지운다(입력값은 애초에 주소에 없다)

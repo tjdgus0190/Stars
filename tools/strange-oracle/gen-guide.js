@@ -47,10 +47,15 @@ function build() {
   const { SAJU } = load("data-saju.js");
   const { NAKSHATRAS } = load("data-stars.js");
   const { RUNES } = load("data-runes.js");
+  const { OGHAM } = load("data-ogham.js");
+  const { DECANS } = load("data-decans.js");
+  const { TZOLKIN_SIGNS } = load("data-tzolkin.js");
+  const { LEGENDS: L } = load("data-legends.js");
   const ORIGIN = new URL(TEXT.site.url).origin;
   const GA4 = (TEXT.analytics && TEXT.analytics.ga4) || "";
   const navItem = (href) => { for (const g of N.groups) for (const it of g.items) if (it.href === href) return it; return null; };
-  const hrefOf = (name) => (G.pages[name] || G.tools[name]).path;
+  const entry = (name) => G.pages[name] || G.tools[name] || L.list[name] || (name === "legends" ? L.hub : null);
+  const hrefOf = (name) => { const e = entry(name); if (!e) throw new Error("모르는 관련 링크: " + name); return e.path; };
 
   const sidenav = (current) => `<aside class="sidenav" id="sidenav" aria-label="${esc(N.open)}">
   <div class="sidenav__head"><a class="sidenav__brand" href="${PB}"><b>${esc(N.brand)}</b><small>${esc(N.brandSub)}</small></a><button class="sidenav__close" type="button" data-nav="close" aria-label="${esc(N.close)}">×</button></div>
@@ -62,11 +67,14 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
     if (kind === "stems") return `<ul class="gtable">${SAJU.stems.map((s) => `<li><span class="g-mark">${esc(s.hanja)}</span><div><b>${esc(s.name)}<small>${esc(s.title)}</small></b><span>${esc(s.keywords.join(" · "))}</span></div></li>`).join("")}</ul>`;
     if (kind === "nakshatras") return `<ul class="gtable">${NAKSHATRAS.map((n, i) => `<li><span class="g-mark num">${i + 1}</span><div><b>${esc(n.name)}<small>${esc(n.sanskrit)}</small></b><span>${esc(n.title)} · ${esc(n.symbol)}</span></div></li>`).join("")}</ul>`;
     if (kind === "runes") return `<ul class="gtable">${RUNES.map((r) => `<li><span class="g-mark rune">${esc(r.glyph)}</span><div><b>${esc(r.name)}<small>${esc(r.latin)}</small></b><span>${esc(r.image)} — ${esc(r.keyword)}</span></div></li>`).join("")}</ul>`;
+    if (kind === "ogham") return `<ul class="gtable">${OGHAM.map((o) => `<li><span class="g-mark ogham"><svg viewBox="0 0 40 80" aria-hidden="true"><use href="#ogham-${esc(o.code)}" /></svg></span><div><b>${esc(o.name)}<small>${esc(o.latin)} · ${esc(o.sound)}</small></b><span>${esc(o.title)}</span></div></li>`).join("")}</ul>`;
+    if (kind === "decans") return `<ul class="gtable">${DECANS.map((x, i) => `<li><span class="g-mark num">${i + 1}</span><div><b>${esc(x.sign)}<small>${esc(G.ui.decanPart.replace("{n}", x.part))}</small></b><span>${esc(x.title)}</span></div></li>`).join("")}</ul>`;
+    if (kind === "tzolkin") return `<ul class="gtable">${TZOLKIN_SIGNS.map((x, i) => `<li><span class="g-mark num">${i + 1}</span><div><b>${esc(x.name)}<small>${esc(x.latin)}</small></b><span>${esc(x.title)}</span></div></li>`).join("")}</ul>`;
     throw new Error("모르는 표: " + kind);
   };
   const sections = (list) => (list || []).map((s) => `<section><h2>${esc(s.head)}</h2>${s.lead ? `<p class="glead">${esc(s.lead)}</p>` : ""}${s.table ? table(s.table) : ""}${(s.body || []).map((p) => `<p>${esc(p)}</p>`).join("")}</section>`).join("\n");
   const faq = (list) => `<section><h2>${esc(G.ui.faqHead)}</h2><div class="gfaq">${list.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("")}</div></section>`;
-  const related = (names) => `<section><h2>${esc(G.ui.relatedHead)}</h2><ul class="grelated">${names.map((n) => { const href = hrefOf(n), it = navItem(href) || {}; return `<li><a href="${href}">${esc(it.label || n)}${it.note ? `<small>${esc(it.note)}</small>` : ""}</a></li>`; }).join("")}</ul></section>`;
+  const related = (names) => `<section><h2>${esc(G.ui.relatedHead)}</h2><ul class="grelated">${names.map((n) => { const href = hrefOf(n), it = navItem(href) || entry(n); return `<li><a href="${href}">${esc(it.label || n)}${it.note ? `<small>${esc(it.note)}</small>` : ""}</a></li>`; }).join("")}</ul></section>`;
   const foot = () => `<footer class="gfoot"><p class="gnote" data-js="cookie-line" hidden>${esc(TEXT.privacy.cookieLine)}</p><p><a href="${PB}legal/terms.html">${esc(TEXT.legal.links.terms)}</a><a href="${PB}legal/privacy.html">${esc(TEXT.legal.links.privacy)}</a></p><p>${esc(G.ui.footer)}</p></footer>`;
   const ldFaq = (list) => ({ "@type": "FAQPage", mainEntity: list.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) });
 
@@ -90,15 +98,31 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
 
   const page = (name, d, kind) => {
     const url = ORIGIN + d.path;
-    const ld = kind === "tool"
+    const ld = kind === "legend" || kind === "legends"
+      ? [{ "@context": "https://schema.org", "@type": "Article", headline: d.h1, description: d.description, inLanguage: "ko", mainEntityOfPage: url, publisher: { "@type": "Organization", name: N.brand } }].concat(d.faq ? [Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))] : [])
+      : kind === "tool"
       ? [{ "@context": "https://schema.org", "@type": "WebApplication", name: d.h1, url, description: d.description, applicationCategory: "LifestyleApplication", operatingSystem: "Web", inLanguage: "ko", offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" }, publisher: { "@type": "Organization", name: N.brand } }, Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))]
       : [{ "@context": "https://schema.org", "@type": "Article", headline: d.h1, description: d.description, inLanguage: "ko", mainEntityOfPage: url, publisher: { "@type": "Organization", name: N.brand } }, Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))];
     const fonts = FONTS.concat(name === "rune" || name === "runeDraw" ? [RUNIC] : []);
     const scripts = ["/common/analytics.js", `${PB}data-nav.js`, `${PB}nav.js`, `${PB}data-guide.js`]
-      .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : [])
+      .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : kind === "legend" || kind === "legends" ? [`${PB}data-legends.js`] : [])
       .concat([`${PB}guide.js`]);
-    const sprites = name === "nameOgham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : "";
-    const body = kind === "tool"
+    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : "";
+    const cta = (c) => `<div class="gcta"><h2>${esc(c.head)}</h2><p>${esc(c.body)}</p><a class="gbtn" href="${PB}" data-js="to-room">${esc(c.btn)}</a></div>`;
+    const body = kind === "legend"
+      ? `<p class="geyebrow">${esc(L.ui.roomBadge.replace("{room}", d.room))}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.hook)}</p>
+<article class="gstory">${d.story.map((p) => `<p>${esc(p)}</p>`).join("")}</article>
+<section><h2>${esc(d.tie.head)}</h2>${d.tie.body.map((p) => `<p>${esc(p)}</p>`).join("")}<a class="gtool-link" href="${hrefOf(d.guide)}">${esc(L.ui.guideLink.replace("{label}", (navItem(hrefOf(d.guide)) || {}).label || d.guide))}</a></section>
+<section><h2>${esc(L.ui.sourcesHead)}</h2><ul class="gsources">${d.sources.map((x) => `<li>${esc(x)}</li>`).join("")}</ul><p class="gnote">${esc(L.ui.note)}</p></section>
+${faq(d.faq)}
+${cta(d.cta)}
+${related(d.related.concat(["legends"]))}`
+      : kind === "legends"
+      ? `<p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1>
+${d.intro.map((p) => `<p>${esc(p)}</p>`).join("\n")}
+<section><h2>${esc(L.ui.listHead)}</h2><ul class="glegends">${Object.values(L.list).map((x) => `<li><a href="${x.path}"><small>${esc(L.ui.roomBadge.replace("{room}", x.room))}</small><b>${esc(x.label)}</b><span>${esc(x.hook)}</span></a></li>`).join("")}</ul></section>
+${cta(d.cta)}`
+      : kind === "tool"
       ? `<p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.lead)}</p>
 ${toolForm(name, d)}
 ${sections(d.sections)}
@@ -120,7 +144,7 @@ ${related(d.related)}`;
   <title>${esc(d.title)}</title>
   <meta name="description" content="${esc(d.description)}" />
   <link rel="canonical" href="${url}" />
-  <meta property="og:type" content="${kind === "tool" ? "website" : "article"}" />
+  <meta property="og:type" content="${kind === "tool" || kind === "legends" ? "website" : "article"}" />
   <meta property="og:site_name" content="${esc(N.brand)}" />
   <meta property="og:locale" content="ko_KR" />
   <meta property="og:title" content="${esc(d.title)}" />
@@ -154,7 +178,7 @@ ${foot()}
   const files = [];
   const urls = [];
   const rewrites = [];
-  for (const [kind, group] of [["page", G.pages], ["tool", G.tools]]) {
+  for (const [kind, group] of [["page", G.pages], ["tool", G.tools], ["legends", { legends: L.hub }], ["legend", L.list]]) {
     for (const [name, d] of Object.entries(group)) {
       if (kind === "tool" && !TOOL_SCRIPTS[name]) throw new Error("TOOL_SCRIPTS에 없는 도구: " + name);
       files.push({ path: path.join(P, "guide", slugOf(d), "index.html"), html: page(name, d, kind) });
@@ -183,7 +207,8 @@ function tomlWith(block) {
 // 짧은 주소 → 파일 (data-guide.js만 읽는 가벼운 판, 모의 서버가 요청마다 부른다)
 function routes() {
   const { GUIDE: G } = load("data-guide.js");
-  return Object.values(G.pages).concat(Object.values(G.tools)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]);
+  const { LEGENDS: L } = load("data-legends.js");
+  return Object.values(G.pages).concat(Object.values(G.tools), [L.hub], Object.values(L.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]);
 }
 
 module.exports = { build, routes };

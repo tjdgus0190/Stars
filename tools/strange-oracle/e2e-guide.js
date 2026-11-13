@@ -1,4 +1,4 @@
-// (2026-11-13) 안내 페이지 3개·무료 도구 7개·사이드바 e2e. 짧은 주소·검색 태그·표·도구 계산·개인정보(입력값이 주소·저장소·요청에 0)·입구 사이드바.
+// (2026-11-13) 안내 페이지 7개·무료 도구 7개·전설 기록 7편·사이드바 e2e. 짧은 주소·검색 태그·표·도구 계산·개인정보(입력값이 주소·저장소·요청에 0)·입구 사이드바.
 // 준비: node tools/strange-oracle/mock-server.js --src --port 8788 --mode test
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-guide.js → 결과 tools/strange-oracle/out/e2e-guide.txt
 "use strict";
@@ -24,7 +24,7 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   const setv = (name, v) => ev(`(() => { const f = document.querySelector('[data-js=tool-form]'); const el = f.elements[${JSON.stringify(name)}]; el.value = ${JSON.stringify(String(v))}; return true; })()`);
 
   // ── 1. 안내 페이지 3개: 짧은 주소·제목·canonical·표·FAQ·JSON-LD·사이드바
-  const pages = { saju: 10, vedic: 27, rune: 24 };
+  const pages = { saju: 10, vedic: 27, rune: 24, ogham: 20, egypt: 36, maya: 20, oracle: 0 };
   for (const [p, rows] of Object.entries(pages)) {
     await b.goto(`${TEST}/${p}/`);
     await waitFor("document.readyState === 'complete' && !!window.GUIDE");
@@ -34,10 +34,29 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
       cta: document.querySelector('[data-js=to-room]')?.getAttribute('href') }))()`);
     check(`${p}: 짧은 주소 그대로·제목·h1`, info.path === `/${p}/` && /낯선 점술관/.test(info.title) && !!info.h1, `${info.path} · ${info.h1}`);
     check(`${p}: canonical = 짧은 주소`, info.canon === `https://strange-oracle.com/${p}/`, info.canon);
+    if (p === "ogham") check("ogham: 표 20줄 모두 오검 획(svg)이 그려짐", await ev("[...document.querySelectorAll('.gtable .g-mark.ogham use')].filter((u) => document.querySelector(u.getAttribute('href'))).length") === 20);
     check(`${p}: 표 ${rows}줄 · FAQ · FAQPage`, info.rows === rows && info.faq >= 3 && info.ld.includes("FAQPage"), `${info.rows}줄 · FAQ ${info.faq} · ${info.ld.join(",")}`);
     check(`${p}: 소개 300자 이상`, info.intro >= 300, `${info.intro}자`);
     check(`${p}: 사이드바 링크·지금 페이지 표시·입구 버튼`, info.nav >= 8 && info.cur === `/${p}/` && info.cta === "/products/strange-oracle/", `${info.nav}개 · ${info.cur}`);
   }
+
+  // ── 1b. 전설 기록: 목록 1 + 일곱 편
+  await b.goto(`${TEST}/legends/`);
+  await waitFor("document.readyState === 'complete' && !!window.LEGENDS");
+  const hubInfo = await ev("({ cards: [...document.querySelectorAll('.glegends a')].map((a) => a.getAttribute('href')), canon: document.querySelector('link[rel=canonical]')?.href, cur: document.querySelector('#sidenav a[aria-current=page]')?.getAttribute('href') })");
+  check("전설 기록 목록: 일곱 편 링크 · canonical · 사이드바 표시", hubInfo.cards.length === 7 && hubInfo.canon === "https://strange-oracle.com/legends/" && hubInfo.cur === "/legends/", hubInfo.cards.join(" "));
+  let legendOk = 0;
+  const legendBad = [];
+  for (const href of hubInfo.cards) {
+    await b.goto(TEST + href);
+    await waitFor("document.readyState === 'complete' && !!document.querySelector('.gstory')");
+    const li = await ev(`({ path: location.pathname, canon: document.querySelector('link[rel=canonical]')?.href, story: document.querySelector('.gstory')?.textContent.length, src: document.querySelectorAll('.gsources li').length, faq: document.querySelectorAll('.gfaq details').length,
+      guide: document.querySelector('.gtool-link')?.getAttribute('href'), cta: document.querySelector('[data-js=to-room]')?.getAttribute('href'), ld: [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => JSON.parse(s.textContent)).flat().map((x) => x['@type']), back: [...document.querySelectorAll('.grelated a')].some((a) => a.getAttribute('href') === '/legends/') })`);
+    const guideOk = li.guide ? (await fetch(TEST + li.guide)).status === 200 : false;
+    if (li.path === href && li.canon === "https://strange-oracle.com" + href && li.story >= 400 && li.src >= 1 && li.faq >= 2 && guideOk && li.cta === "/products/strange-oracle/" && li.ld.includes("Article") && li.back) legendOk++;
+    else legendBad.push(href + " " + JSON.stringify(li));
+  }
+  check("전설 기록 일곱 편: 짧은 주소·canonical·이야기 400자 이상·출처·FAQ·점술 안내 링크·방 버튼·Article·목록으로", legendOk === 7, legendBad.join(" | ") || "7편");
   // 사이드바 여닫기(좁은 화면)
   await ev("document.querySelector('[data-nav=open]').click()");
   await sleep(350);
@@ -197,7 +216,7 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await b.goto(`${TEST}/products/strange-oracle/`);
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub' && !!document.querySelector('.topbar__inner .nav-toggle')", 10000);
   const hub = await ev("({ btn: !!document.querySelector('.topbar__inner .nav-toggle'), links: [...document.querySelectorAll('#sidenav a')].map((a) => a.getAttribute('href')), title: document.title })");
-  check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/manse/", "/nakshatra/", "/tzolkin/", "/decan/", "/name-ogham/", "/rune-draw/", "/sibyl/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
+  check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/ogham/", "/egypt/", "/maya/", "/oracle/", "/manse/", "/nakshatra/", "/tzolkin/", "/decan/", "/name-ogham/", "/rune-draw/", "/sibyl/", "/legends/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
   check("입구: 새 제목(검색어 포함)", /무료 사주풀이/.test(hub.title), hub.title);
   await ev("document.querySelector('.topbar__inner .nav-toggle').click()");
   await sleep(350);

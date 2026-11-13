@@ -71,6 +71,46 @@
   status = 200
   force = true
 [[redirects]]
+  from = "/ogham"
+  to = "/ogham/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/ogham/"
+  to = "/products/strange-oracle/guide/ogham/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/egypt"
+  to = "/egypt/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/egypt/"
+  to = "/products/strange-oracle/guide/egypt/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/maya"
+  to = "/maya/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/maya/"
+  to = "/products/strange-oracle/guide/maya/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/oracle"
+  to = "/oracle/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/oracle/"
+  to = "/products/strange-oracle/guide/oracle/index.html"
+  status = 200
+  force = true
+[[redirects]]
   from = "/manse"
   to = "/manse/"
   status = 301
@@ -138,6 +178,86 @@
 [[redirects]]
   from = "/sibyl/"
   to = "/products/strange-oracle/guide/sibyl/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/legends"
+  to = "/legends/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/legends/"
+  to = "/products/strange-oracle/guide/legends/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/legends/sibyl-black-stone"
+  to = "/legends/sibyl-black-stone/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/legends/sibyl-black-stone/"
+  to = "/products/strange-oracle/guide/legends/sibyl-black-stone/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/legends/rune-poisoned-horn"
+  to = "/legends/rune-poisoned-horn/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/legends/rune-poisoned-horn/"
+  to = "/products/strange-oracle/guide/legends/rune-poisoned-horn/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/legends/ogham-lost-queen"
+  to = "/legends/ogham-lost-queen/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/legends/ogham-lost-queen/"
+  to = "/products/strange-oracle/guide/legends/ogham-lost-queen/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/legends/vedic-coronation"
+  to = "/legends/vedic-coronation/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/legends/vedic-coronation/"
+  to = "/products/strange-oracle/guide/legends/vedic-coronation/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/legends/decan-birth-moment"
+  to = "/legends/decan-birth-moment/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/legends/decan-birth-moment/"
+  to = "/products/strange-oracle/guide/legends/decan-birth-moment/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/legends/maya-hero-twins"
+  to = "/legends/maya-hero-twins/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/legends/maya-hero-twins/"
+  to = "/products/strange-oracle/guide/legends/maya-hero-twins/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/legends/saju-ask-heaven"
+  to = "/legends/saju-ask-heaven/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/legends/saju-ask-heaven/"
+  to = "/products/strange-oracle/guide/legends/saju-ask-heaven/index.html"
   status = 200
   force = true
 # <<< gen-guide 짧은 주소

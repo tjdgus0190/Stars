@@ -17,6 +17,10 @@ window.NAV = {
         { label: "사주 명리", note: "무료 사주풀이 · 열 개의 일간", href: "/saju/" },
         { label: "인도 베다 점성술", note: "달의 집 나크샤트라 27", href: "/vedic/" },
         { label: "북유럽 룬", note: "룬 문자 24자의 뜻", href: "/rune/" },
+        { label: "켈트 오검", note: "나무 문자 20자의 뜻", href: "/ogham/" },
+        { label: "이집트 데칸", note: "서른여섯 별시계", href: "/egypt/" },
+        { label: "마야 달력 촐킨", note: "260일과 스무 날 이름", href: "/maya/" },
+        { label: "시빌라 신탁", note: "로마의 예언서와 제비뽑기", href: "/oracle/" },
       ],
     },
     {
@@ -33,7 +37,10 @@ window.NAV = {
     },
     {
       head: "이야기",
-      items: [{ label: "문 너머의 기록", note: "점술에 얽힌 전설 · 인스타그램", href: "https://www.instagram.com/strange_oracle_off/", ext: true }],
+      items: [
+        { label: "전설 기록", note: "점술이 움직인 일곱 사건", href: "/legends/" },
+        { label: "문 너머의 기록", note: "점술에 얽힌 전설 · 인스타그램", href: "https://www.instagram.com/strange_oracle_off/", ext: true },
+      ],
     },
     {
       head: "안내",
