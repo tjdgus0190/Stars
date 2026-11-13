@@ -8,7 +8,7 @@
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const fill = (s, o) => String(s).replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? "" : o[k]));
   const LG = window.LEGENDS; // 전설 기록 페이지에만 있다
-  const PAGES = Object.keys(G.pages).concat(Object.keys(G.tools), LG ? ["legends"].concat(Object.keys(LG.list)) : []);
+  const PAGES = Object.keys(G.pages).concat(Object.keys(G.tools), Object.keys(G.apps || {}), LG ? ["legends"].concat(Object.keys(LG.list)) : []);
   const TOOLS = Object.keys(G.tools);
 
   // ── 분석(허용 목록 밖은 버림). query는 시작할 때 지운다(입력값은 애초에 주소에 없다)
@@ -24,6 +24,93 @@
   }
   const track = (n, p) => { if (on) A.track(n, p); };
   document.addEventListener("click", (e) => { if (e.target.closest("[data-js=to-room]")) track("so_guide_cta", { page: CONF.page }); });
+
+
+  // ───────── (v1-C) 점술관의 하루: 오늘의 신탁 · 안내자 도감 · 별가루 ─────────
+  // 별가루 계산·저장은 stardust.js(window.Dust). 이 기기 localStorage에 번호·이름만 둔다(입력값 없음)
+  if (CONF.kind === "app") {
+    const D = window.Dust, NV = (window.NAV && window.NAV.dust) || {}, COST = NV.cost || {};
+    const box = $("[data-js=app]");
+    const P = G.apps[CONF.page];
+    if (!D || !box) return;
+    const ROOM_URL = "/products/strange-oracle/";
+
+    if (CONF.page === "today") {
+      const A = P.app, OR = window.ORACLES;
+      const pick = () => window.Calc.pickOracle(OR.length);
+      const draw = () => {
+        const st = D.state();
+        const o = st.oracle && st.oracle.day === D.kstDay() ? st.oracle : null;
+        const [, mm, dd] = D.kstDay().split("-").map(Number);
+        const head = fill(A.head, { date: fill(A.dateFmt, { m: mm, d: dd }) });
+        const left = 7 - (st.run % 7); // 이레를 채운 날은 다음 이레까지 7
+        const streak = `<p class="gnote gcenter">${esc(fill(A.streak, { n: st.run || 1 }))} · ${esc(fill(A.streakNext, { left }))}</p>`;
+        if (!o) {
+          box.innerHTML = `<div class="gtoday"><div class="gtoday__scroll is-closed" aria-hidden="true"></div><button class="gbtn" type="button" data-js="today-open">${esc(A.open)}</button>${streak}</div>`;
+          return;
+        }
+        const x = OR[o.idx];
+        const more = o.more.map((i) => `<blockquote class="gscroll gscroll--more"><small>${esc(A.moreHead)}</small>${esc(OR[i].line)}</blockquote>`).join("");
+        const need = (COST.more || 0) - st.bal;
+        box.innerHTML = `<div class="gtoday"><h2>${esc(head)}</h2><blockquote class="gscroll">${esc(x.line)}</blockquote><div class="gdm"><b>${esc(x.title)}</b><p style="margin-top:8px !important">${esc(x.key)}</p></div>${more}
+          <div class="gactions"><button class="gbtn ghost" type="button" data-js="today-more"${need > 0 ? " disabled" : ""}>${esc(fill(A.more, { cost: COST.more }))}</button></div>${need > 0 ? `<p class="gnote gcenter">${esc(fill(A.moreShort, { need }))}</p>` : ""}
+          ${streak}<p class="gnote gcenter">${esc(A.tomorrow)}</p><div class="gactions"><a class="gbtn" href="${ROOM_URL}" data-js="to-room">${esc(A.toRoom)}</a></div></div>`;
+      };
+      box.addEventListener("click", (e) => {
+        if (e.target.closest("[data-js=today-open]")) { D.oracleToday(pick); D.earn("oracle"); draw(); track("so_tool_result", { tool: "today" }); }
+        else if (e.target.closest("[data-js=today-more]")) { if (D.oracleMore(pick, COST.more)) draw(); }
+      });
+      document.addEventListener("dust:change", () => { if (!box.querySelector("[data-js=today-open]")) draw(); });
+      draw();
+    }
+
+    if (CONF.page === "dex") {
+      const X = window.DEX, U = X.ui;
+      const draw = () => {
+        const st = D.state();
+        const cards = X.guides.map((g) => {
+          const has = st.cards.includes(g.room), open = st.open.includes(g.room);
+          const art = `<div class="gcard__art" style="--h:${g.art.hue};background-image:url('/products/strange-oracle/img/dex/${g.art.img}')"><svg class="gcard__fig" viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${g.room}" /></svg></div>`;
+          if (!has) return `<li class="gcard is-locked">${art}<div class="gcard__body"><small>${esc(g.roomName)}</small><b>${esc(U.locked)}</b><p>${esc(fill(U.lockedHint, { room: g.roomName }))}</p><a class="gbtn ghost" href="${ROOM_URL}" data-js="to-room">${esc(fill(U.toRoom, { room: g.roomName }))}</a></div></li>`;
+          const tr = Object.entries(U.traitHeads).map(([k, h]) => `<dt>${esc(h)}</dt><dd>${esc(g.traits[k])}</dd>`).join("");
+          const need = (COST.story || 0) - st.bal;
+          const secret = open
+            ? `<div class="gcard__secret"><h3>${esc(U.secretHead)}</h3><p>${esc(g.secret)}</p></div>`
+            : `<div class="gcard__secret is-shut"><h3>${esc(U.secretHead)}</h3><button class="gbtn ghost" type="button" data-js="dex-open" data-room="${g.room}"${need > 0 ? " disabled" : ""}>${esc(fill(U.secretOpen, { cost: COST.story }))}</button>${need > 0 ? `<p class="gnote">${esc(fill(U.secretShort, { need }))}</p>` : ""}</div>`;
+          return `<li class="gcard">${art}<div class="gcard__body"><small>${esc(g.roomName)} · ${esc(g.place)}</small><b>${esc(g.name)}</b><em>${esc(g.epithet)}</em><q>${esc(g.line)}</q><dl class="gkv">${tr}</dl>${secret}</div></li>`;
+        }).join("");
+        const all = st.cards.length === X.guides.length;
+        box.innerHTML = `<p class="gdex-count">${esc(fill(U.count, { n: st.cards.length }))}</p>
+          <div class="gseal${all ? " is-open" : ""}"><b>${esc(U.sealHead)}</b><p>${esc(all ? U.sealText : U.sealHint)}</p></div><ul class="gcards">${cards}</ul>`;
+      };
+      box.addEventListener("click", (e) => { const b = e.target.closest("[data-js=dex-open]"); if (b && D.openStory(b.dataset.room, COST.story)) draw(); });
+      document.addEventListener("dust:change", draw);
+      draw();
+    }
+
+    if (CONF.page === "stardust") {
+      const A = P.app;
+      const draw = () => {
+        const st = D.state();
+        const uses = A.uses.map((u) => `<li><span>${esc(u.label)}</span><b>${esc(u.amt)}</b></li>`).join("");
+        const ways = A.ways.map((w) => `<li><span>${esc(w.label)}<small>${esc(w.note)}</small></span><b>${esc(w.amt)}</b></li>`).join("");
+        box.innerHTML = `<div class="gdust"><small>${esc(A.balance)}</small><b><i aria-hidden="true">✦</i> ${st.bal}</b><p>${esc(fill(A.today, { got: st.got, cap: st.cap }))}</p><i class="gdust__bar"><u style="width:${Math.round((st.got / st.cap) * 100)}%"></u></i></div>
+          <h2>${esc(A.waysHead)}</h2><ul class="grows">${ways}</ul><p class="gnote">${esc(A.capNote)}</p>
+          <h2>${esc(A.usesHead)}</h2><ul class="grows">${uses}</ul>
+          <div class="gactions"><button class="gbtn ghost" type="button" data-js="dust-clear">${esc(A.clear)}</button></div><p class="gnote gcenter" data-js="dust-cleared" hidden>${esc(A.cleared)}</p>`;
+      };
+      box.addEventListener("click", (e) => {
+        if (!e.target.closest("[data-js=dust-clear]")) return;
+        if (!window.confirm(A.clearAsk)) return;
+        D.clear();
+        draw();
+        box.querySelector("[data-js=dust-cleared]").hidden = false;
+      });
+      document.addEventListener("dust:change", draw);
+      draw();
+    }
+    return;
+  }
 
   if (CONF.kind !== "tool") return;
   const T = G.tools[CONF.page];
@@ -82,7 +169,7 @@
     if (!validYmd(y, m, d)) return { err: T.errors.date };
     return { y, m, d };
   };
-  const shown = () => { out.hidden = false; out.scrollIntoView({ behavior: "smooth", block: "start" }); track("so_tool_result", { tool: CONF.page }); };
+  const shown = () => { out.hidden = false; out.scrollIntoView({ behavior: "smooth", block: "start" }); track("so_tool_result", { tool: CONF.page }); if (window.Dust) window.Dust.earn("tool"); };
 
   // ───────── 무료 만세력 ─────────
   if (CONF.page === "manse") {

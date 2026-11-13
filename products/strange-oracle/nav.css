@@ -61,3 +61,15 @@ html.nav-open { overflow: hidden; }
   .topbar__inner.has-nav .topbar__end, .topbar__inner.has-nav .topbar__clear { grid-column: 3; }
 }
 @media (prefers-reduced-motion: reduce) { .sidenav, .sidenav-scrim { transition: none; } }
+
+/* (2026-11-13 v1-C) 별가루 잔액·알림 */
+.dust-badge { display: inline-flex; align-items: baseline; gap: 4px; margin-left: auto; padding: 6px 10px; border-radius: 999px; border: 1px solid oklch(0.6 0.08 80 / 0.5); background: oklch(0.2 0.04 285 / 0.8); color: oklch(0.9 0.09 85); text-decoration: none; font-size: 0.875rem; white-space: nowrap; }
+.dust-badge i { font-style: normal; color: oklch(0.85 0.12 85); }
+.dust-badge small { font-size: 0.6875rem; color: var(--c-text-faint, #b4adc4); }
+.dust-toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 90; max-width: min(440px, calc(100vw - 32px)); padding: 10px 16px; border-radius: 14px; border: 1px solid oklch(0.6 0.08 80 / 0.55); background: oklch(0.16 0.04 285 / 0.96); color: var(--c-text-strong, #f5f1ea); font-size: 0.875rem; text-align: center; box-shadow: 0 8px 30px oklch(0 0 0 / 0.45); opacity: 0; transform: translate(-50%, 12px); pointer-events: none; transition: opacity 0.25s, transform 0.25s; }
+.dust-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.dust-toast i { font-style: normal; color: oklch(0.85 0.12 85); }
+.dust-toast b { color: oklch(0.9 0.1 85); }
+.dust-toast span { color: var(--c-text-muted, #c9c2d8); }
+.dust-toast small { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--c-text-faint, #b4adc4); }
+@media (prefers-reduced-motion: reduce) { .dust-toast { transition: none; } }

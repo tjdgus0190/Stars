@@ -5,7 +5,7 @@
 // 결제 전 화면·틀린 코드·off 배포판 DOM 0은 e2e-pay.js가 본다.
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-book.js
 // 결과: 콘솔 PASS/FAIL + tools/strange-oracle/out/e2e-book.txt (+ out/book-variety-e2e.txt)
-const { launch, googleCount } = require("./cdp.js");
+const { launch, googleCount, LS_ONLY_DUST } = require("./cdp.js");
 const fs = require("fs");
 const path = require("path");
 const BASE = "http://127.0.0.1:8788/products/strange-oracle/index.html";
@@ -571,7 +571,7 @@ const STUB_ADS = `(function () {
   const SECRETS = [PARTNER.name, encodeURIComponent(PARTNER.name), "19931107", "1993-11", NAME, encodeURIComponent(NAME), "19950325", "PK_TEST", "ORDER_TEST", "friend", "family", "\"work\""];
   const hits = SECRETS.filter((s) => hay.includes(s));
   check("13-7.11 상대·내 이름·생일·관계 유형·옛 결제 값: 요청 URL·본문·gtag 인자·storage·쿠키 0건", hits.length === 0, hits.join(","));
-  check("localStorage·쿠키 0", (await ev("localStorage.length")) === 0 && (await ev("document.cookie")) === "");
+  check("localStorage는 별가루 장부뿐(정해진 칸만) · 쿠키 0", (await ev(LS_ONLY_DUST)) === true && (await ev("document.cookie")) === "");
   const realGoogle = b.log.requests.filter((u) => /google|doubleclick/.test(u)).map((u) => u.replace(/^\w+ /, ""));
   // (19-5) GA4 주소(googletagmanager·google-analytics)는 cdp.js가 먼저 막아 가짜 답 단계까지 오지 않는다 → 막힘으로 센다
   const gaRe = /googletagmanager\.com|google-analytics\.com/;

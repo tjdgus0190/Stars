@@ -6757,10 +6757,16 @@
     }
   }
   function track(name, props) {
+    if (name === "so_share" && window.Dust) window.Dust.earn("share"); // (v1-C) 별가루: 공유 하루 2번까지
     if (externalOn) Analytics.track(name, props);
   }
   const storySent = new Set();
   function onScreen(name, scr) {
+    // (v1-C) 별가루·도감: 방 결과에 처음 닿으면 그 방 카드(방 이름만 이 기기에 기록)
+    if (window.Dust) {
+      const r = roomOfScreen(name);
+      if (CHAPTER_ORDER.includes(r) && name === `${r}-result` && state.visits[r]) window.Dust.earn("room", r);
+    }
     if (!externalOn) return;
     const room = roomOfScreen(name);
     if (CHAPTER_ORDER.includes(room) && name === `${room}-intro`) track("so_room_view", { room });

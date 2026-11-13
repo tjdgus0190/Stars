@@ -6,10 +6,28 @@ window.NAV = {
   brandSub: "STRANGE ORACLE",
   open: "메뉴",
   close: "메뉴 닫기",
+  // (2026-11-13 v1-C) 별가루 — 사이드바 잔액·얻을 때 알림 (계산은 stardust.js)
+  dust: {
+    href: "/stardust/",
+    unit: "별가루",
+    badgeLabel: "내 별가루 {n} · 모으는 법 보기",
+    gain: "별가루 +{n}",
+    why: { first: "낯선 점술관에 온 걸 환영해요", oracle: "오늘의 신탁을 받았어요", tool: "무료 도구를 써 봤어요", share: "결과를 나눴어요", room: "방 하나를 끝까지 지났어요", streak: "이레 연속으로 찾아왔어요" },
+    capped: "오늘 모을 수 있는 별가루를 다 모았어요. 내일 또 와요.",
+    cost: { story: 10, more: 3 }, // 도감 숨은 이야기 · 오늘의 신탁 한 줄 더 (면담 10은 v1-D 서버가 정한다)
+  },
   groups: [
     {
       head: "일곱 점술",
       items: [{ label: "입구 · 일곱 개의 문", note: "사주부터 시빌라 신탁까지 한 번에", href: "/products/strange-oracle/" }],
+    },
+    {
+      head: "점술관의 하루",
+      items: [
+        { label: "오늘의 신탁", note: "하루 한 줄 · 별가루 +5", href: "/today/" },
+        { label: "안내자 도감", note: "일곱 안내자의 숨은 이야기", href: "/dex/" },
+        { label: "별가루", note: "모으는 법과 쓰는 곳", href: "/stardust/" },
+      ],
     },
     {
       head: "점술 안내",

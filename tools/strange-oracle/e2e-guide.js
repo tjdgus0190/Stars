@@ -2,7 +2,7 @@
 // 준비: node tools/strange-oracle/mock-server.js --src --port 8788 --mode test
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-guide.js → 결과 tools/strange-oracle/out/e2e-guide.txt
 "use strict";
-const { launch } = require("./cdp.js");
+const { launch, LS_ONLY_DUST } = require("./cdp.js");
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.join(__dirname, "..", "..");
@@ -212,11 +212,50 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   const reqLeak = b.log.requests.filter((r) => /1995|19950325|y=1995/.test(r)).concat(b.log.bodies.filter((x) => /1995/.test(x.body)).map((x) => x.url));
   check("개인정보: 요청 주소·본문에 생년월일 0", reqLeak.length === 0, reqLeak.slice(0, 3).join(" | "));
 
+  // ── 6. (v1-C) 별가루 · 오늘의 신탁 · 안내자 도감
+  await b.goto(`${TEST}/stardust/`);
+  await waitFor("!!window.Dust && !!document.querySelector('.gdust')");
+  await ev("Dust.clear(); localStorage.removeItem('strange-oracle-dust'); true");
+  await b.goto(`${TEST}/today/`);
+  await waitFor("!!window.Dust && !!document.querySelector('[data-js=today-open]')");
+  const d0 = await ev("Dust.state().bal");
+  const badge0 = await ev("document.querySelector('.dust-badge b')?.textContent");
+  check("별가루: 처음 오면 10 · 사이드바 잔액 표시", d0 === 10 && badge0 === "10", `${d0} · ${badge0}`);
+  await ev("document.querySelector('[data-js=today-open]').click(); true");
+  await waitFor("!!document.querySelector('.gtoday .gscroll')");
+  const t1 = await ev("({ line: document.querySelector('.gtoday .gscroll').textContent, bal: Dust.state().bal, toast: document.querySelector('.dust-toast')?.textContent || '' })");
+  await b.goto(`${TEST}/today/`);
+  await waitFor("!!document.querySelector('.gtoday .gscroll')");
+  const t2 = await ev("({ line: document.querySelector('.gtoday .gscroll').textContent, bal: Dust.state().bal })");
+  check("오늘의 신탁: 펼치면 +5 · 알림 · 다시 와도 같은 한 줄·더 주지 않음", t1.bal === 15 && /\+5/.test(t1.toast) && t2.line === t1.line && t2.bal === 15, `${t1.line} · ${t1.bal}→${t2.bal}`);
+  await ev("document.querySelector('[data-js=today-more]').click(); true");
+  await sleep(300);
+  const t3 = await ev("({ n: document.querySelectorAll('.gscroll--more').length, bal: Dust.state().bal })");
+  check("오늘의 신탁: 한 줄 더 → 별가루 3 쓰고 한 줄 더", t3.n === 1 && t3.bal === 12, JSON.stringify(t3));
+  await b.goto(`${TEST}/rune-draw/`);
+  await waitFor("!!window.Calc && !!window.Dust && !!document.querySelector('[data-js=tool-form]')");
+  await ev("document.querySelector('[data-js=tool-form] button[type=submit]').click(); true");
+  await waitFor("!document.querySelector('[data-js=tool-result]').hidden");
+  check("무료 도구 결과 → 별가루 +2", (await ev("Dust.state().bal")) === 14);
+  await b.goto(`${TEST}/dex/`);
+  await waitFor("!!window.DEX && !!document.querySelector('.gcards')");
+  const x0 = await ev("({ locked: document.querySelectorAll('.gcard.is-locked').length, fig: [...document.querySelectorAll('.gcard__fig use')].filter((u) => document.querySelector(u.getAttribute('href'))).length, img: getComputedStyle(document.querySelector('.gcard__art')).backgroundImage })");
+  const imgOk = (await fetch(TEST + "/products/strange-oracle/img/dex/dex-saju.webp")).status === 200;
+  check("도감: 처음엔 일곱 장 모두 잠김 · 실루엣 7 · 명화 배경", x0.locked === 7 && x0.fig === 7 && /dex-saju\.webp/.test(x0.img) && imgOk, JSON.stringify(x0).slice(0, 160));
+  await ev("Dust.earn('room', 'rune'); true");
+  await sleep(200);
+  const x1 = await ev("({ locked: document.querySelectorAll('.gcard.is-locked').length, btn: !!document.querySelector('[data-js=dex-open][data-room=rune]'), bal: Dust.state().bal })");
+  await ev("document.querySelector('[data-js=dex-open][data-room=rune]').click(); true");
+  await sleep(200);
+  const x2 = await ev("({ open: !!document.querySelector('.gcard__secret:not(.is-shut)'), bal: Dust.state().bal })");
+  check("도감: 룬의 방 완주 → 카드 열림(+5) · 숨은 이야기 10으로 펼침", x1.locked === 6 && x1.btn && x1.bal === 19 && x2.open && x2.bal === 9, `${JSON.stringify(x1)} ${JSON.stringify(x2)}`);
+  check("도감: 이 기기 localStorage는 별가루 장부뿐(정해진 칸만)", await ev(LS_ONLY_DUST));
+
   // ── 5. 입구(index.html): 사이드바 버튼·링크
   await b.goto(`${TEST}/products/strange-oracle/`);
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub' && !!document.querySelector('.topbar__inner .nav-toggle')", 10000);
   const hub = await ev("({ btn: !!document.querySelector('.topbar__inner .nav-toggle'), links: [...document.querySelectorAll('#sidenav a')].map((a) => a.getAttribute('href')), title: document.title })");
-  check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/ogham/", "/egypt/", "/maya/", "/oracle/", "/manse/", "/nakshatra/", "/tzolkin/", "/decan/", "/name-ogham/", "/rune-draw/", "/sibyl/", "/legends/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
+  check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/ogham/", "/egypt/", "/maya/", "/oracle/", "/manse/", "/nakshatra/", "/tzolkin/", "/decan/", "/name-ogham/", "/rune-draw/", "/sibyl/", "/legends/", "/today/", "/dex/", "/stardust/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
   check("입구: 새 제목(검색어 포함)", /무료 사주풀이/.test(hub.title), hub.title);
   await ev("document.querySelector('.topbar__inner .nav-toggle').click()");
   await sleep(350);

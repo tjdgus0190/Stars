@@ -30,6 +30,8 @@ const TOOL_SCRIPTS = {
   runeDraw: ["data-runes.js", "calc.js"],
   sibyl: ["data-oracles.js", "calc.js"],
 };
+// (v1-C) 점술관의 하루 페이지(오늘의 신탁·도감·별가루) — guide.js가 화면을 그린다
+const APP_SCRIPTS = { today: ["data-oracles.js", "calc.js"], dex: ["data-dex.js"], stardust: [] };
 // 페이지 폴더 = 짧은 주소 이름 (/name-ogham/ → guide/name-ogham/)
 const slugOf = (d) => d.path.replace(/^\/|\/$/g, "");
 // 입구 index.html의 오검·마야 숫자 획(<symbol>)을 그대로 옮겨 쓴다 (모양의 원본은 하나)
@@ -54,7 +56,7 @@ function build() {
   const ORIGIN = new URL(TEXT.site.url).origin;
   const GA4 = (TEXT.analytics && TEXT.analytics.ga4) || "";
   const navItem = (href) => { for (const g of N.groups) for (const it of g.items) if (it.href === href) return it; return null; };
-  const entry = (name) => G.pages[name] || G.tools[name] || L.list[name] || (name === "legends" ? L.hub : null);
+  const entry = (name) => G.pages[name] || G.tools[name] || (G.apps || {})[name] || L.list[name] || (name === "legends" ? L.hub : null);
   const hrefOf = (name) => { const e = entry(name); if (!e) throw new Error("모르는 관련 링크: " + name); return e.path; };
 
   const sidenav = (current) => `<aside class="sidenav" id="sidenav" aria-label="${esc(N.open)}">
@@ -98,16 +100,18 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
 
   const page = (name, d, kind) => {
     const url = ORIGIN + d.path;
-    const ld = kind === "legend" || kind === "legends"
+    const ld = kind === "app"
+      ? [{ "@context": "https://schema.org", "@type": "WebPage", name: d.h1, url, description: d.description, inLanguage: "ko", publisher: { "@type": "Organization", name: N.brand } }, Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))]
+      : kind === "legend" || kind === "legends"
       ? [{ "@context": "https://schema.org", "@type": "Article", headline: d.h1, description: d.description, inLanguage: "ko", mainEntityOfPage: url, publisher: { "@type": "Organization", name: N.brand } }].concat(d.faq ? [Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))] : [])
       : kind === "tool"
       ? [{ "@context": "https://schema.org", "@type": "WebApplication", name: d.h1, url, description: d.description, applicationCategory: "LifestyleApplication", operatingSystem: "Web", inLanguage: "ko", offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" }, publisher: { "@type": "Organization", name: N.brand } }, Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))]
       : [{ "@context": "https://schema.org", "@type": "Article", headline: d.h1, description: d.description, inLanguage: "ko", mainEntityOfPage: url, publisher: { "@type": "Organization", name: N.brand } }, Object.assign({ "@context": "https://schema.org" }, ldFaq(d.faq))];
     const fonts = FONTS.concat(name === "rune" || name === "runeDraw" ? [RUNIC] : []);
-    const scripts = ["/common/analytics.js", `${PB}data-nav.js`, `${PB}nav.js`, `${PB}data-guide.js`]
-      .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : kind === "legend" || kind === "legends" ? [`${PB}data-legends.js`] : [])
+    const scripts = ["/common/analytics.js", `${PB}data-nav.js`, `${PB}stardust.js`, `${PB}nav.js`, `${PB}data-guide.js`]
+      .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : kind === "app" ? (APP_SCRIPTS[name] || []).map((f) => PB + f) : kind === "legend" || kind === "legends" ? [`${PB}data-legends.js`] : [])
       .concat([`${PB}guide.js`]);
-    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : "";
+    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : kind === "app" && name === "dex" ? sprite("guide") : "";
     const cta = (c) => `<div class="gcta"><h2>${esc(c.head)}</h2><p>${esc(c.body)}</p><a class="gbtn" href="${PB}" data-js="to-room">${esc(c.btn)}</a></div>`;
     const body = kind === "legend"
       ? `<p class="geyebrow">${esc(L.ui.roomBadge.replace("{room}", d.room))}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.hook)}</p>
@@ -122,6 +126,12 @@ ${related(d.related.concat(["legends"]))}`
 ${d.intro.map((p) => `<p>${esc(p)}</p>`).join("\n")}
 <section><h2>${esc(L.ui.listHead)}</h2><ul class="glegends">${Object.values(L.list).map((x) => `<li><a href="${x.path}"><small>${esc(L.ui.roomBadge.replace("{room}", x.room))}</small><b>${esc(x.label)}</b><span>${esc(x.hook)}</span></a></li>`).join("")}</ul></section>
 ${cta(d.cta)}`
+      : kind === "app"
+      ? `<p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.lead)}</p>
+<section class="gapp gapp--${name}" data-js="app" aria-live="polite"></section>
+${sections(d.sections)}
+${faq(d.faq)}
+${related(d.related)}`
       : kind === "tool"
       ? `<p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.lead)}</p>
 ${toolForm(name, d)}
@@ -144,7 +154,7 @@ ${related(d.related)}`;
   <title>${esc(d.title)}</title>
   <meta name="description" content="${esc(d.description)}" />
   <link rel="canonical" href="${url}" />
-  <meta property="og:type" content="${kind === "tool" || kind === "legends" ? "website" : "article"}" />
+  <meta property="og:type" content="${kind === "tool" || kind === "app" || kind === "legends" ? "website" : "article"}" />
   <meta property="og:site_name" content="${esc(N.brand)}" />
   <meta property="og:locale" content="ko_KR" />
   <meta property="og:title" content="${esc(d.title)}" />
@@ -178,9 +188,10 @@ ${foot()}
   const files = [];
   const urls = [];
   const rewrites = [];
-  for (const [kind, group] of [["page", G.pages], ["tool", G.tools], ["legends", { legends: L.hub }], ["legend", L.list]]) {
+  for (const [kind, group] of [["page", G.pages], ["tool", G.tools], ["app", G.apps || {}], ["legends", { legends: L.hub }], ["legend", L.list]]) {
     for (const [name, d] of Object.entries(group)) {
       if (kind === "tool" && !TOOL_SCRIPTS[name]) throw new Error("TOOL_SCRIPTS에 없는 도구: " + name);
+      if (kind === "app" && !APP_SCRIPTS[name]) throw new Error("APP_SCRIPTS에 없는 페이지: " + name);
       files.push({ path: path.join(P, "guide", slugOf(d), "index.html"), html: page(name, d, kind) });
       urls.push(ORIGIN + d.path);
       rewrites.push([d.path, `${PB}guide/${slugOf(d)}/index.html`]);
@@ -208,7 +219,7 @@ function tomlWith(block) {
 function routes() {
   const { GUIDE: G } = load("data-guide.js");
   const { LEGENDS: L } = load("data-legends.js");
-  return Object.values(G.pages).concat(Object.values(G.tools), [L.hub], Object.values(L.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]);
+  return Object.values(G.pages).concat(Object.values(G.tools), Object.values(G.apps || {}), [L.hub], Object.values(L.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]);
 }
 
 module.exports = { build, routes };

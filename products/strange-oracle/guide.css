@@ -151,3 +151,53 @@ a { color: var(--gold); }
 .glegends small { display: block; font-family: var(--font-sans); font-size: 0.75rem; color: var(--gold-dim); }
 .glegends b { display: block; margin: 4px 0; font-size: var(--fs-lg); color: var(--c-text-strong); }
 .glegends span { display: block; font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.6; }
+
+/* (2026-11-13 v1-C) 오늘의 신탁 · 안내자 도감 · 별가루 */
+.gapp { margin: 18px 0 8px; }
+.gapp h2 { margin-top: 22px; }
+.gtoday { text-align: center; }
+.gtoday__scroll { width: 160px; height: 200px; margin: 6px auto 18px; border-radius: 10px; background: linear-gradient(90deg, oklch(0.62 0.06 70), oklch(0.82 0.05 80) 18%, oklch(0.86 0.04 80) 50%, oklch(0.82 0.05 80) 82%, oklch(0.62 0.06 70)); box-shadow: 0 0 40px oklch(0.75 0.12 85 / 0.25), inset 0 0 20px oklch(0.5 0.06 60 / 0.4); }
+.gtoday__scroll.is-closed { width: 220px; height: 54px; border-radius: 27px; animation: gscroll-glow 2.6s ease-in-out infinite alternate; }
+@keyframes gscroll-glow { from { box-shadow: 0 0 18px oklch(0.75 0.12 85 / 0.2); } to { box-shadow: 0 0 46px oklch(0.75 0.12 85 / 0.5); } }
+.gtoday .gdm { text-align: left; }
+.gscroll--more { margin-top: 10px; font-size: var(--fs-md); }
+.gscroll--more small { display: block; margin-bottom: 6px; font-family: var(--font-sans); font-size: 0.6875rem; letter-spacing: 0.12em; color: oklch(0.42 0.05 50); }
+.gbtn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+.gdex-count { margin: 0 0 10px !important; font-family: var(--font-latin); letter-spacing: 0.12em; color: var(--gold-dim) !important; text-align: center; }
+.gseal { margin: 0 0 16px; padding: 14px 16px; border-radius: 14px; border: 1px dashed oklch(0.5 0.05 80 / 0.6); text-align: center; }
+.gseal b { display: block; color: var(--c-text-muted); }
+.gseal p { margin: 6px 0 0 !important; font-size: var(--fs-sm) !important; }
+.gseal.is-open { border-style: solid; border-color: var(--gold); background: radial-gradient(circle at 50% 0%, oklch(0.75 0.12 85 / 0.25), transparent 70%); }
+.gseal.is-open b { color: var(--gold); }
+.gcards { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.gcard { overflow: hidden; border-radius: 18px; border: 1px solid var(--line-gold); background: oklch(0.14 0.035 285); }
+.gcard__art { position: relative; aspect-ratio: 5 / 4; background-size: cover; background-position: center; }
+.gcard__art::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, oklch(0.45 0.08 var(--h) / 0.25), oklch(0.18 0.05 var(--h) / 0.6)), radial-gradient(circle at 50% 60%, transparent 35%, oklch(0.1 0.03 285 / 0.45) 90%); }
+.gcard__art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, oklch(0.14 0.035 285)); }
+.gcard__fig { position: absolute; z-index: 1; left: 50%; bottom: 10%; width: 36%; height: auto; transform: translateX(-50%); fill: none; stroke: oklch(0.92 0.1 85); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; color: oklch(0.92 0.1 85); filter: drop-shadow(0 0 10px oklch(0.8 0.14 85 / 0.8)); }
+.gcard.is-locked .gcard__art { filter: grayscale(1) brightness(0.45); }
+.gcard.is-locked .gcard__fig { stroke: oklch(0.6 0.02 285); color: oklch(0.6 0.02 285); filter: none; opacity: 0.6; }
+.gcard__body { padding: 4px 18px 18px; }
+.gcard__body > small { display: block; font-family: var(--font-sans); font-size: 0.75rem; color: var(--gold-dim); }
+.gcard__body > b { display: block; margin-top: 4px; font-size: 1.5rem; color: var(--c-text-strong); }
+.gcard__body > em { display: block; font-style: normal; color: var(--gold); font-size: var(--fs-sm); }
+.gcard__body > q { display: block; margin: 12px 0; font-size: var(--fs-md); color: var(--c-text-strong); quotes: "“" "”"; }
+.gcard__body > p { margin: 8px 0 12px !important; font-size: var(--fs-sm) !important; }
+.gcard__secret { margin-top: 14px; padding: 14px; border-radius: 12px; background: oklch(0.18 0.05 285 / 0.9); border: 1px solid oklch(0.45 0.06 80 / 0.45); }
+.gcard__secret h3 { margin: 0 0 8px; font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--gold); }
+.gcard__secret p { margin: 0 !important; font-size: var(--fs-sm) !important; }
+.gcard__secret .gbtn { width: 100%; }
+
+.gdust { padding: 18px; border-radius: 16px; border: 1px solid var(--line-gold); background: radial-gradient(circle at 50% 0%, oklch(0.4 0.1 85 / 0.25), transparent 70%), oklch(0.14 0.035 285); text-align: center; }
+.gdust small { display: block; font-family: var(--font-sans); font-size: 0.75rem; color: var(--gold-dim); }
+.gdust > b { display: block; margin: 4px 0; font-size: 2.25rem; color: var(--c-text-strong); }
+.gdust > b i { font-style: normal; color: var(--gold); }
+.gdust p { margin: 0 0 8px !important; font-size: var(--fs-sm) !important; }
+.gdust__bar { display: block; height: 6px; border-radius: 3px; background: oklch(0.25 0.03 285); overflow: hidden; }
+.gdust__bar u { display: block; height: 100%; background: var(--gold); }
+.grows { display: grid; gap: 6px; margin: 10px 0; padding: 0; list-style: none; }
+.grows li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; background: oklch(0.14 0.035 285); border: 1px solid oklch(0.4 0.04 285 / 0.5); }
+.grows span { font-size: var(--fs-sm); color: var(--c-text-strong); }
+.grows span small { display: block; font-size: 0.75rem; color: var(--c-text-faint); }
+.grows b { font-family: var(--font-latin); color: var(--gold); white-space: nowrap; }

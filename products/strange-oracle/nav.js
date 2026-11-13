@@ -1,7 +1,7 @@
 // 사이드바(메뉴) 동작 (2026-11-13). 문구·링크는 data-nav.js(window.NAV), 모양은 nav.css.
 // - 안내·도구 페이지: gen-guide.js가 사이드바 HTML을 미리 써 둔다(검색 엔진이 링크를 읽게) → 여닫기만 붙인다.
 // - 입구(index.html): 사이드바가 없으면 window.NAV로 그리고, 위 띠(.topbar__inner) 맨 앞에 ☰ 버튼을 끼운다.
-// 입력값·저장소·분석 이벤트를 쓰지 않는다.
+// 입력값·분석 이벤트를 쓰지 않는다. (2026-11-13 v1-C) stardust.js(window.Dust)가 있으면 사이드바 머리에 별가루 잔액을 보이고, 얻을 때 짧은 알림을 띄운다.
 (function () {
   const N = window.NAV;
   const html = document.documentElement;
@@ -13,7 +13,7 @@
   const sameAs = (href) => {
     if (/^https?:/.test(href)) return false;
     if (href === here) return true;
-    const m = here.match(/\/products\/strange-oracle\/guide\/([a-z]+)\/$/);
+    const m = here.match(/\/products\/strange-oracle\/guide\/([a-z0-9/-]+?)\/$/);
     return !!m && href === `/${m[1]}/`;
   };
 
@@ -59,6 +59,31 @@
   if (toggle) {
     toggle.setAttribute("aria-controls", "sidenav");
     toggle.setAttribute("aria-expanded", "false");
+  }
+
+  // ── 별가루: 사이드바 머리 잔액 + 얻을 때 알림 (문구 NAV.dust)
+  const D = window.Dust, T = N && N.dust;
+  if (D && T) {
+    const head = aside.querySelector(".sidenav__head");
+    const badge = document.createElement("a");
+    badge.className = "dust-badge";
+    badge.href = T.href;
+    head.insertBefore(badge, head.querySelector(".sidenav__close"));
+    const paint = () => { const st = D.state(); badge.innerHTML = `<i aria-hidden="true">✦</i><b>${st.bal}</b><small>${esc(T.unit)}</small>`; badge.setAttribute("aria-label", T.badgeLabel.replace("{n}", st.bal)); };
+    document.addEventListener("dust:change", paint);
+    let box = null, timer = 0;
+    document.addEventListener("dust:gain", (e) => {
+      const { kind, amt, capped } = e.detail || {};
+      if (!box) { box = document.createElement("div"); box.className = "dust-toast"; box.setAttribute("role", "status"); document.body.append(box); }
+      box.innerHTML = `<i aria-hidden="true">✦</i> <b>${esc(T.gain.replace("{n}", amt))}</b> <span>${esc((T.why && T.why[kind]) || "")}</span>${capped ? `<small>${esc(T.capped)}</small>` : ""}`;
+      box.classList.remove("is-on");
+      void box.offsetWidth;
+      box.classList.add("is-on");
+      clearTimeout(timer);
+      timer = setTimeout(() => box.classList.remove("is-on"), 2600);
+    });
+    paint();
+    D.visit();
   }
 
   const wide = window.matchMedia("(min-width: 1180px)");

@@ -181,6 +181,36 @@
   status = 200
   force = true
 [[redirects]]
+  from = "/today"
+  to = "/today/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/today/"
+  to = "/products/strange-oracle/guide/today/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/dex"
+  to = "/dex/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/dex/"
+  to = "/products/strange-oracle/guide/dex/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/stardust"
+  to = "/stardust/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/stardust/"
+  to = "/products/strange-oracle/guide/stardust/index.html"
+  status = 200
+  force = true
+[[redirects]]
   from = "/legends"
   to = "/legends/"
   status = 301
