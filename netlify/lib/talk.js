@@ -153,7 +153,12 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   const model = modelOf(env.TALK_MODEL);
   const params = Prompt.build(p, model);
   let msg;
-  try { msg = await llm(params, env); } catch (e) { return json(502, { error: "upstream" }); }
+  try { msg = await llm(params, env); } catch (e) {
+    // 원인 구분용: 모델 API의 상태 번호와 오류 종류 이름만(메시지 본문·키·질문은 넣지 않는다)
+    const st = Number(e && e.status) || 0;
+    const ty = String((e && e.error && e.error.error && e.error.error.type) || (e && e.name) || "").replace(/[^A-Za-z_]/g, "").slice(0, 40);
+    return json(502, { error: "upstream", status: st, type: ty });
+  }
   if (!uh) h.free++;
   try { await store.set(key, { usd: Math.round((b.usd + costOf(model, msg && msg.usage)) * 1e6) / 1e6, n: b.n + 1 }); } catch (e) { /* 기록 실패는 답을 막지 않는다(다음 요청이 다시 읽는다) */ }
   const text = Prompt.textOf(msg);

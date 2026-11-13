@@ -42,19 +42,9 @@
 #   주소창은 짧은 주소 그대로(200 rewrite). canonical·sitemap도 짧은 주소를 쓴다. 끝 / 없는 주소는 / 붙은 주소로 보낸다.
 # >>> gen-guide 짧은 주소 (tools/strange-oracle/gen-guide.js가 쓴다. 손으로 고치지 말 것)
 [[redirects]]
-  from = "/saju"
-  to = "/saju/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/saju/"
   to = "/products/strange-oracle/guide/saju/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/vedic"
-  to = "/vedic/"
-  status = 301
   force = true
 [[redirects]]
   from = "/vedic/"
@@ -62,19 +52,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/rune"
-  to = "/rune/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/rune/"
   to = "/products/strange-oracle/guide/rune/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/ogham"
-  to = "/ogham/"
-  status = 301
   force = true
 [[redirects]]
   from = "/ogham/"
@@ -82,19 +62,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/egypt"
-  to = "/egypt/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/egypt/"
   to = "/products/strange-oracle/guide/egypt/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/maya"
-  to = "/maya/"
-  status = 301
   force = true
 [[redirects]]
   from = "/maya/"
@@ -102,19 +72,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/oracle"
-  to = "/oracle/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/oracle/"
   to = "/products/strange-oracle/guide/oracle/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/manse"
-  to = "/manse/"
-  status = 301
   force = true
 [[redirects]]
   from = "/manse/"
@@ -122,19 +82,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/nakshatra"
-  to = "/nakshatra/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/nakshatra/"
   to = "/products/strange-oracle/guide/nakshatra/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/tzolkin"
-  to = "/tzolkin/"
-  status = 301
   force = true
 [[redirects]]
   from = "/tzolkin/"
@@ -142,19 +92,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/decan"
-  to = "/decan/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/decan/"
   to = "/products/strange-oracle/guide/decan/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/name-ogham"
-  to = "/name-ogham/"
-  status = 301
   force = true
 [[redirects]]
   from = "/name-ogham/"
@@ -162,19 +102,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/rune-draw"
-  to = "/rune-draw/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/rune-draw/"
   to = "/products/strange-oracle/guide/rune-draw/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/sibyl"
-  to = "/sibyl/"
-  status = 301
   force = true
 [[redirects]]
   from = "/sibyl/"
@@ -182,19 +112,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/today"
-  to = "/today/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/today/"
   to = "/products/strange-oracle/guide/today/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/dex"
-  to = "/dex/"
-  status = 301
   force = true
 [[redirects]]
   from = "/dex/"
@@ -202,19 +122,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/talk"
-  to = "/talk/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/talk/"
   to = "/products/strange-oracle/guide/talk/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/stardust"
-  to = "/stardust/"
-  status = 301
   force = true
 [[redirects]]
   from = "/stardust/"
@@ -222,19 +132,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/legends"
-  to = "/legends/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/legends/"
   to = "/products/strange-oracle/guide/legends/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/legends/sibyl-black-stone"
-  to = "/legends/sibyl-black-stone/"
-  status = 301
   force = true
 [[redirects]]
   from = "/legends/sibyl-black-stone/"
@@ -242,19 +142,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/legends/rune-poisoned-horn"
-  to = "/legends/rune-poisoned-horn/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/legends/rune-poisoned-horn/"
   to = "/products/strange-oracle/guide/legends/rune-poisoned-horn/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/legends/ogham-lost-queen"
-  to = "/legends/ogham-lost-queen/"
-  status = 301
   force = true
 [[redirects]]
   from = "/legends/ogham-lost-queen/"
@@ -262,19 +152,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/legends/vedic-coronation"
-  to = "/legends/vedic-coronation/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/legends/vedic-coronation/"
   to = "/products/strange-oracle/guide/legends/vedic-coronation/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/legends/decan-birth-moment"
-  to = "/legends/decan-birth-moment/"
-  status = 301
   force = true
 [[redirects]]
   from = "/legends/decan-birth-moment/"
@@ -282,19 +162,9 @@
   status = 200
   force = true
 [[redirects]]
-  from = "/legends/maya-hero-twins"
-  to = "/legends/maya-hero-twins/"
-  status = 301
-  force = true
-[[redirects]]
   from = "/legends/maya-hero-twins/"
   to = "/products/strange-oracle/guide/legends/maya-hero-twins/index.html"
   status = 200
-  force = true
-[[redirects]]
-  from = "/legends/saju-ask-heaven"
-  to = "/legends/saju-ask-heaven/"
-  status = 301
   force = true
 [[redirects]]
   from = "/legends/saju-ask-heaven/"

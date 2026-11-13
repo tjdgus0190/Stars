@@ -236,11 +236,10 @@ location.replace("${P}#${to}");
     send(req, res, TYPES[path.extname(mapFile[1])], fs.readFileSync(path.join(PRODUCT, mapFile[1])));
     return log(200);
   }
-  // (2026-11-13) 짧은 주소(netlify.toml의 200 rewrite와 같은 규칙): /saju/ → guide/saju/index.html
+  // (2026-11-13) 짧은 주소(netlify.toml의 200 rewrite와 같은 규칙): /saju/·/saju → guide/saju/index.html
   //   목록은 gen-guide.js의 rewrites(netlify.toml을 쓰는 것과 같은 값)에서 받는다
   const short = SHORT_PAGES().find(([p]) => rel === p || rel + "/" === p);
-  if (short && rel !== short[0]) return res.writeHead(301, { Location: short[0] + url.search }).end();
-  if (short) rel = short[1];
+  if (short) rel = short[1]; // Netlify와 같게: /x 와 /x/ 모두 같은 페이지(200)
   let file = path.join(STATIC, rel);
   if (!file.startsWith(STATIC)) return res.writeHead(403).end();
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {

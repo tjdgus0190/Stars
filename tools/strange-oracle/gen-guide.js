@@ -205,7 +205,9 @@ const NB = "# >>> gen-guide 짧은 주소 (tools/strange-oracle/gen-guide.js가 
 const NE = "# <<< gen-guide 짧은 주소";
 function netlifyBlock(rewrites) {
   const r = (from, to, status) => `[[redirects]]\n  from = "${from}"\n  to = "${to}"\n  status = ${status}\n  force = true`;
-  return [NB].concat(rewrites.flatMap(([p, f]) => [r(p.replace(/\/$/, ""), p, 301), r(p, f, 200)]), [NE]).join("\n");
+  // Netlify는 끝 /를 가리지 않고 맞춘다(/x 규칙이 /x/에도 맞음) → /x → /x/ 301을 두면 /x/가 자기 자신으로 계속 돌아간다(시험 배포에서 확인).
+  //   그래서 200 rewrite 하나만 둔다: /x 와 /x/ 모두 같은 페이지, canonical은 /x/
+  return [NB].concat(rewrites.map(([p, f]) => r(p, f, 200)), [NE]).join("\n");
 }
 const TOML = path.join(ROOT, "netlify.toml");
 function tomlWith(block) {

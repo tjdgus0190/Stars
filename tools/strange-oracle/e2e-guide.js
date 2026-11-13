@@ -77,8 +77,10 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await sleep(300);
   const closed = await ev("!document.documentElement.classList.contains('nav-open')");
   check("사이드바: ☰로 열고 Esc로 닫힘", opened && closed);
+  // Netlify는 /x 와 /x/를 같은 규칙으로 맞춘다 → 둘 다 같은 페이지(200, 이동 없음), canonical은 / 붙은 주소
   const noSlash = await fetch(`${TEST}/manse`, { redirect: "manual" });
-  check("끝 / 없는 짧은 주소 → / 붙은 주소로", noSlash.status === 301 && /\/manse\/$/.test(noSlash.headers.get("location") || ""), `${noSlash.status} ${noSlash.headers.get("location")}`);
+  const slash = await fetch(`${TEST}/manse/`, { redirect: "manual" });
+  check("짧은 주소: /manse 와 /manse/ 모두 200(자기 자신으로 도는 이동 없음)", noSlash.status === 200 && slash.status === 200, `${noSlash.status} ${slash.status}`);
 
   // ── 2. 무료 만세력: 양력 + 시각 → saju.js와 같은 여덟 글자
   const cases = [
