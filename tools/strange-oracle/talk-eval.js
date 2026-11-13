@@ -2,7 +2,7 @@
 // 실행: TALK_EVAL_BASE=https://<시험 배포 주소> node tools/strange-oracle/talk-eval.js [--only F01,N05]
 //   시험 배포(Netlify "Branch deploys" 문맥)에 TALK_RATE_10MIN·TALK_FREE_PER_DAY를 넉넉히(예: 300) 넣어야 IP 횟수 제한에 걸리지 않는다.
 //   (또는 TALK_EVAL_KEY를 시험 배포와 이 실행 환경 변수에 같은 값으로 — 값은 코드·문서에 쓰지 않는다)
-// 문항: tools/strange-oracle/talk-eval-set.json (금지·주의 30, 일반 70). 결과: reports/talk-eval-strange-oracle.md·.json
+// 문항: tools/strange-oracle/talk-eval-set.json (금지·주의 31, 일반 70). 결과: reports/talk-eval-strange-oracle-run.md·.json (--out=이름 으로 바꿀 수 있음, 정리한 보고서 reports/talk-eval-strange-oracle.md는 덮어쓰지 않음)
 // 비용: 질문 하나 약 1~2센트(claude-sonnet-5-5 추정) → 100문항 약 1~2달러. 면담 월 상한(TALK_MONTHLY_USD)에 포함된다.
 "use strict";
 const fs = require("fs");
@@ -12,6 +12,7 @@ const BASE = String(process.env.TALK_EVAL_BASE || "").replace(/\/$/, "");
 if (!/^https?:\/\//.test(BASE)) { console.error("TALK_EVAL_BASE를 넣어 주세요"); process.exit(2); }
 const SET = require("./talk-eval-set.json");
 const only = (process.argv.find((a) => a.startsWith("--only=")) || "").slice(7).split(",").filter(Boolean);
+const OUTNAME = ((process.argv.find((a) => a.startsWith("--out=")) || "").slice(6) || "talk-eval-strange-oracle-run").replace(/[^a-z0-9-]/g, "");
 const items = only.length ? SET.filter((x) => only.includes(x.id)) : SET;
 
 // 자동 점검(사람 검토 전 1차 거르기). 하나라도 걸리면 표에 표시
@@ -55,10 +56,10 @@ async function ask(x) {
   }));
   out.sort((a, b) => a.id.localeCompare(b.id));
   fs.mkdirSync(path.join(ROOT, "reports"), { recursive: true });
-  fs.writeFileSync(path.join(ROOT, "reports", "talk-eval-strange-oracle.json"), JSON.stringify(out, null, 1));
+  fs.writeFileSync(path.join(ROOT, "reports", OUTNAME + ".json"), JSON.stringify(out, null, 1));
   const esc = (s) => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
   const md = [`# 안내자와 면담 — 실제 모델 안전 시험 (자동 점검 결과)`, ``, `- 대상: ${BASE.replace(/^https?:\/\//, "")} /api/talk · ${new Date().toISOString().slice(0, 16)}Z · ${out.length}문항`, `- 자동 점검에 걸린 문항: ${out.filter((x) => x.flags.length).length}`, ``, `| ID | 방 | 갈래 | 질문 | 답 | 자동 점검 |`, `|---|---|---|---|---|---|`]
     .concat(out.map((x) => `| ${x.id} | ${x.room} | ${x.topic} | ${esc(x.q)} | ${esc(x.a)} | ${esc(x.flags.join(", ") || "ok")} |`));
-  fs.writeFileSync(path.join(ROOT, "reports", "talk-eval-strange-oracle.md"), md.join("\n") + "\n");
+  fs.writeFileSync(path.join(ROOT, "reports", OUTNAME + ".md"), md.join("\n") + "\n");
   console.log(`끝: ${out.length}문항, 자동 점검에 걸림 ${out.filter((x) => x.flags.length).length}`);
 })();
