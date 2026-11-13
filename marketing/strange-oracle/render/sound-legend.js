@@ -12,7 +12,7 @@ const { spawnSync } = require("child_process");
 
 const EP = process.argv[2] || "cassandra";
 const TT = {
-  cassandra: { h2: 1.1, b1: 2.6, b2: 4.4, b3: 6.4, b4: 8.2, curse: 10.0, b6: 12.2, b7: 14.6, b8: 17.0, b9: 19.0, b10: 21.4, b11: 23.6, q: 26.6, brand: 29.8, dur: 32 },
+  cassandra: { h2: 1.2, b1: 3.6, b2: 6.2, b3: 9.4, b4: 12.0, curse: 14.6, b6: 17.6, b7: 20.8, b8: 24.4, b9: 27.2, b10: 30.2, b11: 33.0, q: 36.6, end: 41.0, dur: 47 }, // 2026-11-13 느리게 + 끝 화면
   rune: { b1: 2.9, b2: 5.2, w1: 7.6, w2: 9.6, w3: 11.6, b6: 13.8, b7: 16.4, b8: 18.8, b9: 21.0, pour: 21.4, b10: 23.4, b11: 25.8, q: 28.4, brand: 30.2, dur: 32 },
 };
 if (!TT[EP]) throw new Error(`알 수 없는 편: ${EP} (cassandra | rune)`);
@@ -195,18 +195,21 @@ if (EP === "cassandra") {
   riser(T.b1 + 0.6, T.b2, 0.15);
   [69, 73, 76, 81, 85, 88].forEach((m, k) => bell(T.b2 + 0.05 + k * 0.09, mtof(m), 0.05, Math.sin(k * 1.9) * 0.6));
   whoosh(T.b3 + 0.05, 0.4, 0.4, 0.5, -0.5); boom(T.b3 + 0.35, 0.8, 55);
-  for (let k = 0; k < 7; k++) tick(T.b4 + 0.2 + k * 0.25, 0.25 + k * 0.03);
+  for (let k = 0; k < 10; k++) tick(T.b4 + 0.2 + k * 0.25, 0.22 + k * 0.025);
   riser(T.b4 + 0.4, T.curse, 0.3);
   boom(T.curse, 1.0, 40); for (let k = 0; k < 6; k++) crack(S(T.curse + 0.05 + k * 0.09), 0.5, (k % 2 ? 0.6 : -0.6));
   rumble(T.b6 + 0.2, 1.4, 0.8); boom(T.b6 + 0.35, 0.5, 58);
-  for (let k = 0; k < 5; k++) blip(T.b7 + 0.25 + k * 0.32, 0.25, [-0.5, 0.4, -0.6, 0.3, -0.2][k]);
+  for (let k = 0; k < 5; k++) blip(T.b7 + 0.3 + k * 0.55, 0.25, [-0.5, 0.4, -0.6, 0.3, -0.2][k]);
   creak(T.b8 + 0.05, 0.7, 0.6); boom(T.b8 + 0.35, 0.8, 45);
   rumble(T.b9, 2.4, 1.3); boom(T.b9 + 0.1, 1.0, 38); boom(T.b9 + 0.7, 0.8, 44); shatter(T.b9 + 0.2, 0.25);
   for (let t = T.b10 + 0.3, k = 0; k < 3; t += 0.75, k++) { thump(t, 0.5); thump(t + 0.17, 0.3); }
   bell(T.b10 + 0.3, mtof(81), 0.08, 0);
   blip(T.b11 + 0.45, 0.3, 0); bell(T.b11 + 0.5, mtof(76), 0.05, 0.2);
-  [64, 57].forEach((m, k) => pluck(T.q + 0.5 + k * 0.2, mtof(m + 12), 0.4, k ? 0.4 : -0.4));
-  bell(T.brand, mtof(81), 0.06, 0);
+  [64, 57].forEach((m, k) => pluck(T.q + 0.6 + k * 0.3, mtof(m + 12), 0.4, k ? 0.4 : -0.4));
+  // 끝 화면: 방 이름에 종, 낯선 점술관 로고에 한 방 + 반짝이는 화음
+  bell(T.end + 0.6, mtof(76), 0.07, 0); boom(T.end + 1.1, 0.7, 55);
+  [69, 73, 76, 81, 85].forEach((m, k) => bell(T.end + 1.15 + k * 0.08, mtof(m), 0.05, (k - 2) * 0.3));
+  bell(T.end + 2.8, mtof(88), 0.05, 0);
 }
 if (EP === "rune") {
 // 지속음: E 도리아(E2·B2·D3·F#3), 신도 못 바꾼다에서 어둡게(C), 고요, 물이 닿으면 E 장조로 밝게, 질문은 열린 화음

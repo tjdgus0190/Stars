@@ -28,7 +28,7 @@
       im.style.animation = `${k} ${dur.toFixed(2)}s ${s.ease || "cubic-bezier(0.25, 0.1, 0.25, 1)"} ${(s.t0 - 0.3).toFixed(2)}s both`;
       shot.append(im);
       const cut = s.cut || "fade";
-      const inA = i === 0 ? null : cut === "flash" ? `shot-in 0.08s linear ${s.t0}s both` : cut === "whip" ? `shot-whip 0.35s cubic-bezier(0.6, 0, 0.2, 1) ${s.t0 - 0.15}s both` : `shot-in 0.45s ease-in-out ${s.t0 - 0.2}s both`;
+      const inA = i === 0 ? null : cut === "flash" ? `shot-in 0.08s linear ${s.t0}s both` : cut === "whip" ? `shot-whip 0.55s cubic-bezier(0.6, 0, 0.2, 1) ${s.t0 - 0.25}s both` : `shot-in 0.7s ease-in-out ${s.t0 - 0.3}s both`;
       const outA = s.t1 != null && i < list.length - 1 ? `shot-out 0.01s linear ${(s.t1 + 0.5).toFixed(2)}s forwards` : null;
       shot.style.animation = [inA, outA].filter(Boolean).join(", ");
       if (i === 0) shot.style.opacity = 1;
