@@ -56,7 +56,7 @@
     leaks: [T.b1, T.b4, T.b9, T.b11],
     white: [T.b6 + 0.4, T.b9 + 0.35],
     redHits: [T.b3 + 0.35, T.b8 + 0.1, T.b8 + 0.6],
-    prop: { html: HORN, t0: T.b6, t1: T.b8 + 0.5 },
+    prop: { html: HORN, t0: T.b6, t1: T.b8 + 0.5, cls: "big" },
     crack: { t: T.b8 + 0.05, out: T.b9 - 0.2, at: [540, 1010] },
     ask: { choices: ["그냥 마신다", "룬을 새긴다"], line: "댓글로 골라 주세요" },
     end: { room: "<b>Ⅵ</b> 룬의 방", pitch: "돌 세 개를 뽑으면<br>지나온 길·지금·다가올 것을 읽어요", cta: "프로필 링크에서 여섯 번째 문", next: "다음 전설 — 사라진 왕비와 네 개의 나무 막대" },

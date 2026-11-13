@@ -34,7 +34,7 @@
       [T.b11, T.q, "왕은 그 언덕을 파헤쳐<br><em class=\"hit\">왕비를 되찾았대요</em>"],
       [T.q, T.end, "당신이 왕이었다면<br>마지막 판, <em>걸었을까요?</em>"],
     ],
-    h2: { t: T.h2, size: 72, html: "<br><br><br>찾아낸 건 <em class=\"red\">막대 네 개</em>" },
+    h2: { t: T.h2, html: "<br><br><br>답은 <em class=\"red\">막대 네 개</em>" },
     shots: [
       S(MAB, { t0: 0, t1: T.b1, a: [0.45, 0.45, 1.3], b: [0.4, 0.4, 1.6], grade: "saturate(1.15) contrast(1.15) brightness(0.85)" }),
       S(HEAD, { t0: T.b1, t1: T.b2, a: [0.5, 0.35, 1.2], b: [0.5, 0.3, 1.5], grade: OBJ, cut: "whip" }),
@@ -55,7 +55,7 @@
     leaks: [T.b1, T.b4, T.b6, T.b10, T.b11],
     white: [T.b6 + 0.35, T.b9 + 0.6, T.b10 + 0.35],
     redHits: [T.b3 + 0.5],
-    prop: { html: WANDS, t0: T.b9, t1: T.b10 + 0.2 },
+    prop: { html: WANDS, t0: T.b9, t1: T.b10 + 0.2, cls: "big" },
     ask: { choices: ["건다", "안 건다"], line: "댓글로 골라 주세요" },
     end: { room: "<b>Ⅱ</b> 오검의 방", pitch: "이름의 소리를 따라<br>스무 나무 글자 중 하나를 새겨 드려요", cta: "프로필 링크에서 두 번째 문", next: "다음 전설 — 별이 나쁘다는 말에 앞당긴 대관식" },
     after: ({ stage, anim }) => {

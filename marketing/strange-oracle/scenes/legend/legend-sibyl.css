@@ -30,3 +30,24 @@
 @keyframes redden { to { stroke: oklch(0.62 0.23 25); filter: drop-shadow(0 0 14px oklch(0.6 0.24 25)); } }
 @keyframes burst { 0% { transform: none; opacity: 1; filter: brightness(1); } 30% { transform: scale(1.12) rotate(-3deg); filter: brightness(2); } 100% { transform: scale(1.5) rotate(6deg); opacity: 0; filter: brightness(3) blur(8px); } }
 .sib .stone .og { fill: none; stroke: oklch(0.9 0.13 150); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 400; stroke-dashoffset: 400; filter: drop-shadow(0 0 10px oklch(0.8 0.15 150)); }
+.sib .stone.big { scale: 1.6; }
+/* 베다 편: 달의 집 바퀴 */
+.sib .stone .nk { fill: oklch(0.85 0.06 290); opacity: 0.75; }
+.sib .stone .pushya { fill: oklch(0.85 0.06 290); }
+.sib .stone .bad { fill: oklch(0.6 0.23 25); filter: drop-shadow(0 0 14px oklch(0.6 0.24 25)); opacity: 0; }
+.sib .stone .moon2 { fill: oklch(0.95 0.06 90); filter: drop-shadow(0 0 16px oklch(0.9 0.1 90)); }
+@keyframes bad-in { from { opacity: 0; transform: scale(0.2); transform-box: fill-box; transform-origin: center; } to { opacity: 1; transform: none; transform-box: fill-box; transform-origin: center; } }
+@keyframes bad-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes pushya-on { to { fill: oklch(0.92 0.15 85); filter: drop-shadow(0 0 20px oklch(0.88 0.16 80)); r: 22px; } }
+@keyframes moon-go { from { transform: translate(0, 0); } to { transform: translate(172px, 10px) scale(0.55); } }
+.sib .stone .moon2 { transform-box: fill-box; transform-origin: center; }
+.sib .stone .bad { transform-box: fill-box; transform-origin: center; }
+/* 데칸 편: 별판 */
+.sib .stone .tk { stroke: #c8a85f; stroke-width: 2; }
+.sib .stone .tk2 { stroke: #8a6a35; stroke-width: 3; }
+.sib .stone .dk { fill: #5a4a2e; }
+.sib .stone .r1, .sib .stone .r2 { transform-box: view-box; transform-origin: 280px 260px; }
+.sib .stone .sun { fill: oklch(0.88 0.15 75); filter: drop-shadow(0 0 18px oklch(0.85 0.16 70)); }
+.sib .stone .moon3 { fill: oklch(0.94 0.04 90); }
+@keyframes spin-r { to { transform: rotate(-360deg); } }
+@keyframes dk-on { to { fill: oklch(0.95 0.12 85); filter: drop-shadow(0 0 6px oklch(0.9 0.15 80)); } }
