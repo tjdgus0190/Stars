@@ -16,7 +16,8 @@
 [functions]
   directory = "netlify/functions"
   # 함수 book이 읽을 유료 원본. 함수 묶음에만 들어가고 정적 주소로는 내려받을 수 없다.
-  included_files = ["products/strange-oracle/api/_paid/book/**"]
+  # (v1-D) 함수 talk가 읽는 안내자 설정·무료 해석 칸(공개 파일과 같은 것)
+  included_files = ["products/strange-oracle/api/_paid/book/**", "products/strange-oracle/data-dex.js", "products/strange-oracle/data-saju.js", "products/strange-oracle/data-ogham.js", "products/strange-oracle/data-stars.js", "products/strange-oracle/data-decans.js", "products/strange-oracle/data-tzolkin.js", "products/strange-oracle/data-runes.js", "products/strange-oracle/data-oracles.js"]
 
 # (2026-10-22) 함수는 새 형식(Functions v2, netlify/functions/*.mjs)이고 주소를 각 파일의 config.path로 정한다:
 #   book.mjs → /api/book, pay.mjs → /api/pay/feedback·status·return. 옛 [[redirects]](→ /.netlify/functions/…)는 지웠다.
@@ -198,6 +199,16 @@
 [[redirects]]
   from = "/dex/"
   to = "/products/strange-oracle/guide/dex/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/talk"
+  to = "/talk/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/talk/"
+  to = "/products/strange-oracle/guide/talk/index.html"
   status = 200
   force = true
 [[redirects]]

@@ -486,7 +486,12 @@ test("netlify.toml·v2 함수: build-dist·dist/public·함수 폴더·included_
   assert.match(t, /command = "node tools\/build-dist\.js"/);
   assert.match(t, /publish = "dist\/public"/);
   assert.match(t, /directory = "netlify\/functions"/);
-  assert.deepStrictEqual([...t.matchAll(/included_files = \[([^\]]*)\]/g)].map((m) => m[1].trim()), ['"products/strange-oracle/api/_paid/book/**"']);
+  // (v1-D) 유료 원본 + 함수 talk가 읽는 공개 data 파일(안내자·무료 해석)
+  const inc = [...t.matchAll(/included_files = \[([^\]]*)\]/g)].map((m) => m[1].trim());
+  assert.strictEqual(inc.length, 1);
+  const items = inc[0].split(",").map((x) => x.trim().replace(/"/g, ""));
+  assert.strictEqual(items[0], "products/strange-oracle/api/_paid/book/**");
+  assert.ok(items.slice(1).every((x) => /^products\/strange-oracle\/data-[a-z]+\.js$/.test(x)), items.join(" "));
   // (2026-10-22) 함수는 v2(.mjs), 주소는 config.path. 옛 redirects·v1 파일 없음
   assert.ok(!/\.netlify\/functions/.test(t.replace(/^#.*$/gm, "")), "옛 redirects 없음");
   assert.ok(fs.existsSync(path.join(ROOT, "netlify", "lib", "pay.js")) && !fs.existsSync(path.join(ROOT, "netlify", "functions", "pay.js")) && !fs.existsSync(path.join(ROOT, "netlify", "functions", "book.js")));

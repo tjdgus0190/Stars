@@ -31,7 +31,7 @@ const TOOL_SCRIPTS = {
   sibyl: ["data-oracles.js", "calc.js"],
 };
 // (v1-C) 점술관의 하루 페이지(오늘의 신탁·도감·별가루) — guide.js가 화면을 그린다
-const APP_SCRIPTS = { today: ["data-oracles.js", "calc.js"], dex: ["data-dex.js"], stardust: [] };
+const APP_SCRIPTS = { today: ["data-oracles.js", "calc.js"], dex: ["data-dex.js"], talk: ["data-dex.js"], stardust: [] };
 // 페이지 폴더 = 짧은 주소 이름 (/name-ogham/ → guide/name-ogham/)
 const slugOf = (d) => d.path.replace(/^\/|\/$/g, "");
 // 입구 index.html의 오검·마야 숫자 획(<symbol>)을 그대로 옮겨 쓴다 (모양의 원본은 하나)
@@ -111,7 +111,7 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
     const scripts = ["/common/analytics.js", `${PB}data-nav.js`, `${PB}stardust.js`, `${PB}nav.js`, `${PB}data-guide.js`]
       .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : kind === "app" ? (APP_SCRIPTS[name] || []).map((f) => PB + f) : kind === "legend" || kind === "legends" ? [`${PB}data-legends.js`] : [])
       .concat([`${PB}guide.js`]);
-    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : kind === "app" && name === "dex" ? sprite("guide") : "";
+    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : kind === "app" && (name === "dex" || name === "talk") ? sprite("guide") : "";
     const cta = (c) => `<div class="gcta"><h2>${esc(c.head)}</h2><p>${esc(c.body)}</p><a class="gbtn" href="${PB}" data-js="to-room">${esc(c.btn)}</a></div>`;
     const body = kind === "legend"
       ? `<p class="geyebrow">${esc(L.ui.roomBadge.replace("{room}", d.room))}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.hook)}</p>

@@ -251,17 +251,42 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   check("도감: 룬의 방 완주 → 카드 열림(+5) · 숨은 이야기 10으로 펼침", x1.locked === 6 && x1.btn && x1.bal === 19 && x2.open && x2.bal === 9, `${JSON.stringify(x1)} ${JSON.stringify(x2)}`);
   check("도감: 이 기기 localStorage는 별가루 장부뿐(정해진 칸만)", await ev(LS_ONLY_DUST));
 
+  // ── 7. (v1-D) 안내자와 면담 — 모의 서버(test)의 가짜 모델. 보내는 칸 · 별가루 10 · 실패 시 돌려주기
+  await ev("sessionStorage.setItem('strange-oracle', JSON.stringify({ profile: { name: '테스트이름' }, visits: { saju: { code: 1501, archetype: 'sage' } } })); true");
+  await fetch(`${TEST}/__dev/talk-reset`);
+  await b.goto(`${TEST}/talk/`);
+  await waitFor("!!window.DEX && !!document.querySelector('[data-js=talk-pick]')");
+  const shortBtn = await ev("(() => { document.querySelector('[data-js=talk-pick][data-room=saju]').click(); return document.querySelector('[data-js=talk-form] button[type=submit]').disabled && Dust.state().bal < 10; })()");
+  check("면담: 별가루가 10보다 적으면 [묻기]가 꺼짐", shortBtn);
+  await ev("Dust.refund(30); true");
+  await sleep(150);
+  await waitFor("!!document.querySelector('[data-js=talk-form]')");
+  const k0 = await ev("({ bal: Dust.state().bal, known: document.querySelector('.gtalk > .gnote').textContent })");
+  await ev("(() => { const t = document.querySelector('[data-js=talk-form] textarea'); t.value = '올해 일은 어떻게 풀어 가면 좋을까요?'; document.querySelector('[data-js=talk-form] button[type=submit]').click(); return true; })()");
+  await waitFor("document.querySelectorAll('[data-js=talk-log] .gsay--guide:not(.is-wait)').length === 1", 8000);
+  const k1 = await ev("({ a: document.querySelector('[data-js=talk-log] .gsay--guide:not(.is-wait) p').textContent, bal: Dust.state().bal })");
+  const sent = b.log.bodies.filter((x) => x.url.endsWith("/api/talk")).map((x) => JSON.parse(x.body));
+  const last = await (await fetch(`${TEST}/__dev/talk-last`)).json();
+  check("면담: 만신 고르기 → 결과 안내 · 답이 옴 · 별가루 10 씀", /결과를 바탕으로/.test(k0.known) && /만신이 답해요/.test(k1.a) && k1.bal === k0.bal - 10, `${k0.bal}→${k1.bal} · ${k1.a.slice(0, 30)}`);
+  check("면담: 보낸 칸은 room·r·q·hist뿐 · 결과는 번호만(일간 3) · 이름·생일 없음", sent.length === 1 && Object.keys(sent[0]).sort().join() === "hist,q,r,room" && JSON.stringify(sent[0].r) === '{"s":3}' && !JSON.stringify(sent[0]).includes("테스트이름") && !JSON.stringify(last).includes("테스트이름"), JSON.stringify(sent[0]));
+  await ev("(() => { const t = document.querySelector('[data-js=talk-form] textarea'); t.value = '__fail 두 번째 질문'; document.querySelector('[data-js=talk-form] button[type=submit]').click(); return true; })()");
+  await waitFor("!document.querySelector('[data-js=talk-error]')?.hidden", 8000);
+  const k2 = await ev("({ bal: Dust.state().bal, err: document.querySelector('[data-js=talk-error]').textContent, kept: document.querySelector('[data-js=talk-form] textarea').value, sentHist: 0 })");
+  const sent2 = b.log.bodies.filter((x) => x.url.endsWith("/api/talk")).map((x) => JSON.parse(x.body));
+  check("면담: 실패하면 별가루 돌려줌 · 오류 안내 · 쓴 질문은 칸에 남김 · 앞선 문답 1개 함께 보냄", k2.bal === k1.bal && /돌려드렸어요/.test(k2.err) && k2.kept === "__fail 두 번째 질문" && sent2.length === 2 && sent2[1].hist.length === 1, JSON.stringify(k2));
+  await ev("sessionStorage.removeItem('strange-oracle'); true");
+
   // ── 5. 입구(index.html): 사이드바 버튼·링크
   await b.goto(`${TEST}/products/strange-oracle/`);
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub' && !!document.querySelector('.topbar__inner .nav-toggle')", 10000);
   const hub = await ev("({ btn: !!document.querySelector('.topbar__inner .nav-toggle'), links: [...document.querySelectorAll('#sidenav a')].map((a) => a.getAttribute('href')), title: document.title })");
-  check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/ogham/", "/egypt/", "/maya/", "/oracle/", "/manse/", "/nakshatra/", "/tzolkin/", "/decan/", "/name-ogham/", "/rune-draw/", "/sibyl/", "/legends/", "/today/", "/dex/", "/stardust/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
+  check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/ogham/", "/egypt/", "/maya/", "/oracle/", "/manse/", "/nakshatra/", "/tzolkin/", "/decan/", "/name-ogham/", "/rune-draw/", "/sibyl/", "/legends/", "/today/", "/dex/", "/stardust/", "/talk/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
   check("입구: 새 제목(검색어 포함)", /무료 사주풀이/.test(hub.title), hub.title);
   await ev("document.querySelector('.topbar__inner .nav-toggle').click()");
   await sleep(350);
   check("입구: 메뉴 열림", await ev("document.documentElement.classList.contains('nav-open')"));
 
-  const errs = b.log.errors.filter((e) => !/favicon/.test(e));
+  const errs = b.log.errors.filter((e) => !/favicon/.test(e) && !/502 \(Bad Gateway\) http:\/\/127\.0\.0\.1:8788\/api\/talk/.test(e)); // 면담 실패 시험(__fail)의 502는 일부러 낸 것
   check("콘솔 오류 0", errs.length === 0, errs.slice(0, 3).join(" | "));
   const pass = out.filter((l) => l.startsWith("PASS")).length, fail = out.length - pass;
   console.log(`${pass} PASS / ${fail} FAIL`);

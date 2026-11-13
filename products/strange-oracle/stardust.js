@@ -11,7 +11,8 @@
 //   room    방 처음 완주 5 (방마다 한 번) — 도감 카드도 이때 열린다
 //   streak  연속 7일 방문 10 (7일마다)
 //   무료로 얻는 양은 하루 최대 30(first 빼고). 넘치는 몫은 버린다.
-// 쓰기: 도감 숨은 이야기 펼치기·오늘의 신탁 한 줄 더 (값은 NAV.dust.cost). 면담 차감은 서버가 한다(v1-D).
+// 쓰기: 도감 숨은 이야기 펼치기·오늘의 신탁 한 줄 더·면담 질문 (값은 NAV.dust.cost). 면담이 실패하면 돌려준다(refund).
+//   ※ 무료 몫은 이 기기에 있으므로 서버가 따로 하루 질문 수와 월 비용 상한을 건다(netlify/lib/talk.js).
 (function () {
   const KEY = "strange-oracle-dust";
   const DAY_CAP = 30;
@@ -90,6 +91,14 @@
     return true;
   }
 
+  // 돌려주기(면담 실패 등 — 쓴 만큼만, 오늘 무료 몫에는 세지 않는다)
+  function refund(amt) {
+    const s = load();
+    if (!(amt > 0)) return;
+    s.bal += amt;
+    save(s);
+  }
+
   // 오늘의 신탁: 하루 한 번 뽑은 번호를 기억(같은 날 다시 와도 같은 줄). more = 한 줄 더 받은 번호들
   function oracleToday(pick) {
     const s = load();
@@ -122,5 +131,5 @@
   // 이 기기의 별가루 기록 지우기
   function clear() { mem = null; try { localStorage.removeItem(KEY); } catch (e) {} save(blank()); }
 
-  window.Dust = { RULES, DAY_CAP, ROOMS, visit, earn, spend, oracleToday, oracleMore, openStory, state, clear, kstDay };
+  window.Dust = { RULES, DAY_CAP, ROOMS, visit, earn, spend, refund, oracleToday, oracleMore, openStory, state, clear, kstDay };
 })();

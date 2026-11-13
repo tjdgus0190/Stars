@@ -69,6 +69,20 @@ const MOCK_PASS_NY = PayCode.Pass.make("ny"); // (2026-11-12) 2027 신년운세 
 const PAYMOCK = MODE === "test" ? require("./mock-pay.js").createPayMock({ port: PORT }) : null;
 const ENV = { PASS_MODE: MODE === "test" ? "test" : "", BOOK_PASS_HASHES: MODE === "test" ? Book.hashOf(MOCK_PASS) : "", NY_PASS_HASHES: MODE === "test" ? Book.hashOf(MOCK_PASS_NY) : "" };
 const MAPMOCK = require("./mock-map.js").createMapMock({ port: PORT, mode: MODE });
+// (2026-11-13 v1-D) 함수 talk 흉내: test에서만 켜고, 모델 대신 가짜 답(외부 요청 없음). 저장소는 메모리
+const Talk = require(path.join(ROOT, "netlify", "lib", "talk.js"));
+const TALK_ENV = MODE === "test" ? { TALK_MODE: "test", ANTHROPIC_API_KEY: "mock-not-a-key", TALK_MONTHLY_USD: arg("--talk-usd", "5") } : {};
+const talkMem = new Map();
+const talkStore = { get: async (k) => (talkMem.has(k) ? JSON.parse(talkMem.get(k)) : null), set: async (k, v) => { talkMem.set(k, JSON.stringify(v)); } };
+let talkLast = null; // 시험용: 마지막으로 모델에 보냈을 요청(/__dev/talk-last)
+async function fakeLlm(params) {
+  talkLast = params;
+  const q = params.messages[params.messages.length - 1].content;
+  if (q.includes("__fail")) throw new Error("upstream");
+  if (q.includes("__refuse")) return { stop_reason: "refusal", content: [], usage: { input_tokens: 900, output_tokens: 0 } };
+  const who = (params.system[0].text.match(/안내자 (\S+?)이?다\./) || [])[1] || "?";
+  return { stop_reason: "end_turn", content: [{ type: "text", text: `(시험 답) ${who}이 답해요. 물은 글자 수 ${q.length}. 오늘은 물 한 잔을 천천히 마셔 보세요.` }], usage: { input_tokens: 1800, output_tokens: 220 } };
+}
 const bookEnv = () => (PAYMOCK ? Object.assign({}, ENV, { PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET }) : ENV);
 
 const TYPES = {
@@ -115,6 +129,19 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
+  // (v1-D) 함수 talk 흉내 — 본문은 읽기만, 찍지 않음
+  if (rel === "/api/talk") {
+    let body = "";
+    req.on("data", (c) => { if (body.length < 9000) body += c; });
+    req.on("end", async () => {
+      const r = await Talk.handle({ method: req.method, body, ip: req.socket.remoteAddress }, TALK_ENV, talkStore, Date.now(), fakeLlm);
+      res.writeHead(r.status, r.headers).end(r.body);
+      log(r.status);
+    });
+    return;
+  }
+  if (MODE === "test" && rel === "/__dev/talk-last") return res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }).end(JSON.stringify(talkLast));
+  if (MODE === "test" && rel === "/__dev/talk-reset") { Talk._reset(); talkMem.clear(); talkLast = null; return res.writeHead(204).end(); }
   // (21단계) 카카오 로그인 흉내 — test에서만. 시작은 실제 카카오 대신 가짜 동의 화면(/__dev/kakao/authorize)으로, 콜백·claim은 함수 auth의 handle 그대로(가짜 카카오)
   if (PAYMOCK && (rel.startsWith("/api/auth/") || rel === "/__dev/kakao/authorize")) {
     const origin = `http://127.0.0.1:${PORT}`;
@@ -229,6 +256,8 @@ location.replace("${P}#${to}");
     if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(MAPMOCK.transformDataJs(PAYMOCK.transformDataJs(String(data).replace(PAY_RE, '$1"test"').replace(SITE_RE, '$1""').replace(/(\bauth:\s*\{\s*kakao:\s*)"off"/, '$1"on"').replace(/(\bny:\s*\{\s*mode:\s*)"off"/, SRC ? '$1"test"' : '$1"off"'))));
     // 19-5 (b): 모든 모드에서 data.js 응답의 GA4 측정 ID를 시험 ID로 (실제 ID로 localhost 방문이 나가지 않게, 파일은 그대로)
     if (/[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(GA4_RE, '$1"' + GA4_TEST + '"'));
+    // (v1-D) 면담 화면: 시험 모드에서만 켠다(배포판 data-guide.js는 "off")
+    if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data-guide\.js$/.test(file)) data = Buffer.from(String(data).replace(/(\btalkMode:\s*)"off"/, '$1"test"'));
     send(req, res, TYPES[path.extname(file)] || "application/octet-stream", data);
   });
 });

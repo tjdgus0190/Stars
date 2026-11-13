@@ -14,7 +14,7 @@ window.NAV = {
     gain: "별가루 +{n}",
     why: { first: "낯선 점술관에 온 걸 환영해요", oracle: "오늘의 신탁을 받았어요", tool: "무료 도구를 써 봤어요", share: "결과를 나눴어요", room: "방 하나를 끝까지 지났어요", streak: "이레 연속으로 찾아왔어요" },
     capped: "오늘 모을 수 있는 별가루를 다 모았어요. 내일 또 와요.",
-    cost: { story: 10, more: 3 }, // 도감 숨은 이야기 · 오늘의 신탁 한 줄 더 (면담 10은 v1-D 서버가 정한다)
+    cost: { story: 10, more: 3, talk: 10 }, // 도감 숨은 이야기 · 오늘의 신탁 한 줄 더 · 면담 질문 하나
   },
   groups: [
     {
@@ -25,6 +25,7 @@ window.NAV = {
       head: "점술관의 하루",
       items: [
         { label: "오늘의 신탁", note: "하루 한 줄 · 별가루 +5", href: "/today/" },
+        { label: "안내자와 면담", note: "안내자에게 직접 묻기 · 별가루 10", href: "/talk/" },
         { label: "안내자 도감", note: "일곱 안내자의 숨은 이야기", href: "/dex/" },
         { label: "별가루", note: "모으는 법과 쓰는 곳", href: "/stardust/" },
       ],

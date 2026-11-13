@@ -201,3 +201,25 @@ a { color: var(--gold); }
 .grows span { font-size: var(--fs-sm); color: var(--c-text-strong); }
 .grows span small { display: block; font-size: 0.75rem; color: var(--c-text-faint); }
 .grows b { font-family: var(--font-latin); color: var(--gold); white-space: nowrap; }
+
+/* (2026-11-13 v1-D) 안내자와 면담 */
+.gtalk-pick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 14px; padding: 0; list-style: none; }
+.gtalk-pick button { display: grid; justify-items: center; gap: 2px; width: 100%; padding: 10px 4px; border-radius: 14px; border: 1px solid oklch(0.4 0.04 285 / 0.6); background: oklch(0.14 0.035 285); color: var(--c-text-strong); font: inherit; cursor: pointer; }
+.gtalk-pick button[aria-pressed="true"] { border-color: var(--gold); box-shadow: 0 0 16px oklch(0.75 0.12 85 / 0.35); }
+.gtalk-pick svg { width: 30px; height: 40px; fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--gold); }
+.gtalk-pick b { font-size: var(--fs-sm); }
+.gtalk-pick small { font-family: var(--font-sans); font-size: 0.625rem; color: var(--c-text-faint); line-height: 1.3; text-align: center; }
+.gtalk-closed { margin-top: 6px !important; }
+.gtalk { display: grid; gap: 10px; }
+.gsay { position: relative; max-width: 88%; padding: 12px 14px; border-radius: 16px; }
+.gsay small { display: block; margin-bottom: 4px; font-family: var(--font-sans); font-size: 0.6875rem; color: var(--gold-dim); }
+.gsay p { margin: 0 !important; font-size: var(--fs-md) !important; line-height: 1.7 !important; white-space: pre-wrap; }
+.gsay--guide { justify-self: start; padding-left: 50px; background: oklch(0.17 0.045 285); border: 1px solid oklch(0.45 0.06 80 / 0.45); }
+.gsay--guide svg { position: absolute; left: 10px; top: 12px; width: 28px; height: 38px; fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--gold); }
+.gsay--me { justify-self: end; background: oklch(0.24 0.05 285); border: 1px solid oklch(0.45 0.04 285 / 0.5); }
+.gsay.is-wait p { color: var(--c-text-faint); animation: gwait 1.4s ease-in-out infinite; }
+@keyframes gwait { 50% { opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) { .gsay.is-wait p { animation: none; } }
+.gtalk-form { margin-top: 6px; }
+.gtalk-form .gbtn { width: 100%; }
+[data-js=talk-log] { display: grid; gap: 10px; }

@@ -17,7 +17,7 @@
   if (A && CONF.ga4) {
     const search = location.search;
     if (search) history.replaceState(null, "", location.pathname + location.hash);
-    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS } }, utm: { search, allow: {}, ignore: [] } });
+    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] } }, utm: { search, allow: {}, ignore: [] } });
     if (on) A.track("so_guide_view", { page: CONF.page });
     const cookie = $("[data-js=cookie-line]");
     if (cookie && A.configured(CONF.ga4)) cookie.hidden = false;
@@ -85,6 +85,103 @@
       };
       box.addEventListener("click", (e) => { const b = e.target.closest("[data-js=dex-open]"); if (b && D.openStory(b.dataset.room, COST.story)) draw(); });
       document.addEventListener("dust:change", draw);
+      draw();
+    }
+
+
+    // ── 안내자와 면담 (v1-D). talkMode "off"면 아무것도 보내지 않는다.
+    //   보내는 것: 방 이름 · 그 방 결과 번호(이 탭 sessionStorage의 방 기록에서 번호만) · 질문 글 · 앞선 문답 3개. 이름·생일은 보내지 않는다
+    //   문답은 이 화면 메모리에만 두고 저장하지 않는다
+    if (CONF.page === "talk") {
+      const A = P.app, X = window.DEX, E = A.errors, COSTQ = COST.talk || 10;
+      const on = P.talkMode === "test" || P.talkMode === "live";
+      let visits = {};
+      try { visits = (JSON.parse(sessionStorage.getItem("strange-oracle") || "null") || {}).visits || {}; } catch (e) { visits = {}; }
+      const I = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
+      const resultOf = (room) => {
+        const v = visits[room];
+        if (!v) return null;
+        if (room === "saju" && I(v.code, 1, 5000)) return { s: Math.floor((v.code - 1) / 500) };
+        if (room === "ogham" && I(v.ogham, 0, 19)) return { i: v.ogham };
+        if (room === "star" && I(v.nak, 0, 26)) return { i: v.nak };
+        if (room === "decan" && I(v.decan, 0, 35)) return { i: v.decan };
+        if (room === "tzolkin" && I(v.number, 1, 13) && I(v.sign, 0, 19)) return { n: v.number, s: v.sign };
+        if (room === "rune" && Array.isArray(v.picks) && v.picks.length === 3 && v.picks.every((c) => /^[a-z]{2,12}$/.test(c))) return { p: v.picks.slice() };
+        if (room === "sibyl" && I(v.sors, 0, 31)) return { i: v.sors };
+        return null;
+      };
+      let cur = null; // 고른 안내자
+      let hist = []; // [{ q, a }]
+      let busy = false;
+      const fig = (room) => `<svg viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${room}" /></svg>`;
+      const pickHtml = () => `<h2>${esc(A.pick)}</h2><ul class="gtalk-pick">${X.guides.map((g) => `<li><button type="button" data-js="talk-pick" data-room="${g.room}"${cur && cur.room === g.room ? ' aria-pressed="true"' : ""}>${fig(g.room)}<b>${esc(g.name)}</b><small>${esc(g.roomName)}</small></button></li>`).join("")}</ul>`;
+      const draw = () => {
+        if (!on) { box.innerHTML = pickHtml() + `<p class="gnote gcenter gtalk-closed">${esc(A.closed)}</p>`; return; }
+        if (!cur) { box.innerHTML = pickHtml(); return; }
+        const r = resultOf(cur.room);
+        const st = D.state(), need = COSTQ - st.bal;
+        const log = hist.map((h) => `<div class="gsay gsay--me"><small>${esc(A.you)}</small><p>${esc(h.q)}</p></div><div class="gsay gsay--guide">${fig(cur.room)}<small>${esc(cur.name)}</small><p>${esc(h.a)}</p></div>`).join("");
+        box.innerHTML = pickHtml() + `<div class="gtalk">
+          <div class="gsay gsay--guide">${fig(cur.room)}<small>${esc(cur.name)}</small><p>${esc(cur.line)}</p></div>
+          <p class="gnote gcenter">${esc(fill(r ? A.known : A.unknown, { room: cur.roomName }))}${r ? "" : ` <a href="/products/strange-oracle/" data-js="to-room">${esc(fill(A.toRoom, { room: cur.roomName }))}</a>`}</p>
+          <div data-js="talk-log">${log}</div>
+          <form class="gform gtalk-form" data-js="talk-form" novalidate autocomplete="off">
+            <label class="gfield gfield--wide"><textarea name="q" rows="3" maxlength="300" placeholder="${esc(A.placeholder)}" aria-label="${esc(A.placeholder)}"></textarea></label>
+            <p class="gnote">${esc(A.privacy)} <span data-js="talk-count">${esc(fill(A.count, { n: 0 }))}</span></p>
+            <p class="gerror" data-js="talk-error" role="alert" hidden></p>
+            <button class="gbtn" type="submit"${need > 0 || busy ? " disabled" : ""}>${esc(fill(A.ask, { cost: COSTQ }))}</button>
+            <p class="gnote gcenter">${esc(fill(A.balance, { n: st.bal }))}${need > 0 ? " · " + esc(fill(A.short, { need })) : ""}</p>
+          </form></div>`;
+      };
+      const err = (m) => { const e = box.querySelector("[data-js=talk-error]"); if (e) { e.textContent = m; e.hidden = !m; } };
+      box.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-js=talk-pick]");
+        if (!b || busy) return;
+        const g = X.guides.find((x) => x.room === b.dataset.room);
+        if (!g || (cur && cur.room === g.room)) return;
+        cur = g;
+        hist = [];
+        draw();
+        if (on) { const t = box.querySelector("textarea"); if (t) t.focus({ preventScroll: true }); }
+      });
+      box.addEventListener("input", (e) => { if (e.target.name === "q") { const c = box.querySelector("[data-js=talk-count]"); if (c) c.textContent = fill(A.count, { n: e.target.value.length }); } });
+      box.addEventListener("submit", async (e) => {
+        if (!e.target.closest("[data-js=talk-form]")) return;
+        e.preventDefault();
+        if (!on || !cur || busy) return;
+        const ta = e.target.elements.q, q = ta.value.trim();
+        if (!q) return err(E.empty);
+        if (q.length > 300) return err(E.long);
+        busy = true; // 먼저 잠근다(별가루가 바뀌며 화면을 다시 그리지 않게)
+        if (!D.spend(COSTQ)) { busy = false; draw(); return; }
+        const room = cur.room;
+        const logBox = box.querySelector("[data-js=talk-log]");
+        logBox.insertAdjacentHTML("beforeend", `<div class="gsay gsay--me"><small>${esc(A.you)}</small><p>${esc(q)}</p></div><div class="gsay gsay--guide is-wait" data-js="talk-wait">${fig(room)}<small>${esc(cur.name)}</small><p>${esc(A.waiting)}</p></div>`);
+        e.target.querySelector("button[type=submit]").disabled = true;
+        ta.value = "";
+        let res = null, data = null;
+        try {
+          res = await fetch("/api/talk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ room, r: resultOf(room), q, hist: hist.slice(-3) }) });
+          data = await res.json();
+        } catch (x) { res = null; }
+        busy = false;
+        if (cur.room !== room) return; // 그새 다른 안내자를 골랐다
+        if (res && res.ok && data && typeof data.a === "string") {
+          if (data.crisis) D.refund(COSTQ); // 위기 안내는 별가루를 쓰지 않는다
+          hist.push({ q, a: data.a.slice(0, 600) });
+          track("so_talk", { room, step: "answer" });
+          draw();
+        } else {
+          D.refund(COSTQ);
+          const code = data && data.error;
+          draw();
+          ta && err(code === "off" ? E.off : code === "budget" ? E.budget : code === "rate" ? E.rate : E.fail);
+          const t = box.querySelector("textarea"); if (t) t.value = q;
+        }
+        const last = box.querySelectorAll(".gsay");
+        if (last.length) last[last.length - 1].scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+      document.addEventListener("dust:change", () => { if (!busy && cur) { const t = box.querySelector("textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector("textarea"); if (t2) t2.value = keep; } });
       draw();
     }
 
