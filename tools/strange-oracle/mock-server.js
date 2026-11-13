@@ -59,6 +59,7 @@ const PayCode = require(path.join(ROOT, "products", "strange-oracle", "paycode.j
 const PaySec = require(path.join(ROOT, "tools", "pay-sections.js"));
 const og = require(path.join(ROOT, "tools", "og-tags.js"));
 const PRODUCT = path.join(ROOT, "products", "strange-oracle");
+const SHORT_PAGES = () => require(path.join(ROOT, "tools", "strange-oracle", "gen-guide.js")).routes(); // (2026-11-13) 짧은 주소 목록
 if (!fs.existsSync(STATIC)) {
   console.error(`폴더가 없습니다: ${STATIC}\n먼저 node tools/build-dist.js 를 실행하거나 --src 를 붙이세요.`);
   process.exit(1);
@@ -209,9 +210,10 @@ location.replace("${P}#${to}");
     return log(200);
   }
   // (2026-11-13) 짧은 주소(netlify.toml의 200 rewrite와 같은 규칙): /saju/ → guide/saju/index.html
-  const shortPage = rel.match(/^\/(saju|vedic|rune|manse|nakshatra)(\/?)$/);
-  if (shortPage && !shortPage[2]) return res.writeHead(301, { Location: rel + "/" + url.search }).end();
-  if (shortPage) rel = `/products/strange-oracle/guide/${shortPage[1]}/index.html`;
+  //   목록은 gen-guide.js의 rewrites(netlify.toml을 쓰는 것과 같은 값)에서 받는다
+  const short = SHORT_PAGES().find(([p]) => rel === p || rel + "/" === p);
+  if (short && rel !== short[0]) return res.writeHead(301, { Location: short[0] + url.search }).end();
+  if (short) rel = short[1];
   let file = path.join(STATIC, rel);
   if (!file.startsWith(STATIC)) return res.writeHead(403).end();
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {

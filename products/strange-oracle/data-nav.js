@@ -24,6 +24,11 @@ window.NAV = {
       items: [
         { label: "무료 만세력", note: "내 사주 여덟 글자 · 오행", href: "/manse/" },
         { label: "나크샤트라 계산기", note: "태어난 밤 달이 머문 집", href: "/nakshatra/" },
+        { label: "마야 탄생일", note: "촐킨 260일 달력의 내 날", href: "/tzolkin/" },
+        { label: "이집트 데칸", note: "별자리 속 숨은 자리", href: "/decan/" },
+        { label: "이름 오검", note: "이름을 켈트 나무 문자로", href: "/name-ogham/" },
+        { label: "룬 한 개 뽑기", note: "오늘의 룬 메시지", href: "/rune-draw/" },
+        { label: "시빌라 한 줄 신탁", note: "고민 하나에 한 줄", href: "/sibyl/" },
       ],
     },
     {

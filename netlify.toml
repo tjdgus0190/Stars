@@ -39,6 +39,7 @@
 
 # (2026-11-13 운영자 결정: 짧은 주소) 안내 페이지·무료 도구. 파일은 products/strange-oracle/guide/<이름>/index.html(tools/strange-oracle/gen-guide.js가 만듦)이고
 #   주소창은 짧은 주소 그대로(200 rewrite). canonical·sitemap도 짧은 주소를 쓴다. 끝 / 없는 주소는 / 붙은 주소로 보낸다.
+# >>> gen-guide 짧은 주소 (tools/strange-oracle/gen-guide.js가 쓴다. 손으로 고치지 말 것)
 [[redirects]]
   from = "/saju"
   to = "/saju/"
@@ -89,6 +90,57 @@
   to = "/products/strange-oracle/guide/nakshatra/index.html"
   status = 200
   force = true
+[[redirects]]
+  from = "/tzolkin"
+  to = "/tzolkin/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/tzolkin/"
+  to = "/products/strange-oracle/guide/tzolkin/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/decan"
+  to = "/decan/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/decan/"
+  to = "/products/strange-oracle/guide/decan/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/name-ogham"
+  to = "/name-ogham/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/name-ogham/"
+  to = "/products/strange-oracle/guide/name-ogham/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/rune-draw"
+  to = "/rune-draw/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/rune-draw/"
+  to = "/products/strange-oracle/guide/rune-draw/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/sibyl"
+  to = "/sibyl/"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/sibyl/"
+  to = "/products/strange-oracle/guide/sibyl/index.html"
+  status = 200
+  force = true
+# <<< gen-guide 짧은 주소
 
 # 로직은 netlify/lib/(CommonJS)에 있고 모의 서버·단위 시험이 그대로 부른다.
 # 환경 변수 PASS_MODE·PAYAPP_USERID·PAYAPP_LINKKEY·PAYAPP_LINKVAL·PASS_SECRET(32바이트 이상) 중 하나라도 없으면 함수는 503(안전).

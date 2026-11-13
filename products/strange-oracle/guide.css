@@ -123,3 +123,19 @@ a { color: var(--gold); }
 .gresult .gcta { margin-top: 22px; }
 .gactions { display: flex; justify-content: center; margin-top: 14px; }
 [hidden] { display: none !important; }
+
+/* (2026-11-13) 무료 도구 5개: 이름·고민 칸, 오검 획, 마야 숫자, 룬, 두루마리 */
+.gsprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.gfield--wide { display: grid; gap: 6px; width: 100%; margin: 0 0 12px; }
+.gfield--wide input, .gfield--wide textarea { width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; border: 1px solid oklch(0.4 0.04 285 / 0.6); background: oklch(0.12 0.03 285); color: var(--c-text-strong); font: inherit; font-size: var(--fs-md); resize: vertical; }
+.gfield--wide input:focus, .gfield--wide textarea:focus { outline: 2px solid var(--gold-dim); outline-offset: 1px; }
+.gcenter { text-align: center; }
+.gmaya { display: block; width: 72px; height: 72px; margin: 4px auto 0; fill: var(--gold); }
+.gstave { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 2px; margin: 14px 0 6px; padding: 0; list-style: none; }
+.gstave li { display: grid; justify-items: center; width: 26px; }
+.gstave svg { width: 24px; height: 48px; fill: none; stroke: var(--gold); stroke-width: 3.5; stroke-linecap: round; }
+.gstave span { font-family: var(--font-latin); font-size: 0.6875rem; color: var(--c-text-faint); }
+.gogham { display: block; width: 40px; height: 80px; margin: 8px auto 0; fill: none; stroke: var(--gold); stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 0 8px oklch(0.75 0.12 85 / 0.5)); }
+.grune { display: block; font-family: "Noto Sans Runic", "Segoe UI Historic", sans-serif; font-size: 4rem; line-height: 1.2; color: var(--gold); text-shadow: 0 0 18px oklch(0.75 0.12 85 / 0.45); }
+.gscroll { margin: 14px 0 0; padding: 22px 20px; border-radius: 6px; background: linear-gradient(oklch(0.86 0.04 80), oklch(0.8 0.05 75)); color: oklch(0.28 0.04 50); font-size: var(--fs-lg); line-height: 1.7; text-align: center; box-shadow: inset 0 0 24px oklch(0.55 0.06 60 / 0.35); }
+.gday .num { text-align: center !important; margin-top: 4px !important; }

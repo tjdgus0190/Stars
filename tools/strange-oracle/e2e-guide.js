@@ -1,4 +1,4 @@
-// (2026-11-13) 안내 페이지 3개·무료 도구 2개·사이드바 e2e. 짧은 주소·검색 태그·표·도구 계산·개인정보(입력값이 주소·저장소·요청에 0)·입구 사이드바.
+// (2026-11-13) 안내 페이지 3개·무료 도구 7개·사이드바 e2e. 짧은 주소·검색 태그·표·도구 계산·개인정보(입력값이 주소·저장소·요청에 0)·입구 사이드바.
 // 준비: node tools/strange-oracle/mock-server.js --src --port 8788 --mode test
 // 실행: node --experimental-websocket tools/strange-oracle/e2e-guide.js → 결과 tools/strange-oracle/out/e2e-guide.txt
 "use strict";
@@ -109,6 +109,83 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   const cands = await ev("document.querySelectorAll('.gcands li').length");
   check("나크샤트라: 시각 모름 → 후보 1~3개와 시간대", cands >= 1 && cands <= 3, `${cands}개`);
 
+  // ── 3b. 무료 도구 5개 (마야 탄생일·이집트 데칸·이름 오검·룬 뽑기·시빌라 신탁)
+  const submit = () => ev("document.querySelector('[data-js=tool-form] button[type=submit]').click()");
+  const resultShown = (ms = 10000) => waitFor("!document.querySelector('[data-js=tool-result]').hidden", ms);
+  await b.goto(`${TEST}/tzolkin/`);
+  await waitFor("!!window.Calc && !!window.TZOLKIN_SIGNS && !!document.querySelector('[data-js=tool-form]')");
+  await setv("y", 2012); await setv("m", 12); await setv("d", 21);
+  await submit();
+  await resultShown();
+  const tz = await ev("({ name: document.querySelector('.gday b')?.textContent, maya: document.querySelector('.gday use')?.getAttribute('href'), sprite: !!document.querySelector('#maya-4'), ajaw: TZOLKIN_SIGNS[19].name, form: !!document.querySelector('[data-js=tool-form] [name=notime]') })");
+  check("마야 탄생일: 2012-12-21 = 4 아하우(장주기 13.0.0.0.0) · 마야 숫자 4", tz.name === `4 ${tz.ajaw}` && tz.maya === "#maya-4" && tz.sprite, `${tz.name} · ${tz.maya}`);
+  check("마야 탄생일: 시각 칸 없음(날짜만)", !tz.form);
+
+  await b.goto(`${TEST}/decan/`);
+  await waitFor("!!window.Calc && !!window.DECANS && !!document.querySelector('[data-js=tool-form]')");
+  await setv("y", 1990); await setv("m", 7); await setv("d", 21);
+  await submit();
+  await resultShown(20000);
+  const dc = await ev("({ where: document.querySelector('.gnak b')?.textContent, num: document.querySelector('.gnak .num')?.textContent, want: (() => { const r = Calc.decan(1990, 7, 21); return r.candidates.length ? null : DECANS[r.noon.index].title; })(), title: document.querySelector('.gnak em')?.textContent })");
+  check("이집트 데칸: 1990-07-21 = 게자리 세 번째 데칸(12번째) · calc.js와 같은 문구", /게자리의 세 번째 데칸/.test(dc.where || "") && /12번째/.test(dc.num || "") && dc.title === dc.want, `${dc.where} · ${dc.num} · ${dc.title}`);
+  // 경계 날: 태양이 그날 안에 데칸을 넘는 날을 calc.js로 찾아 후보 둘이 나오는지
+  const edge = await ev("(() => { for (let d = 1; d <= 31; d++) { const r = Calc.decan(2001, 3, d); if (r.candidates.length) return d; } return 0; })()");
+  await ev("document.querySelector('[data-js=again]').click()");
+  await setv("y", 2001); await setv("m", 3); await setv("d", edge);
+  await submit();
+  await resultShown(10000);
+  const dc2 = await ev("document.querySelectorAll('.gcands li').length");
+  check("이집트 데칸: 경계 날 → 후보 둘과 시간대", edge > 0 && dc2 === 2, `2001-3-${edge} · ${dc2}개`);
+
+  const NAME = "김하늘";
+  await b.goto(`${TEST}/name-ogham/`);
+  await waitFor("!!window.Calc && !!window.OGHAM && !!document.querySelector('[data-js=tool-form]')");
+  await submit();
+  await sleep(200);
+  const og0 = await ev("({ err: !document.querySelector('[data-js=tool-error]').hidden, res: document.querySelector('[data-js=tool-result]').hidden })");
+  check("이름 오검: 빈 이름 → 오류 문구, 결과 없음", og0.err && og0.res);
+  await setv("name", NAME);
+  await submit();
+  await resultShown();
+  const og = await ev(`(() => { const r = Calc.ogham(${JSON.stringify(NAME)}); return { n: document.querySelectorAll('.gstave li').length, want: r.letters.length, b: document.querySelector('.gnak b')?.textContent, wantB: OGHAM[r.index].name, use: document.querySelector('.gogham use')?.getAttribute('href'), code: OGHAM[r.index].code, latin: document.querySelector('.gresult .gnote')?.textContent }; })()`);
+  check("이름 오검: 이름 글자마다 오검 획 · 나무 글자 = calc.js", og.n === og.want && og.n > 0 && (og.b || "").startsWith(og.wantB) && og.use === `#ogham-${og.code}`, `${og.n}자 · ${og.b} · ${og.latin}`);
+  const shownName = await ev(`document.querySelector('[data-js=tool-result]').textContent.includes(${JSON.stringify(NAME)})`);
+  check("이름 오검: 결과 화면에 이름 원문을 다시 적지 않음", !shownName);
+
+  await b.goto(`${TEST}/rune-draw/`);
+  await waitFor("!!window.Calc && !!window.RUNES && !!document.querySelector('[data-js=tool-form]')");
+  const seen = new Set();
+  for (let i = 0; i < 12; i++) {
+    if (i === 0) await submit(); else await ev("document.querySelector('[data-js=again]').click()");
+    await resultShown();
+    seen.add(await ev("document.querySelector('.grune')?.textContent"));
+    await sleep(60);
+  }
+  const allRunes = await ev("RUNES.map((r) => r.glyph)");
+  check("룬 한 개 뽑기: 뽑을 때마다 24자 가운데 하나 · [다시 뽑기]로 바로 다시", [...seen].every((g) => allRunes.includes(g)) && seen.size >= 3, `12번에 ${seen.size}종`);
+
+  const Q = "이직을 해도 될까요 비밀고민123";
+  await b.goto(`${TEST}/sibyl/`);
+  await waitFor("!!window.Calc && !!window.ORACLES && !!document.querySelector('[data-js=tool-form]')");
+  await submit();
+  await resultShown();
+  const sb0 = await ev("({ line: document.querySelector('.gscroll')?.textContent, all: ORACLES.map((o) => o.line) })");
+  check("시빌라 신탁: 고민 없이도 두루마리 한 줄(32개 가운데)", sb0.all.includes(sb0.line), sb0.line);
+  await ev("document.querySelector('[data-js=again]').click()");
+  await setv("question", Q);
+  await submit();
+  await resultShown();
+  const sb = await ev(`({ line: document.querySelector('.gscroll')?.textContent, echo: document.querySelector('[data-js=tool-result]').textContent.includes(${JSON.stringify(Q)}) })`);
+  check("시빌라 신탁: 고민을 적어도 한 줄 · 결과에 고민 글을 되풀이하지 않음", !!sb.line && !sb.echo, sb.line);
+  await setv("question", "가".repeat(101));
+  await submit();
+  await sleep(200);
+  check("시빌라 신탁: 100자 넘으면 오류 문구", await ev("!document.querySelector('[data-js=tool-error]').hidden"));
+  const store2 = await ev("({ url: location.href, ls: JSON.stringify(Object.assign({}, localStorage)), ss: JSON.stringify(Object.assign({}, sessionStorage)), ck: document.cookie })");
+  const secret = [NAME, encodeURIComponent(NAME), "비밀고민123", encodeURIComponent("비밀고민123")];
+  const leak2 = secret.some((s) => (store2.url + store2.ls + store2.ss + store2.ck).includes(s)) || b.log.requests.some((r) => secret.some((s) => r.includes(s))) || b.log.bodies.some((x) => secret.some((s) => x.body.includes(s)));
+  check("개인정보: 이름·고민 글이 주소·저장소·쿠키·요청 본문에 0", !leak2);
+
   // ── 4. 개인정보: 주소·저장소·쿠키·요청에 입력값 0
   const store = await ev("({ url: location.href, ls: JSON.stringify(Object.assign({}, localStorage)), ss: JSON.stringify(Object.assign({}, sessionStorage)), ck: document.cookie })");
   const leakStore = ["1995", "2000-1-1", "14:37"].some((s) => (store.url + store.ls + store.ss + store.ck).includes(s));
@@ -120,7 +197,7 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await b.goto(`${TEST}/products/strange-oracle/`);
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub' && !!document.querySelector('.topbar__inner .nav-toggle')", 10000);
   const hub = await ev("({ btn: !!document.querySelector('.topbar__inner .nav-toggle'), links: [...document.querySelectorAll('#sidenav a')].map((a) => a.getAttribute('href')), title: document.title })");
-  check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/manse/", "/nakshatra/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
+  check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/manse/", "/nakshatra/", "/tzolkin/", "/decan/", "/name-ogham/", "/rune-draw/", "/sibyl/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
   check("입구: 새 제목(검색어 포함)", /무료 사주풀이/.test(hub.title), hub.title);
   await ev("document.querySelector('.topbar__inner .nav-toggle').click()");
   await sleep(350);

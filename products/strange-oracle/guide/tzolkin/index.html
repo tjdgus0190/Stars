@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="night">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- 이 파일은 tools/strange-oracle/gen-guide.js가 만든다. 문구는 data-guide.js·data-nav.js에서 고치고 스크립트를 다시 돌린다 -->
+  <title>마야 탄생일 계산기 · 촐킨 260일 달력으로 보는 내 날의 기호 | 낯선 점술관</title>
+  <meta name="description" content="생년월일을 넣으면 마야의 신성한 260일 달력 촐킨에서 내가 태어난 날의 숫자와 기호(스무 날 이름)를 알려 드려요. 날짜 산술(GMT 상관 계수)로 계산해요." />
+  <link rel="canonical" href="https://strange-oracle.com/tzolkin/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="낯선 점술관" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:title" content="마야 탄생일 계산기 · 촐킨 260일 달력으로 보는 내 날의 기호 | 낯선 점술관" />
+  <meta property="og:description" content="생년월일을 넣으면 마야의 신성한 260일 달력 촐킨에서 내가 태어난 날의 숫자와 기호(스무 날 이름)를 알려 드려요. 날짜 산술(GMT 상관 계수)로 계산해요." />
+  <meta property="og:url" content="https://strange-oracle.com/tzolkin/" />
+  <meta property="og:image" content="https://strange-oracle.com/products/strange-oracle/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#080717" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/400.css" integrity="sha384-UmN2JKCN3ZzGKhUCbF72zmj7SCKSsgzpBPRTuYCs90jUI3LUOfltMKpFi9ZWIfoL" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/700.css" integrity="sha384-EIZic2kT4Iyqg6Rn2tm4B7Ql9xDJWopYmx3ry1RafjC/gfDHItTLBMXp6jrmkxla" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.3.0/500.css" integrity="sha384-7v1bWR/nP3kDOX0ewP+ZV/TdyDB1LMi6swZIHUv+/ihIN+yo/tIKCXkVJk1WaZ2b" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/common/base.css" />
+  <link rel="stylesheet" href="/products/strange-oracle/guide.css" />
+  <link rel="stylesheet" href="/products/strange-oracle/nav.css" />
+  <script type="application/ld+json">[{"@context":"https://schema.org","@type":"WebApplication","name":"마야 탄생일 계산기","url":"https://strange-oracle.com/tzolkin/","description":"생년월일을 넣으면 마야의 신성한 260일 달력 촐킨에서 내가 태어난 날의 숫자와 기호(스무 날 이름)를 알려 드려요. 날짜 산술(GMT 상관 계수)로 계산해요.","applicationCategory":"LifestyleApplication","operatingSystem":"Web","inLanguage":"ko","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","name":"낯선 점술관"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"태어난 시각도 필요한가요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 촐킨은 하루 단위 달력이라 날짜만 있으면 돼요."}},{"@type":"Question","name":"다른 사이트와 결과가 달라요.","acceptedAnswer":{"@type":"Answer","text":"상관 계수(GMT 584283, 584285 등)를 무엇으로 쓰느냐에 따라 하루~이틀 차이가 날 수 있어요. 이 계산기는 584283을 써요."}}]}]</script>
+  <script>window.GUIDE_PAGE = {"page":"tzolkin","kind":"tool","ga4":"G-4J5SVQV3B1"};</script>
+  <script defer src="/common/analytics.js"></script>
+  <script defer src="/products/strange-oracle/data-nav.js"></script>
+  <script defer src="/products/strange-oracle/nav.js"></script>
+  <script defer src="/products/strange-oracle/data-guide.js"></script>
+  <script defer src="/products/strange-oracle/data-tzolkin.js"></script>
+  <script defer src="/products/strange-oracle/calc.js"></script>
+  <script defer src="/products/strange-oracle/guide.js"></script>
+</head>
+<body>
+<svg class="gsprite" aria-hidden="true" focusable="false"><symbol id="maya-1" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.8" /></symbol><symbol id="maya-2" viewBox="0 0 24 24"><circle cx="9.6" cy="12" r="1.8" /><circle cx="14.4" cy="12" r="1.8" /></symbol><symbol id="maya-3" viewBox="0 0 24 24"><circle cx="7.2" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="16.8" cy="12" r="1.8" /></symbol><symbol id="maya-4" viewBox="0 0 24 24"><circle cx="4.8" cy="12" r="1.8" /><circle cx="9.6" cy="12" r="1.8" /><circle cx="14.4" cy="12" r="1.8" /><circle cx="19.2" cy="12" r="1.8" /></symbol><symbol id="maya-5" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /></symbol><symbol id="maya-6" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /><circle cx="12" cy="15.3" r="1.8" /></symbol><symbol id="maya-7" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /><circle cx="9.6" cy="15.3" r="1.8" /><circle cx="14.4" cy="15.3" r="1.8" /></symbol><symbol id="maya-8" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /><circle cx="7.2" cy="15.3" r="1.8" /><circle cx="12" cy="15.3" r="1.8" /><circle cx="16.8" cy="15.3" r="1.8" /></symbol><symbol id="maya-9" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /><circle cx="4.8" cy="15.3" r="1.8" /><circle cx="9.6" cy="15.3" r="1.8" /><circle cx="14.4" cy="15.3" r="1.8" /><circle cx="19.2" cy="15.3" r="1.8" /></symbol><symbol id="maya-10" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /><rect x="3" y="13.9" width="18" height="3.2" rx="1.6" /></symbol><symbol id="maya-11" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /><rect x="3" y="13.9" width="18" height="3.2" rx="1.6" /><circle cx="12" cy="10.7" r="1.8" /></symbol><symbol id="maya-12" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /><rect x="3" y="13.9" width="18" height="3.2" rx="1.6" /><circle cx="9.6" cy="10.7" r="1.8" /><circle cx="14.4" cy="10.7" r="1.8" /></symbol><symbol id="maya-13" viewBox="0 0 24 24"><rect x="3" y="18.5" width="18" height="3.2" rx="1.6" /><rect x="3" y="13.9" width="18" height="3.2" rx="1.6" /><circle cx="7.2" cy="10.7" r="1.8" /><circle cx="12" cy="10.7" r="1.8" /><circle cx="16.8" cy="10.7" r="1.8" /></symbol></svg><header class="gtop"><div class="gtop__inner"><button class="nav-toggle" type="button" data-nav="open" aria-label="메뉴"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button><a class="gtop__brand" href="/products/strange-oracle/">낯선 점술관</a><a class="gtop__go" href="/products/strange-oracle/" data-js="to-room">입구로</a></div></header>
+<aside class="sidenav" id="sidenav" aria-label="메뉴">
+  <div class="sidenav__head"><a class="sidenav__brand" href="/products/strange-oracle/"><b>낯선 점술관</b><small>STRANGE ORACLE</small></a><button class="sidenav__close" type="button" data-nav="close" aria-label="메뉴 닫기">×</button></div>
+  <nav class="sidenav__group" aria-label="일곱 점술"><h2>일곱 점술</h2><ul><li><a href="/products/strange-oracle/">입구 · 일곱 개의 문<small>사주부터 시빌라 신탁까지 한 번에</small></a></li></ul></nav>
+  <nav class="sidenav__group" aria-label="점술 안내"><h2>점술 안내</h2><ul><li><a href="/saju/">사주 명리<small>무료 사주풀이 · 열 개의 일간</small></a></li><li><a href="/vedic/">인도 베다 점성술<small>달의 집 나크샤트라 27</small></a></li><li><a href="/rune/">북유럽 룬<small>룬 문자 24자의 뜻</small></a></li></ul></nav>
+  <nav class="sidenav__group" aria-label="무료 도구"><h2>무료 도구</h2><ul><li><a href="/manse/">무료 만세력<small>내 사주 여덟 글자 · 오행</small></a></li><li><a href="/nakshatra/">나크샤트라 계산기<small>태어난 밤 달이 머문 집</small></a></li><li><a href="/tzolkin/" aria-current="page">마야 탄생일<small>촐킨 260일 달력의 내 날</small></a></li><li><a href="/decan/">이집트 데칸<small>별자리 속 숨은 자리</small></a></li><li><a href="/name-ogham/">이름 오검<small>이름을 켈트 나무 문자로</small></a></li><li><a href="/rune-draw/">룬 한 개 뽑기<small>오늘의 룬 메시지</small></a></li><li><a href="/sibyl/">시빌라 한 줄 신탁<small>고민 하나에 한 줄</small></a></li></ul></nav>
+  <nav class="sidenav__group" aria-label="이야기"><h2>이야기</h2><ul><li><a href="https://www.instagram.com/strange_oracle_off/" target="_blank" rel="noopener">문 너머의 기록<span class="ext">↗</span><small>점술에 얽힌 전설 · 인스타그램</small></a></li></ul></nav>
+  <nav class="sidenav__group" aria-label="안내"><h2>안내</h2><ul><li><a href="/products/strange-oracle/legal/terms.html">이용약관</a></li><li><a href="/products/strange-oracle/legal/privacy.html">개인정보처리방침</a></li></ul></nav>
+</aside>
+<div class="sidenav-scrim" data-nav="close"></div>
+<main class="gpage">
+<p class="geyebrow">TZOLK'IN · 마야 탄생일</p><h1>마야 탄생일 계산기</h1><p class="glead">태어난 날이 마야 달력에서 어떤 이름의 날이었는지 찾아 드려요.</p>
+<form class="gform" data-js="tool-form" data-kind="date" novalidate autocomplete="off"><fieldset><legend>생년월일</legend><div class="grow"><label class="gfield"><input class="y" name="y" type="number" inputmode="numeric" min="1900" max="2099" placeholder="1995" aria-label="생년월일 년" required />년</label><label class="gfield"><input name="m" type="number" inputmode="numeric" min="1" max="12" placeholder="1~12" aria-label="생년월일 월" required />월</label><label class="gfield"><input name="d" type="number" inputmode="numeric" min="1" max="31" placeholder="1~31" aria-label="생년월일 일" required />일</label></div></fieldset><p class="gnote">계산은 이 기기의 브라우저 안에서만 해요. 입력한 날짜와 시각은 저장하거나 어디로도 보내지 않아요.</p><p class="gerror" data-js="tool-error" role="alert" hidden></p><button class="gbtn" type="submit">내 날의 이름 찾기</button></form>
+<section class="gresult" data-js="tool-result" aria-live="polite" hidden></section>
+<section><h2>촐킨이란</h2><p>촐킨(Tzolk'in)은 마야 사람들이 2천 년 넘게 써 온 260일짜리 신성한 달력이에요. 1부터 13까지의 숫자와 스무 개의 날 이름이 톱니바퀴처럼 맞물려 돌아서, 같은 숫자와 이름이 다시 만나기까지 260일이 걸려요.</p><p>과테말라 고원의 마야 사람들은 지금도 이 순환을 세며 '날을 지키는 이'가 아이의 이름과 중요한 날을 정해요. 태어난 날의 이름은 그 사람이 타고난 기운을 담고 있다고 여겨요.</p><p>이 계산기는 학계에서 가장 널리 쓰는 GMT 상관 계수(584283)로 그레고리력 날짜를 장주기 날수로 바꿔 계산해요. 한국 날짜 그대로 하루 단위로 봐요.</p></section>
+<section><h2>자주 묻는 질문</h2><div class="gfaq"><details><summary>태어난 시각도 필요한가요?</summary><p>아니요. 촐킨은 하루 단위 달력이라 날짜만 있으면 돼요.</p></details><details><summary>다른 사이트와 결과가 달라요.</summary><p>상관 계수(GMT 584283, 584285 등)를 무엇으로 쓰느냐에 따라 하루~이틀 차이가 날 수 있어요. 이 계산기는 584283을 써요.</p></details></div></section>
+<section><h2>함께 보면 좋은 곳</h2><ul class="grelated"><li><a href="/decan/">이집트 데칸<small>별자리 속 숨은 자리</small></a></li><li><a href="/nakshatra/">나크샤트라 계산기<small>태어난 밤 달이 머문 집</small></a></li><li><a href="/manse/">무료 만세력<small>내 사주 여덟 글자 · 오행</small></a></li></ul></section>
+<footer class="gfoot"><p class="gnote" data-js="cookie-line" hidden>방문 통계에 구글 애널리틱스 쿠키를 써요. 입력한 정보는 보내지 않아요.</p><p><a href="/products/strange-oracle/legal/terms.html">이용약관</a><a href="/products/strange-oracle/legal/privacy.html">개인정보처리방침</a></p><p>낯선 점술관 · STRANGE ORACLE</p></footer>
+</main>
+</body>
+</html>
