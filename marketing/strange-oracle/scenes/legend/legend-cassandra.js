@@ -135,6 +135,9 @@
   stage.append(anim($("p", "askline", "맞는 말만 하는데 아무도 안 믿어 주는<br>친구가 있다면 태그해 주세요"), [`cap-in 0.6s var(--ease-out) ${T.q + 1.4}s both`, `hide 0.4s ease-in ${T.end - 0.4}s forwards`]));
 
   // ── 끝 화면: 이 전설이 사는 방 + 낯선 점술관을 크게
+  const shade = $("div", "endshade");
+  stage.querySelector(".grade").after(anim(shade, [`show 0.8s ease-out ${T.q - 0.2}s both`]));
+  shade.style.setProperty("--o", 1);
   const end = $("div", "endcard", `<p class="e1">이 전설이 잠든 곳</p>
     <p class="e2"><b>Ⅶ</b> 시빌라 신탁의 방</p>
     <p class="logo e3">낯선 점술관</p>
