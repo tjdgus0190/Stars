@@ -26,7 +26,7 @@
     aside.innerHTML = `<div class="sidenav__head"><a class="sidenav__brand" href="/products/strange-oracle/"><b>${esc(N.brand)}</b><small>${esc(N.brandSub)}</small></a>
       <button class="sidenav__close" type="button" data-nav="close" aria-label="${esc(N.close)}">×</button></div>` +
       N.groups.map((g) => `<nav class="sidenav__group" aria-label="${esc(g.head)}"><h2>${esc(g.head)}</h2><ul>${g.items.map((it) =>
-        `<li><a href="${esc(it.href)}"${it.ext ? ' target="_blank" rel="noopener"' : ""}>${esc(it.label)}${it.ext ? '<span class="ext">↗</span>' : ""}${it.note ? `<small>${esc(it.note)}</small>` : ""}</a></li>`).join("")}</ul></nav>`).join("");
+        `<li><a href="${esc(it.href)}"${it.ext ? ' target="_blank" rel="noopener"' : ""}>${esc(it.label)}${it.ext ? '<span class="ext">↗</span>' : ""}${it.note ? `<small>${esc(it.note)}</small>` : ""}</a>${it.disclose ? `<p class="sidenav__notice">${esc(it.disclose)}</p>` : ""}</li>`).join("")}</ul></nav>`).join("");
     document.body.append(aside);
     return aside;
   }

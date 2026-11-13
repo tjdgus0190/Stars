@@ -25,7 +25,8 @@ window.NAV = {
       head: "점술관의 하루",
       items: [
         { label: "오늘의 신탁", note: "하루 한 줄 · 별가루 +5", href: "/today/" },
-        { label: "안내자와 면담", note: "안내자에게 직접 묻기 · 별가루 10", href: "/talk/" },
+        // 면담 고지 한 줄(운영 규칙 ⑯ 예외: 이 줄·약관·개인정보처리방침에만, 표시 안에서만). 대화 화면에는 넣지 않는다
+        { label: "안내자와 면담", note: "안내자에게 직접 묻기 · 별가루 10", href: "/talk/", /* ai-notice */ disclose: "안내자의 말은 생성형 인공지능이 점술관의 기록으로 엮어 냅니다." /* /ai-notice */ },
         { label: "안내자 도감", note: "일곱 안내자의 숨은 이야기", href: "/dex/" },
         { label: "별가루", note: "모으는 법과 쓰는 곳", href: "/stardust/" },
       ],

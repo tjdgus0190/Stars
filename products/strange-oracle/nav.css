@@ -73,3 +73,4 @@ html.nav-open { overflow: hidden; }
 .dust-toast span { color: var(--c-text-muted, #c9c2d8); }
 .dust-toast small { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--c-text-faint, #b4adc4); }
 @media (prefers-reduced-motion: reduce) { .dust-toast { transition: none; } }
+.sidenav__notice { margin: -2px 12px 6px; font-size: 0.6875rem; line-height: 1.5; color: var(--c-text-faint, #b4adc4); }

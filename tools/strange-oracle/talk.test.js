@@ -146,13 +146,22 @@ test("POST만 받는다", async () => {
   assert.strictEqual(r.status, 405);
 });
 
-test("함수 파일·배포 설정: 주소 /api/talk, 함수 묶음에 안내자·해석 파일, 공개 화면 기본값 off", () => {
+test("함수 파일·배포 설정: 주소 /api/talk, 함수 묶음에 안내자·해석 파일, 공개 화면은 off|live(live면 CLAUDE.md 예외)", () => {
   const fs = require("fs");
   const fn = fs.readFileSync(path.join(ROOT, "netlify", "functions", "talk.mjs"), "utf8");
   assert.ok(/path:\s*"\/api\/talk"/.test(fn));
   const toml = fs.readFileSync(path.join(ROOT, "netlify.toml"), "utf8");
   for (const f of ["data-dex.js", "data-saju.js", "data-runes.js", "data-oracles.js"]) assert.ok(toml.includes("products/strange-oracle/" + f), f);
   const g = fs.readFileSync(path.join(ROOT, "products", "strange-oracle", "data-guide.js"), "utf8");
-  assert.ok(/talkMode:\s*"off"/.test(g));
+  const mode = (g.match(/talkMode:\s*"(\w+)"/) || [])[1];
+  assert.ok(mode === "off" || mode === "live", mode);
+  if (mode === "live") assert.ok(/안내자 면담/.test(fs.readFileSync(path.join(ROOT, "CLAUDE.md"), "utf8")), "live면 CLAUDE.md 면담 예외 필요");
   assert.ok(!/sk-ant-/.test(fn + toml + g + fs.readFileSync(path.join(ROOT, "netlify", "lib", "talk.js"), "utf8")));
+});
+
+test("TALK_MODEL 값 정리: claude- 없이 적어도 받고, 이상한 값은 기본 모델", () => {
+  assert.strictEqual(Talk.modelOf("sonnet-5-5"), "claude-sonnet-5-5");
+  assert.strictEqual(Talk.modelOf(" Claude-Sonnet-5-5 "), "claude-sonnet-5-5");
+  assert.strictEqual(Talk.modelOf(""), "claude-opus-5-5");
+  assert.strictEqual(Talk.modelOf("rm -rf"), "claude-opus-5-5");
 });

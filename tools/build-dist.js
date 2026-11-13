@@ -233,6 +233,12 @@ let count = 0;
   const rules = fs.readFileSync(path.join(ROOT, "CLAUDE.md"), "utf8");
   if (mode !== "off" && !/안내자 면담/.test(rules)) fails.push(`⑲ data-guide.js talkMode "${mode}" — CLAUDE.md에 안내자 면담 예외가 없음. 운영자가 specs/claude-md-v1-exceptions.md를 붙인 뒤에 켤 것`);
   if (mode !== "off" && mode !== "live") fails.push(`⑲ data-guide.js talkMode는 배포판에서 "off" 또는 "live"만 (지금 "${mode}")`);
+  if (mode === "live") {
+    const L = (f) => fs.readFileSync(path.join(ROOT, "products", "strange-oracle", "legal", f), "utf8");
+    if (!/id="s4-7"[\s\S]*Anthropic[\s\S]*미국/.test(L("privacy.html"))) fails.push("⑲ 면담 live인데 개인정보처리방침에 국외 이전 조항(제4조의7)이 없음");
+    if (!/id="s2-5"[\s\S]*만 14세 이상/.test(L("terms.html"))) fails.push("⑲ 면담 live인데 이용약관에 만 14세 이상 조항(제2조의5)이 없음");
+    if (!/disclose:/.test(fs.readFileSync(path.join(ROOT, "products", "strange-oracle", "data-nav.js"), "utf8"))) fails.push("⑲ 면담 live인데 사이드바 고지 한 줄이 없음");
+  }
 }
 console.log(`dist/ 생성 완료 — 파일 ${count}개`);
 
@@ -265,7 +271,13 @@ const publicTexts = [];
         const t = fs.readFileSync(p, "utf8");
         publicTexts.push(t);
         // ⑯ (2026-10-24 운영자 "AI가 만들었다는 내용은 모두 지워") 공개 파일에 제작 도구·작업 체계 흔적 0
-        const tell = t.match(/CLAUDE\.md|\bClaude\b|\bAnthropic\b|ChatGPT|OpenAI|Clipwave|인공지능|생성형|\bAI\b|에이전트|assets\/ai\//);
+        // (2026-11-13 운영자 ⑯ 예외) 생성형 인공지능 고지는 약관·개인정보처리방침과 사이드바 「안내자와 면담」 한 줄에만, ai-notice 표시 안에서만 허용한다.
+        //   표시 안에서도 제작 도구 이름(Claude·ChatGPT·OpenAI·Clipwave·CLAUDE.md·에이전트)은 여전히 0이어야 한다
+        const NOTICE_OK = /(^|\/)legal\/(terms|privacy)\.html$|(^|\/)data-nav\.js$|(^|\/)guide\/.+\.html$/.test(rel);
+        const NOTICE_RE = /<!-- ai-notice -->[\s\S]*?<!-- \/ai-notice -->|\/\* ai-notice \*\/[\s\S]*?\/\* \/ai-notice \*\//g;
+        const notices = NOTICE_OK ? t.match(NOTICE_RE) || [] : [];
+        for (const n of notices) { const bad = n.match(/CLAUDE\.md|\bClaude\b|ChatGPT|OpenAI|Clipwave|에이전트|assets\/ai\//); if (bad) fails.push(`⑯ public/${rel}의 고지 안에 "${bad[0]}"`); }
+        const tell = (NOTICE_OK ? t.replace(NOTICE_RE, "") : t).match(/CLAUDE\.md|\bClaude\b|\bAnthropic\b|ChatGPT|OpenAI|Clipwave|인공지능|생성형|\bAI\b|에이전트|assets\/ai\//);
         if (tell) fails.push(`⑯ public/${rel}에 "${tell[0]}"`);
         for (const w of SECRET_WORDS) if (t.includes(w)) fails.push(`⑧ public/${rel}에 "${w}" 있음`); // (15-7) 결제 비밀값 이름·모의 길 0건
         for (const w of MAP_WORDS) if (t.includes(w)) fails.push(`⑫ public/${rel}에 "${w}" 있음`); // (16-8) 지도 서버 칸·설정 이름·모의 지도 길 0건

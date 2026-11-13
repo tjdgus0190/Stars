@@ -9,11 +9,11 @@
 //
 // 켜는 조건 (하나라도 빠지면 503 off, 로그 없음):
 //   TALK_MODE = "test" | "live",  ANTHROPIC_API_KEY,  TALK_MONTHLY_USD > 0 (월 비용 상한, 미국 달러)
-//   ※ CLAUDE.md에 운영자가 면담 예외(specs/claude-md-v1-exceptions.md)를 붙여 넣기 전에는 켜지 않는다.
+//   CLAUDE.md 3·6·7장 면담·재화 예외(운영자 2026-11-13 반영).
 // 저장(Netlify Blobs, 저장소 "strange-oracle-talk"): budget/<YYYY-MM> { usd, n } — 이번 달 쓴 돈(추정)과 문답 수뿐.
 //   질문 글·답·IP·방 결과는 저장하지 않고 console에도 찍지 않는다.
 // 횟수 제한(함수 인스턴스 메모리, IP는 Map 키로만): 10분에 12번, 한국 날짜 하루 무료 질문 4번(별가루 무료 몫 30 + 첫 방문 10 = 4번).
-// 모델: TALK_MODEL(기본 claude-opus-5-5). 거절(refusal) 시 서버 쪽 대체 모델(fallbacks "default")로 한 번 더 가고, 그래도 거절이면 안내자 말투의 정해진 한 줄.
+// 모델: TALK_MODEL(기본 claude-opus-5-5, 운영자 설정 claude-sonnet-5-5 — "sonnet-5-5"처럼 적어도 받는다). 거절(refusal) 시 서버 쪽 대체 모델(fallbacks "default")로 한 번 더 가고, 그래도 거절이면 안내자 말투의 정해진 한 줄.
 // 핵심 handle(req, env, store, now, llm)을 모의 서버·단위 시험이 그대로 부른다(llm을 가짜로 바꿔 끼운다).
 "use strict";
 const Prompt = require("./talk-prompt.js");
@@ -46,6 +46,12 @@ const R_SHAPE = {
   rune: { p: "codes" },
   sibyl: { i: [0, 31] },
 };
+// TALK_MODEL 값 정리: 앞뒤 빈칸을 지우고, "sonnet-5-5"처럼 claude- 없이 적어도 받는다. 모양이 이상하면 기본값
+function modelOf(v) {
+  let m = String(v || "").trim().toLowerCase();
+  if (/^(opus|sonnet|haiku|fable)-/.test(m)) m = "claude-" + m;
+  return /^claude-[a-z0-9-]{3,40}$/.test(m) ? m : DEFAULT_MODEL;
+}
 const isInt = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
 function validR(room, r) {
   if (r == null) return true;
@@ -117,7 +123,7 @@ async function handle(req, env, store, now = Date.now(), llm) {
   try { b = (await store.get(key)) || { usd: 0, n: 0 }; } catch (e) { return json(503, { error: "store" }); }
   if (b.usd >= Number(env.TALK_MONTHLY_USD)) return json(503, { error: "budget" });
 
-  const model = env.TALK_MODEL || DEFAULT_MODEL;
+  const model = modelOf(env.TALK_MODEL);
   const params = Prompt.build(p, model);
   let msg;
   try { msg = await llm(params, env); } catch (e) { return json(502, { error: "upstream" }); }
@@ -156,4 +162,4 @@ async function respond(req, context, openStore, env = process.env) {
 }
 
 const _reset = () => hits.clear();
-module.exports = { respond, handle, parse, validR, costOf, envOk, storeFrom, STORE_NAME, ROOMS, R_SHAPE, MAX_Q, FREE_PER_DAY, DEFAULT_MODEL, _reset };
+module.exports = { modelOf, respond, handle, parse, validR, costOf, envOk, storeFrom, STORE_NAME, ROOMS, R_SHAPE, MAX_Q, FREE_PER_DAY, DEFAULT_MODEL, _reset };
