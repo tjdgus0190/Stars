@@ -16,14 +16,14 @@ const EP = process.argv[2] || "cassandra";
 const TT = {
   sibyl: { h2: 1.2, b1: 3.6, b2: 6.6, b3: 9.6, b4: 12.8, b5: 16.2, b6: 19.2, b7: 22.6, b8: 25.8, b9: 29.4, b10: 32.8, b11: 35.8, b12: 38.8, q: 41.8, end: 45.6, dur: 51 }, // 2026-11-13 예언서가 부른 검은 돌
   cassandra: { h2: 1.2, b1: 3.6, b2: 6.2, b3: 9.4, b4: 12.0, curse: 14.6, b6: 17.6, b7: 20.8, b8: 24.4, b9: 27.2, b10: 30.2, b11: 33.0, q: 36.6, end: 41.0, dur: 47 }, // 2026-11-13 느리게 + 끝 화면
-  rune: { b1: 2.9, b2: 5.2, w1: 7.6, w2: 9.6, w3: 11.6, b6: 13.8, b7: 16.4, b8: 18.8, b9: 21.0, pour: 21.4, b10: 23.4, b11: 25.8, q: 28.4, brand: 30.2, dur: 32 },
+  norn: { b1: 2.9, b2: 5.2, w1: 7.6, w2: 9.6, w3: 11.6, b6: 13.8, b7: 16.4, b8: 18.8, b9: 21.0, pour: 21.4, b10: 23.4, b11: 25.8, q: 28.4, brand: 30.2, dur: 32 },
 };
 // 공용 틀 편(scenes/legend/ep/<편>.js)은 그 설정 파일에서 시각표와 소리 목록을 읽는다
 const EPFILE = path.resolve(__dirname, "..", "scenes", "legend", "ep", `${EP}.js`);
 const EPCONF = !TT[EP] && fs.existsSync(EPFILE) ? require(EPFILE) : null;
-if (!TT[EP] && !EPCONF) throw new Error(`알 수 없는 편: ${EP} (sibyl | cassandra | rune | scenes/legend/ep/의 편)`);
+if (!TT[EP] && !EPCONF) throw new Error(`알 수 없는 편: ${EP} (sibyl | cassandra | norn | scenes/legend/ep/의 편)`);
 const T = TT[EP] || EPCONF.T;
-const VIDEO = EPCONF ? `legend-ep-${EP}-ko` : `legend-${EP}-ko`;
+const VIDEO = EPCONF ? `legend-ep-${EP}-ko` : `legend-${EP === "norn" ? "rune" : EP}-ko`; // 보류한 「세 여인」 편은 파일 이름이 legend-rune-ko(옛 이름)
 const OUT = path.resolve(__dirname, "..", "out");
 const SR = 48000, DUR = T.dur, N = SR * DUR;
 const L = new Float32Array(N), R = new Float32Array(N), VL = new Float32Array(N), VR = new Float32Array(N);
@@ -281,7 +281,7 @@ if (EP === "cassandra") {
   [69, 73, 76, 81, 85].forEach((m, k) => bell(T.end + 1.15 + k * 0.08, mtof(m), 0.05, (k - 2) * 0.3));
   bell(T.end + 2.8, mtof(88), 0.05, 0);
 }
-if (EP === "rune") {
+if (EP === "norn") {
 // 지속음: E 도리아(E2·B2·D3·F#3), 신도 못 바꾼다에서 어둡게(C), 고요, 물이 닿으면 E 장조로 밝게, 질문은 열린 화음
 const chord = (t) => (t < T.b7 ? [40, 47, 50, 54] : t < T.b9 ? [36, 43, 52, 55] : t < T.q ? [40, 47, 56, 59] : [40, 47, 54, 59]);
 strings((t) => (0.4 + 0.2 * smooth(T.b1, T.b1 + 1.5, t) + 0.3 * smooth(T.b6, T.b7, t)) * (1 - 0.75 * smooth(T.b8, T.b8 + 0.8, t) * (1 - smooth(T.pour + 0.6, T.pour + 1.6, t))) * (1 - 0.4 * smooth(T.q, T.q + 1.5, t)) * (1 - smooth(DUR - 0.8, DUR, t)) * Math.min(1, t / 0.05 + 0.4), chord, 0.055);
