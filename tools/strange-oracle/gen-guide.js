@@ -119,6 +119,8 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
       .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : kind === "app" ? (APP_SCRIPTS[name] || []).map((f) => PB + f) : kind === "home" ? [`${PB}data-dex.js`] : kind === "legend" || kind === "legends" ? [`${PB}data-legends.js`] : [])
       .concat([`${PB}guide.js`]);
     const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : ""; // (2026-11-14) 하루 페이지·처음 화면은 선 실루엣 대신 초상 그림(img/guide/)
+    // (2026-11-14) 하루 페이지·도구: 긴 설명과 자주 묻는 질문은 접어 둔다(검색 엔진은 그대로 읽는다)
+    const fold = (inner) => `<details class="gfold-more"><summary>${esc(G.ui.moreInfo)}</summary>${inner}</details>`;
     const cta = (c) => `<div class="gcta"><h2>${esc(c.head)}</h2><p>${esc(c.body)}</p><a class="gbtn" href="${PB}" data-js="to-room">${esc(c.btn)}</a></div>`;
     const ARCH_ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
     const DEX_IMG = (room) => `${PB}img/dex/dex-${room}.webp`;
@@ -155,14 +157,12 @@ ${cta(d.cta)}`
       : kind === "app"
       ? `<p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.lead)}</p>
 <section class="gapp gapp--${name}" data-js="app" aria-live="polite"></section>
-${sections(d.sections)}
-${faq(d.faq)}
+${fold(sections(d.sections) + faq(d.faq))}
 ${related(d.related)}`
       : kind === "tool"
       ? `<p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.lead)}</p>
 ${toolForm(name, d)}
-${sections(d.sections)}
-${faq(d.faq)}
+${fold(sections(d.sections) + faq(d.faq))}
 ${related(d.related)}`
       : `<p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1>
 ${d.intro.map((p) => `<p>${esc(p)}</p>`).join("\n")}

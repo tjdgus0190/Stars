@@ -5976,3 +5976,29 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 
 /* (2026-11-06) 글자 크기를 줄여도 입력칸은 16px(아이폰이 16px 미만 입력칸을 누르면 화면을 확대한다) */
 .input, input[type="text"], input[type="date"], input[type="time"], input[type="number"], input[type="email"], textarea, select { font-size: 1rem; }
+
+/* ═════════ (2026-11-14) 안내자 초상(img/guide/) — 선 실루엣을 대신하는 작은 얼굴·아치 그림 ═════════
+   .gface--<방>: 그림과 눈높이(작은 크기에서는 얼굴만 보이게 2배 확대). 큰 칸(방 시작·신년운세)은 상반신 */
+.gface { display: inline-block; flex: none; box-sizing: border-box; border-radius: 999px 999px 5px 5px; border: 1px solid oklch(0.78 0.1 82 / 0.8);
+  background: var(--gp) 50% var(--gfy, 0%) / 200% auto no-repeat, oklch(0.16 0.04 285); box-shadow: 0 0 0 2px oklch(0.12 0.03 285 / 0.9), 0 0 14px var(--accent-glow, oklch(0.8 0.1 80 / 0.25));
+  fill: none; stroke: none; filter: none; }
+.gface--saju { --gp: url("img/guide/saju.webp"); --gfy: 0%; }
+.gface--ogham { --gp: url("img/guide/ogham.webp"); --gfy: 18%; }
+.gface--star { --gp: url("img/guide/star.webp"); --gfy: 20%; }
+.gface--decan { --gp: url("img/guide/decan.webp"); --gfy: 6%; }
+.gface--tzolkin { --gp: url("img/guide/tzolkin.webp"); --gfy: 50%; }
+.gface--rune { --gp: url("img/guide/rune.webp"); --gfy: 0%; }
+.gface--sibyl { --gp: url("img/guide/sibyl.webp"); --gfy: 0%; }
+.say__figure.gface { width: 36px; height: 42px; }
+.say__head .say__figure.gface { width: 26px; height: 30px; }
+.room-rest__room-fig.gface { width: 28px; height: 34px; }
+.room-rest__room.is-here .room-rest__room-fig.gface { border-color: var(--accent); }
+/* 방 시작: 문 옆 선 실루엣은 숨기고, 안내자 인사말 위에 상반신 초상(아치) */
+.guide-figure.gface { display: none; }
+.say__portrait.gface { width: 76px; height: 101px; margin: 0 auto var(--space-3); background-size: cover; background-position: center top; border-width: 1.5px;
+  box-shadow: 0 0 0 3px oklch(0.12 0.03 285 / 0.9), 0 0 0 4px oklch(0.6 0.08 80 / 0.4), 0 10px 28px oklch(0 0 0 / 0.5), 0 0 30px var(--accent-glow, transparent); }
+/* 처음 화면 버튼 */
+.topbar__lobby { display: inline-flex; align-items: center; gap: 4px; min-height: var(--tap-min); padding: 0 var(--space-2); border-radius: 12px; text-decoration: none; font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--c-text-strong); white-space: nowrap; }
+.topbar__lobby svg { width: 18px; height: 18px; color: oklch(0.86 0.1 85); }
+.topbar.is-room .topbar__lobby span, .topbar.is-reading .topbar__lobby span, .topbar.is-room .topbar__clear span { display: none; }
+.topbar.is-room .topbar__lobby, .topbar.is-room .topbar__clear { padding: 0 6px; }

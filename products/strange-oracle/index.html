@@ -173,6 +173,8 @@
   <!-- ═════════ 상단 막대 (모든 화면 공통) ═════════ -->
   <header class="topbar" data-js="topbar">
     <div class="topbar__inner">
+      <!-- (2026-11-14) 처음 화면(/)으로: 늘 보임. 입구 화면에서는 글자까지, 방 안에서는 아이콘만 -->
+      <a class="topbar__lobby" href="/" data-js="topbar-lobby"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg><span data-t="topbar.lobby">처음 화면</span></a>
       <!-- (8단계) 늘 보이는 "입구" 버튼: 입구 화면에서만 .is-hidden. 기존 ← 뒤로 버튼(topbar-back)을 대체 -->
       <button class="topbar__home is-hidden" type="button" data-go="hub" data-js="topbar-home">
         <svg class="topbar__home-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 18V9a6 6 0 0 1 12 0v9M4 18h12M10 18v-6M8 12h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -602,12 +604,13 @@
           <span class="saju-gate__sill"></span>
         </div>
         <!-- 안내자 「만신」: SVG 실루엣(한복·방울·부채). 이미지 교체 자리 — 확정 이미지가 생기면 이 svg를 img로 (맨 위 sprite 주석) -->
-        <svg class="guide-figure guide-figure--saju" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg>
+        <i class="guide-figure guide-figure--saju gface gface--saju" aria-hidden="true"></i>
         <p class="eyebrow" lang="en" data-t="saju.intro.eyebrow">SAJU · THE EIGHT CHARACTERS</p>
         <h1 class="room-head__title" data-t="saju.intro.title">만신의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="1"></span> <span data-t="rooms.saju.chapterName">타고난 그릇</span></p>
         <p class="room-head__pitch" data-t="saju.intro.pitch">여덟 글자로 읽는, 나의 타고난 그릇</p>
         <div class="say say--greet" data-js="guide-greet">
+          <i class="say__portrait gface gface--saju" aria-hidden="true"></i>
           <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">만신</b></p>
           <p class="say__line" data-t="guides.saju.greet">어서 오게, 먼 길 오느라 애썼구먼. 이제 세상의 여섯 문을 더 지날 터이니, 그 전에 자네 그릇부터 한번 들여다보세.</p>
         </div>
@@ -712,7 +715,7 @@
       </div>
 
       <div class="say say--ritual" data-js="guide-ritual">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg>
+        <i class="say__figure gface gface--saju" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">만신</b></p>
         <p class="say__line ritual__guide" data-js="saju-ritual-guide" data-t="guides.saju.ritual" aria-live="polite">쌀 위에 방울을 한 번 흔들어 보게. 글자가 제 발로 올라올 것이여.</p>
       </div>
@@ -755,7 +758,7 @@
          공유 카드에는 일간 이름·한자·오행 막대·원형만. 원국 8글자와 성별은 넣지 않는다(카드 그리는 코드는 개발 담당, 명세는 design 14단계 9절) -->
     <section class="screen result result--saju" id="screen-saju-result" data-js="screen-saju-result" data-room="saju" data-preview="4. 만신의 방 — 결과">
       <div class="say say--open" data-js="guide-open">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg>
+        <i class="say__figure gface gface--saju" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">만신</b></p>
         <p class="say__line" data-t="guides.saju.open">만신이 쌀 위에 {who}의 여덟 글자를 펼쳐 보았네.</p>
       </div>
@@ -829,7 +832,7 @@
 
       <!-- S5 만신의 공수: 마무리 = 실행 가능한 긍정 조언. 안내자 close 자리와 같은 컴포넌트에 한지 띠를 두른다 -->
       <div class="say say--close say--gongsu" data-js="guide-close">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg>
+        <i class="say__figure gface gface--saju" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">만신</b></p>
         <p class="say__line" data-js="saju-s5"></p>
       </div>
@@ -856,7 +859,7 @@
       <section class="passage" data-js="result-passage" aria-labelledby="saju-bridge-title">
         <h2 class="visually-hidden" id="saju-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <div class="say say--bridge" data-js="guide-bridge">
-          <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-saju" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">만신</b></span></p>
+          <p class="say__head"><i class="say__figure gface gface--saju" aria-hidden="true"></i><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.saju.name">만신</b></span></p>
           <p class="passage__bridge" data-js="result-bridge" data-t="bridges.saju">타고난 그릇을 보았으니, 그 그릇에 이름은 어떤 뿌리를 새겼을까요?</p>
         </div>
         <button class="next-door" type="button" data-room="ogham" data-go="ogham-intro" data-js="result-next-door">
@@ -881,13 +884,14 @@
     <section class="screen screen--dock room-intro" id="screen-rune-intro" data-js="screen-rune-intro" data-room="rune" data-preview="1. 룬의 방 — 시작">
       <header class="room-head">
         <div class="room-emblem room-emblem--rune" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__rune" viewBox="0 0 40 60"><use href="#rune-raidho" /></svg></div>
-        <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-rune" /></svg>
+        <i class="guide-figure gface gface--rune" aria-hidden="true"></i>
         <p class="eyebrow" lang="en" data-t="rune.intro.eyebrow">THE RUNE ROOM</p>
         <h1 class="room-head__title" data-t="rune.intro.title">룬의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="5"></span> <span data-t="rooms.rune.chapterName">과거·현재·미래</span></p>
         <p class="room-head__pitch" data-t="rune.intro.pitch">세 개의 돌이 말해주는, 당신의 과거·현재·미래</p>
         <!-- (9단계) 안내자 한마디: greet -->
         <div class="say say--greet" data-js="guide-greet">
+          <i class="say__portrait gface gface--rune" aria-hidden="true"></i>
           <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.rune.name">룬</b></p>
           <p class="say__line" data-t="guides.rune.greet">바닷바람이 부는 곳까지 잘 오셨어요, 룬이에요. 돌 세 개가 조용히 당신을 기다리고 있어요.</p>
         </div>
@@ -947,7 +951,7 @@
       <p class="ritual-skip" data-js="ritual-skip" data-t="ritual.skipHint">누르면 바로 보기</p>
       <!-- (9단계) 안내자 한마디: ritual -->
       <div class="say say--ritual" data-js="guide-ritual">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-rune" /></svg>
+        <i class="say__figure gface gface--rune" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.rune.name">룬</b></p>
         <p class="say__line ritual__guide" data-js="rune-ritual-guide" data-t="guides.rune.ritual" aria-live="polite">돌을 손끝으로 눌러 쥐었다가, 흔들거나 놓아서 던져 보세요.</p>
       </div>
@@ -1016,7 +1020,7 @@
       <!-- 캡처 영역. 화면에 들어오면 JS가 .is-revealed → 봉인이 그려지고 풀리며 룬 → 빛 → 제목 순서로 드러난다 -->
       <!-- (9단계) 안내자 한마디: open -->
       <div class="say say--open" data-js="guide-open">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-rune" /></svg>
+        <i class="say__figure gface gface--rune" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.rune.name">룬</b></p>
         <p class="say__line" data-t="guides.rune.open">물결이 흘러와 세 개의 돌을 {who}의 자리로 데려다주었어요.</p>
       </div>
@@ -1088,7 +1092,7 @@
 
       <!-- (9단계) 안내자 한마디: close -->
       <div class="say say--close" data-js="guide-close">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-rune" /></svg>
+        <i class="say__figure gface gface--rune" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.rune.name">룬</b></p>
         <p class="say__line" data-t="guides.rune.close">바람은 오늘도 다시 불어와요. 고른 세 개의 돌을 마음에 담아 두세요.</p>
       </div>
@@ -1107,7 +1111,7 @@
         <h2 class="visually-hidden" id="rune-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.rune)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
-          <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-rune" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.rune.name">룬</b></span></p>
+          <p class="say__head"><i class="say__figure gface gface--rune" aria-hidden="true"></i><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.rune.name">룬</b></span></p>
           <p class="passage__bridge" data-js="result-bridge" data-t="bridges.rune">세 돌이 놓인 길 끝에서, 오늘 품은 질문은 어떤 울림을 만날까요?</p>
         </div>
         <button class="next-door" type="button" data-room="sibyl" data-go="sibyl-intro" data-js="result-next-door">
@@ -1133,13 +1137,14 @@
     <section class="screen screen--dock room-intro" id="screen-star-intro" data-js="screen-star-intro" data-room="star" data-preview="1. 베다의 방 — 시작">
       <header class="room-head">
         <div class="room-emblem room-emblem--star" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__icon room-emblem__moon" viewBox="0 0 40 40"><use href="#icon-star" /></svg></div>
-        <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-star" /></svg>
+        <i class="guide-figure gface gface--star" aria-hidden="true"></i>
         <p class="eyebrow" lang="en" data-t="star.intro.eyebrow">THE STAR ROOM</p>
         <h1 class="room-head__title" data-t="star.intro.title">베다의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="2"></span> <span data-t="rooms.star.chapterName">마음결</span></p>
         <p class="room-head__pitch" data-t="star.intro.pitch">태어난 순간 하늘의 달이 알려주는, 지금의 속마음</p>
         <!-- (9단계) 안내자 한마디: greet -->
         <div class="say say--greet" data-js="guide-greet">
+          <i class="say__portrait gface gface--star" aria-hidden="true"></i>
           <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.star.name">베다</b></p>
           <p class="say__line" data-t="guides.star.greet">어서 와요, 밤마다 달의 집을 세는 별이에요. 오늘 밤 달이 몇 번째 집에 머무는지 함께 세어 볼까요.</p>
         </div>
@@ -1222,7 +1227,7 @@
       <p class="ritual-skip" data-js="ritual-skip" data-t="ritual.skipHint">누르면 바로 보기</p>
       <!-- (9단계) 안내자 한마디: ritual -->
       <div class="say say--ritual" data-js="guide-ritual">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-star" /></svg>
+        <i class="say__figure gface gface--star" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.star.name">베다</b></p>
         <p class="say__line ritual__guide" data-js="star-ritual-guide" data-t="guides.star.ritual" aria-live="polite">달의 집을 하나, 둘, 차례로 짚어 가며 세고 있어요.</p>
       </div>
@@ -1354,7 +1359,7 @@
 
       <!-- (9단계) 안내자 한마디: open -->
       <div class="say say--open" data-js="guide-open">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-star" /></svg>
+        <i class="say__figure gface gface--star" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.star.name">베다</b></p>
         <p class="say__line" data-t="guides.star.open">밤하늘 스물일곱 개 집 가운데, {who}의 집을 찾아냈어요.</p>
       </div>
@@ -1434,7 +1439,7 @@
 
       <!-- (9단계) 안내자 한마디: close -->
       <div class="say say--close" data-js="guide-close">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-star" /></svg>
+        <i class="say__figure gface gface--star" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.star.name">베다</b></p>
         <p class="say__line" data-t="guides.star.close">달은 다시 이 집으로 돌아와요, 오늘 함께 센 숫자를 기억해 두세요.</p>
       </div>
@@ -1455,7 +1460,7 @@
         <h2 class="visually-hidden" id="star-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.star)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
-          <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-star" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.star.name">베다</b></span></p>
+          <p class="say__head"><i class="say__figure gface gface--star" aria-hidden="true"></i><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.star.name">베다</b></span></p>
           <p class="passage__bridge" data-js="result-bridge" data-t="bridges.star">달이 비춘 이 마음결 아래, 아직 깨우지 않은 재능은 무엇일까요?</p>
         </div>
         <button class="next-door" type="button" data-room="decan" data-go="decan-intro" data-js="result-next-door">
@@ -1486,13 +1491,14 @@
     <section class="screen screen--dock room-intro" id="screen-ogham-intro" data-js="screen-ogham-intro" data-room="ogham" data-preview="1. 오검의 방 — 시작">
       <header class="room-head">
         <div class="room-emblem room-emblem--ogham" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__ogham" viewBox="0 0 40 80"><use href="#ogham-beith" /></svg></div>
-        <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg>
+        <i class="guide-figure gface gface--ogham" aria-hidden="true"></i>
         <p class="eyebrow" lang="en" data-t="ogham.intro.eyebrow">OGHAM · THE TREE LETTERS</p>
         <h1 class="room-head__title" data-t="ogham.intro.title">오검의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="1"></span> <span data-t="rooms.ogham.chapterName">뿌리</span></p>
         <p class="room-head__pitch" data-t="ogham.intro.pitch">이름 하나로 새겨지는, 나의 뿌리 이야기</p>
         <!-- (9단계) 안내자 한마디: greet -->
         <div class="say say--greet" data-js="guide-greet">
+          <i class="say__portrait gface gface--ogham" aria-hidden="true"></i>
           <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></p>
           <p class="say__line" data-t="guides.ogham.greet">어서 와요, 자작나무 숲의 필경사 오검이에요. 당신의 이름 한 자 한 자를, 나무의 결을 따라 정성껏 새겨 드릴게요.</p>
         </div>
@@ -1556,7 +1562,7 @@
 
       <!-- (9단계) 안내자 한마디: ritual -->
       <div class="say say--ritual" data-js="guide-ritual">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg>
+        <i class="say__figure gface gface--ogham" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></p>
         <p class="say__line ritual__guide" data-js="ogham-ritual-guide" data-t="guides.ogham.ritual" aria-live="polite">숨을 한 번 고르고, 나무의 결을 따라 천천히 새기고 있어요.</p>
       </div>
@@ -1592,7 +1598,7 @@
 
       <!-- (9단계) 안내자 한마디: open -->
       <div class="say say--open" data-js="guide-open">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg>
+        <i class="say__figure gface gface--ogham" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></p>
         <p class="say__line" data-t="guides.ogham.open">오검이 나무의 결을 따라 {who}의 이름을 한 획씩 새겨 보았어요.</p>
       </div>
@@ -1674,7 +1680,7 @@
 
       <!-- (9단계) 안내자 한마디: close -->
       <div class="say say--close" data-js="guide-close">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg>
+        <i class="say__figure gface gface--ogham" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></p>
         <p class="say__line" data-t="guides.ogham.close">새긴 결은 이 숲이 오래도록 기억해요, 오늘의 결을 소중히 간직해 두세요.</p>
       </div>
@@ -1695,7 +1701,7 @@
         <h2 class="visually-hidden" id="ogham-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.ogham)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
-          <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-ogham" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></span></p>
+          <p class="say__head"><i class="say__figure gface gface--ogham" aria-hidden="true"></i><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.ogham.name">오검</b></span></p>
           <p class="passage__bridge" data-js="result-bridge" data-t="bridges.ogham">이 뿌리 위에서 지금 자라는 마음은 어떤 결일지, 별에게 물어볼까요?</p>
         </div>
         <button class="next-door" type="button" data-room="star" data-go="star-intro" data-js="result-next-door">
@@ -1721,13 +1727,14 @@
     <section class="screen screen--dock room-intro" id="screen-decan-intro" data-js="screen-decan-intro" data-room="decan" data-preview="1. 데칸의 방 — 시작">
       <header class="room-head">
         <div class="room-emblem room-emblem--decan" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__icon" viewBox="0 0 40 40"><use href="#icon-decan" /></svg></div>
-        <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-decan" /></svg>
+        <i class="guide-figure gface gface--decan" aria-hidden="true"></i>
         <p class="eyebrow" lang="en" data-t="decan.intro.eyebrow">DECANS · THIRTY-SIX STARS</p>
         <h1 class="room-head__title" data-t="decan.intro.title">데칸의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="3"></span> <span data-t="rooms.decan.chapterName">숨은 재능</span></p>
         <p class="room-head__pitch" data-t="decan.intro.pitch">생일 속에 잠들어 있던, 아무도 몰랐던 재능</p>
         <!-- (9단계) 안내자 한마디: greet -->
         <div class="say say--greet" data-js="guide-greet">
+          <i class="say__portrait gface gface--decan" aria-hidden="true"></i>
           <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.decan.name">데칸</b></p>
           <p class="say__line" data-t="guides.decan.greet">반가워요, 알렉산드리아의 별시계를 돌보는 데칸이에요. 그림자가 당신의 생일 눈금을 가만히 가리키고 있어요.</p>
         </div>
@@ -1791,7 +1798,7 @@
       <p class="ritual-skip" data-js="ritual-skip" data-t="ritual.skipHint">누르면 바로 보기</p>
       <!-- (9단계) 안내자 한마디: ritual -->
       <div class="say say--ritual" data-js="guide-ritual">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-decan" /></svg>
+        <i class="say__figure gface gface--decan" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.decan.name">데칸</b></p>
         <p class="say__line ritual__guide" data-js="decan-ritual-guide" data-t="guides.decan.ritual" aria-live="polite">그림자가 눈금 위를 조용히 지나가고 있어요, 잠시만 기다려요.</p>
       </div>
@@ -1909,7 +1916,7 @@
 
       <!-- (9단계) 안내자 한마디: open -->
       <div class="say say--open" data-js="guide-open">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-decan" /></svg>
+        <i class="say__figure gface gface--decan" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.decan.name">데칸</b></p>
         <p class="say__line" data-t="guides.decan.open">그림자가 멈춰 선 눈금, 바로 그 자리가 {who}의 자리예요.</p>
       </div>
@@ -1995,7 +2002,7 @@
 
       <!-- (9단계) 안내자 한마디: close -->
       <div class="say say--close" data-js="guide-close">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-decan" /></svg>
+        <i class="say__figure gface gface--decan" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.decan.name">데칸</b></p>
         <p class="say__line" data-t="guides.decan.close">그림자는 내일도 같은 눈금으로 돌아와요, 오늘 짚은 자리를 기억해요.</p>
       </div>
@@ -2016,7 +2023,7 @@
         <h2 class="visually-hidden" id="decan-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.decan)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
-          <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-decan" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.decan.name">데칸</b></span></p>
+          <p class="say__head"><i class="say__figure gface gface--decan" aria-hidden="true"></i><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.decan.name">데칸</b></span></p>
           <p class="passage__bridge" data-js="result-bridge" data-t="bridges.decan">그림자가 짚은 이 재능은 앞으로 어떤 순환을 타고 돌아올까요?</p>
         </div>
         <button class="next-door" type="button" data-room="tzolkin" data-go="tzolkin-intro" data-js="result-next-door">
@@ -2042,13 +2049,14 @@
     <section class="screen screen--dock room-intro" id="screen-tzolkin-intro" data-js="screen-tzolkin-intro" data-room="tzolkin" data-preview="1. 촐킨의 방 — 시작">
       <header class="room-head">
         <div class="room-emblem room-emblem--tzolkin" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__icon room-emblem__gear" viewBox="0 0 40 40"><use href="#icon-tzolkin" /></svg></div>
-        <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-tzolkin" /></svg>
+        <i class="guide-figure gface gface--tzolkin" aria-hidden="true"></i>
         <p class="eyebrow" lang="en" data-t="tzolkin.intro.eyebrow">TZOLK'IN · THE SACRED COUNT</p>
         <h1 class="room-head__title" data-t="tzolkin.intro.title">촐킨의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="4"></span> <span data-t="rooms.tzolkin.chapterName">다가올 순환</span></p>
         <p class="room-head__pitch" data-t="tzolkin.intro.pitch">260일 신성한 달력이 짚어 주는, 다가올 흐름</p>
         <!-- (9단계) 안내자 한마디: greet -->
         <div class="say say--greet" data-js="guide-greet">
+          <i class="say__portrait gface gface--tzolkin" aria-hidden="true"></i>
           <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.tzolkin.name">촐킨</b></p>
           <p class="say__line" data-t="guides.tzolkin.greet">이 돌은 260일 동안 돌아오는 순환을 새기고 있어요. 당신의 날도 이 안에 새겨져 있어요.</p>
         </div>
@@ -2115,7 +2123,7 @@
 
       <!-- (9단계) 안내자 한마디: ritual -->
       <div class="say say--ritual" data-js="guide-ritual">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-tzolkin" /></svg>
+        <i class="say__figure gface gface--tzolkin" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.tzolkin.name">촐킨</b></p>
         <p class="say__line ritual__guide" data-js="tzolkin-ritual-guide" data-t="guides.tzolkin.ritual" aria-live="polite">이 돌에 새겨진 순환이 천천히 다시 돌아오고 있어요.</p>
       </div>
@@ -2184,7 +2192,7 @@
 
       <!-- (9단계) 안내자 한마디: open -->
       <div class="say say--open" data-js="guide-open">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-tzolkin" /></svg>
+        <i class="say__figure gface gface--tzolkin" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.tzolkin.name">촐킨</b></p>
         <p class="say__line" data-t="guides.tzolkin.open">이 돌에 새겨진 순환 속에서, {who}의 날이 다시 돌아왔어요.</p>
       </div>
@@ -2260,7 +2268,7 @@
 
       <!-- (9단계) 안내자 한마디: close -->
       <div class="say say--close" data-js="guide-close">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-tzolkin" /></svg>
+        <i class="say__figure gface gface--tzolkin" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.tzolkin.name">촐킨</b></p>
         <p class="say__line" data-t="guides.tzolkin.close">순환은 늘 다시 돌아와요. 이 돌은 여기서 다음 날을 가만히 기다려요.</p>
       </div>
@@ -2281,7 +2289,7 @@
         <h2 class="visually-hidden" id="tzolkin-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.tzolkin)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
-          <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-tzolkin" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.tzolkin.name">촐킨</b></span></p>
+          <p class="say__head"><i class="say__figure gface gface--tzolkin" aria-hidden="true"></i><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.tzolkin.name">촐킨</b></span></p>
           <p class="passage__bridge" data-js="result-bridge" data-t="bridges.tzolkin">돌아오는 순환 위에서, 지나온 날과 오늘과 내일은 어떻게 이어질까요?</p>
         </div>
         <button class="next-door" type="button" data-room="rune" data-go="rune-intro" data-js="result-next-door">
@@ -2307,13 +2315,14 @@
     <section class="screen screen--dock room-intro" id="screen-sibyl-intro" data-js="screen-sibyl-intro" data-room="sibyl" data-preview="1. 시빌라 신탁의 방 — 시작">
       <header class="room-head">
         <div class="room-emblem room-emblem--sibyl" aria-hidden="true" data-js="room-emblem"><svg class="room-emblem__laurel" viewBox="-60 -60 120 120"><use href="#laurel" /></svg><svg class="room-emblem__icon room-emblem__flame" viewBox="0 0 40 40"><use href="#icon-sibyl" /></svg></div>
-        <svg class="guide-figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-sibyl" /></svg>
+        <i class="guide-figure gface gface--sibyl" aria-hidden="true"></i>
         <p class="eyebrow" lang="en" data-t="sibyl.intro.eyebrow">SORTES · THE CANDLE ORACLE</p>
         <h1 class="room-head__title" data-t="sibyl.intro.title">시빌라 신탁의 방</h1>
         <p class="room-head__chapter"><span class="room-head__chapter-num" data-js="room-chapter-num" data-n="6"></span> <span data-t="rooms.sibyl.chapterName">오늘의 질문</span></p>
         <p class="room-head__pitch" data-t="sibyl.intro.pitch">촛불에 떠오르는 글자로 듣는, 오늘의 답</p>
         <!-- (9단계) 안내자 한마디: greet -->
         <div class="say say--greet" data-js="guide-greet">
+          <i class="say__portrait gface gface--sibyl" aria-hidden="true"></i>
           <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.sibyl.name">시빌라</b></p>
           <p class="say__line" data-t="guides.sibyl.greet">동굴 깊은 곳까지 잘 오셨네요… 울림으로 말을 전하는 시빌라예요. 당신의 질문을 기다리고 있어요.</p>
         </div>
@@ -2374,7 +2383,7 @@
 
       <!-- (9단계) 안내자 한마디: ritual -->
       <div class="say say--ritual" data-js="guide-ritual">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-sibyl" /></svg>
+        <i class="say__figure gface gface--sibyl" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.sibyl.name">시빌라</b></p>
         <p class="say__line ritual__guide" data-js="sibyl-ritual-guide" data-t="guides.sibyl.ritual" aria-live="polite">동굴이 낮게 울려요… 마음을 가라앉히고 가만히 귀 기울여 보세요.</p>
       </div>
@@ -2412,7 +2421,7 @@
 
       <!-- (9단계) 안내자 한마디: open -->
       <div class="say say--open" data-js="guide-open">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-sibyl" /></svg>
+        <i class="say__figure gface gface--sibyl" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.sibyl.name">시빌라</b></p>
         <p class="say__line" data-t="guides.sibyl.open">동굴의 울림이 {who}에게 전할 말을 가만히 들려주었어요…</p>
       </div>
@@ -2494,7 +2503,7 @@
 
       <!-- (9단계) 안내자 한마디: close -->
       <div class="say say--close" data-js="guide-close">
-        <svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-sibyl" /></svg>
+        <i class="say__figure gface gface--sibyl" aria-hidden="true"></i>
         <p class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.sibyl.name">시빌라</b></p>
         <p class="say__line" data-t="guides.sibyl.close">울림은 동굴 안에 오래도록 남아요… 오늘 들은 말을 마음에 품고 가세요.</p>
       </div>
@@ -2515,7 +2524,7 @@
         <h2 class="visually-hidden" id="sibyl-bridge-title" data-t="result.bridgeTitle">다음 문으로</h2>
         <!-- (9단계) 다리 = 떠나는 안내자의 바통 넘기기. 머리줄(작은 실루엣+이름)만 더하고 다리 문장 칸(bridges.sibyl)은 그대로 -->
         <div class="say say--bridge" data-js="guide-bridge">
-          <p class="say__head"><svg class="say__figure" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-sibyl" /></svg><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.sibyl.name">시빌라</b></span></p>
+          <p class="say__head"><i class="say__figure gface gface--sibyl" aria-hidden="true"></i><span class="say__name"><span class="say__role" data-t="guides.role">안내자</span> <b data-t="guides.sibyl.name">시빌라</b></span></p>
           <p class="passage__bridge" data-js="result-bridge" data-t="bridges.sibyl">타고난 그릇에서 뿌리와 마음결로, 재능에서 순환을 지나 오늘의 질문까지 일곱 방을 모두 지나왔어요. 동굴의 울림은 여기까지예요… 이제부터는 안내자가 아니라 당신이 이야기를 이어 갈 차례예요. 일곱 조각을 모두 모아, 당신만의 이야기 한 편을 여기서 펼쳐 보세요.</p>
         </div>
         <button class="next-door" type="button" data-room="hall" data-go="finale" data-js="result-next-door">

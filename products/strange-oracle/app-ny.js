@@ -329,7 +329,7 @@
       head.append(mk("p", "ny-eyebrow", N.hub.eyebrow), mk("h1", "ny-room__title", `${ROMAN[i]} ${T.rooms[room].name}`));
       const guide = mk("div", "ny-guide");
       guide.dataset.room = room;
-      guide.innerHTML = `<svg class="ny-guide__fig" viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${room}" /></svg>`;
+      guide.innerHTML = `<i class="ny-guide__fig gface gface--${room}" aria-hidden="true"></i>`;
       const say = mk("p", "ny-guide__say", R.greet);
       guide.append(say);
       const form = mk("div", "ny-form");
@@ -1052,7 +1052,7 @@
       const M = model, L = N.result.full;
       const hook = mk("div", "ny-hook");
       hook.dataset.room = M.room;
-      hook.innerHTML = `<svg class="ny-hook__fig" viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${M.room}" /></svg>`;
+      hook.innerHTML = `<i class="ny-hook__fig gface gface--${M.room}" aria-hidden="true"></i>`;
       const hb = mk("div", "ny-hook__body");
       hb.append(mk("p", "ny-hook__by", fill(L.hookBy, { guide: T.rooms[M.room].short || "" })), mk("p", "ny-hook__say", F.hook || ""));
       hook.append(hb);

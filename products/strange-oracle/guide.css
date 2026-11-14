@@ -382,3 +382,48 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .gshop .gactions .gbtn { width: 100%; }
 .gbtn--kakao { background: oklch(0.89 0.17 98); color: oklch(0.2 0.02 60); box-shadow: none; }
 .gshop [data-js=dust-msg]:empty { display: none; }
+
+/* (2026-11-14) 오늘의 신탁 카드: 오늘의 결·전승 이야기 */
+.gread__h { justify-self: stretch; margin: 14px 0 0; font-family: var(--font-sans); font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--gold-dim); text-align: left; }
+.gread__h + p { margin-top: 4px !important; }
+.gread__lore { justify-self: stretch; margin-top: 12px; text-align: left; font-family: var(--font-sans); font-size: 0.75rem; }
+.gread__lore summary { padding: 6px 0; color: var(--c-text-muted); cursor: pointer; }
+.gread__lore p { margin: 4px 0 0 !important; font-size: var(--fs-sm) !important; color: var(--c-text-muted) !important; }
+
+/* (2026-11-14) 접어 둔 설명 */
+.gfold-more { margin-top: 28px; border-radius: 16px; border: 1px solid oklch(0.4 0.04 285 / 0.45); background: oklch(0.14 0.035 285 / 0.6); }
+.gfold-more > summary { padding: 14px 16px; font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--c-text-muted); cursor: pointer; list-style: none; }
+.gfold-more > summary::-webkit-details-marker { display: none; }
+.gfold-more > summary::after { content: "＋"; float: right; color: var(--gold); }
+.gfold-more[open] > summary::after { content: "－"; }
+.gfold-more > :not(summary) { padding: 0 16px; }
+.gfold-more > :last-child { padding-bottom: 12px; }
+.gfold-more h2 { margin-top: 18px !important; }
+
+/* (2026-11-14) 면담 전 설정 · 이어서 표시 · 대화 지우기 */
+.gdoorpick__dot { margin-top: 2px; padding: 2px 8px; border-radius: 999px; font-style: normal; font-family: var(--font-sans); font-size: 0.625rem; font-weight: 700; color: oklch(0.2 0.03 285); background: var(--gold); }
+.groom__clear { margin-left: auto; font-size: 0.6875rem; }
+.gsetup { align-self: stretch; margin: 2px 0; padding: 14px; border-radius: 18px; background: oklch(0.13 0.035 285 / 0.88); border: 1px solid oklch(0.6 0.08 80 / 0.45); backdrop-filter: blur(6px); }
+.gsetup__lead { margin: 0 0 10px !important; font-size: var(--fs-md) !important; color: var(--c-text-strong) !important; }
+.gsetup__btns { display: grid; gap: 8px; }
+.gsetup__btn { min-height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid oklch(0.55 0.05 285 / 0.7); background: oklch(0.2 0.045 285); color: var(--c-text-strong); font: inherit; font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; text-align: left; cursor: pointer; }
+.gsetup__btn[data-primary] { border-color: var(--gold); background: linear-gradient(160deg, oklch(0.86 0.1 85), oklch(0.74 0.1 70)); color: oklch(0.2 0.03 285); }
+.gsetup__btn[data-js=setup-skip] { border-style: dashed; background: transparent; color: var(--c-text-muted); font-weight: 400; }
+.gsetup__form { display: grid; gap: 8px; margin-top: 12px; }
+.gsetup__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 6px; }
+.gsetup__form label { display: grid; gap: 4px; font-family: var(--font-sans); font-size: 0.6875rem; color: var(--c-text-muted); }
+.gsetup__form input { min-width: 0; height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid oklch(0.55 0.05 285 / 0.7); background: oklch(0.17 0.04 285); color: var(--c-text-strong); font: inherit; font-size: 1rem; }
+.gsetup__form .gbtn { width: 100%; }
+.gsetup__note { margin: 10px 0 0 !important; font-family: var(--font-sans); font-size: 0.6875rem !important; line-height: 1.5 !important; color: var(--c-text-faint) !important; }
+.gsetup .gerror { margin-top: 8px !important; }
+.groom__row textarea:disabled { opacity: 0.55; }
+
+/* (v1-G) 처음 화면 로그인 권유 */
+.glogin { position: fixed; inset: 0; z-index: 90; display: grid; place-items: end center; }
+.glogin__scrim { position: absolute; inset: 0; background: oklch(0.06 0.03 285 / 0.7); backdrop-filter: blur(3px); }
+.glogin__card { position: relative; box-sizing: border-box; display: grid; gap: 10px; width: min(480px, 100vw); padding: 26px 20px calc(24px + env(safe-area-inset-bottom)); border-radius: 26px 26px 0 0; border: 1px solid oklch(0.55 0.07 75 / 0.5); border-bottom: 0; background: oklch(0.14 0.035 285); text-align: center; animation: gsheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.glogin__card h2 { margin: 0 !important; padding: 0 !important; font-size: var(--fs-xl) !important; }
+.glogin__card h2::before { display: none; }
+.glogin__card p { margin: 0 0 6px !important; font-size: var(--fs-md) !important; color: var(--c-text-muted) !important; }
+.glogin__card .gbtn { width: 100%; }
+.glogin__card small { font-family: var(--font-sans); font-size: 0.6875rem; color: var(--c-text-faint); }

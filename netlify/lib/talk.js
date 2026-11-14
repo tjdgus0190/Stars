@@ -3,7 +3,7 @@
 //   room  일곱 방 이름
 //   r     그 방 결과 번호만 (방마다 모양이 정해짐, 아래 R_SHAPE). 없으면 null — 결과 없이 묻기
 //   q     질문 글 (1~300자)
-//   hist  앞선 문답 최대 3개 [{ q, a }] (각 300자·600자 이하) — 서버에 남기지 않는다
+//   hist  앞선 문답 최대 3개 [{ q, a }] (각 300자·1600자 이하) — 서버에 남기지 않는다
 //   이름·생년월일·태어난 시각·성별은 받지 않는다(모양 검사에서 모르는 칸이 있으면 400).
 // 답: 200 { a, declined?, paid?(남은 충전 별가루) } | 401 { error: "session" } | 402 { error: "dust" } | 400 { error: "bad" } | 429 { error: "rate" } | 503 { error: "off" | "budget" } | 502 { error: "upstream" }
 //
@@ -25,7 +25,7 @@ const TALK_COST = 10; // 질문 하나 = 별가루 10 (화면 data-nav.js cost.t
 const STORE_NAME = "strange-oracle-talk";
 const ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
 const MAX_Q = 300;
-const MAX_A = 600;
+const MAX_A = 1600; // (2026-11-14) 답을 끝까지(5~9문장) — 앞선 문답의 답도 이만큼까지
 const MAX_HIST = 3;
 const MAX_BODY = 4096;
 const WINDOW_MS = 10 * 60 * 1000;

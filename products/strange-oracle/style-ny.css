@@ -482,3 +482,6 @@ body.is-ny #sky { opacity: 0.45; transition: opacity 1100ms ease; }
 .ny-share__btns { display: grid; gap: var(--space-3); justify-items: stretch; }
 .ny-share__kakao { width: 100%; }
 .ny-share__link { justify-self: center; }
+
+/* (2026-11-14) 안내자 초상(style.css .gface) — 큰 칸은 상반신 */
+.ny-guide__fig.gface, .ny-hook__fig.gface { background-size: cover; background-position: center top; border-radius: 999px 999px 6px 6px; }

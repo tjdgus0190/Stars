@@ -3958,7 +3958,7 @@
         CHAPTER_ORDER.forEach((r) => {
           const li = rmk("li", r === room ? "room-rest__room is-here" : "room-rest__room");
           li.dataset.room = r;
-          li.innerHTML = `<svg class="room-rest__room-fig" viewBox="0 0 48 64" aria-hidden="true" focusable="false"><use href="#guide-${r}" /></svg>`;
+          li.innerHTML = `<i class="room-rest__room-fig gface gface--${r}" aria-hidden="true"></i>`;
           li.append(rmk("span", "room-rest__room-name", T.rooms[r].short));
           rooms.append(li);
         });
@@ -6629,7 +6629,7 @@
           saved = null;
         }
         const mode = saved && saved.mode;
-        const home = saved && (saved.from === "hub" || saved.from === "ny" || saved.from === "stardust") ? "hub" : "deeper"; // (22단계) 입구에서 시작했으면 입구로 · (v1-D) 별가루 페이지에서 시작했으면 로그인 뒤 그 페이지로
+        const home = saved && (saved.from === "hub" || saved.from === "ny" || ["stardust", "talk", "home", "today", "dex"].includes(saved.from)) ? "hub" : "deeper"; // (22단계) 입구에서 시작했으면 입구로 · (v1-D) 별가루 페이지에서 시작했으면 로그인 뒤 그 페이지로
         if (saved && saved.from === "ny") nyGoHub = true; // (2026-11-12) 새해의 회랑에서 시작 → 새해 탭을 붙인 뒤 회랑으로
         if (!m || !saved || saved.s !== m[2]) {
           track("so_auth", { step: "fail", mode: ["restore", "link", "forget", "login"].includes(mode) ? mode : "restore" });
@@ -6656,7 +6656,9 @@
               if (!res.sid) return toast((AUTH.msg[res.state] || AUTH.msg.error) || "");
               writeLogin({ sid: res.sid, exp: Date.now() + DAY30, consent: res.data ? true : null });
               syncHubKakao();
-              if (saved.from === "stardust") return location.replace("/stardust/#login"); // (v1-D) 별가루 충전하러 로그인한 경우: 별가루 페이지로 돌아간다
+              // (v1-D·v1-G) 하루 페이지(별가루·면담·처음 화면)에서 로그인한 경우: 그 페이지로 돌아간다
+              const BACK = { stardust: "/stardust/", talk: "/talk/", home: "/", today: "/today/", dex: "/dex/" };
+              if (BACK[saved.from]) return location.replace(BACK[saved.from] + "#login");
               return applyAccount(res, true);
             }
             if (res.state === "found" && res.passes && res.passes[0]) {

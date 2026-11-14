@@ -12,11 +12,12 @@
 .nav-toggle:focus-visible, .sidenav a:focus-visible, .sidenav__close:focus-visible, .tabbar a:focus-visible, .dust-badge:focus-visible { outline: 2px solid oklch(0.84 0.1 85); outline-offset: 2px; }
 
 /* 입구 위 띠에 끼울 때: 메뉴 버튼 · 입구 · 장 이름 · 끝 */
-.topbar__inner.has-nav { grid-template-columns: auto auto 1fr auto; }
+.topbar__inner.has-nav { grid-template-columns: auto auto auto 1fr auto; }
 .topbar__inner.has-nav .nav-toggle { grid-column: 1; }
-.topbar__inner.has-nav .topbar__home, .topbar__inner.has-nav .topbar__back { grid-column: 2; }
-.topbar__inner.has-nav .topbar__chapter { grid-column: 3; }
-.topbar__inner.has-nav .topbar__end, .topbar__inner.has-nav .topbar__clear { grid-column: 4; }
+.topbar__inner.has-nav .topbar__lobby { grid-column: 2; }
+.topbar__inner.has-nav .topbar__home, .topbar__inner.has-nav .topbar__back { grid-column: 3; }
+.topbar__inner.has-nav .topbar__chapter { grid-column: 4; }
+.topbar__inner.has-nav .topbar__end, .topbar__inner.has-nav .topbar__clear { grid-column: 5; }
 
 /* ── 전체 메뉴: 아래에서 올라오는 시트, 묶음마다 4칸 아이콘 격자 */
 .sidenav-scrim { position: fixed; inset: 0; z-index: 70; background: oklch(0.06 0.03 285 / 0.66); backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.22s ease; }

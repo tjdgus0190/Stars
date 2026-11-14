@@ -50,6 +50,33 @@
         if (sub) sub.textContent = fill(G.home.features.today.sub, { name: g.name });
       }
     }
+    // (v1-G) 처음 화면에서 무언가를 고르면 카카오 로그인을 권한다. 로그인은 선택 — 「로그인 없이 계속」으로 그대로 들어간다(운영 규칙 3장)
+    const LG = G.home.login;
+    const loggedIn = () => { try { const x = JSON.parse(localStorage.getItem("strange-oracle-login") || "null"); return Boolean(x && /^[0-9a-f]{32}$/.test(x.sid) && x.exp > Date.now()); } catch (e) { return false; } };
+    const skippedLogin = () => { try { return sessionStorage.getItem("strange-oracle-login-skip") === "1"; } catch (e) { return false; } };
+    if (LG) document.addEventListener("click", (e) => {
+      const a = e.target.closest(".gfeat[href], .gchips a[href]");
+      if (!a || loggedIn() || skippedLogin() || e.metaKey || e.ctrlKey) return;
+      e.preventDefault();
+      const href = a.getAttribute("href");
+      const box = document.createElement("div");
+      box.className = "glogin";
+      box.innerHTML = `<div class="glogin__scrim" data-js="login-skip"></div><div class="glogin__card" role="dialog" aria-modal="true" aria-labelledby="glogin-h"><h2 id="glogin-h">${esc(LG.title)}</h2><p>${esc(LG.body)}</p>
+        <button class="gbtn gbtn--kakao" type="button" data-js="login-go">${esc(LG.go)}</button><button class="glink" type="button" data-js="login-skip">${esc(LG.skip)}</button><small>${esc(LG.note)}</small></div>`;
+      document.body.append(box);
+      box.querySelector("[data-js=login-go]").focus();
+      box.addEventListener("click", (ev) => {
+        if (ev.target.closest("[data-js=login-skip]")) { try { sessionStorage.setItem("strange-oracle-login-skip", "1"); } catch (x) { /* 무시 */ } location.href = href; return; }
+        if (ev.target.closest("[data-js=login-go]")) {
+          const b = new Uint8Array(16); crypto.getRandomValues(b);
+          const st = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
+          const from = { "/talk/": "talk", "/today/": "today", "/dex/": "dex", "/stardust/": "stardust" }[href] || "home";
+          try { sessionStorage.setItem("strange-oracle-kakao", JSON.stringify({ s: st, mode: "login", from, prod: "book" })); } catch (x) { location.href = href; return; }
+          location.href = "/api/auth/kakao/start?state=" + st;
+        }
+      });
+      document.addEventListener("keydown", function esc1(ev) { if (ev.key === "Escape") { box.remove(); document.removeEventListener("keydown", esc1); } });
+    });
     return;
   }
 
@@ -71,9 +98,9 @@
       try { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" }); let j = null; try { j = await r.json(); } catch (e) { j = null; } return { status: r.status, j }; } catch (e) { return { status: 0, j: null }; }
     };
     // 카카오 로그인 시작: 돌아오면 입구가 표를 받아(로그인 유지) 이 별가루 페이지로 다시 보낸다
-    const kakaoLogin = () => {
+    const kakaoLogin = (from = "stardust") => {
       const st = hex32();
-      try { sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode: "login", from: "stardust", prod: "book" })); } catch (e) { return; }
+      try { sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode: "login", from, prod: "book" })); } catch (e) { return; }
       location.href = "/api/auth/kakao/start?state=" + st;
     };
     let paidBal = null; // 충전한 별가루(서버 값, 화면 메모리만)
@@ -92,6 +119,8 @@
     const guide = (room) => DEXG().find((g) => g.room === room);
     const IMG = (room) => `/products/strange-oracle/img/dex/dex-${room}.webp`;
     // (2026-11-14) 아치 문 안은 안내자 초상(img/guide/, 어둡게 다듬은 그림). 작은 얼굴(xs)은 눈높이(FACE_Y, 그림 높이 비율)에 맞춰 확대
+    // 받침에 맞춘 조사(이/가)
+    const iga = (w) => { const c = String(w).charCodeAt(String(w).length - 1) - 0xac00; return c >= 0 && c < 11172 && c % 28 ? "이" : "가"; };
     const PORT = (room) => `/products/strange-oracle/img/guide/${room}.webp`;
     const FACE_Y = { saju: 0.23, ogham: 0.34, star: 0.35, decan: 0.28, tzolkin: 0.5, rune: 0.2, sibyl: 0.22 };
     const arch = (room, cls = "") => `<span class="garch ${cls}" style="--art:url('${PORT(room)}');--fy:${Math.round(Math.min(1, Math.max(0, 2 * (FACE_Y[room] || 0.3) - 0.5)) * 100)}%" aria-hidden="true"></span>`;
@@ -119,7 +148,10 @@
       const x = list[i] || {};
       const kw = Array.isArray(x.keywords) ? x.keywords.slice(0, 3) : x.keyword ? [x.keyword] : [];
       const act = x.advice && x.advice.title ? x.advice.title : "";
-      const base = { kw, act, key: x.key };
+      // (2026-11-14) 오늘의 결(조언 문단)·전승 이야기 — 정적 파일에 있는 무료 문구만 쓴다
+      const sm = x.summary, flow = Array.isArray(sm) ? sm[1] || sm[0] : sm && typeof sm === "object" ? sm.now : "";
+      const lore = x.fact || (x.identity && x.identity.lede) || "";
+      const base = { kw, act, key: x.key, flow: flow || "", lore };
       if (room === "saju") return Object.assign(base, { mark: x.hanja, name: x.name, sub: x.title });
       if (room === "ogham") return Object.assign(base, { mark: x.glyph, name: `${x.name} · ${x.latin}`, sub: x.title, rune: true });
       if (room === "star") return Object.assign(base, { mark: i + 1, name: x.name, sub: x.title, num: true });
@@ -131,7 +163,7 @@
     const ACT = (P && P.app && P.app.act) || "";
     const readCard = (room, v, head) => `<article class="gread" style="--art:url('${IMG(room)}')">${head ? `<small class="gread__head">${esc(head)}</small>` : ""}
       ${v.quote ? `<blockquote class="gscroll">${esc(v.quote)}</blockquote>` : `<span class="gread__mark${v.num ? " num" : ""}${v.rune ? " rune" : ""}">${esc(v.mark)}</span>`}
-      <b>${esc(v.name)}</b>${v.sub ? `<em>${esc(v.sub)}</em>` : ""}${v.kw.length ? `<span class="gread__kw">${v.kw.map((k) => `<i>${esc(k)}</i>`).join("")}</span>` : ""}<p>${esc(v.key)}</p>${v.act && ACT ? `<p class="gread__act"><small>${esc(ACT)}</small>${esc(v.act)}</p>` : ""}</article>`;
+      <b>${esc(v.name)}</b>${v.sub ? `<em>${esc(v.sub)}</em>` : ""}${v.kw.length ? `<span class="gread__kw">${v.kw.map((k) => `<i>${esc(k)}</i>`).join("")}</span>` : ""}<p>${esc(v.key)}</p>${v.flow && P.app && P.app.flowHead ? `<h3 class="gread__h">${esc(P.app.flowHead)}</h3><p>${esc(v.flow)}</p>` : ""}${v.act && ACT ? `<p class="gread__act"><small>${esc(ACT)}</small>${esc(v.act)}</p>` : ""}${v.lore && P.app && P.app.loreHead ? `<details class="gread__lore"><summary>${esc(P.app.loreHead)}</summary><p>${esc(v.lore)}</p></details>` : ""}</article>`;
 
     if (CONF.page === "today") {
       const A = P.app;
@@ -234,14 +266,22 @@
     //   보내는 것: 방 이름 · 그 방 결과 번호(이 탭 sessionStorage의 방 기록에서 번호만) · 질문 글 · 앞선 문답 3개(· 충전분이면 로그인 표). 이름·생일은 보내지 않는다
     //   문답은 이 화면 메모리에만 두고 저장하지 않는다
     if (CONF.page === "talk") {
-      const A = P.app, X = window.DEX, E = A.errors, COSTQ = COST.talk || 10;
+      const A = P.app, X = window.DEX, E = A.errors, SU = A.setup || {}, COSTQ = COST.talk || 10;
       const on = P.talkMode === "test" || P.talkMode === "live";
       const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      let visits = {};
-      try { visits = (JSON.parse(sessionStorage.getItem("strange-oracle") || "null") || {}).visits || {}; } catch (e) { visits = {}; }
+      // ── 기록: 입구 방 기록(같은 탭 sessionStorage "strange-oracle") + 면담 기록(이 탭 sessionStorage "strange-oracle-talk")
+      //   면담 기록에 두는 것: 방별 결과 번호(입력값 아님)와 문답. 탭을 닫으면 사라지고 「대화 지우기」로 바로 지운다(운영 규칙 6장 sessionStorage 예외)
+      //   생년월일·이름은 결과 번호를 계산하는 동안만 이 화면 메모리에 두고 저장·전송하지 않는다
+      let tab = {};
+      try { tab = JSON.parse(sessionStorage.getItem("strange-oracle") || "null") || {}; } catch (e) { tab = {}; }
+      const TKEY = "strange-oracle-talk";
+      const blankT = () => ({ v: 1, r: {}, chat: {} });
+      let TS = blankT();
+      try { const x = JSON.parse(sessionStorage.getItem(TKEY) || "null"); if (x && x.v === 1 && x.r && x.chat) TS = x; } catch (e) { TS = blankT(); }
+      const saveT = () => { try { sessionStorage.setItem(TKEY, JSON.stringify(TS)); } catch (e) { /* 이 화면에서만 */ } };
       const I = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
-      const resultOf = (room) => {
-        const v = visits[room];
+      // 입구 방 기록(visits 모양) → 보내는 결과 번호
+      const fromVisit = (room, v) => {
         if (!v) return null;
         if (room === "saju" && I(v.code, 1, 5000)) return { s: Math.floor((v.code - 1) / 500) };
         if (room === "ogham" && I(v.ogham, 0, 19)) return { i: v.ogham };
@@ -252,23 +292,114 @@
         if (room === "sibyl" && I(v.sors, 0, 31)) return { i: v.sors };
         return null;
       };
+      const okR = (room, r) => {
+        if (!r || typeof r !== "object") return null;
+        if (room === "saju") return I(r.s, 0, 9) ? r : null;
+        if (room === "tzolkin") return I(r.n, 1, 13) && I(r.s, 0, 19) ? r : null;
+        if (room === "rune") return Array.isArray(r.p) && r.p.length === 3 && r.p.every((c) => /^[a-z]{2,12}$/.test(c)) ? r : null;
+        return I(r.i, 0, { ogham: 19, star: 26, decan: 35, sibyl: 31 }[room] || 0) ? r : null;
+      };
+      const resultOf = (room) => okR(room, TS.r[room]) || fromVisit(room, (tab.visits || {})[room]);
+      const chatOf = (room) => (Array.isArray(TS.chat[room]) ? TS.chat[room] : (TS.chat[room] = []));
+      // 결과 이름(화면 표시용) — 방 데이터 파일이 오면 채운다
+      const resultName = (room, r) => {
+        const L = ROOM_DATA[room][1]();
+        if (!L || !r) return "";
+        if (room === "saju") return L[r.s] ? `${L[r.s].hanja} ${L[r.s].name}` : "";
+        if (room === "tzolkin") return L[r.s] ? `${r.n} ${L[r.s].name}` : "";
+        if (room === "rune") return r.p.map((c) => (L.find((x) => x.code === c) || {}).name || "").filter(Boolean).join(" · ");
+        if (room === "decan") return L[r.i] ? `${L[r.i].sign} ${G.ui.decanPart.replace("{n}", L[r.i].part)}` : "";
+        if (room === "sibyl") return L[r.i] ? L[r.i].title : "";
+        return L[r.i] ? L[r.i].name : "";
+      };
+      // ── 결과 번호 계산(브라우저 안에서만). 필요한 계산 파일은 그때 불러온다
+      const ASTRONOMY = { src: "https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js", integrity: "sha384-LTVHvxfbG3XHla4Lu0C0s9U18B2sBOuzJIeOoVHm2t05SOOORvMbBMEVjXrGau9g" };
+      const scripts = {};
+      const need = (src, attrs) => scripts[src] || (scripts[src] = new Promise((ok, no) => {
+        const sc = document.createElement("script");
+        Object.assign(sc, { src, async: false }, attrs || {});
+        sc.onload = ok;
+        sc.onerror = () => { delete scripts[src]; no(new Error("lib")); };
+        document.head.append(sc);
+      }));
+      const PB = "/products/strange-oracle/";
+      const calc = () => (window.Calc ? Promise.resolve() : need(PB + "calc.js"));
+      const astro = () => (window.Astro ? Promise.resolve() : need(ASTRONOMY.src, { integrity: ASTRONOMY.integrity, crossOrigin: "anonymous" }).then(() => need(PB + "astro.js")));
+      const NEEDS = { saju: "birth", ogham: "name", star: "birth", decan: "birth", tzolkin: "birth", rune: "draw", sibyl: "draw" };
+      async function computeR(room, pf) {
+        const b = pf && pf.birth, t = pf && pf.time;
+        if (room === "ogham") { await calc(); const r = pf && pf.name ? window.Calc.ogham(pf.name) : null; return r ? { i: r.index } : null; }
+        if (room === "rune") { await calc(); await loadRoom("rune"); const L = window.RUNES, got = []; while (got.length < 3) { const c = L[window.Calc.pickOracle(L.length)].code; if (!got.includes(c)) got.push(c); } return { p: got }; }
+        if (room === "sibyl") { await calc(); await loadRoom("sibyl"); return { i: window.Calc.pickOracle(window.ORACLES.length) }; }
+        if (!b || !I(b.y, 1900, 2099) || !I(b.m, 1, 12) || !I(b.d, 1, 31)) return null;
+        if (room === "saju") {
+          if (!window.Saju) { await need(PB + "data-saju.js"); await need(PB + "saju.js"); }
+          await window.Saju.loadLunar();
+          const r = window.Saju.compute({ y: b.y, m: b.m, d: b.d, time: t ? { h: t.h, mi: t.m } : null, gender: "none" });
+          return I(r.dayStem, 0, 9) ? { s: r.dayStem } : null;
+        }
+        if (room === "tzolkin") { await calc(); const r = window.Calc.tzolkin(b.y, b.m, b.d); return r ? { n: r.number, s: r.sign } : null; }
+        await astro();
+        if (room === "star") { const r = window.Astro.birthChart(b.y, b.m, b.d, t ? { h: t.h, m: t.m } : null); const c = r && r.charts && r.charts[0]; return c && I(c.nakshatra, 0, 26) ? { i: c.nakshatra } : null; }
+        if (room === "decan") {
+          await calc();
+          const r = window.Calc.decan(b.y, b.m, b.d);
+          if (!r) return null;
+          let i = r.noon ? r.noon.index : null;
+          if (t && r.candidates && r.candidates.length) { const mn = t.h * 60 + t.m; const c = r.candidates.find((x) => mn >= x.startMin && mn < x.endMin); if (c) i = c.decan.index; }
+          return I(i, 0, 35) ? { i } : null;
+        }
+        return null;
+      }
+      // 기록 출처: 이 탭(입구에서 넣은 정보) · 카카오 계정(저장 동의한 기록)
+      const tabProfile = () => { const p = tab.profile || {}; return p.birth || p.name ? { birth: p.birth || null, time: p.time || null, name: p.name || "" } : null; };
+      const hasFor = (room, pf) => pf && (NEEDS[room] === "name" ? Boolean(pf.name) : NEEDS[room] === "birth" ? Boolean(pf.birth) : true);
+
       let cur = null; // 고른 안내자(방 안에 있을 때)
-      const hists = {}; // 방마다 [{ q, a }] — 메모리만
-      let busy = false, entering = false;
-      const lobby = () => `<p class="gnote gcenter">${esc(on ? A.pick : A.closed)}</p><ul class="gdoorpick">${X.guides.map((g) => `<li><button type="button" data-js="talk-pick" data-room="${g.room}">${arch(g.room, "garch--door")}<b>${esc(g.name)}</b><small>${esc(g.roomName)}</small></button></li>`).join("")}</ul>`;
+      let busy = false, entering = false, setupMsg = "", formOpen = false;
+      const skipped = {}; // 결과 없이 이야기하기로 한 방(이 화면 메모리)
+      const lobby = () => `<p class="gnote gcenter">${esc(on ? A.pick : A.closed)}</p><ul class="gdoorpick">${X.guides.map((g) => `<li><button type="button" data-js="talk-pick" data-room="${g.room}">${arch(g.room, "garch--door")}<b>${esc(g.name)}</b><small>${esc(g.roomName)}</small>${chatOf(g.room).length ? `<em class="gdoorpick__dot">${esc(A.continued)}</em>` : ""}</button></li>`).join("")}</ul>`;
       const balLine = () => { const st = D.state(); return paidBal != null ? fill(A.balancePaid, { n: st.bal, p: paidBal }) : fill(A.balance, { n: st.bal }); };
       const say = (who, text, extra = "") => `<div class="gsay gsay--${who}${extra}">${who === "guide" ? arch(cur.room, "garch--xs") : ""}<p>${esc(text)}</p></div>`;
+      // 면담 전 설정: 어떤 기록으로 볼지
+      const setupCard = (g) => {
+        const nd = NEEDS[g.room], tp = tabProfile(), lg = readLogin();
+        const btn = (js, label, extra = "") => `<button type="button" class="gsetup__btn" data-js="${js}"${extra}>${esc(label)}</button>`;
+        let h = `<div class="gsetup" data-js="talk-setup"><p class="gsetup__lead">${esc(fill(nd === "draw" ? SU.leadDraw : SU.lead, { name: g.name, iga: iga(g.name) }))}</p><div class="gsetup__btns">`;
+        if (nd === "draw") h += btn("setup-draw", g.room === "rune" ? SU.drawRune : SU.drawSibyl, ' data-primary="1"');
+        else {
+          if (hasFor(g.room, tp)) h += btn("setup-tab", SU.fromTab, ' data-primary="1"');
+          h += btn("setup-kakao", lg ? SU.fromKakao : SU.loginKakao);
+          h += btn("setup-form", nd === "name" ? SU.typeName : SU.typeBirth);
+        }
+        h += btn("setup-skip", SU.skip) + `</div>`;
+        if (formOpen && nd !== "draw") {
+          h += nd === "name"
+            ? `<form class="gsetup__form" data-js="setup-form-box" novalidate autocomplete="off"><label>${esc(SU.nameLabel)}<input name="name" maxlength="20" autocomplete="off" /></label><button class="gbtn" type="submit">${esc(SU.go)}</button></form>`
+            : `<form class="gsetup__form" data-js="setup-form-box" novalidate autocomplete="off"><div class="gsetup__row"><label>${esc(SU.y)}<input name="y" inputmode="numeric" maxlength="4" /></label><label>${esc(SU.m)}<input name="m" inputmode="numeric" maxlength="2" /></label><label>${esc(SU.d)}<input name="d" inputmode="numeric" maxlength="2" /></label></div>
+               <div class="gsetup__row"><label>${esc(SU.h)}<input name="h" inputmode="numeric" maxlength="2" placeholder="${esc(SU.optional)}" /></label><label>${esc(SU.mi)}<input name="mi" inputmode="numeric" maxlength="2" placeholder="${esc(SU.optional)}" /></label></div><button class="gbtn" type="submit">${esc(SU.go)}</button></form>`;
+        }
+        h += `<p class="gsetup__note">${esc(SU.privacy)}</p>${setupMsg ? `<p class="gerror" role="alert">${esc(setupMsg)}</p>` : ""}</div>`;
+        return h;
+      };
+      const roomNote = (g) => {
+        const r = resultOf(g.room);
+        if (r) { const nm = resultName(g.room, r); return `<p class="groom__note">${esc(fill(SU.using, { room: g.roomName, result: nm || SU.yours }))} <button type="button" class="glink" data-js="setup-change">${esc(SU.change)}</button></p>`; }
+        if (skipped[g.room]) return `<p class="groom__note">${esc(fill(A.unknown, { room: g.roomName }))} <button type="button" class="glink" data-js="setup-change">${esc(SU.change)}</button></p>`;
+        return setupCard(g);
+      };
       const room = () => {
-        const g = cur, r = resultOf(g.room), hist = hists[g.room] || [];
+        const g = cur, hist = chatOf(g.room);
         const st = D.state(), usePaid = st.bal < COSTQ && paidBal != null && paidBal >= COSTQ, need = usePaid ? 0 : COSTQ - st.bal;
+        const ready = Boolean(resultOf(g.room)) || skipped[g.room];
         return `<div class="groom${entering ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}')">
-          <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b><small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span></header>
-          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${r ? "" : `<p class="groom__note">${esc(fill(A.unknown, { room: g.roomName }))} <a href="${ROOM_URL}" data-js="to-room">${esc(fill(A.toRoom, { room: g.roomName }))}</a></p>`}${r ? `<p class="groom__note">${esc(fill(A.known, { room: g.roomName }))}</p>` : ""}
+          <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b><small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
+          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${roomNote(g)}${hist.length ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
             ${hist.map((h) => say("me", h.q) + say("guide", h.a)).join("")}</div>
           <form class="groom__bar" data-js="talk-form" novalidate autocomplete="off">
             <p class="groom__meta"><span>${esc(balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}</p>
             <p class="gerror" data-js="talk-error" role="alert" hidden></p>
-            <div class="groom__row"><textarea name="q" rows="1" maxlength="300" placeholder="${esc(A.placeholder)}" aria-label="${esc(A.placeholder)}"></textarea><button type="submit" class="groom__send"${need > 0 || busy ? " disabled" : ""} aria-label="${esc(fill(A.ask, { cost: COSTQ }))}"><span>✦${COSTQ}</span></button></div>
+            <div class="groom__row"><textarea name="q" rows="1" maxlength="300" placeholder="${esc(ready ? A.placeholder : SU.first)}" aria-label="${esc(A.placeholder)}"${ready ? "" : " disabled"}></textarea><button type="submit" class="groom__send"${need > 0 || busy || !ready ? " disabled" : ""} aria-label="${esc(fill(A.ask, { cost: COSTQ }))}"><span>✦${COSTQ}</span></button></div>
           </form></div>`;
       };
       const draw = () => {
@@ -284,33 +415,73 @@
         const bar = box.querySelector(".groom__bar");
         if (!bar) return;
         const st = D.state(), usePaid = st.bal < COSTQ && paidBal != null && paidBal >= COSTQ, need = usePaid ? 0 : COSTQ - st.bal;
+        const ready = Boolean(resultOf(cur.room)) || skipped[cur.room];
         bar.querySelector(".groom__meta").innerHTML = `<span>${esc(balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}`;
-        bar.querySelector(".groom__send").disabled = need > 0;
+        bar.querySelector(".groom__send").disabled = need > 0 || !ready;
       };
       const err = (m) => { const e = box.querySelector("[data-js=talk-error]"); if (e) { e.textContent = m; e.hidden = !m; } };
-      // 글자가 이어 나오는 답 (움직임 줄이기면 한 번에)
       const typeOut = (el, text) => new Promise((ok) => {
         if (reduce) { el.textContent = text; return ok(); }
         let i = 0;
-        const step = () => { i = Math.min(text.length, i + 2); el.textContent = text.slice(0, i); const log = box.querySelector("[data-js=talk-log]"); if (log) log.scrollTop = log.scrollHeight; if (i < text.length) setTimeout(step, 22); else ok(); };
+        const step = () => { i = Math.min(text.length, i + 3); el.textContent = text.slice(0, i); const log = box.querySelector("[data-js=talk-log]"); if (log) log.scrollTop = log.scrollHeight; if (i < text.length) setTimeout(step, 20); else ok(); };
         step();
       });
-      box.addEventListener("click", (e) => {
+      const enter = (roomName) => {
+        cur = X.guides.find((x) => x.room === roomName) || null;
+        entering = true; setupMsg = ""; formOpen = false;
+        draw();
+        loadRoom(roomName).then(() => { if (cur && cur.room === roomName && !busy) { const t = box.querySelector(".groom textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector(".groom textarea"); if (t2) t2.value = keep; } }).catch(() => {});
+        const t = box.querySelector(".groom textarea"); if (t && !t.disabled) t.focus({ preventScroll: true });
+      };
+      const setR = (room, r) => { TS.r[room] = r; saveT(); setupMsg = ""; formOpen = false; draw(); };
+      const tryProfile = async (pf) => {
+        const room0 = cur.room;
+        let r = null;
+        try { r = await computeR(room0, pf); } catch (x) { r = null; }
+        if (!cur || cur.room !== room0) return;
+        if (r) setR(room0, r); else { setupMsg = SU.cant; draw(); }
+      };
+      box.addEventListener("click", async (e) => {
         const b = e.target.closest("[data-js=talk-pick]");
-        if (b && !busy) {
-          if (!on) return;
-          cur = X.guides.find((x) => x.room === b.dataset.room) || null;
-          entering = true;
-          draw();
-          const t = box.querySelector(".groom textarea"); if (t) t.focus({ preventScroll: true });
-          return;
+        if (b && !busy) { if (on) enter(b.dataset.room); return; }
+        if (e.target.closest("[data-js=talk-leave]") && !busy) { cur = null; draw(); return; }
+        if (!cur || busy) return;
+        if (e.target.closest("[data-js=talk-clear]")) {
+          if (!window.confirm(A.clearAsk)) return;
+          TS.chat[cur.room] = []; delete TS.r[cur.room]; saveT(); draw(); return;
         }
-        if (e.target.closest("[data-js=talk-leave]") && !busy) { cur = null; draw(); }
+        if (e.target.closest("[data-js=setup-change]")) { delete TS.r[cur.room]; delete skipped[cur.room]; saveT(); draw(); return; }
+        if (e.target.closest("[data-js=setup-skip]")) { skipped[cur.room] = true; draw(); return; }
+        if (e.target.closest("[data-js=setup-form]")) { formOpen = !formOpen; setupMsg = ""; draw(); const f = box.querySelector("[data-js=setup-form-box] input"); if (f) f.focus(); return; }
+        if (e.target.closest("[data-js=setup-draw]")) { setupMsg = SU.working; draw(); return tryProfile({}); }
+        if (e.target.closest("[data-js=setup-tab]")) { setupMsg = SU.working; draw(); return tryProfile(tabProfile()); }
+        if (e.target.closest("[data-js=setup-kakao]")) {
+          const lg = readLogin();
+          if (!lg) { try { sessionStorage.setItem("strange-oracle-talk-back", cur.room); } catch (x) { /* 무시 */ } return kakaoLogin("talk"); }
+          setupMsg = SU.working; draw();
+          const r = await post("/api/auth/me", { sid: lg.sid });
+          if (r.status === 401) { dropLogin(); setupMsg = A.sessionEnd; return draw(); }
+          const dt = r.status === 200 && r.j && r.j.data;
+          if (!dt) { setupMsg = SU.noSaved; return draw(); }
+          const fv = fromVisit(cur.room, (dt.v || {})[cur.room]);
+          if (fv) return setR(cur.room, fv);
+          const pp = dt.p || {};
+          return tryProfile({ birth: pp.birth || null, time: pp.time || null, name: pp.name || "" });
+        }
       });
-      box.addEventListener("input", (e) => { if (e.target.name === "q") { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; } });
-      box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
-      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && cur && !busy) { cur = null; draw(); } });
       box.addEventListener("submit", async (e) => {
+        const sf = e.target.closest("[data-js=setup-form-box]");
+        if (sf) {
+          e.preventDefault();
+          const v = (k) => (sf.elements[k] ? sf.elements[k].value.trim() : "");
+          if (NEEDS[cur.room] === "name") { const nm = v("name"); if (!nm) { setupMsg = SU.cant; return draw(); } return tryProfile({ name: nm }); }
+          const n = (k) => (v(k) === "" ? null : Number(v(k)));
+          const y = n("y"), m = n("m"), d = n("d"), h = n("h"), mi = n("mi");
+          const okDate = I(y, 1900, 2099) && I(m, 1, 12) && I(d, 1, 31) && new Date(Date.UTC(y, m - 1, d)).getUTCDate() === d;
+          const okTime = h == null || (I(h, 0, 23) && (mi == null || I(mi, 0, 59)));
+          if (!okDate || !okTime) { setupMsg = SU.badDate; return draw(); }
+          return tryProfile({ birth: { y, m, d }, time: h == null ? null : { h, m: mi == null ? 0 : mi } });
+        }
         if (!e.target.closest("[data-js=talk-form]")) return;
         e.preventDefault();
         if (!on || !cur || busy) return;
@@ -322,7 +493,7 @@
         const lg = readLogin();
         const paid = D.state().bal < COSTQ && lg && paidBal != null && paidBal >= COSTQ;
         if (!paid && !D.spend(COSTQ)) { busy = false; draw(); return; }
-        const g = cur, roomName = g.room, hist = hists[roomName] || (hists[roomName] = []);
+        const g = cur, roomName = g.room, hist = chatOf(roomName);
         const logBox = box.querySelector("[data-js=talk-log]");
         logBox.insertAdjacentHTML("beforeend", say("me", q, " is-new") + `<div class="gsay gsay--guide is-wait is-new" data-js="talk-wait">${arch(roomName, "garch--xs")}<p><span class="gdots" aria-label="${esc(fill(A.typing, { name: g.name }))}"><i></i><i></i><i></i></span></p></div>`);
         logBox.scrollTop = logBox.scrollHeight;
@@ -339,11 +510,14 @@
         if (res && res.ok && data && typeof data.a === "string") {
           if (!paid && (data.crisis || data.declined)) D.refund(COSTQ); // 위기 안내·답하지 못한 물음은 별가루를 쓰지 않는다
           if (paid && Number.isInteger(data.paid)) paidBal = data.paid;
-          const a = data.a.slice(0, 600);
+          const a = data.a.slice(0, 1600);
           hist.push({ q, a });
+          if (hist.length > 30) hist.splice(0, hist.length - 30);
+          saveT();
           track("so_talk", { room: roomName, step: "answer" });
           if (wait) { wait.classList.remove("is-wait"); wait.removeAttribute("data-js"); await typeOut(wait.querySelector("p"), a); }
           busy = false;
+          if (!box.querySelector("[data-js=talk-clear]") && cur && cur.room === roomName) { const t = box.querySelector(".groom textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector(".groom textarea"); if (t2) t2.value = keep; }
           refresh();
         } else {
           busy = false;
@@ -356,9 +530,19 @@
           const t = box.querySelector(".groom textarea"); if (t) t.value = q;
         }
       });
+      box.addEventListener("input", (e) => { if (e.target.name === "q") { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; } });
+      box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && cur && !busy) { cur = null; draw(); } });
       loadPaid().then(refresh);
       document.addEventListener("dust:change", refresh);
       draw();
+      // 카카오 로그인하고 돌아온 경우(#login): 고르던 방을 다시 연다
+      if (/^#login/.test(location.hash)) {
+        let back = "";
+        try { back = sessionStorage.getItem("strange-oracle-talk-back") || ""; sessionStorage.removeItem("strange-oracle-talk-back"); } catch (x) { back = ""; }
+        history.replaceState(null, "", location.pathname);
+        if (on && X.guides.some((g) => g.room === back)) enter(back);
+      }
     }
 
     if (CONF.page === "stardust") {
