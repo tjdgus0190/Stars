@@ -2,16 +2,21 @@
 
 운영자가 이미지 생성 서비스(ChatGPT 이미지·Midjourney·Adobe Firefly 등)로 직접 만든다. 에이전트는 받은 파일을 다듬어 화면에 넣는다.
 
-## 방향
-- 화풍: 점술관 화면(밤빛 남보라 + 금선, 방마다 깔린 고전 명화)과 맞도록 **유화 질감의 반실사 초상 + 아르누보풍 금선 장식**. 아이돌식 애니메이션·귀여운 캐릭터 화풍은 쓰지 않는다(명화 배경과 부딪힘).
-- 구도: 가슴 위 반신, 얼굴이 위쪽 1/3 가운데. 세로 3:4. 배경은 거의 검은 남색(장면 없음) → 아치 문·도감 카드·면담 머리에 그대로 들어간다.
-- 일곱 명이 한 세트로 보이도록 공통 문단을 매번 그대로 붙인다. 방마다 강조색 하나(data-dex.js hue와 같은 계열).
-- 성별 구성: 여 4(만신·베다·룬·시빌라) · 남 3(데칸·촐킨·오검은 중성적인 청년).
-- 문화 표현은 존중하는 차림으로, 우스꽝스럽거나 과장된 고정관념은 피한다. 노출 없는 차림(광고 심사).
+## 방향 (2026-11-14 수정 — 운영자: 첫 시안이 실사풍이라 AI 티가 나고 화면과 안 어울림)
+- 화풍: 실사·유화풍을 버리고 **평면 일러스트**로. 점술관 화면(밤빛 남색 + 가는 금선 아이콘 + 아치 문)과 같은 결이 되도록, 오래된 타로 카드처럼 **또렷한 외곽선 + 몇 가지 색만 칠한 평면 채색 + 종이 질감**.
+- AI 티를 줄이는 법: 반짝이는 피부·영화 조명·빛 입자·심도(배경 흐림)·과한 디테일을 금지어로 넣고, 색 수를 제한하고, 손은 소매 속이나 소품 쥔 모양으로 단순하게.
+- 구도: 정면에 가깝게 가운데, 가슴 위 반신, 배경은 단색 남색. 작은 크기(아치 문 70px)에서도 머리 모양·소품 윤곽으로 누구인지 알아보게.
+- 시안 A(추천): 평면 구아슈 타로 카드풍. 시안 B: 남색 바탕에 금선만으로 그린 판화풍(지금 아이콘과 가장 가깝지만 덜 화사).
+- 성별 구성: 여 4(만신·베다·룬·시빌라) · 남 3(데칸·촐킨·오검은 중성적인 청년). 존중하는 차림, 노출 없는 차림.
 
-## 공통 문단 (매 프롬프트 끝에 붙임)
+## 공통 문단 A — 평면 타로 카드풍 (추천, 매 프롬프트 끝에 붙임)
 ```
-Painterly semi-realistic portrait, bust from the chest up, facing the viewer at a slight three-quarter angle, face centered in the upper third of the frame. Beautiful, graceful, refined features, calm and mysterious expression, natural skin texture. Night lighting: deep indigo and violet shadows, a warm candle-gold rim light tracing the hair and shoulders, a few softly glowing gold dust particles. Classical oil-painting texture combined with Art Nouveau elegance, fine antique-gold line ornaments on the clothing. Background: plain near-black midnight indigo with a soft vignette, no scenery. Vertical 3:4 composition. No text, no letters, no logo, no watermark, no frame or border, no weapons, no blood, not cartoon, not chibi, not childish, modest clothing.
+Flat hand-drawn illustration in the style of a vintage tarot card, front-facing bust from the chest up, centered, symmetrical, face in the upper third. Clean confident dark-indigo outlines of even width, flat matte colors with almost no shading, a limited palette of only five colors: midnight indigo, antique gold, cream, and the accent color named above plus one muted secondary. Simple stylized face with almond eyes, small nose and small mouth, gentle and pretty but not realistic. Hands simple or hidden in sleeves. Subtle paper grain texture, slightly imperfect brush edges. Plain flat midnight-indigo background with a thin gold arch line behind the head. No photorealism, no 3D, no glossy skin, no cinematic lighting, no glow, no light particles, no bokeh, no depth of field, no gradients, no text, no letters, no watermark, no frame, modest clothing.
+```
+
+## 공통 문단 B — 금선 판화풍 (대안)
+```
+Elegant engraved line illustration, front-facing bust from the chest up, centered and symmetrical. Drawn only with fine antique-gold lines on a flat midnight-indigo background, like gold ink on dark paper, with small flat fills of one accent color (named above) and cream. Stylized graceful face with simple features, not realistic. Decorative Art Nouveau line patterns on the clothing, simple hands. No shading gradients, no photorealism, no 3D, no glow, no light particles, no text, no letters, no watermark, no frame, modest clothing.
 ```
 
 ## 1. 만신 (사주 · 강조색 주홍)
@@ -50,6 +55,8 @@ An ancient Italian oracle priestess, ethereal and mysterious, eyes half-closed a
 ```
 
 ## 만드는 법
+- Midjourney는 `--style raw --stylize 50 --ar 3:4`로 화려함을 낮춘다. ChatGPT는 "simple flat illustration, not realistic"을 맨 앞에 한 번 더 쓴다.
+- 만신의 "rice grains float"는 빛 입자처럼 나오면 지운다.
 - 만신을 먼저 여러 장 뽑아 마음에 드는 한 장을 정한 뒤, 나머지 여섯은 그 그림을 화풍 기준으로 쓴다.
   - ChatGPT: 같은 대화에서 "앞의 만신 그림과 같은 화풍·조명·구도로" 한 줄을 앞에 붙인다.
   - Midjourney: 고른 그림 주소를 `--sref <주소>`로 붙이고 `--ar 3:4`. 프롬프트에 화가 이름은 넣지 않는다.
