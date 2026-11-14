@@ -429,3 +429,12 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .glogin__card small { font-family: var(--font-sans); font-size: 0.6875rem; color: var(--c-text-faint); }
 
 .gpacks em { justify-self: center; padding: 1px 7px; border-radius: 999px; font-style: normal; font-family: var(--font-sans); font-size: 0.625rem; font-weight: 700; color: oklch(0.2 0.03 285); background: var(--gold); }
+
+/* (2026-11-14) 로그인 안내(체험 콘텐츠는 카카오 로그인 뒤) */
+.ggate { display: grid; justify-items: center; gap: 12px; padding: 26px 18px 22px; border-radius: 22px; text-align: center; border: 1px solid oklch(0.55 0.07 75 / 0.5); background: radial-gradient(ellipse 80% 60% at 50% 0%, oklch(0.32 0.08 80 / 0.3), transparent 70%), oklch(0.13 0.035 285); }
+.ggate__arches { display: flex; gap: 10px; margin-bottom: 4px; }
+.ggate h2 { margin: 0 !important; padding: 0 !important; font-size: var(--fs-xl) !important; }
+.ggate h2::before { display: none; }
+.ggate p { margin: 0 !important; font-size: var(--fs-md) !important; color: var(--c-text-muted) !important; }
+.ggate .gbtn { width: 100%; }
+.ggate small { font-family: var(--font-sans); font-size: 0.6875rem; color: var(--c-text-faint); }

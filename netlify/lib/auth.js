@@ -248,7 +248,7 @@ async function account(path, body, env, store, now) {
   } catch (e) {
     b = null;
   }
-  if (!plainObj(b) || Object.keys(b).some((k) => !["sid", "data", "pass", "buy", "earn", "use"].includes(k)) || String(body).length > DATA_MAX + 200) return json(400, { error: "bad" });
+  if (!plainObj(b) || Object.keys(b).some((k) => !["sid", "data", "pass", "buy", "earn", "use", "room"].includes(k)) || String(body).length > DATA_MAX + 200) return json(400, { error: "bad" });
   try {
     const uh = await sessionOf(store, b.sid, now);
     if (!uh) return json(401, { error: "session" });
@@ -261,9 +261,22 @@ async function account(path, body, env, store, now) {
     if (path === "dust" && b.buy == null) {
       if (b.data != null || (b.earn != null && b.pass != null)) return json(400, { error: "bad" });
       // (2026-11-14) 하루 페이지에서 쓰기: { sid, use: "extra"|"story" } → 3·10 차감(무료 몫 먼저), 모자라면 402
+      // (2026-11-14) 방 완주 기록: { sid, room } → 도감 카드(계정). 숨은 이야기: { sid, use: "story", room } → 한 번 10
+      if (b.room != null && b.use == null) {
+        if (b.earn != null || b.pass != null) return json(400, { error: "bad" });
+        const v = await Dust.room(store, uh, b.room, now);
+        return v ? json(200, Object.assign({ state: "room" }, v)) : json(400, { error: "bad" });
+      }
+      if (b.use === "story") {
+        if (b.earn != null || b.pass != null || !Dust.ROOMS.includes(b.room)) return json(400, { error: "bad" });
+        const v = await Dust.story(store, uh, b.room, now);
+        if (v === null) return json(403, { error: "card" });
+        if (v === false) return json(402, { error: "dust", need: Dust.USE.story - (await Dust.balanceOf(store, uh)) });
+        return json(200, Object.assign({ state: "used", n: Dust.USE.story }, v));
+      }
       if (b.use != null) {
         const n = Dust.USE[b.use];
-        if (!n || b.earn != null || b.pass != null) return json(400, { error: "bad" });
+        if (!n || b.earn != null || b.pass != null || b.room != null) return json(400, { error: "bad" });
         const left = await Dust.spend(store, uh, n, now);
         if (left === false) return json(402, { error: "dust", need: n - (await Dust.balanceOf(store, uh)) });
         return json(200, Object.assign({ state: "used", n }, Dust.view(await Dust.read(store, uh))));
@@ -271,7 +284,7 @@ async function account(path, body, env, store, now) {
       // (2026-11-14) 로그인한 채 받는 별가루: { sid, earn: "first"|"oracle"|"seal" } → 첫 로그인 10·출석 5(하루 한 번)·금빛 봉인 30
       if (b.earn != null) {
         const e = await Dust.earn(store, uh, b.earn, now);
-        if (!e) return json(400, { error: "bad" });
+        if (!e) return json(b.earn === "seal" ? 403 : 400, { error: b.earn === "seal" ? "rooms" : "bad" });
         return json(200, Object.assign({ state: "earn" }, e));
       }
       if (b.pass != null) {

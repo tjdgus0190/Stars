@@ -234,35 +234,38 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await waitFor("!!window.Dust && !!window.DEX && !!document.querySelector('[data-js=home-today]')");
   const home = await ev("({ path: location.pathname, sub: document.querySelector('[data-js=home-today-sub]').textContent, art: document.querySelector('[data-js=home-today]').style.getPropertyValue('--art'), want: DEX.guides.find((g) => g.room === Dust.guideOf()), feats: [...document.querySelectorAll('.gfeat')].map((a) => a.getAttribute('href')), tabs: document.querySelectorAll('.tabbar a').length, cur: document.querySelector('.tabbar a[aria-current=page]')?.getAttribute('href'), canon: document.querySelector('link[rel=canonical]')?.href })");
   check("처음 화면(/): 일곱 개의 문·오늘의 신탁·면담·도감·별가루 다섯 칸 · 아래 탭 5 · 오늘 담당 안내자 표시", home.path === "/" && ["/products/strange-oracle/", "/today/", "/talk/", "/dex/", "/stardust/"].every((h) => home.feats.includes(h)) && home.tabs === 5 && home.cur === "/" && home.sub.includes(home.want.name) && home.art.includes(`img/guide/${home.want.room}.webp`) && home.canon === "https://strange-oracle.com/", JSON.stringify({ sub: home.sub, feats: home.feats, cur: home.cur }));
-  // (v1-G) 처음 화면에서 카드를 누르면 로그인 권유가 뜨고, 「로그인 없이 계속」이면 그대로 들어간다
-  await ev("sessionStorage.removeItem('strange-oracle-login-skip'); document.querySelector('.gfeat[href=\"/dex/\"]').click(); true");
+  // (2026-11-14 운영자) 체험 콘텐츠는 로그인 뒤: 처음 화면 카드는 로그인 안내(건너뛰기 없음) · 점술 안내·무료 도구 칸은 그대로
+  await ev("document.querySelector('.gfeat[href=\"/dex/\"]').click(); true");
   await waitFor("!!document.querySelector('.glogin [data-js=login-go]')", 5000);
-  const lgOpen = await ev("location.pathname === '/' && !!document.querySelector('.glogin')");
-  await ev("document.querySelector('.glogin .glink[data-js=login-skip]').click(); true");
-  const lgSkip = await waitFor("location.pathname === '/dex/'", 8000);
-  check("처음 화면: 카드를 누르면 카카오 로그인 권유 · 로그인 없이 계속하면 그 화면으로", lgOpen && lgSkip);
-  // (2026-11-14 운영자) 별가루는 카카오 로그인한 계정에만: 첫 로그인 10 · 출석(오늘의 신탁) 5/일 · 금빛 봉인 30
+  const lgOpen = await ev("({ path: location.pathname, skip: [...document.querySelectorAll('.glogin button')].some((b) => /없이/.test(b.textContent)) })");
+  await ev("document.querySelector('.glogin [data-js=login-skip]').click(); true");
+  await sleep(200);
+  const lgClosed = await ev("!document.querySelector('.glogin') && location.pathname === '/'");
+  check("처음 화면: 체험 콘텐츠 카드를 누르면 카카오 로그인 안내(「로그인 없이 계속」 없음) · 닫으면 그대로", lgOpen.path === "/" && !lgOpen.skip && lgClosed, JSON.stringify(lgOpen));
   const acctBal = async () => { const sid = await ev("JSON.parse(localStorage.getItem('strange-oracle-login') || 'null')?.sid || ''"); if (!sid) return null; const r = await fetch(`${TEST}/api/auth/dust`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid }) }); return (await r.json()).bal; };
-  await b.goto(`${TEST}/today/`);
-  await waitFor("!!window.Dust && !!document.querySelector('[data-js=today-open]')");
-  const n0 = await ev("({ dev: Dust.state().bal, badge: document.querySelector('.dust-badge b')?.textContent, note: document.querySelector('.gtoday-hero .gnote')?.textContent || '', login: !!document.querySelector('[data-js=today-login]') })");
-  check("로그인 전: 이 기기는 별가루를 주지 않음(0) · 오늘의 신탁에 「카카오 로그인하면 출석 별가루 +5」", n0.dev === 0 && n0.badge === "0" && /로그인하면 출석 별가루/.test(n0.note) && n0.login, JSON.stringify(n0));
-  const g0 = await ev("({ name: document.querySelector('.gtoday-hero h2').textContent, want: DEX.guides.find((g) => g.room === Dust.guideOf()).name })");
-  check("오늘의 신탁: 오늘 담당 안내자가 맞음(날짜 순환)", g0.name === g0.want, JSON.stringify(g0));
-  await ev("document.querySelector('[data-js=today-open]').click(); true");
-  await waitFor("!!document.querySelector('.gread')");
-  const t0 = await ev("({ bal: Dust.state().bal, toast: document.querySelector('.dust-toast')?.textContent || '' })");
-  check("로그인 전에도 오늘의 신탁은 받음(별가루 없음)", t0.bal === 0 && !/\+5/.test(t0.toast), JSON.stringify(t0));
-  // 카카오 로그인(모의) → 첫 로그인 +10
+  const postDust = async (body) => { const sid = await ev("JSON.parse(localStorage.getItem('strange-oracle-login') || 'null')?.sid || ''"); return (await fetch(`${TEST}/api/auth/dust`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ sid }, body)) })).json(); };
+  const gates = {};
+  for (const pg of ["today", "dex", "talk", "stardust"]) {
+    await b.goto(`${TEST}/${pg}/`);
+    await waitFor("!!document.querySelector('.ggate [data-js=gate-login]') || !!document.querySelector('[data-js=app] > :not(.ggate)')", 8000);
+    gates[pg] = await ev("({ gate: !!document.querySelector('.ggate [data-js=gate-login]'), more: !!document.querySelector('.gfold-more') })");
+  }
+  check("로그인 전: 오늘의 신탁·도감·면담·별가루는 로그인 안내만(설명·자주 묻는 질문은 그대로)", Object.values(gates).every((g) => g.gate && g.more), JSON.stringify(gates));
+  await b.goto(`${TEST}/manse/`);
+  await waitFor("!!document.querySelector('[data-js=tool-form]')");
+  check("무료 도구·점술 안내는 로그인 없이 그대로", !(await ev("!!document.querySelector('.ggate')")));
+  // 오늘의 신탁에서 로그인(모의 카카오) → 오늘의 신탁으로 돌아옴 · 첫 로그인 +10
   const KID0 = String(300000000 + Math.floor(Math.random() * 99999999));
-  await b.goto(`${TEST}/stardust/`);
-  await waitFor("!!document.querySelector('[data-js=dust-login]')", 8000);
-  await ev("document.querySelector('[data-js=dust-login]').click(); true");
+  await b.goto(`${TEST}/today/`);
+  await waitFor("!!document.querySelector('[data-js=gate-login]')", 8000);
+  await ev("document.querySelector('[data-js=gate-login]').click(); true");
   await waitFor("location.pathname === '/__dev/kakao/authorize'", 8000);
   await ev(`document.querySelector('[data-field=kid]').value = '${KID0}'; document.querySelector('[data-act=agree]').click(); true`);
-  await waitFor("location.pathname === '/stardust/' && /10/.test(document.querySelector('[data-js=dust-total]')?.textContent || '')", 15000);
-  const f1 = await ev("({ total: document.querySelector('[data-js=dust-total]').textContent, badge: document.querySelector('.dust-badge b')?.textContent })");
-  check("카카오 첫 로그인 → 계정에 별가루 10(한 번) · 위 띠 잔액", f1.total === "10" && f1.badge === "10" && (await acctBal()) === 10, JSON.stringify(f1));
+  await waitFor("location.pathname === '/today/' && !!document.querySelector('[data-js=today-open]')", 15000);
+  await waitFor("document.querySelector('.dust-badge b')?.textContent === '10'", 8000);
+  check("로그인하면 그 페이지로 돌아와 열림 · 첫 로그인 별가루 10(계정) · 위 띠 잔액", (await acctBal()) === 10 && (await ev("document.querySelector('.dust-badge b')?.textContent")) === "10");
+  const g0 = await ev("({ name: document.querySelector('.gtoday-hero h2').textContent, want: DEX.guides.find((g) => g.room === Dust.guideOf()).name })");
+  check("오늘의 신탁: 오늘 담당 안내자가 맞음(날짜 순환)", g0.name === g0.want, JSON.stringify(g0));
   await b.goto(`${TEST}/stardust/`);
   await waitFor("!!document.querySelector('[data-js=dust-total]')");
   await sleep(600);
@@ -292,8 +295,9 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   const x0 = await ev("({ locked: document.querySelectorAll('.gdexcard.is-locked').length, fig: [...document.querySelectorAll('.gdexcard .garch')].filter((g) => (g.getAttribute('style') || '').includes('img/guide/')).length, img: document.querySelector('.gdexcard .garch').getAttribute('style'), note: document.querySelector('.gseal small')?.textContent || '' })");
   const imgOk = (await Promise.all(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"].map((r) => fetch(`${TEST}/products/strange-oracle/img/guide/${r}.webp`)))).every((r) => r.status === 200);
   check("도감: 처음엔 일곱 장 모두 잠김 · 아치 문 초상 7 · 「다 모으면 별가루 30」 안내", x0.locked === 7 && x0.fig === 7 && /img\/guide\/saju\.webp/.test(x0.img) && imgOk && /30/.test(x0.note), JSON.stringify(x0).slice(0, 200));
-  await ev("Dust.earn('room', 'rune'); true");
-  await sleep(200);
+  await postDust({ room: "rune" }); // 방 완주는 입구가 계정에 기록한다(여기서는 같은 길을 바로 부름)
+  await b.goto(`${TEST}/dex/`);
+  await waitFor("document.querySelectorAll('.gdexcard.is-locked').length === 6", 8000);
   await ev("document.querySelector('[data-js=dex-card][data-room=rune]').click(); true");
   await sleep(200);
   const x1 = await ev("({ locked: document.querySelectorAll('.gdexcard.is-locked').length, sheet: !!document.querySelector('.gsheet[role=dialog]'), btn: !!document.querySelector('[data-js=dex-open][data-room=rune]') })");
@@ -303,13 +307,13 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await ev("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); true");
   await sleep(150);
   const x3 = await ev("!document.querySelector('.gsheet') && !document.documentElement.classList.contains('sheet-open')");
-  check("도감: 룬의 방 완주 → 카드만 열림 · 카드 누르면 펼침 시트 · 숨은 이야기 계정 별가루 10 · Esc로 닫힘", x1.locked === 6 && x1.sheet && x1.btn && x2 && x3 && (await acctBal()) === 2, JSON.stringify({ x1, x2, x3 }));
+  check("도감: 룬의 방 완주(계정 기록) → 카드 열림 · 카드 누르면 펼침 시트 · 숨은 이야기 계정 별가루 10 · Esc로 닫힘", x1.locked === 6 && x1.sheet && x1.btn && x2 && x3 && (await acctBal()) === 2, JSON.stringify({ x1, x2, x3 }));
   // 일곱 장 → 금빛 봉인 + 별가루 30(계정에 한 번)
-  await ev("['saju','ogham','star','decan','tzolkin','sibyl'].forEach((r) => Dust.earn('room', r)); true");
+  for (const r of ["saju", "ogham", "star", "decan", "tzolkin", "sibyl"]) await postDust({ room: r });
   await b.goto(`${TEST}/dex/`);
   await waitFor("!!document.querySelector('.gseal.is-open') && /받았어요/.test(document.querySelector('.gseal small')?.textContent || '')", 10000);
   const seal = await ev("({ text: document.querySelector('.gseal p').textContent, toast: document.querySelector('.dust-toast')?.textContent || '' })");
-  check("도감 일곱 장 → 금빛 봉인 열림 · 마지막 한마디 · 별가루 +30(계정)", /당신이요/.test(seal.text) && /\+30/.test(seal.toast) && (await acctBal()) === 32, JSON.stringify(seal));
+  check("도감 일곱 장(계정에 기록된 방 완주) → 금빛 봉인 열림 · 마지막 한마디 · 별가루 +30(계정)", /당신이요/.test(seal.text) && /\+30/.test(seal.toast) && (await acctBal()) === 32, JSON.stringify(seal));
   await b.goto(`${TEST}/dex/`);
   await waitFor("!!document.querySelector('.gseal.is-open')");
   await sleep(700);

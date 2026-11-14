@@ -439,7 +439,7 @@ const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStor
     check("10 생년월일 없으면 한 번 묻기 → 만 11세 막힘 · 요청 0 · 저장 0", askOk && (await cardState(B)) === "young" && B.mapReqs().length === n7 && !(await B.ev("sessionStorage.getItem('strange-oracle').includes('2015')")));
 
     // ── 8. off 배포판: 지도 DOM 0, 지도 요청 0, #join=… 평소 입구
-    const off = spawn(process.execPath, [path.join(__dirname, "mock-server.js"), "--port", "8792", "--mode", "off"], { stdio: "ignore" });
+    const off = spawn(process.execPath, [path.join(__dirname, "mock-server.js"), "--port", "8792", "--mode", "off", "--gate", "off"], { stdio: "ignore" }); // (2026-11-14) 로그인 안내 없이 방을 지나는 예전 시험
     await sleep(1500);
     try {
       const n0 = A.log.requests.length;

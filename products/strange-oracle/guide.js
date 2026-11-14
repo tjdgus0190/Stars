@@ -50,27 +50,26 @@
         if (sub) sub.textContent = fill(G.home.features.today.sub, { name: g.name });
       }
     }
-    // (v1-G) 처음 화면에서 무언가를 고르면 카카오 로그인을 권한다. 로그인은 선택 — 「로그인 없이 계속」으로 그대로 들어간다(운영 규칙 3장)
+    // (v1-G·2026-11-14 운영자) 처음 화면에서 체험 콘텐츠 카드를 누르면 카카오 로그인 안내(로그인해야 들어간다). 점술 안내·무료 도구는 누구나
     const LG = G.home.login;
     const loggedIn = () => { try { const x = JSON.parse(localStorage.getItem("strange-oracle-login") || "null"); return Boolean(x && /^[0-9a-f]{32}$/.test(x.sid) && x.exp > Date.now()); } catch (e) { return false; } };
-    const skippedLogin = () => { try { return sessionStorage.getItem("strange-oracle-login-skip") === "1"; } catch (e) { return false; } };
     if (LG) document.addEventListener("click", (e) => {
-      const a = e.target.closest(".gfeat[href], .gchips a[href]");
-      if (!a || loggedIn() || skippedLogin() || e.metaKey || e.ctrlKey) return;
+      const a = e.target.closest(".gfeat[href]"); // (2026-11-14) 체험 콘텐츠 카드만 — 점술 안내·무료 도구는 누구나
+      if (!a || loggedIn() || e.metaKey || e.ctrlKey) return;
       e.preventDefault();
       const href = a.getAttribute("href");
       const box = document.createElement("div");
       box.className = "glogin";
       box.innerHTML = `<div class="glogin__scrim" data-js="login-skip"></div><div class="glogin__card" role="dialog" aria-modal="true" aria-labelledby="glogin-h"><h2 id="glogin-h">${esc(LG.title)}</h2><p>${esc(LG.body)}</p>
-        <button class="gbtn gbtn--kakao" type="button" data-js="login-go">${esc(LG.go)}</button><button class="glink" type="button" data-js="login-skip">${esc(LG.skip)}</button><small>${esc(LG.note)}</small></div>`;
+        <button class="gbtn gbtn--kakao" type="button" data-js="login-go">${esc(LG.go)}</button><button class="glink" type="button" data-js="login-skip">${esc(LG.close)}</button><small>${esc(LG.note)}</small></div>`;
       document.body.append(box);
       box.querySelector("[data-js=login-go]").focus();
       box.addEventListener("click", (ev) => {
-        if (ev.target.closest("[data-js=login-skip]")) { try { sessionStorage.setItem("strange-oracle-login-skip", "1"); } catch (x) { /* 무시 */ } location.href = href; return; }
+        if (ev.target.closest("[data-js=login-skip]")) { box.remove(); return; }
         if (ev.target.closest("[data-js=login-go]")) {
           const b = new Uint8Array(16); crypto.getRandomValues(b);
           const st = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
-          const from = { "/talk/": "talk", "/today/": "today", "/dex/": "dex", "/stardust/": "stardust" }[href] || "home";
+          const from = { "/talk/": "talk", "/today/": "today", "/dex/": "dex", "/stardust/": "stardust" }[href] || "home"; // 일곱 개의 문(입구)은 처음 화면으로 돌아온다
           try { sessionStorage.setItem("strange-oracle-kakao", JSON.stringify({ s: st, mode: "login", from, prod: "book" })); } catch (x) { location.href = href; return; }
           location.href = "/api/auth/kakao/start?state=" + st;
         }
@@ -103,12 +102,13 @@
       try { sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode: "login", from, prod: "book" })); } catch (e) { return; }
       location.href = "/api/auth/kakao/start?state=" + st;
     };
-    let paidBal = null; // 충전한 별가루(서버 값, 화면 메모리만)
+    let paidBal = null; // 카카오 계정 별가루(서버 값, 화면 메모리만)
+    let onExpired = () => {}; // 로그인이 끝났을 때(401) — 로그인 안내로
     const loadPaid = async () => {
       const lg = readLogin();
       if (!lg) { paidBal = null; return null; }
       const r = await post("/api/auth/dust", { sid: lg.sid });
-      if (r.status === 401) { dropLogin(); paidBal = null; return null; }
+      if (r.status === 401) { dropLogin(); paidBal = null; onExpired(); return null; }
       paidBal = r.status === 200 && r.j && Number.isInteger(r.j.bal) ? r.j.bal : null;
       acctOnce = r.j && Array.isArray(r.j.once) ? r.j.once : [];
       acctView = r.j || null;
@@ -199,6 +199,16 @@
       ${v.quote ? `<blockquote class="gscroll">${esc(v.quote)}</blockquote>` : `<span class="gread__mark${v.num ? " num" : ""}${v.rune ? " rune" : ""}">${esc(v.mark)}</span>`}
       <b>${esc(v.name)}</b>${v.sub ? `<em>${esc(v.sub)}</em>` : ""}${v.kw.length ? `<span class="gread__kw">${v.kw.map((k) => `<i>${esc(k)}</i>`).join("")}</span>` : ""}<p>${esc(v.key)}</p>${v.flow && P.app && P.app.flowHead ? `<h3 class="gread__h">${esc(P.app.flowHead)}</h3><p>${esc(v.flow)}</p>` : ""}${v.act && ACT ? `<p class="gread__act"><small>${esc(ACT)}</small>${esc(v.act)}</p>` : ""}${v.lore && P.app && P.app.loreHead ? `<details class="gread__lore"><summary>${esc(P.app.loreHead)}</summary><p>${esc(v.lore)}</p></details>` : ""}</article>`;
 
+    // ── (2026-11-14 운영자) 체험 콘텐츠는 카카오 로그인 뒤: 로그인 표가 없으면 안내만 보인다(아래 설명·자주 묻는 질문은 그대로)
+    const GATE = window.NAV && window.NAV.gate && window.NAV.gate.on ? window.NAV.gate : null;
+    const showGate = () => {
+      box.innerHTML = `<div class="ggate"><div class="ggate__arches" aria-hidden="true">${["saju", "sibyl", "rune"].map((r) => arch(r, "garch--sm")).join("")}</div><h2>${esc(GATE.title)}</h2><p>${esc(GATE.body)}</p><button class="gbtn gbtn--kakao" type="button" data-js="gate-login">${esc(GATE.go)}</button><small>${esc(GATE.note)}</small></div>`;
+      document.documentElement.classList.remove("room-open", "sheet-open");
+    };
+    if (GATE) box.addEventListener("click", (e) => { if (e.target.closest("[data-js=gate-login]")) kakaoLogin(CONF.page); });
+    if (GATE && !readLogin()) { showGate(); return; }
+    onExpired = () => { if (GATE) showGate(); };
+
     if (CONF.page === "today") {
       const A = P.app;
       const pick = (room) => window.Calc.pickOracle((ROOM_DATA[room][1]() || []).length || 1);
@@ -269,7 +279,8 @@
       const X = window.DEX, U = X.ui;
       let openRoom = null;
       const draw = () => {
-        const st = D.state();
+        // (2026-11-14) 카드·펼친 이야기는 카카오 계정 기록(방 완주를 서버가 안다)
+        const st = { cards: (acctView && acctView.rooms) || [], open: (acctView && acctView.stories) || [] };
         const all = st.cards.length === X.guides.length;
         const cards = X.guides.map((g) => {
           const has = st.cards.includes(g.room);
@@ -303,12 +314,13 @@
         if (b) {
           if (!readLogin()) return kakaoLogin("dex");
           b.disabled = true;
-          useAcct("story").then((u) => { if (u === true) D.openStory(b.dataset.room, 0); draw(); });
+          const lg = readLogin();
+          post("/api/auth/dust", { sid: lg.sid, use: "story", room: b.dataset.room }).then((r) => { if (r.status === 200 && r.j) { paidBal = r.j.bal; acctView = r.j; acctEvt(); } draw(); });
         }
       });
       // 일곱 장을 모두 모으면 금빛 봉인 별가루 +30(계정에 한 번)
       const sealCheck = async () => {
-        if (D.state().cards.length === X.guides.length && readLogin() && !acctOnce.includes("seal")) { await earnAcct("seal"); draw(); }
+        if (acctView && (acctView.rooms || []).length === X.guides.length && readLogin() && !acctOnce.includes("seal")) { await earnAcct("seal"); draw(); }
       };
       loadPaid().then(() => { draw(); sealCheck(); });
       document.addEventListener("keydown", (e) => { if (e.key === "Escape" && openRoom) { openRoom = null; draw(); } });

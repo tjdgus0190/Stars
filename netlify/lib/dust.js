@@ -15,6 +15,7 @@ const COSTS = Object.freeze({ book: 49, ny: 49 }); // 별가루로 여는 유료
 const EARN = Object.freeze({ first: 10, oracle: 5, seal: 30 });
 const ONCE = new Set(["first", "seal"]);
 const USE = Object.freeze({ extra: 3, story: 10 }); // 계정 별가루로 쓰는 하루 페이지 항목(다른 안내자의 오늘의 신탁 · 도감 숨은 이야기)
+const ROOMS = Object.freeze(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]); // (2026-11-14) 방 완주·숨은 이야기는 계정에 기록(도감은 서버 기록으로)
 const kstDay = (now) => new Date(now + 9 * 3600 * 1000).toISOString().slice(0, 10);
 const LOG_MAX = 30;
 const iso = (now) => new Date(now).toISOString();
@@ -22,16 +23,16 @@ const K = (uh) => "dust/" + uh;
 
 async function read(store, uh) {
   const r = await store.get(K(uh));
-  if (!r || !Number.isInteger(r.bal) || r.bal < 0) return { bal: 0, free: 0, oday: "", once: [], log: [], at: null };
-  return { bal: r.bal, free: Number.isInteger(r.free) && r.free >= 0 ? r.free : 0, oday: typeof r.oday === "string" ? r.oday : "", once: Array.isArray(r.once) ? r.once.filter((x) => ONCE.has(x)) : [], log: Array.isArray(r.log) ? r.log : [], at: r.at };
+  if (!r || !Number.isInteger(r.bal) || r.bal < 0) return { bal: 0, free: 0, oday: "", once: [], rooms: [], stories: [], log: [], at: null };
+  return { bal: r.bal, free: Number.isInteger(r.free) && r.free >= 0 ? r.free : 0, oday: typeof r.oday === "string" ? r.oday : "", once: Array.isArray(r.once) ? r.once.filter((x) => ONCE.has(x)) : [], rooms: Array.isArray(r.rooms) ? r.rooms.filter((x) => ROOMS.includes(x)) : [], stories: Array.isArray(r.stories) ? r.stories.filter((x) => ROOMS.includes(x)) : [], log: Array.isArray(r.log) ? r.log : [], at: r.at };
 }
 async function write(store, uh, rec, entry, now) {
   const log = [entry].concat(rec.log).slice(0, LOG_MAX);
-  await store.set(K(uh), { bal: rec.bal, free: rec.free, oday: rec.oday, once: rec.once, log, at: iso(now) });
+  await store.set(K(uh), { bal: rec.bal, free: rec.free, oday: rec.oday, once: rec.once, rooms: rec.rooms, stories: rec.stories, log, at: iso(now) });
 }
 // 쓸 수 있는 전체(무료 + 충전)
 const balanceOf = async (store, uh) => { const r = await read(store, uh); return r.bal + r.free; };
-const view = (r) => ({ bal: r.bal + r.free, paid: r.bal, free: r.free, today: r.oday, once: r.once.slice() });
+const view = (r) => ({ bal: r.bal + r.free, paid: r.bal, free: r.free, today: r.oday, once: r.once.slice(), rooms: r.rooms.slice(), stories: r.stories.slice() });
 
 // 결제 코드 p(이미 paid 확인된 것)로 충전. prod = pay.js 상품 이름. 같은 코드는 한 번만(다른 계정도 못 씀) → { ok, bal, already? }
 async function credit(store, uh, ph, prod, now) {
@@ -60,6 +61,32 @@ async function spend(store, uh, n, now) {
   return rec.bal + rec.free;
 }
 
+// 방 하나를 처음 끝까지 지남 → 계정에 기록(도감 카드). 별가루는 없음
+async function room(store, uh, name, now) {
+  if (!ROOMS.includes(name)) return null;
+  const rec = await read(store, uh);
+  if (!rec.rooms.includes(name)) {
+    rec.rooms.push(name);
+    await write(store, uh, rec, { k: "room", n: 0, at: iso(now) }, now);
+  }
+  return view(rec);
+}
+// 숨은 이야기 펼치기: 카드가 있는 방만, 한 번 10(이미 펼쳤으면 무료) → view | false(모자람) | null(카드 없음)
+async function story(store, uh, name, now) {
+  if (!ROOMS.includes(name)) return null;
+  const rec = await read(store, uh);
+  if (!rec.rooms.includes(name)) return null;
+  if (rec.stories.includes(name)) return view(rec);
+  const n = USE.story;
+  if (rec.bal + rec.free < n) return false;
+  const f = Math.min(rec.free, n);
+  rec.free -= f;
+  rec.bal -= n - f;
+  rec.stories.push(name);
+  await write(store, uh, rec, { k: "use", n, at: iso(now) }, now);
+  return view(rec);
+}
+
 // 로그인한 채 받는 무료 별가루(first·seal은 계정에 한 번, oracle은 한국 날짜로 하루 한 번) → { added, ...view }
 async function earn(store, uh, kind, now) {
   const n = EARN[kind];
@@ -70,6 +97,7 @@ async function earn(store, uh, kind, now) {
     rec.oday = day;
   } else {
     if (rec.once.includes(kind)) return Object.assign({ added: 0 }, view(rec));
+    if (kind === "seal" && rec.rooms.length < ROOMS.length) return null; // 금빛 봉인: 계정에 일곱 방 완주가 기록돼 있어야
     rec.once.push(kind);
   }
   rec.free += n;
@@ -92,4 +120,4 @@ async function refund(store, ph, now) {
 
 const erase = (store, uh) => store.del(K(uh));
 
-module.exports = { USE, PACKS, COSTS, EARN, read, view, balanceOf, credit, spend, earn, refund, erase, LOG_MAX, kstDay };
+module.exports = { ROOMS, room, story, USE, PACKS, COSTS, EARN, read, view, balanceOf, credit, spend, earn, refund, erase, LOG_MAX, kstDay };

@@ -19,17 +19,17 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
 
   // ── 1. 별가루 페이지: 묶음 4종(개수·가격·덤), 1개 = 100원, 쓰는 곳에 책·신년운세 49
   await b.goto(`${TEST}/stardust/`);
-  await waitFor("!!window.Dust && !!document.querySelector('.gwallet')");
+  await waitFor("!!window.Dust");
   await ev("localStorage.clear(); sessionStorage.clear(); true");
   await b.goto(`${TEST}/stardust/`);
-  await waitFor("!!document.querySelector('[data-js=dust-login]')", 8000);
-  const sd = await ev("({ uses: [...document.querySelectorAll('.gmini')[1].querySelectorAll('li')].map((l) => l.textContent), rate: [...document.querySelectorAll('.gnote')].some((n) => /1개 = 100원/.test(n.textContent)) })");
-  check("별가루 페이지: 쓰는 곳 = 면담 5 · 다른 안내자 3 · 숨은 이야기 10 · 책 49 · 신년운세 49 · 1개 = 100원", sd.uses.length === 5 && /면담.*5/.test(sd.uses[0]) && /책.*49/.test(sd.uses[3]) && /신년운세.*49/.test(sd.uses[4]) && sd.rate, JSON.stringify(sd));
-  // 카카오 로그인(모의)
-  await ev("document.querySelector('[data-js=dust-login]').click(); true");
+  await waitFor("!!document.querySelector('[data-js=gate-login]')", 8000);
+  // 카카오 로그인(모의) — 별가루 페이지는 로그인 뒤에 열린다
+  await ev("document.querySelector('[data-js=gate-login]').click(); true");
   await waitFor("location.pathname === '/__dev/kakao/authorize'", 8000);
   await ev(`document.querySelector('[data-field=kid]').value = '${KID}'; document.querySelector('[data-act=agree]').click(); true`);
   await waitFor("location.pathname === '/stardust/' && !!document.querySelector('[data-js=dust-pack]')", 15000);
+  const sd = await ev("({ uses: [...document.querySelectorAll('.gmini')[1].querySelectorAll('li')].map((l) => l.textContent), rate: [...document.querySelectorAll('.gnote')].some((n) => /1개 = 100원/.test(n.textContent)) })");
+  check("별가루 페이지: 쓰는 곳 = 면담 5 · 다른 안내자 3 · 숨은 이야기 10 · 책 49 · 신년운세 49 · 1개 = 100원", sd.uses.length === 5 && /면담.*5/.test(sd.uses[0]) && /책.*49/.test(sd.uses[3]) && /신년운세.*49/.test(sd.uses[4]) && sd.rate, JSON.stringify(sd));
   const packs = await ev("[...document.querySelectorAll('[data-js=dust-pack]')].map((p) => p.textContent.replace(/\\s+/g, ' ').trim())");
   check("충전 묶음 4종: 30개 3,000원 · 50개 5,000원 · 100개(+10 덤) 10,000원 · 300개(+50 덤) 30,000원", packs.length === 4 && /30개.*3,000원/.test(packs[0]) && /50개.*5,000원/.test(packs[1]) && /100개.*\+10 덤.*10,000원/.test(packs[2]) && /300개.*\+50 덤.*30,000원/.test(packs[3]), packs.join(" | "));
   // 30개 충전 → 49에 모자람
@@ -79,8 +79,10 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   await b.goto(`${TEST}/products/strange-oracle/`);
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'", 10000);
   await ev("sessionStorage.removeItem('strange-oracle-pass'); StrangeOracle.go('deeper'); true");
-  await waitFor("/카카오 로그인/.test(document.querySelector('[data-js=pay-dust]')?.textContent || '')", 8000);
-  check("로그인 전: 「카카오 로그인하면 가진 별가루로 바로 열려요」", true);
+  const gated = await waitFor("!!document.querySelector('[data-js=login-gate]:not([hidden]) .login-gate__go') && document.querySelector('.screen.is-active')?.id === 'screen-hub'", 8000);
+  await ev("StrangeOracle.go('saju-intro'); true");
+  const gated2 = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub' && !!document.querySelector('[data-js=login-gate]:not([hidden])')", 8000);
+  check("로그인 전: 입구는 보이지만 방·책 화면으로는 못 가고 카카오 로그인 안내", gated && gated2);
 
   const pass = out.filter((l) => l.startsWith("PASS")).length, fail = out.length - pass;
   console.log(`${pass} PASS / ${fail} FAIL`);

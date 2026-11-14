@@ -485,7 +485,7 @@ const storeDump = () => fetch(`${TEST}/__dev/pay-store`).then((r) => r.json());
   check("I8 test: 콘솔 오류 0 (일부러 낸 401·403·404·429·503·연결 실패 제외)", errs.length === 0, errs.slice(0, 3).join(" | "));
 
   // ═══ J. 배포판과 같은 data.js (모의 서버 --mode off = dist/public). (2026-10-22) 배포판이 live면 L 묶음, off면 J 묶음 ═══
-  const srv = spawn(process.execPath, [path.join(__dirname, "mock-server.js"), "--port", "8791", "--mode", "off"], { stdio: "ignore" });
+  const srv = spawn(process.execPath, [path.join(__dirname, "mock-server.js"), "--port", "8791", "--mode", "off", "--gate", "off"], { stdio: "ignore" }); // (2026-11-14) 로그인 안내 없이 방을 지나는 예전 시험
   await sleep(900);
   try {
     const DIST_MODE = ((await (await fetch(`${OFF}/products/strange-oracle/data.js`)).text()).match(/\bpay:\s*\{\s*mode:\s*"(\w+)"/) || [])[1];

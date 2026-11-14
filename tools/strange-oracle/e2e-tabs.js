@@ -152,7 +152,7 @@ async function open({ port, width = 360, height = 640, reduced = true, mapOff = 
   await M.close();
 
   // ═══ off (배포판과 같은 data.js) ═══
-  const srv = spawn(process.execPath, [path.join(__dirname, "mock-server.js"), "--port", "8793", "--mode", "off"], { stdio: "ignore" });
+  const srv = spawn(process.execPath, [path.join(__dirname, "mock-server.js"), "--port", "8793", "--mode", "off", "--gate", "off"], { stdio: "ignore" }); // (2026-11-14) 로그인 안내 없이 방을 지나는 예전 시험
   await sleep(900);
   try {
     const O = await open({ port: 9664 });

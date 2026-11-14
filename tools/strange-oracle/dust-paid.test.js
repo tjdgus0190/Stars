@@ -68,7 +68,7 @@ test("충전: 로그인한 계정에 한 번만, 다른 계정은 같은 코드�
   assert.strictEqual(other.status, 409);
   assert.strictEqual(JSON.parse((await dust(store, { sid: B.sid })).body).bal, 0);
   const rec = await store.get("dust/" + A.uh);
-  assert.deepStrictEqual(Object.keys(rec).sort(), ["at", "bal", "free", "log", "oday", "once"]);
+  assert.deepStrictEqual(Object.keys(rec).sort(), ["at", "bal", "free", "log", "oday", "once", "rooms", "stories"]);
   assert.deepStrictEqual(Object.keys(rec.log[0]).sort(), ["at", "k", "n"]);
 });
 
@@ -157,7 +157,7 @@ test("새 충전 묶음 4종: 30=3,000 · 50=5,000 · 100=10,000(+10) · 300=30,
   }
 });
 
-test("로그인한 계정에만 주는 별가루: 출석 5(하루 한 번)·첫 로그인 10·금빛 봉인 30(한 번) · 다른 안내자 3·숨은 이야기 10 차감", async () => {
+test("로그인한 계정에만 주는 별가루: 출석 5(하루 한 번)·첫 로그인 10·금빛 봉인 30(계정에 일곱 방 완주가 있어야, 한 번) · 다른 안내자 3·숨은 이야기 10(방 카드 있어야, 한 번) 차감", async () => {
   const store = new MemStore();
   const { sid, uh } = await login(store);
   let x = JSON.parse((await dust(store, { sid, earn: "oracle" })).body);
@@ -169,14 +169,20 @@ test("로그인한 계정에만 주는 별가루: 출석 5(하루 한 번)·첫 
   assert.deepStrictEqual([x.added, x.free], [10, 15]);
   x = JSON.parse((await dust(store, { sid, earn: "first" })).body);
   assert.strictEqual(x.added, 0);
+  assert.strictEqual((await dust(store, { sid, earn: "seal" })).status, 403); // 일곱 방 완주가 계정에 없으면 못 받음
+  for (const r of ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]) assert.strictEqual((await dust(store, { sid, room: r })).status, 200);
+  assert.strictEqual((await dust(store, { sid, room: "nope" })).status, 400);
   x = JSON.parse((await dust(store, { sid, earn: "seal" })).body);
-  assert.deepStrictEqual([x.added, x.free], [30, 45]);
+  assert.deepStrictEqual([x.added, x.free, x.rooms.length], [30, 45, 7]);
   x = JSON.parse((await dust(store, { sid, earn: "seal" })).body);
   assert.strictEqual(x.added, 0);
   x = JSON.parse((await dust(store, { sid, use: "extra" })).body);
   assert.deepStrictEqual([x.state, x.bal], ["used", 42]);
-  x = JSON.parse((await dust(store, { sid, use: "story" })).body);
-  assert.strictEqual(x.bal, 32);
+  assert.strictEqual((await dust(store, { sid, use: "story" })).status, 400); // 방 이름 없음
+  x = JSON.parse((await dust(store, { sid, use: "story", room: "rune" })).body);
+  assert.deepStrictEqual([x.bal, x.stories], [32, ["rune"]]);
+  x = JSON.parse((await dust(store, { sid, use: "story", room: "rune" })).body);
+  assert.strictEqual(x.bal, 32); // 이미 펼친 이야기는 다시 쓰지 않음
   assert.strictEqual((await dust(store, { sid, use: "talk" })).status, 400);
   const nx = await Dust.earn(store, uh, "oracle", NOW + 86400000);
   assert.deepStrictEqual([nx.added, nx.free], [5, 37]);

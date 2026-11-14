@@ -512,7 +512,46 @@
     go(name, { instant: true, fromPop: true });
   });
 
+  // ── (2026-11-14 운영자) 체험 콘텐츠는 카카오 로그인해야 들어간다: 입구(hub)·새해 회랑 첫 화면만 열어 두고, 방·책·결제 화면은 로그인 안내를 띄운다
+  const GATE = T.gate && T.gate.on ? T.gate : null;
+  const GATE_FREE = new Set(["hub", "ny-hub"]);
+  const loggedIn = () => {
+    try {
+      const x = JSON.parse(window.localStorage.getItem("strange-oracle-login") || "null");
+      return Boolean(x && /^[0-9a-f]{32}$/.test(x.sid) && x.exp > Date.now());
+    } catch (e) {
+      return false;
+    }
+  };
+  let gateEl = null;
+  function openLoginGate() {
+    if (!gateEl) {
+      gateEl = document.createElement("div");
+      gateEl.className = "login-gate";
+      gateEl.dataset.js = "login-gate";
+      gateEl.innerHTML = `<div class="login-gate__scrim" data-act="close"></div><div class="login-gate__card" role="dialog" aria-modal="true" aria-labelledby="login-gate-h"><button class="login-gate__x" type="button" data-act="close" aria-label="${esc(GATE.close || "")}">×</button><h2 id="login-gate-h"></h2><p class="login-gate__body"></p><button class="btn btn--block login-gate__go" type="button" data-act="go"></button><small class="login-gate__note"></small></div>`;
+      gateEl.querySelector("h2").textContent = GATE.title || "";
+      gateEl.querySelector(".login-gate__body").textContent = GATE.body || "";
+      gateEl.querySelector(".login-gate__go").textContent = GATE.go || "";
+      gateEl.querySelector(".login-gate__note").textContent = GATE.note || "";
+      gateEl.addEventListener("click", (e) => {
+        const a = e.target.closest("[data-act]");
+        if (!a) return;
+        if (a.dataset.act === "close") gateEl.hidden = true;
+        else if (dustLogin) dustLogin(false);
+        else toast(GATE.off || "");
+      });
+      document.body.append(gateEl);
+    }
+    gateEl.hidden = false;
+    gateEl.querySelector(".login-gate__go").focus({ preventScroll: true });
+  }
   function go(name, opts = {}) {
+    if (GATE && !loggedIn() && !GATE_FREE.has(name)) {
+      openLoginGate();
+      if (currentName) return;
+      name = "hub";
+    }
     const want = roomOfScreen(name);
     // (결정 120) 책 화면은 app-book.js·style-book.css를 다 받은 뒤 보인다. 받는 동안 같은 화면을 또 눌러도 한 번만
     const wait = want && ROOM_FILES[want] && !roomReady[want] ? ensureRoom(want) : BOOK_ON && !BX && /^(report|preview|deeper)$/.test(name) ? bookGo === name ? 0 : ((bookGo = name), ensureBook().finally(() => (bookGo = ""))) : null;
@@ -6859,7 +6898,16 @@
     // (v1-C) 별가루·도감: 방 결과에 처음 닿으면 그 방 카드(방 이름만 이 기기에 기록)
     if (window.Dust) {
       const r = roomOfScreen(name);
-      if (CHAPTER_ORDER.includes(r) && name === `${r}-result` && state.visits[r]) window.Dust.earn("room", r);
+      if (CHAPTER_ORDER.includes(r) && name === `${r}-result` && state.visits[r]) {
+        window.Dust.earn("room", r);
+        // (2026-11-14) 방 완주를 카카오 계정에도 기록(도감 카드·금빛 봉인은 서버 기록으로 판단)
+        try {
+          const x = JSON.parse(window.localStorage.getItem("strange-oracle-login") || "null");
+          if (x && /^[0-9a-f]{32}$/.test(x.sid)) fetch("/api/auth/dust", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: x.sid, room: r }), cache: "no-store", credentials: "omit" }).catch(() => {});
+        } catch (e) {
+          /* 무시 */
+        }
+      }
     }
     if (!externalOn) return;
     const room = roomOfScreen(name);
