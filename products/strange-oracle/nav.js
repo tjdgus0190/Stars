@@ -83,14 +83,14 @@
     else { const head = aside.querySelector(".sidenav__head"); head.insertBefore(badge, head.querySelector(".sidenav__close")); }
     // (2026-11-14 운영자) 별가루는 카카오 계정에만 — 하루 페이지가 계정 잔액을 받으면 dust:acct로 알린다(로그인 전 0)
     let acct = 0;
-    const paint = () => { const n = acct; badge.innerHTML = `<img src="/products/strange-oracle/img/stardust.svg" alt="" width="18" height="18"><b>${n}</b>`; badge.setAttribute("aria-label", T.badgeLabel.replace("{n}", n)); };
+    const paint = () => { const n = acct; badge.innerHTML = `<img src="/products/strange-oracle/img/stardust.webp" alt="" width="18" height="18"><b>${n}</b>`; badge.setAttribute("aria-label", T.badgeLabel.replace("{n}", n)); };
     document.addEventListener("dust:change", paint);
     document.addEventListener("dust:acct", (e) => { acct = (e.detail && Number.isInteger(e.detail.bal)) ? e.detail.bal : 0; paint(); });
     let box = null, timer = 0;
     document.addEventListener("dust:gain", (e) => {
       const { kind, amt, capped } = e.detail || {};
       if (!box) { box = document.createElement("div"); box.className = "dust-toast"; box.setAttribute("role", "status"); document.body.append(box); }
-      box.innerHTML = `${ico("spark")} <b>${esc(T.gain.replace("{n}", amt))}</b> <span>${esc((T.why && T.why[kind]) || "")}</span>${capped ? `<small>${esc(T.capped)}</small>` : ""}`;
+      box.innerHTML = `<img src="/products/strange-oracle/img/stardust.webp" alt="" width="18" height="18" style="vertical-align:-4px"> <b>${esc(T.gain.replace("{n}", amt))}</b> <span>${esc((T.why && T.why[kind]) || "")}</span>${capped ? `<small>${esc(T.capped)}</small>` : ""}`;
       box.classList.remove("is-on");
       void box.offsetWidth;
       box.classList.add("is-on");

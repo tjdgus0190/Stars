@@ -439,7 +439,7 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .ggate .gbtn { width: 100%; }
 .ggate small { font-family: var(--font-sans); font-size: 0.6875rem; color: var(--c-text-faint); }
 
-/* (2026-11-14) 별가루 충전 목록: 상점 카드 · 결정 아이콘(img/stardust.svg) */
+/* (2026-11-14) 별가루 충전 목록: 상점 카드 · 결정 아이콘(img/stardust.webp) */
 .gwallet__i { width: 34px; height: 34px; vertical-align: -6px; filter: drop-shadow(0 0 8px oklch(0.75 0.15 255 / 0.85)); }
 .gpacks { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .gpacks .gpack { display: grid; gap: 4px; width: 100%; padding: 0 0 10px; overflow: hidden; border-radius: 16px; border: 1px solid oklch(0.55 0.08 265 / 0.5); background: oklch(0.17 0.04 275); color: var(--c-text-strong); font: inherit; text-align: left; cursor: pointer; }

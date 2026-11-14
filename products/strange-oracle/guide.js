@@ -622,7 +622,7 @@
         const st = D.state();
         const mini = (head, list, sign) => `<section class="gmini"><h2>${esc(head)}</h2><ul>${list.map((x) => `<li><span>${esc(x.label)}${x.note ? `<small>${esc(x.note)}</small>` : ""}</span><b>${sign}${esc(String(x.amt).replace(/^\+/, ""))}</b></li>`).join("")}</ul></section>`;
         // (2026-11-14) 별가루는 카카오 계정에만 — 로그인 전이면 0과 로그인 안내
-        box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><img class="gwallet__i" src="/products/strange-oracle/img/stardust.svg" alt=""> <span data-js="dust-total">${paidBal || 0}</span></b>
+        box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><img class="gwallet__i" src="/products/strange-oracle/img/stardust.webp" alt=""> <span data-js="dust-total">${paidBal || 0}</span></b>
             <p>${paidBal != null && acctView ? `<span>${esc(A.free)} ${acctView.free || 0}</span><span>${esc(A.paid)} ${acctView.paid || 0}</span>` : `<span>${esc(A.loginNote)}</span>`}</p></div>
           <div class="gminis">${mini(A.waysHead, A.ways, "+")}${mini(A.usesHead, A.uses, "−")}</div>${A.rate ? `<p class="gnote gcenter">${esc(A.rate)}</p>` : ""}${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc(S.back)}</a></div>` : ""}
           <div data-js="dust-shop"></div>
@@ -649,7 +649,7 @@
         } else {
           const k = S.packs.find((x) => x.prod === pick);
           // (2026-11-14) 상점처럼: 묶음마다 카드(결정 아이콘 무더기 · ×개수 · 덤 · 이름 · 값)
-          const DI = (n) => `<img src="/products/strange-oracle/img/stardust.svg" alt="" class="gpack__i${n}">`;
+          const DI = (n) => `<img src="/products/strange-oracle/img/stardust.webp" alt="" class="gpack__i${n}">`;
           h += `<ul class="gpacks">${S.packs.map((x, i) => `<li><button type="button" class="gpack" data-js="dust-pack" data-prod="${x.prod}" aria-pressed="${pick === x.prod}"><span class="gpack__art">${[...Array(i + 1)].map((_, j) => DI(j)).join("")}<b class="gpack__qty">×${x.base || x.n}</b>${x.bonus ? `<em class="gpack__bonus">${esc(fill(S.bonus, { n: x.bonus }))}</em>` : ""}</span><span class="gpack__name">${esc(fill(S.packName || S.pack, { n: x.base || x.n }))}</span><span class="gpack__price">${esc(fill(S.price, { price: won(x.price) }))}</span><small>${esc(fill(S.packTalk, { q: Math.floor(x.n / (COST.talk || 5)) }))}</small></button></li>`).join("")}</ul>
             <p class="gsummary">${esc(S.summary)}</p>
             <details class="gfold"><summary>${esc(S.more)}</summary><ul class="gsources">${S.terms.map((t) => `<li>${esc(t)}</li>`).join("")}</ul><p class="gnote"><a href="/products/strange-oracle/legal/terms.html#s2-4">${esc(S.termsLink)}</a></p></details>

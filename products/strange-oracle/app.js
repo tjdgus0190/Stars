@@ -5977,7 +5977,7 @@
     };
     // 결제 버튼 아래 한 줄: 가진 별가루 · 모자라면 충전하러 가기
     // (2026-11-14) 별가루 줄: [결정 아이콘] 가진 별가루 N개 · 모자람 · [충전하기] + 충전 묶음 칩(아이콘·개수·값)
-    const DUST_ICON = "img/stardust.svg";
+    const DUST_ICON = "img/stardust.webp";
     const dustLine = (el, msg, charge, prod, have) => {
       if (!el) return;
       el.textContent = "";
