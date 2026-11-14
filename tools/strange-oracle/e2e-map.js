@@ -481,7 +481,8 @@ const lsSnaps = []; // (QA16 권장1) 중간중간 두 브라우저의 localStor
     // 무작위 ID·해시·시각 칸은 우연히 "1995"·"1437" 같은 숫자를 품을 수 있어 입력값 검색에서 뺀다(사람이 넣은 칸 nick·icon·main·sub만 본다). SOM-·SOD- 원문 검사는 전체에
     const st = JSON.stringify(stRaw, (k, v) => (/^(id|invite|rid|map_id|created|active|joined)$|_hash$|^hour_/.test(k) ? "" : v));
     const stAll = JSON.stringify(stRaw);
-    check("6장 /__dev/map-store에 입력값·키·코드 원문 0", hitIn(st).length === 0 && !/SOM-|SOD-/.test(stAll), hitIn(st).join(","));
+    // (2026-11-14) 무작위 ID·해시(base64url, "-" 포함)가 우연히 "SOD-" 같은 글자를 품을 수 있어 코드 원문 검사도 무작위 칸을 뺀 값(st)으로. 원문이 무작위 칸 이름으로 들어가도 값 모양(SOM-/SOD-+영숫자 4자)으로 잡는다
+    check("6장 /__dev/map-store에 입력값·키·코드 원문 0", hitIn(st).length === 0 && !/SOM-|SOD-/.test(st) && !/"(SOM|SOD)-[A-Z0-9]{4}/.test(stAll), hitIn(st).join(","));
     check("6장 요청 URL에 열람 키·삭제 코드·초대 ID 0", !/SOM-|SOD-/.test(urls) && !urls.split("\n").some((u) => u.includes(invite) || u.includes(invite2)));
     const dlOf = (log) => log.console.filter((l) => /^debug: DL /.test(l)).map((l) => l.replace(/^debug: DL /, ""));
     const dlLines = dlOf(A.log).concat(dlOf(B.log));
