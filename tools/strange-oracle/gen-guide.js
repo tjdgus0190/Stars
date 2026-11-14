@@ -118,18 +118,19 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
     const scripts = ["/common/analytics.js", `${PB}data-nav.js`, `${PB}nav-icons.js`, `${PB}stardust.js`, `${PB}nav.js`, `${PB}data-guide.js`]
       .concat(kind === "tool" ? (TOOL_SCRIPTS[name] || []).map((f) => PB + f) : kind === "app" ? (APP_SCRIPTS[name] || []).map((f) => PB + f) : kind === "home" ? [`${PB}data-dex.js`] : kind === "legend" || kind === "legends" ? [`${PB}data-legends.js`] : [])
       .concat([`${PB}guide.js`]);
-    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : (kind === "app" && ["dex", "talk", "today"].includes(name)) || kind === "home" ? sprite("guide") : "";
+    const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : ""; // (2026-11-14) 하루 페이지·처음 화면은 선 실루엣 대신 초상 그림(img/guide/)
     const cta = (c) => `<div class="gcta"><h2>${esc(c.head)}</h2><p>${esc(c.body)}</p><a class="gbtn" href="${PB}" data-js="to-room">${esc(c.btn)}</a></div>`;
     const ARCH_ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
     const DEX_IMG = (room) => `${PB}img/dex/dex-${room}.webp`;
+    const PORTRAIT = (room) => `${PB}img/guide/${room}.webp`; // (2026-11-14) 안내자 초상
     const F = d.features || {};
     const chipList = (items) => `<ul class="gchips">${items.map((it) => `<li><a href="${esc(it.href)}">${ico(it.icon)}<span>${esc(it.short || it.label)}</span></a></li>`).join("")}</ul>`;
     const group = (head) => (N.groups.find((g) => g.head === head) || { items: [] }).items;
     const body = kind === "home"
       ? `<section class="ghero"><p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.lead)}</p></section>
-<a class="gfeat gfeat--doors" href="${esc(N.doors)}"><span class="gdoors" aria-hidden="true">${ARCH_ROOMS.map((r) => `<i style="background-image:url('${DEX_IMG(r)}')"><svg viewBox="0 0 48 64"><use href="#guide-${r}" /></svg></i>`).join("")}</span><span class="gfeat__txt">${F.doors.badge ? `<em>${esc(F.doors.badge)}</em>` : ""}<b>${esc(F.doors.title)}</b><span>${esc(F.doors.sub)}</span></span><span class="gfeat__go">${esc(F.doors.cta)} ${ico("back")}</span></a>
+<a class="gfeat gfeat--doors" href="${esc(N.doors)}"><span class="gdoors" aria-hidden="true">${ARCH_ROOMS.map((r) => `<i style="background-image:url('${PORTRAIT(r)}')"></i>`).join("")}</span><span class="gfeat__txt">${F.doors.badge ? `<em>${esc(F.doors.badge)}</em>` : ""}<b>${esc(F.doors.title)}</b><span>${esc(F.doors.sub)}</span></span><span class="gfeat__go">${esc(F.doors.cta)} ${ico("back")}</span></a>
 <div class="gfeats">
-  <a class="gfeat" href="/today/" data-js="home-today" style="--art:url('${DEX_IMG("saju")}')"><span class="gfeat__art"><svg viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-saju" /></svg></span><span class="gfeat__txt">${F.today.badge ? `<em>${esc(F.today.badge)}</em>` : ""}<b>${esc(F.today.title)}</b><span data-js="home-today-sub">${esc(F.today.subNone)}</span></span></a>
+  <a class="gfeat gfeat--portrait" href="/today/" data-js="home-today" style="--art:url('${PORTRAIT("saju")}')"><span class="gfeat__art">${ico("scroll")}</span><span class="gfeat__txt">${F.today.badge ? `<em>${esc(F.today.badge)}</em>` : ""}<b>${esc(F.today.title)}</b><span data-js="home-today-sub">${esc(F.today.subNone)}</span></span></a>
   <a class="gfeat" href="/talk/" style="--art:url('${DEX_IMG("sibyl")}')"><span class="gfeat__art">${ico("chat")}</span><span class="gfeat__txt">${F.talk.badge ? `<em>${esc(F.talk.badge)}</em>` : ""}<b>${esc(F.talk.title)}</b><span>${esc(F.talk.sub)}</span></span></a>
   <a class="gfeat" href="/dex/" style="--art:url('${DEX_IMG("ogham")}')"><span class="gfeat__art">${ico("book")}</span><span class="gfeat__txt"><b>${esc(F.dex.title)}</b><span>${esc(F.dex.sub)}</span></span></a>
   <a class="gfeat" href="/stardust/" style="--art:url('${DEX_IMG("rune")}')"><span class="gfeat__art">${ico("spark")}</span><span class="gfeat__txt"><b>${esc(F.stardust.title)}</b><span>${esc(F.stardust.sub)}</span></span></a>

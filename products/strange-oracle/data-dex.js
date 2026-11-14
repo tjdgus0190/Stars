@@ -1,5 +1,5 @@
 // 안내자 도감 — 일곱 방의 안내자 (2026-11-13, 정식판 v1-C). 로직 없음. 화면은 guide.js(도감 페이지)가 그린다.
-// 카드 그림 = 안내자 실루엣(입구 index.html의 guide-<방> 획) + 공개 명화(CC0) 배경. 명화 출처는 CREDITS.md 「안내자 도감 카드」.
+// 카드 그림 = 안내자 초상(img/guide/<방>.webp, 2026-11-14) · 방 배경은 공개 명화(CC0, img/dex/). 출처는 CREDITS.md 「안내자 도감 카드」·「안내자 초상」.
 //   name·epithet  이름과 별칭 (이름은 data.js guides와 같게)
 //   place         머무는 곳
 //   art           배경 그림 파일(img/dex/), hue = 카드 빛깔(oklch 색상각)

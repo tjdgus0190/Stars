@@ -38,15 +38,14 @@
   document.addEventListener("click", (e) => { if (e.target.closest("[data-js=to-room]")) track("so_guide_cta", { page: CONF.page }); });
 
 
-  // ── (v1-F) 처음 화면: 오늘의 신탁 카드에 오늘 담당 안내자(그림·실루엣·이름)
+  // ── (v1-F) 처음 화면: 오늘의 신탁 카드에 오늘 담당 안내자(초상·이름)
   if (CONF.kind === "home") {
     const D = window.Dust, X = window.DEX, card = $("[data-js=home-today]");
     if (D && X && card && G.home) {
       const room = D.guideOf(), g = X.guides.find((x) => x.room === room);
       if (g) {
-        card.style.setProperty("--art", `url('/products/strange-oracle/img/dex/dex-${room}.webp')`);
-        const u = card.querySelector("use");
-        if (u) u.setAttribute("href", "#guide-" + room);
+        card.style.setProperty("--art", `url('/products/strange-oracle/img/guide/${room}.webp')`);
+        card.dataset.room = room;
         const sub = $("[data-js=home-today-sub]", card);
         if (sub) sub.textContent = fill(G.home.features.today.sub, { name: g.name });
       }
@@ -92,7 +91,10 @@
     const DEXG = () => (window.DEX && window.DEX.guides) || [];
     const guide = (room) => DEXG().find((g) => g.room === room);
     const IMG = (room) => `/products/strange-oracle/img/dex/dex-${room}.webp`;
-    const arch = (room, cls = "") => `<span class="garch ${cls}" style="--art:url('${IMG(room)}')"><svg viewBox="0 0 48 64" aria-hidden="true"><use href="#guide-${room}" /></svg></span>`;
+    // (2026-11-14) 아치 문 안은 안내자 초상(img/guide/, 어둡게 다듬은 그림). 작은 얼굴(xs)은 눈높이(FACE_Y, 그림 높이 비율)에 맞춰 확대
+    const PORT = (room) => `/products/strange-oracle/img/guide/${room}.webp`;
+    const FACE_Y = { saju: 0.23, ogham: 0.34, star: 0.35, decan: 0.28, tzolkin: 0.5, rune: 0.2, sibyl: 0.22 };
+    const arch = (room, cls = "") => `<span class="garch ${cls}" style="--art:url('${PORT(room)}');--fy:${Math.round(Math.min(1, Math.max(0, 2 * (FACE_Y[room] || 0.3) - 0.5)) * 100)}%" aria-hidden="true"></span>`;
     const ROOM_DATA = {
       saju: ["data-saju.js", () => window.SAJU && window.SAJU.stems],
       ogham: ["data-ogham.js", () => window.OGHAM],

@@ -66,3 +66,9 @@ Google Fonts는 쓰지 않는다 (2026-09-25 교체). 라이선스는 각 패키
 - 위치: `img/dex/`
 - 공개 작품(**CC0**, 상업적 이용 가능)을 잘라 크기만 줄여 WebP로 저장하고, 화면에서 색을 입히고 안내자 실루엣(입구의 guide-<방> 선 그림, 자체 제작)을 겹침. `dex-saju.webp` ← 김시 「Snowscape with Figures」(1584, 클리블랜드 미술관 Open Access 153664) · `dex-ogham.webp` ← Richard Doyle 「The Enchanted Tree」(1868, 메트로폴리탄 미술관 Open Access 896751) · `dex-star.webp` ← 「Rama, Sita, and Lakshmana in the forest」(c. 1830, 클리블랜드 미술관 Open Access 154752) · `dex-decan.webp` ← Adrien Dauzats 「The Great Pyramid, Giza」(1830 이후, 메트로폴리탄 미술관 Open Access 441357) · `dex-tzolkin.webp` ← 「Front Face of a Stela」(692, 클리블랜드 미술관 Open Access 143381) · `dex-rune.webp` ← 클로드 로랭 「The Trojan Women Setting Fire to Their Fleet」(1643년경, 메트로폴리탄 미술관 435908) · `dex-sibyl.webp` ← 조반니 파올로 파니니 「Interior of the Pantheon, Rome」(1747, 클리블랜드 미술관 1974.39)
 - 라이선스: 퍼블릭 도메인(CC0)
+- (2026-11-14) 위 명화는 이제 안내자 카드의 배경·면담 방 배경·오늘의 신탁 카드 배경으로만 쓴다(카드 안 인물은 아래 「안내자 초상」).
+
+## 안내자 초상 (2026-11-14)
+- 위치: `img/guide/` (saju·ogham·star·decan·tzolkin·rune·sibyl .webp, 480×640)
+- 운영자가 마련해 제공한 그림 7장. 종이 테두리를 잘라 내고 채도·밝기를 낮춰 얼굴 위쪽에 그림자를 드리움(tools/strange-oracle/portraits.py).
+- 출처 서비스·요금제·상업적 이용 허락: 운영자 확인 후 기록(출시 전 필수, 운영 규칙 8장).
