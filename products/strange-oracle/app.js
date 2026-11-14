@@ -515,6 +515,8 @@
   // ── (2026-11-14 운영자) 체험 콘텐츠는 카카오 로그인해야 들어간다: 입구(hub)·새해 회랑 첫 화면만 열어 두고, 방·책·결제 화면은 로그인 안내를 띄운다
   const GATE = T.gate && T.gate.on ? T.gate : null;
   const GATE_FREE = new Set(["hub", "ny-hub"]);
+  const GATE_ROOMS = GATE && Array.isArray(GATE.freeRooms) ? GATE.freeRooms : []; // (2026-11-14 운영자) 로그인 없이 결과까지 보는 방(첫 번째 문)
+  const gateFree = (name) => GATE_FREE.has(name) || GATE_ROOMS.includes(roomOfScreen(name));
   const loggedIn = () => {
     try {
       const x = JSON.parse(window.localStorage.getItem("strange-oracle-login") || "null");
@@ -547,7 +549,7 @@
     gateEl.querySelector(".login-gate__go").focus({ preventScroll: true });
   }
   function go(name, opts = {}) {
-    if (GATE && !loggedIn() && !GATE_FREE.has(name)) {
+    if (GATE && !loggedIn() && !gateFree(name)) {
       openLoginGate();
       if (currentName) return;
       name = "hub";
@@ -6805,7 +6807,7 @@
               syncHubKakao();
               // (v1-D·v1-G) 하루 페이지(별가루·면담·처음 화면)에서 로그인한 경우: 그 페이지로 돌아간다
               const BACK = { stardust: "/stardust/", talk: "/talk/", home: "/", today: "/today/", dex: "/dex/" };
-              if (BACK[saved.from]) return location.replace(BACK[saved.from] + "#login");
+              if (BACK[saved.from]) return location.replace(BACK[saved.from] + "#login" + (saved.ch ? (res.channel > 0 ? "-ch" : "-ch0") : "")); // (2026-11-14) 채널 친구 확인 결과만 해시로
               return applyAccount(res, true);
             }
             if (res.state === "found" && res.passes && res.passes[0]) {
@@ -6888,8 +6890,8 @@
     allow: {
       utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads"], // (2026-10-30) 메타 광고 관리자에서 흔히 쓰는 값 더함
       utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
-      utm_campaign: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "ig_profile", "x_profile", "gads_main", "kakao_share", "halloween", "halloween_samhain"], // (2026-11-12) ad9_newyear = 9안 「새해의 문」(신년운세)
-      utm_content: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_ny", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl"],
+      utm_campaign: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "ig_profile", "x_profile", "gads_main", "kakao_share", "halloween", "halloween_samhain", "kakao_channel"], // (2026-11-12) ad9_newyear = 9안 「새해의 문」(신년운세)
+      utm_content: ["#meta_id", "ad1_seven_doors", "ad2_manshin", "ad3_book", "ad4_busted", "ad5_saju_only", "ad6_untold", "ad7_rooms", "ad8_season", "ad9_newyear", "halloween_samhain", "ig_profile", "ig_story_book", "x_profile", "x_pinned", "gads_main", "kakao_main", "kakao_code", "kakao_ny", "kakao_saju", "kakao_ogham", "kakao_star", "kakao_decan", "kakao_tzolkin", "kakao_rune", "kakao_sibyl", "ch_welcome", "ch_menu_doors", "ch_menu_ny", "ch_auto"],
     },
     ignore: ["fbclid", "ttclid"],
   };

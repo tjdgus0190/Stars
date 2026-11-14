@@ -12,8 +12,9 @@
 const PACKS = Object.freeze({ dust50: 50, dust120: 120, dust300: 300, d30: 30, d50: 50, d100: 110, d300: 350 }); // 상품 → 별가루 양(덤 포함) (pay.js PRODUCTS와 같은 이름). dust50·120·300은 옛 묶음
 const COSTS = Object.freeze({ book: 49, ny: 49 }); // 별가루로 여는 유료 콘텐츠
 // (2026-11-14 운영자 결정) 별가루는 카카오 로그인한 계정에만 준다: 첫 로그인 10(한 번) · 출석 = 오늘의 신탁 5(하루 한 번) · 도감 일곱 장 금빛 봉인 30(한 번)
-const EARN = Object.freeze({ first: 10, oracle: 5, seal: 30 });
-const ONCE = new Set(["first", "seal"]);
+// (2026-11-14 운영자) 카카오톡 채널 친구 추가 10(계정에 한 번) — 카카오가 확인해 준 로그인(auth.js claim)에서만 준다. /api/auth/dust의 earn으로는 받을 수 없다
+const EARN = Object.freeze({ first: 10, oracle: 5, seal: 30, channel: 10 });
+const ONCE = new Set(["first", "seal", "channel"]);
 const USE = Object.freeze({ extra: 3, story: 10 }); // 계정 별가루로 쓰는 하루 페이지 항목(다른 안내자의 오늘의 신탁 · 도감 숨은 이야기)
 const ROOMS = Object.freeze(["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"]); // (2026-11-14) 방 완주·숨은 이야기는 계정에 기록(도감은 서버 기록으로)
 const kstDay = (now) => new Date(now + 9 * 3600 * 1000).toISOString().slice(0, 10);

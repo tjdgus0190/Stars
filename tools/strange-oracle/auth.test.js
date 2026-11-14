@@ -199,3 +199,46 @@ test("23 v2 연결 파일: auth.mjs 새 주소 · auth-sweep 예약", () => {
   for (const p of ["/api/auth/me", "/api/auth/save", "/api/auth/logout", "/api/auth/erase"]) assert.ok(m.includes(`"${p}"`), p);
   assert.match(fs.readFileSync(path.join(ROOT, "netlify", "functions", "auth-sweep.mjs"), "utf8"), /schedule: "@daily"/);
 });
+
+// ── (2026-11-14 운영자) 카카오톡 채널 친구 추가 → 별가루 10 (계정에 한 번, 카카오 확인으로만)
+test("채널: 시작에 ch=1일 때만 scope=plusfriends · 아니면 scope 없음", async () => {
+  const st = new MemStore();
+  const a = new URL((await call(st, "GET", `/api/auth/kakao/start?state=${hex()}`)).headers.Location);
+  const b = new URL((await call(st, "GET", `/api/auth/kakao/start?state=${hex()}&ch=1`)).headers.Location);
+  assert.strictEqual(a.searchParams.get("scope"), null);
+  assert.strictEqual(b.searchParams.get("scope"), "plusfriends");
+});
+test("채널: 카카오가 ADDED라고 하면 로그인 때 별가루 10 한 번 · 두 번째는 0 · 표에는 참/거짓만 · earn:channel 직접 요청은 400", async () => {
+  const st = new MemStore();
+  const added = { idOf: async () => ({ id: "4242", ch: true }) };
+  const one = await login(st, hex(), added);
+  const tk = JSON.parse(st.map.get("ticket/" + one.t));
+  assert.deepStrictEqual(Object.keys(tk).sort(), ["ch", "exp", "sh", "uh"]);
+  const c1 = JSON.parse((await call(st, "POST", "/api/auth/claim", { t: one.t, s: one.s, login: true })).body);
+  assert.strictEqual(c1.channel, 10);
+  const bal = JSON.parse((await call(st, "POST", "/api/auth/dust", { sid: c1.sid })).body);
+  assert.ok(bal.once.includes("channel") && bal.bal === 10);
+  const two = await login(st, hex(), added);
+  const c2 = JSON.parse((await call(st, "POST", "/api/auth/claim", { t: two.t, s: two.s, login: true })).body);
+  assert.strictEqual(c2.channel, 0);
+  assert.strictEqual((await call(st, "POST", "/api/auth/dust", { sid: c2.sid, earn: "channel" })).status, 400);
+  // 추가하지 않은 상태(NONE)면 0도 아니고 칸 없음
+  const none = await login(st, hex(), { idOf: async () => ({ id: "5151", ch: false }) });
+  const c3 = JSON.parse((await call(st, "POST", "/api/auth/claim", { t: none.t, s: none.s, login: true })).body);
+  assert.strictEqual(c3.channel, undefined);
+});
+test("채널: realKakao — 토큰 scope에 plusfriends가 있을 때만 talk/channels를 묻고 ADDED면 ch 참", async () => {
+  const calls = [];
+  const mk = (scope, relation) => async (u, o) => {
+    calls.push(String(u));
+    if (/oauth\/token/.test(u)) return { ok: true, json: async () => ({ access_token: "tok", scope }) };
+    if (/v2\/user\/me/.test(u)) return { ok: true, json: async () => ({ id: 777 }) };
+    if (/talk\/channels/.test(u)) return { ok: true, json: async () => ({ user_id: 777, channels: [{ channel_public_id: "_abc", relation }] }) };
+    return { ok: false };
+  };
+  assert.strictEqual(await Auth.realKakao(ENV, mk("", "ADDED")).idOf("c"), "777");
+  assert.ok(!calls.some((u) => /talk\/channels/.test(u)));
+  assert.deepStrictEqual(await Auth.realKakao(Object.assign({}, ENV, { KAKAO_CHANNEL_ID: "_abc" }), mk("plusfriends", "ADDED")).idOf("c"), { id: "777", ch: true });
+  assert.deepStrictEqual(await Auth.realKakao(ENV, mk("plusfriends", "BLOCKED")).idOf("c"), { id: "777", ch: false });
+  assert.deepStrictEqual(await Auth.realKakao(Object.assign({}, ENV, { KAKAO_CHANNEL_ID: "_other" }), mk("plusfriends", "ADDED")).idOf("c"), { id: "777", ch: false });
+});

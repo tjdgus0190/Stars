@@ -152,18 +152,20 @@ const server = http.createServer((req, res) => {
     const authEnv = { PASS_MODE: "test", KAKAO_REST_KEY: "mock-rest-key", PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET, SITE_URL: `${origin}/products/strange-oracle/` };
     if (rel === "/api/auth/kakao/start") {
       const st = url.searchParams.get("state") || "";
-      res.writeHead(/^[0-9a-f]{32}$/.test(st) ? 302 : 400, { Location: `/__dev/kakao/authorize?state=${encodeURIComponent(st)}`, "Cache-Control": "no-store" }).end();
+      res.writeHead(/^[0-9a-f]{32}$/.test(st) ? 302 : 400, { Location: `/__dev/kakao/authorize?state=${encodeURIComponent(st)}${url.searchParams.get("ch") === "1" ? "&ch=1" : ""}`, "Cache-Control": "no-store" }).end(); // (2026-11-14) ch=1: 채널 추가 상태 추가 동의
       return log(302);
     }
     if (rel === "/__dev/kakao/authorize") {
       const st = String(url.searchParams.get("state") || "").replace(/[^0-9a-f]/g, "");
+      const chQ = url.searchParams.get("ch") === "1";
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }).end(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>가짜 카카오 로그인</title>
 <body style="font-family:sans-serif;padding:24px"><h1>가짜 카카오 로그인 (시험 전용)</h1><label>가짜 회원번호 <input data-field="kid" value="1001"></label>
-<p><button data-act="agree" onclick="location.href='/api/auth/kakao/callback?code=mock-'+document.querySelector('[data-field=kid]').value.replace(/\D/g,'')+'&state=${st}'">동의하고 계속하기</button>
+${chQ ? `<p><label><input type="checkbox" data-field="ch"> (가짜) 낯선 점술관 카카오톡 채널을 추가한 상태</label></p>` : ""}
+<p><button data-act="agree" onclick="location.href='/api/auth/kakao/callback?code=mock-'+document.querySelector('[data-field=kid]').value.replace(/\D/g,'')+(${chQ ? "document.querySelector('[data-field=ch]').checked ? '-chadd' : '-chnone'" : "''"})+'&state=${st}'">동의하고 계속하기</button>
 <button data-act="cancel" onclick="location.href='/api/auth/kakao/callback?error=access_denied&state=${st}'">취소</button></p></body>`);
       return log(200);
     }
-    const kakao = { idOf: async (code) => { const m = /^mock-(\d{1,20})$/.exec(code); if (!m) throw new Error("code"); return m[1]; } };
+    const kakao = { idOf: async (code) => { const m = /^mock-(\d{1,20})(-ch(add|none))?$/.exec(code); if (!m) throw new Error("code"); return m[2] ? { id: m[1], ch: m[3] === "add" } : m[1]; } }; // (2026-11-14) -chadd/-chnone: 채널 추가 상태 동의한 로그인
     let body = "";
     req.on("data", (c) => (body += c));
     req.on("end", async () => {

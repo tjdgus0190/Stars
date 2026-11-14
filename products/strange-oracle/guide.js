@@ -16,7 +16,7 @@
   const slugOf = (p) => "c_" + String(p).replace(/^\/|\/$/g, "").replace(/[\/-]/g, "_");
   const landPaths = [].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {})).map((d) => d.path)
     .concat(window.LEGENDS ? [window.LEGENDS.hub.path].concat(Object.values(window.LEGENDS.list).map((d) => d.path)) : ["/legends/"]);
-  const LAND = ["#meta_id"].concat(landPaths.map(slugOf), ["reel_sibyl", "reel_rune", "reel_ogham", "reel_star", "reel_decan", "reel_tzolkin", "reel_saju", "ig_profile", "x_profile", "gads_main", "ad10_guides"]); // (2026-11-14) ad10_guides = 10안 「일곱 안내자」(처음 화면 착지)
+  const LAND = ["#meta_id"].concat(landPaths.map(slugOf), ["reel_sibyl", "reel_rune", "reel_ogham", "reel_star", "reel_decan", "reel_tzolkin", "reel_saju", "ig_profile", "x_profile", "gads_main", "ad10_guides", "kakao_channel", "ch_welcome", "ch_menu_today", "ch_menu_doors", "ch_menu_talk", "ch_menu_dust", "ch_menu_ny", "ch_auto"]); // (2026-11-14) 카카오톡 채널(환영 메시지·채팅방 메뉴·자동응답) // (2026-11-14) ad10_guides = 10안 「일곱 안내자」(처음 화면 착지)
   const CAMPAIGN = {
     utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads", "naver", "youtube"],
     utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
@@ -55,7 +55,7 @@
     const loggedIn = () => { try { const x = JSON.parse(localStorage.getItem("strange-oracle-login") || "null"); return Boolean(x && /^[0-9a-f]{32}$/.test(x.sid) && x.exp > Date.now()); } catch (e) { return false; } };
     if (LG) document.addEventListener("click", (e) => {
       const a = e.target.closest(".gfeat[href]"); // (2026-11-14) 체험 콘텐츠 카드만 — 점술 안내·무료 도구는 누구나
-      if (!a || loggedIn() || e.metaKey || e.ctrlKey) return;
+      if (!a || loggedIn() || e.metaKey || e.ctrlKey || (LG.free || []).includes(a.getAttribute("href"))) return; // 로그인 없이 여는 카드(첫 번째 문·새해·오늘의 신탁)
       e.preventDefault();
       const href = a.getAttribute("href");
       const box = document.createElement("div");
@@ -102,10 +102,10 @@
       } catch (e) { return { status: 0, j: null }; }
     };
     // 카카오 로그인 시작: 돌아오면 입구가 표를 받아(로그인 유지) 이 별가루 페이지로 다시 보낸다
-    const kakaoLogin = (from = "stardust") => {
+    const kakaoLogin = (from = "stardust", ch = false) => {
       const st = hex32();
-      try { sessionStorage.setItem(KAKAO_KEY, JSON.stringify({ s: st, mode: "login", from, prod: "book" })); } catch (e) { return; }
-      location.href = "/api/auth/kakao/start?state=" + st;
+      try { sessionStorage.setItem(KAKAO_KEY, JSON.stringify(Object.assign({ s: st, mode: "login", from, prod: "book" }, ch ? { ch: true } : {}))); } catch (e) { return; }
+      location.href = "/api/auth/kakao/start?state=" + st + (ch ? "&ch=1" : ""); // ch: 카카오톡 채널 추가 상태를 묻는 추가 동의(이 버튼을 누를 때만)
     };
     let paidBal = null; // 카카오 계정 별가루(서버 값, 화면 메모리만)
     let onExpired = () => {}; // 로그인이 끝났을 때(401) — 로그인 안내로
@@ -222,8 +222,9 @@
       document.documentElement.classList.remove("room-open", "sheet-open");
     };
     if (GATE) box.addEventListener("click", (e) => { if (e.target.closest("[data-js=gate-login]")) kakaoLogin(CONF.page); });
-    if (GATE && !readLogin()) { showGate(); return; }
-    onExpired = () => { if (GATE) showGate(); };
+    const GATE_ON = GATE && !(GATE.free || []).includes(CONF.page); // (2026-11-14) 오늘의 신탁은 로그인 없이(출석 별가루·다른 안내자는 로그인 뒤)
+    if (GATE_ON && !readLogin()) { showGate(); return; }
+    onExpired = () => { if (GATE_ON) showGate(); };
 
     if (CONF.page === "today") {
       const A = P.app;
@@ -242,12 +243,14 @@
         if (o) {
           const list = ROOM_DATA[room][1]();
           if (list) h += readCard(room, itemView(room, list, o.idx), fill(A.receivedHead, { name: g.name }));
+          // (2026-11-14 로그인 벽 완화) 로그인 없이 받은 사람: 출석 별가루·다른 안내자는 로그인 뒤
+          if (!readLogin()) h += `<div class="gactions gcol"><small class="gnote gcenter">${esc(A.rewardLogin)}</small><button class="gbtn gbtn--kakao" type="button" data-js="today-login">${esc(A.login)}</button></div>`;
           const others = D.TODAY_ORDER.filter((r) => r !== room);
           const got = o.extra || [];
-          const need = readLogin() ? (COST.extra || 0) - acct() : 0;
+          const need = readLogin() ? (COST.extra || 0) - acct() : 0, noLogin = !readLogin();
           h += got.map((x) => { const l = ROOM_DATA[x.room][1](); return l ? readCard(x.room, itemView(x.room, l, x.idx), fill(A.receivedHead, { name: guide(x.room).name })) : ""; }).join("");
           h += `<section class="gothers"><h2>${esc(A.othersHead)}</h2><p class="gnote">${esc(fill(A.othersNote, { cost: COST.extra }))}${need > 0 ? " · " + esc(fill(A.othersShort, { need })) : ""}</p>
-            <ul class="gpickrow">${others.map((r) => { const done = got.some((x) => x.room === r); return `<li><button type="button" data-js="today-extra" data-room="${r}"${done || need > 0 || busy ? " disabled" : ""}${done ? ' aria-pressed="true"' : ""}>${arch(r, "garch--sm")}<span>${esc(guide(r).name)}</span></button></li>`; }).join("")}</ul></section>`;
+            <ul class="gpickrow">${others.map((r) => { const done = got.some((x) => x.room === r); return `<li><button type="button" data-js="today-extra" data-room="${r}"${done || need > 0 || busy || noLogin ? " disabled" : ""}${done ? ' aria-pressed="true"' : ""}>${arch(r, "garch--sm")}<span>${esc(guide(r).name)}</span></button></li>`; }).join("")}</ul></section>`;
           h += `<p class="gnote gcenter">${esc(fill(A.tomorrow, { name: guide(nextRoom).name, iga: iga(guide(nextRoom).name) }))}</p><div class="gactions"><a class="gbtn ghost" href="${ROOM_URL}" data-js="to-room">${esc(fill(A.toRoom, { room: g.roomName }))}</a></div>`;
         }
         if (msg) h += `<p class="gerror" role="alert">${esc(msg)}</p>`;
@@ -659,9 +662,19 @@
         // (2026-11-14) 별가루는 카카오 계정에만 — 로그인 전이면 0과 로그인 안내
         box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><img class="gwallet__i" src="/products/strange-oracle/img/stardust.webp" alt=""> <span data-js="dust-total">${paidBal || 0}</span></b></div>
           <div class="gminis">${mini(A.waysHead, A.ways, "+")}${mini(A.usesHead, A.uses, "−")}</div>${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc(S.back)}</a></div>` : ""}
-          <div data-js="dust-shop"></div>`;
+          ${chBox()}<div data-js="dust-shop"></div>`;
         drawShop();
       };
+      // (2026-11-14 운영자) 카카오톡 채널 친구 추가 → 별가루 10(계정에 한 번, 카카오 확인)
+      const CH = A.channel || {}, CH_URL = (window.NAV && window.NAV.channel && window.NAV.channel.url) || "";
+      let chMsg = { "#login-ch": "ok", "#login-ch0": "no" }[location.hash] || "";
+      const chBox = () => {
+        if (!/^https:\/\/pf\.kakao\.com\/_[A-Za-z0-9]+\/?$/.test(CH_URL)) return "";
+        const got = acctOnce.includes("channel");
+        return `<section class="gchannel"><h2>${esc(CH.head)}</h2><p class="gnote">${esc(CH.lead)}</p>${chMsg === "no" && !got ? `<p class="gerror" role="status">${esc(CH.no)}</p>` : ""}
+          ${got ? `<p class="gnote gcenter" role="status">${esc(chMsg === "ok" ? fill(CH.ok, { n: 10 }) : CH.got)}</p>` : `<div class="gactions gcol"><a class="gbtn ghost" href="${esc(CH_URL.replace(/\/$/, "") + "/friend")}" target="_blank" rel="noopener" data-js="ch-add">${esc(CH.add)}</a><button class="gbtn gbtn--kakao" type="button" data-js="ch-claim">${esc(CH.claim)}</button></div><small class="gnote">${esc(CH.note)}</small>`}</section>`;
+      };
+      box.addEventListener("click", (e) => { if (e.target.closest("[data-js=ch-claim]")) kakaoLogin("stardust", true); });
       // ── 충전 (운영 규칙 7장): 결제 전에 받는 것·가격·환불·판매자를 보이고, 동의 체크 뒤에만 결제창
       const S = A.shop || {};
       // 일곱 방 결제 화면에서 「별가루 충전하러 가기」로 왔으면 돌아가는 단추(이 탭 sessionStorage "strange-oracle-dust-back")
@@ -777,7 +790,7 @@
           return startBuy();
         }
       });
-      if (shopOn) loadPaid().then(() => { draw(); if (location.hash === "#paid" || readPend()) settle(); if (/^#(paid|login)$/.test(location.hash)) history.replaceState(null, "", location.pathname); });
+      if (shopOn) loadPaid().then(() => { draw(); if (location.hash === "#paid" || readPend()) settle(); if (/^#(paid|login|login-ch0?)$/.test(location.hash)) history.replaceState(null, "", location.pathname); if (chMsg === "ok" && acctOnce.includes("channel")) { try { document.dispatchEvent(new CustomEvent("dust:gain", { detail: { kind: "channel", amt: 10 } })); } catch (e) { /* 무시 */ } } });
       document.addEventListener("dust:change", draw);
       draw();
     }

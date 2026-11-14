@@ -1,6 +1,8 @@
 // 낯선 점술관 — 카카오 로그인으로 산 책 다시 열기 (spec 21단계, 운영자 결정 133, CLAUDE.md 3·6장 2026-10-22 예외). 함수 auth(netlify/functions/auth.mjs)가 respond()를 부른다.
 // 길 셋:
 //   GET  /api/auth/kakao/start?state=S      S(32자 16진수, 브라우저 sessionStorage에만) → 카카오 인가 주소로 302. 동의 항목(scope)은 요청하지 않는다(회원번호만)
+//        (2026-11-14 운영자 결정) &ch=1 → 이용자가 「채널 추가하고 별가루 받기」를 누른 경우에만 scope=plusfriends(카카오톡 채널 추가 상태)를 더 요청.
+//        콜백에서 /v2/api/talk/channels로 우리 채널이 ADDED인지 한 번 묻고, 결과는 표의 ch(참/거짓)로만 넘긴 뒤 버린다(저장 0). claim(login)에서 계정에 한 번 별가루 10
 //   GET  /api/auth/kakao/callback?code&state 카카오 → 우리. 코드를 토큰으로 바꾸고 /v2/user/me로 회원번호만 받아 uh = HMAC(PASS_SECRET, "kakao:"+회원번호)
 //                                            → 한 번 쓰는 표 ticket/<T>(2분) = { uh, sh: SHA-256(S), exp } → 303 SITE_URL#kakao-<T>-<S>. 토큰은 쓰고 버린다(저장 0)
 //   POST /api/auth/claim  { t, s, pass?, forget? } 표를 한 번 쓰고 지운 뒤
@@ -78,13 +80,21 @@ function realKakao(env, fetchImpl) {
       if (env.KAKAO_CLIENT_SECRET) form.set("client_secret", env.KAKAO_CLIENT_SECRET);
       const t = await fetchImpl(KAUTH + "/oauth/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8" }, body: form.toString() });
       if (!t.ok) throw new Error("token");
-      const tok = (await t.json()).access_token;
+      const tj = await t.json(), tok = tj.access_token, granted = tj.scope; // scope: 이번 토큰에 동의된 항목(공백 구분)
       if (!tok) throw new Error("token");
       const me = await fetchImpl(KAPI + "/v2/user/me", { headers: { Authorization: "Bearer " + tok } });
       if (!me.ok) throw new Error("me");
       const id = (await me.json()).id;
       if (id == null || !/^\d{1,20}$/.test(String(id))) throw new Error("me");
-      return String(id);
+      if (!/(^|\s)plusfriends(\s|$)/.test(String(granted || ""))) return String(id);
+      // (2026-11-14) 채널 추가 상태에 동의한 경우만: 우리 채널(KAKAO_CHANNEL_ID, 없으면 앱에 연결된 채널)이 ADDED인지
+      let ch = false;
+      try {
+        const q = env.KAKAO_CHANNEL_ID ? "?channel_ids=" + encodeURIComponent(env.KAKAO_CHANNEL_ID) + "&channel_id_type=channel_public_id" : "";
+        const r = await fetchImpl(KAPI + "/v2/api/talk/channels" + q, { headers: { Authorization: "Bearer " + tok } });
+        if (r.ok) { const j = await r.json(); ch = Array.isArray(j.channels) && j.channels.some((c) => c && c.relation === "ADDED" && (!env.KAKAO_CHANNEL_ID || c.channel_public_id === env.KAKAO_CHANNEL_ID)); }
+      } catch (e) { ch = false; }
+      return { id: String(id), ch };
     },
   };
 }
@@ -93,6 +103,7 @@ async function start(url, env) {
   const s = url.searchParams.get("state") || "";
   if (!HEX32.test(s)) return json(400, { error: "bad" });
   const q = new URLSearchParams({ client_id: env.KAKAO_REST_KEY, redirect_uri: redirectUriAt(url), response_type: "code", state: s });
+  if (url.searchParams.get("ch") === "1") q.set("scope", "plusfriends"); // 채널 친구 보상 버튼을 누른 경우에만 추가 동의
   return go(302, KAUTH + "/oauth/authorize?" + q.toString());
 }
 
@@ -101,15 +112,16 @@ async function callback(url, env, store, kakao, now) {
   const s = url.searchParams.get("state") || "";
   const code = url.searchParams.get("code") || "";
   if (!HEX32.test(s) || !code || code.length > 512) return back("kakao-error");
-  let id;
+  let id, ch = false;
   try {
-    id = await kakao.idOf(code, redirectUriAt(url));
+    const r = await kakao.idOf(code, redirectUriAt(url));
+    if (r && typeof r === "object") { id = r.id; ch = r.ch === true; } else id = r; // (2026-11-14) 채널 확인 결과는 참/거짓만
   } catch (e) {
     return back("kakao-error");
   }
   const t = crypto.randomBytes(16).toString("hex");
   try {
-    await store.set("ticket/" + t, { uh: hmac(env.PASS_SECRET, "kakao:" + id), sh: sha(s), exp: now + TICKET_MS });
+    await store.set("ticket/" + t, Object.assign({ uh: hmac(env.PASS_SECRET, "kakao:" + id), sh: sha(s), exp: now + TICKET_MS }, ch ? { ch: true } : {}));
   } catch (e) {
     return back("kakao-error");
   }
@@ -162,6 +174,8 @@ async function claim(body, env, store, now) {
       if (rec.enc.length || rec.data) await putRec(store, K, rec, now); // 로그인도 활동 — 보관 1년을 다시 센다
       out.sid = sid;
       out.data = openData(env, rec);
+      // (2026-11-14 운영자) 카카오가 우리 채널 친구(ADDED)라고 알려 준 로그인: 계정에 한 번 별가루 10. 이미 받았으면 0
+      if (tk.ch === true) { const e = await Dust.earn(store, tk.uh, "channel", now); out.channel = e ? e.added : 0; }
     }
     return json(200, out);
   } catch (e) {
@@ -283,6 +297,7 @@ async function account(path, body, env, store, now) {
       }
       // (2026-11-14) 로그인한 채 받는 별가루: { sid, earn: "first"|"oracle"|"seal" } → 첫 로그인 10·출석 5(하루 한 번)·금빛 봉인 30
       if (b.earn != null) {
+        if (b.earn === "channel") return json(400, { error: "bad" }); // 채널 보상은 카카오 확인(claim)으로만
         const e = await Dust.earn(store, uh, b.earn, now);
         if (!e) return json(b.earn === "seal" ? 403 : 400, { error: b.earn === "seal" ? "rooms" : "bad" });
         return json(200, Object.assign({ state: "earn" }, e));
