@@ -6,4 +6,4 @@ import Pay from "../lib/pay.js";
 
 export default (req, context) => Auth.respond(req, context, () => getStore({ name: Pay.STORE_NAME, consistency: "strong" }));
 
-export const config = { path: ["/api/auth/kakao/start", "/api/auth/kakao/callback", "/api/auth/claim", "/api/auth/me", "/api/auth/save", "/api/auth/logout", "/api/auth/erase"] }; // (23단계) me·save·logout·erase
+export const config = { path: ["/api/auth/kakao/start", "/api/auth/kakao/callback", "/api/auth/claim", "/api/auth/me", "/api/auth/save", "/api/auth/logout", "/api/auth/erase", "/api/auth/dust"] }; // (23단계) me·save·logout·erase · (v1-D·2026-11-14) dust: 별가루 잔액·충전·받기·쓰기·책/신년운세 열기

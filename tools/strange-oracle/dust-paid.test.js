@@ -201,3 +201,16 @@ test("별가루로 책·신년운세 열기: 49 차감(무료 먼저) → 결제
   assert.strictEqual((await dust(store, { sid, buy: "dust50" })).status, 400);
   assert.strictEqual((await dust(store, { sid: rnd(16), buy: "book" })).status, 401);
 });
+
+// (2026-11-14) 배포 길: 화면이 부르는 /api/auth/* 길은 모두 함수 auth의 config.path에 있어야 한다(빠지면 Netlify에서 404)
+test("함수 auth 길 목록에 화면이 부르는 /api/auth/dust·me·save·logout·erase·claim이 모두 있음", () => {
+  const fs = require("fs"), path = require("path");
+  const cfg = fs.readFileSync(path.join(__dirname, "..", "..", "netlify", "functions", "auth.mjs"), "utf8");
+  const used = new Set();
+  for (const f of ["app.js", "guide.js"]) {
+    const src = fs.readFileSync(path.join(__dirname, "..", "..", "products", "strange-oracle", f), "utf8");
+    for (const m of src.matchAll(/\/api\/auth\/([a-z]+)/g)) if (m[1] !== "kakao") used.add(m[1]);
+  }
+  for (const p of ["dust", "me", "save", "logout", "erase", "claim"]) used.add(p);
+  for (const p of used) assert.ok(cfg.includes(`"/api/auth/${p}"`), "빠진 길: /api/auth/" + p);
+});
