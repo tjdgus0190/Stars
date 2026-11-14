@@ -39,12 +39,12 @@ window.TEXT = {
   analytics: { ga4: "G-4J5SVQV3B1" },
 
   // ── (2026-11-04 운영자 결정, 시험판) 2027 신년운세 탭 「새해의 회랑」. 나의 이야기와 따로 떨어진 탭: 듣고 싶은 방을 골라 들어갔다 나온다(다음 방으로 잇지 않음).
-  // mode: "off" = 배포판(하단 탭·새해 화면·app-ny.js·data-ny.js·style-ny.css 없음). "test" = 시험 페이지에서만(mock-server --mode test가 응답할 때만 바꾼다).
+  // mode: "off" = 꺼짐(하단 탭·새해 화면·app-ny.js·data-ny.js·style-ny.css 없음). "live" = 열림(2026-11-14~). "test" = 시험 페이지에서만(mock-server --mode test가 응답할 때만 바꾼다).
   //   ※ mode는 이 묶음 맨 앞에 둔다(모의 서버가 이 모양으로 찾는다). 12월 오픈 때 운영자가 "live"로 바꾸고 build-dist 검사도 함께 푼다.
   // 무료: 방마다 「한 해의 결」·열쇠 낱말·가장 빛나는 때(data-ny.js). 유료(책을 산 열람 코드): 한 해 풀이·네 갈래·달마다/계절마다·한 가지(api/_paid/book/book-ny.js, 서버로만).
   // 화면에 보이는 새해 문구는 모두 여기와 data-ny.js에 둔다. 방별 결과 문장(유료)은 여기에 쓰지 않는다(7장).
   ny: {
-    mode: "off",
+    mode: "live", // (2026-11-14 운영자 결정) 처음 화면 배너와 함께 지금 연다
     tabs: { story: "나의 이야기", ny: "2027 신년운세", aria: "탭 고르기" },
     hub: {
       eyebrow: "2027 · 정미년(丁未年)",

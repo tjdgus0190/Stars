@@ -100,10 +100,11 @@ for (const slug of PRODUCTS) {
     const mapMode = T.map && T.map.mode ? String(T.map.mode) : "off";
     MAP_MODES[slug] = mapMode;
     if (mapMode !== "off") fails.push(`⑩ products/${slug}/data.js map.mode = "${mapMode}" (배포판은 "off"만)`);
-    // ⑰ (2026-11-04) 2027 신년운세 탭은 시험판: 배포판은 ny.mode "off"만(12월 오픈 때 운영자 결정으로 함께 푼다)
+    // ⑰ (2026-11-04) 2027 신년운세 탭: 배포판은 "off" 또는 "live"(2026-11-14 운영자 결정으로 오픈). "test"는 시험 페이지에서만
     const nyMode = T.ny && T.ny.mode ? String(T.ny.mode) : "off";
     NY_MODES[slug] = nyMode;
-    if (nyMode !== "off") fails.push(`⑰ products/${slug}/data.js ny.mode = "${nyMode}" (배포판은 "off"만)`);
+    if (nyMode !== "off" && nyMode !== "live") fails.push(`⑰ products/${slug}/data.js ny.mode = "${nyMode}" (배포판은 "off"·"live"만)`);
+    if (nyMode === "live") for (const n of NY_FILES) if (!fs.existsSync(path.join(ROOT, "products", slug, n))) fails.push(`⑰ live: products/${slug}/${n} 없음`);
     if (mapMode === "live") {
       if (!/^https:\/\//.test(String(T.map.api || ""))) fails.push(`⑬ live: products/${slug}/data.js map.api가 https://로 시작하지 않음`);
       if (!SITE[slug]) fails.push(`⑬ live: products/${slug}/data.js site.url이 비어 있음 (초대 링크 주소)`);

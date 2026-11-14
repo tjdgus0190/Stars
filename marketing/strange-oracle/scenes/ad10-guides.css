@@ -1,0 +1,112 @@
+/* 광고 10안 「일곱 안내자」 (2026-11-14). common.css 위에 얹는다. 21초 · 1080x1920 · 30fps
+   밤하늘 + 운영자가 준 안내자 초상(아치 문 틀) + 별가루 결정. 움직임은 이동·크기·투명도만(번쩍임·큰 흔들림 없음) */
+.a10 { --soft: cubic-bezier(0.22, 0.9, 0.3, 1); --ink-hi: oklch(0.97 0.012 90); --ink: oklch(0.9 0.015 90); --muted: oklch(0.78 0.03 285);
+  background: linear-gradient(180deg, oklch(0.12 0.035 280), oklch(0.15 0.045 285) 55%, oklch(0.19 0.055 300)); }
+.sky10 { position: absolute; inset: -80px; animation: drift10 21s linear 0s both; }
+@keyframes drift10 { from { transform: translateY(30px); } to { transform: translateY(-30px); } }
+.sky10__stars { position: absolute; inset: 0; }
+.sky10__stars.s1 { opacity: 0.7; background:
+  radial-gradient(circle, oklch(0.97 0.02 90) 0 1.4px, transparent 2.2px) 23px 41px / 131px 149px,
+  radial-gradient(circle, oklch(0.92 0.04 250) 0 1.1px, transparent 1.9px) 77px 9px / 97px 113px; }
+.sky10__stars.s2 { background:
+  radial-gradient(circle, oklch(0.98 0.03 85) 0 2.2px, transparent 3.4px) 61px 107px / 263px 241px,
+  radial-gradient(circle, oklch(0.95 0.03 300) 0 1.8px, transparent 2.8px) 151px 37px / 317px 283px; animation: tw10 3.6s ease-in-out 0s infinite; }
+@keyframes tw10 { 50% { opacity: 0.4; } }
+.sky10__glow { position: absolute; left: 0; right: 0; bottom: 0; height: 1000px; background: radial-gradient(ellipse 80% 70% at 50% 100%, oklch(0.38 0.08 300 / 0.5), transparent 70%); }
+
+/* 방 명화 배경(장면마다 옅게) */
+.bg10 { position: absolute; inset: 0; background: var(--img) center / cover no-repeat; opacity: 0; }
+.bg10::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, oklch(0.1 0.03 280 / 0.75), oklch(0.1 0.03 280 / 0.55) 45%, oklch(0.08 0.03 280 / 0.92)); }
+
+/* 공통 움직임 */
+@keyframes in10 { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+@keyframes out10 { to { opacity: 0; transform: translateY(-18px); } }
+@keyframes fi10 { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fo10 { to { opacity: 0; } }
+@keyframes pop10 { 0% { opacity: 0; transform: translateY(18px) scale(0.96); } 100% { opacity: 1; transform: none; } }
+@keyframes kb10 { from { transform: scale(1.1); } to { transform: scale(1); } }
+@keyframes bgin10 { from { opacity: 0; } to { opacity: var(--o, 0.35); } }
+
+/* 아치 문 틀 + 초상 */
+.arch10 { position: absolute; overflow: hidden; border-radius: 999px 999px 16px 16px; border: 3px solid oklch(0.8 0.1 82); background: oklch(0.14 0.04 285);
+  box-shadow: 0 0 0 7px oklch(0.2 0.04 285 / 0.9), 0 0 0 9px oklch(0.6 0.08 78 / 0.55), 0 18px 60px oklch(0.05 0.02 280 / 0.8), 0 0 70px oklch(0.8 0.1 82 / 0.18); }
+.arch10 .pt { position: absolute; inset: 0; background: var(--img) center top / cover no-repeat; }
+.arch10::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, oklch(0.1 0.03 285 / 0.55)); }
+
+/* 위쪽 큰 자막(첫 장면) */
+.cap10 { position: absolute; left: 140px; width: 800px; text-align: center; word-break: keep-all; opacity: 0;
+  font: 900 72px/1.3 "Noto Serif KR", var(--font-serif); color: var(--ink-hi); text-shadow: 0 3px 16px oklch(0.08 0.03 280); }
+.cap10 em { font-style: normal; color: oklch(0.88 0.1 85); text-shadow: 0 0 26px oklch(0.8 0.12 75 / 0.55), 0 3px 12px oklch(0.08 0.03 280); }
+
+/* 기능 머리표: 01 · 전 세계의 점술로 알아보는 나 */
+.chip10 { position: absolute; left: 140px; width: 800px; top: 300px; display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0; text-align: center; }
+.chip10 .no { font: 700 34px/1 var(--font-latin); letter-spacing: 0.3em; color: oklch(0.8 0.1 82); }
+.chip10 .t { font: 900 58px/1.22 "Noto Serif KR", var(--font-serif); color: var(--ink-hi); word-break: keep-all; text-shadow: 0 3px 16px oklch(0.08 0.03 280); }
+.chip10 .t em { font-style: normal; color: oklch(0.88 0.1 85); }
+
+/* ① 일곱 점술: 큰 아치 아래 이름표 */
+.who10 { position: absolute; left: 140px; width: 800px; top: 1010px; text-align: center; opacity: 0; }
+.who10 .og { margin: 0; font: 700 30px/1 var(--font-latin); letter-spacing: 0.18em; color: oklch(0.82 0.12 var(--h)); }
+.who10 .nm { margin: 16px 0 0; font: 700 60px/1.15 var(--font-serif); color: var(--ink-hi); }
+.who10 .ln { margin: 14px 0 0; font: 400 40px/1.3 var(--font-serif); color: var(--ink); }
+.dots10 { position: absolute; left: 0; right: 0; top: 1205px; display: flex; justify-content: center; gap: 18px; }
+.dots10 i { width: 16px; height: 16px; border-radius: 50%; background: oklch(0.45 0.04 285); }
+.dots10 i b { display: block; width: 100%; height: 100%; border-radius: 50%; background: oklch(0.82 0.13 var(--h)); box-shadow: 0 0 12px oklch(0.82 0.13 var(--h)); opacity: 0; }
+
+/* ② 면담 대화 카드 */
+.chat10 { position: absolute; left: 120px; width: 840px; top: 515px; height: 735px; border-radius: 40px; overflow: hidden; opacity: 0;
+  background: oklch(0.13 0.035 285 / 0.86); border: 2px solid oklch(0.6 0.08 80 / 0.45); box-shadow: 0 30px 90px oklch(0.04 0.02 280 / 0.85); }
+.chat10__head { position: relative; z-index: 2; display: flex; align-items: center; gap: 20px; height: 112px; padding: 0 30px; border-bottom: 1px solid oklch(0.5 0.05 285 / 0.4); background: oklch(0.16 0.04 285); }
+.chat10__face { width: 66px; height: 86px; border-radius: 999px 999px 8px 8px; border: 2px solid oklch(0.8 0.1 82); background: url("/products/strange-oracle/img/guide/saju.webp") center top / cover; }
+.chat10__head b { display: block; font: 700 40px/1.1 var(--font-serif); color: var(--ink-hi); }
+.chat10__head small { display: flex; align-items: center; gap: 10px; margin-top: 6px; font: 400 28px/1 var(--font-serif); color: var(--muted); }
+.chat10__head small::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: oklch(0.75 0.17 150); box-shadow: 0 0 10px oklch(0.75 0.17 150); }
+.chat10__body { position: absolute; left: 0; right: 0; top: 112px; bottom: 0; padding: 30px 30px; display: flex; flex-direction: column; gap: 16px; }
+.msg10 { max-width: 640px; padding: 20px 28px; border-radius: 30px; font: 400 36px/1.45 var(--font-serif); word-break: keep-all; opacity: 0; }
+.msg10.me { align-self: flex-end; border-bottom-right-radius: 10px; color: oklch(0.2 0.03 285); font-weight: 700; background: linear-gradient(160deg, oklch(0.86 0.1 82), oklch(0.74 0.1 70)); }
+.msg10.g { align-self: flex-start; margin-left: 74px; border-bottom-left-radius: 10px; color: var(--ink-hi); background: oklch(0.19 0.045 285); border: 2px solid oklch(0.6 0.08 80 / 0.45); }
+.msg10.q { border-color: oklch(0.82 0.11 82); box-shadow: 0 0 30px oklch(0.8 0.1 82 / 0.3); color: oklch(0.92 0.08 85); font-weight: 700; }
+.face10 { position: absolute; left: 30px; width: 58px; height: 76px; border-radius: 999px 999px 8px 8px; border: 2px solid oklch(0.8 0.1 82); background: url("/products/strange-oracle/img/guide/saju.webp") center top / cover; opacity: 0; }
+.typing10 { position: absolute; left: 104px; padding: 26px 30px; border-radius: 30px; border-bottom-left-radius: 10px; background: oklch(0.19 0.045 285); border: 2px solid oklch(0.6 0.08 80 / 0.45); display: flex; gap: 12px; opacity: 0; }
+.typing10 i { width: 16px; height: 16px; border-radius: 50%; background: oklch(0.85 0.08 85); animation: dot10 0.9s ease-in-out infinite; }
+.typing10 i:nth-child(2) { animation-delay: 0.15s; } .typing10 i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot10 { 0%, 100% { opacity: 0.3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-8px); } }
+.ai10 { position: absolute; left: 140px; width: 800px; top: 1262px; text-align: center; font: 400 30px/1.3 var(--font-serif); color: var(--muted); opacity: 0; }
+
+/* ③ 오늘의 신탁 */
+.day10 { position: absolute; left: 0; right: 0; top: 0; }
+.today10__chip { position: absolute; left: 140px; width: 800px; top: 900px; text-align: center; opacity: 0; }
+.today10__chip span { display: inline-block; padding: 12px 30px; border-radius: 999px; border: 2px solid oklch(0.6 0.08 80 / 0.6); background: oklch(0.18 0.04 285 / 0.9); font: 700 30px/1 var(--font-serif); color: oklch(0.86 0.09 85); }
+.today10__nm { position: absolute; left: 140px; width: 800px; top: 965px; text-align: center; font: 700 64px/1.1 var(--font-serif); color: oklch(0.9 0.1 85); opacity: 0; }
+.scroll10 { position: absolute; left: 150px; width: 780px; top: 1070px; padding: 34px 46px; border-radius: 22px; text-align: center; opacity: 0; transform-origin: 50% 0;
+  background: linear-gradient(180deg, oklch(0.9 0.035 82), oklch(0.84 0.045 78)); box-shadow: inset 0 0 0 3px oklch(0.7 0.06 70 / 0.6), 0 20px 50px oklch(0.05 0.02 280 / 0.7);
+  font: 700 38px/1.5 var(--font-serif); color: oklch(0.26 0.04 50); word-break: keep-all; }
+@keyframes unroll10 { from { opacity: 0; transform: scaleY(0.2); } 40% { opacity: 1; } to { opacity: 1; transform: none; } }
+.toast10 { position: absolute; left: 0; right: 0; top: 1268px; display: flex; justify-content: center; opacity: 0; }
+.toast10 span { display: inline-flex; align-items: center; gap: 14px; padding: 14px 30px 14px 18px; border-radius: 999px; background: oklch(0.16 0.04 285 / 0.95); border: 2px solid oklch(0.65 0.12 255 / 0.6);
+  font: 700 34px/1 var(--font-serif); color: oklch(0.92 0.06 250); box-shadow: 0 0 40px oklch(0.6 0.15 255 / 0.35); }
+.toast10 img { width: 56px; height: 56px; filter: drop-shadow(0 0 10px oklch(0.75 0.15 255 / 0.9)); }
+.next10 { position: absolute; left: 140px; width: 800px; top: 1100px; text-align: center; font: 700 44px/1.4 var(--font-serif); color: oklch(0.88 0.1 85); opacity: 0; }
+
+/* 별가루 결정(떠다니는 장식) */
+.dust10 { position: absolute; width: var(--s); height: var(--s); background: url("/products/strange-oracle/img/stardust.webp") center / contain no-repeat; opacity: 0;
+  filter: drop-shadow(0 0 12px oklch(0.75 0.15 255 / 0.8)); }
+@keyframes float10 { 0% { opacity: 0; transform: translateY(40px) rotate(-8deg); } 20% { opacity: var(--o, 0.8); } 80% { opacity: var(--o, 0.8); } 100% { opacity: 0; transform: translateY(-80px) rotate(8deg); } }
+
+/* 끝 화면 */
+.end10 { position: absolute; inset: 0; opacity: 0; }
+.end10 .eb { position: absolute; left: 0; right: 0; top: 400px; text-align: center; margin: 0; font: 700 36px/1 var(--font-latin); letter-spacing: 0.32em; color: oklch(0.8 0.1 82); }
+.end10 .logo { position: absolute; left: 0; right: 0; top: 455px; text-align: center; margin: 0; font: 700 132px/1.1 var(--font-serif); color: oklch(0.88 0.1 85);
+  text-shadow: 0 0 40px oklch(0.8 0.12 75 / 0.55), 0 4px 18px oklch(0.06 0.02 280); }
+.end10 .row { position: absolute; left: 0; right: 0; top: 650px; display: flex; justify-content: center; gap: 14px; }
+.end10 .row .arch10 { position: relative; width: 98px; height: 130px; border-width: 2px; box-shadow: 0 0 0 4px oklch(0.2 0.04 285 / 0.9), 0 0 30px oklch(0.8 0.1 82 / 0.2); opacity: 0; }
+.end10 ul { position: absolute; left: 170px; width: 740px; top: 840px; margin: 0; padding: 0; list-style: none; display: grid; gap: 22px; }
+.end10 li { display: flex; align-items: center; gap: 18px; font: 700 42px/1.2 var(--font-serif); color: var(--ink-hi); opacity: 0; }
+.end10 li img { width: 50px; height: 50px; flex-shrink: 0; filter: drop-shadow(0 0 10px oklch(0.75 0.15 255 / 0.9)); }
+.end10 .cta { position: absolute; left: 140px; width: 800px; top: 1120px; text-align: center; margin: 0; opacity: 0; }
+.end10 .cta span { display: inline-block; padding: 24px 56px; border-radius: 999px; font: 700 48px/1 var(--font-serif); color: oklch(0.18 0.03 285);
+  background: linear-gradient(180deg, oklch(0.9 0.1 85), oklch(0.76 0.11 75)); box-shadow: 0 10px 40px oklch(0.8 0.12 75 / 0.35); }
+.end10 .url { position: absolute; left: 0; right: 0; top: 1225px; text-align: center; margin: 0; font: 700 32px/1 var(--font-latin); letter-spacing: 0.08em; color: var(--muted); opacity: 0; }
+@keyframes shimmer10 { 0%, 100% { text-shadow: 0 0 40px oklch(0.8 0.12 75 / 0.55), 0 4px 18px oklch(0.06 0.02 280); } 50% { text-shadow: 0 0 60px oklch(0.92 0.1 85 / 0.95), 0 0 120px oklch(0.8 0.12 75 / 0.6), 0 4px 18px oklch(0.06 0.02 280); } }
+@keyframes up10 { from { transform: none; } to { transform: translateY(-60px); } }
+@keyframes up10b { from { transform: translateY(-60px); } to { transform: translateY(-205px); } }

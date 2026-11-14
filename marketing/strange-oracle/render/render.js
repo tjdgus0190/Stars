@@ -29,6 +29,7 @@ const ADS = {
   ad8: { scene: "ad8-profile.html", out: "ad8-profile-ko.mp4", frames: 450 }, // (2026-10-27) 8안 「일곱 문의 점술관」 프로필 유입 15초
   ad7: { scene: "ad7-season.html", out: "ad7-season-ko.mp4", frames: 450 }, // (2026-10-27) 7안 「첫 계절의 값」 15초
   ad9: { scene: "ad9-newyear.html", out: "ad9-newyear-ko.mp4", frames: 450 }, // (2026-11-12) 9안 「새해의 문」 2027 신년운세 15초
+  ad10: { scene: "ad10-guides.html", out: "ad10-guides-ko.mp4", frames: 630 }, // (2026-11-14) 10안 「일곱 안내자」 세 기능(세계 점술·AI 면담·오늘의 신탁) 21초
   "ep-rune": { scene: "legend-ep.html?ep=rune", out: "legend-ep-rune-ko.mp4", frames: 1440 }, // (2026-11-13) 전설 릴스 공용 틀 48초
   "ep-ogham": { scene: "legend-ep.html?ep=ogham", out: "legend-ep-ogham-ko.mp4", frames: 1440 }, // (2026-11-13) 전설 릴스 공용 틀 48초
   "ep-star": { scene: "legend-ep.html?ep=star", out: "legend-ep-star-ko.mp4", frames: 1440 }, // (2026-11-13) 전설 릴스 공용 틀 48초

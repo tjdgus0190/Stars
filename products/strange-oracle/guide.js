@@ -16,7 +16,7 @@
   const slugOf = (p) => "c_" + String(p).replace(/^\/|\/$/g, "").replace(/[\/-]/g, "_");
   const landPaths = [].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {})).map((d) => d.path)
     .concat(window.LEGENDS ? [window.LEGENDS.hub.path].concat(Object.values(window.LEGENDS.list).map((d) => d.path)) : ["/legends/"]);
-  const LAND = ["#meta_id"].concat(landPaths.map(slugOf), ["reel_sibyl", "reel_rune", "reel_ogham", "reel_star", "reel_decan", "reel_tzolkin", "reel_saju", "ig_profile", "x_profile", "gads_main"]);
+  const LAND = ["#meta_id"].concat(landPaths.map(slugOf), ["reel_sibyl", "reel_rune", "reel_ogham", "reel_star", "reel_decan", "reel_tzolkin", "reel_saju", "ig_profile", "x_profile", "gads_main", "ad10_guides"]); // (2026-11-14) ad10_guides = 10안 「일곱 안내자」(처음 화면 착지)
   const CAMPAIGN = {
     utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads", "naver", "youtube"],
     utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
@@ -69,7 +69,7 @@
         if (ev.target.closest("[data-js=login-go]")) {
           const b = new Uint8Array(16); crypto.getRandomValues(b);
           const st = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
-          const from = { "/talk/": "talk", "/today/": "today", "/dex/": "dex", "/stardust/": "stardust" }[href] || "home"; // 일곱 개의 문(입구)은 처음 화면으로 돌아온다
+          const from = { "/talk/": "talk", "/today/": "today", "/dex/": "dex", "/stardust/": "stardust", "/products/strange-oracle/": "hub", "/products/strange-oracle/#ny-hub": "ny" }[href] || "home"; // (2026-11-14) 누른 카드로 바로 이어진다: 일곱 개의 문 → 입구, 신년운세 배너 → 새해의 회랑
           try { sessionStorage.setItem("strange-oracle-kakao", JSON.stringify({ s: st, mode: "login", from, prod: "book" })); } catch (x) { location.href = href; return; }
           location.href = "/api/auth/kakao/start?state=" + st;
         }
@@ -248,7 +248,7 @@
           h += got.map((x) => { const l = ROOM_DATA[x.room][1](); return l ? readCard(x.room, itemView(x.room, l, x.idx), fill(A.receivedHead, { name: guide(x.room).name })) : ""; }).join("");
           h += `<section class="gothers"><h2>${esc(A.othersHead)}</h2><p class="gnote">${esc(fill(A.othersNote, { cost: COST.extra }))}${need > 0 ? " · " + esc(fill(A.othersShort, { need })) : ""}</p>
             <ul class="gpickrow">${others.map((r) => { const done = got.some((x) => x.room === r); return `<li><button type="button" data-js="today-extra" data-room="${r}"${done || need > 0 || busy ? " disabled" : ""}${done ? ' aria-pressed="true"' : ""}>${arch(r, "garch--sm")}<span>${esc(guide(r).name)}</span></button></li>`; }).join("")}</ul></section>`;
-          h += `<p class="gnote gcenter">${esc(fill(A.tomorrow, { name: guide(nextRoom).name }))}</p><div class="gactions"><a class="gbtn ghost" href="${ROOM_URL}" data-js="to-room">${esc(fill(A.toRoom, { room: g.roomName }))}</a></div>`;
+          h += `<p class="gnote gcenter">${esc(fill(A.tomorrow, { name: guide(nextRoom).name, iga: iga(guide(nextRoom).name) }))}</p><div class="gactions"><a class="gbtn ghost" href="${ROOM_URL}" data-js="to-room">${esc(fill(A.toRoom, { room: g.roomName }))}</a></div>`;
         }
         if (msg) h += `<p class="gerror" role="alert">${esc(msg)}</p>`;
         box.innerHTML = h;
@@ -303,7 +303,7 @@
           return `<li><button type="button" class="gdexcard${has ? "" : " is-locked"}" data-js="dex-card" data-room="${g.room}">${arch(g.room, "garch--md")}<small>${esc(g.roomName)}</small><b>${esc(has ? g.name : U.locked)}</b>${has ? `<span>${esc(g.epithet)}</span>` : `<span>${esc(fill(U.lockedHint, { room: g.roomName }))}</span>`}</button></li>`;
         }).join("");
         const sealNote = all ? (readLogin() ? (acctOnce.includes("seal") ? U.sealGot : U.sealWorking) : U.sealLogin) : U.sealReward;
-        let h = `<div class="gseal${all ? " is-open" : ""}"><b>${esc(U.sealHead)} · ${esc(fill(U.count, { n: st.cards.length }))}</b><p>${esc(all ? U.sealText : U.sealHint)}</p><small>${esc(sealNote)}</small>${all && !readLogin() ? `<button class="glink" type="button" data-js="dex-login">${esc(U.login)}</button>` : ""}</div><ul class="gdexgrid">${cards}</ul>`;
+        let h = `<div class="gseal${all ? " is-open" : ""}"><b>${esc(U.sealHead)} · ${esc(fill(U.count, { n: st.cards.length }))}</b>${all ? `<p>${esc(U.sealText)}</p>` : ""}<small>${esc(sealNote)}</small>${all && !readLogin() ? `<button class="glink" type="button" data-js="dex-login">${esc(U.login)}</button>` : ""}</div><ul class="gdexgrid">${cards}</ul>`;
         if (openRoom) {
           const g = guide(openRoom), has = st.cards.includes(g.room), open = st.open.includes(g.room), need = readLogin() ? (COST.story || 0) - acct() : 0;
           const tr = Object.entries(U.traitHeads).map(([k, hd]) => `<dt>${esc(hd)}</dt><dd>${esc(g.traits[k])}</dd>`).join("");
@@ -586,7 +586,7 @@
         if (!paid) { busy = false; draw(); return; }
         const g = cur, roomName = g.room, hist = chatOf(roomName);
         const logBox = box.querySelector("[data-js=talk-log]");
-        logBox.insertAdjacentHTML("beforeend", say("me", q, " is-new") + `<div class="gsay gsay--guide is-wait is-new" data-js="talk-wait">${arch(roomName, "garch--xs")}<p><span class="gdots" aria-label="${esc(fill(A.typing, { name: g.name }))}"><i></i><i></i><i></i></span></p></div>`);
+        logBox.insertAdjacentHTML("beforeend", say("me", q, " is-new") + `<div class="gsay gsay--guide is-wait is-new" data-js="talk-wait">${arch(roomName, "garch--xs")}<p><span class="gdots" aria-label="${esc(fill(A.typing, { name: g.name, iga: iga(g.name) }))}"><i></i><i></i><i></i></span></p></div>`);
         logBox.scrollTop = logBox.scrollHeight;
         e.target.querySelector("button[type=submit]").disabled = true;
         ta.value = ""; ta.style.height = "auto";
