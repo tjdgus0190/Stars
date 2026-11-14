@@ -297,7 +297,10 @@ async function account(path, body, env, store, now) {
         if (!c.ok) return json(409, { error: "used" }); // 다른 계정에 이미 충전한 코드
         return json(200, { state: c.already ? "already" : "credited", bal: c.bal, paid: c.paid, free: c.free, n: Dust.PACKS[prod] });
       }
-      return json(200, Object.assign({ state: "bal" }, Dust.view(await Dust.read(store, uh))));
+      // (2026-11-14) 잔액을 볼 때 카카오에 저장한 방 결과(예전에 연 방)도 도감 카드로 옮겨 적는다
+      const saved = openData(env, await getRec(store, K, now));
+      const done = saved && plainObj(saved.v) ? Object.keys(saved.v).filter((r) => plainObj(saved.v[r]) && Object.keys(saved.v[r]).length) : [];
+      return json(200, Object.assign({ state: "bal" }, Dust.view(done.length ? await Dust.addRooms(store, uh, done, now) : await Dust.read(store, uh))));
     }
     if (path === "erase") {
       await Dust.erase(store, uh); // 충전한 별가루도 함께 지운다(지우기 전 화면에서 알림)

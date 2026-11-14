@@ -94,7 +94,12 @@
     const dropLogin = () => { try { localStorage.removeItem(LOGIN_KEY); } catch (e) { /* 무시 */ } };
     const hex32 = () => { const b = new Uint8Array(16); crypto.getRandomValues(b); return [...b].map((x) => x.toString(16).padStart(2, "0")).join(""); };
     const post = async (url, body) => {
-      try { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" }); let j = null; try { j = await r.json(); } catch (e) { j = null; } return { status: r.status, j }; } catch (e) { return { status: 0, j: null }; }
+      try {
+        const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" }); let j = null; try { j = await r.json(); } catch (e) { j = null; }
+        // 계정 별가루가 바뀌면 위 띠 잔액도 함께(nav.js)
+        if (url === "/api/auth/dust" && r.status === 200 && j && Number.isInteger(j.bal)) { try { document.dispatchEvent(new CustomEvent("dust:acct", { detail: { bal: j.bal } })); } catch (e) { /* 무시 */ } }
+        return { status: r.status, j };
+      } catch (e) { return { status: 0, j: null }; }
     };
     // 카카오 로그인 시작: 돌아오면 입구가 표를 받아(로그인 유지) 이 별가루 페이지로 다시 보낸다
     const kakaoLogin = (from = "stardust") => {
@@ -112,6 +117,15 @@
       paidBal = r.status === 200 && r.j && Number.isInteger(r.j.bal) ? r.j.bal : null;
       acctOnce = r.j && Array.isArray(r.j.once) ? r.j.once : [];
       acctView = r.j || null;
+      // (2026-11-14) 이 기기에 남은 예전 도감 카드(방을 끝까지 지난 기록)를 계정 도감으로 옮겨 적는다
+      if (acctView && Array.isArray(acctView.rooms)) {
+        let local = [];
+        try { const st = D.state(); local = [...new Set([].concat(st.rooms || [], st.cards || []))]; } catch (e) { local = []; }
+        for (const room of local.filter((x) => !acctView.rooms.includes(x))) {
+          const w = await post("/api/auth/dust", { sid: lg.sid, room });
+          if (w.status === 200 && w.j && Array.isArray(w.j.rooms)) acctView = w.j;
+        }
+      }
       // (2026-11-14 운영자) 별가루는 로그인한 계정에만: 첫 로그인 10(계정에 한 번, 서버가 센다)
       if (paidBal != null && !acctOnce.includes("first")) await earnAcct("first");
       acctEvt();
@@ -202,7 +216,9 @@
     // ── (2026-11-14 운영자) 체험 콘텐츠는 카카오 로그인 뒤: 로그인 표가 없으면 안내만 보인다(아래 설명·자주 묻는 질문은 그대로)
     const GATE = window.NAV && window.NAV.gate && window.NAV.gate.on ? window.NAV.gate : null;
     const showGate = () => {
-      box.innerHTML = `<div class="ggate"><div class="ggate__arches" aria-hidden="true">${["saju", "sibyl", "rune"].map((r) => arch(r, "garch--sm")).join("")}</div><h2>${esc(GATE.title)}</h2><p>${esc(GATE.body)}</p><button class="gbtn gbtn--kakao" type="button" data-js="gate-login">${esc(GATE.go)}</button><small>${esc(GATE.note)}</small></div>`;
+      const T = Object.assign({ title: GATE.title, body: GATE.body }, (GATE.pages || {})[CONF.page] || {});
+      const art = CONF.page === "stardust" ? `<img class="ggate__dust" src="/products/strange-oracle/img/stardust.webp" alt="" width="96" height="96">` : ["saju", "sibyl", "rune"].map((r) => arch(r, "garch--sm")).join("");
+      box.innerHTML = `<div class="ggate"><div class="ggate__arches" aria-hidden="true">${art}</div><h2>${esc(T.title)}</h2><p>${esc(T.body)}</p><button class="gbtn gbtn--kakao" type="button" data-js="gate-login">${esc(GATE.go)}</button><small>${esc(GATE.note)}</small></div>`;
       document.documentElement.classList.remove("room-open", "sheet-open");
     };
     if (GATE) box.addEventListener("click", (e) => { if (e.target.closest("[data-js=gate-login]")) kakaoLogin(CONF.page); });
@@ -427,6 +443,9 @@
       const lobby = () => `<p class="gnote gcenter">${esc(on ? A.pick : A.closed)}</p><ul class="gdoorpick">${X.guides.map((g) => `<li><button type="button" data-js="talk-pick" data-room="${g.room}">${arch(g.room, "garch--door")}<b>${esc(g.name)}</b><small>${esc(g.roomName)}</small>${chatOf(g.room).length ? `<em class="gdoorpick__dot">${esc(A.continued)}</em>` : ""}</button></li>`).join("")}</ul>`;
       const balLine = () => (paidBal != null ? fill(A.balance, { n: paidBal }) : A.loginToTalk);
       const say = (who, text, extra = "") => `<div class="gsay gsay--${who}${extra}">${who === "guide" ? arch(cur.room, "garch--xs") : ""}<p>${esc(text)}</p></div>`;
+      // (2026-11-14 운영자) 안내자의 답은 문단마다 말풍선 하나(3~4개). 빈 줄로 나눈다. 너무 많으면 뒤를 마지막 풍선에 모은다
+      const partsOf = (text) => { const p = String(text).split(/\n\s*\n+/).map((x) => x.trim()).filter(Boolean); return p.length > 5 ? p.slice(0, 4).concat(p.slice(4).join("\n\n")) : p.length ? p : [String(text)]; };
+      const sayGuide = (text) => partsOf(text).map((x, i) => say("guide", x, i ? " gsay--cont" : "")).join("");
       // 면담 전 설정: 어떤 기록으로 볼지
       const setupCard = (g) => {
         const nd = NEEDS[g.room], tp = tabProfile(), lg = readLogin();
@@ -465,7 +484,7 @@
         return `<div class="groom${entering ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}')">
           <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b><small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
           <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${roomNote(g)}${hist.length ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
-            ${hist.map((h) => say("me", h.q) + say("guide", h.a)).join("")}</div>
+            ${hist.map((h) => say("me", h.q) + sayGuide(h.a)).join("")}</div>
           <form class="groom__bar" data-js="talk-form" novalidate autocomplete="off">
             <p class="groom__meta">${metaHtml(need)}</p>
             <p class="gerror" data-js="talk-error" role="alert" hidden></p>
@@ -586,7 +605,22 @@
           if (hist.length > 30) hist.splice(0, hist.length - 30);
           saveT();
           track("so_talk", { room: roomName, step: "answer" });
-          if (wait) { wait.classList.remove("is-wait"); wait.removeAttribute("data-js"); await typeOut(wait.querySelector("p"), a); }
+          if (wait) {
+            const parts = partsOf(a);
+            wait.classList.remove("is-wait"); wait.removeAttribute("data-js");
+            await typeOut(wait.querySelector("p"), parts[0]);
+            // 다음 풍선: 잠깐 말을 고르는 점 → 한 풍선씩
+            for (const part of parts.slice(1)) {
+              const lb = box.querySelector("[data-js=talk-log]");
+              if (!lb) break;
+              lb.insertAdjacentHTML("beforeend", `<div class="gsay gsay--guide gsay--cont is-wait is-new" data-js="talk-wait">${arch(roomName, "garch--xs")}<p><span class="gdots"><i></i><i></i><i></i></span></p></div>`);
+              lb.scrollTop = lb.scrollHeight;
+              const w = lb.querySelector("[data-js=talk-wait]");
+              if (!reduce) await new Promise((ok) => setTimeout(ok, 650));
+              w.classList.remove("is-wait"); w.removeAttribute("data-js");
+              await typeOut(w.querySelector("p"), part);
+            }
+          }
           busy = false;
           if (!box.querySelector("[data-js=talk-clear]") && cur && cur.room === roomName) { const t = box.querySelector(".groom textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector(".groom textarea"); if (t2) t2.value = keep; }
           refresh();
@@ -601,7 +635,8 @@
         }
       });
       box.addEventListener("input", (e) => { if (e.target.name === "q") { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; } });
-      box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
+      // (2026-11-14 운영자) Enter는 줄바꿈. 보내기는 보내기 단추(PC에서는 Ctrl·Cmd + Enter도)
+      box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
       document.addEventListener("keydown", (e) => { if (e.key === "Escape" && cur && !busy) { cur = null; draw(); } });
       loadPaid().then(refresh);
       document.addEventListener("dust:change", refresh);
@@ -617,16 +652,14 @@
 
     if (CONF.page === "stardust") {
       const A = P.app;
-      // (v1-F) 한 장짜리: 잔액 카드 → 모으는 법·쓰는 곳(짧은 두 칸) → 충전 → 지우기
+      // (v1-F) 한 장짜리: 잔액 카드 → 모으는 법·쓰는 곳(짧은 두 칸) → 충전
       const draw = () => {
         const st = D.state();
         const mini = (head, list, sign) => `<section class="gmini"><h2>${esc(head)}</h2><ul>${list.map((x) => `<li><span>${esc(x.label)}${x.note ? `<small>${esc(x.note)}</small>` : ""}</span><b>${sign}${esc(String(x.amt).replace(/^\+/, ""))}</b></li>`).join("")}</ul></section>`;
         // (2026-11-14) 별가루는 카카오 계정에만 — 로그인 전이면 0과 로그인 안내
-        box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><img class="gwallet__i" src="/products/strange-oracle/img/stardust.webp" alt=""> <span data-js="dust-total">${paidBal || 0}</span></b>
-            <p>${paidBal != null && acctView ? `<span>${esc(A.free)} ${acctView.free || 0}</span><span>${esc(A.paid)} ${acctView.paid || 0}</span>` : `<span>${esc(A.loginNote)}</span>`}</p></div>
-          <div class="gminis">${mini(A.waysHead, A.ways, "+")}${mini(A.usesHead, A.uses, "−")}</div>${A.rate ? `<p class="gnote gcenter">${esc(A.rate)}</p>` : ""}${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc(S.back)}</a></div>` : ""}
-          <div data-js="dust-shop"></div>
-          <p class="gcenter"><button class="glink" type="button" data-js="dust-clear">${esc(A.clear)}</button></p><p class="gnote gcenter" data-js="dust-cleared" hidden>${esc(A.cleared)}</p>`;
+        box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><img class="gwallet__i" src="/products/strange-oracle/img/stardust.webp" alt=""> <span data-js="dust-total">${paidBal || 0}</span></b></div>
+          <div class="gminis">${mini(A.waysHead, A.ways, "+")}${mini(A.usesHead, A.uses, "−")}</div>${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc(S.back)}</a></div>` : ""}
+          <div data-js="dust-shop"></div>`;
         drawShop();
       };
       // ── 충전 (운영 규칙 7장): 결제 전에 받는 것·가격·환불·판매자를 보이고, 동의 체크 뒤에만 결제창
@@ -650,7 +683,7 @@
           const k = S.packs.find((x) => x.prod === pick);
           // (2026-11-14) 상점처럼: 묶음마다 카드(결정 아이콘 무더기 · ×개수 · 덤 · 이름 · 값)
           const DI = (n) => `<img src="/products/strange-oracle/img/stardust.webp" alt="" class="gpack__i${n}">`;
-          h += `<ul class="gpacks">${S.packs.map((x, i) => `<li><button type="button" class="gpack" data-js="dust-pack" data-prod="${x.prod}" aria-pressed="${pick === x.prod}"><span class="gpack__art">${[...Array(i + 1)].map((_, j) => DI(j)).join("")}<b class="gpack__qty">×${x.base || x.n}</b>${x.bonus ? `<em class="gpack__bonus">${esc(fill(S.bonus, { n: x.bonus }))}</em>` : ""}</span><span class="gpack__name">${esc(fill(S.packName || S.pack, { n: x.base || x.n }))}</span><span class="gpack__price">${esc(fill(S.price, { price: won(x.price) }))}</span><small>${esc(fill(S.packTalk, { q: Math.floor(x.n / (COST.talk || 5)) }))}</small></button></li>`).join("")}</ul>
+          h += `<ul class="gpacks">${S.packs.map((x, i) => `<li><button type="button" class="gpack" data-js="dust-pack" data-prod="${x.prod}" aria-pressed="${pick === x.prod}"><span class="gpack__art">${[...Array(i + 1)].map((_, j) => DI(j)).join("")}<b class="gpack__qty">×${x.base || x.n}</b>${x.bonus ? `<em class="gpack__bonus">${esc(fill(S.bonus, { n: x.bonus }))}</em>` : ""}</span><span class="gpack__name">${esc(fill(S.packName || S.pack, { n: x.base || x.n }))}</span><span class="gpack__price">${esc(fill(S.price, { price: won(x.price) }))}</span></button></li>`).join("")}</ul>
             <p class="gsummary">${esc(S.summary)}</p>
             <details class="gfold"><summary>${esc(S.more)}</summary><ul class="gsources">${S.terms.map((t) => `<li>${esc(t)}</li>`).join("")}</ul><p class="gnote"><a href="/products/strange-oracle/legal/terms.html#s2-4">${esc(S.termsLink)}</a></p></details>
             <label class="gcheck"><input type="checkbox" data-js="dust-agree" />${esc(S.agree)}</label>
@@ -745,13 +778,6 @@
         }
       });
       if (shopOn) loadPaid().then(() => { draw(); if (location.hash === "#paid" || readPend()) settle(); if (/^#(paid|login)$/.test(location.hash)) history.replaceState(null, "", location.pathname); });
-      box.addEventListener("click", (e) => {
-        if (!e.target.closest("[data-js=dust-clear]")) return;
-        if (!window.confirm(A.clearAsk)) return;
-        D.clear();
-        draw();
-        box.querySelector("[data-js=dust-cleared]").hidden = false;
-      });
       document.addEventListener("dust:change", draw);
       draw();
     }

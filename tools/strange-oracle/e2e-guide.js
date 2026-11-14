@@ -234,6 +234,8 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await waitFor("!!window.Dust && !!window.DEX && !!document.querySelector('[data-js=home-today]')");
   const home = await ev("({ path: location.pathname, sub: document.querySelector('[data-js=home-today-sub]').textContent, art: document.querySelector('[data-js=home-today]').style.getPropertyValue('--art'), want: DEX.guides.find((g) => g.room === Dust.guideOf()), feats: [...document.querySelectorAll('.gfeat')].map((a) => a.getAttribute('href')), tabs: document.querySelectorAll('.tabbar a').length, cur: document.querySelector('.tabbar a[aria-current=page]')?.getAttribute('href'), canon: document.querySelector('link[rel=canonical]')?.href })");
   check("처음 화면(/): 일곱 개의 문·오늘의 신탁·면담·도감·별가루 다섯 칸 · 아래 탭 5 · 오늘 담당 안내자 표시", home.path === "/" && ["/products/strange-oracle/", "/today/", "/talk/", "/dex/", "/stardust/"].every((h) => home.feats.includes(h)) && home.tabs === 5 && home.cur === "/" && home.sub.includes(home.want.name) && home.art.includes(`img/guide/${home.want.room}.webp`) && home.canon === "https://strange-oracle.com/", JSON.stringify({ sub: home.sub, feats: home.feats, cur: home.cur }));
+  const nyb = await ev("(() => { const a = document.querySelector('[data-js=home-ny]'); return a ? { href: a.getAttribute('href'), txt: a.textContent } : null; })()");
+  check("처음 화면: 2027 신년운세 배너 → 입구 신년운세 탭(#ny-hub) · 버튼", !!nyb && nyb.href === "/products/strange-oracle/#ny-hub" && /2027 신년운세/.test(nyb.txt) && /새해 운세 보기/.test(nyb.txt), JSON.stringify(nyb));
   // (2026-11-14 운영자) 체험 콘텐츠는 로그인 뒤: 처음 화면 카드는 로그인 안내(건너뛰기 없음) · 점술 안내·무료 도구 칸은 그대로
   await ev("document.querySelector('.gfeat[href=\"/dex/\"]').click(); true");
   await waitFor("!!document.querySelector('.glogin [data-js=login-go]')", 5000);
@@ -354,8 +356,12 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await waitFor("!document.querySelector('.groom__send').disabled", 8000);
   const k0 = await ev("({ known: document.querySelector('.groom__note').textContent, greet: document.querySelectorAll('[data-js=talk-log] .gsay--guide').length, meta: document.querySelector('.groom__meta').textContent })");
   await ev("(() => { const t = document.querySelector('.groom textarea'); t.value = '올해 일은 어떻게 풀어 가면 좋을까요?'; document.querySelector('.groom__send').click(); return true; })()");
-  await waitFor("document.querySelectorAll('[data-js=talk-log] .gsay--guide:not(.is-wait)').length === 2 && !document.querySelector('.groom__send').disabled", 10000);
-  const k1 = await ev("({ a: [...document.querySelectorAll('[data-js=talk-log] .gsay--guide p')].pop().textContent, me: document.querySelectorAll('[data-js=talk-log] .gsay--me').length, meta: document.querySelector('.groom__meta').textContent })");
+  await waitFor("document.querySelectorAll('[data-js=talk-log] .gsay--guide:not(.is-wait)').length === 5 && !document.querySelector('.groom__send').disabled", 15000);
+  const k1 = await ev("(() => { const ps = [...document.querySelectorAll('[data-js=talk-log] .gsay--guide p')].map((p) => p.textContent); return { a: ps[1], q: ps[4], n: ps.length, me: document.querySelectorAll('[data-js=talk-log] .gsay--me').length, meta: document.querySelector('.groom__meta').textContent }; })()");
+  // Enter는 줄바꿈(보내지 않음)
+  const nl = await ev("(() => { const t = document.querySelector('.groom textarea'); t.value = '첫 줄'; t.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })); return { prevented: false, me: document.querySelectorAll('[data-js=talk-log] .gsay--me').length }; })()");
+  await ev("document.querySelector('.groom textarea').value = ''; true");
+  check("면담: 답은 문단마다 말풍선(4개) · 마지막은 역질문 · Enter는 보내지 않음(줄바꿈)", k1.n === 5 && /\?$/.test(k1.q) && nl.me === 1, JSON.stringify({ n: k1.n, q: k1.q, nl }));
   const sent = b.log.bodies.filter((x) => x.url.endsWith("/api/talk")).map((x) => JSON.parse(x.body));
   const last = await (await fetch(`${TEST}/__dev/talk-last`)).json();
   const lg = await ev("JSON.parse(localStorage.getItem('strange-oracle-login') || 'null')");

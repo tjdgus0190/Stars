@@ -85,7 +85,7 @@ async function fakeLlm(params) {
   if (q.includes("__fail")) throw new Error("upstream");
   if (q.includes("__refuse")) return { stop_reason: "refusal", content: [], usage: { input_tokens: 900, output_tokens: 0 } };
   const who = (params.system[0].text.match(/안내자 (\S+?)이?다\./) || [])[1] || "?";
-  return { stop_reason: "end_turn", content: [{ type: "text", text: `(시험 답) ${who}이 답해요. 물은 글자 수 ${q.length}. 오늘은 물 한 잔을 천천히 마셔 보세요.` }], usage: { input_tokens: 1800, output_tokens: 220 } };
+  return { stop_reason: "end_turn", content: [{ type: "text", text: `(시험 답) ${who}이 답해요. 물은 글자 수 ${q.length}.\n\n그렇게 읽히는 까닭은 결과의 기운에 있어요.\n\n오늘은 물 한 잔을 천천히 마셔 보세요.\n\n요즘 그 일에서 가장 마음에 걸리는 장면은 무엇인가요?` }], usage: { input_tokens: 1800, output_tokens: 220 } };
 }
 const bookEnv = () => (PAYMOCK ? Object.assign({}, ENV, { PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET }) : ENV);
 

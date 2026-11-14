@@ -43,6 +43,16 @@
     document.body.append(tb);
     document.body.classList.add("has-tabbar");
   }
+  // (2026-11-14 운영자) 입구의 「내 정보 지우기」는 위 막대 대신 메뉴 맨 아래에 (6장: 언제든 누를 수 있게 — ☰는 입구 모든 화면에 있다)
+  const clr = document.querySelector(".topbar [data-js=clear-open]");
+  if (clr) {
+    const foot = document.createElement("div");
+    foot.className = "sidenav__foot";
+    clr.classList.remove("topbar__clear");
+    clr.classList.add("sidenav__clear");
+    foot.append(clr);
+    aside.append(foot);
+  }
   aside.querySelectorAll("a[href]").forEach((a) => { if (sameAs(a.getAttribute("href"))) a.setAttribute("aria-current", "page"); });
   document.querySelectorAll(".tabbar a[href]").forEach((a) => { if (sameAs(a.getAttribute("href"))) a.setAttribute("aria-current", "page"); });
   let scrim = document.querySelector(".sidenav-scrim");
@@ -85,7 +95,18 @@
     let acct = 0;
     const paint = () => { const n = acct; badge.innerHTML = `<img src="/products/strange-oracle/img/stardust.webp" alt="" width="18" height="18"><b>${n}</b>`; badge.setAttribute("aria-label", T.badgeLabel.replace("{n}", n)); };
     document.addEventListener("dust:change", paint);
-    document.addEventListener("dust:acct", (e) => { acct = (e.detail && Number.isInteger(e.detail.bal)) ? e.detail.bal : 0; paint(); });
+    let heard = false;
+    document.addEventListener("dust:acct", (e) => { heard = true; acct = (e.detail && Number.isInteger(e.detail.bal)) ? e.detail.bal : 0; paint(); });
+    // (2026-11-14) 어느 화면에서든 로그인해 있으면 계정 잔액을 직접 받아 온다(충전 뒤 홈·입구로 옮겨도 그대로). 로그인 표는 무작위 값
+    try {
+      const lg = JSON.parse(localStorage.getItem("strange-oracle-login") || "null");
+      if (lg && /^[0-9a-f]{32}$/.test(lg.sid) && lg.exp > Date.now()) {
+        fetch("/api/auth/dust", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: lg.sid }), cache: "no-store", credentials: "omit" })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((j) => { if (!heard && j && Number.isInteger(j.bal)) { acct = j.bal; paint(); } })
+          .catch(() => {});
+      }
+    } catch (e) { /* 무시 */ }
     let box = null, timer = 0;
     document.addEventListener("dust:gain", (e) => {
       const { kind, amt, capped } = e.detail || {};
@@ -124,7 +145,7 @@
     const t = e.target.closest("[data-nav]");
     if (t && t.dataset.nav === "open") open();
     else if (t && t.dataset.nav === "close") close(true);
-    else if (e.target.closest(".sidenav a")) close(false);
+    else if (e.target.closest(".sidenav a, .sidenav__clear")) close(false);
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(true); });
   setHidden();

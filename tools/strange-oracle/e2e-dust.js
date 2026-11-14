@@ -28,8 +28,8 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   await waitFor("location.pathname === '/__dev/kakao/authorize'", 8000);
   await ev(`document.querySelector('[data-field=kid]').value = '${KID}'; document.querySelector('[data-act=agree]').click(); true`);
   await waitFor("location.pathname === '/stardust/' && !!document.querySelector('[data-js=dust-pack]')", 15000);
-  const sd = await ev("({ uses: [...document.querySelectorAll('.gmini')[1].querySelectorAll('li')].map((l) => l.textContent), rate: [...document.querySelectorAll('.gnote')].some((n) => /1개 = 100원/.test(n.textContent)) })");
-  check("별가루 페이지: 쓰는 곳 = 면담 5 · 다른 안내자 3 · 숨은 이야기 10 · 책 49 · 신년운세 49 · 1개 = 100원", sd.uses.length === 5 && /면담.*5/.test(sd.uses[0]) && /책.*49/.test(sd.uses[3]) && /신년운세.*49/.test(sd.uses[4]) && sd.rate, JSON.stringify(sd));
+  const sd = await ev("({ uses: [...document.querySelectorAll('.gmini')[1].querySelectorAll('li')].map((l) => l.textContent), rate: /1개 = 100원/.test(document.querySelector('[data-js=app]').textContent), split: !!document.querySelector('.gwallet p'), talkq: /면담 질문 \\d+번/.test(document.querySelector('[data-js=app]').textContent), clear: !!document.querySelector('[data-js=dust-clear]') })");
+  check("별가루 페이지: 쓰는 곳 = 면담 5 · 다른 안내자 3 · 숨은 이야기 10 · 책 49 · 신년운세 49 / 무료·계정 나눔·1개=100원·면담 질문 n번·기기 기록 지우기 없음", sd.uses.length === 5 && /면담.*5/.test(sd.uses[0]) && /책.*49/.test(sd.uses[3]) && /신년운세.*49/.test(sd.uses[4]) && !sd.rate && !sd.split && !sd.talkq && !sd.clear, JSON.stringify(sd));
   const packs = await ev("[...document.querySelectorAll('[data-js=dust-pack]')].map((p) => p.textContent.replace(/\\s+/g, ' ').trim())");
   check("충전 묶음 4종: 30개 3,000원 · 50개 5,000원 · 100개(+10 덤) 10,000원 · 300개(+50 덤) 30,000원", packs.length === 4 && /×30.*별가루 30개.*3,000원/.test(packs[0]) && /×50.*5,000원/.test(packs[1]) && /×100.*\+10 덤.*10,000원/.test(packs[2]) && /×300.*\+50 덤.*30,000원/.test(packs[3]), packs.join(" | "));
   // 30개 충전 → 49에 모자람

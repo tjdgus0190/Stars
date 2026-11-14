@@ -71,6 +71,16 @@ async function room(store, uh, name, now) {
   }
   return view(rec);
 }
+// (2026-11-14) 예전에 방을 연 기록(카카오에 저장한 방 결과)을 도감 카드로 옮겨 적기 — 없는 방만 더한다. 별가루는 없음
+async function addRooms(store, uh, names, now) {
+  const rec = await read(store, uh);
+  const add = [...new Set(names)].filter((x) => ROOMS.includes(x) && !rec.rooms.includes(x));
+  if (add.length) {
+    rec.rooms.push(...add);
+    await write(store, uh, rec, { k: "room", n: 0, at: iso(now) }, now);
+  }
+  return rec;
+}
 // 숨은 이야기 펼치기: 카드가 있는 방만, 한 번 10(이미 펼쳤으면 무료) → view | false(모자람) | null(카드 없음)
 async function story(store, uh, name, now) {
   if (!ROOMS.includes(name)) return null;
@@ -120,4 +130,4 @@ async function refund(store, ph, now) {
 
 const erase = (store, uh) => store.del(K(uh));
 
-module.exports = { ROOMS, room, story, USE, PACKS, COSTS, EARN, read, view, balanceOf, credit, spend, earn, refund, erase, LOG_MAX, kstDay };
+module.exports = { ROOMS, room, addRooms, story, USE, PACKS, COSTS, EARN, read, view, balanceOf, credit, spend, earn, refund, erase, LOG_MAX, kstDay };

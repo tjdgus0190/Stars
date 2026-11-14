@@ -73,3 +73,9 @@ body.has-tabbar { --appbar-h: calc(62px + env(safe-area-inset-bottom, 0px)); pad
 .dust-toast small { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--c-text-faint, #b4adc4); }
 @media (prefers-reduced-motion: reduce) { .sidenav, .sidenav-scrim, .dust-toast { transition: none; } }
 .dust-badge img { filter: drop-shadow(0 0 4px oklch(0.75 0.15 255 / 0.8)); }
+/* (2026-11-14 운영자) 입구의 「내 정보 지우기」는 메뉴 맨 아래 */
+.sidenav__foot { margin-top: 14px; display: flex; justify-content: center; }
+.sidenav__clear { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border: 0; background: none; font-family: var(--font-sans, system-ui); font-size: 0.8125rem; color: var(--c-text-faint, #b4adc4); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.sidenav__clear svg { width: 16px; height: 16px; }
+/* 입구 위 막대의 별가루 잔액 */
+.topbar__end .dust-badge { margin-left: 6px; }

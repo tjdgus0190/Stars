@@ -5970,6 +5970,8 @@
         const r = await fetch("/api/auth/dust", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" });
         let j = null;
         try { j = await r.json(); } catch (e) { j = null; }
+        // 계정 별가루가 바뀌면 위 띠 잔액도 함께(nav.js)
+        if (r.status === 200 && j && Number.isInteger(j.bal)) { try { document.dispatchEvent(new CustomEvent("dust:acct", { detail: { bal: j.bal } })); } catch (e) { /* 무시 */ } }
         return { status: r.status, j };
       } catch (e) {
         return { status: 0, j: null };

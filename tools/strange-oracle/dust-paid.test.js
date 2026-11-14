@@ -220,3 +220,17 @@ test("함수 auth 길 목록에 화면이 부르는 /api/auth/dust·me·save·lo
   for (const p of ["dust", "me", "save", "logout", "erase", "claim"]) used.add(p);
   for (const p of used) assert.ok(cfg.includes(`"/api/auth/${p}"`), "빠진 길: /api/auth/" + p);
 });
+
+// (2026-11-14 운영자) 예전에 방을 연 사람: 카카오에 저장한 방 결과가 도감 카드로 옮겨진다(잔액 볼 때)
+test("잔액 보기: 저장한 방 결과(v)의 방 이름이 계정 도감(rooms)으로 · 빈 방은 빼고 · 별가루는 그대로", async () => {
+  const store = new MemStore();
+  const { sid } = await login(store);
+  const save = await Auth.handle({ method: "POST", url: "https://example.test/api/auth/save", body: JSON.stringify({ sid, data: { p: {}, v: { saju: { s: 3 }, rune: { k: [1, 2, 3] }, star: {} } } }) }, ENV, store, null, NOW);
+  assert.strictEqual(save.status, 200);
+  const r = JSON.parse((await dust(store, { sid })).body);
+  assert.deepStrictEqual([r.rooms.slice().sort(), r.bal], [["rune", "saju"], 0]);
+  // 이미 있는 방은 겹치지 않음
+  await dust(store, { sid, room: "saju" });
+  const r2 = JSON.parse((await dust(store, { sid })).body);
+  assert.deepStrictEqual(r2.rooms.slice().sort(), ["rune", "saju"]);
+});

@@ -5998,10 +5998,11 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 .say__portrait.gface { width: 76px; height: 101px; margin: 0 auto var(--space-3); background-size: cover; background-position: center top; border-width: 1.5px;
   box-shadow: 0 0 0 3px oklch(0.12 0.03 285 / 0.9), 0 0 0 4px oklch(0.6 0.08 80 / 0.4), 0 10px 28px oklch(0 0 0 / 0.5), 0 0 30px var(--accent-glow, transparent); }
 /* 처음 화면 버튼 */
-.topbar__lobby { display: inline-flex; align-items: center; gap: 4px; min-height: var(--tap-min); padding: 0 var(--space-2); border-radius: 12px; text-decoration: none; font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; color: var(--c-text-strong); white-space: nowrap; }
-.topbar__lobby svg { width: 18px; height: 18px; color: oklch(0.86 0.1 85); }
-.topbar.is-room .topbar__lobby span, .topbar.is-reading .topbar__lobby span, .topbar.is-room .topbar__clear span { display: none; }
-.topbar.is-room .topbar__lobby, .topbar.is-room .topbar__clear { padding: 0 6px; }
+/* (2026-11-14 운영자) 처음 화면과 같은 위 막대 이름(낯선 점술관 → 처음 화면). 방·책 안에서는 숨기고 「입구」·방 이름을 보인다 */
+.topbar__lobby { display: inline-flex; align-items: center; min-height: var(--tap-min); padding: 0 var(--space-1); text-decoration: none; font-size: 1.0625rem; font-weight: 700; letter-spacing: 0.04em; color: var(--gold, oklch(0.84 0.1 85)); white-space: nowrap; }
+.topbar.is-room .topbar__lobby, .topbar.is-reading .topbar__lobby { display: none; }
+.topbar.is-room .topbar__clear span { display: none; }
+.topbar.is-room .topbar__clear { padding: 0 6px; }
 
 /* (2026-11-14) 별가루로 열기: 결제 버튼 아래 가진 별가루·충전 안내 */
 .pay-dust { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding: var(--space-3); border-radius: 16px; border: 1px solid oklch(0.62 0.12 260 / 0.35); background: radial-gradient(ellipse 90% 80% at 50% 0%, oklch(0.36 0.12 265 / 0.35), transparent 70%), oklch(0.15 0.04 280 / 0.85); font-family: var(--font-sans); text-align: center; color: var(--c-text); }

@@ -25,7 +25,7 @@ const TALK_COST = 5; // 질문 하나 = 별가루 5 (2026-11-14 운영자: 1개 
 const STORE_NAME = "strange-oracle-talk";
 const ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
 const MAX_Q = 300;
-const MAX_A = 1600; // (2026-11-14) 답을 끝까지(5~9문장) — 앞선 문답의 답도 이만큼까지
+const MAX_A = 1600; // (2026-11-14) 답을 끝까지(짧은 문단 3~4개 + 역질문) — 앞선 문답의 답도 이만큼까지
 const MAX_HIST = 3;
 const MAX_BODY = 4096;
 const WINDOW_MS = 10 * 60 * 1000;
