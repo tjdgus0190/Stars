@@ -25,23 +25,23 @@ function world(startIso) {
 
 // 1. (v1-F 운영자 2026-11-13) 무료로 모으는 길은 둘뿐: 첫 방문 10(한 번) · 오늘의 신탁 5(하루 1번)
 let w = world("2026-11-13T03:00:00Z");
-check("첫 방문 +10, 다시 방문해도 0", w.D.visit() === 10 && w.D.visit() === 0 && w.D.state().bal === 10);
-check("오늘의 신탁 +5, 같은 날 두 번째 0", w.D.earn("oracle") === 5 && w.D.earn("oracle") === 0);
+check("(2026-11-14) 이 기기는 별가루를 주지 않음: 첫 방문 0", w.D.visit() === 0 && w.D.visit() === 0 && w.D.state().bal === 0);
+check("오늘의 신탁도 이 기기에서는 0(출석 별가루는 카카오 계정에서)", w.D.earn("oracle") === 0 && w.D.earn("oracle") === 0);
 check("무료 도구·결과 나누기는 0", w.D.earn("tool") === 0 && w.D.earn("share") === 0);
 check("방 완주: 별가루 0, 도감 카드만 열림", w.D.earn("room", "saju") === 0 && w.D.state().cards.includes("saju") && w.D.state().rooms.includes("saju"));
 check("같은 방 두 번은 아무것도 없음", w.D.earn("room", "saju") === 0 && w.D.state().rooms.filter((r) => r === "saju").length === 1);
 check("모르는 방 이름은 무시", w.D.earn("room", "<script>") === 0 && !w.D.state().rooms.includes("<script>"));
-check("잔액 = 10 + 5", w.D.state().bal === 15, w.D.state().bal);
+check("잔액 0", w.D.state().bal === 0, w.D.state().bal);
 check("카드 열림 알림(dust:card)", w.events.some((e) => e.type === "dust:card" && e.detail.room === "saju"));
 
 // 2. 날 바뀜 → 오늘 몫 초기화, 잔액 유지
 w.advance(1);
 w.D.visit();
-check("다음 날: 오늘 모은 양 0부터 · 신탁 다시 +5 · 잔액 유지", w.D.state().got === 0 && w.D.earn("oracle") === 5 && w.D.state().bal === 20);
+check("다음 날에도 이 기기 지급 0", w.D.state().got === 0 && w.D.earn("oracle") === 0 && w.D.state().bal === 0);
 let w2 = world("2026-11-13T14:59:00Z");
 w2.D.visit(); w2.D.earn("oracle");
 w2.advance(1 / 1440); // 1분 뒤 = KST 0:00
-check("한국 자정에 날이 바뀜", w2.D.earn("oracle") === 5);
+check("한국 자정에 날이 바뀜(kstDay)", w2.D.kstDay() === "2026-11-14");
 
 // 3. 오늘의 신탁 담당: 2026-11-13 만신 → 시빌라 → 오검 → 베다 → 데칸 → 촐킨 → 룬 → 다시 만신
 const order = ["2026-11-13", "2026-11-14", "2026-11-15", "2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20"].map((d) => w.D.guideOf(d)).join();
@@ -58,6 +58,7 @@ check("다음 날 담당은 시빌라", w3.D.oracleToday(pick).room === "sibyl")
 // 4. 쓰기
 let w4 = world("2026-11-13T03:00:00Z");
 w4.D.visit();
+w4.D.refund(10); // 이 기기 장부의 쓰기 규칙만 시험(실제 별가루는 카카오 계정)
 check("모자라면 못 씀(잔액 그대로)", w4.D.spend(11) === false && w4.D.state().bal === 10);
 check("숨은 이야기: 카드 없으면 못 펼침", w4.D.openStory("saju", 10) === false && w4.D.state().bal === 10);
 w4.D.earn("room", "saju");

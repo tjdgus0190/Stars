@@ -212,6 +212,8 @@ window.TEXT = {
       refundLink: "구매·환불 안내 전문",
       agree: "가격·환불 조건을 확인했어요",
       buy: "4,900원 결제하기",
+      buyDust: "별가루 {n}개로 신년운세 열기", // (2026-11-14) pay.dust.on일 때
+      priceDust: "별가루 {n}개({won}원 상당) · 한 번만, 구독 아님",
       safe: "결제 즉시 이 자리에서 열려요 · 7일 안엔 들어 보고도 전액 환불",
       opened: "2027년 일곱 방이 모두 열렸어요",
       openedHere: "이 탭에서는 신년운세가 이미 열려 있어요",
@@ -290,6 +292,22 @@ window.TEXT = {
       ended: "첫 계절이 방금 닫혔어요. 지금 값으로 다시 보여 드릴게요." }, // 화면을 연 채 마감이 지나 결제를 누른 경우 (최대 34자)
     payapp: { userid: "tjdgus0190", shopname: "SHA Studio", goodname: "낯선 점술관 일곱 방 상세 해석서", tag: "so-book-1", sdk: "https://lite.payapp.kr/public/api/v2/payapp-lite.js", openpaytype: "card,phone,naverpay,kakaopay,tosspay,payco,smilepay,applepay" },
     contact: "tjdgus0190@naver.com", // 문의처 = 판매자 이메일 (운영자, 2026-10-22)
+    // (2026-11-14 운영자 결정) 모든 결제는 별가루로(1개 = 100원). on이면 책은 페이앱 결제 대신 카카오 계정의 별가루 49개로 연다(함수 auth /api/auth/dust buy).
+    //   별가루 충전은 별가루 페이지(/stardust/)에서 페이앱으로. {n}=별가루 개수, {won}=원 환산(쉼표), {need}=모자란 개수
+    dust: {
+      on: true,
+      cost: 49,
+      price: "별가루 {n}개",
+      won: "({won}원 상당)",
+      buy: "별가루 {n}개로 책 열기",
+      have: "가진 별가루 {n}개",
+      login: "카카오 로그인하면 가진 별가루로 바로 열려요",
+      short: "별가루가 {need}개 모자라요",
+      charge: "별가루 충전하러 가기",
+      working: "책을 여는 중이에요…",
+      fail: "열지 못했어요. 잠시 뒤 다시 눌러 주세요.",
+      packs: "충전: 30개 3,000원 · 50개 5,000원 · 100개 10,000원(+10) · 300개 30,000원(+50)",
+    },
     testBand: "시험 중 — 아직 판매하지 않아요", // 맨 위 띠 (test에서만, 최대 20자)
     eyebrow: "THE WHOLE BOOK",
     title: "일곱 방 상세 해석서",

@@ -20,7 +20,7 @@ const Prompt = require("./talk-prompt.js");
 const Dust = require("./dust.js");
 const Auth = require("./auth.js");
 const Pay = require("./pay.js"); // 카카오 세션 확인(sessionOf) — 함수 묶음에 들어가도록 맨 위에서 부른다
-const TALK_COST = 10; // 질문 하나 = 별가루 10 (화면 data-nav.js cost.talk와 같은 값)
+const TALK_COST = 5; // 질문 하나 = 별가루 5 (2026-11-14 운영자: 1개 = 100원) (화면 data-nav.js cost.talk와 같은 값)
 
 const STORE_NAME = "strange-oracle-talk";
 const ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];

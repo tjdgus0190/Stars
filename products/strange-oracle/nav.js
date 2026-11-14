@@ -72,8 +72,11 @@
     const slot = document.querySelector("[data-js=dust-slot]");
     if (slot) slot.replaceWith(badge);
     else { const head = aside.querySelector(".sidenav__head"); head.insertBefore(badge, head.querySelector(".sidenav__close")); }
-    const paint = () => { const st = D.state(); badge.innerHTML = `${ico("spark")}<b>${st.bal}</b>`; badge.setAttribute("aria-label", T.badgeLabel.replace("{n}", st.bal)); };
+    // (2026-11-14 운영자) 별가루는 카카오 계정에만 — 하루 페이지가 계정 잔액을 받으면 dust:acct로 알린다(로그인 전 0)
+    let acct = 0;
+    const paint = () => { const n = acct; badge.innerHTML = `${ico("spark")}<b>${n}</b>`; badge.setAttribute("aria-label", T.badgeLabel.replace("{n}", n)); };
     document.addEventListener("dust:change", paint);
+    document.addEventListener("dust:acct", (e) => { acct = (e.detail && Number.isInteger(e.detail.bal)) ? e.detail.bal : 0; paint(); });
     let box = null, timer = 0;
     document.addEventListener("dust:gain", (e) => {
       const { kind, amt, capped } = e.detail || {};

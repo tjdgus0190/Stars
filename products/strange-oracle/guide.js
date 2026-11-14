@@ -110,8 +110,42 @@
       const r = await post("/api/auth/dust", { sid: lg.sid });
       if (r.status === 401) { dropLogin(); paidBal = null; return null; }
       paidBal = r.status === 200 && r.j && Number.isInteger(r.j.bal) ? r.j.bal : null;
+      acctOnce = r.j && Array.isArray(r.j.once) ? r.j.once : [];
+      acctView = r.j || null;
+      // (2026-11-14 운영자) 별가루는 로그인한 계정에만: 첫 로그인 10(계정에 한 번, 서버가 센다)
+      if (paidBal != null && !acctOnce.includes("first")) await earnAcct("first");
+      acctEvt();
       return paidBal;
     };
+    let acctOnce = [], acctView = null;
+    const acctEvt = () => { try { document.dispatchEvent(new CustomEvent("dust:acct", { detail: { bal: paidBal } })); } catch (e) { /* 무시 */ } };
+    // 계정에 별가루 받기(first·oracle·seal) → 받은 양 알림
+    const earnAcct = async (kind) => {
+      const lg = readLogin();
+      if (!lg) return 0;
+      const r = await post("/api/auth/dust", { sid: lg.sid, earn: kind });
+      if (r.status === 401) { dropLogin(); paidBal = null; return 0; }
+      if (r.status !== 200 || !r.j) return 0;
+      paidBal = r.j.bal;
+      acctOnce = r.j.once || acctOnce;
+      acctView = r.j;
+      if (r.j.added) { try { document.dispatchEvent(new CustomEvent("dust:gain", { detail: { kind, amt: r.j.added } })); } catch (e) { /* 무시 */ } }
+      acctEvt();
+      return r.j.added || 0;
+    };
+    // 계정 별가루 쓰기(extra 3 · story 10) → true | { need }
+    const useAcct = async (what) => {
+      const lg = readLogin();
+      if (!lg) return { login: true };
+      const r = await post("/api/auth/dust", { sid: lg.sid, use: what });
+      if (r.status === 401) { dropLogin(); paidBal = null; return { login: true }; }
+      if (r.status === 402) return { need: (r.j && r.j.need) || 0 };
+      if (r.status !== 200 || !r.j) return { fail: true };
+      paidBal = r.j.bal;
+      acctEvt();
+      return true;
+    };
+    const acct = () => (paidBal == null ? 0 : paidBal);
 
 
     // ── (v1-F) 안내자 그림(아치 문 + 실루엣 + 방 명화)·방 데이터 불러오기
@@ -177,14 +211,14 @@
         let h = `<section class="gtoday-hero" style="--art:url('${IMG(room)}')">${arch(room, "garch--lg")}
           <p class="gchip">${esc(A.chip)} · ${esc(fill(A.dateFmt, { m: mm, d: dd }))}</p><h2>${esc(g.name)}</h2><p class="gtoday-hero__epi">${esc(g.epithet)}</p>
           <p class="gtoday-hero__intro">${esc(g.today.intro)}</p>`;
-        if (!o) h += `<button class="gbtn" type="button" data-js="today-open"${busy ? " disabled" : ""}>${esc(g.today.open)}</button><small class="gnote gcenter">${esc(A.reward)}</small>`;
+        if (!o) h += `<button class="gbtn" type="button" data-js="today-open"${busy ? " disabled" : ""}>${esc(g.today.open)}</button><small class="gnote gcenter">${esc(readLogin() ? A.reward : A.rewardLogin)}</small>${readLogin() ? "" : `<button class="glink" type="button" data-js="today-login">${esc(A.login)}</button>`}`;
         h += `</section>`;
         if (o) {
           const list = ROOM_DATA[room][1]();
           if (list) h += readCard(room, itemView(room, list, o.idx), fill(A.receivedHead, { name: g.name }));
           const others = D.TODAY_ORDER.filter((r) => r !== room);
           const got = o.extra || [];
-          const need = (COST.extra || 0) - st.bal;
+          const need = readLogin() ? (COST.extra || 0) - acct() : 0;
           h += got.map((x) => { const l = ROOM_DATA[x.room][1](); return l ? readCard(x.room, itemView(x.room, l, x.idx), fill(A.receivedHead, { name: guide(x.room).name })) : ""; }).join("");
           h += `<section class="gothers"><h2>${esc(A.othersHead)}</h2><p class="gnote">${esc(fill(A.othersNote, { cost: COST.extra }))}${need > 0 ? " · " + esc(fill(A.othersShort, { need })) : ""}</p>
             <ul class="gpickrow">${others.map((r) => { const done = got.some((x) => x.room === r); return `<li><button type="button" data-js="today-extra" data-room="${r}"${done || need > 0 || busy ? " disabled" : ""}${done ? ' aria-pressed="true"' : ""}>${arch(r, "garch--sm")}<span>${esc(guide(r).name)}</span></button></li>`; }).join("")}</ul></section>`;
@@ -194,6 +228,7 @@
         box.innerHTML = h;
       };
       box.addEventListener("click", async (e) => {
+        if (e.target.closest("[data-js=today-login]")) return kakaoLogin("today");
         const openB = e.target.closest("[data-js=today-open]"), ex = e.target.closest("[data-js=today-extra]");
         if ((!openB && !ex) || busy) return;
         busy = true; msg = "";
@@ -202,12 +237,19 @@
             const room = D.guideOf();
             await loadRoom(room);
             D.oracleToday(pick);
-            D.earn("oracle");
+            // (2026-11-14) 카카오 로그인한 채 받으면 별가루를 계정에 쌓는다(하루 한 번, 서버가 센다) — 책·신년운세에도 쓸 수 있게. 아니면 이 기기에
+            // (2026-11-14 운영자) 출석 별가루 +5는 카카오 로그인한 계정에만(하루 한 번, 서버가 센다)
+            await earnAcct("oracle");
             track("so_tool_result", { tool: "today" });
           } else {
             const room = ex.dataset.room;
+            if (!readLogin()) { busy = false; return kakaoLogin("today"); }
             await loadRoom(room);
-            D.oracleExtra(room, pick, COST.extra);
+            const u = await useAcct("extra");
+            if (u === true) D.oracleExtra(room, pick, 0);
+            else if (u.login) { busy = false; return kakaoLogin("today"); }
+            else if (u.need) msg = fill(A.othersShort, { need: u.need });
+            else msg = A.fail;
           }
         } catch (x) { msg = A.fail; }
         busy = false;
@@ -220,6 +262,7 @@
         Promise.all([st0.oracle.room].concat((st0.oracle.extra || []).map((x) => x.room)).map((r) => loadRoom(r).catch(() => null))).then(draw);
       }
       draw();
+      loadPaid().then(() => { if (!busy) draw(); });
     }
 
     if (CONF.page === "dex") {
@@ -232,16 +275,17 @@
           const has = st.cards.includes(g.room);
           return `<li><button type="button" class="gdexcard${has ? "" : " is-locked"}" data-js="dex-card" data-room="${g.room}">${arch(g.room, "garch--md")}<small>${esc(g.roomName)}</small><b>${esc(has ? g.name : U.locked)}</b>${has ? `<span>${esc(g.epithet)}</span>` : `<span>${esc(fill(U.lockedHint, { room: g.roomName }))}</span>`}</button></li>`;
         }).join("");
-        let h = `<div class="gseal${all ? " is-open" : ""}"><b>${esc(U.sealHead)} · ${esc(fill(U.count, { n: st.cards.length }))}</b><p>${esc(all ? U.sealText : U.sealHint)}</p></div><ul class="gdexgrid">${cards}</ul>`;
+        const sealNote = all ? (readLogin() ? (acctOnce.includes("seal") ? U.sealGot : U.sealWorking) : U.sealLogin) : U.sealReward;
+        let h = `<div class="gseal${all ? " is-open" : ""}"><b>${esc(U.sealHead)} · ${esc(fill(U.count, { n: st.cards.length }))}</b><p>${esc(all ? U.sealText : U.sealHint)}</p><small>${esc(sealNote)}</small>${all && !readLogin() ? `<button class="glink" type="button" data-js="dex-login">${esc(U.login)}</button>` : ""}</div><ul class="gdexgrid">${cards}</ul>`;
         if (openRoom) {
-          const g = guide(openRoom), has = st.cards.includes(g.room), open = st.open.includes(g.room), need = (COST.story || 0) - st.bal;
+          const g = guide(openRoom), has = st.cards.includes(g.room), open = st.open.includes(g.room), need = readLogin() ? (COST.story || 0) - acct() : 0;
           const tr = Object.entries(U.traitHeads).map(([k, hd]) => `<dt>${esc(hd)}</dt><dd>${esc(g.traits[k])}</dd>`).join("");
           h += `<div class="gsheet" role="dialog" aria-modal="true" aria-label="${esc(g.name)}"><div class="gsheet__scrim" data-js="dex-close"></div><div class="gsheet__body" style="--art:url('${IMG(g.room)}')">
             <button class="gsheet__x" type="button" data-js="dex-close" aria-label="닫기">×</button>${arch(g.room, "garch--lg")}
             <small class="gchip">${esc(g.roomName)} · ${esc(g.place)}</small><h2>${esc(has ? g.name : U.locked)}</h2>`;
           if (has) {
             h += `<p class="gtoday-hero__epi">${esc(g.epithet)}</p><q class="gline">${esc(g.line)}</q><dl class="gkv">${tr}</dl>
-              <div class="gcard__secret${open ? "" : " is-shut"}"><h3>${esc(U.secretHead)}</h3>${open ? `<p>${esc(g.secret)}</p>` : `<button class="gbtn ghost" type="button" data-js="dex-open" data-room="${g.room}"${need > 0 ? " disabled" : ""}>${esc(fill(U.secretOpen, { cost: COST.story }))}</button>${need > 0 ? `<p class="gnote">${esc(fill(U.secretShort, { need }))}</p>` : ""}`}</div>`;
+              <div class="gcard__secret${open ? "" : " is-shut"}"><h3>${esc(U.secretHead)}</h3>${open ? `<p>${esc(g.secret)}</p>` : `<button class="gbtn ghost" type="button" data-js="dex-open" data-room="${g.room}"${need > 0 ? " disabled" : ""}>${esc(fill(U.secretOpen, { cost: COST.story }))}</button>${need > 0 ? `<p class="gnote">${esc(fill(U.secretShort, { need }))}</p>` : ""}${readLogin() ? "" : `<p class="gnote">${esc(U.secretLogin)}</p>`}`}</div>`;
           } else {
             h += `<p class="gnote gcenter">${esc(fill(U.lockedHint, { room: g.roomName }))}</p><div class="gactions"><a class="gbtn" href="${ROOM_URL}" data-js="to-room">${esc(fill(U.toRoom, { room: g.roomName }))}</a></div>`;
           }
@@ -254,9 +298,19 @@
         const c = e.target.closest("[data-js=dex-card]");
         if (c) { openRoom = c.dataset.room; return draw(); }
         if (e.target.closest("[data-js=dex-close]")) { openRoom = null; return draw(); }
+        if (e.target.closest("[data-js=dex-login]")) return kakaoLogin("dex");
         const b = e.target.closest("[data-js=dex-open]");
-        if (b && D.openStory(b.dataset.room, COST.story)) draw();
+        if (b) {
+          if (!readLogin()) return kakaoLogin("dex");
+          b.disabled = true;
+          useAcct("story").then((u) => { if (u === true) D.openStory(b.dataset.room, 0); draw(); });
+        }
       });
+      // 일곱 장을 모두 모으면 금빛 봉인 별가루 +30(계정에 한 번)
+      const sealCheck = async () => {
+        if (D.state().cards.length === X.guides.length && readLogin() && !acctOnce.includes("seal")) { await earnAcct("seal"); draw(); }
+      };
+      loadPaid().then(() => { draw(); sealCheck(); });
       document.addEventListener("keydown", (e) => { if (e.key === "Escape" && openRoom) { openRoom = null; draw(); } });
       document.addEventListener("dust:change", draw);
       draw();
@@ -359,7 +413,7 @@
       let busy = false, entering = false, setupMsg = "", formOpen = false;
       const skipped = {}; // 결과 없이 이야기하기로 한 방(이 화면 메모리)
       const lobby = () => `<p class="gnote gcenter">${esc(on ? A.pick : A.closed)}</p><ul class="gdoorpick">${X.guides.map((g) => `<li><button type="button" data-js="talk-pick" data-room="${g.room}">${arch(g.room, "garch--door")}<b>${esc(g.name)}</b><small>${esc(g.roomName)}</small>${chatOf(g.room).length ? `<em class="gdoorpick__dot">${esc(A.continued)}</em>` : ""}</button></li>`).join("")}</ul>`;
-      const balLine = () => { const st = D.state(); return paidBal != null ? fill(A.balancePaid, { n: st.bal, p: paidBal }) : fill(A.balance, { n: st.bal }); };
+      const balLine = () => (paidBal != null ? fill(A.balance, { n: paidBal }) : A.loginToTalk);
       const say = (who, text, extra = "") => `<div class="gsay gsay--${who}${extra}">${who === "guide" ? arch(cur.room, "garch--xs") : ""}<p>${esc(text)}</p></div>`;
       // 면담 전 설정: 어떤 기록으로 볼지
       const setupCard = (g) => {
@@ -388,18 +442,22 @@
         if (skipped[g.room]) return `<p class="groom__note">${esc(fill(A.unknown, { room: g.roomName }))} <button type="button" class="glink" data-js="setup-change">${esc(SU.change)}</button></p>`;
         return setupCard(g);
       };
+      // 입력칸 위 한 줄: 가진 별가루(카카오 계정) · 모자라면 충전 · 로그인 전이면 로그인 단추
+      const metaHtml = (need) => paidBal == null
+        ? `<span>${esc(A.loginToTalk)}</span><button type="button" class="glink" data-js="talk-login">${esc(A.login)}</button>`
+        : `<span>${esc(balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}`;
       const room = () => {
         const g = cur, hist = chatOf(g.room);
-        const st = D.state(), usePaid = st.bal < COSTQ && paidBal != null && paidBal >= COSTQ, need = usePaid ? 0 : COSTQ - st.bal;
+        const need = paidBal == null ? 0 : COSTQ - paidBal;
         const ready = Boolean(resultOf(g.room)) || skipped[g.room];
         return `<div class="groom${entering ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}')">
           <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b><small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
           <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${roomNote(g)}${hist.length ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
             ${hist.map((h) => say("me", h.q) + say("guide", h.a)).join("")}</div>
           <form class="groom__bar" data-js="talk-form" novalidate autocomplete="off">
-            <p class="groom__meta"><span>${esc(balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}</p>
+            <p class="groom__meta">${metaHtml(need)}</p>
             <p class="gerror" data-js="talk-error" role="alert" hidden></p>
-            <div class="groom__row"><textarea name="q" rows="1" maxlength="300" placeholder="${esc(ready ? A.placeholder : SU.first)}" aria-label="${esc(A.placeholder)}"${ready ? "" : " disabled"}></textarea><button type="submit" class="groom__send"${need > 0 || busy || !ready ? " disabled" : ""} aria-label="${esc(fill(A.ask, { cost: COSTQ }))}"><span>✦${COSTQ}</span></button></div>
+            <div class="groom__row"><textarea name="q" rows="1" maxlength="300" placeholder="${esc(ready ? A.placeholder : SU.first)}" aria-label="${esc(A.placeholder)}"${ready ? "" : " disabled"}></textarea><button type="submit" class="groom__send"${need > 0 || busy || !ready || paidBal == null ? " disabled" : ""} aria-label="${esc(fill(A.ask, { cost: COSTQ }))}"><span>✦${COSTQ}</span></button></div>
           </form></div>`;
       };
       const draw = () => {
@@ -414,10 +472,10 @@
         if (busy || !cur) return;
         const bar = box.querySelector(".groom__bar");
         if (!bar) return;
-        const st = D.state(), usePaid = st.bal < COSTQ && paidBal != null && paidBal >= COSTQ, need = usePaid ? 0 : COSTQ - st.bal;
+        const need = paidBal == null ? 0 : COSTQ - paidBal;
         const ready = Boolean(resultOf(cur.room)) || skipped[cur.room];
-        bar.querySelector(".groom__meta").innerHTML = `<span>${esc(balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}`;
-        bar.querySelector(".groom__send").disabled = need > 0 || !ready;
+        bar.querySelector(".groom__meta").innerHTML = metaHtml(need);
+        bar.querySelector(".groom__send").disabled = need > 0 || !ready || paidBal == null;
       };
       const err = (m) => { const e = box.querySelector("[data-js=talk-error]"); if (e) { e.textContent = m; e.hidden = !m; } };
       const typeOut = (el, text) => new Promise((ok) => {
@@ -446,6 +504,7 @@
         if (b && !busy) { if (on) enter(b.dataset.room); return; }
         if (e.target.closest("[data-js=talk-leave]") && !busy) { cur = null; draw(); return; }
         if (!cur || busy) return;
+        if (e.target.closest("[data-js=talk-login]")) { try { sessionStorage.setItem("strange-oracle-talk-back", cur.room); } catch (x) { /* 무시 */ } return kakaoLogin("talk"); }
         if (e.target.closest("[data-js=talk-clear]")) {
           if (!window.confirm(A.clearAsk)) return;
           TS.chat[cur.room] = []; delete TS.r[cur.room]; saveT(); draw(); return;
@@ -490,9 +549,10 @@
         if (q.length > 300) return err(E.long);
         busy = true; // 먼저 잠근다(별가루가 바뀌며 화면을 다시 그리지 않게)
         // 무료로 모은 별가루를 먼저 쓰고, 모자라면 카카오 계정의 충전한 별가루(서버가 차감)
+        // (2026-11-14) 별가루는 카카오 계정에만 — 면담은 계정 별가루에서 서버가 차감
         const lg = readLogin();
-        const paid = D.state().bal < COSTQ && lg && paidBal != null && paidBal >= COSTQ;
-        if (!paid && !D.spend(COSTQ)) { busy = false; draw(); return; }
+        const paid = Boolean(lg && paidBal != null && paidBal >= COSTQ);
+        if (!paid) { busy = false; draw(); return; }
         const g = cur, roomName = g.room, hist = chatOf(roomName);
         const logBox = box.querySelector("[data-js=talk-log]");
         logBox.insertAdjacentHTML("beforeend", say("me", q, " is-new") + `<div class="gsay gsay--guide is-wait is-new" data-js="talk-wait">${arch(roomName, "garch--xs")}<p><span class="gdots" aria-label="${esc(fill(A.typing, { name: g.name }))}"><i></i><i></i><i></i></span></p></div>`);
@@ -508,8 +568,7 @@
         } catch (x) { res = null; }
         const wait = box.querySelector("[data-js=talk-wait]");
         if (res && res.ok && data && typeof data.a === "string") {
-          if (!paid && (data.crisis || data.declined)) D.refund(COSTQ); // 위기 안내·답하지 못한 물음은 별가루를 쓰지 않는다
-          if (paid && Number.isInteger(data.paid)) paidBal = data.paid;
+          if (Number.isInteger(data.paid)) { paidBal = data.paid; acctEvt(); }
           const a = data.a.slice(0, 1600);
           hist.push({ q, a });
           if (hist.length > 30) hist.splice(0, hist.length - 30);
@@ -521,7 +580,6 @@
           refresh();
         } else {
           busy = false;
-          if (!paid) D.refund(COSTQ);
           const code = data && data.error;
           if (code === "session") { dropLogin(); paidBal = null; }
           if (code === "dust") await loadPaid();
@@ -551,15 +609,18 @@
       const draw = () => {
         const st = D.state();
         const mini = (head, list, sign) => `<section class="gmini"><h2>${esc(head)}</h2><ul>${list.map((x) => `<li><span>${esc(x.label)}${x.note ? `<small>${esc(x.note)}</small>` : ""}</span><b>${sign}${esc(String(x.amt).replace(/^\+/, ""))}</b></li>`).join("")}</ul></section>`;
-        box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><i aria-hidden="true">✦</i> <span data-js="dust-total">${st.bal + (paidBal || 0)}</span></b>
-            <p><span>${esc(A.free)} ${st.bal}</span>${paidBal != null ? `<span>${esc(A.paid)} ${paidBal}</span>` : ""}</p></div>
-          <div class="gminis">${mini(A.waysHead, A.ways, "+")}${mini(A.usesHead, A.uses, "−")}</div>
+        // (2026-11-14) 별가루는 카카오 계정에만 — 로그인 전이면 0과 로그인 안내
+        box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><i aria-hidden="true">✦</i> <span data-js="dust-total">${paidBal || 0}</span></b>
+            <p>${paidBal != null && acctView ? `<span>${esc(A.free)} ${acctView.free || 0}</span><span>${esc(A.paid)} ${acctView.paid || 0}</span>` : `<span>${esc(A.loginNote)}</span>`}</p></div>
+          <div class="gminis">${mini(A.waysHead, A.ways, "+")}${mini(A.usesHead, A.uses, "−")}</div>${A.rate ? `<p class="gnote gcenter">${esc(A.rate)}</p>` : ""}${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc(S.back)}</a></div>` : ""}
           <div data-js="dust-shop"></div>
           <p class="gcenter"><button class="glink" type="button" data-js="dust-clear">${esc(A.clear)}</button></p><p class="gnote gcenter" data-js="dust-cleared" hidden>${esc(A.cleared)}</p>`;
         drawShop();
       };
       // ── 충전 (운영 규칙 7장): 결제 전에 받는 것·가격·환불·판매자를 보이고, 동의 체크 뒤에만 결제창
       const S = A.shop || {};
+      // 일곱 방 결제 화면에서 「별가루 충전하러 가기」로 왔으면 돌아가는 단추(이 탭 sessionStorage "strange-oracle-dust-back")
+      const backTo = () => { try { return sessionStorage.getItem("strange-oracle-dust-back") || ""; } catch (e) { return ""; } };
       const shopOn = A.shopMode === "live" || A.shopMode === "test";
       const PEND_KEY = "strange-oracle-dustpay"; // 이 탭 sessionStorage: 결제 요청 번호 R(무작위)·상품·받은 결제 코드
       const readPend = () => { try { const x = JSON.parse(sessionStorage.getItem(PEND_KEY) || "null"); return x && /^[0-9a-f]{32}$/.test(x.r) && S.packs.some((k) => k.prod === x.prod) ? x : null; } catch (e) { return null; } };
@@ -575,7 +636,7 @@
           h += `<div class="gactions"><button class="gbtn gbtn--kakao" type="button" data-js="dust-login">${esc(S.login)}</button></div><p class="gnote gcenter">${esc(S.loginNote)}</p>`;
         } else {
           const k = S.packs.find((x) => x.prod === pick);
-          h += `<ul class="gpacks">${S.packs.map((x) => `<li><button type="button" data-js="dust-pack" data-prod="${x.prod}" aria-pressed="${pick === x.prod}"><b><i aria-hidden="true">✦</i> ${x.n}</b><small>${esc(fill(S.packTalk, { q: Math.floor(x.n / (COST.talk || 10)) }))}</small><span>${esc(fill(S.price, { price: won(x.price) }))}</span></button></li>`).join("")}</ul>
+          h += `<ul class="gpacks">${S.packs.map((x) => `<li><button type="button" data-js="dust-pack" data-prod="${x.prod}" aria-pressed="${pick === x.prod}"><b><i aria-hidden="true">✦</i> ${esc(fill(S.pack, { n: x.base || x.n }))}</b>${x.bonus ? `<em>${esc(fill(S.bonus, { n: x.bonus }))}</em>` : ""}<span>${esc(fill(S.price, { price: won(x.price) }))}</span><small>${esc(fill(S.packTalk, { q: Math.floor(x.n / (COST.talk || 5)) }))}</small></button></li>`).join("")}</ul>
             <p class="gsummary">${esc(S.summary)}</p>
             <details class="gfold"><summary>${esc(S.more)}</summary><ul class="gsources">${S.terms.map((t) => `<li>${esc(t)}</li>`).join("")}</ul><p class="gnote"><a href="/products/strange-oracle/legal/terms.html#s2-4">${esc(S.termsLink)}</a></p></details>
             <label class="gcheck"><input type="checkbox" data-js="dust-agree" />${esc(S.agree)}</label>

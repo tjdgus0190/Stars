@@ -367,7 +367,7 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .gmini li b { flex: none; font-family: var(--font-latin); color: var(--gold); }
 .gshop { margin-top: 20px; padding: 18px 16px; border-radius: 22px; border: 1px solid oklch(0.55 0.07 75 / 0.45); background: oklch(0.14 0.035 285 / 0.9); }
 .gshop h2 { margin: 0 0 4px !important; }
-.gpacks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 10px; padding: 0; list-style: none; }
+.gpacks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 14px 0 10px; padding: 0; list-style: none; }
 .gpacks button { display: grid; gap: 3px; width: 100%; padding: 14px 4px 12px; border-radius: 16px; border: 1px solid oklch(0.45 0.04 285 / 0.6); background: oklch(0.18 0.04 285); color: var(--c-text-strong); font: inherit; cursor: pointer; text-align: center; }
 .gpacks button[aria-pressed="true"] { border-color: var(--gold); background: radial-gradient(circle at 50% 0%, oklch(0.4 0.1 85 / 0.35), oklch(0.18 0.04 285) 70%); box-shadow: 0 0 18px oklch(0.75 0.12 85 / 0.35); }
 .gpacks b { font-family: var(--font-latin); font-size: var(--fs-lg); }
@@ -427,3 +427,5 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .glogin__card p { margin: 0 0 6px !important; font-size: var(--fs-md) !important; color: var(--c-text-muted) !important; }
 .glogin__card .gbtn { width: 100%; }
 .glogin__card small { font-family: var(--font-sans); font-size: 0.6875rem; color: var(--c-text-faint); }
+
+.gpacks em { justify-self: center; padding: 1px 7px; border-radius: 999px; font-style: normal; font-family: var(--font-sans); font-size: 0.625rem; font-weight: 700; color: oklch(0.2 0.03 285); background: var(--gold); }

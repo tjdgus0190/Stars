@@ -68,7 +68,7 @@ test("충전: 로그인한 계정에 한 번만, 다른 계정은 같은 코드�
   assert.strictEqual(other.status, 409);
   assert.strictEqual(JSON.parse((await dust(store, { sid: B.sid })).body).bal, 0);
   const rec = await store.get("dust/" + A.uh);
-  assert.deepStrictEqual(Object.keys(rec).sort(), ["at", "bal", "log"]);
+  assert.deepStrictEqual(Object.keys(rec).sort(), ["at", "bal", "free", "log", "oday", "once"]);
   assert.deepStrictEqual(Object.keys(rec.log[0]).sort(), ["at", "k", "n"]);
 });
 
@@ -118,28 +118,86 @@ test("erase(저장한 기록 지우기)는 충전한 별가루도 지움, sweep�
   assert.strictEqual(await store.get("dust/b"), null);
 });
 
-test("면담: sid면 충전한 별가루에서 10 차감(무료 하루 상한과 별개), 모자라면 402, 거절 답은 차감 없음", async () => {
+test("면담: sid면 계정 별가루에서 5 차감(무료 하루 상한과 별개), 모자라면 402, 거절 답은 차감 없음", async () => {
   const pay_ = new MemStore();
   const talkStore = new MemStore();
   const T_ENV = { TALK_MODE: "test", ANTHROPIC_API_KEY: "x", TALK_MONTHLY_USD: "5" };
   const ok = async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: "답" }], usage: { input_tokens: 10, output_tokens: 10 } });
   const no = async () => ({ stop_reason: "refusal", content: [], usage: {} });
   const { sid, uh } = await login(pay_);
-  await pay_.set("dust/" + uh, { bal: 25, log: [], at: new Date(NOW).toISOString() });
+  await pay_.set("dust/" + uh, { bal: 12, log: [], at: new Date(NOW).toISOString() });
   const ask = (llm, extra = {}) => Talk.handle({ method: "POST", body: JSON.stringify(Object.assign({ room: "saju", q: "물음", sid }, extra)), ip: "7.7.7.7" }, T_ENV, talkStore, NOW, llm, pay_);
   for (let i = 0; i < Talk.FREE_PER_DAY; i++) await Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "무료" + i }), ip: "7.7.7.7" }, T_ENV, talkStore, NOW, ok, pay_);
   let r = await ask(ok);
   assert.strictEqual(r.status, 200, r.body);
-  assert.strictEqual(JSON.parse(r.body).paid, 15);
+  assert.strictEqual(JSON.parse(r.body).paid, 7);
   r = await ask(no);
   assert.ok(JSON.parse(r.body).declined);
-  assert.strictEqual(await Dust.balanceOf(pay_, uh), 15);
+  assert.strictEqual(await Dust.balanceOf(pay_, uh), 7);
   r = await ask(ok);
-  assert.strictEqual(JSON.parse(r.body).paid, 5);
+  assert.strictEqual(JSON.parse(r.body).paid, 2);
   r = await ask(ok);
   assert.strictEqual(r.status, 402);
   r = await ask(ok, { sid: rnd(16) });
   assert.strictEqual(r.status, 401);
   r = await ask(ok, { sid: "NOTHEX" });
   assert.strictEqual(r.status, 400);
+});
+
+// ── (2026-11-14 운영자 결정) 별가루 1개 = 100원 · 모든 결제는 별가루로
+test("새 충전 묶음 4종: 30=3,000 · 50=5,000 · 100=10,000(+10) · 300=30,000(+50), 코드 SDD·SDE·SDF·SDG", async () => {
+  for (const [prod, price, head, n] of [["d30", 3000, "SDD", 30], ["d50", 5000, "SDE", 50], ["d100", 10000, "SDF", 110], ["d300", 30000, "SDG", 350]]) {
+    const store = new MemStore();
+    const { r } = await pay(store, prod, price);
+    const { pass } = await status(store, r);
+    assert.ok(pass.startsWith(head), pass);
+    const { sid } = await login(store);
+    const x = JSON.parse((await dust(store, { sid, pass })).body);
+    assert.deepStrictEqual([x.state, x.bal, x.paid, x.free, x.n], ["credited", n, n, 0, n]);
+  }
+});
+
+test("로그인한 계정에만 주는 별가루: 출석 5(하루 한 번)·첫 로그인 10·금빛 봉인 30(한 번) · 다른 안내자 3·숨은 이야기 10 차감", async () => {
+  const store = new MemStore();
+  const { sid, uh } = await login(store);
+  let x = JSON.parse((await dust(store, { sid, earn: "oracle" })).body);
+  assert.deepStrictEqual([x.added, x.free, x.bal], [5, 5, 5]);
+  x = JSON.parse((await dust(store, { sid, earn: "oracle" })).body);
+  assert.strictEqual(x.added, 0);
+  assert.strictEqual((await dust(store, { sid, earn: "tool" })).status, 400);
+  x = JSON.parse((await dust(store, { sid, earn: "first" })).body);
+  assert.deepStrictEqual([x.added, x.free], [10, 15]);
+  x = JSON.parse((await dust(store, { sid, earn: "first" })).body);
+  assert.strictEqual(x.added, 0);
+  x = JSON.parse((await dust(store, { sid, earn: "seal" })).body);
+  assert.deepStrictEqual([x.added, x.free], [30, 45]);
+  x = JSON.parse((await dust(store, { sid, earn: "seal" })).body);
+  assert.strictEqual(x.added, 0);
+  x = JSON.parse((await dust(store, { sid, use: "extra" })).body);
+  assert.deepStrictEqual([x.state, x.bal], ["used", 42]);
+  x = JSON.parse((await dust(store, { sid, use: "story" })).body);
+  assert.strictEqual(x.bal, 32);
+  assert.strictEqual((await dust(store, { sid, use: "talk" })).status, 400);
+  const nx = await Dust.earn(store, uh, "oracle", NOW + 86400000);
+  assert.deepStrictEqual([nx.added, nx.free], [5, 37]);
+});
+
+test("별가루로 책·신년운세 열기: 49 차감(무료 먼저) → 결제 끝난 열람 코드가 계정에 연결, 모자라면 402", async () => {
+  const store = new MemStore();
+  const { sid, uh } = await login(store);
+  await store.set("dust/" + uh, { bal: 60, free: 10, oday: "", log: [], at: new Date(NOW).toISOString() });
+  let r = await dust(store, { sid, buy: "book" });
+  assert.strictEqual(r.status, 200, r.body);
+  const x = JSON.parse(r.body);
+  assert.ok(/^SOP/.test(x.pass), x.pass);
+  assert.deepStrictEqual([x.bal, x.paid, x.free, x.cost], [21, 21, 0, 49]);
+  assert.strictEqual(await Pay.passState(store, ENV.PASS_SECRET, x.pass), "paid");
+  const me = JSON.parse((await Auth.handle({ method: "POST", url: "https://example.test/api/auth/me", body: JSON.stringify({ sid }) }, ENV, store, null, NOW)).body);
+  assert.ok(me.passes.some((p) => p.pass === x.pass || p === x.pass), JSON.stringify(me.passes));
+  r = await dust(store, { sid, buy: "ny" });
+  assert.strictEqual(r.status, 402);
+  assert.strictEqual(JSON.parse(r.body).need, 28);
+  assert.strictEqual(await Dust.balanceOf(store, uh), 21);
+  assert.strictEqual((await dust(store, { sid, buy: "dust50" })).status, 400);
+  assert.strictEqual((await dust(store, { sid: rnd(16), buy: "book" })).status, 401);
 });

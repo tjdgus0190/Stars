@@ -6002,3 +6002,9 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 .topbar__lobby svg { width: 18px; height: 18px; color: oklch(0.86 0.1 85); }
 .topbar.is-room .topbar__lobby span, .topbar.is-reading .topbar__lobby span, .topbar.is-room .topbar__clear span { display: none; }
 .topbar.is-room .topbar__lobby, .topbar.is-room .topbar__clear { padding: 0 6px; }
+
+/* (2026-11-14) 별가루로 열기: 결제 버튼 아래 가진 별가루·충전 안내 */
+.pay-dust { margin: var(--space-2) 0 0; font-family: var(--font-sans); font-size: var(--fs-sm); text-align: center; color: var(--c-text); }
+.pay-dust:empty { display: none; }
+.pay-dust__charge { font-weight: 700; }
+.pay-dust__packs { display: block; margin-top: 4px; font-size: 0.75rem; color: var(--c-text-faint); }

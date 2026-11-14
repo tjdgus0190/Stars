@@ -1131,6 +1131,8 @@
     // ───────── 신년운세 결제 전 화면 (7장: 받는 것·분량·가격·결제 방법·판매자·환불을 결제 전에) ─────────
     //   책 결제 화면과 따로 그린다(다른 상품). 결제창·결제 확인 길(paycheck)·코드 카드는 app.js의 것을 상품 값만 바꿔 같이 쓴다
     const NP = N.pay || {};
+    const DU = T.pay && T.pay.dust && T.pay.dust.on ? T.pay.dust : null; // (2026-11-14) 모든 결제는 별가루로
+    const comma = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     const PT = T.pay || {};
     function renderPay() {
       payScr.textContent = "";
@@ -1149,7 +1151,7 @@
       (NP.what || []).forEach((t) => ul.append(mk("li", "", t)));
       box.append(ul, mk("p", "ny-pay__vol", NP.volume), mk("p", "ny-pay__sep", NP.separate));
       const pr = mk("p", "ny-pay__price");
-      pr.append(mk("span", "ny-pay__price-k", NP.priceHead), mk("strong", "", NP.price));
+      pr.append(mk("span", "ny-pay__price-k", NP.priceHead), mk("strong", "", DU ? fill(NP.priceDust || "", { n: DU.cost, won: comma(DU.cost * 100) }) : NP.price));
       box.append(pr);
       payScr.append(box);
       const act = mk("div", "ny-pay__act");
@@ -1169,7 +1171,7 @@
         const nudge = mk("p", "pay-agree__nudge", PT.agreeNudge || "");
         nudge.hidden = true;
         nudge.setAttribute("role", "alert");
-        const buy = mk("button", "btn btn--primary btn--block pay-buy", NP.buy);
+        const buy = mk("button", "btn btn--primary btn--block pay-buy", DU ? fill(NP.buyDust || "", { n: DU.cost }) : NP.buy);
         buy.type = "button";
         buy.dataset.js = "ny-pay-buy";
         const sync = () => {
@@ -1189,7 +1191,9 @@
           }
           if (!C.startPay()) C.toast(T.toast.loadFail || "");
         });
-        act.append(lab, nudge, buy, mk("p", "pay-safe", NP.safe), kakaoRow("pay"));
+        act.append(lab, nudge, buy);
+        if (DU) { const dl = mk("p", "pay-dust"); dl.dataset.js = "pay-dust"; act.append(dl); if (C.dustInfo) C.dustInfo(dl); }
+        act.append(mk("p", "pay-safe", NP.safe), kakaoRow("pay"));
       }
       payScr.append(act);
       // 결제 방법·판매자 · 환불 (책과 같은 판매자·결제대행, 환불은 이 상품 문장)

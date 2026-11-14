@@ -31,13 +31,18 @@ const TAG_NY = "so-ny-1";
 const NY_PRICE = 4900;
 // (2026-11-13 운영자 결정, CLAUDE.md 7장 재화) 별가루 충전 3종: 50 = 2,900원 · 120 = 5,900원 · 300 = 12,900원. 결제 코드 SDA·SDB·SDC는
 //   카카오 계정에 한 번만 충전하는 데 쓰고(netlify/lib/dust.js), 책·신년운세를 열지 않는다(함수 book이 접두로 가른다)
-const DUST_PRICES = Object.freeze({ dust50: 2900, dust120: 5900, dust300: 12900 });
+// (2026-11-14 운영자 결정) 별가루 1개 = 100원. 새 충전 묶음 4종(d30·d50·d100·d300, 코드 SDD·SDE·SDF·SDG). 위 3종은 이미 나간 코드의 충전·취소를 위해서만 남긴다(새로 팔지 않음)
+const DUST_PRICES = Object.freeze({ dust50: 2900, dust120: 5900, dust300: 12900, d30: 3000, d50: 5000, d100: 10000, d300: 30000 });
 const PRODUCTS = Object.freeze({
   book: { tag: TAG, prefix: "SOP", salt: "pass:", price: (n, now) => priceOk(n, now) },
   ny: { tag: TAG_NY, prefix: "SNY", salt: "pass-ny:", price: (n) => n === NY_PRICE },
   dust50: { tag: "so-dust50-1", prefix: "SDA", salt: "pass-dust50:", price: (n) => n === DUST_PRICES.dust50 },
   dust120: { tag: "so-dust120-1", prefix: "SDB", salt: "pass-dust120:", price: (n) => n === DUST_PRICES.dust120 },
   dust300: { tag: "so-dust300-1", prefix: "SDC", salt: "pass-dust300:", price: (n) => n === DUST_PRICES.dust300 },
+  d30: { tag: "so-d30-1", prefix: "SDD", salt: "pass-d30:", price: (n) => n === DUST_PRICES.d30 },
+  d50: { tag: "so-d50-1", prefix: "SDE", salt: "pass-d50:", price: (n) => n === DUST_PRICES.d50 },
+  d100: { tag: "so-d100-1", prefix: "SDF", salt: "pass-d100:", price: (n) => n === DUST_PRICES.d100 },
+  d300: { tag: "so-d300-1", prefix: "SDG", salt: "pass-d300:", price: (n) => n === DUST_PRICES.d300 },
 });
 const productOfTag = (t) => Object.keys(PRODUCTS).find((k) => PRODUCTS[k].tag === t) || null;
 const R_RE = /^[0-9a-f]{32}$/;
@@ -165,6 +170,16 @@ async function onCancel(store, secret, mul, r, now, prod = "book") {
   if (pr && pr.mul_no === mul && pr.state !== "cancelled") await store.set("pass/" + ph, { mul_no: mul, state: "cancelled", at });
   // (v1-D) 별가루 충전 코드였으면 충전한 양을 되돌린다(충전 전이면 아무 일 없음)
   await Dust.refund(store, ph, now);
+}
+
+// (2026-11-14) 별가루로 산 책·신년운세: 결제대행 없이 "결제 끝난" 열람 코드를 하나 만든다(auth.js가 별가루를 먼저 차감한 뒤에만 부른다).
+//   기록 모양은 결제와 같다(pass/<코드 해시> { mul_no, state: "paid", at }). mul_no = "D" + 무작위 32자(결제대행 번호와 겹치지 않음)
+async function mintPass(store, secret, prod, now) {
+  if (prod !== "book" && prod !== "ny") throw new Error("prod");
+  const r = crypto.randomBytes(16).toString("hex");
+  const p = passOf(secret, r, prod);
+  await store.set("pass/" + hashOfPass(secret, p), { mul_no: "D" + r, state: "paid", at: iso(now) }, { onlyIfNew: true });
+  return p;
 }
 
 // 코드 P의 결제 상태: "paid" | "cancelled" | null (기록 없음). 읽기 실패는 throw. 함수 book도 쓴다
@@ -300,4 +315,4 @@ async function respond(req, context, openStore, env = process.env) {
 
 const _reset = () => hits.clear();
 const productOfPass = (p) => { const n = normalize(p); return Object.keys(PRODUCTS).find((k) => n.startsWith(PRODUCTS[k].prefix)) || "book"; };
-module.exports = { DUST_PRICES, productOfTag, respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, productOfPass, STORE_NAME, PRICE, SEASON, priceOk, TAG, TAG_NY, NY_PRICE, PRODUCTS, CANCEL_STATES, _hits: hits, _reset };
+module.exports = { mintPass, DUST_PRICES, productOfTag, respond, handle, storeFrom, passOf, hashOfPass, passState, secretOk, normalize, productOfPass, STORE_NAME, PRICE, SEASON, priceOk, TAG, TAG_NY, NY_PRICE, PRODUCTS, CANCEL_STATES, _hits: hits, _reset };

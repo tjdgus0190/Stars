@@ -146,10 +146,13 @@
   // (2026-10-27 운영자) 첫 계절의 값: 마감(한국 시각) 전이면 판매 값을 season.amount로 — 화면의 {price}와 결제창 price가 모두 따라간다. 정가는 PAY.regular
   const SEASON_END = PAY.season ? Date.parse(PAY.season.until) : NaN;
   const seasonOn = () => Date.now() < SEASON_END;
-  if (PAY.season && seasonOn()) {
+  // (2026-11-14 운영자 결정) 모든 결제는 별가루로: on이면 책·신년운세를 카카오 계정의 별가루로 연다(첫 계절 줄 그은 값은 쓰지 않음)
+  const DUST = PAY.dust && PAY.dust.on ? PAY.dust : null;
+  if (PAY.season && seasonOn() && !DUST) {
     PAY.regular = PAY.amount;
     PAY.amount = PAY.season.amount;
   }
+  if (DUST) PAY.amount = DUST.cost * 100; // 분석 purchase 값(원 환산)
   const PAY_MODE = PAY.mode === "test" || PAY.mode === "live" ? PAY.mode : "off";
   const BOOK_ON = PAY_MODE !== "off";
   let syncHubKakao = () => {}; // (22·23단계) 입구 카카오 줄(로그인 전 버튼 / 로그인 뒤 상태). 결제 화면을 붙일 때 바뀐다
@@ -3411,7 +3414,8 @@
   const comma = (n) => Number(n).toLocaleString("ko-KR");
   // (2026-10-27 운영자) 가격 자리: 첫 계절이면 템플릿의 "{price}원"을 [줄 그은 정가] + 지금 값으로. 아니면 지금 값만(글자 그대로)
   function setPriced(el, tpl) {
-    const t = String(tpl == null ? "" : tpl);
+    let t = String(tpl == null ? "" : tpl);
+    if (DUST) t = t.split("{price}원").join(fill(DUST.price || "", { n: DUST.cost })); // 별가루 49개
     const f = (x) => fill(x, { price: comma(PAY.amount) });
     if (!PAY.regular || !t.includes("{price}원")) {
       el.textContent = f(t);
@@ -3782,6 +3786,7 @@
   }
   // (2026-10-27 운영자) 첫 계절의 값: 줄 그은 정가 + 지금 값 + 꼬리표, 그 아래 두 줄. 계절이 아니면 null
   function seasonBlock() {
+    if (DUST) return null;
     const S = PAY.season;
     if (!S || !PAY.regular) return null;
     const d = rmk("div", "season");
@@ -5448,6 +5453,8 @@
   let payScr = null;
   let payReturn = null; // #paid 복귀 처리(시작 때 부름). off면 null
   let nyAfterPay = false; // (2026-11-12) 결제 확인이 새해 탭을 붙이기 전에 끝났으면, 붙인 뒤에 신년운세 화면으로
+  let dustLogin = null;
+  let dustInfoHook = null; // (2026-11-14) 별가루로 열기: 로그인이 없으면 카카오 로그인(카카오 블록이 채움)
   let nyPayStart = null; // (2026-11-12) 신년운세 결제 시작(결제 화면 설정 안에서 채움). off면 null
   let nyOpenPass = null; // (2026-11-12) 신년운세 결제 화면의 코드 넣기 → 같은 확인 길
   let openNyCode = null; // (2026-11-12) 신년운세 코드 카드 열기
@@ -5711,7 +5718,7 @@
     const pass = { input: js("pass-input", payScr), err: js("pass-error", payScr), status: js("pass-status", payScr), panel: js("pass-panel", payScr), toggle: js("pass-toggle", payScr), go: js("pass-go", payScr) };
     const agree = js("pay-agree", payScr), buy = js("pay-buy", payScr), act = js("pay-act", payScr);
     const syncBuy = () => {
-      buy.setAttribute("aria-disabled", String(!PA.userid)); // (2026-11-06) 동의 체크 전에도 켜진 모습. 누르면 체크 칸을 짚어 준다
+      buy.setAttribute("aria-disabled", String(!PA.userid && !DUST)); // (2026-11-06) 동의 체크 전에도 켜진 모습. 누르면 체크 칸을 짚어 준다
       buy.classList.toggle("is-waiting-agree", !agree.checked);
       if (agree.checked && agreeNudge) agreeNudge.hidden = true;
     };
@@ -5779,7 +5786,8 @@
       }
       show(js("pay-refund-link", payScr), false); // legal/refund.html은 지금 배포 폴더에서 빠진다(build-dist) → 본문 링크 숨김. 결제 문단은 G4
       act.classList.toggle("is-opened", Boolean(passNow())); // (검수 권장 4) 이 탭에서 책이 이미 열려 있으면 결제 버튼 대신 안내
-      show(js("pay-store-empty", payScr), !PA.userid);
+      show(js("pay-store-empty", payScr), !PA.userid && !DUST);
+      if (DUST) dustInfo(js("pay-dust", payScr), "book");
       syncBuy();
       passMsg("");
       show(pass.status, false);
@@ -5909,6 +5917,86 @@
         () => setCheck("sdkfail")
       );
     }
+    // ── (2026-11-14) 별가루로 열기: 카카오 계정의 별가루 49 → 함수가 열람 코드를 만들어 계정에 연결 → payDone (결제 뒤와 같은 길)
+    const readSid = () => {
+      try {
+        const x = JSON.parse(window.localStorage.getItem("strange-oracle-login") || "null");
+        return x && /^[0-9a-f]{32}$/.test(x.sid) && x.exp > Date.now() ? x.sid : null;
+      } catch (e) {
+        return null;
+      }
+    };
+    const dustPost = async (body) => {
+      try {
+        const r = await fetch("/api/auth/dust", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" });
+        let j = null;
+        try { j = await r.json(); } catch (e) { j = null; }
+        return { status: r.status, j };
+      } catch (e) {
+        return { status: 0, j: null };
+      }
+    };
+    // 결제 버튼 아래 한 줄: 가진 별가루 · 모자라면 충전하러 가기
+    const dustLine = (el, msg, charge, prod) => {
+      if (!el) return;
+      el.textContent = msg || "";
+      if (charge) {
+        const a = rmk("button", "text-link pay-dust__charge", DUST.charge || "");
+        a.type = "button";
+        a.addEventListener("click", () => {
+          try { window.sessionStorage.setItem("strange-oracle-dust-back", prod === "ny" ? "ny" : "book"); } catch (e) { /* 무시 */ }
+          location.href = "/stardust/";
+        });
+        el.append(" ", a);
+      }
+      const pk = rmk("small", "pay-dust__packs", DUST.packs || "");
+      el.append(pk);
+    };
+    const dustInfo = async (el, prod = "book") => {
+      if (!DUST || !el) return;
+      const sid = readSid();
+      if (!sid) return dustLine(el, DUST.login, false, prod);
+      const r = await dustPost({ sid, earn: "first" }); // 첫 로그인 별가루 10(계정에 한 번, 이미 받았으면 0) + 잔액
+      if (r.status === 200 && r.j && Number.isInteger(r.j.bal)) {
+        const need = DUST.cost - r.j.bal;
+        return dustLine(el, fill(DUST.have || "", { n: r.j.bal }) + (need > 0 ? " · " + fill(DUST.short || "", { need }) : ""), need > 0, prod);
+      }
+      dustLine(el, DUST.login, false, prod);
+    };
+    let dustBusy = false;
+    async function dustBuy(prod) {
+      if (dustBusy) return;
+      const sid = readSid();
+      if (!sid) {
+        if (dustLogin) dustLogin(prod === "ny");
+        return;
+      }
+      const line = prod === "ny" ? document.querySelector("[data-js=ny-pay-act] [data-js=pay-dust]") : js("pay-dust", payScr);
+      dustBusy = true;
+      if (line) line.textContent = DUST.working || "";
+      const r = await dustPost({ sid, buy: prod });
+      dustBusy = false;
+      if (r.status === 200 && r.j && window.PayCode.Pass.looksPass(r.j.pass || "")) {
+        writePayProd(prod);
+        try { window.sessionStorage.setItem(PAYFROM_KEY, prod === "ny" ? "ny" : payEntry); } catch (e) { /* 무시 */ }
+        track("so_pay", { step: "start", from: prod === "ny" ? "ny" : payEntry });
+        return payDone([window.PayCode.Pass.normalize(r.j.pass)]);
+      }
+      if (r.status === 401) {
+        try { window.localStorage.removeItem("strange-oracle-login"); } catch (e) { /* 무시 */ }
+        if (dustLogin) dustLogin(prod === "ny");
+        return;
+      }
+      if (r.status === 402 && r.j) return dustLine(line, fill(DUST.short || "", { need: r.j.need }), true, prod);
+      dustLine(line, DUST.fail, false, prod);
+    }
+    dustInfoHook = dustInfo;
+    if (DUST) {
+      buy.textContent = fill(DUST.buy || "", { n: DUST.cost });
+      const dl = rmk("p", "pay-dust", "");
+      dl.dataset.js = "pay-dust";
+      buy.after(dl);
+    }
     buy.addEventListener("click", () => {
       if (buy.getAttribute("aria-disabled") === "true" || passNow()) return;
       if (!agree.checked) {
@@ -5923,6 +6011,7 @@
         agree.focus({ preventScroll: true });
         return;
       }
+      if (DUST) return dustBuy("book");
       // (2026-10-27) 화면을 연 채 첫 계절이 끝났으면 지금 값으로 다시 그린다(결제창에 지난 값이 가지 않게)
       if (PAY.regular && !seasonOn()) {
         toast(PAY.season.ended || "");
@@ -5941,6 +6030,7 @@
     // (2026-11-12) 신년운세(별도 상품) 결제: 새해 결제 화면(app-ny.js)의 동의·버튼이 부른다. 같은 결제창·같은 확인 길, 상품 값만 다르다
     nyPayStart = () => {
       if (nyPassNow()) return;
+      if (DUST) return dustBuy("ny");
       try {
         window.sessionStorage.setItem(PAYFROM_KEY, "ny");
       } catch (e) {
@@ -6411,6 +6501,7 @@
         track("so_auth", { step: "start", mode });
         location.href = "/api/auth/kakao/start?state=" + st;
       };
+      dustLogin = (ny) => kakaoStart("login", ny); // (2026-11-14) 별가루로 열기 전에 로그인
       js("kakao-restore", payScr).addEventListener("click", () => kakaoStart("restore"));
       js("kakao-forget", payScr).addEventListener("click", () => window.confirm(AUTH.forgetConfirm || "") && kakaoStart("forget"));
       js("kakao-link-btn", codeDlg).addEventListener("click", () => passOfProd(cardProd) && kakaoStart("link"));
@@ -7056,6 +7147,7 @@
         // (2026-11-12 운영자 결정) 신년운세는 책과 따로 파는 상품: 신년운세 코드(SNY)만 보고, 결제는 신년운세 값으로
         passNow: nyPassNow, nyFree: callNyFree, payMode: PAY_MODE, applyText,
         startPay: () => (nyPayStart ? (nyPayStart(), true) : false),
+        dustInfo: (el) => (dustInfoHook ? dustInfoHook(el, "ny") : null),
         openPass: (value, msg, btn) => (nyOpenPass ? nyOpenPass(value, msg, btn) : Promise.resolve(false)),
         showCode: () => openNyCode && openNyCode(),
         kakao: () => kakaoNy, // (2026-11-12) null이면 카카오 로그인 줄을 그리지 않는다

@@ -13,6 +13,8 @@
 //   POST /api/auth/save   { sid, data?, pass? } → data(동의한 이용자의 이름·생년월일·태어난 시각·성별 + 방 결과 코드)를 AES-256-GCM으로 덮어쓰고, pass(결제 확인된 코드)는 연결
 //   POST /api/auth/logout { sid }              → 세션만 지움
 //   POST /api/auth/erase  { sid }              → 그 카카오의 기록(kakao/<uh>)·충전한 별가루(dust/<uh>) 전체와 세션을 지움
+//   POST /api/auth/dust   { sid, buy: "book"|"ny" } → (2026-11-14) 별가루 49로 열람 코드를 만들어 이 계정에 연결
+//                         { sid, earn: "first"|"oracle"|"seal" } → 로그인한 계정에만 주는 별가루(첫 로그인 10·출석 5/일·금빛 봉인 30) · { sid, use: "extra"|"story" } → 3·10 차감
 //   POST /api/auth/dust   { sid, pass? }       → (v1-D) 충전한 별가루 잔액 / 별가루 결제 코드(SDA·SDB·SDC)를 이 계정에 한 번만 충전 (netlify/lib/dust.js)
 //   보관: 마지막 저장·로그인 뒤 1년(KEEP_MS). 읽을 때 지난 기록은 지우고, 함수 auth-sweep이 하루 한 번 ticket/·sess/·kakao/의 지난 것을 지운다.
 //   data 모양(서버가 검사): { p: { name(1~10자), birth{y,m,d}, time{h,m}|null, gender m|f|x }, v: { 방: { 숫자·짧은 글자 칸 } } }, JSON 4KB 이하. 상대(궁합) 정보·질문 글은 받지 않는다.
@@ -246,7 +248,7 @@ async function account(path, body, env, store, now) {
   } catch (e) {
     b = null;
   }
-  if (!plainObj(b) || Object.keys(b).some((k) => !["sid", "data", "pass"].includes(k)) || String(body).length > DATA_MAX + 200) return json(400, { error: "bad" });
+  if (!plainObj(b) || Object.keys(b).some((k) => !["sid", "data", "pass", "buy", "earn", "use"].includes(k)) || String(body).length > DATA_MAX + 200) return json(400, { error: "bad" });
   try {
     const uh = await sessionOf(store, b.sid, now);
     if (!uh) return json(401, { error: "session" });
@@ -256,19 +258,33 @@ async function account(path, body, env, store, now) {
       return json(200, { state: "out" });
     }
     // (v1-D) 충전한 별가루: { sid } → 잔액, { sid, pass } → 결제 확인된 별가루 코드를 이 계정에 한 번만 충전
-    if (path === "dust") {
-      if (b.data != null) return json(400, { error: "bad" });
+    if (path === "dust" && b.buy == null) {
+      if (b.data != null || (b.earn != null && b.pass != null)) return json(400, { error: "bad" });
+      // (2026-11-14) 하루 페이지에서 쓰기: { sid, use: "extra"|"story" } → 3·10 차감(무료 몫 먼저), 모자라면 402
+      if (b.use != null) {
+        const n = Dust.USE[b.use];
+        if (!n || b.earn != null || b.pass != null) return json(400, { error: "bad" });
+        const left = await Dust.spend(store, uh, n, now);
+        if (left === false) return json(402, { error: "dust", need: n - (await Dust.balanceOf(store, uh)) });
+        return json(200, Object.assign({ state: "used", n }, Dust.view(await Dust.read(store, uh))));
+      }
+      // (2026-11-14) 로그인한 채 받는 별가루: { sid, earn: "first"|"oracle"|"seal" } → 첫 로그인 10·출석 5(하루 한 번)·금빛 봉인 30
+      if (b.earn != null) {
+        const e = await Dust.earn(store, uh, b.earn, now);
+        if (!e) return json(400, { error: "bad" });
+        return json(200, Object.assign({ state: "earn" }, e));
+      }
       if (b.pass != null) {
         if (typeof b.pass !== "string") return json(400, { error: "bad" });
         const p = Pay.normalize(b.pass);
         const prod = Pay.productOfPass(p);
-        if (!Dust.PACKS[prod] || !/^SD[ABC]/.test(p)) return json(400, { error: "pass" });
+        if (!Dust.PACKS[prod] || !/^SD[A-G]/.test(p)) return json(400, { error: "pass" });
         if ((await Pay.passState(store, env.PASS_SECRET, p)) !== "paid") return json(403, { error: "pass" });
         const c = await Dust.credit(store, uh, Pay.hashOfPass(env.PASS_SECRET, p), prod, now);
         if (!c.ok) return json(409, { error: "used" }); // 다른 계정에 이미 충전한 코드
-        return json(200, { state: c.already ? "already" : "credited", bal: c.bal, n: Dust.PACKS[prod] });
+        return json(200, { state: c.already ? "already" : "credited", bal: c.bal, paid: c.paid, free: c.free, n: Dust.PACKS[prod] });
       }
-      return json(200, { state: "bal", bal: await Dust.balanceOf(store, uh) });
+      return json(200, Object.assign({ state: "bal" }, Dust.view(await Dust.read(store, uh))));
     }
     if (path === "erase") {
       await Dust.erase(store, uh); // 충전한 별가루도 함께 지운다(지우기 전 화면에서 알림)
@@ -278,6 +294,18 @@ async function account(path, body, env, store, now) {
     }
     const rec = await getRec(store, K, now);
     let passes = openPasses(env, rec);
+    // (2026-11-14) 별가루로 책·신년운세 열기: { sid, buy: "book"|"ny" } → 별가루 49 차감 → 열람 코드를 만들어 이 계정에 연결 → { pass, bal }
+    if (path === "dust" && b.buy != null) {
+      const cost = Dust.COSTS[b.buy];
+      if (!cost || b.data != null || b.pass != null || b.earn != null) return json(400, { error: "bad" });
+      const left = await Dust.spend(store, uh, cost, now);
+      if (left === false) return json(402, { error: "dust", need: cost - (await Dust.balanceOf(store, uh)) });
+      const p = await Pay.mintPass(store, env.PASS_SECRET, b.buy, now);
+      passes = [p].concat(passes.filter((x) => x !== p)).slice(0, MAX_LINKS);
+      rec.enc = passes.map((x) => seal(env.PASS_SECRET, x));
+      await putRec(store, K, rec, now);
+      return json(200, Object.assign({ state: "bought", pass: p, cost }, Dust.view(await Dust.read(store, uh))));
+    }
     if (path === "save") {
       if (b.data != null) {
         const txt = JSON.stringify(b.data);

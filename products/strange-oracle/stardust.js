@@ -14,7 +14,8 @@
 (function () {
   const KEY = "strange-oracle-dust";
   const DAY_CAP = 30;
-  const RULES = { oracle: { amt: 5, max: 1 }, room: { amt: 0 }, first: { amt: 10 } };
+  // (2026-11-14 운영자) 별가루는 카카오 로그인한 계정에만 준다(netlify/lib/dust.js earn) → 이 기기 장부는 별가루를 주지 않고 카드·오늘의 신탁 기록만 둔다
+const RULES = { oracle: { amt: 0, max: 1 }, room: { amt: 0 }, first: { amt: 0 } };
   const ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
   const TODAY_ORDER = ["saju", "sibyl", "ogham", "star", "decan", "tzolkin", "rune"]; // 오늘의 신탁 담당 순서
   const TODAY_ANCHOR = "2026-11-13"; // 이 날 = 만신
@@ -38,6 +39,7 @@
     try { document.dispatchEvent(new CustomEvent("dust:change", { detail: { bal: s.bal } })); } catch (e) {}
   }
   const gain = (s, kind, amt, capped) => {
+    if (!(amt > 0)) return 0;
     const room = capped ? Math.max(0, DAY_CAP - s.got) : amt;
     const g = Math.min(amt, room);
     if (g <= 0) return 0;
