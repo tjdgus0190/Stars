@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 별가루 결정(직접 그림, 2026-11-14): 네 갈래 큰 빛 + 대각선 작은 빛, 면마다 다른 푸른빛 -->
+  <defs>
+    <radialGradient id="g" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#7fa8ff" stop-opacity=".55"/><stop offset="1" stop-color="#3b4fd8" stop-opacity="0"/></radialGradient>
+    <linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2f9ff"/><stop offset="1" stop-color="#a9d2ff"/></linearGradient>
+    <linearGradient id="m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8cc4ff"/><stop offset="1" stop-color="#5a83f0"/></linearGradient>
+    <linearGradient id="d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5d7cf0"/><stop offset="1" stop-color="#3442c9"/></linearGradient>
+    <linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9c8ff"/><stop offset="1" stop-color="#8e8cf5"/></linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#g)"/>
+  <g stroke="#e8f4ff" stroke-width=".6" stroke-linejoin="round" stroke-opacity=".7">
+    
+    <polygon points="50,3 50,50 38,38" fill="url(#l)"/><polygon points="50,3 62,38 50,50" fill="url(#m)"/>
+    <polygon points="91,50 50,50 62,38" fill="url(#m)"/><polygon points="91,50 62,62 50,50" fill="url(#d)"/>
+    <polygon points="50,97 50,50 62,62" fill="url(#d)"/><polygon points="50,97 38,62 50,50" fill="url(#p)"/>
+    <polygon points="9,50 50,50 38,62" fill="url(#p)"/><polygon points="9,50 38,38 50,50" fill="url(#l)"/>
+  </g>
+  <path d="M50 3 L50 97 M9 50 L91 50" stroke="#ffffff" stroke-width=".8" stroke-opacity=".8"/>
+  <circle cx="50" cy="50" r="3.2" fill="#fff"/>
+  <circle cx="28" cy="24" r="1.2" fill="#fff"/><circle cx="76" cy="78" r="1" fill="#cfe3ff"/><circle cx="80" cy="22" r=".8" fill="#fff"/>
+</svg>

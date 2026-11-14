@@ -31,7 +31,7 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   const sd = await ev("({ uses: [...document.querySelectorAll('.gmini')[1].querySelectorAll('li')].map((l) => l.textContent), rate: [...document.querySelectorAll('.gnote')].some((n) => /1개 = 100원/.test(n.textContent)) })");
   check("별가루 페이지: 쓰는 곳 = 면담 5 · 다른 안내자 3 · 숨은 이야기 10 · 책 49 · 신년운세 49 · 1개 = 100원", sd.uses.length === 5 && /면담.*5/.test(sd.uses[0]) && /책.*49/.test(sd.uses[3]) && /신년운세.*49/.test(sd.uses[4]) && sd.rate, JSON.stringify(sd));
   const packs = await ev("[...document.querySelectorAll('[data-js=dust-pack]')].map((p) => p.textContent.replace(/\\s+/g, ' ').trim())");
-  check("충전 묶음 4종: 30개 3,000원 · 50개 5,000원 · 100개(+10 덤) 10,000원 · 300개(+50 덤) 30,000원", packs.length === 4 && /30개.*3,000원/.test(packs[0]) && /50개.*5,000원/.test(packs[1]) && /100개.*\+10 덤.*10,000원/.test(packs[2]) && /300개.*\+50 덤.*30,000원/.test(packs[3]), packs.join(" | "));
+  check("충전 묶음 4종: 30개 3,000원 · 50개 5,000원 · 100개(+10 덤) 10,000원 · 300개(+50 덤) 30,000원", packs.length === 4 && /×30.*별가루 30개.*3,000원/.test(packs[0]) && /×50.*5,000원/.test(packs[1]) && /×100.*\+10 덤.*10,000원/.test(packs[2]) && /×300.*\+50 덤.*30,000원/.test(packs[3]), packs.join(" | "));
   // 30개 충전 → 49에 모자람
   await ev("document.querySelector('[data-js=dust-pack][data-prod=d30]').click(); document.querySelector('[data-js=dust-agree]').checked = true; document.querySelector('[data-js=dust-buy]').click(); true");
   await waitFor("location.pathname === '/__dev/payapp/checkout'", 15000);
@@ -46,7 +46,7 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   await ev("StrangeOracle.go('deeper'); true");
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-deeper' && /가진 별가루/.test(document.querySelector('[data-js=pay-dust]')?.textContent || '')", 10000);
   const p0 = await ev("({ buy: document.querySelector('[data-js=pay-buy]').textContent, line: document.querySelector('[data-js=pay-dust]').textContent, price: document.querySelector('[data-js=pay-quick-price]')?.textContent || '' })");
-  check("일곱 방 결제 화면: 버튼 「별가루 49개로 책 열기」 · 가격 별가루 49개 · 가진 별가루 40개(첫 로그인 10 + 충전 30) · 9개 모자라요 · 충전 묶음 표", /별가루 49개로 책 열기/.test(p0.buy) && /별가루 49개/.test(p0.price) && /가진 별가루 40개/.test(p0.line) && /9개 모자라요/.test(p0.line) && /30개 3,000원/.test(p0.line), JSON.stringify(p0));
+  check("일곱 방 결제 화면: 버튼 「별가루 49개로 책 열기」 · 가격 별가루 49개 · 가진 별가루 40개(첫 로그인 10 + 충전 30) · 9개 모자라요 · 충전 묶음 표", /별가루 49개로 책 열기/.test(p0.buy) && /별가루 49개/.test(p0.price) && /가진 별가루\s*40/.test(p0.line) && /9개 모자라요/.test(p0.line) && /30개\s*3,000원/.test(p0.line), JSON.stringify(p0));
   await ev("(() => { const a = document.querySelector('[data-js=pay-agree]'); if (!a.checked) a.click(); document.querySelector('[data-js=pay-buy]').click(); return true; })()");
   await waitFor("/모자라요/.test(document.querySelector('[data-js=pay-dust]').textContent) && !!document.querySelector('.pay-dust__charge')", 8000);
   check("모자라면 열지 않고 「별가루 충전하러 가기」", (await ev("document.querySelector('.screen.is-active').id")) === "screen-deeper" && (await ev("!!document.querySelector('.pay-dust__charge')")));
@@ -64,7 +64,7 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   await b.goto(`${TEST}/products/strange-oracle/`);
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'", 10000);
   await ev("StrangeOracle.go('deeper'); true");
-  await waitFor("/가진 별가루 90개/.test(document.querySelector('[data-js=pay-dust]')?.textContent || '')", 10000);
+  await waitFor("/가진 별가루\\s*90/.test(document.querySelector('[data-js=pay-dust]')?.textContent || '')", 10000);
   await ev("(() => { const a = document.querySelector('[data-js=pay-agree]'); if (!a.checked) a.click(); document.querySelector('[data-js=pay-buy]').click(); return true; })()");
   const opened = await waitFor("!!document.querySelector('[data-js=pay-code-dialog][open], dialog[open] [data-js=code-list]') || /^SOP/.test(sessionStorage.getItem('strange-oracle-pass') || '')", 15000);
   const codes = await ev("[...document.querySelectorAll('[data-js=code-list] *')].map((x) => x.textContent).join(' ')");

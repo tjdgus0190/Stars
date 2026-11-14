@@ -306,7 +306,16 @@ window.TEXT = {
       charge: "별가루 충전하러 가기",
       working: "책을 여는 중이에요…",
       fail: "열지 못했어요. 잠시 뒤 다시 눌러 주세요.",
-      packs: "충전: 30개 3,000원 · 50개 5,000원 · 100개 10,000원(+10) · 300개 30,000원(+50)",
+      haveLabel: "가진 별가루",
+      packsHead: "별가루 충전",
+      packN: "{n}개",
+      bonus: "+{n}",
+      packList: [ // 별가루 페이지(data-guide.js stardust.shop.packs)·함수 pay와 같은 값
+        { n: 30, price: "3,000원" },
+        { n: 50, price: "5,000원" },
+        { n: 100, bonus: 10, price: "10,000원" },
+        { n: 300, bonus: 50, price: "30,000원" },
+      ],
     },
     testBand: "시험 중 — 아직 판매하지 않아요", // 맨 위 띠 (test에서만, 최대 20자)
     eyebrow: "THE WHOLE BOOK",

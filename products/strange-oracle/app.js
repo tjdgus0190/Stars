@@ -5976,20 +5976,35 @@
       }
     };
     // 결제 버튼 아래 한 줄: 가진 별가루 · 모자라면 충전하러 가기
-    const dustLine = (el, msg, charge, prod) => {
+    // (2026-11-14) 별가루 줄: [결정 아이콘] 가진 별가루 N개 · 모자람 · [충전하기] + 충전 묶음 칩(아이콘·개수·값)
+    const DUST_ICON = "img/stardust.svg";
+    const dustLine = (el, msg, charge, prod, have) => {
       if (!el) return;
-      el.textContent = msg || "";
+      el.textContent = "";
+      const top = rmk("p", "pay-dust__top", "");
+      if (have != null) {
+        const h = rmk("span", "pay-dust__have", "");
+        h.innerHTML = `<img src="${DUST_ICON}" alt="" width="20" height="20"><span>${esc(DUST.haveLabel || "")}</span><b>${esc(String(have))}</b>`;
+        top.append(h);
+      }
+      if (msg) top.append(rmk("span", "pay-dust__msg", msg));
+      el.append(top);
       if (charge) {
-        const a = rmk("button", "text-link pay-dust__charge", DUST.charge || "");
+        const a = rmk("button", "btn pay-dust__charge", DUST.charge || "");
         a.type = "button";
         a.addEventListener("click", () => {
           try { window.sessionStorage.setItem("strange-oracle-dust-back", prod === "ny" ? "ny" : "book"); } catch (e) { /* 무시 */ }
           location.href = "/stardust/";
         });
-        el.append(" ", a);
+        el.append(a);
       }
-      const pk = rmk("small", "pay-dust__packs", DUST.packs || "");
-      el.append(pk);
+      const ul = rmk("ul", "pay-dust__packs", "");
+      (DUST.packList || []).forEach((k) => {
+        const li = rmk("li", "", "");
+        li.innerHTML = `<img src="${DUST_ICON}" alt="" width="16" height="16"><b>${esc(fill(DUST.packN || "", { n: k.n }))}</b>${k.bonus ? `<em>${esc(fill(DUST.bonus || "", { n: k.bonus }))}</em>` : ""}<span>${esc(k.price)}</span>`;
+        ul.append(li);
+      });
+      if (ul.children.length) el.append(rmk("p", "pay-dust__packs-h", DUST.packsHead || ""), ul);
     };
     const dustInfo = async (el, prod = "book") => {
       if (!DUST || !el) return;
@@ -5998,7 +6013,7 @@
       const r = await dustPost({ sid, earn: "first" }); // 첫 로그인 별가루 10(계정에 한 번, 이미 받았으면 0) + 잔액
       if (r.status === 200 && r.j && Number.isInteger(r.j.bal)) {
         const need = DUST.cost - r.j.bal;
-        return dustLine(el, fill(DUST.have || "", { n: r.j.bal }) + (need > 0 ? " · " + fill(DUST.short || "", { need }) : ""), need > 0, prod);
+        return dustLine(el, need > 0 ? fill(DUST.short || "", { need }) : "", need > 0, prod, r.j.bal);
       }
       dustLine(el, DUST.login, false, prod);
     };
@@ -6026,7 +6041,7 @@
         if (dustLogin) dustLogin(prod === "ny");
         return;
       }
-      if (r.status === 402 && r.j) return dustLine(line, fill(DUST.short || "", { need: r.j.need }), true, prod);
+      if (r.status === 402 && r.j) return dustLine(line, fill(DUST.short || "", { need: r.j.need }), true, prod, Math.max(0, DUST.cost - r.j.need));
       dustLine(line, DUST.fail, false, prod);
     }
     dustInfoHook = dustInfo;

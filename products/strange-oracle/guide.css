@@ -438,3 +438,19 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .ggate p { margin: 0 !important; font-size: var(--fs-md) !important; color: var(--c-text-muted) !important; }
 .ggate .gbtn { width: 100%; }
 .ggate small { font-family: var(--font-sans); font-size: 0.6875rem; color: var(--c-text-faint); }
+
+/* (2026-11-14) 별가루 충전 목록: 상점 카드 · 결정 아이콘(img/stardust.svg) */
+.gwallet__i { width: 34px; height: 34px; vertical-align: -6px; filter: drop-shadow(0 0 8px oklch(0.75 0.15 255 / 0.85)); }
+.gpacks { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.gpacks .gpack { display: grid; gap: 4px; width: 100%; padding: 0 0 10px; overflow: hidden; border-radius: 16px; border: 1px solid oklch(0.55 0.08 265 / 0.5); background: oklch(0.17 0.04 275); color: var(--c-text-strong); font: inherit; text-align: left; cursor: pointer; }
+.gpacks .gpack[aria-pressed="true"] { border-color: oklch(0.8 0.12 250); box-shadow: 0 0 0 2px oklch(0.7 0.14 255 / 0.6), 0 0 22px oklch(0.65 0.15 260 / 0.45); }
+.gpack__art { position: relative; display: block; height: 96px; background: radial-gradient(ellipse 70% 80% at 50% 45%, oklch(0.42 0.14 265 / 0.55), transparent 70%), linear-gradient(180deg, oklch(0.26 0.06 270), oklch(0.18 0.05 275)); }
+.gpack__art img { position: absolute; width: 46px; height: 46px; left: 50%; top: 44%; transform: translate(-50%, -50%); filter: drop-shadow(0 0 8px oklch(0.75 0.15 255 / 0.85)); }
+.gpack__art .gpack__i1 { width: 32px; height: 32px; transform: translate(-130%, -30%); }
+.gpack__art .gpack__i2 { width: 30px; height: 30px; transform: translate(30%, -20%); }
+.gpack__art .gpack__i3 { width: 24px; height: 24px; transform: translate(-60%, -110%); }
+.gpack__qty { position: absolute; right: 10px; bottom: 6px; font-family: var(--font-sans); font-size: 1.375rem; font-weight: 900; font-style: italic; color: #fff; -webkit-text-stroke: 4px oklch(0.22 0.06 270); paint-order: stroke fill; letter-spacing: -0.02em; }
+.gpack__bonus { position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 999px; font-style: normal; font-family: var(--font-sans); font-size: 0.6875rem; font-weight: 800; color: oklch(0.2 0.03 285); background: var(--gold); }
+.gpack__name { padding: 4px 12px 0; font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: 700; }
+.gpack__price { padding: 0 12px; font-family: var(--font-sans); font-size: var(--fs-md); font-weight: 800; color: oklch(0.88 0.1 85); }
+.gpack small { padding: 0 12px; font-family: var(--font-sans); font-size: 0.6875rem; color: var(--c-text-faint); }

@@ -6004,11 +6004,21 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 .topbar.is-room .topbar__lobby, .topbar.is-room .topbar__clear { padding: 0 6px; }
 
 /* (2026-11-14) 별가루로 열기: 결제 버튼 아래 가진 별가루·충전 안내 */
-.pay-dust { margin: var(--space-2) 0 0; font-family: var(--font-sans); font-size: var(--fs-sm); text-align: center; color: var(--c-text); }
+.pay-dust { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding: var(--space-3); border-radius: 16px; border: 1px solid oklch(0.62 0.12 260 / 0.35); background: radial-gradient(ellipse 90% 80% at 50% 0%, oklch(0.36 0.12 265 / 0.35), transparent 70%), oklch(0.15 0.04 280 / 0.85); font-family: var(--font-sans); text-align: center; color: var(--c-text); }
 .pay-dust:empty { display: none; }
-.pay-dust__charge { font-weight: 700; }
-.pay-dust__packs { display: block; margin-top: 4px; font-size: 0.75rem; color: var(--c-text-faint); }
-
+.pay-dust__top { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px; margin: 0; font-size: var(--fs-sm); }
+.pay-dust__have { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 6px; border-radius: 999px; background: oklch(0.22 0.06 265 / 0.9); border: 1px solid oklch(0.7 0.12 255 / 0.45); }
+.pay-dust__have img { filter: drop-shadow(0 0 4px oklch(0.75 0.15 255 / 0.8)); }
+.pay-dust__have b { font-size: var(--fs-md); color: oklch(0.9 0.08 250); }
+.pay-dust__msg { color: oklch(0.85 0.1 60); font-weight: 700; }
+.pay-dust__charge { justify-self: center; min-height: 40px; padding: 0 18px; border-radius: 999px; border: 0; background: linear-gradient(160deg, oklch(0.72 0.14 255), oklch(0.56 0.16 270)); color: #fff; font-weight: 700; }
+.pay-dust__packs-h { margin: 4px 0 0; font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--c-text-faint); }
+.pay-dust__packs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.pay-dust__packs li { display: grid; justify-items: center; gap: 1px; padding: 8px 2px 6px; border-radius: 12px; background: oklch(0.19 0.045 270 / 0.9); border: 1px solid oklch(0.5 0.08 265 / 0.35); }
+.pay-dust__packs img { filter: drop-shadow(0 0 3px oklch(0.75 0.15 255 / 0.7)); }
+.pay-dust__packs b { font-size: var(--fs-sm); color: var(--c-text-strong); }
+.pay-dust__packs em { font-style: normal; font-size: 0.625rem; font-weight: 700; color: oklch(0.85 0.12 85); }
+.pay-dust__packs span { font-size: 0.6875rem; color: var(--c-text-muted); }
 /* (2026-11-14) 로그인 안내(체험 콘텐츠는 카카오 로그인 뒤) */
 .login-gate { position: fixed; inset: 0; z-index: 120; display: grid; place-items: end center; }
 .login-gate[hidden] { display: none; }
@@ -6019,3 +6029,10 @@ body.has-pay-dock.has-dock-peek .screen.is-active { padding-bottom: calc(var(--s
 .login-gate__go { background: oklch(0.89 0.17 98); color: oklch(0.2 0.02 60); border: 0; font-weight: 700; }
 .login-gate__note { font-family: var(--font-sans); font-size: 0.75rem; color: var(--c-text-faint); }
 .login-gate__x { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border: 0; border-radius: 12px; background: oklch(0.22 0.04 285 / 0.85); color: var(--c-text-strong); font-size: 1.25rem; cursor: pointer; }
+
+/* (2026-11-14) 입구에도 아래 탭 바(nav.css .tabbar): 입구의 바닥 띠·결제 띠·건너뛰기를 그 위로 */
+body.has-tabbar .hub-tabs { position: relative; bottom: auto; margin-top: var(--space-8); padding-bottom: 0; border: 1px solid oklch(0.66 0.075 75 / 0.35); border-radius: 18px; box-shadow: none; animation: none; }
+body.has-tabbar .pay-dock { bottom: var(--appbar-h); }
+body.has-tabbar .ritual-skip { bottom: calc(var(--appbar-h) + var(--space-5)); }
+body.has-tabbar .hub.is-active { padding-bottom: var(--space-8); }
+body.has-tabbar .tabbar { z-index: calc(var(--z-sticky) + 1); }

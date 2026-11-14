@@ -485,3 +485,15 @@ body.is-ny #sky { opacity: 0.45; transition: opacity 1100ms ease; }
 
 /* (2026-11-14) 안내자 초상(style.css .gface) — 큰 칸은 상반신 */
 .ny-guide__fig.gface, .ny-hook__fig.gface { background-size: cover; background-position: center top; border-radius: 999px 999px 6px 6px; }
+
+/* (2026-11-14) 아래 탭 바(홈·일곱 개의 문·…)가 있을 때: 「나의 이야기 / 2027 신년운세」는 위 띠 아래 작은 알약으로 */
+body.has-tabbar .ny-tabbar {
+  top: calc(var(--topbar-h, 56px) + 8px); bottom: auto; width: min(320px, calc(100% - 32px)); padding: 0; overflow: hidden;
+  border: 1px solid oklch(0.62 0.07 75 / 0.45); border-radius: 999px; box-shadow: 0 6px 20px oklch(0 0 0 / 0.35);
+  transform: translate(-50%, -160%); z-index: calc(var(--z-sticky, 10) + 2);
+}
+body.has-tabbar .ny-tabbar.is-on { transform: translate(-50%, 0); }
+body.has-tabbar .ny-tabbar__tab { min-height: 40px; font-size: var(--fs-sm); }
+body.has-tabbar .ny-tabbar__tab.is-current { background: oklch(0.26 0.06 285 / 0.9); }
+body.has-tabbar .ny-tabbar__tab.is-current::before { display: none; }
+body.has-tabbar.has-ny-tabbar #app { padding-top: 56px; padding-bottom: 0; }

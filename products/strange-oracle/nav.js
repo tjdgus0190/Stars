@@ -1,6 +1,6 @@
 // 전체 메뉴(☰ → 아이콘 칸 시트) · 아래 탭 바 · 별가루 잔액 (2026-11-13 v1-F). 문구·링크는 data-nav.js(window.NAV), 아이콘은 nav-icons.js, 모양은 nav.css.
 // - 안내·도구·하루 페이지·처음 화면: gen-guide.js가 메뉴·탭 바 HTML을 미리 써 둔다(검색 엔진이 링크를 읽게) → 여닫기·현재 위치만 붙인다.
-// - 입구(index.html): 메뉴가 없으면 window.NAV로 그리고, 위 띠(.topbar__inner) 맨 앞에 ☰ 버튼을 끼운다(탭 바는 두지 않음 — 입구는 자기 하단 탭이 있다).
+// - 입구(index.html): 메뉴가 없으면 window.NAV로 그리고, 위 띠(.topbar__inner) 맨 앞에 ☰ 버튼을 끼운다. 아래 탭 바도 그린다(입구의 나의 이야기·신년운세 띠는 그 위로).
 // 입력값·분석 이벤트를 쓰지 않는다. stardust.js(window.Dust)가 있으면 잔액을 보이고, 얻을 때 짧은 알림을 띄운다.
 (function () {
   const N = window.NAV;
@@ -34,6 +34,15 @@
 
   const aside = document.getElementById("sidenav") || build();
   if (!aside) return;
+  // (2026-11-14 운영자) 입구(일곱 개의 문)에도 같은 아래 탭 바 — 페이지들은 gen-guide.js가 미리 써 둔다
+  if (N && N.tabs && !document.querySelector(".tabbar")) {
+    const tb = document.createElement("nav");
+    tb.className = "tabbar";
+    tb.setAttribute("aria-label", N.tabsLabel || "");
+    tb.innerHTML = N.tabs.map((t) => `<a href="${esc(t.href)}">${ico(t.icon)}<span>${esc(t.label)}</span></a>`).join("");
+    document.body.append(tb);
+    document.body.classList.add("has-tabbar");
+  }
   aside.querySelectorAll("a[href]").forEach((a) => { if (sameAs(a.getAttribute("href"))) a.setAttribute("aria-current", "page"); });
   document.querySelectorAll(".tabbar a[href]").forEach((a) => { if (sameAs(a.getAttribute("href"))) a.setAttribute("aria-current", "page"); });
   let scrim = document.querySelector(".sidenav-scrim");
@@ -74,7 +83,7 @@
     else { const head = aside.querySelector(".sidenav__head"); head.insertBefore(badge, head.querySelector(".sidenav__close")); }
     // (2026-11-14 운영자) 별가루는 카카오 계정에만 — 하루 페이지가 계정 잔액을 받으면 dust:acct로 알린다(로그인 전 0)
     let acct = 0;
-    const paint = () => { const n = acct; badge.innerHTML = `${ico("spark")}<b>${n}</b>`; badge.setAttribute("aria-label", T.badgeLabel.replace("{n}", n)); };
+    const paint = () => { const n = acct; badge.innerHTML = `<img src="/products/strange-oracle/img/stardust.svg" alt="" width="18" height="18"><b>${n}</b>`; badge.setAttribute("aria-label", T.badgeLabel.replace("{n}", n)); };
     document.addEventListener("dust:change", paint);
     document.addEventListener("dust:acct", (e) => { acct = (e.detail && Number.isInteger(e.detail.bal)) ? e.detail.bal : 0; paint(); });
     let box = null, timer = 0;

@@ -10,11 +10,12 @@ window.NAV = {
   doors: "/products/strange-oracle/", // 일곱 개의 문(입구 앱)
   menuHead: "전체 메뉴",
   // (2026-11-13 v1-F) 아래 탭 바 — 안내·도구·하루 페이지와 처음 화면에 늘 보인다(입구 앱은 ☰ 메뉴만)
-  tabs: [
+  tabsLabel: "바로 가기",
+  tabs: [ // (2026-11-14 운영자) 처음 화면·일곱 개의 문·하루 페이지 모두 같은 아래 탭
     { label: "홈", href: "/", icon: "home" },
-    { label: "오늘", href: "/today/", icon: "scroll" },
-    { label: "면담", href: "/talk/", icon: "chat" },
-    { label: "도감", href: "/dex/", icon: "book" },
+    { label: "일곱 개의 문", href: "/products/strange-oracle/", icon: "door" },
+    { label: "오늘의 신탁", href: "/today/", icon: "scroll" },
+    { label: "심층상담", href: "/talk/", icon: "chat" },
     { label: "별가루", href: "/stardust/", icon: "spark" },
   ],
   // 별가루 — 위 띠 잔액·얻을 때 알림 (계산은 stardust.js)
