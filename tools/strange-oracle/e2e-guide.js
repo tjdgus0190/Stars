@@ -252,15 +252,21 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
     await waitFor("!!document.querySelector('.ggate [data-js=gate-login]') || !!document.querySelector('[data-js=app] > :not(.ggate)')", 8000);
     gates[pg] = await ev("({ gate: !!document.querySelector('.ggate [data-js=gate-login]'), more: !!document.querySelector('.gfold-more') })");
   }
-  check("로그인 전: 오늘의 신탁·도감·면담·별가루는 로그인 안내만(설명·자주 묻는 질문은 그대로)", Object.values(gates).every((g) => g.gate && g.more), JSON.stringify(gates));
+  // (2026-11-14 운영자: 로그인 벽 완화) 오늘의 신탁은 로그인 없이 한 줄까지 — 도감·심층상담·별가루만 로그인 안내
+  check("로그인 전: 도감·심층상담·별가루는 로그인 안내만 · 오늘의 신탁은 로그인 없이(설명·자주 묻는 질문은 그대로)", !gates.today.gate && ["dex", "talk", "stardust"].every((k) => gates[k].gate) && Object.values(gates).every((g) => g.more), JSON.stringify(gates));
+  await b.goto(`${TEST}/`);
+  await waitFor("!!document.querySelector('.gfeat--doors')");
+  await ev("document.querySelector('.gfeat[href=\"/today/\"]').click(); true");
+  await waitFor("location.pathname === '/today/'", 5000);
+  check("처음 화면: 오늘의 신탁 카드는 로그인 팝업 없이 바로", (await ev("location.pathname")) === "/today/");
   await b.goto(`${TEST}/manse/`);
   await waitFor("!!document.querySelector('[data-js=tool-form]')");
   check("무료 도구·점술 안내는 로그인 없이 그대로", !(await ev("!!document.querySelector('.ggate')")));
   // 오늘의 신탁에서 로그인(모의 카카오) → 오늘의 신탁으로 돌아옴 · 첫 로그인 +10
   const KID0 = String(300000000 + Math.floor(Math.random() * 99999999));
   await b.goto(`${TEST}/today/`);
-  await waitFor("!!document.querySelector('[data-js=gate-login]')", 8000);
-  await ev("document.querySelector('[data-js=gate-login]').click(); true");
+  await waitFor("!!document.querySelector('[data-js=today-login]')", 8000);
+  await ev("document.querySelector('[data-js=today-login]').click(); true");
   await waitFor("location.pathname === '/__dev/kakao/authorize'", 8000);
   await ev(`document.querySelector('[data-field=kid]').value = '${KID0}'; document.querySelector('[data-act=agree]').click(); true`);
   await waitFor("location.pathname === '/today/' && !!document.querySelector('[data-js=today-open]')", 15000);
@@ -336,7 +342,7 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await b.goto(`${TEST}/stardust/`);
   await waitFor("!!document.querySelector('[data-js=dust-pack]')", 8000);
   const sd = await ev("({ ways: document.querySelectorAll('.gmini')[0].querySelectorAll('li').length, uses: [...document.querySelectorAll('.gmini')[1].querySelectorAll('li')].map((l) => l.textContent) })");
-  check("별가루 페이지: 모으는 법 3줄(첫 로그인·출석·금빛 봉인) · 쓰는 곳 5줄(면담 5·다른 안내자·숨은 이야기·책 49·신년운세 49)", sd.ways === 3 && sd.uses.length === 5 && sd.uses.some((t) => /책.*49/.test(t)), JSON.stringify(sd));
+  check("별가루 페이지: 모으는 법 4줄(첫 로그인·출석·금빛 봉인·채널 친구) · 쓰는 곳 5줄(심층상담 5·다른 안내자·숨은 이야기·책 49·신년운세 49)", sd.ways === 4 && sd.uses.length === 5 && sd.uses.some((t) => /책.*49/.test(t)), JSON.stringify(sd));
   const sum = await ev("({ summary: document.querySelector('.gsummary')?.textContent || '', fold: document.querySelectorAll('.gfold .gsources li').length, packs: document.querySelectorAll('[data-js=dust-pack]').length })");
   check("충전: 묶음 4종 · 결제 전 한 줄 요약(받는 것·유효기간·7일 청약철회) · 자세한 조건은 펼침에", sum.packs === 4 && /카카오 계정/.test(sum.summary) && /7일/.test(sum.summary) && /유효기간/.test(sum.summary) && sum.fold === 4, JSON.stringify(sum));
   await ev("document.querySelector('[data-js=dust-pack][data-prod=d50]').click(); document.querySelector('[data-js=dust-buy]').click(); true");

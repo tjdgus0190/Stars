@@ -29,7 +29,7 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   await ev(`document.querySelector('[data-field=kid]').value = '${KID}'; document.querySelector('[data-act=agree]').click(); true`);
   await waitFor("location.pathname === '/stardust/' && !!document.querySelector('[data-js=dust-pack]')", 15000);
   const sd = await ev("({ uses: [...document.querySelectorAll('.gmini')[1].querySelectorAll('li')].map((l) => l.textContent), rate: /1개 = 100원/.test(document.querySelector('[data-js=app]').textContent), split: !!document.querySelector('.gwallet p'), talkq: /면담 질문 \\d+번/.test(document.querySelector('[data-js=app]').textContent), clear: !!document.querySelector('[data-js=dust-clear]') })");
-  check("별가루 페이지: 쓰는 곳 = 면담 5 · 다른 안내자 3 · 숨은 이야기 10 · 책 49 · 신년운세 49 / 무료·계정 나눔·1개=100원·면담 질문 n번·기기 기록 지우기 없음", sd.uses.length === 5 && /면담.*5/.test(sd.uses[0]) && /책.*49/.test(sd.uses[3]) && /신년운세.*49/.test(sd.uses[4]) && !sd.rate && !sd.split && !sd.talkq && !sd.clear, JSON.stringify(sd));
+  check("별가루 페이지: 쓰는 곳 = 심층상담 5 · 다른 안내자 3 · 숨은 이야기 10 · 책 49 · 신년운세 49 / 무료·계정 나눔·1개=100원·면담 질문 n번·기기 기록 지우기 없음", sd.uses.length === 5 && /심층상담.*5/.test(sd.uses[0]) && /책.*49/.test(sd.uses[3]) && /신년운세.*49/.test(sd.uses[4]) && !sd.rate && !sd.split && !sd.talkq && !sd.clear, JSON.stringify(sd));
   const packs = await ev("[...document.querySelectorAll('[data-js=dust-pack]')].map((p) => p.textContent.replace(/\\s+/g, ' ').trim())");
   check("충전 묶음 4종: 30개 3,000원 · 50개 5,000원 · 100개(+10 덤) 10,000원 · 300개(+50 덤) 30,000원", packs.length === 4 && /×30.*별가루 30개.*3,000원/.test(packs[0]) && /×50.*5,000원/.test(packs[1]) && /×100.*\+10 덤.*10,000원/.test(packs[2]) && /×300.*\+50 덤.*30,000원/.test(packs[3]), packs.join(" | "));
   // 30개 충전 → 49에 모자람
@@ -80,9 +80,13 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'", 10000);
   await ev("sessionStorage.removeItem('strange-oracle-pass'); StrangeOracle.go('deeper'); true");
   const gated = await waitFor("!!document.querySelector('[data-js=login-gate]:not([hidden]) .login-gate__go') && document.querySelector('.screen.is-active')?.id === 'screen-hub'", 8000);
-  await ev("StrangeOracle.go('saju-intro'); true");
+  await ev("document.querySelector('[data-js=login-gate]').hidden = true; StrangeOracle.go('ogham-intro'); true");
   const gated2 = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub' && !!document.querySelector('[data-js=login-gate]:not([hidden])')", 8000);
-  check("로그인 전: 입구는 보이지만 방·책 화면으로는 못 가고 카카오 로그인 안내", gated && gated2);
+  check("로그인 전: 입구는 보이지만 둘째 문·책 화면으로는 못 가고 카카오 로그인 안내", gated && gated2);
+  // (2026-11-14 운영자: 로그인 벽 완화) 첫 번째 문(만신의 방)은 로그인 없이
+  await ev("document.querySelector('[data-js=login-gate]').hidden = true; StrangeOracle.go('saju-intro'); true");
+  const free = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-saju-intro' && !document.querySelector('[data-js=login-gate]:not([hidden])')", 8000);
+  check("로그인 전: 첫 번째 문(만신의 방)은 로그인 안내 없이 열림", free);
 
   const pass = out.filter((l) => l.startsWith("PASS")).length, fail = out.length - pass;
   console.log(`${pass} PASS / ${fail} FAIL`);
