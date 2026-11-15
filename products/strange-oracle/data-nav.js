@@ -35,7 +35,8 @@ window.NAV = {
   },
   // (2026-11-14 운영자) 카카오톡 채널. url = 채널 홈 주소(https://pf.kakao.com/_xxxx — 공개 주소, 운영자가 채운다). 비어 있으면 별가루 페이지의 「채널 친구 추가」 칸을 숨긴다
   // reward: 채널 친구 별가루 10(카카오 채널 관계 확인 — 동의 항목에 비즈 앱 전환이 필요해 2026-11-15 운영자 보류). false면 별가루 칸 없이 「채널 추가하기」만
-  channel: { url: "https://pf.kakao.com/_xinaNX", reward: false },
+  // show: 사이트에 채널을 보일지. (2026-11-15 운영자) 채널 추가 화면에 "사업자가 확인되지 않은 채널" 경고가 떠, 사업자등록 전까지 모두 숨김(별가루 페이지 칸·메뉴 링크)
+  channel: { url: "https://pf.kakao.com/_xinaNX", show: false, reward: false },
   dust: {
     href: "/stardust/",
     unit: "별가루",
@@ -88,7 +89,7 @@ window.NAV = {
       items: [
         { short: "전설 기록", label: "전설 기록", note: "점술이 움직인 일곱 사건", href: "/legends/", icon: "feather" },
         { short: "인스타그램", label: "문 너머의 기록", note: "점술에 얽힌 전설 · 인스타그램", href: "https://www.instagram.com/strange_oracle_off/", ext: true, icon: "camera" },
-        { short: "카카오 채널", label: "낯선 점술관 카카오톡 채널", note: "새 소식 · 문의", href: "https://pf.kakao.com/_xinaNX", ext: true, icon: "chat" }, // (2026-11-15) 운영자 채널
+        // (2026-11-15 운영자) 카카오톡 채널 링크는 사업자등록 뒤에 다시: { short: "카카오 채널", label: "낯선 점술관 카카오톡 채널", note: "새 소식 · 문의", href: "https://pf.kakao.com/_xinaNX", ext: true, icon: "chat" },
       ],
     },
     {

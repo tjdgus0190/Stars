@@ -666,10 +666,10 @@
         drawShop();
       };
       // (2026-11-14 운영자) 카카오톡 채널 친구 추가 → 별가루 10(계정에 한 번, 카카오 확인)
-      const CH = A.channel || {}, CH_URL = (window.NAV && window.NAV.channel && window.NAV.channel.url) || "", CH_REWARD = Boolean(window.NAV && window.NAV.channel && window.NAV.channel.reward); // (2026-11-15 운영자) 보상은 보류
+      const CH = A.channel || {}, CH_URL = (window.NAV && window.NAV.channel && window.NAV.channel.url) || "", CH_REWARD = Boolean(window.NAV && window.NAV.channel && window.NAV.channel.reward), CH_SHOW = Boolean(window.NAV && window.NAV.channel && window.NAV.channel.show); // (2026-11-15 운영자) 보상 보류 · 사업자등록 전까지 채널 숨김
       let chMsg = { "#login-ch": "ok", "#login-ch0": "no" }[location.hash] || "";
       const chBox = () => {
-        if (!/^https:\/\/pf\.kakao\.com\/_[A-Za-z0-9]+\/?$/.test(CH_URL)) return "";
+        if (!CH_SHOW || !/^https:\/\/pf\.kakao\.com\/_[A-Za-z0-9]+\/?$/.test(CH_URL)) return "";
         const got = acctOnce.includes("channel");
         if (!CH_REWARD) return `<section class="gchannel"><h2>${esc(CH.headPlain)}</h2><p class="gnote">${esc(CH.lead)}</p><div class="gactions"><a class="gbtn ghost" href="${esc(CH_URL.replace(/\/$/, ""))}" target="_blank" rel="noopener" data-js="ch-add">${esc(CH.addPlain)}</a></div></section>`;
         return `<section class="gchannel"><h2>${esc(CH.head)}</h2><p class="gnote">${esc(CH.lead)}</p>${chMsg === "no" && !got ? `<p class="gerror" role="status">${esc(CH.no)}</p>` : ""}
