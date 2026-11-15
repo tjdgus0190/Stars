@@ -661,20 +661,21 @@
         const mini = (head, list, sign) => `<section class="gmini"><h2>${esc(head)}</h2><ul>${list.map((x) => `<li><span>${esc(x.label)}${x.note ? `<small>${esc(x.note)}</small>` : ""}</span><b>${sign}${esc(String(x.amt).replace(/^\+/, ""))}</b></li>`).join("")}</ul></section>`;
         // (2026-11-14) 별가루는 카카오 계정에만 — 로그인 전이면 0과 로그인 안내
         box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><img class="gwallet__i" src="/products/strange-oracle/img/stardust.webp" alt=""> <span data-js="dust-total">${paidBal || 0}</span></b></div>
-          <div class="gminis">${mini(A.waysHead, A.ways, "+")}${mini(A.usesHead, A.uses, "−")}</div>${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc(S.back)}</a></div>` : ""}
+          <div class="gminis">${mini(A.waysHead, A.ways.filter((x) => x.kind !== "channel" || ((window.NAV && window.NAV.channel) || {}).reward), "+")}${mini(A.usesHead, A.uses, "−")}</div>${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc(S.back)}</a></div>` : ""}
           ${chBox()}<div data-js="dust-shop"></div>`;
         drawShop();
       };
       // (2026-11-14 운영자) 카카오톡 채널 친구 추가 → 별가루 10(계정에 한 번, 카카오 확인)
-      const CH = A.channel || {}, CH_URL = (window.NAV && window.NAV.channel && window.NAV.channel.url) || "";
+      const CH = A.channel || {}, CH_URL = (window.NAV && window.NAV.channel && window.NAV.channel.url) || "", CH_REWARD = Boolean(window.NAV && window.NAV.channel && window.NAV.channel.reward); // (2026-11-15 운영자) 보상은 보류
       let chMsg = { "#login-ch": "ok", "#login-ch0": "no" }[location.hash] || "";
       const chBox = () => {
         if (!/^https:\/\/pf\.kakao\.com\/_[A-Za-z0-9]+\/?$/.test(CH_URL)) return "";
         const got = acctOnce.includes("channel");
+        if (!CH_REWARD) return `<section class="gchannel"><h2>${esc(CH.headPlain)}</h2><p class="gnote">${esc(CH.lead)}</p><div class="gactions"><a class="gbtn ghost" href="${esc(CH_URL.replace(/\/$/, ""))}" target="_blank" rel="noopener" data-js="ch-add">${esc(CH.addPlain)}</a></div></section>`;
         return `<section class="gchannel"><h2>${esc(CH.head)}</h2><p class="gnote">${esc(CH.lead)}</p>${chMsg === "no" && !got ? `<p class="gerror" role="status">${esc(CH.no)}</p>` : ""}
           ${got ? `<p class="gnote gcenter" role="status">${esc(chMsg === "ok" ? fill(CH.ok, { n: 10 }) : CH.got)}</p>` : `<div class="gactions gcol"><a class="gbtn ghost" href="${esc(CH_URL.replace(/\/$/, "") + "/friend")}" target="_blank" rel="noopener" data-js="ch-add">${esc(CH.add)}</a><button class="gbtn gbtn--kakao" type="button" data-js="ch-claim">${esc(CH.claim)}</button></div><small class="gnote">${esc(CH.note)}</small>`}</section>`;
       };
-      box.addEventListener("click", (e) => { if (e.target.closest("[data-js=ch-claim]")) kakaoLogin("stardust", true); });
+      box.addEventListener("click", (e) => { if (CH_REWARD && e.target.closest("[data-js=ch-claim]")) kakaoLogin("stardust", true); });
       // ── 충전 (운영 규칙 7장): 결제 전에 받는 것·가격·환불·판매자를 보이고, 동의 체크 뒤에만 결제창
       const S = A.shop || {};
       // 일곱 방 결제 화면에서 「별가루 충전하러 가기」로 왔으면 돌아가는 단추(이 탭 sessionStorage "strange-oracle-dust-back")

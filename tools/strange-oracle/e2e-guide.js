@@ -342,7 +342,7 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await b.goto(`${TEST}/stardust/`);
   await waitFor("!!document.querySelector('[data-js=dust-pack]')", 8000);
   const sd = await ev("({ ways: document.querySelectorAll('.gmini')[0].querySelectorAll('li').length, uses: [...document.querySelectorAll('.gmini')[1].querySelectorAll('li')].map((l) => l.textContent) })");
-  check("별가루 페이지: 모으는 법 4줄(첫 로그인·출석·금빛 봉인·채널 친구) · 쓰는 곳 5줄(심층상담 5·다른 안내자·숨은 이야기·책 49·신년운세 49)", sd.ways === 4 && sd.uses.length === 5 && sd.uses.some((t) => /책.*49/.test(t)), JSON.stringify(sd));
+  check("별가루 페이지: 모으는 법 3줄(첫 로그인·출석·금빛 봉인 — 채널 친구는 보류) · 쓰는 곳 5줄(심층상담 5·다른 안내자·숨은 이야기·책 49·신년운세 49)", sd.ways === 3 && sd.uses.length === 5 && sd.uses.some((t) => /책.*49/.test(t)), JSON.stringify(sd));
   const sum = await ev("({ summary: document.querySelector('.gsummary')?.textContent || '', fold: document.querySelectorAll('.gfold .gsources li').length, packs: document.querySelectorAll('[data-js=dust-pack]').length })");
   check("충전: 묶음 4종 · 결제 전 한 줄 요약(받는 것·유효기간·7일 청약철회) · 자세한 조건은 펼침에", sum.packs === 4 && /카카오 계정/.test(sum.summary) && /7일/.test(sum.summary) && /유효기간/.test(sum.summary) && sum.fold === 4, JSON.stringify(sum));
   await ev("document.querySelector('[data-js=dust-pack][data-prod=d50]').click(); document.querySelector('[data-js=dust-buy]').click(); true");
