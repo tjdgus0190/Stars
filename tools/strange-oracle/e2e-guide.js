@@ -402,7 +402,7 @@ Saju.useLibrary(require(path.join(__dirname, "vendor", "lunar.js")));
   await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub' && !!document.querySelector('.topbar__inner .nav-toggle')", 10000);
   const hub = await ev("({ btn: !!document.querySelector('.topbar__inner .nav-toggle'), links: [...document.querySelectorAll('#sidenav a')].map((a) => a.getAttribute('href')), title: document.title })");
   check("입구: 위 띠에 ☰ 메뉴 · 사이드바에 안내·도구 링크", hub.btn && ["/saju/", "/vedic/", "/rune/", "/ogham/", "/egypt/", "/maya/", "/oracle/", "/manse/", "/nakshatra/", "/tzolkin/", "/decan/", "/name-ogham/", "/rune-draw/", "/sibyl/", "/legends/", "/today/", "/dex/", "/stardust/", "/talk/"].every((h) => hub.links.includes(h)), hub.links.join(" "));
-  check("입구: 새 제목(검색어 포함)", /무료 사주풀이/.test(hub.title), hub.title);
+  check("입구: 제목 「낯선 점술관 - 세계 각지의 점술」(운영자 2026-11-15)", hub.title === "낯선 점술관 - 세계 각지의 점술", hub.title);
   await ev("document.querySelector('.topbar__inner .nav-toggle').click()");
   await sleep(350);
   check("입구: 메뉴 열림", await ev("document.documentElement.classList.contains('nav-open')"));
