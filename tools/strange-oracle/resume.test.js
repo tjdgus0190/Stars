@@ -177,10 +177,12 @@ test("10-4: title·description·og·meta.json 키워드의 방 순서 = CHAPTER_
   const head = og.readHead(fs.readFileSync(path.join(P, "index.html"), "utf8"));
   const words = ["오검", "베다", "데칸", "촐킨", "룬", "시빌라"];
   const inOrder = (s) => words.map((w) => s.indexOf(w)).every((x, i, a) => x >= 0 && (i === 0 || a[i - 1] < x));
-  for (const k of ["title", "description", "ogTitle", "ogDescription"]) assert.ok(inOrder(head[k]), k + ": " + head[k]);
+  // (2026-11-15 운영자) 제목은 「낯선 점술관 - 세계 각지의 점술」(방 이름 없음), 설명은 네이버 권장 80자 안 — 방 순서는 설명에서만 본다
+  assert.equal(head.title, "낯선 점술관 - 세계 각지의 점술");
+  for (const k of ["description", "ogDescription"]) assert.ok(inOrder(head[k]), k + ": " + head[k]);
   assert.equal(head.title, head.ogTitle);
   assert.equal(head.description, head.ogDescription);
-  assert.ok(head.title.length <= 60 && head.description.length >= 80 && head.description.length <= 110, `${head.title.length}/${head.description.length}`);
+  assert.ok(head.title.length <= 40 && head.description.length <= 80, `${head.title.length}/${head.description.length}`);
   const kw = JSON.parse(fs.readFileSync(path.join(P, "meta.json"), "utf8")).keywords.join(" | ");
   assert.ok(inOrder(kw), kw);
   // (14단계) 순서는 만신이 맨 앞. title·description·키워드에 만신을 넣는 일은 copywriter F5 → 그때 words 맨 앞에 "만신"을 더한다

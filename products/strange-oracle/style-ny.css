@@ -498,3 +498,5 @@ body.has-tabbar .ny-tabbar__tab { min-height: 40px; font-size: var(--fs-sm); }
 body.has-tabbar .ny-tabbar__tab.is-current { background: oklch(0.26 0.06 285 / 0.9); }
 body.has-tabbar .ny-tabbar__tab.is-current::before { display: none; }
 body.has-tabbar.has-ny-tabbar #app { padding-top: 56px; padding-bottom: 0; }
+/* (2026-11-15 성능) 신년운세 화면이 아닐 때는 투명한 새해 하늘의 움직임을 멈춘다(보이지 않는데 계속 돌던 구름·빛 알갱이) */
+body:not(.is-ny) .ny-sky, body:not(.is-ny) .ny-sky * { animation-play-state: paused !important; }

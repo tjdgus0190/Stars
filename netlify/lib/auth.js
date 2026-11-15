@@ -108,7 +108,7 @@ async function start(url, env) {
 }
 
 async function callback(url, env, store, kakao, now) {
-  const back = (frag) => go(303, homeAt(url, env) + "#" + frag);
+  const back = (frag) => go(303, homeAt(url, env) + "auth.html#" + frag); // (2026-11-15 성능) 가벼운 복귀 페이지 → 하루 페이지로 바로, 그 밖은 입구로
   const s = url.searchParams.get("state") || "";
   const code = url.searchParams.get("code") || "";
   if (!HEX32.test(s) || !code || code.length > 512) return back("kakao-error");
@@ -174,6 +174,9 @@ async function claim(body, env, store, now) {
       if (rec.enc.length || rec.data) await putRec(store, K, rec, now); // 로그인도 활동 — 보관 1년을 다시 센다
       out.sid = sid;
       out.data = openData(env, rec);
+      // (2026-11-14) 카카오에 저장한 방 결과(예전에 연 방)를 도감 카드로 옮겨 적는다 — (2026-11-15 성능) 잔액 볼 때마다가 아니라 로그인할 때 한 번
+      const done = out.data && plainObj(out.data.v) ? Object.keys(out.data.v).filter((r) => plainObj(out.data.v[r]) && Object.keys(out.data.v[r]).length) : [];
+      if (done.length) await Dust.addRooms(store, tk.uh, done, now);
       // (2026-11-14 운영자) 카카오가 우리 채널 친구(ADDED)라고 알려 준 로그인: 계정에 한 번 별가루 10. 이미 받았으면 0
       if (tk.ch === true) { const e = await Dust.earn(store, tk.uh, "channel", now); out.channel = e ? e.added : 0; }
     }
@@ -312,10 +315,7 @@ async function account(path, body, env, store, now) {
         if (!c.ok) return json(409, { error: "used" }); // 다른 계정에 이미 충전한 코드
         return json(200, { state: c.already ? "already" : "credited", bal: c.bal, paid: c.paid, free: c.free, n: Dust.PACKS[prod] });
       }
-      // (2026-11-14) 잔액을 볼 때 카카오에 저장한 방 결과(예전에 연 방)도 도감 카드로 옮겨 적는다
-      const saved = openData(env, await getRec(store, K, now));
-      const done = saved && plainObj(saved.v) ? Object.keys(saved.v).filter((r) => plainObj(saved.v[r]) && Object.keys(saved.v[r]).length) : [];
-      return json(200, Object.assign({ state: "bal" }, Dust.view(done.length ? await Dust.addRooms(store, uh, done, now) : await Dust.read(store, uh)), env.TALK_TEST_FREE === "1" ? { talkFree: true } : {}));
+      return json(200, Object.assign({ state: "bal" }, Dust.view(await Dust.read(store, uh)), env.TALK_TEST_FREE === "1" ? { talkFree: true } : {}));
     }
     if (path === "erase") {
       await Dust.erase(store, uh); // 충전한 별가루도 함께 지운다(지우기 전 화면에서 알림)

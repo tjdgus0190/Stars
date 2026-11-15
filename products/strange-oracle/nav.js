@@ -101,10 +101,11 @@
     try {
       const lg = JSON.parse(localStorage.getItem("strange-oracle-login") || "null");
       if (lg && /^[0-9a-f]{32}$/.test(lg.sid) && lg.exp > Date.now()) {
-        fetch("/api/auth/dust", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: lg.sid }), cache: "no-store", credentials: "omit" })
-          .then((r) => (r.ok ? r.json() : null))
-          .then((j) => { if (!heard && j && Number.isInteger(j.bal)) { acct = j.bal; paint(); } })
-          .catch(() => {});
+        // (2026-11-15 성능) 이 첫 조회를 하루 페이지(guide.js loadPaid)도 함께 쓴다(같은 잔액을 두 번 묻지 않게) — { sid, status, j }
+        window.SO_ACCT_FIRST = fetch("/api/auth/dust", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: lg.sid }), cache: "no-store", credentials: "omit" })
+          .then(async (r) => { let j = null; try { j = await r.json(); } catch (e) { j = null; } return { sid: lg.sid, status: r.status, j }; })
+          .catch(() => ({ sid: lg.sid, status: 0, j: null }));
+        window.SO_ACCT_FIRST.then(({ j }) => { if (!heard && j && Number.isInteger(j.bal)) { acct = j.bal; paint(); } });
       }
     } catch (e) { /* 무시 */ }
     let box = null, timer = 0;

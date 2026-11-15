@@ -222,11 +222,17 @@ test("함수 auth 길 목록에 화면이 부르는 /api/auth/dust·me·save·lo
 });
 
 // (2026-11-14 운영자) 예전에 방을 연 사람: 카카오에 저장한 방 결과가 도감 카드로 옮겨진다(잔액 볼 때)
-test("잔액 보기: 저장한 방 결과(v)의 방 이름이 계정 도감(rooms)으로 · 빈 방은 빼고 · 별가루는 그대로", async () => {
+test("로그인할 때: 저장한 방 결과(v)의 방 이름이 계정 도감(rooms)으로 · 빈 방은 빼고 · 별가루는 그대로 (2026-11-15: 잔액 볼 때마다가 아니라 로그인할 때 한 번)", async () => {
   const store = new MemStore();
-  const { sid } = await login(store);
-  const save = await Auth.handle({ method: "POST", url: "https://example.test/api/auth/save", body: JSON.stringify({ sid, data: { p: {}, v: { saju: { s: 3 }, rune: { k: [1, 2, 3] }, star: {} } } }) }, ENV, store, null, NOW);
+  const { sid: sid0, uh } = await login(store);
+  const save = await Auth.handle({ method: "POST", url: "https://example.test/api/auth/save", body: JSON.stringify({ sid: sid0, data: { p: {}, v: { saju: { s: 3 }, rune: { k: [1, 2, 3] }, star: {} } } }) }, ENV, store, null, NOW);
   assert.strictEqual(save.status, 200);
+  assert.deepStrictEqual(JSON.parse((await dust(store, { sid: sid0 })).body).rooms, []); // 잔액 보기만으로는 옮기지 않음
+  // 다시 로그인(표 → claim login)
+  const T = rnd(16), S = rnd(16);
+  await store.set("ticket/" + T, { uh, sh: crypto.createHash("sha256").update(S).digest("hex"), exp: NOW + 60000 });
+  const c = JSON.parse((await Auth.handle({ method: "POST", url: "https://example.test/api/auth/claim", body: JSON.stringify({ t: T, s: S, login: true }) }, ENV, store, null, NOW)).body);
+  const sid = c.sid;
   const r = JSON.parse((await dust(store, { sid })).body);
   assert.deepStrictEqual([r.rooms.slice().sort(), r.bal], [["rune", "saju"], 0]);
   // 이미 있는 방은 겹치지 않음

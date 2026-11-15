@@ -201,6 +201,8 @@ for (const slug of PRODUCTS) {
 // 제품 index.html 복사본: og:image 절대 경로, og:url·canonical 추가 (site.url이 있을 때만)
 for (const slug of PRODUCTS) {
   const file = path.join(PUBLIC, "products", slug, "index.html");
+  // (2026-11-15 성능) 배포판 입구 HTML에서 개발 메모 주석을 걷어 낸다(약 34KB). 구획 표지는 위에서 이미 처리됐고, ai-notice 표시는 남긴다
+  fs.writeFileSync(file, fs.readFileSync(file, "utf8").replace(/<!--(?!\s*\/?ai-notice)[\s\S]*?-->/g, "").replace(/\n[ \t]*\n(?:[ \t]*\n)+/g, "\n"));
   if (SITE[slug]) fs.writeFileSync(file, og.injectOg(fs.readFileSync(file, "utf8"), SITE[slug]));
   else console.log(`  경고: products/${slug}/data.js의 site.url이 비어 있어 og:url·canonical을 넣지 않았고 og:image는 상대 경로입니다 (배포 전에 채울 것)`);
 }

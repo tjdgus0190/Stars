@@ -59,7 +59,7 @@ test("21-6 콜백: 표 하나(uh·state 해시·2분), 회원번호 원문 0 · 
   const st = new MemStore();
   const { r, t, s } = await login(st);
   assert.strictEqual(r.status, 303);
-  assert.ok(t && r.headers.Location.startsWith(ENV.SITE_URL + "#kakao-"));
+  assert.ok(t && r.headers.Location.startsWith(ENV.SITE_URL + "auth.html#kakao-")); // (2026-11-15 성능) 가벼운 복귀 페이지
   const dump = JSON.stringify(st.dump());
   assert.ok(!dump.includes(KAKAO_ID) && !dump.includes(s), "회원번호·state 원문 없음");
   const bad = await call(st, "GET", `/api/auth/kakao/callback?code=bad&state=${hex()}`);

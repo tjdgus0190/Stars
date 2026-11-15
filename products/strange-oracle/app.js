@@ -401,7 +401,7 @@
     let lastDraw = 0;
     function frame(t) {
       // 긴 글을 읽는 동안·스크롤 중·탭이 숨었을 때는 다시 그리지 않는다
-      if (t - lastDraw > 50 && !body.classList.contains("is-reading") && !body.classList.contains("is-scrolling") && !document.hidden) {
+      if (t - lastDraw > 50 && !body.classList.contains("is-reading") && !body.classList.contains("is-scrolling") && !body.classList.contains("sky-rest") && !document.hidden) {
         lastDraw = t;
         draw(t);
       }
@@ -2752,15 +2752,17 @@
     }
   }
   function sparkAt(x, y, kind, n) {
+    const frag = document.createDocumentFragment(); // (2026-11-15 성능) 한 번에 붙인다
     for (let i = 0; i < n; i++) {
       const sp = document.createElement("i");
       const ang = Math.random() * Math.PI * 2, dist = (kind === "rice" ? 26 : 40) + Math.random() * (kind === "rice" ? 34 : 70);
       sp.className = "spark spark--" + kind;
       const size = kind === "gold" ? `--s:${(4 + Math.random() * 4).toFixed(1)}px;` : kind === "ring" ? `--grow:${(2.4 + i * 1.4).toFixed(1)};animation-delay:${i * 140}ms;` : "";
       sp.style.cssText = `${size}--x:${x}px;--y:${y}px;--dx:${(Math.cos(ang) * dist).toFixed(1)}px;--dy:${(kind === "rice" ? -18 - Math.random() * 40 : Math.sin(ang) * dist).toFixed(1)}px;--r:${Math.round(Math.random() * 360)}deg;--t:${Math.round(800 + Math.random() * 700)}ms`;
-      bellSparks.append(sp);
+      frag.append(sp);
       setTimeout(() => sp.remove(), 1900);
     }
+    bellSparks.append(frag);
   }
   function bellRing() {
     const n = bellRite.chars.length;
@@ -2787,11 +2789,12 @@
     const box = bellSparks.getBoundingClientRect(), r = ch.getBoundingClientRect();
     const cx = r.left + r.width / 2 - box.left, cy = r.top + r.height / 2 - box.top;
     sparkAt(cx, cy, "ring", 1);
-    sparkAt(cx, cy, "gold", 12 + k * 2);
-    sparkAt(cx, cy, "star", 2 + (k % 2));
-    sparkAt(cx, cy + r.height * 0.3, "rice", 8);
+    // (2026-11-15 성능) 휴대폰에서 버벅여 불꽃 수를 절반쯤으로(금빛 12+2k → 6+k, 쌀 8 → 4, 별 2~3 → 1~2, 방울 아래 5 → 3)
+    sparkAt(cx, cy, "gold", 6 + k);
+    sparkAt(cx, cy, "star", 1 + (k % 2));
+    sparkAt(cx, cy + r.height * 0.3, "rice", 4);
     const br = bellBody.getBoundingClientRect();
-    sparkAt(br.left + br.width / 2 - box.left, br.top + br.height * 0.7 - box.top, "gold", 5);
+    sparkAt(br.left + br.width / 2 - box.left, br.top + br.height * 0.7 - box.top, "gold", 3);
     if (bellRite.count === Math.ceil(n / 2) && T.saju.ritual.mid) sajuGuideLine.textContent = strip(T.saju.ritual.mid);
     if (bellRite.count === n - 1 && T.saju.ritual.near) sajuGuideLine.textContent = strip(T.saju.ritual.near);
     if (bellRite.count >= n) later(bellAwake, 520);
@@ -3470,7 +3473,8 @@
   const BookCore = window.BookCore;
   const BV = window.BOOK_VOLUME;
   const READ_PER_MIN = 500; // 읽는 속도 분당 500자 (spec 8단계 가정)
-  const comma = (n) => Number(n).toLocaleString("ko-KR");
+  const NUM_KO = new Intl.NumberFormat("ko-KR"); // (2026-11-15 성능) 숫자 쉼표 형식기를 한 번만 만든다(toLocaleString은 부를 때마다 무겁다)
+  const comma = (n) => NUM_KO.format(Number(n));
   // (2026-10-27 운영자) 가격 자리: 첫 계절이면 템플릿의 "{price}원"을 [줄 그은 정가] + 지금 값으로. 아니면 지금 값만(글자 그대로)
   function setPriced(el, tpl) {
     let t = String(tpl == null ? "" : tpl);
@@ -5845,6 +5849,10 @@
       }
       show(js("pay-refund-link", payScr), false); // legal/refund.html은 지금 배포 폴더에서 빠진다(build-dist) → 본문 링크 숨김. 결제 문단은 G4
       act.classList.toggle("is-opened", Boolean(passNow())); // (검수 권장 4) 이 탭에서 책이 이미 열려 있으면 결제 버튼 대신 안내
+      { // (2026-11-15) 아래 돌아가기: 책을 연 사람은 목차로, 아직 안 연 사람은 입구로
+        const bk = js("pay-back", payScr), opened = Boolean(passNow());
+        if (bk) { bk.dataset.go = opened ? "report" : "hub"; const lab = bk.querySelector("[data-t]"); if (lab) lab.textContent = opened ? T.pay.back : T.pay.backHub || T.pay.back; }
+      }
       show(js("pay-store-empty", payScr), !PA.userid && !DUST);
       if (DUST) dustInfo(js("pay-dust", payScr), "book");
       syncBuy();
@@ -6932,6 +6940,7 @@
   }
   const storySent = new Set();
   function onScreen(name, scr) {
+    body.classList.toggle("sky-rest", Boolean(scr && scr.classList && scr.classList.contains("ritual"))); // (2026-11-15 성능) 의식 중 별 캔버스 쉼
     // (v1-C) 별가루·도감: 방 결과에 처음 닿으면 그 방 카드(방 이름만 이 기기에 기록)
     if (window.Dust) {
       const r = roomOfScreen(name);

@@ -321,18 +321,18 @@ body.is-reading #sky { opacity: 0.2; }
 .screen { display: none; padding: var(--space-6) 0 var(--space-16); }
 .screen.is-active {
   display: block;
-  animation: screen-in 700ms var(--ease-reveal) both;
+  animation: screen-in 420ms var(--ease-reveal) both; /* (2026-11-15 성능) 0.7초·흐림 → 0.42초·투명도와 이동만 */
 }
 .screen.is-leaving {
   display: block;
   animation: screen-out 320ms var(--ease-in-out) forwards;
 }
 @keyframes screen-in {
-  from { opacity: 0; transform: scale(1.03); filter: blur(6px); }
-  to { opacity: 1; transform: none; filter: none; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }
 @keyframes screen-out {
-  to { opacity: 0; transform: scale(0.97); filter: blur(6px); }
+  to { opacity: 0; transform: translateY(-6px); }
 }
 
 .screen--dock.is-active {
@@ -6040,3 +6040,5 @@ body.has-tabbar .tabbar { z-index: calc(var(--z-sticky) + 1); }
 /* (2026-11-15) 광고 유입: 만신의 방 의식 「건너뛰고 바로 보기」 */
 .saju-skip-row { margin: var(--space-3, 12px) 0 0; text-align: center; }
 .saju-skip { font-size: var(--fs-sm); color: var(--c-text-muted); text-decoration: underline; text-underline-offset: 3px; }
+/* (2026-11-15 성능) 의식 화면(body.sky-rest)에서는 뒤에 가려진 우주 배경의 움직임을 멈춘다(휴대폰에서 버벅임 원인) */
+body.sky-rest .cosmos, body.sky-rest .cosmos * { animation-play-state: paused !important; }

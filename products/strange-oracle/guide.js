@@ -29,12 +29,15 @@
   if (A && CONF.ga4) {
     const search = location.search;
     if (search) history.replaceState(null, "", location.pathname + location.hash);
-    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] }, so_dust: { step: ["start", "done"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
+    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] }, so_dust: { step: ["start", "done"] }, so_auth: { step: ["login", "fail"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
     if (on) A.track("so_guide_view", { page: CONF.page });
     const cookie = $("[data-js=cookie-line]");
     if (cookie && A.configured(CONF.ga4)) cookie.hidden = false;
   }
   const track = (n, p) => { if (on) A.track(n, p); };
+  // (2026-11-15) 카카오 로그인 복귀(auth.html → 이 페이지 #login…): 로그인 단계 이름만 기록(6장 예외 3). 실패면 주소 조각만 지운다
+  if (/^#login(-ch0?)?$/.test(location.hash)) track("so_auth", { step: "login" });
+  if (location.hash === "#login-fail") { track("so_auth", { step: "fail" }); history.replaceState(null, "", location.pathname); }
   document.addEventListener("click", (e) => { if (e.target.closest("[data-js=to-room]")) track("so_guide_cta", { page: CONF.page }); });
 
 
@@ -112,7 +115,11 @@
     const loadPaid = async () => {
       const lg = readLogin();
       if (!lg) { paidBal = null; return null; }
-      const r = await post("/api/auth/dust", { sid: lg.sid });
+      // (2026-11-15 성능) 위 띠(nav.js)가 막 받아 둔 잔액이 있으면 그걸 쓴다(처음 한 번만)
+      const first = window.SO_ACCT_FIRST;
+      window.SO_ACCT_FIRST = null;
+      const pre = first ? await first : null;
+      const r = pre && pre.sid === lg.sid && pre.status !== 0 ? pre : await post("/api/auth/dust", { sid: lg.sid });
       if (r.status === 401) { dropLogin(); paidBal = null; onExpired(); return null; }
       paidBal = r.status === 200 && r.j && Number.isInteger(r.j.bal) ? r.j.bal : null;
       acctOnce = r.j && Array.isArray(r.j.once) ? r.j.once : [];
@@ -311,7 +318,7 @@
           const g = guide(openRoom), has = st.cards.includes(g.room), open = st.open.includes(g.room), need = readLogin() ? (COST.story || 0) - acct() : 0;
           const tr = Object.entries(U.traitHeads).map(([k, hd]) => `<dt>${esc(hd)}</dt><dd>${esc(g.traits[k])}</dd>`).join("");
           h += `<div class="gsheet" role="dialog" aria-modal="true" aria-label="${esc(g.name)}"><div class="gsheet__scrim" data-js="dex-close"></div><div class="gsheet__body" style="--art:url('${IMG(g.room)}')">
-            <button class="gsheet__x" type="button" data-js="dex-close" aria-label="닫기">×</button>${arch(g.room, "garch--lg")}
+            <button class="gsheet__x" type="button" data-js="dex-close" aria-label="${esc(G.home.login.close)}">×</button>${arch(g.room, "garch--lg")}
             <small class="gchip">${esc(g.roomName)} · ${esc(g.place)}</small><h2>${esc(has ? g.name : U.locked)}</h2>`;
           if (has) {
             h += `<p class="gtoday-hero__epi">${esc(g.epithet)}</p><q class="gline">${esc(g.line)}</q><dl class="gkv">${tr}</dl>
@@ -457,7 +464,8 @@
         if (nd === "draw") h += btn("setup-draw", g.room === "rune" ? SU.drawRune : SU.drawSibyl, ' data-primary="1"');
         else {
           if (hasFor(g.room, tp)) h += btn("setup-tab", SU.fromTab, ' data-primary="1"');
-          h += btn("setup-kakao", lg ? SU.fromKakao : SU.loginKakao);
+          if (!lg) h += btn("setup-kakao", SU.loginKakao); // (2026-11-15) 로그인 전: 로그인하고 불러오기
+          else if (lg.consent === true) h += btn("setup-kakao", SU.fromKakao); // 저장한 기록이 있는 계정만
           h += btn("setup-form", nd === "name" ? SU.typeName : SU.typeBirth);
         }
         h += btn("setup-skip", SU.skip) + `</div>`;
@@ -487,7 +495,7 @@
         const ready = Boolean(resultOf(g.room)) || skipped[g.room];
         return `<div class="groom${entering ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}')">
           <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b><small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
-          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${roomNote(g)}${hist.length ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
+          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${roomNote(g)}${hist.length && g.hadHist ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
             ${hist.map((h) => say("me", h.q) + sayGuide(h.a)).join("")}</div>
           <form class="groom__bar" data-js="talk-form" novalidate autocomplete="off">
             <p class="groom__meta">${metaHtml(need)}</p>
@@ -521,6 +529,7 @@
       });
       const enter = (roomName) => {
         cur = X.guides.find((x) => x.room === roomName) || null;
+        if (cur) cur.hadHist = chatOf(roomName).length > 0; // (2026-11-15) 들어올 때 이미 대화가 있었을 때만 "지난 대화" 안내
         entering = true; setupMsg = ""; formOpen = false;
         draw();
         loadRoom(roomName).then(() => { if (cur && cur.room === roomName && !busy) { const t = box.querySelector(".groom textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector(".groom textarea"); if (t2) t2.value = keep; } }).catch(() => {});
