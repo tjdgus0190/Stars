@@ -33,22 +33,36 @@
 
 ---
 
-## 2. 친구 추가 환영 메시지 (관리자센터 › 채팅 › 자동응답 › 친구 추가 시)
+## 2. 친구 추가 환영 메시지 (관리자센터 › 채팅 › 자동응답 › 친구 추가 시) — 확정본 2026-11-15
 
 이미지: `kakao/welcome-1200x600.png`
 
 ```
-낯선 점술관에 오신 걸 환영해요 ✦
-일곱 나라의 안내자가 오늘 밤 당신을 기다려요.
+어서 오세요, 낯선 점술관이에요 ✦
 
-오늘의 신탁과 첫 번째 문(만신의 방)은
-로그인 없이도 바로 열려요.
-카카오로 로그인하면 별가루 10개를 드려요.
-아래 메뉴를 눌러 보세요.
+이곳엔 일곱 나라의 점술을 지키는
+일곱 명의 안내자가 살고 있어요.
+한국의 만신부터 로마의 시빌라까지,
+같은 당신을 저마다의 눈으로 읽어 드려요.
+
+🌙 오늘의 신탁
+날마다 다른 안내자가 한 줄을 건네요. (로그인 없이)
+
+🚪 첫 번째 문 · 만신의 방
+태어난 여덟 글자로 읽는 나의 그릇. (로그인 없이)
+
+💬 심층상담
+내 결과를 아는 안내자에게 직접 물어보세요.
+
+카카오로 처음 로그인하면 별가루 10개를 드려요.
+궁금한 건 언제든 이 채팅방에 남겨 주세요.
 ```
-버튼
-- [첫 번째 문 열기] → `https://strange-oracle.com/products/strange-oracle/?utm_source=kakao&utm_medium=social&utm_campaign=kakao_channel&utm_content=ch_welcome`
+버튼(최대 개수는 관리자센터 화면 기준, 둘이면 위 둘)
 - [오늘의 신탁 받기] → `https://strange-oracle.com/today/?utm_source=kakao&utm_medium=social&utm_campaign=kakao_channel&utm_content=ch_welcome`
+- [첫 번째 문 열기] → `https://strange-oracle.com/products/strange-oracle/?utm_source=kakao&utm_medium=social&utm_campaign=kakao_channel&utm_content=ch_welcome`
+- (셋째가 되면) [심층상담] → `https://strange-oracle.com/talk/?utm_source=kakao&utm_medium=social&utm_campaign=kakao_channel&utm_content=ch_welcome`
+
+글자 수가 넘치면 줄일 순서: ① "한국의 만신부터 로마의 시빌라까지," 줄 → ② 「심층상담」 두 줄.
 
 ---
 
