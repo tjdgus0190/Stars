@@ -77,6 +77,7 @@ window.SAJU = {
         ],
         "unknownHour": "시는 하늘만 알지",
         "done": "여덟 글자가 다 올라왔구먼.",
+        "skip": "건너뛰고 바로 보기",
         "bell": "잡고 흔들기"
       },
       "gongsu": {

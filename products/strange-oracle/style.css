@@ -6037,3 +6037,6 @@ body.has-tabbar .pay-dock { bottom: var(--appbar-h); }
 body.has-tabbar .ritual-skip { bottom: calc(var(--appbar-h) + var(--space-5)); }
 body.has-tabbar .hub.is-active { padding-bottom: var(--space-8); }
 body.has-tabbar .tabbar { z-index: calc(var(--z-sticky) + 1); }
+/* (2026-11-15) 광고 유입: 만신의 방 의식 「건너뛰고 바로 보기」 */
+.saju-skip-row { margin: var(--space-3, 12px) 0 0; text-align: center; }
+.saju-skip { font-size: var(--fs-sm); color: var(--c-text-muted); text-decoration: underline; text-underline-offset: 3px; }

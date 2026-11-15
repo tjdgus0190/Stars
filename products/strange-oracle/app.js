@@ -532,8 +532,6 @@
       gateEl.className = "login-gate";
       gateEl.dataset.js = "login-gate";
       gateEl.innerHTML = `<div class="login-gate__scrim" data-act="close"></div><div class="login-gate__card" role="dialog" aria-modal="true" aria-labelledby="login-gate-h"><button class="login-gate__x" type="button" data-act="close" aria-label="${esc(GATE.close || "")}">×</button><h2 id="login-gate-h"></h2><p class="login-gate__body"></p><button class="btn btn--block login-gate__go" type="button" data-act="go"></button><small class="login-gate__note"></small></div>`;
-      gateEl.querySelector("h2").textContent = GATE.title || "";
-      gateEl.querySelector(".login-gate__body").textContent = GATE.body || "";
       gateEl.querySelector(".login-gate__go").textContent = GATE.go || "";
       gateEl.querySelector(".login-gate__note").textContent = GATE.note || "";
       gateEl.addEventListener("click", (e) => {
@@ -545,6 +543,10 @@
       });
       document.body.append(gateEl);
     }
+    // (2026-11-15) 첫 번째 문(무료)을 마치고 다음으로 가려는 경우는 그에 맞는 안내(첫 로그인 별가루 10)
+    const afterFree = GATE_ROOMS.includes(roomOfScreen(currentName || "")) && GATE.afterFree ? GATE.afterFree : null;
+    gateEl.querySelector("h2").textContent = (afterFree && afterFree.title) || GATE.title || "";
+    gateEl.querySelector(".login-gate__body").textContent = (afterFree && afterFree.body) || GATE.body || "";
     gateEl.hidden = false;
     gateEl.querySelector(".login-gate__go").focus({ preventScroll: true });
   }
@@ -2524,7 +2526,7 @@
     T.saju = {
       intro: X.intro,
       input: Object.assign({}, I, { dateLabel: I.birthLabel, dateWhy: I.birthWhy, genderM: G.male, genderF: G.female, genderX: G.none }),
-      ritual: { bell: rice.bell, bellLabel: rice.bellLabel, hint: rice.hint, mid: rice.mid, near: rice.near, sound: rice.sound !== false, hourUnknown: rice.unknownHour, done: rice.done, call: gongsu.call, callSub: gongsu.callSub, go: gongsu.next },
+      ritual: { bell: rice.bell, bellLabel: rice.bellLabel, hint: rice.hint, mid: rice.mid, near: rice.near, sound: rice.sound !== false, hourUnknown: rice.unknownHour, done: rice.done, skip: rice.skip, call: gongsu.call, callSub: gongsu.callSub, go: gongsu.next },
       pillars: { hour: pl[0], day: pl[1], month: pl[2], year: pl[3], unknown: R.unknownCell },
       elements: R.elementNames || {},
       result: Object.assign({}, R, {
@@ -2551,6 +2553,7 @@
   const sajuIntro = screens["saju-intro"];
   const sajuInput = screens["saju-input"];
   const sajuRitual = screens["saju-ritual"];
+  const AD_KEY = "strange-oracle-ad"; // (2026-11-15) 광고로 들어온 탭 표시 "1"(입력값 아님) — 의식 건너뛰기 버튼
   const sajuResult = screens["saju-result"];
   let sajuCalc = null; // Saju.compute 결과 (메모리만)
   let sajuView = null;
@@ -2712,6 +2715,9 @@
     bellBeads.textContent = "";
     bellRite.chars.forEach(() => bellBeads.append(document.createElement("li")));
     sajuRitual.classList.remove("is-awake", "is-shaking");
+    let adTab = false;
+    try { adTab = window.sessionStorage.getItem(AD_KEY) === "1"; } catch (e) { adTab = false; }
+    show(js("saju-skip", sajuRitual), adTab);
     sajuRitual.style.setProperty("--heat", "0");
     sajuGuideLine.textContent = strip(T.guides.saju.ritual || "");
   };
@@ -2790,6 +2796,18 @@
     if (bellRite.count === n - 1 && T.saju.ritual.near) sajuGuideLine.textContent = strip(T.saju.ritual.near);
     if (bellRite.count >= n) later(bellAwake, 520);
   }
+  // (2026-11-15) 광고 유입: 「건너뛰고 바로 보기」 → 글자를 한꺼번에 올리고 공수로
+  js("saju-skip", sajuRitual).addEventListener("click", () => {
+    if (sajuRitual.dataset.stage !== "rice" || !sajuCalc) return;
+    bellRite.chars.forEach((el) => el.classList.add("is-up"));
+    $$("li", bellBeads).forEach((li) => li.classList.add("is-on"));
+    bellRite.count = bellRite.chars.length;
+    show(js("saju-skip", sajuRitual), false);
+    sajuRitual.classList.add("is-awake");
+    show(js("saju-hour-unknown", sajuRitual), !sajuCalc.pillars.hour);
+    sajuRitual.dataset.stage = "gongsu";
+    js("saju-gongsu-go", sajuRitual).click();
+  });
   // 다 올라옴: 소반·일주가 빛나고 불티가 크게 한 번 → 공수
   function bellAwake() {
     if (sajuRitual.dataset.stage !== "rice") return;
@@ -7164,6 +7182,7 @@
   // (8단계) 새 세션(이 탭에 마친 방이 없음)은 주소와 상관없이 입구부터 (spec 8-2, 7-2 딥링크 무시).
   // 같은 탭(새로고침·뒤로 가기): 주소 해시의 화면 이름으로 — 방 이름(#rune)이나 방 화면(#rune-result)은 문지기 규칙대로, 의식·결제 화면은 입구로
   const hash = location.hash.replace("#", "");
+  const AD_IN = /[?&]utm_medium=(paid_social|paid|cpc|cpm)(&|$)/.test(location.search); // 광고 유입(주소를 지우기 전에 본다)
   const hashRoom = roomOfScreen(hash) || (CHAPTER_ORDER.includes(hash) ? hash : null);
   let first = "hub";
   // (13단계) 옛 결제·책 주소(#deeper·#unseal·#report)와 옛 영수증 칸으로 오면 책 목차로
@@ -7191,7 +7210,12 @@
     else if (CHAPTER_ORDER.includes(hash)) first = roomTarget(hash);
     else if (CHAPTER_ORDER.includes(hashRoom) && !TRANSIENT_TO(hash)) first = hash === `${hashRoom}-result` && isDone(hashRoom) ? roomTarget(hashRoom) : hash;
   }
-  // (2026-10-27 운영자) 광고로 온 사람도 입구부터(2026-10-26의 "광고 → 만신의 방 대문 바로" 규칙은 걷어 냄)
+  // (2026-11-15 운영자) 광고로 온 사람(utm_medium 유료)은 결과까지 빨리: 이 탭에 마친 방이 없고 주소에 화면 이름이 없으면 만신의 방 입력 화면으로 바로.
+  //   의식(쌀·방울)에는 「건너뛰고 바로 보기」를 보인다(이 탭 sessionStorage 표시, 입력값 아님). (2026-10-27의 "광고도 입구부터"를 바꿈)
+  if (AD_IN) {
+    try { window.sessionStorage.setItem(AD_KEY, "1"); } catch (e) { /* 이 화면에서만 */ }
+    if (first === "hub" && !hash && !filledRooms().length) first = "saju-input";
+  }
   renderHub();
   setTopbar("hub");
   if (state.visits.saju && Saju) Saju.loadLunar().catch(() => {}); // 원국 표는 생일이 있을 때만 다시 그린다

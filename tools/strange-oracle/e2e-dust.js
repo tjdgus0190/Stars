@@ -88,6 +88,26 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
   const free = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-saju-intro' && !document.querySelector('[data-js=login-gate]:not([hidden])')", 8000);
   check("로그인 전: 첫 번째 문(만신의 방)은 로그인 안내 없이 열림", free);
 
+  // ── 5. (2026-11-15 운영자) 광고 유입: 만신의 방 입력 화면으로 바로 → 의식 「건너뛰고 바로 보기」 → 결과 → 다음 문은 로그인 안내(첫 로그인 별가루 10)
+  await b.goto(`${TEST}/stardust/`);
+  await ev("localStorage.clear(); sessionStorage.clear(); true");
+  await b.goto(`${TEST}/products/strange-oracle/?utm_source=instagram&utm_medium=paid_social&utm_campaign=ad10_guides&utm_content=ad10_guides`);
+  const adLand = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-saju-input'", 10000);
+  await ev("(() => { const s = (k, v) => { const i = document.querySelector('[data-js=' + k + ']'); i.value = v; i.dispatchEvent(new Event('input')); }; s('saju-name', '하늘'); s('saju-year', '1995'); s('saju-month', '3'); s('saju-day', '25'); const u = document.querySelector('[data-js=saju-time-unknown]'); u.checked = true; u.dispatchEvent(new Event('change')); document.querySelector('[data-js=saju-gender-opt][value=f]').click(); document.querySelector('[data-js=saju-input-go]').click(); return true; })()");
+  await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-saju-ritual'", 15000);
+  const skipOn = await waitFor("!document.querySelector('[data-js=saju-skip]').classList.contains('is-hidden')", 5000);
+  await ev("document.querySelector('[data-js=saju-skip]').click(); true");
+  const adRes = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-saju-result'", 15000);
+  await ev("StrangeOracle.go('ogham-intro'); true");
+  await waitFor("!!document.querySelector('[data-js=login-gate]:not([hidden])')", 5000);
+  const adGate = await ev("document.querySelector('[data-js=login-gate] h2').textContent + ' / ' + document.querySelector('[data-js=login-gate] .login-gate__body').textContent");
+  check("광고 유입: 만신의 방 입력 화면으로 바로 · 의식 건너뛰기 → 결과 · 다음 문은 로그인 안내(별가루 10)", adLand && skipOn && adRes && /나머지 여섯 문/.test(adGate) && /별가루 10/.test(adGate), adGate);
+  // 광고가 아닌 유입: 입구 그대로 · 건너뛰기 없음
+  await ev("sessionStorage.clear(); true");
+  await b.goto(`${TEST}/products/strange-oracle/`);
+  const hubLand = await waitFor("document.querySelector('.screen.is-active')?.id === 'screen-hub'", 10000);
+  check("광고가 아닌 유입은 입구 그대로", hubLand);
+
   const pass = out.filter((l) => l.startsWith("PASS")).length, fail = out.length - pass;
   console.log(`${pass} PASS / ${fail} FAIL`);
   fs.mkdirSync(OUT, { recursive: true });
