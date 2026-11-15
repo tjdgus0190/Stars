@@ -141,6 +141,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   try { b = (await store.get(key)) || { usd: 0, n: 0 }; } catch (e) { return json(503, { error: "store" }); }
   if (b.usd >= Number(env.TALK_MONTHLY_USD)) return json(503, { error: "budget" });
 
+  const FREE_TEST = env.TALK_TEST_FREE === "1"; // 시험 배포만(respond가 배포 종류로 정한다)
   // 충전한 별가루로 묻기: 로그인 표 → 계정 → 잔액 10 이상 (차감은 답을 받은 뒤)
   let uh = null;
   if (p.sid) {
@@ -148,7 +149,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
     try {
       uh = await Auth.sessionOf(payStore, p.sid, now);
       if (!uh) return json(401, { error: "session" });
-      if ((await Dust.balanceOf(payStore, uh)) < TALK_COST) return json(402, { error: "dust" });
+      if (!FREE_TEST && (await Dust.balanceOf(payStore, uh)) < TALK_COST) return json(402, { error: "dust" });
     } catch (e) { return json(503, { error: "store" }); }
   }
 
@@ -167,6 +168,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   try { await store.set(key, { usd: Math.round((b.usd + costOf(model, msg && msg.usage)) * 1e6) / 1e6, n: b.n + 1 }); } catch (e) { /* 기록 실패는 답을 막지 않는다(다음 요청이 다시 읽는다) */ }
   const text = Prompt.textOf(msg);
   if (!text) return json(200, { a: Prompt.declineReply(p.room), declined: true }); // 답하지 못한 물음은 별가루를 쓰지 않는다
+  if (uh && FREE_TEST) { let bal = null; try { bal = await Dust.balanceOf(payStore, uh); } catch (e) { bal = null; } return json(200, { a: text, paid: bal }); } // 시험 배포: 차감 없음
   if (uh) {
     let left = false;
     try { left = await Dust.spend(payStore, uh, TALK_COST, now); } catch (e) { left = false; }
@@ -194,7 +196,11 @@ function storeFrom(openStore) {
 }
 
 // Netlify Functions v2 요청 → handle
+// (2026-11-15 운영자) 시험 배포(Netlify 배포 종류 "branch-deploy")에서만 심층상담을 별가루 없이 계속 해 볼 수 있게(TALK_TEST_FREE).
+//   운영(production)에서는 켜지지 않는다. 10분 횟수 제한은 그대로 두되, 시험 배포 값(TALK_RATE_10MIN)이 없으면 60으로
+const testEnv = (env, context) => (context && context.deploy && context.deploy.context === "branch-deploy" ? Object.assign({ TALK_RATE_10MIN: "60" }, env, { TALK_TEST_FREE: "1" }) : env);
 async function respond(req, context, openStore, env = process.env, openPay = null, Anthropic = null) {
+  env = testEnv(env, context);
   const body = req.method === "POST" ? await req.text() : "";
   const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown"), evalKey: req.headers.get("x-talk-eval-key") || "" }, env, storeFrom(openStore), Date.now(), Anthropic ? anthropicLlmWith(Anthropic) : async () => { throw new Error("sdk"); }, openPay ? Pay.storeFrom(openPay) : null);
   return new Response(r.body, { status: r.status, headers: r.headers });

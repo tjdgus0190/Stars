@@ -234,3 +234,24 @@ test("잔액 보기: 저장한 방 결과(v)의 방 이름이 계정 도감(room
   const r2 = JSON.parse((await dust(store, { sid })).body);
   assert.deepStrictEqual(r2.rooms.slice().sort(), ["rune", "saju"]);
 });
+
+// (2026-11-15 운영자) 시험 배포(branch-deploy)에서만 심층상담에 별가루를 쓰지 않음
+test("심층상담: 시험 배포(TALK_TEST_FREE)면 잔액 0이어도 답하고 차감 없음 · 운영 env에서는 402", async () => {
+  const pay_ = new MemStore();
+  const talkStore = new MemStore();
+  const ok = async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: "답" }], usage: { input_tokens: 10, output_tokens: 10 } });
+  const { sid, uh } = await login(pay_);
+  const base = { TALK_MODE: "test", ANTHROPIC_API_KEY: "x", TALK_MONTHLY_USD: "5" };
+  const ask = (env) => Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "물음", sid }), ip: "8.8.4.4" }, env, talkStore, NOW, ok, pay_);
+  assert.strictEqual((await ask(base)).status, 402);
+  for (let i = 0; i < 3; i++) {
+    const r = await ask(Object.assign({}, base, { TALK_TEST_FREE: "1" }));
+    assert.strictEqual(r.status, 200, r.body);
+    assert.strictEqual(JSON.parse(r.body).paid, 0);
+  }
+  assert.strictEqual(await Dust.balanceOf(pay_, uh), 0);
+  // 잔액 응답: 시험 배포 문맥(context.deploy.context = branch-deploy)이면 talkFree, 아니면 없음
+  const view = async (env) => JSON.parse((await Auth.handle({ method: "POST", url: "https://example.test/api/auth/dust", body: JSON.stringify({ sid }) }, env, pay_, null, NOW)).body);
+  assert.strictEqual((await view(Object.assign({}, ENV, { TALK_TEST_FREE: "1" }))).talkFree, true);
+  assert.strictEqual((await view(ENV)).talkFree, undefined);
+});

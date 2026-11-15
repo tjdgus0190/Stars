@@ -315,7 +315,7 @@ async function account(path, body, env, store, now) {
       // (2026-11-14) 잔액을 볼 때 카카오에 저장한 방 결과(예전에 연 방)도 도감 카드로 옮겨 적는다
       const saved = openData(env, await getRec(store, K, now));
       const done = saved && plainObj(saved.v) ? Object.keys(saved.v).filter((r) => plainObj(saved.v[r]) && Object.keys(saved.v[r]).length) : [];
-      return json(200, Object.assign({ state: "bal" }, Dust.view(done.length ? await Dust.addRooms(store, uh, done, now) : await Dust.read(store, uh))));
+      return json(200, Object.assign({ state: "bal" }, Dust.view(done.length ? await Dust.addRooms(store, uh, done, now) : await Dust.read(store, uh)), env.TALK_TEST_FREE === "1" ? { talkFree: true } : {}));
     }
     if (path === "erase") {
       await Dust.erase(store, uh); // 충전한 별가루도 함께 지운다(지우기 전 화면에서 알림)
@@ -391,6 +391,8 @@ async function handle(req, env, store, kakao, now = Date.now()) {
 
 // 새 형식 함수(v2) 연결
 async function respond(req, context, openStore, env = process.env, kakao = null) {
+  // (2026-11-15) 시험 배포(branch-deploy)면 잔액 응답에 talkFree를 붙여 화면이 심층상담을 막지 않게 한다(차감 없음은 함수 talk가 한다)
+  if (context && context.deploy && context.deploy.context === "branch-deploy") env = Object.assign({}, env, { TALK_TEST_FREE: "1" });
   const body = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
   const r = await handle({ method: req.method, url: req.url, body }, env, Pay.storeFrom(openStore), kakao);
   return new Response(r.body, { status: r.status, headers: r.headers });

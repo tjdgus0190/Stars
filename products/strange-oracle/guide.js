@@ -477,12 +477,13 @@
         return setupCard(g);
       };
       // 입력칸 위 한 줄: 가진 별가루(카카오 계정) · 모자라면 충전 · 로그인 전이면 로그인 단추
+      const testFree = () => Boolean(acctView && acctView.talkFree); // (2026-11-15) 시험 배포: 심층상담에 별가루를 쓰지 않음
       const metaHtml = (need) => paidBal == null
         ? `<span>${esc(A.loginToTalk)}</span><button type="button" class="glink" data-js="talk-login">${esc(A.login)}</button>`
-        : `<span>${esc(balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}`;
+        : `<span>${esc(testFree() ? A.testFree || "" : balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}`;
       const room = () => {
         const g = cur, hist = chatOf(g.room);
-        const need = paidBal == null ? 0 : COSTQ - paidBal;
+        const need = paidBal == null || testFree() ? 0 : COSTQ - paidBal;
         const ready = Boolean(resultOf(g.room)) || skipped[g.room];
         return `<div class="groom${entering ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}')">
           <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b><small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
@@ -506,7 +507,7 @@
         if (busy || !cur) return;
         const bar = box.querySelector(".groom__bar");
         if (!bar) return;
-        const need = paidBal == null ? 0 : COSTQ - paidBal;
+        const need = paidBal == null || testFree() ? 0 : COSTQ - paidBal;
         const ready = Boolean(resultOf(cur.room)) || skipped[cur.room];
         bar.querySelector(".groom__meta").innerHTML = metaHtml(need);
         bar.querySelector(".groom__send").disabled = need > 0 || !ready || paidBal == null;
@@ -585,7 +586,7 @@
         // 무료로 모은 별가루를 먼저 쓰고, 모자라면 카카오 계정의 충전한 별가루(서버가 차감)
         // (2026-11-14) 별가루는 카카오 계정에만 — 면담은 계정 별가루에서 서버가 차감
         const lg = readLogin();
-        const paid = Boolean(lg && paidBal != null && paidBal >= COSTQ);
+        const paid = Boolean(lg && paidBal != null && (paidBal >= COSTQ || testFree()));
         if (!paid) { busy = false; draw(); return; }
         const g = cur, roomName = g.room, hist = chatOf(roomName);
         const logBox = box.querySelector("[data-js=talk-log]");
