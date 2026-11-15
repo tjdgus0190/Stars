@@ -16,7 +16,7 @@
   const slugOf = (p) => "c_" + String(p).replace(/^\/|\/$/g, "").replace(/[\/-]/g, "_");
   const landPaths = [].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {})).map((d) => d.path)
     .concat(window.LEGENDS ? [window.LEGENDS.hub.path].concat(Object.values(window.LEGENDS.list).map((d) => d.path)) : ["/legends/"]);
-  const LAND = ["#meta_id"].concat(landPaths.map(slugOf), ["reel_sibyl", "reel_rune", "reel_ogham", "reel_star", "reel_decan", "reel_tzolkin", "reel_saju", "ig_profile", "x_profile", "gads_main", "ad10_guides", "kakao_channel", "ch_welcome", "ch_menu_today", "ch_menu_doors", "ch_menu_talk", "ch_menu_dust", "ch_menu_ny", "ch_auto"]); // (2026-11-14) 카카오톡 채널(환영 메시지·채팅방 메뉴·자동응답) // (2026-11-14) ad10_guides = 10안 「일곱 안내자」(처음 화면 착지)
+  const LAND = ["#meta_id"].concat(landPaths.map(slugOf), ["reel_sibyl", "reel_rune", "reel_ogham", "reel_star", "reel_decan", "reel_tzolkin", "reel_saju", "ig_profile", "x_profile", "gads_main", "ad10_guides", "ad11_saju", "ad12_today", "ad13_talk", "kakao_channel", "ch_welcome", "ch_menu_today", "ch_menu_doors", "ch_menu_talk", "ch_menu_dust", "ch_menu_ny", "ch_auto"]); // (2026-11-14) 카카오톡 채널(환영 메시지·채팅방 메뉴·자동응답) // (2026-11-14) ad10_guides = 10안 「일곱 안내자」(처음 화면 착지)
   const CAMPAIGN = {
     utm_source: ["instagram", "tiktok", "kakao", "x", "google", "meta", "facebook", "fb", "ig", "threads", "naver", "youtube"],
     utm_medium: ["paid_social", "organic", "share", "cpc", "paid", "social", "cpm"],
