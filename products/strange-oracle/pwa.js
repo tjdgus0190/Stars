@@ -16,6 +16,12 @@
     add("meta", { name: "mobile-web-app-capable", content: "yes" });
     add("meta", { name: "apple-mobile-web-app-title", content: "낯선 점술관" });
     add("meta", { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" });
+    // (2026-11-16) 아이폰 실행 첫 화면(흰 화면 대신 어두운 바탕 + 앱 아이콘 → 이어서 intro.js 연출). 기종별 화면 크기
+    [[440, 956, 3], [402, 874, 3], [430, 932, 3], [393, 852, 3], [428, 926, 3], [390, 844, 3], [375, 812, 3], [414, 896, 2], [375, 667, 2]].forEach(([w, h, r]) => add("link", {
+      rel: "apple-touch-startup-image",
+      media: `(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${r}) and (orientation: portrait)`,
+      href: `/products/strange-oracle/img/app/splash/splash-${w * r}x${h * r}.png`,
+    }));
   }
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
   // 설치 창을 설치 페이지에서 쓸 수 있게 미리 받아 둔다(안드로이드 크롬 등)

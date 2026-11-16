@@ -199,7 +199,7 @@ ${fonts.map(([f, sri]) => `  <link rel="stylesheet" href="https://cdn.jsdelivr.n
   <link rel="stylesheet" href="${PB}nav.css" />
   <script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>
   <script>window.GUIDE_PAGE = ${JSON.stringify({ page: name, kind, ga4: GA4 })};</script>
-${scripts.map((s) => `  <script defer src="${s}"></script>`).join("\n")}
+${kind === "home" ? `  <script src="${PB}intro.js"></script>\n` : ""}${scripts.map((s) => `  <script defer src="${s}"></script>`).join("\n")}
 </head>
 <body class="has-tabbar page-${kind} page-${esc(name)}">
 ${sprites}<header class="gtop"><div class="gtop__inner"><button class="nav-toggle" type="button" data-nav="open" aria-label="${esc(N.open)}">${ico("menu")}</button><a class="gtop__brand" href="${esc(N.home)}">${esc(N.brand)}</a><span data-js="dust-slot"></span></div></header>

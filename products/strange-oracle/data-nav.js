@@ -43,6 +43,8 @@ window.NAV = {
     prodHosts: ["strange-oracle.com", "www.strange-oracle.com"],
     install: "/install/",
     icon: "/products/strange-oracle/img/app/icon-480.webp",
+    // (2026-11-16 운영자) 홈 화면 앱을 켤 때의 실행 연출(intro.js)
+    intro: { eyebrow: "STRANGE ORACLE", name: "낯선 점술관", line: "오늘 밤, 일곱 개의 문이 열려요" },
     // 처음 들어왔을 때 한 번 묻는 창
     ask: {
       eyebrow: "STRANGE ORACLE",
