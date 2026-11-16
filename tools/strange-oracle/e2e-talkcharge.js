@@ -33,6 +33,9 @@ const check = (name, ok, extra = "") => { const l = `${ok ? "PASS" : "FAIL"}  ${
     await waitFor("/가진 별가루 10/.test(document.querySelector('.groom__meta')?.textContent || '') && !document.querySelector('.groom__send').disabled", 10000);
     const m0 = await ev("document.querySelector('.groom__meta').textContent");
     check("첫 로그인 10: 두 번 물을 수 있어 미리 알림 없음", !/남았어요/.test(m0) && !document_has_charge(m0), m0);
+    // (2026-11-16) 대화 보관(talkSync)이 꺼진 기본 상태: 동의 카드 없음 · /api/auth/chat 요청 0
+    const sy = await ev("({ card: !!document.querySelector('[data-js=sync-card]'), calls: performance.getEntriesByType('resource').filter((e) => /\\/api\\/auth\\/chat/.test(e.name)).length })");
+    check("대화 보관 꺼짐(기본): 동의 카드 없음 · 보관 요청 0", !sy.card && sy.calls === 0, JSON.stringify(sy));
 
     // 2. 한 번 묻기 → 5 남음 → 「한 번 물을 만큼 남았어요 · 충전하기」
     await ev("(() => { const t = document.querySelector('.groom textarea'); t.value = '올해 일은 어떻게 풀어 가면 좋을까요?'; document.querySelector('.groom__send').click(); return true; })()");

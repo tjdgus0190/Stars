@@ -56,6 +56,7 @@ const DUST_OFF = arg("--dust", "on") === "off";
 const GATE_OFF = arg("--gate", "on") === "off";
 // (2026-11-16) --pwa on: 앱처럼 홈 화면에 두기(PWA)를 켠다. 기본은 끔(data-nav.js 응답의 pwa.mode만 "off" — 기존 시험이 팝업·서비스 워커 요청에 걸리지 않게, 파일은 그대로)
 const PWA_ON = arg("--pwa", "off") === "on";
+const SYNC_ON = arg("--sync", "off") === "on"; // (2026-11-16) 심층상담 대화 보관(talkSync)을 시험으로 켠다
 const PUSH = require("../../netlify/lib/push.js");
 const PUSH_STORE = (() => { const m = new Map(); return { get: async (k) => (m.has(k) ? JSON.parse(m.get(k)) : null), set: async (k, v, o) => { if (o && o.onlyIfNew && m.has(k)) return; m.set(k, JSON.stringify(v)); }, del: async (k) => m.delete(k), keys: async (p) => [...m.keys()].filter((k) => k.startsWith(p)) }; })();
 const MODE = arg("--mode", "off") === "test" ? "test" : "off";
@@ -153,7 +154,7 @@ const server = http.createServer((req, res) => {
   // (21단계) 카카오 로그인 흉내 — test에서만. 시작은 실제 카카오 대신 가짜 동의 화면(/__dev/kakao/authorize)으로, 콜백·claim은 함수 auth의 handle 그대로(가짜 카카오)
   if (PAYMOCK && (rel.startsWith("/api/auth/") || rel === "/__dev/kakao/authorize")) {
     const origin = `http://127.0.0.1:${PORT}`;
-    const authEnv = { PASS_MODE: "test", KAKAO_REST_KEY: "mock-rest-key", PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET, SITE_URL: `${origin}/products/strange-oracle/` };
+    const authEnv = { PASS_MODE: "test", KAKAO_REST_KEY: "mock-rest-key", PASS_SECRET: PAYMOCK.payEnv().PASS_SECRET, SITE_URL: `${origin}/products/strange-oracle/`, TALK_SYNC_DEPLOY: SYNC_ON ? "1" : "" };
     if (rel === "/api/auth/kakao/start") {
       const st = url.searchParams.get("state") || "";
       res.writeHead(/^[0-9a-f]{32}$/.test(st) ? 302 : 400, { Location: `/__dev/kakao/authorize?state=${encodeURIComponent(st)}${url.searchParams.get("ch") === "1" ? "&ch=1" : ""}`, "Cache-Control": "no-store" }).end(); // (2026-11-14) ch=1: 채널 추가 상태 추가 동의
@@ -282,6 +283,7 @@ location.replace("${P}#${to}");
     if (GATE_OFF && /[\\/]products[\\/]strange-oracle[\\/]data(-nav)?\.js$/.test(file)) data = Buffer.from(String(data).replace(/(gate: \{\s*on: )true/, "$1false"));
     // (v1-D) 면담 화면: 시험 모드에서만 켠다(배포판 data-guide.js는 "off")
     if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data-guide\.js$/.test(file)) data = Buffer.from(String(data).replace(/(\btalkMode:\s*)"off"/, '$1"test"'));
+    if (/[\\/]products[\\/]strange-oracle[\\/]data-guide\.js$/.test(file)) data = Buffer.from(String(data).replace(/(\btalkSync:\s*)"[a-z]+"/, SYNC_ON ? '$1"test"' : '$1"off"'));
     send(req, res, TYPES[path.extname(file)] || "application/octet-stream", data);
   });
 });

@@ -242,3 +242,75 @@ test("채널: realKakao — 토큰 scope에 plusfriends가 있을 때만 talk/ch
   assert.deepStrictEqual(await Auth.realKakao(ENV, mk("plusfriends", "BLOCKED")).idOf("c"), { id: "777", ch: false });
   assert.deepStrictEqual(await Auth.realKakao(Object.assign({}, ENV, { KAKAO_CHANNEL_ID: "_other" }), mk("plusfriends", "ADDED")).idOf("c"), { id: "777", ch: false });
 });
+
+// ── (2026-11-16 운영자) 심층상담 대화 보관: 동의한 계정에만 · 암호문 · 방마다 30개 · 지우기·끄기·1년 정리
+const SYNC_ENV = Object.assign({}, ENV, { TALK_SYNC: "live" });
+const chat = (st, body, env = SYNC_ENV, now) => call(st, "POST", "/api/auth/chat", body, null, env, now);
+test("대화 보관: 꺼져 있으면 503 · 로그인 없으면 401 · 동의 전에는 쓰지 않음(409)", async () => {
+  const st = new MemStore();
+  const a = await loginSid(st);
+  assert.strictEqual((await chat(st, { sid: a.sid }, ENV)).status, 503, "TALK_SYNC 없으면 off");
+  assert.strictEqual((await chat(st, { sid: hex() })).status, 401);
+  const g = JSON.parse((await chat(st, { sid: a.sid })).body);
+  assert.deepStrictEqual(g, { on: false, chat: {} });
+  assert.strictEqual((await chat(st, { sid: a.sid, room: "saju", add: { q: "질문", a: "답" } })).status, 409);
+  assert.ok(![...st.map.keys()].some((k) => k.startsWith("chat/")), "동의 전 기록 없음");
+});
+test("대화 보관: 동의 → 덧붙이기 → 다른 기기(새 로그인)에서 그대로 · 저장소에는 암호문만", async () => {
+  const st = new MemStore();
+  const a = await loginSid(st);
+  assert.strictEqual(JSON.parse((await chat(st, { sid: a.sid, consent: true })).body).on, true);
+  assert.strictEqual((await chat(st, { sid: a.sid, room: "saju", add: { q: "올해 일은 어떨까요?", a: "만신이 보기엔 봄에 길이 열려요." } })).status, 200);
+  assert.strictEqual((await chat(st, { sid: a.sid, put: { rune: [{ q: "룬 질문", a: "룬 답" }], saju: [{ q: "덮어쓰기?", a: "아니요" }] } })).status, 200);
+  const b = await loginSid(st); // 같은 카카오 계정, 다른 기기
+  const g = JSON.parse((await chat(st, { sid: b.sid })).body);
+  assert.strictEqual(g.on, true);
+  assert.deepStrictEqual(g.chat.saju, [{ q: "올해 일은 어떨까요?", a: "만신이 보기엔 봄에 길이 열려요." }], "계정에 있던 방은 put으로 덮지 않음");
+  assert.deepStrictEqual(g.chat.rune, [{ q: "룬 질문", a: "룬 답" }]);
+  const dump = [...st.map.values()].join("\n");
+  assert.ok(!dump.includes("올해 일은") && !dump.includes("룬 답") && !dump.includes(KAKAO_ID), "저장소에 문답·회원번호 원문 없음");
+  const other = await loginSid(st, fakeKakao("999"));
+  assert.deepStrictEqual(JSON.parse((await chat(st, { sid: other.sid })).body), { on: false, chat: {} }, "다른 계정은 못 봄");
+});
+test("대화 보관: 방마다 최근 30개 · 길이·방 이름·모양 검사", async () => {
+  const st = new MemStore();
+  const a = await loginSid(st);
+  await chat(st, { sid: a.sid, consent: true });
+  for (let i = 0; i < 33; i++) await chat(st, { sid: a.sid, room: "star", add: { q: "q" + i, a: "a" + i } });
+  const g = JSON.parse((await chat(st, { sid: a.sid })).body);
+  assert.strictEqual(g.chat.star.length, 30);
+  assert.strictEqual(g.chat.star[0].q, "q3");
+  const bad = [
+    { sid: a.sid, room: "nope", add: { q: "a", a: "b" } },
+    { sid: a.sid, room: "star", add: { q: "x".repeat(301), a: "b" } },
+    { sid: a.sid, room: "star", add: { q: "a", a: "x".repeat(1601) } },
+    { sid: a.sid, room: "star", add: { q: "a", a: "b", name: "홍길동" } },
+    { sid: a.sid, room: "star", add: { q: "", a: "b" } },
+    { sid: a.sid, put: { star: [{ q: "a" }] } },
+    { sid: a.sid, birth: "1990-01-01" },
+  ];
+  for (const x of bad) assert.strictEqual((await chat(st, x)).status, 400, JSON.stringify(x).slice(0, 80));
+});
+test("대화 보관: 방 지우기 · 끄기(모두 지움) · 저장한 기록 지우기 · 1년 정리", async () => {
+  const st = new MemStore();
+  const a = await loginSid(st);
+  await chat(st, { sid: a.sid, consent: true });
+  await chat(st, { sid: a.sid, room: "saju", add: { q: "a", a: "b" } });
+  await chat(st, { sid: a.sid, room: "rune", add: { q: "c", a: "d" } });
+  await chat(st, { sid: a.sid, room: "saju", clear: true });
+  let g = JSON.parse((await chat(st, { sid: a.sid })).body);
+  assert.ok(!g.chat.saju && g.chat.rune.length === 1);
+  assert.deepStrictEqual(JSON.parse((await chat(st, { sid: a.sid, consent: false })).body), { on: false, chat: {} });
+  assert.ok(![...st.map.keys()].some((k) => k.startsWith("chat/")), "끄면 기록 없음");
+  await chat(st, { sid: a.sid, consent: true });
+  await chat(st, { sid: a.sid, room: "rune", add: { q: "c", a: "d" } });
+  assert.strictEqual(JSON.parse((await call(st, "POST", "/api/auth/erase", { sid: a.sid })).body).state, "erased");
+  assert.ok(![...st.map.keys()].some((k) => k.startsWith("chat/")), "저장한 기록 지우기에 함께");
+  const b = await loginSid(st);
+  await chat(st, { sid: b.sid, consent: true });
+  const list = async (pre) => [...st.map.keys()].filter((k) => k.startsWith(pre));
+  await Auth.sweep(st, list, Date.now() + Auth.KEEP_MS - 60000);
+  assert.ok((await list("chat/")).length === 1, "1년 안은 그대로");
+  await Auth.sweep(st, list, Date.now() + Auth.KEEP_MS + 60000);
+  assert.strictEqual((await list("chat/")).length, 0, "마지막 상담 뒤 1년 지나면 지움");
+});

@@ -665,7 +665,7 @@
         const age = Date.now() - enterAt;
         return `<div class="groom${age < 420 ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}');--ed:-${Math.max(0, age)}ms">
           <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b>${bondTag(g.room)}<small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
-          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${doorCard(g)}${roomNote(g)}${hist.length && g.hadHist ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
+          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${doorCard(g)}${roomNote(g)}${syncCard()}${hist.length && g.hadHist ? `<p class="groom__note">${esc(sync === "on" ? SY.kept : A.kept)}</p>` : ""}
             ${hist.map((h) => say("me", h.q) + sayGuide(h.a)).join("")}</div>
           <form class="groom__bar" data-js="talk-form" novalidate autocomplete="off">
             <p class="groom__meta">${metaHtml(need)}</p>
@@ -713,6 +713,39 @@
         if (!cur || cur.room !== room0) return;
         if (r) setR(room0, r); else { setupMsg = SU.cant; draw(); }
       };
+      // ── (2026-11-16 운영자) 카카오 계정에 대화 보관: 동의한 계정만. 들어올 때 계정의 대화를 받아 이 탭 기록에 합치고, 답을 받을 때마다 한 턴씩 덧붙인다
+      //   계정에 있는 방은 계정 것이 우선(다른 기기에서 이어진 대화), 이 탭에만 있는 방은 보관을 켤 때 한 번 올린다. talkSync "off"면 아무것도 보내지 않는다
+      const SYNC = P.talkSync === "live" || (P.talkSync === "test" && !((((window.NAV || {}).pwa || {}).prodHosts) || ["strange-oracle.com", "www.strange-oracle.com"]).includes(location.hostname));
+      const SY = A.sync || {};
+      let sync = null; // null 모름·꺼짐(서버 없음) | "off" 아직 동의 안 함 | "on"
+      let syncMsg = "";
+      const syncUp = () => { const up = {}; for (const g of X.guides) { const l = chatOf(g.room); if (l.length) up[g.room] = l.slice(-30).map((h) => ({ q: String(h.q).slice(0, 300), a: String(h.a).slice(0, 1600) })); } return up; };
+      const syncLoad = async () => {
+        const lg = readLogin();
+        if (!SYNC || !lg) { sync = null; return; }
+        const r = await post("/api/auth/chat", { sid: lg.sid });
+        if (r.status !== 200 || !r.j) { sync = null; return; }
+        sync = r.j.on ? "on" : "off";
+        if (sync !== "on") return;
+        const acct = r.j.chat || {};
+        let changed = false;
+        const up = {};
+        for (const g of X.guides) {
+          const a = Array.isArray(acct[g.room]) ? acct[g.room].filter((h) => h && typeof h.q === "string" && typeof h.a === "string") : [];
+          if (a.length) { if (JSON.stringify(a) !== JSON.stringify(chatOf(g.room))) { TS.chat[g.room] = a.slice(-30); changed = true; } }
+          else if (chatOf(g.room).length) up[g.room] = syncUp()[g.room];
+        }
+        if (changed) saveT();
+        if (Object.keys(up).length) post("/api/auth/chat", { sid: lg.sid, put: up });
+      };
+      const syncAdd = (room, h) => { const lg = readLogin(); if (sync !== "on" || !lg) return; post("/api/auth/chat", { sid: lg.sid, room, add: h }).then((r) => { if (r.status === 409) sync = "off"; }); };
+      const syncCard = () => {
+        if (!SYNC || paidBal == null || sync !== "off" || TS.syncNo) return syncMsg ? `<p class="groom__note" role="status">${esc(syncMsg)}</p>` : "";
+        return `<section class="gsync" data-js="sync-card"><b>${esc(SY.head)}</b><p>${esc(SY.body)}</p><p class="gsync__short">${esc(SY.short)}</p>
+          <details class="gsync__more"><summary>${esc(SY.more)}</summary><ul>${(SY.detail || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></details>
+          <label class="gsync__agree"><input type="checkbox" data-js="sync-agree"> <span>${esc(SY.agree)}</span></label>
+          <div class="gsync__btns"><button type="button" class="gbtn" data-js="sync-yes" disabled>${esc(SY.yes)}</button><button type="button" class="glink" data-js="sync-no">${esc(SY.no)}</button></div>${syncMsg ? `<p class="gerror" role="alert">${esc(syncMsg)}</p>` : ""}</section>`;
+      };
       // ── (2026-11-16) 화면 안 충전 창: 별가루 페이지와 같은 충전 칸(makeShop). 결제창에 다녀오면 이 방·적던 질문으로 돌아온다
       const RES_KEY = "strange-oracle-talk-resume"; // 이 탭 sessionStorage: 결제 뒤 다시 열 방 이름 · 적던 질문(대화 기록과 같은 6장 sessionStorage 예외)
       const sheet = document.createElement("div");
@@ -757,8 +790,22 @@
         if (!cur || busy) return;
         if (e.target.closest("[data-js=talk-login]")) { try { sessionStorage.setItem("strange-oracle-talk-back", cur.room); } catch (x) { /* 무시 */ } return kakaoLogin("talk"); }
         if (e.target.closest("[data-js=talk-clear]")) {
-          if (!window.confirm(A.clearAsk)) return;
+          if (!window.confirm(sync === "on" ? SY.clearAsk : A.clearAsk)) return;
+          if (sync === "on" && readLogin()) post("/api/auth/chat", { sid: readLogin().sid, room: cur.room, clear: true });
           TS.chat[cur.room] = []; delete TS.r[cur.room]; saveT(); draw(); return;
+        }
+        if (e.target.closest("[data-js=sync-no]")) { TS.syncNo = true; saveT(); syncMsg = ""; return draw(); }
+        if (e.target.closest("[data-js=sync-yes]")) {
+          const ag = box.querySelector("[data-js=sync-agree]"), lg = readLogin();
+          if (!ag || !ag.checked || !lg) return;
+          const r = await post("/api/auth/chat", { sid: lg.sid, consent: true });
+          if (r.status === 401) { dropLogin(); paidBal = null; syncMsg = ""; return draw(); }
+          if (r.status !== 200) { syncMsg = SY.fail; return draw(); }
+          sync = "on"; syncMsg = SY.done;
+          track("so_talk", { room: cur.room, step: "sync_on" });
+          const up = syncUp();
+          if (Object.keys(up).length) await post("/api/auth/chat", { sid: lg.sid, put: up });
+          return draw();
         }
         if (e.target.closest("[data-js=setup-change]")) { delete TS.r[cur.room]; delete skipped[cur.room]; saveT(); draw(); return; }
         if (e.target.closest("[data-js=setup-skip]")) { skipped[cur.room] = true; draw(); return; }
@@ -830,6 +877,7 @@
           hist.push({ q, a });
           if (hist.length > 30) hist.splice(0, hist.length - 30);
           saveT();
+          syncAdd(roomName, { q: q.slice(0, 300), a });
           track("so_talk", { room: roomName, step: "answer" });
           if (wait) {
             const parts = partsOf(a);
@@ -860,11 +908,17 @@
           const t = box.querySelector(".groom textarea"); if (t) t.value = q;
         }
       });
+      box.addEventListener("change", (e) => { if (e.target.matches && e.target.matches("[data-js=sync-agree]")) { const y = box.querySelector("[data-js=sync-yes]"); if (y) y.disabled = !e.target.checked; } });
       box.addEventListener("input", (e) => { if (e.target.name === "q") { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; } });
       // (2026-11-14 운영자) Enter는 줄바꿈. 보내기는 보내기 단추(PC에서는 Ctrl·Cmd + Enter도)
       box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
       document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!sheet.hidden) { closeCharge(); return; } if (cur && !busy) leaveRoom(); });
-      loadPaid().then(refresh);
+      loadPaid().then(async () => {
+        refresh();
+        await syncLoad().catch(() => { sync = null; });
+        if (busy) return;
+        if (cur) { const t = box.querySelector(".groom textarea"); const keep = t ? t.value : ""; cur.hadHist = chatOf(cur.room).length > 0; draw(); const t2 = box.querySelector(".groom textarea"); if (t2) t2.value = keep; } else draw();
+      });
       document.addEventListener("dust:change", refresh);
       draw();
       // 충전 결제에서 돌아온 경우(#paid 또는 확인 중인 결제): 그 방·적던 질문을 다시 열고 충전 창에서 결제를 확인한다
@@ -943,19 +997,33 @@
           ${row(M.today, today ? esc(M.todayDone) : `${esc(M.todayNot)} · <a href="/today/">${esc(M.todayGo)}</a>`)}
           ${row(M.books, hasBook || hasNy ? [hasBook ? `<a href="${ROOM_URL}#report">${esc(M.book)}</a>` : "", hasNy ? `<a href="${ROOM_URL}#ny-hub">${esc(M.ny)}</a>` : ""].filter(Boolean).join(" · ") : esc(M.booksNone))}
           ${row(M.saved, esc(me && me.data ? M.savedYes : M.savedNo))}
+          ${syncOn === null ? "" : row(M.syncHead, syncOn ? `${esc(M.syncOn)} · <button type="button" class="glink" data-js="me-sync-off">${esc(M.syncStop)}</button>` : esc(syncMsgMe || M.syncOff))}
         </dl></section>`;
         // 로그아웃
         h += `<section class="gme-out"><h2>${esc(M.logoutHead)}</h2><p class="gnote">${esc(M.logoutNote)}</p><div class="gactions"><button class="gbtn ghost" type="button" data-js="me-logout">${esc(M.logout)}</button></div></section>`;
         box.innerHTML = h;
       };
       box.innerHTML = `<p class="gnote gcenter">${esc(M.loading)}</p>`;
+      const SYNC_ME = ((m) => m === "live" || (m === "test" && !((((window.NAV || {}).pwa || {}).prodHosts) || ["strange-oracle.com", "www.strange-oracle.com"]).includes(location.hostname)))((G.apps.talk || {}).talkSync); // (2026-11-16) 대화 보관이 켜져 있을 때만 줄을 보인다
+      let syncOn = null, syncMsgMe = "", lastMe = null, lastVisits = {};
       box.addEventListener("click", async (e) => {
+        if (e.target.closest("[data-js=me-sync-off]")) {
+          if (!window.confirm(M.syncStopAsk)) return;
+          const lg = readLogin();
+          if (!lg) return;
+          const r = await post("/api/auth/chat", { sid: lg.sid, consent: false });
+          if (r.status !== 200) { window.alert(M.fail); return; }
+          syncOn = false; syncMsgMe = M.syncStopped;
+          try { sessionStorage.removeItem("strange-oracle-talk"); } catch (x) { /* 무시 */ }
+          draw(lastMe, lastVisits);
+          return;
+        }
         if (!e.target.closest("[data-js=me-logout]")) return;
         if (!window.confirm(M.logoutAsk)) return;
         const lg = readLogin();
         if (lg) await post("/api/auth/logout", { sid: lg.sid }); // 서버의 로그인 표도 지운다(실패해도 이 기기에서는 로그아웃)
         dropLogin();
-        try { sessionStorage.removeItem("strange-oracle-talk-resume"); } catch (x) { /* 무시 */ }
+        try { sessionStorage.removeItem("strange-oracle-talk-resume"); if (syncOn) sessionStorage.removeItem("strange-oracle-talk"); } catch (x) { /* 무시 */ } // 계정에서 받아 온 대화는 이 기기에 남기지 않는다
         track("so_auth", { step: "logout" });
         location.href = "/";
       });
@@ -970,6 +1038,8 @@
         const need = ROOMS.filter((x) => visits[x]);
         await Promise.all(need.map((x) => loadRoom(x).catch(() => null)));
         if (!me && r.status !== 200) { box.innerHTML = `<p class="gerror gcenter">${esc(M.fail)}</p>`; return; }
+        if (SYNC_ME) { const c = await post("/api/auth/chat", { sid: lg.sid }); syncOn = c.status === 200 && c.j ? Boolean(c.j.on) : null; }
+        lastMe = me; lastVisits = visits;
         draw(me, visits);
       })();
     }

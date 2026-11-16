@@ -234,6 +234,14 @@ let count = 0;
   const pm = /pwa: \{\s*mode: "([a-z]+)"/.exec(navSrc);
   if (pm && pm[1] === "live" && !/웹 푸시 알림에 한함/.test(fs.readFileSync(path.join(ROOT, "CLAUDE.md"), "utf8"))) fails.push("⑳ data-nav.js pwa.mode가 live인데 CLAUDE.md에 웹 푸시 알림 예외(specs/claude-md-push.md)가 없음");
 }
+// ㉑ (2026-11-16) 심층상담 대화 보관: data-guide.js talkSync가 "off"가 아니면 CLAUDE.md에 「심층상담 대화 보관에 한함」 예외(specs/claude-md-talk-sync.md)가 있어야 한다
+{
+  const g = fs.readFileSync(path.join(ROOT, "products", "strange-oracle", "data-guide.js"), "utf8");
+  const sm = (g.match(/\btalkSync:\s*"(\w+)"/) || [])[1];
+  if (!sm) fails.push("㉑ data-guide.js에 talkSync 값이 없음");
+  else if (!["off", "test", "live"].includes(sm)) fails.push(`㉑ data-guide.js talkSync는 "off"|"test"|"live"만 (지금 "${sm}")`);
+  else if (sm !== "off" && !/심층상담 대화 보관에 한함/.test(fs.readFileSync(path.join(ROOT, "CLAUDE.md"), "utf8"))) fails.push(`㉑ data-guide.js talkSync "${sm}" — CLAUDE.md에 심층상담 대화 보관 예외가 없음. 운영자가 specs/claude-md-talk-sync.md를 붙인 뒤에 켤 것`);
+}
 // ⑲ (2026-11-13 v1-D) 안내자 면담: 공개 화면의 talkMode가 "off"가 아니면, 운영자가 CLAUDE.md에 면담 예외(3장·6장, specs/claude-md-v1-exceptions.md)를
 //    붙여 넣은 뒤여야 한다. 아니면 질문 글을 서버로 보내는 화면이 배포되지 않게 빌드를 멈춘다.
 {

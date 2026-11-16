@@ -320,6 +320,7 @@ async function account(path, body, env, store, now) {
     if (path === "erase") {
       await Dust.erase(store, uh); // 충전한 별가루도 함께 지운다(지우기 전 화면에서 알림)
       await store.del(K);
+      await store.del("chat/" + uh); // (2026-11-16) 보관한 심층상담 대화도
       await store.del("sess/" + sha(b.sid));
       return json(200, { state: "erased" });
     }
@@ -359,14 +360,55 @@ async function account(path, body, env, store, now) {
     return json(503, { error: "store" });
   }
 }
+// ── (2026-11-16 운영자) 심층상담 대화 보관: 카카오 계정에 방별 문답을 암호문으로. 이용자가 「보관하기」를 고른 계정만(on).
+//   chat/<uh> = { enc: AES-GCM({ 방 이름: [{ q, a }] }), on: true, at }. 방마다 최근 CHAT_TURNS개 · 질문 300자 · 답 1,600자까지.
+//   { sid } → { on, chat } · { sid, consent: true } → 보관 켬 · { sid, consent: false } → 끄고 보관한 대화 지움
+//   { sid, room, add: { q, a } } → 그 방에 한 턴 덧붙임 · { sid, room, clear: true } → 그 방 대화 지움 · { sid, put: { 방: [턴…] } } → 처음 켤 때 이 기기 대화 올리기
+const CHAT_ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
+const CHAT_TURNS = 30, CHAT_MAX = 120000;
+const turnOk = (t) => plainObj(t) && Object.keys(t).every((k) => k === "q" || k === "a") && typeof t.q === "string" && typeof t.a === "string" && t.q.trim() && t.a.trim() && t.q.length <= 300 && t.a.length <= 1600;
+async function chat(body, env, store, now) {
+  if (!(env.TALK_SYNC === "live" || env.TALK_SYNC_DEPLOY === "1")) return json(503, { error: "off" }); // 켜는 조건: 운영 TALK_SYNC=live(CLAUDE.md 예외를 넣은 뒤) · 시험 배포
+  if (String(body || "").length > CHAT_MAX) return json(400, { error: "bad" });
+  let b = null;
+  try { b = JSON.parse(String(body || "")); } catch (e) { b = null; }
+  if (!plainObj(b) || Object.keys(b).some((k) => !["sid", "consent", "room", "add", "clear", "put"].includes(k))) return json(400, { error: "bad" });
+  if (b.room != null && !CHAT_ROOMS.includes(b.room)) return json(400, { error: "bad" });
+  try {
+    const uh = await sessionOf(store, b.sid, now);
+    if (!uh) return json(401, { error: "session" });
+    const K = "chat/" + uh;
+    const rec = (await store.get(K)) || null;
+    let data = {};
+    if (rec && rec.enc) { try { data = JSON.parse(open(env.PASS_SECRET, rec.enc)); } catch (e) { data = {}; } }
+    const write = async (on) => { await store.set(K, { enc: seal(env.PASS_SECRET, JSON.stringify(data)), on, at: new Date(now).toISOString() }); };
+    if (b.consent === false) { await store.del(K); return json(200, { on: false, chat: {} }); }
+    if (b.consent === true) { await write(true); return json(200, { on: true, chat: data }); }
+    const on = Boolean(rec && rec.on);
+    if (b.add == null && b.clear == null && b.put == null) return json(200, { on, chat: on ? data : {} });
+    if (!on) return json(409, { error: "off" }); // 보관을 켜지 않은 계정에는 쓰지 않는다
+    if (b.put != null) {
+      if (!plainObj(b.put) || Object.keys(b.put).some((r) => !CHAT_ROOMS.includes(r) || !Array.isArray(b.put[r]) || !b.put[r].every(turnOk))) return json(400, { error: "bad" });
+      for (const r of Object.keys(b.put)) if (!(data[r] || []).length) data[r] = b.put[r].slice(-CHAT_TURNS); // 계정에 이미 있는 방은 그대로
+    } else if (b.clear === true && b.room) {
+      delete data[b.room];
+    } else if (b.add != null && b.room && turnOk(b.add)) {
+      data[b.room] = (data[b.room] || []).concat([{ q: b.add.q, a: b.add.a }]).slice(-CHAT_TURNS);
+    } else return json(400, { error: "bad" });
+    await write(true);
+    return json(200, { on: true, n: (data[b.room] || []).length });
+  } catch (e) {
+    return json(503, { error: "store" });
+  }
+}
 // 하루 한 번(함수 auth-sweep): 지난 표·세션·1년 지난 기록 지우기. list = 저장소의 prefix 목록 함수(키 배열)
 async function sweep(store, list, now = Date.now()) {
   let n = 0;
-  for (const pre of ["ticket/", "sess/", "kakao/", "keep/", "dust/"]) { // (2026-10-28) keep/ = 열람 코드에 담아 둔 결과 암호문(함수 book), 마지막 저장 뒤 1년
+  for (const pre of ["ticket/", "sess/", "kakao/", "keep/", "dust/", "chat/"]) { // (2026-11-16) chat/ = 보관한 심층상담 대화, 마지막 대화 뒤 1년 // (2026-10-28) keep/ = 열람 코드에 담아 둔 결과 암호문(함수 book), 마지막 저장 뒤 1년
     for (const k of await list(pre)) {
       const r = await store.get(k);
       // dust/(충전한 별가루)는 유효기간이 없다(운영자 2026-11-13) — 잔액이 남은 기록은 지우지 않고, 잔액 0인 기록만 마지막 이용 뒤 1년에 지운다
-      const gone = !r || (pre === "dust/" ? (r.bal || 0) === 0 && (!r.at || Date.parse(r.at) + KEEP_MS < now) : pre === "kakao/" || pre === "keep/" ? !r.at || Date.parse(r.at) + KEEP_MS < now : !(r.exp > now));
+      const gone = !r || (pre === "dust/" ? (r.bal || 0) === 0 && (!r.at || Date.parse(r.at) + KEEP_MS < now) : pre === "kakao/" || pre === "keep/" || pre === "chat/" ? !r.at || Date.parse(r.at) + KEEP_MS < now : !(r.exp > now));
       if (gone) {
         await store.del(k);
         n++;
@@ -384,6 +426,7 @@ async function handle(req, env, store, kakao, now = Date.now()) {
   if (p.endsWith("/api/auth/kakao/start") && req.method === "GET") return start(url, env);
   if (p.endsWith("/api/auth/kakao/callback") && req.method === "GET") return callback(url, env, store, kakao || realKakao(env, globalThis.fetch), now);
   if (p.endsWith("/api/auth/claim") && req.method === "POST") return claim(req.body, env, store, now);
+  if (p.endsWith("/api/auth/chat") && req.method === "POST") return chat(req.body, env, store, now); // (2026-11-16) 심층상담 대화 보관
   const m = /\/api\/auth\/(me|save|logout|erase|dust)$/.exec(p);
   if (m && req.method === "POST") return account(m[1], req.body, env, store, now);
   return json(404, { error: "route" });
@@ -392,7 +435,7 @@ async function handle(req, env, store, kakao, now = Date.now()) {
 // 새 형식 함수(v2) 연결
 async function respond(req, context, openStore, env = process.env, kakao = null) {
   // (2026-11-15) 시험 배포(branch-deploy)면 잔액 응답에 talkFree를 붙여 화면이 심층상담을 막지 않게 한다(차감 없음은 함수 talk가 한다)
-  if (context && context.deploy && context.deploy.context === "branch-deploy") env = Object.assign({}, env, { TALK_TEST_FREE: "1" });
+  if (context && context.deploy && context.deploy.context === "branch-deploy") env = Object.assign({}, env, { TALK_TEST_FREE: "1", TALK_SYNC_DEPLOY: "1" });
   const body = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
   const r = await handle({ method: req.method, url: req.url, body }, env, Pay.storeFrom(openStore), kakao);
   return new Response(r.body, { status: r.status, headers: r.headers });

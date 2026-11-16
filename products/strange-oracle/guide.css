@@ -521,6 +521,20 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .gdoor__btns { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .gdoor__btns .gbtn { margin: 0; padding: 9px 16px; font-size: 0.9rem; }
 .gdoor small { display: block; margin-top: 8px; font-size: 0.75rem; color: var(--c-text-faint); }
+/* (2026-11-16) 카카오 계정에 대화 보관 — 동의 카드 */
+.gsync { margin: 10px 0 12px; padding: 14px 16px; border-radius: 16px; border: 1px solid oklch(0.6 0.06 285 / 0.6); background: linear-gradient(160deg, oklch(0.22 0.05 285 / 0.75), oklch(0.15 0.035 285 / 0.9)); font-family: var(--font-sans); }
+.gsync b { display: block; color: oklch(0.9 0.1 85); font-family: var(--font-serif); font-size: 1rem; }
+.gsync p { margin: 6px 0 4px; font-size: 0.875rem; color: var(--c-text-strong); }
+.gsync .gsync__short { font-size: 0.8125rem; color: var(--c-text-soft, oklch(0.8 0.03 285)); }
+.gsync__more { margin: 4px 0 8px; font-size: 0.8125rem; color: var(--c-text-soft, oklch(0.8 0.03 285)); }
+.gsync__more summary { cursor: pointer; color: oklch(0.86 0.08 85); }
+.gsync__more ul { margin: 6px 0 0; padding-left: 18px; }
+.gsync__more li { margin: 3px 0; }
+.gsync__agree { display: flex; align-items: flex-start; gap: 8px; margin: 6px 0 10px; font-size: 0.8125rem; color: var(--c-text-strong); cursor: pointer; }
+.gsync__agree input { flex: none; width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--gold); }
+.gsync__btns { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.gsync__btns .gbtn { margin: 0; padding: 9px 16px; font-size: 0.9rem; }
+.gsync__btns .gbtn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* (2026-11-16 운영자) 창이 열리고 닫힐 때 스르륵 */
 .groom.is-enter { animation: groom-in 0.42s cubic-bezier(0.2, 0.8, 0.2, 1); }
