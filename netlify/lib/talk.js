@@ -167,6 +167,8 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   let rooms = [];
   if (uh) { try { rooms = (await Dust.read(payStore, uh)).rooms || []; } catch (e) { rooms = []; } }
   const bond = { kind: rooms.includes(p.room) ? "known" : p.r ? "new" : "none", doors: rooms.length };
+  // (시험 전용) TALK_EVAL_KEY가 맞을 때만 x-talk-eval-bond 머리로 손님 단계를 정해 볼 수 있다(실모델 말투 시험용 — 로그인 없이 단골을 흉내). 운영 이용자에겐 영향 없음
+  if (evalOk && /^(known|new|none)(:[0-7])?$/.test(String(req.evalBond || ""))) { const [k, d] = String(req.evalBond).split(":"); bond.kind = k; bond.doors = Number(d || (k === "known" ? 1 : 0)); }
   const model = modelOf(env.TALK_MODEL);
   const params = Prompt.build(p, model, bond);
   let msg;
@@ -216,7 +218,7 @@ const testEnv = (env, context) => (context && context.deploy && context.deploy.c
 async function respond(req, context, openStore, env = process.env, openPay = null, Anthropic = null) {
   env = testEnv(env, context);
   const body = req.method === "POST" ? await req.text() : "";
-  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown"), evalKey: req.headers.get("x-talk-eval-key") || "" }, env, storeFrom(openStore), Date.now(), Anthropic ? anthropicLlmWith(Anthropic) : async () => { throw new Error("sdk"); }, openPay ? Pay.storeFrom(openPay) : null);
+  const r = await handle({ method: req.method, body, ip: String((context && context.ip) || "unknown"), evalKey: req.headers.get("x-talk-eval-key") || "", evalBond: req.headers.get("x-talk-eval-bond") || "" }, env, storeFrom(openStore), Date.now(), Anthropic ? anthropicLlmWith(Anthropic) : async () => { throw new Error("sdk"); }, openPay ? Pay.storeFrom(openPay) : null);
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
 
