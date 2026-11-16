@@ -270,3 +270,28 @@ test("심층상담: 시험 배포(TALK_TEST_FREE)면 잔액 0이어도 답하고
   assert.strictEqual((await view(Object.assign({}, ENV, { TALK_TEST_FREE: "1" }))).talkFree, true);
   assert.strictEqual((await view(ENV)).talkFree, undefined);
 });
+
+// (2026-11-16 운영자) 손님과의 사이: 그 방 문을 지나온 계정이면 단골, 결과만 계산해 왔으면 초면 — 서버가 계정 도감으로 정한다(화면 값 안 믿음)
+test("심층상담 손님과의 사이: 도감에 그 방이 있으면 단골(다시 온 손님) · 없고 결과만 있으면 초면 · 결과 없으면 결과 없음", async () => {
+  const pay_ = new MemStore();
+  const talkStore = new MemStore();
+  let seen = "";
+  const llm = async (params) => { seen = params.system[1].text; return { stop_reason: "end_turn", content: [{ type: "text", text: "답" }], usage: { input_tokens: 10, output_tokens: 10 } }; };
+  const { sid, uh } = await login(pay_);
+  const env = { TALK_MODE: "test", ANTHROPIC_API_KEY: "x", TALK_MONTHLY_USD: "5", TALK_TEST_FREE: "1" };
+  const ask = (extra) => Talk.handle({ method: "POST", body: JSON.stringify(Object.assign({ room: "saju", q: "물음", sid }, extra)), ip: "8.8.8.1" }, env, talkStore, NOW, llm, pay_);
+  assert.strictEqual((await ask({ r: { s: 0 } })).status, 200);
+  assert.ok(/처음 만난 손님\(초면\)/.test(seen) && !/다시 온 손님/.test(seen));
+  await ask({});
+  assert.ok(/처음 만난 손님\(결과 없음\)/.test(seen));
+  await Dust.addRooms(pay_, uh, ["saju"], NOW);
+  await ask({ r: { s: 0 } });
+  assert.ok(/다시 온 손님\(단골\)/.test(seen) && /위 결과는 그때 나온 것/.test(seen) && /첫 답에서 한 번/.test(seen));
+  await ask({ r: { s: 0 }, hist: [{ q: "앞 질문", a: "앞 답" }] });
+  assert.ok(/이미 인사는 했다/.test(seen));
+  await ask({ room: "ogham", r: { i: 1 } }); // 다른 방은 문을 안 지났으면 초면
+  assert.ok(/처음 만난 손님\(초면\)/.test(seen));
+  // 로그인 없이(무료 몫)는 계정을 모르니 단골이 될 수 없다
+  await Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", r: { s: 0 }, q: "물음" }), ip: "8.8.8.2" }, env, talkStore, NOW, llm, pay_);
+  assert.ok(/처음 만난 손님\(초면\)/.test(seen));
+});

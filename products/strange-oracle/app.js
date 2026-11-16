@@ -7215,6 +7215,7 @@
     first = pr.first;
     payAfter = pr.after || null;
   } else if (BOOK_ON && (["report", "deeper", "unseal", "preview"].includes(hash) || oldReceipt)) first = hash === "deeper" ? "deeper" : hash === "preview" ? "preview" : "report";
+  else if (!filledRooms().length && CHAPTER_ORDER.includes(hash) && isUnlocked(hash)) first = roomTarget(hash); // (2026-11-16) 심층상담 「문 열기」: 처음 탭이라도 열 수 있는 방이면 바로
   else if (filledRooms().length && hash) {
     if (hash === "story") first = "story";
     else if (CHAPTER_ORDER.includes(hash)) first = roomTarget(hash);

@@ -637,13 +637,27 @@
         const charge = (t) => `<button type="button" class="glink" data-js="talk-charge">${esc(t)}</button>`;
         return `<span>${esc(testFree() ? A.testFree || "" : balLine())}${low ? " · " + esc(A.lowOne) : ""}</span>${need > 0 ? charge(fill(A.short, { need })) : low ? charge(A.charge) : `<span>${esc(A.privacy)}</span>`}`;
       };
+      // (2026-11-16 운영자) 손님과의 사이: 그 방 문을 지나온 계정(도감 카드)이면 단골, 아니면 첫 만남 — 서버도 같은 기록으로 정한다
+      const ORDER = X.guides.map((x) => x.room);
+      const known = (r) => Boolean(acctView && Array.isArray(acctView.rooms) && acctView.rooms.includes(r));
+      const bondTag = (r) => (paidBal == null ? "" : known(r)
+        ? `<em class="gbond is-known">${esc((acctView.rooms || []).length >= 7 ? A.bondSeal : A.bondKnown)}</em>`
+        : `<button type="button" class="gbond is-new" data-js="door-show">${esc(A.bondNew)}</button>`);
+      if (!TS.door) TS.door = {};
+      const doorCard = (g) => {
+        if (paidBal == null || known(g.room) || TS.door[g.room]) return "";
+        const done = Object.keys(tab.visits || {}), next = ORDER.find((r) => !done.includes(r));
+        const direct = next === g.room;
+        return `<section class="gdoor" data-js="door-card"><b>${esc(fill(A.doorHead, { room: g.roomName }))}</b><p>${esc(fill(A.doorBody, { name: g.name, iga: iga(g.name) }))}</p><ul>${A.doorPoints.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+          <div class="gdoor__btns"><a class="gbtn" href="${ROOM_URL}${direct ? "#" + g.room : ""}">${esc(direct ? fill(A.doorGo, { room: g.roomName }) : A.doorGoHub)}</a><button type="button" class="glink" data-js="door-later">${esc(A.doorLater)}</button></div>${direct ? "" : `<small>${esc(A.doorOrder)}</small>`}</section>`;
+      };
       const room = () => {
         const g = cur, hist = chatOf(g.room);
         const need = paidBal == null || testFree() ? 0 : COSTQ - paidBal;
         const ready = Boolean(resultOf(g.room)) || skipped[g.room];
         return `<div class="groom${entering ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}')">
-          <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b><small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
-          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${roomNote(g)}${hist.length && g.hadHist ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
+          <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b>${bondTag(g.room)}<small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
+          <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${doorCard(g)}${roomNote(g)}${hist.length && g.hadHist ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
             ${hist.map((h) => say("me", h.q) + sayGuide(h.a)).join("")}</div>
           <form class="groom__bar" data-js="talk-form" novalidate autocomplete="off">
             <p class="groom__meta">${metaHtml(need)}</p>
@@ -716,6 +730,8 @@
       sheet.addEventListener("click", (e) => { if (e.target.closest("[data-js=charge-close]")) closeCharge(); });
       box.addEventListener("click", async (e) => {
         if (e.target.closest("[data-js=talk-charge]")) return openCharge();
+        if (cur && e.target.closest("[data-js=door-later]")) { TS.door[cur.room] = true; saveT(); return draw(); }
+        if (cur && e.target.closest("[data-js=door-show]")) { delete TS.door[cur.room]; saveT(); draw(); const c = box.querySelector("[data-js=door-card]"); if (c) c.scrollIntoView({ block: "nearest" }); return; }
         const b = e.target.closest("[data-js=talk-pick]");
         if (b && !busy) { if (on) enter(b.dataset.room); return; }
         if (e.target.closest("[data-js=talk-leave]") && !busy) { cur = null; draw(); return; }

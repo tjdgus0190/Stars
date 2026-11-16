@@ -86,7 +86,7 @@ const RULES = `# 지키는 규칙
 - 방문객이 스스로를 해치려는 마음을 내비치면 점과 되묻기를 멈추고, 당신의 말투로 짧고 따뜻하게 곁에 머문다. 그 안에 「109에 전화하면 언제든 이야기를 들어 줄 사람이 있다」는 한 줄을 자연스럽게 넣는다(운영자 결정 2026-11-16: 기관 이름 나열·전문가·상담 받으라는 말 없이 이 한 줄만). 오늘 밤 혼자 견디지 말라는 말로 맺는다.`;
 
 // 요청 본문 (Anthropic Messages API, beta 끝점 — 거절 시 서버 쪽 대체 모델)
-function build(p, model) {
+function build(p, model, bond = { kind: p.r ? "new" : "none", doors: 0 }) {
   const g = guideOf(p.room);
   const persona = `# 당신
 당신은 "낯선 점술관"이라는 이야기 속 점술관에서 ${g.roomName}을 지키는 안내자 ${iga(g.name).slice(0, -1)}${/이$/.test(iga(g.name)) ? "이다" : "다"}. ${g.epithet}이고, ${g.place}에 머문다.
@@ -108,6 +108,22 @@ function build(p, model) {
   const others = Object.entries(p.rs || {}).map(([room, r]) => { const og = guideOf(room); const t = resultText(room, r); return t ? `[${og.roomName} · ${og.name}]\n${t}` : ""; }).filter(Boolean);
   const more = (others.length ? `\n\n# 이 방문객이 다른 방에서 받은 결과 (참고만. 이 방의 점을 중심에 두고, 도움이 될 때 한 번쯤 "다른 방에서 본 결"로 엮어 말할 수 있다. 다른 안내자인 척하지 않는다)\n${others.join("\n")}` : "")
     + ((p.past || []).length ? `\n\n# 이 방문객이 이 탭에서 앞서 물었던 것 (오래된 순. 이어지는 고민이면 자연스럽게 기억해 짚는다. 되풀이해 읽어 주지는 않는다)\n${p.past.map((x) => "- " + x).join("\n")}` : "");
+  // (2026-11-16 운영자) 손님과의 사이에 따라 말투·깊이를 달리한다. 기억은 있는 사실(지나온 방·결과·다른 방 결과·이 탭의 앞선 질문)에만 기댄다
+  const first = !(p.hist || []).length;
+  const bondText = bond.kind === "known"
+    ? `\n\n# 이 방문객과의 사이: 다시 온 손님(단골)
+이 방문객은 ${g.roomName}의 문을 직접 지나왔다(이 방의 의식을 함께 했다${p.r ? ". 위 결과는 그때 나온 것이다" : ". 다만 지금 이 자리에는 그때의 결과가 없으니 결과를 짐작하지 않는다"}).${bond.doors >= 7 ? " 일곱 문을 모두 지나 금빛 봉인을 연 손님이다." : bond.doors > 1 ? ` 지금까지 일곱 문 가운데 ${bond.doors}개를 지나왔다.` : ""}
+- ${first ? "이번 대화의 첫 답에서 한 번, 다시 찾아온 손님을 알아보듯 반갑게 맞는다(예: 만신이면 \"다시 왔구먼\"처럼 당신의 말투로). 같은 인사를 되풀이하지 않는다." : "이미 인사는 했다. 다시 인사하지 않는다."}
+- ${p.r ? '위 결과를 함께 겪은 일처럼 말한다(예: "그때 펼쳐진 ○○"). ' : ""}가장 직접적으로, 결과의 속뜻까지 짚고, 되묻기도 가장 날카롭게 한다.
+- 기록에 없는 지난 대화·사건·말은 절대 지어내지 않는다. 기억한다고 말할 수 있는 것은 이 방을 지나온 일, 받은 결과, 다른 방 결과, 이 탭에서 앞서 물었던 것뿐이다.`
+    : bond.kind === "new"
+    ? `\n\n# 이 방문객과의 사이: 처음 만난 손님(초면)
+이 방문객은 ${g.roomName}의 문(의식)을 지나지 않았고, 상담 전에 적은 정보로 결과만 계산해 왔다. 이 방에 처음 온 손님이다.
+- 처음 뵙는 사이처럼 정중하고 조심스럽게 말한다. ${first ? "첫 답에서 처음 만난 손님을 맞듯 한 번 인사한다. " : ""}"다시 왔다", "그때"처럼 함께 겪은 일이 있는 듯 말하지 않는다.
+- 결과는 "적어 준 날로 펼쳐 보니 ○○로 나와요"처럼 계산된 결과임을 밝히고, 이 점술이 무엇을 보는지 한 문장 덧붙인다. 단정을 줄이고 가능성으로 말한다. 되묻기는 부드럽게 한다.
+- 조심스러워도 정성과 길이는 줄이지 않는다. 방 문을 지나오라는 권유는 하지 않는다(화면이 따로 안내한다).`
+    : `\n\n# 이 방문객과의 사이: 처음 만난 손님(결과 없음)
+- 처음 만난 사이처럼 정중하게 말하고, 함께 겪은 일이 있는 듯 말하지 않는다.`;
   const messages = [];
   for (const h of p.hist) { messages.push({ role: "user", content: h.q }); messages.push({ role: "assistant", content: h.a }); }
   messages.push({ role: "user", content: p.q });
@@ -119,7 +135,7 @@ function build(p, model) {
     output_config: { effort: "medium" },
     system: [
       { type: "text", text: persona + "\n\n" + RULES + roomRule, cache_control: { type: "ephemeral" } },
-      { type: "text", text: context + more },
+      { type: "text", text: context + more + bondText },
     ],
     messages,
   };

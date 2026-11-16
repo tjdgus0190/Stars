@@ -162,8 +162,13 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
     } catch (e) { return json(503, { error: "store" }); }
   }
 
+  // (2026-11-16 운영자) 손님과의 사이: 그 방 문을 지나온 계정이면 단골(known), 결과만 계산해 왔으면 초면(new), 결과 없으면 none.
+  //   화면이 보내는 값을 믿지 않고 카카오 계정의 도감 기록(지나온 방)으로 서버가 정한다
+  let rooms = [];
+  if (uh) { try { rooms = (await Dust.read(payStore, uh)).rooms || []; } catch (e) { rooms = []; } }
+  const bond = { kind: rooms.includes(p.room) ? "known" : p.r ? "new" : "none", doors: rooms.length };
   const model = modelOf(env.TALK_MODEL);
-  const params = Prompt.build(p, model);
+  const params = Prompt.build(p, model, bond);
   let msg;
   try { msg = await llm(params, env); } catch (e) {
     // 원인 구분용: 모델 API의 상태 번호와 오류 종류 이름만(메시지 본문·키·질문은 넣지 않는다)
