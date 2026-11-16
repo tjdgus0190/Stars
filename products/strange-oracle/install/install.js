@@ -41,7 +41,7 @@
     <ul class="ins-feats">${feats}</ul>
     <div class="ins-cta" data-js="cta">
       <button class="ins-btn" type="button" data-js="add">${PLUS.replace("<svg", '<svg class="ico"')}${esc(inapp ? P.inapp.btn : P.add)}</button>
-      <p class="ins-note">${esc(inapp ? P.inapp.note : P.note)}</p>
+      ${(inapp ? P.inapp.note : P.note) ? `<p class="ins-note">${esc(inapp ? P.inapp.note : P.note)}</p>` : ""}
       <a class="ins-web" href="${HOME}">${esc(P.web)}</a>
     </div>`;
   document.title = P.title || P.name;

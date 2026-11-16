@@ -54,6 +54,8 @@ const HOST = arg("--host", "127.0.0.1");
 const DUST_OFF = arg("--dust", "on") === "off";
 // (2026-11-14) --gate off: data.js·data-nav.js 응답에서만 로그인 안내(gate.on)를 false로(로그인 없이 방을 지나는 예전 시험용, 파일은 그대로)
 const GATE_OFF = arg("--gate", "on") === "off";
+// (2026-11-16) --pwa on: 앱처럼 홈 화면에 두기(PWA)를 켠다. 기본은 끔(data-nav.js 응답의 pwa.mode만 "off" — 기존 시험이 팝업·서비스 워커 요청에 걸리지 않게, 파일은 그대로)
+const PWA_ON = arg("--pwa", "off") === "on";
 const MODE = arg("--mode", "off") === "test" ? "test" : "off";
 const STATIC = SRC ? ROOT : path.join(ROOT, "dist", "public");
 const PAID = path.join(ROOT, "products", "strange-oracle", "api", "_paid", "book");
@@ -262,6 +264,7 @@ location.replace("${P}#${to}");
     // 19-5 (b): 모든 모드에서 data.js 응답의 GA4 측정 ID를 시험 ID로 (실제 ID로 localhost 방문이 나가지 않게, 파일은 그대로)
     if (/[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(GA4_RE, '$1"' + GA4_TEST + '"'));
     if (DUST_OFF && /[\\/]products[\\/]strange-oracle[\\/]data\.js$/.test(file)) data = Buffer.from(String(data).replace(/(dust: \{\s*on: )true/, "$1false"));
+    if (!PWA_ON && /[\\/]products[\\/]strange-oracle[\\/]data-nav\.js$/.test(file)) data = Buffer.from(String(data).replace(/(pwa: \{\s*mode: )"[a-z]+"/, '$1"off"'));
     if (GATE_OFF && /[\\/]products[\\/]strange-oracle[\\/]data(-nav)?\.js$/.test(file)) data = Buffer.from(String(data).replace(/(gate: \{\s*on: )true/, "$1false"));
     // (v1-D) 면담 화면: 시험 모드에서만 켠다(배포판 data-guide.js는 "off")
     if (MODE === "test" && /[\\/]products[\\/]strange-oracle[\\/]data-guide\.js$/.test(file)) data = Buffer.from(String(data).replace(/(\btalkMode:\s*)"off"/, '$1"test"'));

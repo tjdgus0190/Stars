@@ -39,7 +39,7 @@
     box.innerHTML = `<div class="pwa-ask__scrim" data-pwa="web"></div><div class="pwa-ask__card">
       <div class="pwa-ask__icon"><img src="${esc(C.icon)}" alt="" width="84" height="84"></div>
       <small class="pwa-ask__eyebrow">${esc(A.eyebrow)}</small><h2>${esc(A.title)}</h2><p>${esc(A.body)}</p>
-      <ul class="pwa-ask__points">${A.points.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+      ${(A.points || []).length ? `<ul class="pwa-ask__points">${A.points.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<div class="pwa-ask__gap"></div>`}
       <a class="pwa-ask__app" href="${esc(C.install)}" data-pwa="app">${esc(A.app)}</a>
       <button class="pwa-ask__web" type="button" data-pwa="web">${esc(A.web)}</button></div>`;
     document.body.append(box);
