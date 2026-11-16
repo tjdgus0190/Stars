@@ -6804,7 +6804,7 @@
           saved = null;
         }
         const mode = saved && saved.mode;
-        const home = saved && (saved.from === "hub" || saved.from === "ny" || ["stardust", "talk", "home", "today", "dex"].includes(saved.from)) ? "hub" : "deeper"; // (22단계) 입구에서 시작했으면 입구로 · (v1-D) 별가루 페이지에서 시작했으면 로그인 뒤 그 페이지로
+        const home = saved && (saved.from === "hub" || saved.from === "ny" || ["stardust", "talk", "home", "today", "dex", "me"].includes(saved.from)) ? "hub" : "deeper"; // (22단계) 입구에서 시작했으면 입구로 · (v1-D) 별가루 페이지에서 시작했으면 로그인 뒤 그 페이지로
         if (saved && saved.from === "ny") nyGoHub = true; // (2026-11-12) 새해의 회랑에서 시작 → 새해 탭을 붙인 뒤 회랑으로
         if (!m || !saved || saved.s !== m[2]) {
           track("so_auth", { step: "fail", mode: ["restore", "link", "forget", "login"].includes(mode) ? mode : "restore" });
@@ -6832,7 +6832,7 @@
               writeLogin({ sid: res.sid, exp: Date.now() + DAY30, consent: res.data ? true : null });
               syncHubKakao();
               // (v1-D·v1-G) 하루 페이지(별가루·면담·처음 화면)에서 로그인한 경우: 그 페이지로 돌아간다
-              const BACK = { stardust: "/stardust/", talk: "/talk/", home: "/", today: "/today/", dex: "/dex/" };
+              const BACK = { stardust: "/stardust/", talk: "/talk/", home: "/", today: "/today/", dex: "/dex/", me: "/me/" };
               if (BACK[saved.from]) return location.replace(BACK[saved.from] + "#login" + (saved.ch ? (res.channel > 0 ? "-ch" : "-ch0") : "")); // (2026-11-14) 채널 친구 확인 결과만 해시로
               return applyAccount(res, true);
             }

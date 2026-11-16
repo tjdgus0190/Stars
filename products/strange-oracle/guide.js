@@ -29,7 +29,7 @@
   if (A && CONF.ga4) {
     const search = location.search;
     if (search) history.replaceState(null, "", location.pathname + location.hash);
-    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] }, so_dust: { step: ["start", "done"] }, so_auth: { step: ["login", "fail"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
+    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] }, so_dust: { step: ["start", "done"] }, so_auth: { step: ["login", "fail", "logout"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
     if (on) A.track("so_guide_view", { page: CONF.page });
     const cookie = $("[data-js=cookie-line]");
     if (cookie && A.configured(CONF.ga4)) cookie.hidden = false;
@@ -72,7 +72,7 @@
         if (ev.target.closest("[data-js=login-go]")) {
           const b = new Uint8Array(16); crypto.getRandomValues(b);
           const st = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
-          const from = { "/talk/": "talk", "/today/": "today", "/dex/": "dex", "/stardust/": "stardust", "/products/strange-oracle/": "hub", "/products/strange-oracle/#ny-hub": "ny" }[href] || "home"; // (2026-11-14) 누른 카드로 바로 이어진다: 일곱 개의 문 → 입구, 신년운세 배너 → 새해의 회랑
+          const from = { "/talk/": "talk", "/today/": "today", "/dex/": "dex", "/stardust/": "stardust", "/me/": "me", "/products/strange-oracle/": "hub", "/products/strange-oracle/#ny-hub": "ny" }[href] || "home"; // (2026-11-14) 누른 카드로 바로 이어진다: 일곱 개의 문 → 입구, 신년운세 배너 → 새해의 회랑
           try { sessionStorage.setItem("strange-oracle-kakao", JSON.stringify({ s: st, mode: "login", from, prod: "book" })); } catch (x) { location.href = href; return; }
           location.href = "/api/auth/kakao/start?state=" + st;
         }
@@ -824,6 +824,89 @@
         history.replaceState(null, "", location.pathname);
         if (on && X.guides.some((g) => g.room === back)) enter(back);
       }
+    }
+
+    // ── (2026-11-16 운영자) 나의 이야기: 지금까지 쌓은 서사 + 별가루 + 맨 아래 로그아웃
+    //   보이는 것: 계정에 있는 것(별가루·지나온 방·숨은 이야기·오늘의 신탁 날짜·열어 둔 책)과 결과 이름(이 탭 기록 또는 카카오에 저장한 기록). 입력값(이름·생일)은 보이지 않는다
+    if (CONF.page === "me") {
+      const M = P.app;
+      const ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
+      const I = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
+      // 방 기록(visits 모양) → 결과 이름(공개 방 문구에서)
+      const nameOf = (room, v) => {
+        if (!v) return "";
+        const L = ROOM_DATA[room] ? ROOM_DATA[room][1]() : null;
+        if (!L) return "";
+        if (room === "saju" && I(v.code, 1, 5000)) { const x = L[Math.floor((v.code - 1) / 500)]; return x ? `${x.hanja} ${x.name}` : ""; }
+        if (room === "ogham" && I(v.ogham, 0, 19)) return (L[v.ogham] || {}).name || "";
+        if (room === "star" && I(v.nak, 0, 26)) return (L[v.nak] || {}).name || "";
+        if (room === "decan" && I(v.decan, 0, 35)) { const x = L[v.decan]; return x ? `${x.sign} ${G.ui.decanPart.replace("{n}", x.part)}` : ""; }
+        if (room === "tzolkin" && I(v.number, 1, 13) && I(v.sign, 0, 19)) { const x = L[v.sign]; return x ? `${v.number} ${x.name}` : ""; }
+        if (room === "rune" && Array.isArray(v.picks)) return v.picks.map((c) => (L.find((x) => x.code === c) || {}).name || "").filter(Boolean).join(" · ");
+        if (room === "sibyl" && I(v.sors, 0, 31)) return (L[v.sors] || {}).title || "";
+        return "";
+      };
+      let tabV = {};
+      try { tabV = (JSON.parse(sessionStorage.getItem("strange-oracle") || "null") || {}).visits || {}; } catch (e) { tabV = {}; }
+      const kst = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+      const row = (k, v) => `<dt>${esc(k)}</dt><dd>${v}</dd>`;
+      const draw = (me, visits) => {
+        const av = acctView || {}, cards = Array.isArray(av.rooms) ? av.rooms : [], stories = Array.isArray(av.stories) ? av.stories : [];
+        const rooms = ROOMS.filter((r) => cards.includes(r) || (visits[r] && nameOf(r, visits[r]))); // 지나온 문 = 계정 도감 + 결과가 있는 방(이 탭·저장 기록)
+        const passes = (me && Array.isArray(me.passes)) ? me.passes : [];
+        const hasBook = passes.some((p) => /^SOP/i.test(String(p))), hasNy = passes.some((p) => /^SNY/i.test(String(p)));
+        const seal = cards.length >= 7 || (Array.isArray(av.once) && av.once.includes("seal"));
+        const named = ROOMS.filter((r) => rooms.includes(r) && nameOf(r, visits[r]));
+        let h = `<section class="gme-doors"><div class="gme-doors__arches">${ROOMS.map((r) => `<span class="gme-door${rooms.includes(r) ? " is-on" : ""}">${arch(r, "garch--sm")}</span>`).join("")}</div>
+          <h2>${esc(M.doorsHead)} <b>${esc(fill(M.doorsCount, { n: rooms.length }))}</b></h2>${seal ? `<p class="gme-seal">${esc(M.sealOpen)}</p>` : ""}
+          ${rooms.length ? "" : `<p class="gnote gcenter">${esc(M.doorsNone)}</p><div class="gactions"><a class="gbtn" href="${ROOM_URL}">${esc(M.doorsGo)}</a></div>`}</section>`;
+        // 안내자들이 읽어 준 당신 — 지나온 방마다 결과 이름(있을 때)
+        if (rooms.length) {
+          h += `<section class="gme-story"><h2>${esc(M.storyHead)}</h2><ol>${ROOMS.map((r) => {
+            const g = guide(r) || { name: r, roomName: r };
+            const on = rooms.includes(r), nm = on ? nameOf(r, visits[r]) : "";
+            return `<li class="${on ? "is-on" : "is-off"}">${arch(r, "garch--xs")}<span><small>${esc(g.name)} · ${esc(g.roomName)}</small><b>${esc(on ? nm || "✓" : M.storyLocked)}</b></span></li>`;
+          }).join("")}</ol>${named.length ? "" : `<p class="gnote">${esc(M.storyNone)}</p>`}</section>`;
+        }
+        // 별가루
+        h += `<section class="gme-dust"><img src="/products/strange-oracle/img/stardust.webp" alt="" width="56" height="56"><span><small>${esc(M.dustHead)}</small><b>${paidBal == null ? 0 : paidBal}</b></span><a class="gbtn" href="/stardust/">${esc(M.dustCharge)}</a></section>`;
+        // 쌓아 온 것
+        const today = av.today === kst();
+        h += `<section class="gme-rec"><h2>${esc(M.recHead)}</h2><dl class="gkv">
+          ${row(M.cards, `<a href="/dex/">${esc(fill(M.countOf, { n: cards.length, m: 7 }))}</a>`)}
+          ${row(M.stories, esc(fill(M.countOf, { n: stories.length, m: 7 })))}
+          ${row(M.today, today ? esc(M.todayDone) : `${esc(M.todayNot)} · <a href="/today/">${esc(M.todayGo)}</a>`)}
+          ${row(M.books, hasBook || hasNy ? [hasBook ? `<a href="${ROOM_URL}#report">${esc(M.book)}</a>` : "", hasNy ? `<a href="${ROOM_URL}#ny-hub">${esc(M.ny)}</a>` : ""].filter(Boolean).join(" · ") : esc(M.booksNone))}
+          ${row(M.saved, esc(me && me.data ? M.savedYes : M.savedNo))}
+        </dl></section>`;
+        // 로그아웃
+        h += `<section class="gme-out"><h2>${esc(M.logoutHead)}</h2><p class="gnote">${esc(M.logoutNote)}</p><div class="gactions"><button class="gbtn ghost" type="button" data-js="me-logout">${esc(M.logout)}</button></div></section>`;
+        box.innerHTML = h;
+      };
+      box.innerHTML = `<p class="gnote gcenter">${esc(M.loading)}</p>`;
+      box.addEventListener("click", async (e) => {
+        if (!e.target.closest("[data-js=me-logout]")) return;
+        if (!window.confirm(M.logoutAsk)) return;
+        const lg = readLogin();
+        if (lg) await post("/api/auth/logout", { sid: lg.sid }); // 서버의 로그인 표도 지운다(실패해도 이 기기에서는 로그아웃)
+        dropLogin();
+        try { sessionStorage.removeItem("strange-oracle-talk-resume"); } catch (x) { /* 무시 */ }
+        track("so_auth", { step: "logout" });
+        location.href = "/";
+      });
+      (async () => {
+        const lg = readLogin();
+        await loadPaid();
+        if (!readLogin()) return; // 로그인이 끝났으면 onExpired가 로그인 안내를 보인다
+        const r = await post("/api/auth/me", { sid: lg.sid });
+        if (r.status === 401) { dropLogin(); onExpired(); return; }
+        const me = r.status === 200 ? r.j : null;
+        const visits = Object.assign({}, (me && me.data && me.data.v) || {}, tabV); // 이 탭 기록이 더 새것
+        const need = ROOMS.filter((x) => visits[x]);
+        await Promise.all(need.map((x) => loadRoom(x).catch(() => null)));
+        if (!me && r.status !== 200) { box.innerHTML = `<p class="gerror gcenter">${esc(M.fail)}</p>`; return; }
+        draw(me, visits);
+      })();
     }
 
     if (CONF.page === "stardust") {

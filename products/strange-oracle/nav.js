@@ -90,6 +90,8 @@
     badge.href = T.href;
     const slot = document.querySelector("[data-js=dust-slot]");
     if (slot) slot.replaceWith(badge);
+    // (2026-11-16) 별가루 옆에 「나의 이야기」(프로필) 아이콘
+    if (N.me && badge.parentNode) { const me = document.createElement("a"); me.className = "me-badge"; me.href = N.me.href; me.setAttribute("aria-label", N.me.label); me.innerHTML = ico("user"); badge.after(me); }
     else { const head = aside.querySelector(".sidenav__head"); head.insertBefore(badge, head.querySelector(".sidenav__close")); }
     // (2026-11-14 운영자) 별가루는 카카오 계정에만 — 하루 페이지가 계정 잔액을 받으면 dust:acct로 알린다(로그인 전 0)
     let acct = 0;

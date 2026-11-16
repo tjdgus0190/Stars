@@ -31,7 +31,7 @@ const TOOL_SCRIPTS = {
   sibyl: ["data-oracles.js", "calc.js"],
 };
 // (v1-C) 점술관의 하루 페이지(오늘의 신탁·도감·별가루) — guide.js가 화면을 그린다
-const APP_SCRIPTS = { today: ["data-dex.js", "calc.js"], dex: ["data-dex.js"], talk: ["data-dex.js"], stardust: [] }; // today: 방 데이터는 guide.js가 그날 안내자 것만 불러온다
+const APP_SCRIPTS = { today: ["data-dex.js", "calc.js"], dex: ["data-dex.js"], talk: ["data-dex.js"], stardust: [], me: ["data-dex.js"] }; // (2026-11-16) me = 나의 이야기 // today: 방 데이터는 guide.js가 그날 안내자 것만 불러온다
 // 페이지 폴더 = 짧은 주소 이름 (/name-ogham/ → guide/name-ogham/)
 const slugOf = (d) => d.path.replace(/^\/|\/$/g, "") || "home"; // 처음 화면(/)은 guide/home/
 // 입구 index.html의 오검·마야 숫자 획(<symbol>)을 그대로 옮겨 쓴다 (모양의 원본은 하나)
@@ -180,7 +180,7 @@ ${related(d.related)}`;
   <!-- 이 파일은 tools/strange-oracle/gen-guide.js가 만든다. 문구는 data-guide.js·data-nav.js에서 고치고 스크립트를 다시 돌린다 -->
   <title>${esc(d.title)}</title>
   <meta name="description" content="${esc(d.description)}" />
-  <link rel="canonical" href="${url}" />
+  <link rel="canonical" href="${url}" />${d.noindex ? '\n  <meta name="robots" content="noindex" />' : ""}
   <meta property="og:type" content="${["tool", "app", "legends", "home"].includes(kind) ? "website" : "article"}" />
   <meta property="og:site_name" content="${esc(N.brand)}" />
   <meta property="og:locale" content="ko_KR" />
@@ -221,7 +221,7 @@ ${tabbar(d.path)}
       if (kind === "tool" && !TOOL_SCRIPTS[name]) throw new Error("TOOL_SCRIPTS에 없는 도구: " + name);
       if (kind === "app" && !APP_SCRIPTS[name]) throw new Error("APP_SCRIPTS에 없는 페이지: " + name);
       files.push({ path: path.join(P, "guide", slugOf(d), "index.html"), html: page(name, d, kind) });
-      urls.push(ORIGIN + d.path);
+      if (!d.noindex) urls.push(ORIGIN + d.path); // (2026-11-16) 나의 이야기 같은 개인 화면은 sitemap에서 뺀다
       rewrites.push([d.path, `${PB}guide/${slugOf(d)}/index.html`]);
     }
   }

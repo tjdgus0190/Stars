@@ -3,7 +3,7 @@
 (function () {
   "use strict";
   const KAKAO_KEY = "strange-oracle-kakao", LOGIN_KEY = "strange-oracle-login", DAY30 = 30 * 24 * 60 * 60 * 1000;
-  const BACK = { stardust: "/stardust/", talk: "/talk/", home: "/", today: "/today/", dex: "/dex/" };
+  const BACK = { stardust: "/stardust/", talk: "/talk/", home: "/", today: "/today/", dex: "/dex/", me: "/me/" };
   const entrance = location.pathname.replace(/auth\.html$/, "");
   const forward = () => location.replace(entrance + location.hash); // 입구가 처리(책 연결·잊기·입구에서 시작한 로그인·오류)
   const m = /^#kakao-([0-9a-f]{32})-([0-9a-f]{32})$/.exec(location.hash);

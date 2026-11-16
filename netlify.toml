@@ -112,6 +112,11 @@
   status = 200
   force = true
 [[redirects]]
+  from = "/me/"
+  to = "/products/strange-oracle/guide/me/index.html"
+  status = 200
+  force = true
+[[redirects]]
   from = "/today/"
   to = "/products/strange-oracle/guide/today/index.html"
   status = 200

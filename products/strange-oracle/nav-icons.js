@@ -2,6 +2,7 @@
 // nav.js(입구·페이지)와 tools/strange-oracle/gen-guide.js(정적 HTML)가 같은 값을 쓴다.
 window.NAV_ICONS = {
   home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   door: '<path d="M6 21V10a6 6 0 0 1 12 0v11M4 21h16M12 4v17M10 14h.01M14 14h.01"/>',
   scroll: '<path d="M7 4h11a2 2 0 0 1 0 4H7M7 4a2 2 0 0 0 0 4v10a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V8M10 12h6M10 16h4"/>',
   chat: '<path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-5 4v-4H6a2 2 0 0 1-2-2z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/>',

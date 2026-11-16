@@ -37,6 +37,7 @@ window.NAV = {
   // reward: 채널 친구 별가루 10(카카오 채널 관계 확인 — 동의 항목에 비즈 앱 전환이 필요해 2026-11-15 운영자 보류). false면 별가루 칸 없이 「채널 추가하기」만
   // show: 사이트에 채널을 보일지. (2026-11-15 운영자) 채널 추가 화면에 "사업자가 확인되지 않은 채널" 경고가 떠, 사업자등록 전까지 모두 숨김(별가루 페이지 칸·메뉴 링크)
   channel: { url: "https://pf.kakao.com/_xinaNX", show: false, reward: false },
+  me: { href: "/me/", label: "나의 이야기" }, // (2026-11-16) 위 띠 별가루 옆 사람 아이콘
   dust: {
     href: "/stardust/",
     unit: "별가루",
@@ -58,6 +59,7 @@ window.NAV = {
         { short: "심층상담", label: "심층상담", note: "방에 들어가 직접 묻기", href: "/talk/", icon: "chat", /* ai-notice */ disclose: "안내자의 말은 생성형 인공지능이 점술관의 기록으로 엮어 냅니다." /* /ai-notice */ },
         { short: "안내자 도감", label: "안내자 도감", note: "일곱 안내자의 숨은 이야기", href: "/dex/", icon: "book" },
         { short: "별가루", label: "별가루", note: "모으는 법과 충전", href: "/stardust/", icon: "spark" },
+        { short: "나의 이야기", label: "나의 이야기", note: "지나온 문 · 별가루 · 로그아웃", href: "/me/", icon: "user" },
       ],
     },
     {
