@@ -42,10 +42,10 @@ function choir(notes, env, amp) {
     if (e <= 0) continue;
     let v = 0;
     voices.forEach(({ f, parts }, n) => {
-      const vib = 1 + 0.0035 * Math.sin(2 * Math.PI * (5 + n * 0.3) * t + n);
-      for (const [k, a] of parts) v += a * Math.sin(2 * Math.PI * f * k * vib * t + k * n);
+      // (2026-11-16 운영자 "위잉위잉 거슬림") 떨림(비브라토)을 뺐다 — 예전 식은 떨림 폭이 시간에 따라 커져 사이렌처럼 들렸다
+      for (const [k, a] of parts) v += a * Math.sin(2 * Math.PI * f * k * t + k * n);
     });
-    put(i, v * amp * e * 0.04, 0.2 * Math.sin(2 * Math.PI * 0.11 * t), 0.5);
+    put(i, v * amp * e * 0.028, 0, 0.5); // (2026-11-16) 조금 낮게 · 좌우 흔들림 없이
   }
 }
 // 시계 초침: 아주 짧은 나무+금속 딸깍
