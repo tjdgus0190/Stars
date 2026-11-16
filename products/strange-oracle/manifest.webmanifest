@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "낯선 점술관",
+  "short_name": "낯선 점술관",
+  "description": "사주부터 시빌라 신탁까지, 일곱 점술의 안내자를 만나는 낯선 점술관",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080717",
+  "theme_color": "#080717",
+  "categories": ["lifestyle", "entertainment"],
+  "icons": [
+    { "src": "/products/strange-oracle/img/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/products/strange-oracle/img/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/products/strange-oracle/img/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

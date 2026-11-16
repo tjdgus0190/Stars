@@ -91,7 +91,7 @@ const bookEnv = () => (PAYMOCK ? Object.assign({}, ENV, { PASS_SECRET: PAYMOCK.p
 
 const TYPES = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
-  ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".json": "application/json; charset=utf-8", ".md": "text/plain; charset=utf-8",
+  ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json; charset=utf-8", ".md": "text/plain; charset=utf-8",
 };
 const notFound = (res) => res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("없는 파일");
 const PAY_RE = /(\bpay:\s*\{\s*mode:\s*)"(?:off|live)"/; // (2026-10-22) 배포판이 live여도 시험 페이지는 test로

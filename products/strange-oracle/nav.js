@@ -152,4 +152,11 @@
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(true); });
   setHidden();
+  // (2026-11-16 운영자) 앱처럼 홈 화면에 두기(PWA): 설정이 켜진 곳에서만 pwa.js를 불러온다(문구·규칙은 data-nav.js NAV.pwa)
+  if (N && N.pwa && N.pwa.mode !== "off" && !(N.pwa.mode === "test" && (N.pwa.prodHosts || []).includes(location.hostname))) {
+    const sc = document.createElement("script");
+    sc.src = "/products/strange-oracle/pwa.js";
+    sc.defer = true;
+    document.head.append(sc);
+  }
 })();

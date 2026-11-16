@@ -37,6 +37,44 @@ window.NAV = {
   // reward: 채널 친구 별가루 10(카카오 채널 관계 확인 — 동의 항목에 비즈 앱 전환이 필요해 2026-11-15 운영자 보류). false면 별가루 칸 없이 「채널 추가하기」만
   // show: 사이트에 채널을 보일지. (2026-11-15 운영자) 채널 추가 화면에 "사업자가 확인되지 않은 채널" 경고가 떠, 사업자등록 전까지 모두 숨김(별가루 페이지 칸·메뉴 링크)
   channel: { url: "https://pf.kakao.com/_xinaNX", show: false, reward: false },
+  // (2026-11-16 운영자) 앱처럼 홈 화면에 두기(PWA). mode: "test" = 시험 주소에서만(운영 주소 prodHosts에서는 아무것도 하지 않음) · "live" = 어디서나 · "off"
+  pwa: {
+    mode: "test",
+    prodHosts: ["strange-oracle.com", "www.strange-oracle.com"],
+    install: "/install/",
+    icon: "/products/strange-oracle/img/app/icon-480.webp",
+    // 처음 들어왔을 때 한 번 묻는 창
+    ask: {
+      eyebrow: "STRANGE ORACLE",
+      title: "낯선 점술관을 앱으로",
+      body: "홈 화면에 두면 매일 바뀌는 오늘의 신탁을 아이콘 한 번으로 열 수 있어요.",
+      points: ["스토어 없이 바로", "용량 거의 없음", "언제든 지울 수 있어요"],
+      app: "앱에서 둘러보기",
+      web: "웹으로 계속하기",
+    },
+    // 설치 페이지(/install/)
+    page: {
+      title: "낯선 점술관 · 앱으로 열기",
+      eyebrow: "STRANGE ORACLE",
+      name: "낯선 점술관",
+      lead: "일곱 개의 문을 당신의 홈 화면에",
+      features: [
+        { icon: "scroll", head: "매일 찾아오는 오늘의 신탁", body: "아이콘 한 번이면 오늘의 안내자가 기다려요" },
+        { icon: "chat", head: "일곱 안내자와 심층상담", body: "지나온 문을 기억하는 안내자에게 직접 물어요" },
+        { icon: "door", head: "이어지는 나의 이야기", body: "모은 카드와 별가루가 그대로 이어져요" },
+      ],
+      add: "홈 화면에 추가",
+      adding: "여는 중…",
+      note: "스토어를 거치지 않아요 · 용량은 거의 없어요 · 홈 화면에서 길게 눌러 언제든 지울 수 있어요",
+      web: "웹으로 계속하기",
+      done: { title: "홈 화면에 낯선 점술관이 생겼어요", body: "이제 홈 화면의 아이콘을 눌러 들어오세요. 일곱 안내자가 기다리고 있어요.", go: "지금 둘러보기" },
+      already: { title: "이미 앱으로 열었어요", go: "점술관으로 들어가기" },
+      inapp: { btn: "브라우저에서 열고 설치하기", note: "인스타그램·카카오톡 안에서는 홈 화면에 추가할 수 없어서, 브라우저로 옮겨 열어요." },
+      guideIos: { title: "홈 화면에 추가하는 법", steps: ["화면 아래(또는 주소창 옆)의 공유 버튼을 눌러요", "목록을 올려 「홈 화면에 추가」를 골라요", "오른쪽 위 「추가」를 누르면 끝이에요"], close: "알겠어요" },
+      guideAndroid: { title: "홈 화면에 추가하는 법", steps: ["오른쪽 위 ⋮ 메뉴를 눌러요", "「홈 화면에 추가」 또는 「앱 설치」를 골라요", "「설치」를 누르면 끝이에요"], close: "알겠어요" },
+      guideInapp: { title: "브라우저에서 열어 주세요", steps: ["오른쪽 위 ··· 메뉴를 눌러요", "「외부 브라우저에서 열기」를 골라요", "열린 화면에서 「홈 화면에 추가」를 누르면 끝이에요"], close: "알겠어요" },
+    },
+  },
   me: { href: "/me/", label: "나의 이야기" }, // (2026-11-16) 위 띠 별가루 옆 사람 아이콘
   dust: {
     href: "/stardust/",

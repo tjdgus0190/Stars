@@ -31,6 +31,7 @@ const TOOL_SCRIPTS = {
   sibyl: ["data-oracles.js", "calc.js"],
 };
 // (v1-C) 점술관의 하루 페이지(오늘의 신탁·도감·별가루) — guide.js가 화면을 그린다
+const APP_FILES = [["/sw.js", "/products/strange-oracle/sw.js"], ["/manifest.webmanifest", "/products/strange-oracle/manifest.webmanifest"], ["/install/", "/products/strange-oracle/install/index.html"]]; // (2026-11-16) PWA
 const APP_SCRIPTS = { today: ["data-dex.js", "calc.js"], dex: ["data-dex.js"], talk: ["data-dex.js"], stardust: [], me: ["data-dex.js"] }; // (2026-11-16) me = 나의 이야기 // today: 방 데이터는 guide.js가 그날 안내자 것만 불러온다
 // 페이지 폴더 = 짧은 주소 이름 (/name-ogham/ → guide/name-ogham/)
 const slugOf = (d) => d.path.replace(/^\/|\/$/g, "") || "home"; // 처음 화면(/)은 guide/home/
@@ -225,6 +226,7 @@ ${tabbar(d.path)}
       rewrites.push([d.path, `${PB}guide/${slugOf(d)}/index.html`]);
     }
   }
+  rewrites.push(...APP_FILES); // (2026-11-16) 앱처럼 홈 화면에 두기: 서비스 워커·앱 정보 파일은 사이트 맨 위 주소로, 설치 페이지는 /install/
   return { files, urls, origin: ORIGIN, rewrites, netlify: netlifyBlock(rewrites) };
 }
 
@@ -249,7 +251,7 @@ function tomlWith(block) {
 function routes() {
   const { GUIDE: G } = load("data-guide.js");
   const { LEGENDS: L } = load("data-legends.js");
-  return [G.home].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {}), [L.hub], Object.values(L.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]);
+  return [G.home].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {}), [L.hub], Object.values(L.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]).concat(APP_FILES);
 }
 
 module.exports = { build, routes };

@@ -181,7 +181,28 @@
   to = "/products/strange-oracle/guide/legends/saju-ask-heaven/index.html"
   status = 200
   force = true
+[[redirects]]
+  from = "/sw.js"
+  to = "/products/strange-oracle/sw.js"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/products/strange-oracle/manifest.webmanifest"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/install/"
+  to = "/products/strange-oracle/install/index.html"
+  status = 200
+  force = true
 # <<< gen-guide 짧은 주소
 
 # 로직은 netlify/lib/(CommonJS)에 있고 모의 서버·단위 시험이 그대로 부른다.
 # 환경 변수 PASS_MODE·PAYAPP_USERID·PAYAPP_LINKKEY·PAYAPP_LINKVAL·PASS_SECRET(32바이트 이상) 중 하나라도 없으면 함수는 503(안전).
+
+# (2026-11-16 운영자) 앱처럼 홈 화면에 두기(PWA): 서비스 워커는 늘 새것으로(옛 것이 남지 않게)
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"

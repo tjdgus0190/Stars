@@ -84,3 +84,25 @@ body.has-tabbar { --appbar-h: calc(62px + env(safe-area-inset-bottom, 0px)); pad
 .me-badge { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-left: 6px; border-radius: 999px; border: 1px solid oklch(0.6 0.08 80 / 0.4); background: oklch(0.2 0.04 285 / 0.8); color: oklch(0.88 0.06 85); }
 .me-badge .ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .sidenav__head .me-badge { display: none; }
+
+/* (2026-11-16 운영자) 처음 들어왔을 때 한 번: 앱에서 둘러보기 / 웹으로 계속하기 (pwa.js) */
+.pwa-ask { position: fixed; inset: 0; z-index: 95; display: grid; align-items: end; justify-items: center; pointer-events: none; }
+.pwa-ask__scrim { position: absolute; inset: 0; background: oklch(0.05 0.03 285 / 0.72); opacity: 0; transition: opacity 0.32s ease; pointer-events: auto; }
+.pwa-ask__card { position: relative; box-sizing: border-box; width: min(480px, 100vw); padding: 30px 22px calc(22px + env(safe-area-inset-bottom)); border-radius: 28px 28px 0 0; text-align: center; pointer-events: auto;
+  border: 1px solid oklch(0.62 0.09 80 / 0.55); border-bottom: 0; color: oklch(0.93 0.03 85);
+  background: radial-gradient(ellipse 90% 60% at 50% 0%, oklch(0.36 0.1 300 / 0.55), transparent 70%), radial-gradient(1px 1px at 20% 30%, #fff8, transparent), radial-gradient(1px 1px at 70% 18%, #fff6, transparent), radial-gradient(1.5px 1.5px at 85% 60%, #ffe9b066, transparent), oklch(0.12 0.035 285);
+  transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.pwa-ask.is-on .pwa-ask__scrim { opacity: 1; }
+.pwa-ask.is-on .pwa-ask__card { transform: none; }
+.pwa-ask__icon { width: 84px; height: 84px; margin: -66px auto 10px; border-radius: 22px; overflow: hidden; box-shadow: 0 0 0 2px oklch(0.75 0.11 80 / 0.8), 0 0 36px oklch(0.75 0.13 80 / 0.45), 0 12px 30px oklch(0.03 0.02 280 / 0.8); }
+.pwa-ask__icon img { display: block; width: 100%; height: 100%; }
+.pwa-ask__eyebrow { display: block; font: 500 0.6875rem/1 "Cinzel", serif; letter-spacing: 0.22em; color: oklch(0.8 0.08 80); }
+.pwa-ask__card h2 { margin: 8px 0 6px; font: 700 1.375rem/1.3 "Gowun Batang", serif; color: oklch(0.92 0.1 85); }
+.pwa-ask__card p { margin: 0 auto; max-width: 320px; font: 400 0.9375rem/1.6 "Gowun Batang", serif; color: oklch(0.88 0.02 285); }
+.pwa-ask__points { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px; padding: 0; list-style: none; }
+.pwa-ask__points li { padding: 4px 10px; border-radius: 999px; font: 500 0.75rem/1.4 system-ui, sans-serif; color: oklch(0.86 0.06 85); border: 1px solid oklch(0.6 0.08 80 / 0.45); background: oklch(0.2 0.04 285 / 0.6); }
+.pwa-ask__app { display: block; padding: 16px; border-radius: 999px; font: 700 1.0625rem/1 "Gowun Batang", serif; color: oklch(0.18 0.03 285); text-decoration: none;
+  background: linear-gradient(180deg, oklch(0.92 0.1 88), oklch(0.76 0.12 72)); box-shadow: 0 0 0 1px oklch(0.85 0.1 85 / 0.6), 0 10px 30px oklch(0.75 0.13 75 / 0.35); animation: pwa-glow 2.4s ease-in-out infinite; }
+.pwa-ask__web { margin-top: 12px; padding: 8px 12px; border: 0; background: none; font: 400 0.875rem/1 system-ui, sans-serif; color: oklch(0.72 0.02 285); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+@keyframes pwa-glow { 50% { box-shadow: 0 0 0 1px oklch(0.85 0.1 85 / 0.8), 0 10px 40px oklch(0.8 0.14 78 / 0.55); } }
+@media (prefers-reduced-motion: reduce) { .pwa-ask__card, .pwa-ask__scrim { transition: none; } .pwa-ask__app { animation: none; } }
