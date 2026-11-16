@@ -104,8 +104,8 @@ function paper(t0, dur, amp) {
 const MEL = [74, 76, 78, 81, 83, 86, 88].map(mtof); // D5 E5 F#5 A5 B5 D6 E6
 
 // 바탕 합창: 첫 장면 낮게 → 기능 동안 은은하게 → 끝에서 밝게
-choir([mtof(50), mtof(57), mtof(62), mtof(66)], (t) => Math.min(1, t / 0.8) * 0.5 * (1 - 0.4 * smooth(2.6, 3.4, t)) * (1 - smooth(18.0, 18.6, t)), 1);
-choir([mtof(50), mtof(57), mtof(62), mtof(66), mtof(69)], (t) => smooth(18.4, 19.2, t) * Math.min(1, (DUR - t) / 1.2), 1.1);
+// (2026-11-16 운영자 "위이잉 거슬림") 바탕 합창(계속 울리는 화음)을 뺐다: choir([mtof(50), mtof(57), mtof(62), mtof(66)], (t) => Math.min(1, t / 0.8) * 0.5 * (1 - 0.4 * smooth(2.6, 3.4, t)) * (1 - smooth(18.0, 18.6, t)), 1);
+// (2026-11-16 운영자 "위이잉 거슬림") 바탕 합창(계속 울리는 화음)을 뺐다: choir([mtof(50), mtof(57), mtof(62), mtof(66), mtof(69)], (t) => smooth(18.4, 19.2, t) * Math.min(1, (DUR - t) / 1.2), 1.1);
 // 0~2.75 첫 장면: 아치가 모일 때마다 첼레스타(가운데에서 바깥으로)
 celesta(0.05, mtof(62), 0.2, 0, 1.6);
 [1, 2, 3].forEach((n) => { celesta(0.15 + n * 0.2, mtof(62 + n * 4), 0.15, -0.4, 1.2); celesta(0.17 + n * 0.2, mtof(62 + n * 4 + 3), 0.13, 0.4, 1.2); });

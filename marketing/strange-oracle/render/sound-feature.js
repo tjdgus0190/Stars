@@ -104,8 +104,8 @@ function paper(t0, dur, amp) {
 const MEL = [74, 76, 78, 81, 83, 86, 88].map(mtof); // D5 E5 F#5 A5 B5 D6 E6
 
 // 바탕 합창: 낮게 깔리다 끝 화면에서 밝게
-choir([mtof(50), mtof(57), mtof(62), mtof(66)], (t) => Math.min(1, t / 0.6) * 0.45 * (1 - smooth(9.0 + SHIFT, 9.5 + SHIFT, t)), 1);
-choir([mtof(50), mtof(57), mtof(62), mtof(66), mtof(69)], (t) => smooth(9.3 + SHIFT, 10.0 + SHIFT, t) * Math.min(1, (DUR - t) / 1.0), 1.1);
+// (2026-11-16 운영자 "위이잉 거슬림") 바탕 합창(계속 울리는 화음)을 뺐다: choir([mtof(50), mtof(57), mtof(62), mtof(66)], (t) => Math.min(1, t / 0.6) * 0.45 * (1 - smooth(9.0 + SHIFT, 9.5 + SHIFT, t)), 1);
+// (2026-11-16 운영자 "위이잉 거슬림") 바탕 합창(계속 울리는 화음)을 뺐다: choir([mtof(50), mtof(57), mtof(62), mtof(66), mtof(69)], (t) => smooth(9.3 + SHIFT, 10.0 + SHIFT, t) * Math.min(1, (DUR - t) / 1.0), 1.1);
 // 첫 장면: 초상이 서고 약속 한 줄
 celesta(0.05, mtof(62), 0.2, 0, 1.6); celesta(0.3, mtof(69), 0.15, 0.2, 1.4); celesta(0.55, mtof(74), 0.16, -0.2, 1.6);
 celesta(2.9, mtof(78), 0.14, 0, 1.2);
