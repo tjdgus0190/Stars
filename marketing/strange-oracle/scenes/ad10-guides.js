@@ -1,5 +1,5 @@
 // 광고 10안 「일곱 안내자」 조립 (2026-11-14). 21초. 모든 움직임은 CSS 애니메이션의 시작 시각으로만 정한다(렌더 도구가 currentTime으로 프레임을 고름). 무작위 값 없음.
-// 돋보일 기능(운영자 2026-11-14): ① 전 세계의 점술로 알아보는 나 ② AI 챗봇으로 심층 면담 ③ 매일 찾아오는 오늘의 신탁
+// 돋보일 기능(운영자 2026-11-14): ① 전 세계의 점술로 알아보는 나 ② 안내자와 1:1 심층상담 ③ 매일 찾아오는 오늘의 신탁
 // 그림: 운영자가 준 일곱 안내자 초상 · 별가루 결정. 문구는 제품(data-dex.js·data-guide.js) 결. 8장: 정확도 과장·불안 재촉·건강·돈·이별 예언·가격 없음.
 (function () {
   const IMG = (r) => `/products/strange-oracle/img/guide/${r}.webp`;
@@ -76,10 +76,10 @@
     dots.append(d);
   });
 
-  // ── 7.95~13.35 ② AI 챗봇으로 심층 면담: 만신과의 대화(질문 → 답을 고르는 점 → 짧은 말풍선 셋 → 역질문)
+  // ── 7.95~13.35 ② 안내자와 1:1 심층상담: 만신과의 대화(질문 → 답을 고르는 점 → 짧은 말풍선 셋 → 역질문)
   chip("02", "나를 아는 안내자와<br>1:1 <em>심층상담</em>", T.f2 + 0.05, T.f2out); // (2026-11-16 운영자) 광고에 AI라는 말을 쓰지 않는다
   bg("saju", T.f2, T.f2out, 0.28);
-  const chat = add($("div", "chat10", `<div class="chat10__head"><span class="chat10__face"></span><span><b>만신</b><small>면담 중 · 만신의 방</small></span></div><div class="chat10__body"></div>`));
+  const chat = add($("div", "chat10", `<div class="chat10__head"><span class="chat10__face"></span><span><b>만신</b><small>상담 중 · 만신의 방</small></span></div><div class="chat10__body"></div>`));
   anim(chat, [`pop10 0.5s var(--soft) ${T.f2 + 0.2}s both`, `fo10 0.3s ease-in ${T.f2out}s forwards`]);
   const body = chat.querySelector(".chat10__body");
   const me = $("p", "msg10 me", "짝사랑 중인데,<br>먼저 연락해도 될까요?");
