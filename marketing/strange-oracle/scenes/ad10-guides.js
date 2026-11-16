@@ -77,7 +77,7 @@
   });
 
   // ── 7.95~13.35 ② AI 챗봇으로 심층 면담: 만신과의 대화(질문 → 답을 고르는 점 → 짧은 말풍선 셋 → 역질문)
-  chip("02", "AI 안내자와<br>1:1 <em>심층 면담</em>", T.f2 + 0.05, T.f2out);
+  chip("02", "나를 아는 안내자와<br>1:1 <em>심층상담</em>", T.f2 + 0.05, T.f2out); // (2026-11-16 운영자) 광고에 AI라는 말을 쓰지 않는다
   bg("saju", T.f2, T.f2out, 0.28);
   const chat = add($("div", "chat10", `<div class="chat10__head"><span class="chat10__face"></span><span><b>만신</b><small>면담 중 · 만신의 방</small></span></div><div class="chat10__body"></div>`));
   anim(chat, [`pop10 0.5s var(--soft) ${T.f2 + 0.2}s both`, `fo10 0.3s ease-in ${T.f2out}s forwards`]);
@@ -157,7 +157,7 @@
   ORDER.forEach((r, i) => { const a = arch(r, 0, 0, 98, 130); a.style.position = "relative"; a.style.left = a.style.top = ""; row.append(anim(a, [`pop10 0.35s var(--soft) ${T.end + 0.35 + i * 0.07}s both`])); });
   end.append(row);
   const ul = $("ul");
-  ["전 세계 일곱 점술로 알아보는 나", "AI 안내자와 1:1 심층 면담", "매일 찾아오는 오늘의 신탁"].forEach((s, i) => {
+  ["전 세계 일곱 점술로 알아보는 나", "일곱 안내자와 1:1 심층상담", "매일 찾아오는 오늘의 신탁"].forEach((s, i) => {
     const li = $("li", "", `<img src="${DUST}" alt=""><span>${s}</span>`);
     li.dataset.cap = "E" + i;
     ul.append(anim(li, [`in10 0.4s var(--soft) ${T.end + 0.95 + i * 0.22}s both`]));

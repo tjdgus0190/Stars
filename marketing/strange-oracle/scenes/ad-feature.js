@@ -1,4 +1,5 @@
-// 광고 11~13안 「기능 하나씩」 조립 (2026-11-15). 12초. ?f=saju | today | talk. 움직임은 CSS 애니메이션 시작 시각으로만(렌더 도구가 currentTime으로 프레임을 고름). 무작위 값 없음.
+// 광고 11~13안 「기능 하나씩」 조립 (2026-11-15). 12초(13안 심층상담은 19.5초 — 2026-11-16 운영자: 만신 말고 다른 안내자들도 어떻게 답하는지).
+// (2026-11-16 운영자) 광고 영상에 "AI 안내자"처럼 AI임을 드러내는 말은 쓰지 않는다. ?f=saju | today | talk. 움직임은 CSS 애니메이션 시작 시각으로만(렌더 도구가 currentTime으로 프레임을 고름). 무작위 값 없음.
 // 첫 장면 0~2.9 · 기능 2.9~9.3 · 끝 화면 9.4~12. 그림은 운영자가 준 안내자 초상·별가루 결정(10안과 같음).
 (function () {
   const F = (new URLSearchParams(location.search).get("f") || "saju").replace(/[^a-z]/g, "");
@@ -11,14 +12,16 @@
       feat: "로그인 없이 <em>결과까지 무료</em>", cta: "첫 번째 문 열기" },
     today: { face: "sibyl", bg: "sibyl", hook: "오늘 하루,<br><em>안내자가 한 줄을 건네요</em>", sub: "날마다 바뀌는 일곱 안내자",
       feat: "로그인 없이 <em>오늘의 한 줄</em>", cta: "오늘의 신탁 받기" },
-    talk: { face: "saju", bg: "saju", hook: "나를 아는 안내자에게<br><em>직접 물어보세요</em>", sub: "AI 안내자와 1:1 심층상담",
-      feat: "AI 안내자와 <em>1:1 심층상담</em>", cta: "안내자에게 물어보기" },
+    talk: { face: "saju", bg: "saju", hook: "나를 아는 안내자에게<br><em>직접 물어보세요</em>", sub: "일곱 안내자와 1:1 심층상담",
+      feat: "일곱 안내자와 <em>1:1 심층상담</em>", cta: "안내자에게 물어보기" },
   }[F] || null;
   if (!CONF) return;
-  const T = { body: 2.9, out: 9.25, end: 9.4 };
+  const T = F === "talk" ? { body: 2.9, out: 16.75, end: 16.9 } : { body: 2.9, out: 9.25, end: 9.4 };
+  const SHIFT = T.end - 9.4; // 끝 화면 쪽 고정 시각을 이만큼 민다(13안)
   const $ = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
   const anim = (el, list) => { el.style.animation = list.join(", "); return el; };
   const stage = document.querySelector(".stage");
+  if (F === "talk") stage.dataset.duration = "19.5"; // 13안 길이(렌더 도구가 프레임 수와 맞춰 본다)
   const add = (el) => stage.insertBefore(el, stage.querySelector(".safe-guide"));
   const box = (el, x, y, w, h) => { Object.assign(el.style, { left: x + "px", top: y + "px", width: w + "px", height: h + "px" }); return el; };
   const arch = (r, x, y, w, h) => { const a = box($("div", "arch10"), x, y, w, h); const p = $("div", "pt"); p.style.setProperty("--img", `url("${IMG(r)}")`); a.append(p); return a; };
@@ -96,12 +99,13 @@
     anim(pill, [`in10 0.4s var(--soft) 7.6s both`, `fo10 0.3s ease-in ${T.out}s forwards`]);
   }
   if (F === "talk") {
-    bg("saju", T.body, T.out, 0.26);
-    const chip = $("div", "chip10", `<span class="no">AI CONSULT</span><p class="t" style="margin:0">심층상담</p>`);
+    const M_OUT = 7.7; // 만신 대화가 끝나고 다른 안내자로
+    bg("saju", T.body, M_OUT, 0.26);
+    const chip = $("div", "chip10", `<span class="no">1:1 CONSULT</span><p class="t" style="margin:0">심층상담</p>`);
     chip.dataset.cap = "B1";
     add(anim(chip, [`in10 0.45s var(--soft) ${T.body}s both`, `out10 0.3s ease-in ${T.out}s forwards`]));
     const chat = add($("div", "chat10", `<div class="chat10__head"><span class="chat10__face"></span><span><b>만신</b><small>상담 중 · 만신의 방</small></span></div><div class="chat10__body"></div>`));
-    anim(chat, [`pop10 0.5s var(--soft) ${T.body + 0.1}s both`, `fo10 0.3s ease-in ${T.out}s forwards`]);
+    anim(chat, [`pop10 0.5s var(--soft) ${T.body + 0.1}s both`, `fo10 0.3s ease-in ${M_OUT}s forwards`]);
     const body = chat.querySelector(".chat10__body");
     body.append(anim($("p", "msg10 me", "짝사랑 중인데,<br>먼저 연락해도 될까요?"), [`pop10 0.35s var(--soft) 3.5s both`]));
     const SAY = ["자네는 곧게 뻗는 큰 나무여.", "올겨울은 기다리기보다 먼저 건넬 때 흐름이 열리기 쉬운 결이지.", "이번 주엔 가벼운 안부 한 줄부터 보내 보게.", "그 사람과 가장 편했던 순간은 언제였나?"];
@@ -122,11 +126,45 @@
     anim(body, [`up10 0.4s var(--soft) ${TS[2] - 0.05}s both`, `up10b 0.4s var(--soft) ${TS[3] - 0.05}s forwards`]);
     const ai = $("p", "ai10", "내 결과를 아는 안내자가, 답하고 되물어요");
     ai.dataset.cap = "A1";
-    add(anim(ai, [`fi10 0.4s ease-out 3.8s both`, `fo10 0.3s ease-in ${T.out}s forwards`]));
+    add(anim(ai, [`fi10 0.4s ease-out 3.8s both`, `fo10 0.3s ease-in ${M_OUT}s forwards`]));
+    // ── 7.8~16.7 다른 안내자 셋: 말투도 읽는 법도 다르다(답은 실제 시험에서 나온 답을 줄인 것 — 2026-11-16 실모델 시험 N52·N22·N64)
+    const OTHERS = [
+      { r: "rune", n: "룬", room: "룬의 방", t: 7.85, q: "이직할까, 버틸까 계속 고민돼요",
+        say: ["지금 네 돌은 예라야. 아무도 몰라줘도 꾸준히 해 온 게 거둘 때가 온 흐름이야.", "요즘 제일 버티기 힘든 장면은 뭐야?"] },
+      { r: "star", n: "베다", room: "베다의 방", t: 10.8, q: "요즘 마음이 자꾸 불안해요",
+        say: ["당신의 달의 집은 푸쉬야, 남을 먹이는 젖줄이에요. 내 그릇이 말라 가는 때일 수 있어요.", "오늘 밤엔 챙길 일 하나만 내려놓아 봐요."] },
+      { r: "sibyl", n: "시빌라", room: "시빌라 신탁의 방", t: 13.75, q: "기다리는 게 너무 지쳐요",
+        say: ["맞지 않는 열쇠를 오래 돌려 온 건 아닐까요… 낡은 자물쇠도 맞는 열쇠엔 순순히 돌아가요.", "지금 가장 오래 기다리는 문은 어떤 문인가요…?"] },
+    ];
+    OTHERS.forEach((o, k) => {
+      const t1 = k < OTHERS.length - 1 ? OTHERS[k + 1].t - 0.1 : T.out;
+      bg(o.r, o.t, t1, 0.26);
+      const c = add($("div", "chat10", `<div class="chat10__head"><span class="chat10__face"></span><span><b>${o.n}</b><small>상담 중 · ${o.room}</small></span></div><div class="chat10__body"></div>`));
+      c.querySelector(".chat10__face").style.backgroundImage = `url("${IMG(o.r)}")`;
+      anim(c, [`pop10 0.4s var(--soft) ${o.t}s both`, `fo10 0.25s ease-in ${t1}s forwards`]);
+      const b = c.querySelector(".chat10__body");
+      b.append(anim($("p", "msg10 me", o.q), [`pop10 0.3s var(--soft) ${o.t + 0.25}s both`]));
+      o.say.forEach((s, i) => {
+        const row = $("div", "");
+        row.style.cssText = "position:relative;display:flex;align-items:flex-end;gap:16px";
+        const fc = $("span", "face10");
+        fc.style.cssText = `position:relative;left:auto;flex-shrink:0;background-image:url("${IMG(o.r)}")` + (i ? ";visibility:hidden" : "");
+        if (!i) anim(fc, [`fi10 0.25s ease-out ${o.t + 0.55}s both`]);
+        const m = $("p", "msg10 g" + (i === o.say.length - 1 && /[?？]$/.test(s) ? " q" : ""), s);
+        m.style.margin = "0";
+        anim(m, [`pop10 0.35s var(--soft) ${o.t + 1.05 + i * 0.85}s both`]);
+        row.append(fc, m);
+        if (!i) { const ty = $("span", "typing10", "<i></i><i></i><i></i>"); ty.style.cssText = "left:74px;bottom:0"; anim(ty, [`fi10 0.2s ease-out ${o.t + 0.55}s both`, `fo10 0.12s ease-in ${o.t + 0.98}s forwards`]); row.append(ty); }
+        b.append(row);
+      });
+    });
+    const ai2 = $("p", "ai10", "일곱 안내자, 저마다의 말투로 답해요");
+    ai2.dataset.cap = "A2";
+    add(anim(ai2, [`fi10 0.4s ease-out 7.95s both`, `fo10 0.3s ease-in ${T.out}s forwards`]));
   }
 
   // 별가루 결정 몇 알(고정 위치·시각)
-  [[120, 1150, 60, 0.6, 0.6], [930, 460, 52, 2.0, 0.55], [150, 520, 50, 5.5, 0.55], [920, 1120, 62, 7.4, 0.6], [140, 420, 56, 9.7, 0.7], [930, 540, 64, 10.1, 0.75]]
+  [[120, 1150, 60, 0.6, 0.6], [930, 460, 52, 2.0, 0.55], [150, 520, 50, 5.5, 0.55], [920, 1120, 62, 7.4, 0.6], [140, 420, 56, 9.7 + SHIFT, 0.7], [930, 540, 64, 10.1 + SHIFT, 0.75]]
     .forEach(([x, y, s, t, o]) => { const d = box($("span", "dust10"), x - s / 2, y, s, s); d.style.setProperty("--s", s + "px"); d.style.setProperty("--o", o); add(anim(d, [`float10 2.4s ease-in-out ${t}s both`])); });
 
   // ── 9.4~12 끝 화면: 로고 · 일곱 안내자 · 기능 한 줄 · 행동 문구 · 주소
