@@ -480,10 +480,12 @@
         box.innerHTML = h;
         document.documentElement.classList.toggle("sheet-open", Boolean(openRoom));
       };
+      const closeDex = () => { if (!openRoom) return; const sh = box.querySelector(".gsheet"); openRoom = null; return leave(sh).then(draw); };
+      window.addEventListener("popstate", () => { if (openRoom) closeDex(); });
       box.addEventListener("click", (e) => {
         const c = e.target.closest("[data-js=dex-card]");
-        if (c) { openRoom = c.dataset.room; return draw(); }
-        if (e.target.closest("[data-js=dex-close]")) { if (!openRoom) return; const sh = box.querySelector(".gsheet"); openRoom = null; return leave(sh).then(draw); }
+        if (c) { openRoom = c.dataset.room; history.pushState({ soDex: openRoom }, ""); return draw(); } // (2026-11-16) 휴대폰 뒤로 가기 = 시트 닫기
+        if (e.target.closest("[data-js=dex-close]")) { if (!openRoom) return; if (history.state && history.state.soDex) return history.back(); return closeDex(); }
         if (e.target.closest("[data-js=dex-login]")) return kakaoLogin("dex");
         const b = e.target.closest("[data-js=dex-open]");
         if (b) {
@@ -698,6 +700,7 @@
         cur = X.guides.find((x) => x.room === roomName) || null;
         if (cur) cur.hadHist = chatOf(roomName).length > 0; // (2026-11-15) 들어올 때 이미 대화가 있었을 때만 "지난 대화" 안내
         enterAt = Date.now(); setupMsg = ""; formOpen = false;
+        if (cur && !(history.state && history.state.soRoom === roomName)) history.pushState({ soRoom: roomName }, ""); // (2026-11-16) 휴대폰 뒤로 가기 = 방 나가기
         draw();
         loadRoom(roomName).then(() => { if (cur && cur.room === roomName && !busy) { const t = box.querySelector(".groom textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector(".groom textarea"); if (t2) t2.value = keep; } }).catch(() => {});
         const t = box.querySelector(".groom textarea"); if (t && !t.disabled) t.focus({ preventScroll: true });
@@ -720,7 +723,15 @@
       sheet.setAttribute("aria-label", A.chargeHead || "");
       sheet.innerHTML = `<div class="gsheet__scrim" data-js="charge-close"></div><div class="gsheet__body"><button class="gsheet__x" type="button" data-js="charge-close" aria-label="${esc(G.home.login.close)}">×</button><p class="gcharge__lead">${esc(A.chargeLead || "")}</p><div data-js="dust-shop"></div></div>`;
       document.body.append(sheet);
-      const closeCharge = async () => {
+      // 휴대폰 뒤로 가기·앱의 ←·Esc가 같은 길로: 기록 칸이 있으면 history.back() → popstate가 닫는다
+      const closeRoom = async () => { if (!cur) return; await leave(box.querySelector(".groom"), 300); cur = null; draw(); };
+      const leaveRoom = () => { if (history.state && history.state.soRoom) history.back(); else closeRoom(); };
+      const closeCharge = () => { if (sheet.hidden) return; if (history.state && history.state.soSheet) history.back(); else closeChargeNow(); };
+      window.addEventListener("popstate", () => {
+        if (!sheet.hidden) { closeChargeNow(); return; }
+        if (cur) { if (busy) { history.pushState({ soRoom: cur.room }, ""); return; } closeRoom(); } // 답을 받는 중이면 방에 머문다
+      });
+      const closeChargeNow = async () => {
         if (sheet.hidden) return;
         await leave(sheet, 260);
         sheet.hidden = true;
@@ -734,7 +745,7 @@
         beforePay: () => { try { const t = box.querySelector(".groom textarea"); sessionStorage.setItem(RES_KEY, JSON.stringify({ room: cur ? cur.room : "", q: t ? t.value.slice(0, 300) : "", skip: Boolean(cur && skipped[cur.room]) })); } catch (x) { /* 이 화면에서만 */ } },
         onCredited: () => { refresh(); setTimeout(closeCharge, 1600); },
       });
-      const openCharge = () => { if (!shop.on) { location.href = "/stardust/"; return; } sheet.hidden = false; shop.draw(); const x = sheet.querySelector(".gsheet__x"); if (x) x.focus({ preventScroll: true }); };
+      const openCharge = () => { if (!shop.on) { location.href = "/stardust/"; return; } if (!(history.state && history.state.soSheet)) history.pushState({ soRoom: cur ? cur.room : "", soSheet: 1 }, ""); sheet.hidden = false; shop.draw(); const x = sheet.querySelector(".gsheet__x"); if (x) x.focus({ preventScroll: true }); };
       sheet.addEventListener("click", (e) => { if (e.target.closest("[data-js=charge-close]")) closeCharge(); });
       box.addEventListener("click", async (e) => {
         if (e.target.closest("[data-js=talk-charge]")) return openCharge();
@@ -742,7 +753,7 @@
         if (cur && e.target.closest("[data-js=door-show]")) { delete TS.door[cur.room]; saveT(); draw(); const c = box.querySelector("[data-js=door-card]"); if (c) c.scrollIntoView({ block: "nearest" }); return; }
         const b = e.target.closest("[data-js=talk-pick]");
         if (b && !busy) { if (on) enter(b.dataset.room); return; }
-        if (e.target.closest("[data-js=talk-leave]") && !busy) { const rm = box.querySelector(".groom"); await leave(rm, 300); cur = null; draw(); return; }
+        if (e.target.closest("[data-js=talk-leave]") && !busy) { leaveRoom(); return; }
         if (!cur || busy) return;
         if (e.target.closest("[data-js=talk-login]")) { try { sessionStorage.setItem("strange-oracle-talk-back", cur.room); } catch (x) { /* 무시 */ } return kakaoLogin("talk"); }
         if (e.target.closest("[data-js=talk-clear]")) {
@@ -852,7 +863,7 @@
       box.addEventListener("input", (e) => { if (e.target.name === "q") { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; } });
       // (2026-11-14 운영자) Enter는 줄바꿈. 보내기는 보내기 단추(PC에서는 Ctrl·Cmd + Enter도)
       box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
-      document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!sheet.hidden) { closeCharge(); return; } if (cur && !busy) { leave(box.querySelector(".groom"), 300).then(() => { cur = null; draw(); }); } });
+      document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!sheet.hidden) { closeCharge(); return; } if (cur && !busy) leaveRoom(); });
       loadPaid().then(refresh);
       document.addEventListener("dust:change", refresh);
       draw();
