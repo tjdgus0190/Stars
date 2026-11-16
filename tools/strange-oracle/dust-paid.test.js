@@ -55,6 +55,15 @@ test("돌아오는 길: ?to=dust면 별가루 페이지로, 아니면 입구 #pa
   assert.strictEqual(b.headers.Location, "/products/strange-oracle/#paid");
 });
 
+test("돌아오는 길: ?to=talk면 심층상담으로(2026-11-16 화면 안 충전) · 모르는 값은 입구", async () => {
+  const t = await Pay.handle({ method: "GET", route: "return", body: "", to: "talk" }, ENV, new MemStore(), NOW);
+  assert.strictEqual(t.status, 303);
+  assert.strictEqual(t.headers.Location, "/talk/#paid");
+  const req = new Request("https://example.test/api/pay/return?to=evil", { method: "GET" });
+  const r = await Pay.respond(req, {}, () => new MemStore(), ENV);
+  assert.strictEqual(r.headers.get("Location"), "/products/strange-oracle/#paid");
+});
+
 test("충전: 로그인한 계정에 한 번만, 다른 계정은 같은 코드로 못 씀, 잔액만 기록", async () => {
   const store = new MemStore();
   const { r } = await pay(store, "dust120", 5900);

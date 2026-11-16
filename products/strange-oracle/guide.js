@@ -167,6 +167,126 @@
       return true;
     };
     const acct = () => (paidBal == null ? 0 : paidBal);
+    // (2026-11-16 운영자) 충전 칸을 별가루 페이지와 심층상담(아래에서 올라오는 창)이 함께 쓴다. root 안의 [data-js=dust-shop]에 그린다
+    //   opts: { to: "dust"|"talk" 결제 뒤 돌아갈 곳, from: 로그인 출발 페이지, beforePay(), onCredited(응답) }
+    function makeShop(root, opts = {}) {
+      // ── 충전 (운영 규칙 7장): 결제 전에 받는 것·가격·환불·판매자를 보이고, 동의 체크 뒤에만 결제창
+      const SA = G.apps.stardust.app, S = SA.shop || {};
+      const shopOn = SA.shopMode === "live" || SA.shopMode === "test";
+      const PEND_KEY = "strange-oracle-dustpay"; // 이 탭 sessionStorage: 결제 요청 번호 R(무작위)·상품·받은 결제 코드
+      const readPend = () => { try { const x = JSON.parse(sessionStorage.getItem(PEND_KEY) || "null"); return x && /^[0-9a-f]{32}$/.test(x.r) && S.packs.some((k) => k.prod === x.prod) ? x : null; } catch (e) { return null; } };
+      const writePend = (x) => { try { if (x) sessionStorage.setItem(PEND_KEY, JSON.stringify(x)); else sessionStorage.removeItem(PEND_KEY); } catch (e) { /* 무시 */ } };
+      let pick = null, shopMsg = "", shopBusy = false, showRetry = false;
+      const won = (n) => Number(n).toLocaleString("ko-KR");
+      function drawShop() {
+        const el = root.querySelector("[data-js=dust-shop]");
+        if (!el || !shopOn) return;
+        const lg = readLogin();
+        let h = `<section class="gshop"><h2>${esc(S.head)}</h2><p class="gnote">${esc(S.lead)}</p>`;
+        if (!lg) {
+          h += `<div class="gactions"><button class="gbtn gbtn--kakao" type="button" data-js="dust-login">${esc(S.login)}</button></div><p class="gnote gcenter">${esc(S.loginNote)}</p>`;
+        } else {
+          const k = S.packs.find((x) => x.prod === pick);
+          // (2026-11-14) 상점처럼: 묶음마다 카드(결정 아이콘 무더기 · ×개수 · 덤 · 이름 · 값)
+          const DI = (n) => `<img src="/products/strange-oracle/img/stardust.webp" alt="" class="gpack__i${n}">`;
+          h += `<ul class="gpacks">${S.packs.map((x, i) => `<li><button type="button" class="gpack" data-js="dust-pack" data-prod="${x.prod}" aria-pressed="${pick === x.prod}"><span class="gpack__art">${[...Array(i + 1)].map((_, j) => DI(j)).join("")}<b class="gpack__qty">×${x.base || x.n}</b>${x.bonus ? `<em class="gpack__bonus">${esc(fill(S.bonus, { n: x.bonus }))}</em>` : ""}</span><span class="gpack__name">${esc(fill(S.packName || S.pack, { n: x.base || x.n }))}</span><span class="gpack__price">${esc(fill(S.price, { price: won(x.price) }))}</span></button></li>`).join("")}</ul>
+            <p class="gsummary">${esc(S.summary)}</p>
+            <details class="gfold"><summary>${esc(S.more)}</summary><ul class="gsources">${S.terms.map((t) => `<li>${esc(t)}</li>`).join("")}</ul><p class="gnote"><a href="/products/strange-oracle/legal/terms.html#s2-4">${esc(S.termsLink)}</a></p></details>
+            <label class="gcheck"><input type="checkbox" data-js="dust-agree" />${esc(S.agree)}</label>
+            <div class="gactions"><button class="gbtn" type="button" data-js="dust-buy"${shopBusy ? " disabled" : ""}>${esc(k ? fill(S.buy, { price: won(k.price), n: k.n }) : S.pick)}</button></div>`;
+        }
+        h += `<p class="gnote gcenter" data-js="dust-msg" role="status">${esc(shopMsg)}</p>${showRetry ? `<div class="gactions"><button class="gbtn ghost" type="button" data-js="dust-retry">${esc(S.retry)}</button></div>` : ""}</section>`;
+        el.innerHTML = h;
+      }
+      const say = (m, retry) => { shopMsg = m || ""; showRetry = Boolean(retry); drawShop(); };
+      // 결제창 설정은 입구와 같은 data.js(결제대행 아이디·SDK 주소)에서 — 누를 때만 받는다
+      let cfg = null;
+      const loadCfg = () => cfg || (cfg = new Promise((ok, no) => {
+        if (window.TEXT) return ok(window.TEXT);
+        const sc = document.createElement("script");
+        sc.src = "/products/strange-oracle/data.js";
+        sc.onload = () => (window.TEXT ? ok(window.TEXT) : no(new Error("cfg")));
+        sc.onerror = () => { cfg = null; no(new Error("cfg")); };
+        document.head.append(sc);
+      }));
+      const loadSdk = (src) => new Promise((ok, no) => {
+        if (window.PayApp) return ok();
+        const sc = document.createElement("script");
+        sc.src = src;
+        sc.onload = () => (window.PayApp ? ok() : no(new Error("sdk")));
+        sc.onerror = () => no(new Error("sdk"));
+        document.head.append(sc);
+      });
+      async function startBuy() {
+        const k = S.packs.find((x) => x.prod === pick);
+        if (!k || shopBusy) return;
+        shopBusy = true;
+        const r = hex32();
+        writePend({ r, prod: k.prod }); // 결제창을 열기 전에 저장(돌아와서 이 번호로 확인)
+        try {
+          const T = await loadCfg();
+          const PAY = T.pay || {}, PA = PAY.payapp || {};
+          if (PAY.mode !== "live" && PAY.mode !== "test") throw new Error("off");
+          await loadSdk(PA.sdk);
+          const o = location.origin; // 결제 통보·복귀는 이 페이지를 내준 배포의 함수로(시험 배포에서도 새 상품을 아는 함수가 받게)
+          const P = window.PayApp;
+          P.setDefault("userid", PA.userid);
+          P.setDefault("shopname", PA.shopname || "");
+          const v = { goodname: k.goodname, price: String(k.price), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return?to=${opts.to === "talk" ? "talk" : "dust"}`, var1: r, var2: k.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y", redirectpay: "1" };
+          Object.keys(v).forEach((x) => P.setParam(x, v[x]));
+          if (typeof P.setTarget === "function") P.setTarget("_self");
+          track("so_dust", { step: "start" });
+          if (opts.beforePay) opts.beforePay(); // (2026-11-16) 심층상담: 돌아와서 이어 갈 방·적던 질문을 이 탭에 잠깐
+          P.payrequest();
+        } catch (e) {
+          shopBusy = false;
+          writePend(null);
+          say(e && e.message === "off" ? S.off : S.sdkFail);
+        }
+      }
+      // 돌아와서: R로 결제 확인(2초마다 30초) → 결제 코드 → 카카오 계정에 충전(한 번만)
+      async function settle() {
+        const pend = readPend();
+        if (!pend) return;
+        const lg = readLogin();
+        if (!lg) return say(S.session);
+        say(S.waiting);
+        let code = pend.pass || null;
+        for (let i = 0; !code && i < 15; i++) {
+          const r = await post("/api/pay/status", { r: pend.r });
+          if (r.status === 200 && r.j && r.j.state === "paid" && r.j.pass) { code = r.j.pass; break; }
+          if (r.status === 200 && r.j && r.j.state === "cancelled") { writePend(null); return say(S.cancelled); }
+          await new Promise((ok) => setTimeout(ok, 2000));
+        }
+        if (!code) return say(S.late, true);
+        writePend({ r: pend.r, prod: pend.prod, pass: code });
+        const c = await post("/api/auth/dust", { sid: lg.sid, pass: code });
+        if (c.status === 200 && c.j) {
+          writePend(null);
+          paidBal = c.j.bal;
+          acctEvt();
+          if (opts.onCredited) opts.onCredited(c.j);
+          if (c.j.state === "credited") track("so_dust", { step: "done" });
+          return say(c.j.state === "already" ? S.already : fill(S.credited, { n: c.j.n }));
+        }
+        if (c.status === 401) { dropLogin(); return say(S.session); }
+        if (c.status === 409) { writePend(null); return say(S.used); }
+        say(S.late, true);
+      }
+      root.addEventListener("click", (e) => {
+        const t = e.target;
+        if (t.closest("[data-js=dust-login]")) return kakaoLogin(opts.from || "stardust");
+        const pk = t.closest("[data-js=dust-pack]");
+        if (pk) { const ag = root.querySelector("[data-js=dust-agree]"); const keep = ag && ag.checked; pick = pk.dataset.prod; shopMsg = ""; drawShop(); const ag2 = root.querySelector("[data-js=dust-agree]"); if (ag2) ag2.checked = keep; return; }
+        if (t.closest("[data-js=dust-retry]")) return settle();
+        if (t.closest("[data-js=dust-buy]")) {
+          if (!pick) return say(S.pick);
+          if (!root.querySelector("[data-js=dust-agree]").checked) return say(S.agreeNudge);
+          return startBuy();
+        }
+      });
+      return { draw: drawShop, settle, pending: () => Boolean(readPend()), on: shopOn };
+    }
 
 
     // ── (v1-F) 안내자 그림(아치 문 + 실루엣 + 방 명화)·방 데이터 불러오기
@@ -486,9 +606,13 @@
       };
       // 입력칸 위 한 줄: 가진 별가루(카카오 계정) · 모자라면 충전 · 로그인 전이면 로그인 단추
       const testFree = () => Boolean(acctView && acctView.talkFree); // (2026-11-15) 시험 배포: 심층상담에 별가루를 쓰지 않음
-      const metaHtml = (need) => paidBal == null
-        ? `<span>${esc(A.loginToTalk)}</span><button type="button" class="glink" data-js="talk-login">${esc(A.login)}</button>`
-        : `<span>${esc(testFree() ? A.testFree || "" : balLine())}</span>${need > 0 ? `<a href="/stardust/">${esc(fill(A.short, { need }))}</a>` : `<span>${esc(A.privacy)}</span>`}`;
+      // (2026-11-16 운영자) 충전은 이 화면 안에서(아래에서 올라오는 창) — 별가루 페이지로 넘어가지 않는다. 한 번 물을 만큼만 남으면 미리 알린다
+      const metaHtml = (need) => {
+        if (paidBal == null) return `<span>${esc(A.loginToTalk)}</span><button type="button" class="glink" data-js="talk-login">${esc(A.login)}</button>`;
+        const low = !testFree() && need <= 0 && paidBal < COSTQ * 2;
+        const charge = (t) => `<button type="button" class="glink" data-js="talk-charge">${esc(t)}</button>`;
+        return `<span>${esc(testFree() ? A.testFree || "" : balLine())}${low ? " · " + esc(A.lowOne) : ""}</span>${need > 0 ? charge(fill(A.short, { need })) : low ? charge(A.charge) : `<span>${esc(A.privacy)}</span>`}`;
+      };
       const room = () => {
         const g = cur, hist = chatOf(g.room);
         const need = paidBal == null || testFree() ? 0 : COSTQ - paidBal;
@@ -543,7 +667,31 @@
         if (!cur || cur.room !== room0) return;
         if (r) setR(room0, r); else { setupMsg = SU.cant; draw(); }
       };
+      // ── (2026-11-16) 화면 안 충전 창: 별가루 페이지와 같은 충전 칸(makeShop). 결제창에 다녀오면 이 방·적던 질문으로 돌아온다
+      const RES_KEY = "strange-oracle-talk-resume"; // 이 탭 sessionStorage: 결제 뒤 다시 열 방 이름 · 적던 질문(대화 기록과 같은 6장 sessionStorage 예외)
+      const sheet = document.createElement("div");
+      sheet.className = "gsheet gsheet--charge";
+      sheet.hidden = true;
+      sheet.setAttribute("role", "dialog");
+      sheet.setAttribute("aria-modal", "true");
+      sheet.setAttribute("aria-label", A.chargeHead || "");
+      sheet.innerHTML = `<div class="gsheet__scrim" data-js="charge-close"></div><div class="gsheet__body"><button class="gsheet__x" type="button" data-js="charge-close" aria-label="${esc(G.home.login.close)}">×</button><p class="gcharge__lead">${esc(A.chargeLead || "")}</p><div data-js="dust-shop"></div></div>`;
+      document.body.append(sheet);
+      const closeCharge = () => {
+        sheet.hidden = true;
+        const t = box.querySelector(".groom textarea");
+        if (t && !t.disabled) t.focus({ preventScroll: true });
+      };
+      const shop = makeShop(sheet, {
+        to: "talk",
+        from: "talk",
+        beforePay: () => { try { const t = box.querySelector(".groom textarea"); sessionStorage.setItem(RES_KEY, JSON.stringify({ room: cur ? cur.room : "", q: t ? t.value.slice(0, 300) : "", skip: Boolean(cur && skipped[cur.room]) })); } catch (x) { /* 이 화면에서만 */ } },
+        onCredited: () => { refresh(); setTimeout(closeCharge, 1600); },
+      });
+      const openCharge = () => { if (!shop.on) { location.href = "/stardust/"; return; } sheet.hidden = false; shop.draw(); const x = sheet.querySelector(".gsheet__x"); if (x) x.focus({ preventScroll: true }); };
+      sheet.addEventListener("click", (e) => { if (e.target.closest("[data-js=charge-close]")) closeCharge(); });
       box.addEventListener("click", async (e) => {
+        if (e.target.closest("[data-js=talk-charge]")) return openCharge();
         const b = e.target.closest("[data-js=talk-pick]");
         if (b && !busy) { if (on) enter(b.dataset.room); return; }
         if (e.target.closest("[data-js=talk-leave]") && !busy) { cur = null; draw(); return; }
@@ -650,10 +798,25 @@
       box.addEventListener("input", (e) => { if (e.target.name === "q") { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; } });
       // (2026-11-14 운영자) Enter는 줄바꿈. 보내기는 보내기 단추(PC에서는 Ctrl·Cmd + Enter도)
       box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
-      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && cur && !busy) { cur = null; draw(); } });
+      document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!sheet.hidden) { closeCharge(); return; } if (cur && !busy) { cur = null; draw(); } });
       loadPaid().then(refresh);
       document.addEventListener("dust:change", refresh);
       draw();
+      // 충전 결제에서 돌아온 경우(#paid 또는 확인 중인 결제): 그 방·적던 질문을 다시 열고 충전 창에서 결제를 확인한다
+      if (location.hash === "#paid" || shop.pending()) {
+        let res = null;
+        try { res = JSON.parse(sessionStorage.getItem(RES_KEY) || "null"); sessionStorage.removeItem(RES_KEY); } catch (x) { res = null; }
+        if (location.hash === "#paid") history.replaceState(null, "", location.pathname);
+        if (on && res && X.guides.some((g) => g.room === res.room)) {
+          if (res.skip === true) skipped[res.room] = true; // 결과 없이 이야기하던 방이면 그대로
+          enter(res.room);
+          const t = box.querySelector(".groom textarea");
+          if (t && typeof res.q === "string") t.value = res.q.slice(0, 300);
+        }
+        sheet.hidden = false;
+        shop.draw();
+        shop.settle();
+      }
       // 카카오 로그인하고 돌아온 경우(#login): 고르던 방을 다시 연다
       if (/^#login/.test(location.hash)) {
         let back = "";
@@ -686,121 +849,10 @@
           ${got ? `<p class="gnote gcenter" role="status">${esc(chMsg === "ok" ? fill(CH.ok, { n: 10 }) : CH.got)}</p>` : `<div class="gactions gcol"><a class="gbtn ghost" href="${esc(CH_URL.replace(/\/$/, "") + "/friend")}" target="_blank" rel="noopener" data-js="ch-add">${esc(CH.add)}</a><button class="gbtn gbtn--kakao" type="button" data-js="ch-claim">${esc(CH.claim)}</button></div><small class="gnote">${esc(CH.note)}</small>`}</section>`;
       };
       box.addEventListener("click", (e) => { if (CH_REWARD && e.target.closest("[data-js=ch-claim]")) kakaoLogin("stardust", true); });
-      // ── 충전 (운영 규칙 7장): 결제 전에 받는 것·가격·환불·판매자를 보이고, 동의 체크 뒤에만 결제창
-      const S = A.shop || {};
       // 일곱 방 결제 화면에서 「별가루 충전하러 가기」로 왔으면 돌아가는 단추(이 탭 sessionStorage "strange-oracle-dust-back")
       const backTo = () => { try { return sessionStorage.getItem("strange-oracle-dust-back") || ""; } catch (e) { return ""; } };
-      const shopOn = A.shopMode === "live" || A.shopMode === "test";
-      const PEND_KEY = "strange-oracle-dustpay"; // 이 탭 sessionStorage: 결제 요청 번호 R(무작위)·상품·받은 결제 코드
-      const readPend = () => { try { const x = JSON.parse(sessionStorage.getItem(PEND_KEY) || "null"); return x && /^[0-9a-f]{32}$/.test(x.r) && S.packs.some((k) => k.prod === x.prod) ? x : null; } catch (e) { return null; } };
-      const writePend = (x) => { try { if (x) sessionStorage.setItem(PEND_KEY, JSON.stringify(x)); else sessionStorage.removeItem(PEND_KEY); } catch (e) { /* 무시 */ } };
-      let pick = null, shopMsg = "", shopBusy = false, showRetry = false;
-      const won = (n) => Number(n).toLocaleString("ko-KR");
-      function drawShop() {
-        const el = box.querySelector("[data-js=dust-shop]");
-        if (!el || !shopOn) return;
-        const lg = readLogin();
-        let h = `<section class="gshop"><h2>${esc(S.head)}</h2><p class="gnote">${esc(S.lead)}</p>`;
-        if (!lg) {
-          h += `<div class="gactions"><button class="gbtn gbtn--kakao" type="button" data-js="dust-login">${esc(S.login)}</button></div><p class="gnote gcenter">${esc(S.loginNote)}</p>`;
-        } else {
-          const k = S.packs.find((x) => x.prod === pick);
-          // (2026-11-14) 상점처럼: 묶음마다 카드(결정 아이콘 무더기 · ×개수 · 덤 · 이름 · 값)
-          const DI = (n) => `<img src="/products/strange-oracle/img/stardust.webp" alt="" class="gpack__i${n}">`;
-          h += `<ul class="gpacks">${S.packs.map((x, i) => `<li><button type="button" class="gpack" data-js="dust-pack" data-prod="${x.prod}" aria-pressed="${pick === x.prod}"><span class="gpack__art">${[...Array(i + 1)].map((_, j) => DI(j)).join("")}<b class="gpack__qty">×${x.base || x.n}</b>${x.bonus ? `<em class="gpack__bonus">${esc(fill(S.bonus, { n: x.bonus }))}</em>` : ""}</span><span class="gpack__name">${esc(fill(S.packName || S.pack, { n: x.base || x.n }))}</span><span class="gpack__price">${esc(fill(S.price, { price: won(x.price) }))}</span></button></li>`).join("")}</ul>
-            <p class="gsummary">${esc(S.summary)}</p>
-            <details class="gfold"><summary>${esc(S.more)}</summary><ul class="gsources">${S.terms.map((t) => `<li>${esc(t)}</li>`).join("")}</ul><p class="gnote"><a href="/products/strange-oracle/legal/terms.html#s2-4">${esc(S.termsLink)}</a></p></details>
-            <label class="gcheck"><input type="checkbox" data-js="dust-agree" />${esc(S.agree)}</label>
-            <div class="gactions"><button class="gbtn" type="button" data-js="dust-buy"${shopBusy ? " disabled" : ""}>${esc(k ? fill(S.buy, { price: won(k.price), n: k.n }) : S.pick)}</button></div>`;
-        }
-        h += `<p class="gnote gcenter" data-js="dust-msg" role="status">${esc(shopMsg)}</p>${showRetry ? `<div class="gactions"><button class="gbtn ghost" type="button" data-js="dust-retry">${esc(S.retry)}</button></div>` : ""}</section>`;
-        el.innerHTML = h;
-      }
-      const say = (m, retry) => { shopMsg = m || ""; showRetry = Boolean(retry); drawShop(); };
-      // 결제창 설정은 입구와 같은 data.js(결제대행 아이디·SDK 주소)에서 — 누를 때만 받는다
-      let cfg = null;
-      const loadCfg = () => cfg || (cfg = new Promise((ok, no) => {
-        if (window.TEXT) return ok(window.TEXT);
-        const sc = document.createElement("script");
-        sc.src = "/products/strange-oracle/data.js";
-        sc.onload = () => (window.TEXT ? ok(window.TEXT) : no(new Error("cfg")));
-        sc.onerror = () => { cfg = null; no(new Error("cfg")); };
-        document.head.append(sc);
-      }));
-      const loadSdk = (src) => new Promise((ok, no) => {
-        if (window.PayApp) return ok();
-        const sc = document.createElement("script");
-        sc.src = src;
-        sc.onload = () => (window.PayApp ? ok() : no(new Error("sdk")));
-        sc.onerror = () => no(new Error("sdk"));
-        document.head.append(sc);
-      });
-      async function startBuy() {
-        const k = S.packs.find((x) => x.prod === pick);
-        if (!k || shopBusy) return;
-        shopBusy = true;
-        const r = hex32();
-        writePend({ r, prod: k.prod }); // 결제창을 열기 전에 저장(돌아와서 이 번호로 확인)
-        try {
-          const T = await loadCfg();
-          const PAY = T.pay || {}, PA = PAY.payapp || {};
-          if (PAY.mode !== "live" && PAY.mode !== "test") throw new Error("off");
-          await loadSdk(PA.sdk);
-          const o = location.origin; // 결제 통보·복귀는 이 페이지를 내준 배포의 함수로(시험 배포에서도 새 상품을 아는 함수가 받게)
-          const P = window.PayApp;
-          P.setDefault("userid", PA.userid);
-          P.setDefault("shopname", PA.shopname || "");
-          const v = { goodname: k.goodname, price: String(k.price), feedbackurl: `${o}/api/pay/feedback`, returnurl: `${o}/api/pay/return?to=dust`, var1: r, var2: k.tag, openpaytype: PA.openpaytype, checkretry: "y", smsuse: "n", skip_cstpage: "y", redirectpay: "1" };
-          Object.keys(v).forEach((x) => P.setParam(x, v[x]));
-          if (typeof P.setTarget === "function") P.setTarget("_self");
-          track("so_dust", { step: "start" });
-          P.payrequest();
-        } catch (e) {
-          shopBusy = false;
-          writePend(null);
-          say(e && e.message === "off" ? S.off : S.sdkFail);
-        }
-      }
-      // 돌아와서: R로 결제 확인(2초마다 30초) → 결제 코드 → 카카오 계정에 충전(한 번만)
-      async function settle() {
-        const pend = readPend();
-        if (!pend) return;
-        const lg = readLogin();
-        if (!lg) return say(S.session);
-        say(S.waiting);
-        let code = pend.pass || null;
-        for (let i = 0; !code && i < 15; i++) {
-          const r = await post("/api/pay/status", { r: pend.r });
-          if (r.status === 200 && r.j && r.j.state === "paid" && r.j.pass) { code = r.j.pass; break; }
-          if (r.status === 200 && r.j && r.j.state === "cancelled") { writePend(null); return say(S.cancelled); }
-          await new Promise((ok) => setTimeout(ok, 2000));
-        }
-        if (!code) return say(S.late, true);
-        writePend({ r: pend.r, prod: pend.prod, pass: code });
-        const c = await post("/api/auth/dust", { sid: lg.sid, pass: code });
-        if (c.status === 200 && c.j) {
-          writePend(null);
-          paidBal = c.j.bal;
-          draw();
-          if (c.j.state === "credited") track("so_dust", { step: "done" });
-          return say(c.j.state === "already" ? S.already : fill(S.credited, { n: c.j.n }));
-        }
-        if (c.status === 401) { dropLogin(); return say(S.session); }
-        if (c.status === 409) { writePend(null); return say(S.used); }
-        say(S.late, true);
-      }
-      box.addEventListener("click", (e) => {
-        const t = e.target;
-        if (t.closest("[data-js=dust-login]")) return kakaoLogin();
-        const pk = t.closest("[data-js=dust-pack]");
-        if (pk) { const ag = box.querySelector("[data-js=dust-agree]"); const keep = ag && ag.checked; pick = pk.dataset.prod; shopMsg = ""; drawShop(); const ag2 = box.querySelector("[data-js=dust-agree]"); if (ag2) ag2.checked = keep; return; }
-        if (t.closest("[data-js=dust-retry]")) return settle();
-        if (t.closest("[data-js=dust-buy]")) {
-          if (!pick) return say(S.pick);
-          if (!box.querySelector("[data-js=dust-agree]").checked) return say(S.agreeNudge);
-          return startBuy();
-        }
-      });
+      const shop = makeShop(box, { to: "dust", from: "stardust", onCredited: () => draw() });
+      const drawShop = shop.draw, settle = shop.settle, readPend = shop.pending, shopOn = shop.on;
       if (shopOn) loadPaid().then(() => { draw(); if (location.hash === "#paid" || readPend()) settle(); if (/^#(paid|login|login-ch0?)$/.test(location.hash)) history.replaceState(null, "", location.pathname); if (chMsg === "ok" && acctOnce.includes("channel")) { try { document.dispatchEvent(new CustomEvent("dust:gain", { detail: { kind: "channel", amt: 10 } })); } catch (e) { /* 무시 */ } } });
       document.addEventListener("dust:change", draw);
       draw();

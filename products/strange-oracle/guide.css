@@ -474,3 +474,11 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 /* (2026-11-14) 카카오톡 채널 친구 추가 칸 */
 .gchannel { margin: 18px 0; padding: 18px 16px; border-radius: 20px; border: 1px solid oklch(0.75 0.13 95 / 0.45); background: linear-gradient(160deg, oklch(0.24 0.05 95 / 0.35), oklch(0.15 0.035 285 / 0.9)); }
 .gchannel h2 { margin: 0 0 6px; font-size: var(--fs-lg); color: oklch(0.92 0.1 95); }
+
+/* (2026-11-16) 심층상담 화면 안 충전 창: 상담 방(z 75) 위에, 알림(90) 아래 */
+.gsheet--charge { z-index: 85; }
+.gsheet[hidden] { display: none; }
+.gsheet--charge .gsheet__body { text-align: left; }
+.gcharge__lead { margin: 4px 44px 6px 0; font-size: 0.95rem; color: var(--c-text-soft, oklch(0.8 0.03 285)); }
+.gsheet--charge .gshop { margin-top: 6px; }
+.groom__meta .glink { margin-left: 6px; }

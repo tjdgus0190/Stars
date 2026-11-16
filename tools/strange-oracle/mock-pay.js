@@ -156,7 +156,7 @@ ${script}</body></html>`;
   const returnTo = (s, host) => {
     try {
       const u = new URL(String(s.returnurl || ""), `http://${host}`);
-      if (u.host === host && u.pathname === "/api/pay/return") return u.pathname + (u.searchParams.get("to") === "dust" ? "?to=dust" : ""); // (v1-D) 별가루 충전은 별가루 페이지로
+      if (u.host === host && u.pathname === "/api/pay/return") return u.pathname + (["dust", "talk"].includes(u.searchParams.get("to")) ? "?to=" + u.searchParams.get("to") : ""); // (v1-D) 별가루 충전은 별가루 페이지로 · (2026-11-16) 심층상담 안 충전은 심층상담으로
     } catch (e) {}
     return "/api/pay/return";
   };
@@ -167,7 +167,7 @@ ${script}</body></html>`;
   function route(req, res, rel, url, log) {
     if (rel.startsWith("/api/pay/")) {
       readBody(req).then(async (body) => {
-        const r = await callPay(rel.slice("/api/pay/".length), req.method, body, req.socket.remoteAddress, url.searchParams.get("to") === "dust" ? "dust" : "");
+        const r = await callPay(rel.slice("/api/pay/".length), req.method, body, req.socket.remoteAddress, ["dust", "talk"].includes(url.searchParams.get("to")) ? url.searchParams.get("to") : "");
         res.writeHead(r.status, r.headers).end(r.body);
         log(r.status);
       });

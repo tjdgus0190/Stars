@@ -734,6 +734,10 @@ window.GUIDE = {
         balancePaid: "가진 별가루 {n} · 충전한 별가루 {p}",
         sessionEnd: "카카오 로그인이 끝났어요. 별가루 페이지에서 다시 로그인해 주세요.",
         short: "별가루 {need} 모자라요 · 충전하기",
+        lowOne: "한 번 물을 만큼 남았어요", // (2026-11-16) 바닥나기 전에 미리
+        charge: "충전하기",
+        chargeHead: "별가루 충전",
+        chargeLead: "충전하면 이 대화로 바로 돌아와요. 적던 질문도 그대로 남아요.",
         waiting: "생각하는 중…",
         you: "나",
         count: "{n} / 300",

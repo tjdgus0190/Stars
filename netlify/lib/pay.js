@@ -275,6 +275,8 @@ function back(req, env) {
   // (2026-10-25 도메인 이전) 주소(origin)는 붙이지 않고 경로만 → 이용자가 결제를 시작한 주소(Netlify 주소·strange-oracle.com)로 돌아가 그 탭의 sessionStorage가 이어진다
   // (v1-D) 별가루 충전은 별가루 페이지로 돌아간다(고정 경로, 다른 값은 받지 않음)
   if (req.to === "dust") return { status: 303, headers: Object.assign({}, H_TEXT, { Location: "/stardust/#paid" }), body: "" };
+  // (2026-11-16) 심층상담 화면 안에서 충전하면 그 화면(대화)으로 돌아간다
+  if (req.to === "talk") return { status: 303, headers: Object.assign({}, H_TEXT, { Location: "/talk/#paid" }), body: "" };
   const to = /^https?:\/\/[^\s#?"'<>]+\/$/.test(site) ? new URL(site).pathname + "#paid" : RETURN_FALLBACK;
   return { status: 303, headers: Object.assign({}, H_TEXT, { Location: to }), body: "" }; // R·결제 값을 붙이지 않는다
 }
@@ -308,7 +310,8 @@ function storeFrom(openStore) {
 async function respond(req, context, openStore, env = process.env) {
   const route = (new URL(req.url).pathname.match(/\/(feedback|status|return)\/?$/) || [])[1] || "";
   const body = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
-  const to = new URL(req.url).searchParams.get("to") === "dust" ? "dust" : "";
+  const tq = new URL(req.url).searchParams.get("to");
+  const to = tq === "dust" || tq === "talk" ? tq : ""; // 고정 값만
   const r = await handle({ method: req.method, route, body, to, ip: String((context && context.ip) || "unknown") }, env, storeFrom(openStore), Date.now());
   return new Response(r.body, { status: r.status, headers: r.headers });
 }
