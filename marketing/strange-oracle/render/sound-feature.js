@@ -9,7 +9,7 @@ const { spawnSync } = require("child_process");
 
 const VIDEO = { saju: "ad11-saju-ko", today: "ad12-today-ko", talk: "ad13-talk-ko" }[F];
 const OUT = path.resolve(__dirname, "..", "out");
-const SHIFT = F === "talk" ? 7.5 : 0; // (2026-11-16) 13안은 19.5초 — 끝 화면이 7.5초 늦게
+const SHIFT = F === "talk" ? 14.7 : 0; // (2026-11-16) 13안은 26.7초 — 끝 화면이 14.7초 늦게
 const SR = 48000, DUR = 12 + SHIFT, N = SR * DUR;
 const L = new Float32Array(N), R = new Float32Array(N), VL = new Float32Array(N), VR = new Float32Array(N);
 let seed = 2026111400;
@@ -126,19 +126,14 @@ if (F === "today") {
   celesta(7.6, mtof(81), 0.12, 0, 1.2);
 }
 if (F === "talk") {
-  celesta(3.0, mtof(69), 0.12, 0, 1.2);
-  blip(3.5, 1320, 0.22, 0.35);
-  for (let t = 4.05; t < 4.7; t += 0.3) tick(t, 0.1, -0.2);
-  [4.75, 5.45, 6.15].forEach((t, k) => blip(t, [880, 990, 880][k], 0.2, -0.3));
-  blip(6.95, 880, 0.2, -0.3); celesta(7.0, mtof(81), 0.14, -0.1, 1.0); celesta(7.2, mtof(86), 0.15, 0.1, 1.4);
-  // (2026-11-16) 룬·베다·시빌라: 안내자가 바뀔 때 첼레스타 한 음 · 질문 톡 · 답 톡 둘(안내자마다 높이를 조금 다르게)
-  [[7.85, 74, 760], [10.8, 78, 840], [13.75, 81, 920]].forEach(([t, m, f], k) => {
-    celesta(t, mtof(m), 0.14, (k - 1) * 0.3, 1.2);
-    blip(t + 0.25, 1320, 0.2, 0.35);
-    for (let x = t + 0.55; x < t + 0.98; x += 0.3) tick(x, 0.08, -0.2);
-    blip(t + 1.05, f, 0.19, -0.3); blip(t + 1.9, f * 1.12, 0.19, -0.3);
+  // (2026-11-16) 만신·룬·베다·시빌라: 안내자가 바뀔 때 첼레스타 · 질문 톡 · 답을 고르는 초침 · 답 톡 둘 · 되묻기는 밝은 두 음(시각은 scenes/ad-feature.js TALKS와 같다)
+  [[3.0, 0.5, [4.6, 6.0, 7.0], 69, 880], [9.0, 0.25, [10.0, 11.1, 11.9], 74, 760], [14.0, 0.25, [15.0, 16.1, 16.9], 78, 840], [19.0, 0.25, [20.0, 21.1, 21.9], 81, 920]].forEach(([t, dq, ts, m, f], k) => {
+    celesta(t, mtof(m), 0.13, (k - 1.5) * 0.25, 1.2);
+    blip(t + dq, 1320, 0.2, 0.35);
+    for (let x = t + dq + 0.35; x < ts[0] - 0.05; x += 0.3) tick(x, 0.08, -0.2);
+    blip(ts[0], f, 0.19, -0.3); blip(ts[1], f * 1.12, 0.19, -0.3);
+    blip(ts[2], f, 0.18, -0.3); celesta(ts[2] + 0.05, mtof(m + 12), 0.12, -0.1, 1.0); celesta(ts[2] + 0.25, mtof(m + 17), 0.12, 0.1, 1.3);
   });
-  celesta(15.0, mtof(86), 0.12, 0, 1.4);
 }
 // 끝 화면
 for (let k = 0; k < 7; k++) celesta(9.65 + SHIFT + k * 0.06, MEL[k] * 2, 0.08, (k - 3) * 0.2, 0.8);

@@ -32,7 +32,7 @@ const ADS = {
   ad10: { scene: "ad10-guides.html", out: "ad10-guides-ko.mp4", frames: 630 }, // (2026-11-14) 10안 「일곱 안내자」 세 기능(세계 점술·AI 면담·오늘의 신탁) 21초
   ad11: { scene: "ad-feature.html?f=saju", out: "ad11-saju-ko.mp4", frames: 360 }, // (2026-11-15) 11안 「만신의 방」 기능 하나 12초 → 만신의 방 입력 화면
   ad12: { scene: "ad-feature.html?f=today", out: "ad12-today-ko.mp4", frames: 360 }, // (2026-11-15) 12안 「오늘의 신탁」 12초 → /today/
-  ad13: { scene: "ad-feature.html?f=talk", out: "ad13-talk-ko.mp4", frames: 585 }, // (2026-11-16) 19.5초: 만신 뒤에 룬·베다·시빌라도 // (2026-11-15) 13안 「심층상담」 12초 → /talk/ (반응한 사람 대상)
+  ad13: { scene: "ad-feature.html?f=talk", out: "ad13-talk-ko.mp4", frames: 801 }, // (2026-11-16) 26.7초: 만신·룬·베다·시빌라, 답 + 정곡 되묻기 // (2026-11-15) 13안 「심층상담」 12초 → /talk/ (반응한 사람 대상)
   "ep-rune": { scene: "legend-ep.html?ep=rune", out: "legend-ep-rune-ko.mp4", frames: 1440 }, // (2026-11-13) 전설 릴스 공용 틀 48초
   "ep-ogham": { scene: "legend-ep.html?ep=ogham", out: "legend-ep-ogham-ko.mp4", frames: 1440 }, // (2026-11-13) 전설 릴스 공용 틀 48초
   "ep-star": { scene: "legend-ep.html?ep=star", out: "legend-ep-star-ko.mp4", frames: 1440 }, // (2026-11-13) 전설 릴스 공용 틀 48초

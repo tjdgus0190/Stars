@@ -26,3 +26,15 @@
 /* 끝 화면의 기능 이름 한 줄 */
 .end10 .feat { position: absolute; left: 140px; width: 800px; top: 870px; margin: 0; text-align: center; font: 700 52px/1.35 var(--font-serif); color: var(--ink-hi); word-break: keep-all; opacity: 0; }
 .end10 .feat em { font-style: normal; color: oklch(0.88 0.1 85); }
+/* 13안 (2026-11-16): 대화 카드 말풍선이 아래에서부터 쌓인다 — 높이 0에서 자라며 앞 말풍선을 위로 민다(카드 밖으로 나간 건 가려짐) */
+.chat13 { justify-content: flex-end; overflow: hidden; gap: 0; }
+.chat13 > * { flex-shrink: 0; overflow: hidden; margin: 0 !important; }
+.chat13 .msg10.me { opacity: 1; margin-bottom: 0; }
+.chat13 .row13 { position: relative; display: flex; align-items: flex-end; gap: 16px; }
+.chat13 .f13 { position: relative; left: auto; flex-shrink: 0; opacity: 1; }
+.chat13 .ty13 { position: relative; left: auto; opacity: 1; }
+.chat13 .m13 { opacity: 1; margin: 0; max-width: 660px; font-size: 34px; }
+.chat13 .msg10.g { margin-left: 0; }
+@keyframes grow13 { from { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; transform: translateY(16px); } to { max-height: 420px; opacity: 1; transform: none; } }
+@keyframes shrink13 { from { max-height: 140px; opacity: 1; } to { max-height: 0; opacity: 0; } }
+.chat13 > .msg10.me, .chat13 > .row13 { margin-top: 18px !important; }
