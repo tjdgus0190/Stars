@@ -917,7 +917,7 @@
         const mini = (head, list, sign) => `<section class="gmini"><h2>${esc(head)}</h2><ul>${list.map((x) => `<li><span>${esc(x.label)}${x.note ? `<small>${esc(x.note)}</small>` : ""}</span><b>${sign}${esc(String(x.amt).replace(/^\+/, ""))}</b></li>`).join("")}</ul></section>`;
         // (2026-11-14) 별가루는 카카오 계정에만 — 로그인 전이면 0과 로그인 안내
         box.innerHTML = `<div class="gwallet"><small>${esc(A.balance)}</small><b><img class="gwallet__i" src="/products/strange-oracle/img/stardust.webp" alt=""> <span data-js="dust-total">${paidBal || 0}</span></b></div>
-          <div class="gminis">${mini(A.waysHead, A.ways.filter((x) => x.kind !== "channel" || ((window.NAV && window.NAV.channel) || {}).reward), "+")}${mini(A.usesHead, A.uses, "−")}</div>${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc(S.back)}</a></div>` : ""}
+          <div class="gminis">${mini(A.waysHead, A.ways.filter((x) => x.kind !== "channel" || ((window.NAV && window.NAV.channel) || {}).reward), "+")}${mini(A.usesHead, A.uses, "−")}</div>${backTo() ? `<div class="gactions"><a class="gbtn ghost" href="/products/strange-oracle/" data-js="dust-back">${esc((A.shop || {}).back || "")}</a></div>` : ""}
           ${chBox()}<div data-js="dust-shop"></div>`;
         drawShop();
       };
