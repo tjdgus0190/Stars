@@ -542,3 +542,6 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .groom.is-enter, .groom.is-leave, .gsheet__body, .gsheet__scrim, .gsheet.is-leave .gsheet__body, .gsheet.is-leave .gsheet__scrim, .gread.is-new, .gread.is-new + .gmine { animation: none; } }
 .groom.is-enter { animation-delay: var(--ed, 0ms); }
 .gread { scroll-margin-top: 84px; }
+
+/* (2026-11-16) 처음 화면 신년운세 배너 아래 소개 페이지 링크 */
+.gny-more { display: block; margin: 8px 4px 0; text-align: right; font-family: var(--font-sans); font-size: 0.8125rem; color: oklch(0.86 0.09 85); text-decoration: underline; text-underline-offset: 3px; }
