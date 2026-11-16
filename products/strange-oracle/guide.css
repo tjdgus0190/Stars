@@ -509,3 +509,4 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .gme-out h2::before { display: none; }
 .gme-doors__arches { flex-wrap: nowrap; gap: 4px; }
 .gme-doors__arches .garch--sm { width: 40px; }
+.gmine { margin: 8px 0 0; color: oklch(0.84 0.09 85); }

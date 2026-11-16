@@ -27,7 +27,8 @@ const ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
 const MAX_Q = 300;
 const MAX_A = 1600; // (2026-11-14) 답을 끝까지(짧은 문단 3~4개 + 역질문) — 앞선 문답의 답도 이만큼까지
 const MAX_HIST = 3;
-const MAX_BODY = 4096;
+const MAX_BODY = 8192; // (2026-11-16) 다른 방 결과 번호·앞서 물었던 질문 목록까지
+const MAX_PAST = 8, MAX_PAST_Q = 120; // 이 탭에서 앞서 물었던 질문(답 없이) 몇 개만
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_WINDOW = 12;
 const FREE_PER_DAY = 4;
@@ -80,14 +81,22 @@ function parse(body) {
   let o;
   try { o = JSON.parse(body); } catch (e) { return null; }
   if (!o || typeof o !== "object" || Array.isArray(o)) return null;
-  const allowed = ["room", "r", "q", "hist", "sid"];
+  const allowed = ["room", "r", "q", "hist", "sid", "rs", "past"]; // (2026-11-16 맞춤 1단계) rs = 다른 방 결과 번호 · past = 앞서 물었던 질문
   if (!Object.keys(o).every((k) => allowed.includes(k))) return null; // 모르는 칸(이름·생일 등)은 받지 않는다
   if (!ROOMS.includes(o.room) || !validR(o.room, o.r === undefined ? null : o.r) || !okText(o.q, MAX_Q)) return null;
   const hist = o.hist === undefined ? [] : o.hist;
   if (!Array.isArray(hist) || hist.length > MAX_HIST) return null;
   if (!hist.every((h) => h && typeof h === "object" && Object.keys(h).every((k) => k === "q" || k === "a") && okText(h.q, MAX_Q) && okText(h.a, MAX_A))) return null;
   if (o.sid !== undefined && !/^[0-9a-f]{32}$/.test(String(o.sid))) return null; // 로그인 표(무작위 값) — 충전한 별가루로 묻기
-  return { room: o.room, r: o.r == null ? null : o.r, q: o.q.trim(), hist, sid: o.sid || null };
+  // 다른 방 결과: { 방 이름: 결과 번호 } — 이 방은 빼고, 모양이 맞는 것만(결과 번호뿐, 입력값 아님)
+  let rs = {};
+  if (o.rs !== undefined) {
+    if (!o.rs || typeof o.rs !== "object" || Array.isArray(o.rs)) return null;
+    for (const [k, v] of Object.entries(o.rs)) { if (!ROOMS.includes(k) || k === o.room || !validR(k, v) || v == null) return null; rs[k] = v; }
+  }
+  const past = o.past === undefined ? [] : o.past;
+  if (!Array.isArray(past) || past.length > MAX_PAST || !past.every((x) => okText(x, MAX_PAST_Q))) return null;
+  return { room: o.room, r: o.r == null ? null : o.r, q: o.q.trim(), hist, sid: o.sid || null, rs, past: past.map((x) => x.trim()) };
 }
 
 function envOk(env) {

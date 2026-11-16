@@ -104,6 +104,10 @@ function build(p, model) {
   const context = res
     ? `# 이 방문객이 ${g.roomName}에서 받은 결과 (점술관이 쓴 해석, 이 안에서 이야기한다. 없는 고대 의미를 지어내지 않는다)\n${res}`
     : `# 이 방문객은 아직 ${g.roomName}의 결과가 없다. 결과를 짐작하지 말고, 이 점술의 일반적인 결로 답하며 필요하면 방에 들어가 결과를 받아 보라고 한 번 권한다.`;
+  // (2026-11-16 맞춤 1단계) 다른 방에서 받은 결과(번호 → 점술관 해석 이름·핵심)와 이 탭에서 앞서 물었던 것
+  const others = Object.entries(p.rs || {}).map(([room, r]) => { const og = guideOf(room); const t = resultText(room, r); return t ? `[${og.roomName} · ${og.name}]\n${t}` : ""; }).filter(Boolean);
+  const more = (others.length ? `\n\n# 이 방문객이 다른 방에서 받은 결과 (참고만. 이 방의 점을 중심에 두고, 도움이 될 때 한 번쯤 "다른 방에서 본 결"로 엮어 말할 수 있다. 다른 안내자인 척하지 않는다)\n${others.join("\n")}` : "")
+    + ((p.past || []).length ? `\n\n# 이 방문객이 이 탭에서 앞서 물었던 것 (오래된 순. 이어지는 고민이면 자연스럽게 기억해 짚는다. 되풀이해 읽어 주지는 않는다)\n${p.past.map((x) => "- " + x).join("\n")}` : "");
   const messages = [];
   for (const h of p.hist) { messages.push({ role: "user", content: h.q }); messages.push({ role: "assistant", content: h.a }); }
   messages.push({ role: "user", content: p.q });
@@ -115,7 +119,7 @@ function build(p, model) {
     output_config: { effort: "medium" },
     system: [
       { type: "text", text: persona + "\n\n" + RULES + roomRule, cache_control: { type: "ephemeral" } },
-      { type: "text", text: context },
+      { type: "text", text: context + more },
     ],
     messages,
   };

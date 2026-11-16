@@ -681,6 +681,9 @@ window.GUIDE = {
         rewardLogin: "카카오 로그인하면 출석 별가루 +5를 받아요",
         login: "카카오 로그인",
         receivedHead: "{name}의 신탁",
+        mineHint: "{name}{iga} {room}에서 받은 당신의 결과로 오늘을 읽어 줘요", // (2026-11-16 맞춤 1단계)
+        mineNote: "{room}에서 받은 당신의 결과로 읽은 오늘이에요",
+        notMineHint: "{room}에 다녀오면, 다음에 이 안내자가 올 때 당신의 결과로 읽어 줘요",
         act: "오늘 해 볼 것",
         flowHead: "오늘의 결",
         loreHead: "알고 있었나요",

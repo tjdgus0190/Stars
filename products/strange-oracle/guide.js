@@ -355,7 +355,29 @@
 
     if (CONF.page === "today") {
       const A = P.app;
-      const pick = (room) => window.Calc.pickOracle((ROOM_DATA[room][1]() || []).length || 1);
+      const pickAny = (room) => window.Calc.pickOracle((ROOM_DATA[room][1]() || []).length || 1);
+      // (2026-11-16 맞춤 1단계) 그 방에서 받은 내 결과가 있으면 오늘의 신탁을 내 결과로 읽는다(이 탭 기록 · 카카오에 저장한 기록). 결과 번호만 쓴다
+      const I = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
+      let mine = {};
+      try { mine = (JSON.parse(sessionStorage.getItem("strange-oracle") || "null") || {}).visits || {}; } catch (e) { mine = {}; }
+      const lg0 = readLogin();
+      const mineReady = lg0 && lg0.consent === true
+        ? post("/api/auth/me", { sid: lg0.sid }).then((r) => { const v = r.status === 200 && r.j && r.j.data && r.j.data.v; if (v && typeof v === "object") mine = Object.assign({}, v, mine); }).catch(() => {})
+        : Promise.resolve();
+      const myIdx = (room) => {
+        const v = mine[room];
+        if (!v) return null;
+        if (room === "saju") return I(v.code, 1, 5000) ? Math.floor((v.code - 1) / 500) : null;
+        if (room === "ogham") return I(v.ogham, 0, 19) ? v.ogham : null;
+        if (room === "star") return I(v.nak, 0, 26) ? v.nak : null;
+        if (room === "decan") return I(v.decan, 0, 35) ? v.decan : null;
+        if (room === "tzolkin") return I(v.sign, 0, 19) ? v.sign : null;
+        if (room === "sibyl") return I(v.sors, 0, 31) ? v.sors : null;
+        if (room === "rune" && Array.isArray(v.picks) && v.picks.length) { const L = ROOM_DATA.rune[1]() || []; const day = Number(D.kstDay().slice(-2)) || 0; const i = L.findIndex((x) => x.code === v.picks[day % v.picks.length]); return i >= 0 ? i : null; }
+        return null;
+      };
+      const pick = (room) => { const i = myIdx(room); return i == null ? pickAny(room) : i; };
+      const mineLine = (room, idx) => (myIdx(room) === idx ? `<p class="gnote gcenter gmine">${esc(fill(A.mineNote, { room: guide(room).roomName }))}</p>` : "");
       const [, mm, dd] = D.kstDay().split("-").map(Number);
       const nextRoom = D.TODAY_ORDER[(D.TODAY_ORDER.indexOf(D.guideOf()) + 1) % 7];
       let busy = false, msg = "";
@@ -365,17 +387,18 @@
         let h = `<section class="gtoday-hero" style="--art:url('${IMG(room)}')">${arch(room, "garch--lg")}
           <p class="gchip">${esc(A.chip)} · ${esc(fill(A.dateFmt, { m: mm, d: dd }))}</p><h2>${esc(g.name)}</h2><p class="gtoday-hero__epi">${esc(g.epithet)}</p>
           <p class="gtoday-hero__intro">${esc(g.today.intro)}</p>`;
+        if (!o) h += `<p class="gnote gcenter gmine">${esc(mine[room] ? fill(A.mineHint, { name: g.name, iga: iga(g.name), room: g.roomName }) : fill(A.notMineHint, { room: g.roomName }))}</p>`;
         if (!o) h += `<button class="gbtn" type="button" data-js="today-open"${busy ? " disabled" : ""}>${esc(g.today.open)}</button><small class="gnote gcenter">${esc(readLogin() ? A.reward : A.rewardLogin)}</small>${readLogin() ? "" : `<button class="glink" type="button" data-js="today-login">${esc(A.login)}</button>`}`;
         h += `</section>`;
         if (o) {
           const list = ROOM_DATA[room][1]();
-          if (list) h += readCard(room, itemView(room, list, o.idx), fill(A.receivedHead, { name: g.name }));
+          if (list) h += readCard(room, itemView(room, list, o.idx), fill(A.receivedHead, { name: g.name })) + mineLine(room, o.idx);
           // (2026-11-14 로그인 벽 완화) 로그인 없이 받은 사람: 출석 별가루·다른 안내자는 로그인 뒤
           if (!readLogin()) h += `<div class="gactions gcol"><small class="gnote gcenter">${esc(A.rewardLogin)}</small><button class="gbtn gbtn--kakao" type="button" data-js="today-login">${esc(A.login)}</button></div>`;
           const others = D.TODAY_ORDER.filter((r) => r !== room);
           const got = o.extra || [];
           const need = readLogin() ? (COST.extra || 0) - acct() : 0, noLogin = !readLogin();
-          h += got.map((x) => { const l = ROOM_DATA[x.room][1](); return l ? readCard(x.room, itemView(x.room, l, x.idx), fill(A.receivedHead, { name: guide(x.room).name })) : ""; }).join("");
+          h += got.map((x) => { const l = ROOM_DATA[x.room][1](); return l ? readCard(x.room, itemView(x.room, l, x.idx), fill(A.receivedHead, { name: guide(x.room).name })) + mineLine(x.room, x.idx) : ""; }).join("");
           h += `<section class="gothers"><h2>${esc(A.othersHead)}</h2><p class="gnote">${esc(fill(A.othersNote, { cost: COST.extra }))}${need > 0 ? " · " + esc(fill(A.othersShort, { need })) : ""}</p>
             <ul class="gpickrow">${others.map((r) => { const done = got.some((x) => x.room === r); return `<li><button type="button" data-js="today-extra" data-room="${r}"${done || need > 0 || busy || noLogin ? " disabled" : ""}${done ? ' aria-pressed="true"' : ""}>${arch(r, "garch--sm")}<span>${esc(guide(r).name)}</span></button></li>`; }).join("")}</ul></section>`;
           h += `<p class="gnote gcenter">${esc(fill(A.tomorrow, { name: guide(nextRoom).name, iga: iga(guide(nextRoom).name) }))}</p><div class="gactions"><a class="gbtn ghost" href="${ROOM_URL}" data-js="to-room">${esc(fill(A.toRoom, { room: g.roomName }))}</a></div>`;
@@ -391,7 +414,7 @@
         try {
           if (openB) {
             const room = D.guideOf();
-            await loadRoom(room);
+            await Promise.all([loadRoom(room), mineReady]);
             D.oracleToday(pick);
             // (2026-11-14) 카카오 로그인한 채 받으면 별가루를 계정에 쌓는다(하루 한 번, 서버가 센다) — 책·신년운세에도 쓸 수 있게. 아니면 이 기기에
             // (2026-11-14 운영자) 출석 별가루 +5는 카카오 로그인한 계정에만(하루 한 번, 서버가 센다)
@@ -400,7 +423,7 @@
           } else {
             const room = ex.dataset.room;
             if (!readLogin()) { busy = false; return kakaoLogin("today"); }
-            await loadRoom(room);
+            await Promise.all([loadRoom(room), mineReady]);
             const u = await useAcct("extra");
             if (u === true) D.oracleExtra(room, pick, 0);
             else if (u.login) { busy = false; return kakaoLogin("today"); }
@@ -419,6 +442,7 @@
       }
       draw();
       loadPaid().then(() => { if (!busy) draw(); });
+      mineReady.then(() => { if (!busy) draw(); }); // 카카오에 저장한 결과가 오면 안내 한 줄을 다시
     }
 
     if (CONF.page === "dex") {
@@ -754,6 +778,12 @@
         let res = null, data = null;
         try {
           const body = { room: roomName, r: resultOf(roomName), q, hist: hist.slice(-3) };
+          // (2026-11-16 맞춤 1단계) 다른 방에서 받은 결과 번호(입력값 아님)와 이 탭에서 앞서 물었던 질문(답 없이 8개까지) — 저장하지 않고 이번 답에만 쓴다
+          const rs = {};
+          for (const g2 of X.guides) { if (g2.room === roomName) continue; const r2 = resultOf(g2.room); if (r2) rs[g2.room] = r2; }
+          if (Object.keys(rs).length) body.rs = rs;
+          const past = hist.slice(0, -3).slice(-8).map((h) => String(h.q).trim().slice(0, 120)).filter(Boolean);
+          if (past.length) body.past = past;
           if (paid) body.sid = lg.sid;
           res = await fetch("/api/talk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
           data = await res.json();

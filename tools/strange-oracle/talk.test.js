@@ -194,3 +194,23 @@ test("룬의 방만: 거꾸로 선 룬(역방향)은 읽지 않는 규칙", () =
   assert.ok(/거꾸로 선 룬/.test(rune) && /바로 선 돌로만/.test(rune));
   assert.ok(!/거꾸로 선 룬/.test(saju));
 });
+
+test("(2026-11-16 맞춤 1단계) 다른 방 결과 번호(rs)·앞서 물었던 질문(past): 모양이 맞을 때만 받고, 이 방·모르는 칸·이름은 거절 · 설정에 다른 방 해석이 붙는다", () => {
+  const Talk = require("../../netlify/lib/talk.js");
+  const Prompt = require("../../netlify/lib/talk-prompt.js");
+  const ok = Talk.parse(JSON.stringify({ room: "saju", r: { s: 3 }, q: "요즘 일이 막혀요", rs: { star: { i: 7 }, tzolkin: { n: 4, s: 19 } }, past: ["이직해도 될까요?"] }));
+  assert.ok(ok && ok.rs.star.i === 7 && ok.past.length === 1);
+  for (const bad of [
+    { room: "saju", q: "x", rs: { saju: { s: 1 } } },
+    { room: "saju", q: "x", rs: { star: { i: 99 } } },
+    { room: "saju", q: "x", rs: { star: { i: 1 }, name: "홍길동" } },
+    { room: "saju", q: "x", rs: [1] },
+    { room: "saju", q: "x", past: new Array(9).fill("질문") },
+    { room: "saju", q: "x", past: ["가".repeat(121)] },
+    { room: "saju", q: "x", birth: { y: 1990 } },
+  ]) assert.strictEqual(Talk.parse(JSON.stringify(bad)), null, JSON.stringify(bad));
+  const sys = Prompt.build(ok, "claude-opus-5-5").system[1].text;
+  assert.ok(/다른 방에서 받은 결과/.test(sys) && /베다의 방/.test(sys) && /촐킨의 방/.test(sys) && /이직해도 될까요/.test(sys));
+  const plain = Prompt.build(Talk.parse(JSON.stringify({ room: "saju", q: "x" })), "claude-opus-5-5").system[1].text;
+  assert.ok(!/다른 방에서 받은 결과/.test(plain) && !/앞서 물었던/.test(plain));
+});
