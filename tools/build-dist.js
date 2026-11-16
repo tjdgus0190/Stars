@@ -228,6 +228,12 @@ let count = 0;
   fs.writeFileSync(path.join(PUBLIC, "robots.txt"), `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${g.origin}/sitemap.xml\n`);
   count += 2;
 }
+// ⑳ (2026-11-16) 앱처럼 홈 화면에 두기·웹 푸시: data-nav.js pwa.mode가 "live"(운영 주소에서도 켜짐)이면 CLAUDE.md에 웹 푸시 알림 예외가 있어야 한다(specs/claude-md-push.md)
+{
+  const navSrc = fs.readFileSync(path.join(ROOT, "products", "strange-oracle", "data-nav.js"), "utf8");
+  const pm = /pwa: \{\s*mode: "([a-z]+)"/.exec(navSrc);
+  if (pm && pm[1] === "live" && !/웹 푸시 알림에 한함/.test(fs.readFileSync(path.join(ROOT, "CLAUDE.md"), "utf8"))) fails.push("⑳ data-nav.js pwa.mode가 live인데 CLAUDE.md에 웹 푸시 알림 예외(specs/claude-md-push.md)가 없음");
+}
 // ⑲ (2026-11-13 v1-D) 안내자 면담: 공개 화면의 talkMode가 "off"가 아니면, 운영자가 CLAUDE.md에 면담 예외(3장·6장, specs/claude-md-v1-exceptions.md)를
 //    붙여 넣은 뒤여야 한다. 아니면 질문 글을 서버로 보내는 화면이 배포되지 않게 빌드를 멈춘다.
 {

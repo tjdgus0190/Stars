@@ -22,6 +22,71 @@
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); window.SO_INSTALL = e; document.dispatchEvent(new CustomEvent("so:installable")); });
 
   const standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+
+  // ── (2026-11-16 운영자) 웹 푸시 「오늘의 신탁 알림」 카드: 오늘의 신탁·나의 이야기 페이지에. 서버(PUSH_MODE)가 꺼져 있으면(503) 아무것도 그리지 않는다
+  //   저장: 이 기기 쪽에는 없음(브라우저가 알림 주소를 가진다). 서버에는 알림 주소·시각만(동의 화면에 적은 대로)
+  const PU = C.push;
+  const page = location.pathname.replace(/\/+$/, "/");
+  const pushSpot = PU && (page === "/today/" || page === "/me/") ? document.querySelector("[data-js=app]") : null;
+  const pushable = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  const iosDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const escP = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" });
+  const keyBytes = (k) => { const s = atob(k.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((k.length + 3) % 4)); return Uint8Array.from(s, (c) => c.charCodeAt(0)); };
+  async function pushCard() {
+    if (!pushSpot) return;
+    let key = "";
+    try { const r = await fetch("/api/push/key", { cache: "no-store", credentials: "omit" }); if (r.status !== 200) return; key = (await r.json()).key || ""; } catch (e) { return; }
+    if (!key) return;
+    const card = document.createElement("section");
+    card.className = "pwa-push";
+    pushSpot.before(card);
+    const reg = pushable ? await navigator.serviceWorker.ready.catch(() => null) : null;
+    let sub = reg ? await reg.pushManager.getSubscription().catch(() => null) : null;
+    let msg = "";
+    const draw = (busy) => {
+      const head = `<b class="pwa-push__head">${escP(PU.head)}</b>`;
+      if (!pushable || (iosDevice && !standalone)) {
+        card.innerHTML = head + `<p>${escP(PU.iosHint)}</p><a class="pwa-push__btn" href="${escP(C.install)}">${escP(PU.iosGo)}</a>`;
+        return;
+      }
+      if (sub) {
+        card.innerHTML = `<p class="pwa-push__on">${escP(msg || PU.status)}</p><div class="pwa-push__row"><button type="button" class="pwa-push__link" data-push="off">${escP(PU.off)}</button>${C.mode === "test" ? `<button type="button" class="pwa-push__link" data-push="test">${escP(PU.test)}</button>` : ""}</div>`;
+        return;
+      }
+      if (Notification.permission === "denied") { card.innerHTML = head + `<p>${escP(PU.denied)}</p>`; return; }
+      card.innerHTML = head + `<p>${escP(PU.body)}</p><details class="pwa-push__more"><summary>${escP(PU.more)}</summary><ul>${PU.detail.map((x) => `<li>${escP(x)}</li>`).join("")}</ul></details>
+        <button type="button" class="pwa-push__btn" data-push="on"${busy ? " disabled" : ""}>${escP(busy ? PU.working : PU.on)}</button>${msg ? `<p class="pwa-push__msg">${escP(msg)}</p>` : ""}`;
+    };
+    draw();
+    card.addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-push]");
+      if (!b || !reg) return;
+      const act = b.dataset.push;
+      msg = "";
+      try {
+        if (act === "on") {
+          draw(true);
+          const perm = await Notification.requestPermission();
+          if (perm !== "granted") { draw(); return; }
+          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
+          const r = await post("/api/push/subscribe", { endpoint: sub.endpoint });
+          if (r.status !== 200) { await sub.unsubscribe().catch(() => {}); sub = null; msg = PU.fail; return draw(); }
+          msg = PU.done;
+          return draw();
+        }
+        if (act === "off" && sub) {
+          await post("/api/push/unsubscribe", { endpoint: sub.endpoint }).catch(() => {});
+          await sub.unsubscribe().catch(() => {});
+          sub = null; msg = PU.offDone;
+          return draw();
+        }
+        if (act === "test" && sub) { await post("/api/push/test", { endpoint: sub.endpoint }); msg = PU.testSent; return draw(); }
+      } catch (x) { msg = PU.fail; sub = reg ? await reg.pushManager.getSubscription().catch(() => null) : null; draw(); }
+    });
+  }
+  pushCard();
+
   const A = C.ask;
   if (standalone || !A || location.pathname.replace(/\/+$/, "/") === C.install) return;
   let asked = "";

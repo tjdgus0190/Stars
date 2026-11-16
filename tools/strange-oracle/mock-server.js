@@ -56,6 +56,8 @@ const DUST_OFF = arg("--dust", "on") === "off";
 const GATE_OFF = arg("--gate", "on") === "off";
 // (2026-11-16) --pwa on: 앱처럼 홈 화면에 두기(PWA)를 켠다. 기본은 끔(data-nav.js 응답의 pwa.mode만 "off" — 기존 시험이 팝업·서비스 워커 요청에 걸리지 않게, 파일은 그대로)
 const PWA_ON = arg("--pwa", "off") === "on";
+const PUSH = require("../../netlify/lib/push.js");
+const PUSH_STORE = (() => { const m = new Map(); return { get: async (k) => (m.has(k) ? JSON.parse(m.get(k)) : null), set: async (k, v, o) => { if (o && o.onlyIfNew && m.has(k)) return; m.set(k, JSON.stringify(v)); }, del: async (k) => m.delete(k), keys: async (p) => [...m.keys()].filter((k) => k.startsWith(p)) }; })();
 const MODE = arg("--mode", "off") === "test" ? "test" : "off";
 const STATIC = SRC ? ROOT : path.join(ROOT, "dist", "public");
 const PAID = path.join(ROOT, "products", "strange-oracle", "api", "_paid", "book");
@@ -179,6 +181,18 @@ ${chQ ? `<p><label><input type="checkbox" data-field="ch"> (가짜) 낯선 점�
   }
   if (PAYMOCK && PAYMOCK.route(req, res, rel, url, log)) return;
   if (MAPMOCK.route(req, res, rel, url, log)) return;
+  // (2026-11-16) 웹 푸시(--pwa on일 때만): netlify/lib/push.js를 메모리 저장소로. 실제 알림 서버로는 보내지 않는다(가짜 201)
+  if (PWA_ON && rel.startsWith("/api/push/")) {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", async () => {
+      const route = (rel.match(/^\/api\/push\/(key|subscribe|unsubscribe|test)\/?$/) || [])[1] || "";
+      const r = await PUSH.handle({ method: req.method, route, body, ip: req.socket.remoteAddress }, { PUSH_MODE: "test", PUSH_TEST_DEPLOY: "1" }, PUSH_STORE, async () => ({ status: 201 }));
+      res.writeHead(r.status, r.headers).end(r.body);
+      log(r.status);
+    });
+    return;
+  }
   if (rel === "/api" || rel.startsWith("/api/")) {
     log(404);
     return notFound(res);
