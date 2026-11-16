@@ -6940,6 +6940,7 @@
   }
   const storySent = new Set();
   function onScreen(name, scr) {
+    if (name !== "hub") document.documentElement.classList.remove("ny-boot"); // (2026-11-16) 신년운세 화면이 열리면 감춤 해제
     body.classList.toggle("sky-rest", Boolean(scr && scr.classList && scr.classList.contains("ritual"))); // (2026-11-15 성능) 의식 중 별 캔버스 쉼
     // (v1-C) 별가루·도감: 방 결과에 처음 닿으면 그 방 카드(방 이름만 이 기기에 기록)
     if (window.Dust) {
@@ -7275,7 +7276,9 @@
         nyGoHub = false;
         nyApi.hub(); // 새해 탭에서 새로 고침·카카오 로그인에서 돌아옴 → 새해 입구
       }
-    }, () => {});
+      if (!/^ny-/.test(currentName)) document.documentElement.classList.remove("ny-boot"); // 신년운세로 가지 않았으면 입구를 보인다
+    }, () => document.documentElement.classList.remove("ny-boot"));
+  else document.documentElement.classList.remove("ny-boot");
 
   // 테스트·점검용으로 바깥에서 읽을 수 있게 둔다 (입력값은 내보내지 않음)
   // render*는 저장 없이(fresh=false) 결과 틀만 다시 그린다

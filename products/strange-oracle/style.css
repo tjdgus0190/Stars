@@ -6042,3 +6042,6 @@ body.has-tabbar .tabbar { z-index: calc(var(--z-sticky) + 1); }
 .saju-skip { font-size: var(--fs-sm); color: var(--c-text-muted); text-decoration: underline; text-underline-offset: 3px; }
 /* (2026-11-15 성능) 의식 화면(body.sky-rest)에서는 뒤에 가려진 우주 배경의 움직임을 멈춘다(휴대폰에서 버벅임 원인) */
 body.sky-rest .cosmos, body.sky-rest .cosmos * { animation-play-state: paused !important; }
+
+/* (2026-11-16) #ny-hub 등으로 들어올 때 신년운세가 열리기 전까지 입구 화면을 감춘다(index.html 머리 한 줄 · app.js가 해제) */
+.ny-boot #screen-hub { visibility: hidden; }
