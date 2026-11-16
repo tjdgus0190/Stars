@@ -521,3 +521,24 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 .gdoor__btns { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .gdoor__btns .gbtn { margin: 0; padding: 9px 16px; font-size: 0.9rem; }
 .gdoor small { display: block; margin-top: 8px; font-size: 0.75rem; color: var(--c-text-faint); }
+
+/* (2026-11-16 운영자) 창이 열리고 닫힐 때 스르륵 */
+.groom.is-enter { animation: groom-in 0.42s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.groom.is-leave { animation: groom-out 0.3s ease forwards; pointer-events: none; }
+@keyframes groom-in { from { opacity: 0; transform: translateY(18px) scale(0.985); } }
+@keyframes groom-out { to { opacity: 0; transform: translateY(18px) scale(0.985); } }
+.gsheet__body { animation: gsheet-up 0.38s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.gsheet__scrim { animation: gfade-in 0.3s ease; }
+.gsheet.is-leave .gsheet__body { animation: gsheet-down 0.26s ease forwards; }
+.gsheet.is-leave .gsheet__scrim { animation: gfade-out 0.26s ease forwards; }
+.gsheet.is-leave { pointer-events: none; }
+@keyframes gsheet-up { from { transform: translateY(60px); opacity: 0; } }
+@keyframes gsheet-down { to { transform: translateY(70px); opacity: 0; } }
+@keyframes gfade-in { from { opacity: 0; } }
+@keyframes gfade-out { to { opacity: 0; } }
+.gread.is-new { animation: gread-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.gread.is-new + .gmine { animation: gfade-in 0.6s ease 0.35s both; }
+@keyframes gread-in { from { opacity: 0; transform: translateY(22px) scale(0.98); } 60% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .groom.is-enter, .groom.is-leave, .gsheet__body, .gsheet__scrim, .gsheet.is-leave .gsheet__body, .gsheet.is-leave .gsheet__scrim, .gread.is-new, .gread.is-new + .gmine { animation: none; } }
+.groom.is-enter { animation-delay: var(--ed, 0ms); }
+.gread { scroll-margin-top: 84px; }

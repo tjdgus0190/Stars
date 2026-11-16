@@ -121,7 +121,7 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
     const sprites = name === "nameOgham" || name === "ogham" ? sprite("ogham") : name === "tzolkin" ? sprite("maya") : ""; // (2026-11-14) 하루 페이지·처음 화면은 선 실루엣 대신 초상 그림(img/guide/)
     // (2026-11-14) 하루 페이지·도구: 긴 설명과 자주 묻는 질문은 접어 둔다(검색 엔진은 그대로 읽는다)
     const fold = (inner) => `<details class="gfold-more"><summary>${esc(G.ui.moreInfo)}</summary>${inner}</details>`;
-    const cta = (c) => `<div class="gcta"><h2>${esc(c.head)}</h2><p>${esc(c.body)}</p><a class="gbtn" href="${PB}" data-js="to-room">${esc(c.btn)}</a></div>`;
+    const cta = (c) => `<div class="gcta"><h2>${esc(c.head)}</h2><p>${esc(c.body)}</p><a class="gbtn" href="${c.href || PB}" data-js="to-room">${esc(c.btn)}</a></div>`; // (2026-11-16) href: 신년운세 소개는 새해의 회랑으로
     const ARCH_ROOMS = ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"];
     const DEX_IMG = (room) => `${PB}img/dex/dex-${room}.webp`;
     const PORTRAIT = (room) => `${PB}img/guide/${room}.webp`; // (2026-11-14) 안내자 초상
@@ -170,7 +170,7 @@ ${d.intro.map((p) => `<p>${esc(p)}</p>`).join("\n")}
 ${d.tool ? `<a class="gtool-link" href="${d.tool.href}">${esc(d.tool.label)}</a>` : ""}
 ${sections(d.sections)}
 ${faq(d.faq)}
-<div class="gcta"><h2>${esc(d.cta.head)}</h2><p>${esc(d.cta.body)}</p><a class="gbtn" href="${PB}" data-js="to-room">${esc(d.cta.btn)}</a></div>
+<div class="gcta"><h2>${esc(d.cta.head)}</h2><p>${esc(d.cta.body)}</p><a class="gbtn" href="${d.cta.href || PB}" data-js="to-room">${esc(d.cta.btn)}</a></div>
 ${related(d.related)}`;
     return `<!DOCTYPE html>
 <html lang="ko" data-theme="night">

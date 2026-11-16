@@ -42,6 +42,11 @@
   status = 200
   force = true
 [[redirects]]
+  from = "/newyear-2027/"
+  to = "/products/strange-oracle/guide/newyear-2027/index.html"
+  status = 200
+  force = true
+[[redirects]]
   from = "/saju/"
   to = "/products/strange-oracle/guide/saju/index.html"
   status = 200

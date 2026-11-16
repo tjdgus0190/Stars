@@ -167,6 +167,9 @@
       return true;
     };
     const acct = () => (paidBal == null ? 0 : paidBal);
+    // (2026-11-16 운영자 "열리고 닫히는 게 딱딱") 창이 닫힐 때 스르륵 — is-leave를 붙이고 잠깐 기다린 뒤 지운다. 움직임 줄이기 설정이면 바로
+    const calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const leave = (el, ms = 280) => new Promise((ok) => { if (!el || calm) return ok(); el.classList.add("is-leave"); setTimeout(ok, ms); });
     // (2026-11-16 운영자) 충전 칸을 별가루 페이지와 심층상담(아래에서 올라오는 창)이 함께 쓴다. root 안의 [data-js=dust-shop]에 그린다
     //   opts: { to: "dust"|"talk" 결제 뒤 돌아갈 곳, from: 로그인 출발 페이지, beforePay(), onCredited(응답) }
     function makeShop(root, opts = {}) {
@@ -380,7 +383,7 @@
       const mineLine = (room, idx) => (myIdx(room) === idx ? `<p class="gnote gcenter gmine">${esc(fill(A.mineNote, { room: guide(room).roomName }))}</p>` : "");
       const [, mm, dd] = D.kstDay().split("-").map(Number);
       const nextRoom = D.TODAY_ORDER[(D.TODAY_ORDER.indexOf(D.guideOf()) + 1) % 7];
-      let busy = false, msg = "";
+      let busy = false, msg = "", fresh = ""; // fresh: 방금 받은 카드(main · 방 이름) — 그 카드만 스르륵 떠오른다
       const draw = () => {
         const room = D.guideOf(), g = guide(room), st = D.state();
         const o = st.oracle && st.oracle.day === D.kstDay() && st.oracle.room === room ? st.oracle : null;
@@ -392,19 +395,20 @@
         h += `</section>`;
         if (o) {
           const list = ROOM_DATA[room][1]();
-          if (list) h += readCard(room, itemView(room, list, o.idx), fill(A.receivedHead, { name: g.name })) + mineLine(room, o.idx);
+          if (list) h += readCard(room, itemView(room, list, o.idx), fill(A.receivedHead, { name: g.name })).replace('class="gread"', `class="gread${fresh === "main" ? " is-new" : ""}" data-js="read-${room}"`) + mineLine(room, o.idx);
           // (2026-11-14 로그인 벽 완화) 로그인 없이 받은 사람: 출석 별가루·다른 안내자는 로그인 뒤
           if (!readLogin()) h += `<div class="gactions gcol"><small class="gnote gcenter">${esc(A.rewardLogin)}</small><button class="gbtn gbtn--kakao" type="button" data-js="today-login">${esc(A.login)}</button></div>`;
           const others = D.TODAY_ORDER.filter((r) => r !== room);
           const got = o.extra || [];
           const need = readLogin() ? (COST.extra || 0) - acct() : 0, noLogin = !readLogin();
-          h += got.map((x) => { const l = ROOM_DATA[x.room][1](); return l ? readCard(x.room, itemView(x.room, l, x.idx), fill(A.receivedHead, { name: guide(x.room).name })) + mineLine(x.room, x.idx) : ""; }).join("");
+          h += got.map((x) => { const l = ROOM_DATA[x.room][1](); return l ? readCard(x.room, itemView(x.room, l, x.idx), fill(A.receivedHead, { name: guide(x.room).name })).replace('class="gread"', `class="gread${fresh === x.room ? " is-new" : ""}" data-js="read-${x.room}"`) + mineLine(x.room, x.idx) : ""; }).join("");
           h += `<section class="gothers"><h2>${esc(A.othersHead)}</h2><p class="gnote">${esc(fill(A.othersNote, { cost: COST.extra }))}${need > 0 ? " · " + esc(fill(A.othersShort, { need })) : ""}</p>
             <ul class="gpickrow">${others.map((r) => { const done = got.some((x) => x.room === r); return `<li><button type="button" data-js="today-extra" data-room="${r}"${done || need > 0 || busy || noLogin ? " disabled" : ""}${done ? ' aria-pressed="true"' : ""}>${arch(r, "garch--sm")}<span>${esc(guide(r).name)}</span></button></li>`; }).join("")}</ul></section>`;
           h += `<p class="gnote gcenter">${esc(fill(A.tomorrow, { name: guide(nextRoom).name, iga: iga(guide(nextRoom).name) }))}</p><div class="gactions"><a class="gbtn ghost" href="${ROOM_URL}" data-js="to-room">${esc(fill(A.toRoom, { room: g.roomName }))}</a></div>`;
         }
         if (msg) h += `<p class="gerror" role="alert">${esc(msg)}</p>`;
         box.innerHTML = h;
+        if (fresh) { const c = box.querySelector(`[data-js=read-${fresh === "main" ? room : fresh}]`); fresh = ""; if (c) c.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" }); }
       };
       box.addEventListener("click", async (e) => {
         if (e.target.closest("[data-js=today-login]")) return kakaoLogin("today");
@@ -416,6 +420,7 @@
             const room = D.guideOf();
             await Promise.all([loadRoom(room), mineReady]);
             D.oracleToday(pick);
+            fresh = "main";
             // (2026-11-14) 카카오 로그인한 채 받으면 별가루를 계정에 쌓는다(하루 한 번, 서버가 센다) — 책·신년운세에도 쓸 수 있게. 아니면 이 기기에
             // (2026-11-14 운영자) 출석 별가루 +5는 카카오 로그인한 계정에만(하루 한 번, 서버가 센다)
             await earnAcct("oracle");
@@ -425,7 +430,7 @@
             if (!readLogin()) { busy = false; return kakaoLogin("today"); }
             await Promise.all([loadRoom(room), mineReady]);
             const u = await useAcct("extra");
-            if (u === true) D.oracleExtra(room, pick, 0);
+            if (u === true) { D.oracleExtra(room, pick, 0); fresh = room; }
             else if (u.login) { busy = false; return kakaoLogin("today"); }
             else if (u.need) msg = fill(A.othersShort, { need: u.need });
             else msg = A.fail;
@@ -478,7 +483,7 @@
       box.addEventListener("click", (e) => {
         const c = e.target.closest("[data-js=dex-card]");
         if (c) { openRoom = c.dataset.room; return draw(); }
-        if (e.target.closest("[data-js=dex-close]")) { openRoom = null; return draw(); }
+        if (e.target.closest("[data-js=dex-close]")) { if (!openRoom) return; const sh = box.querySelector(".gsheet"); openRoom = null; return leave(sh).then(draw); }
         if (e.target.closest("[data-js=dex-login]")) return kakaoLogin("dex");
         const b = e.target.closest("[data-js=dex-open]");
         if (b) {
@@ -592,7 +597,7 @@
       const hasFor = (room, pf) => pf && (NEEDS[room] === "name" ? Boolean(pf.name) : NEEDS[room] === "birth" ? Boolean(pf.birth) : true);
 
       let cur = null; // 고른 안내자(방 안에 있을 때)
-      let busy = false, entering = false, setupMsg = "", formOpen = false;
+      let busy = false, enterAt = 0, setupMsg = "", formOpen = false; // enterAt: 방에 들어온 시각 — 들어오는 동안 다시 그려도 스르륵이 끊기지 않게
       const skipped = {}; // 결과 없이 이야기하기로 한 방(이 화면 메모리)
       const lobby = () => `<p class="gnote gcenter">${esc(on ? A.pick : A.closed)}</p><ul class="gdoorpick">${X.guides.map((g) => `<li><button type="button" data-js="talk-pick" data-room="${g.room}">${arch(g.room, "garch--door")}<b>${esc(g.name)}</b><small>${esc(g.roomName)}</small>${chatOf(g.room).length ? `<em class="gdoorpick__dot">${esc(A.continued)}</em>` : ""}</button></li>`).join("")}</ul>`;
       const balLine = () => (paidBal != null ? fill(A.balance, { n: paidBal }) : A.loginToTalk);
@@ -655,7 +660,8 @@
         const g = cur, hist = chatOf(g.room);
         const need = paidBal == null || testFree() ? 0 : COSTQ - paidBal;
         const ready = Boolean(resultOf(g.room)) || skipped[g.room];
-        return `<div class="groom${entering ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}')">
+        const age = Date.now() - enterAt;
+        return `<div class="groom${age < 420 ? " is-enter" : ""}" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="--art:url('${IMG(g.room)}');--ed:-${Math.max(0, age)}ms">
           <header class="groom__top"><button type="button" class="groom__back" data-js="talk-leave" aria-label="${esc(A.leave)}">←</button>${arch(g.room, "garch--xs")}<span class="groom__who"><b>${esc(g.name)}</b>${bondTag(g.room)}<small><i></i>${esc(A.status)} · ${esc(g.roomName)}</small></span>${hist.length ? `<button type="button" class="glink groom__clear" data-js="talk-clear">${esc(A.clearChat)}</button>` : ""}</header>
           <div class="groom__log" data-js="talk-log">${say("guide", g.line)}${doorCard(g)}${roomNote(g)}${hist.length && g.hadHist ? `<p class="groom__note">${esc(A.kept)}</p>` : ""}
             ${hist.map((h) => say("me", h.q) + sayGuide(h.a)).join("")}</div>
@@ -667,7 +673,6 @@
       };
       const draw = () => {
         box.innerHTML = lobby() + (on && cur ? room() : "");
-        entering = false;
         document.documentElement.classList.toggle("room-open", Boolean(on && cur));
         const log = box.querySelector("[data-js=talk-log]");
         if (log) log.scrollTop = log.scrollHeight;
@@ -692,7 +697,7 @@
       const enter = (roomName) => {
         cur = X.guides.find((x) => x.room === roomName) || null;
         if (cur) cur.hadHist = chatOf(roomName).length > 0; // (2026-11-15) 들어올 때 이미 대화가 있었을 때만 "지난 대화" 안내
-        entering = true; setupMsg = ""; formOpen = false;
+        enterAt = Date.now(); setupMsg = ""; formOpen = false;
         draw();
         loadRoom(roomName).then(() => { if (cur && cur.room === roomName && !busy) { const t = box.querySelector(".groom textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector(".groom textarea"); if (t2) t2.value = keep; } }).catch(() => {});
         const t = box.querySelector(".groom textarea"); if (t && !t.disabled) t.focus({ preventScroll: true });
@@ -715,8 +720,11 @@
       sheet.setAttribute("aria-label", A.chargeHead || "");
       sheet.innerHTML = `<div class="gsheet__scrim" data-js="charge-close"></div><div class="gsheet__body"><button class="gsheet__x" type="button" data-js="charge-close" aria-label="${esc(G.home.login.close)}">×</button><p class="gcharge__lead">${esc(A.chargeLead || "")}</p><div data-js="dust-shop"></div></div>`;
       document.body.append(sheet);
-      const closeCharge = () => {
+      const closeCharge = async () => {
+        if (sheet.hidden) return;
+        await leave(sheet, 260);
         sheet.hidden = true;
+        sheet.classList.remove("is-leave");
         const t = box.querySelector(".groom textarea");
         if (t && !t.disabled) t.focus({ preventScroll: true });
       };
@@ -734,7 +742,7 @@
         if (cur && e.target.closest("[data-js=door-show]")) { delete TS.door[cur.room]; saveT(); draw(); const c = box.querySelector("[data-js=door-card]"); if (c) c.scrollIntoView({ block: "nearest" }); return; }
         const b = e.target.closest("[data-js=talk-pick]");
         if (b && !busy) { if (on) enter(b.dataset.room); return; }
-        if (e.target.closest("[data-js=talk-leave]") && !busy) { cur = null; draw(); return; }
+        if (e.target.closest("[data-js=talk-leave]") && !busy) { const rm = box.querySelector(".groom"); await leave(rm, 300); cur = null; draw(); return; }
         if (!cur || busy) return;
         if (e.target.closest("[data-js=talk-login]")) { try { sessionStorage.setItem("strange-oracle-talk-back", cur.room); } catch (x) { /* 무시 */ } return kakaoLogin("talk"); }
         if (e.target.closest("[data-js=talk-clear]")) {
@@ -844,7 +852,7 @@
       box.addEventListener("input", (e) => { if (e.target.name === "q") { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; } });
       // (2026-11-14 운영자) Enter는 줄바꿈. 보내기는 보내기 단추(PC에서는 Ctrl·Cmd + Enter도)
       box.addEventListener("keydown", (e) => { if (e.target.name === "q" && e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); } });
-      document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!sheet.hidden) { closeCharge(); return; } if (cur && !busy) { cur = null; draw(); } });
+      document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!sheet.hidden) { closeCharge(); return; } if (cur && !busy) { leave(box.querySelector(".groom"), 300).then(() => { cur = null; draw(); }); } });
       loadPaid().then(refresh);
       document.addEventListener("dust:change", refresh);
       draw();
