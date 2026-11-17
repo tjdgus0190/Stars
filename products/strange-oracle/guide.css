@@ -562,3 +562,6 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 
 /* (2026-11-17 운영자) 위기 답 아래 작은 안내 줄(안내자 말풍선 밖) */
 .groom__crisis { margin: 6px 0 10px 44px; font-family: var(--font-sans); font-size: 0.75rem; line-height: 1.5; color: var(--c-text-faint, oklch(0.7 0.02 285)); }
+
+/* (2026-11-17 운영자) 별가루가 모자랄 때의 보내기 단추: 눌리지만 흐리게(누르면 충전 창) */
+.groom__send.is-short { opacity: 0.55; }

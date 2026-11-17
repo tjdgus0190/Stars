@@ -670,7 +670,7 @@
           <form class="groom__bar" data-js="talk-form" novalidate autocomplete="off">
             <p class="groom__meta">${metaHtml(need)}</p>
             <p class="gerror" data-js="talk-error" role="alert" hidden></p>
-            <div class="groom__row"><textarea name="q" rows="1" maxlength="300" placeholder="${esc(ready ? A.placeholder : SU.first)}" aria-label="${esc(A.placeholder)}"${ready ? "" : " disabled"}></textarea><button type="submit" class="groom__send"${need > 0 || busy || !ready || paidBal == null ? " disabled" : ""} aria-label="${esc(fill(A.ask, { cost: COSTQ }))}"><span>✦${COSTQ}</span></button></div>
+            <div class="groom__row"><textarea name="q" rows="1" maxlength="300" placeholder="${esc(ready ? A.placeholder : SU.first)}" aria-label="${esc(A.placeholder)}"${ready ? "" : " disabled"}></textarea><button type="submit" class="groom__send${need > 0 ? " is-short" : ""}"${busy || !ready || paidBal == null ? " disabled" : ""} aria-label="${esc(fill(A.ask, { cost: COSTQ }))}"><span>✦${COSTQ}</span></button></div>
           </form></div>`;
       };
       const draw = () => {
@@ -687,7 +687,9 @@
         const need = paidBal == null || testFree() ? 0 : COSTQ - paidBal;
         const ready = Boolean(resultOf(cur.room)) || skipped[cur.room];
         bar.querySelector(".groom__meta").innerHTML = metaHtml(need);
-        bar.querySelector(".groom__send").disabled = need > 0 || !ready || paidBal == null;
+        const sb = bar.querySelector(".groom__send");
+        sb.disabled = !ready || paidBal == null; // (2026-11-17 운영자) 별가루가 모자라도 누를 수 있다 → 누르면 충전 창
+        sb.classList.toggle("is-short", need > 0);
       };
       const err = (m) => { const e = box.querySelector("[data-js=talk-error]"); if (e) { e.textContent = m; e.hidden = !m; } };
       const typeOut = (el, text) => new Promise((ok) => {
@@ -842,6 +844,7 @@
         if (!e.target.closest("[data-js=talk-form]")) return;
         e.preventDefault();
         if (!on || !cur || busy) return;
+        if (readLogin() && paidBal != null && paidBal < COSTQ && !testFree()) return openCharge(); // (2026-11-17 운영자) 별가루가 모자라면 보내기 = 충전 창(적던 질문은 그대로)
         const ta = e.target.elements.q, q = ta.value.trim();
         if (!q) return err(E.empty);
         if (q.length > 300) return err(E.long);
@@ -850,7 +853,7 @@
         // (2026-11-14) 별가루는 카카오 계정에만 — 면담은 계정 별가루에서 서버가 차감
         const lg = readLogin();
         const paid = Boolean(lg && paidBal != null && (paidBal >= COSTQ || testFree()));
-        if (!paid) { busy = false; draw(); return; }
+        if (!paid) { busy = false; if (lg && paidBal != null) { openCharge(); return; } draw(); return; } // (2026-11-17 운영자) 별가루가 모자라면 보내기 → 충전 창(적던 질문은 그대로)
         const g = cur, roomName = g.room, hist = chatOf(roomName);
         const logBox = box.querySelector("[data-js=talk-log]");
         logBox.insertAdjacentHTML("beforeend", say("me", q, " is-new") + `<div class="gsay gsay--guide is-wait is-new" data-js="talk-wait">${arch(roomName, "garch--xs")}<p><span class="gdots" aria-label="${esc(fill(A.typing, { name: g.name, iga: iga(g.name) }))}"><i></i><i></i><i></i></span></p></div>`);
@@ -906,6 +909,7 @@
           if (code === "session") { dropLogin(); paidBal = null; }
           if (code === "dust") await loadPaid();
           draw();
+          if (code === "dust") { const t0 = box.querySelector(".groom textarea"); if (t0) t0.value = q; openCharge(); return; } // 그새 모자라졌으면 충전 창
           err(code === "session" ? A.sessionEnd : code === "off" ? E.off : code === "budget" ? E.budget : code === "rate" ? E.rate : E.fail);
           const t = box.querySelector(".groom textarea"); if (t) t.value = q;
         }
