@@ -318,3 +318,20 @@ test("심층상담 시험 배포: 무료 + 따로 센 비용 장부 · 시험 �
   assert.strictEqual(JSON.parse((await ask(branch, "8.8.1.2")).body).error, "budget");
   assert.strictEqual((await ask(prod, "8.8.1.3")).status, 402, "운영은 상한과 무관(잔액 0이라 402)");
 });
+
+// (2026-11-17 운영자) 모델이 위기를 알아챈 답(끝에 ⟦곁⟧): 표시를 걷고 crisis 표시 · 별가루를 쓰지 않음 · 109는 안내자 말에 없음(화면이 작은 줄로)
+test("심층상담 위기 표시: ⟦곁⟧ → crisis, 표시 걷음, 차감 없음", async () => {
+  const pay_ = new MemStore();
+  const talkStore = new MemStore();
+  const { sid, uh } = await login(pay_);
+  await Dust.earn(pay_, uh, "first", NOW);
+  const before = await Dust.balanceOf(pay_, uh);
+  const llm = async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: "오늘 밤은 혼자 견디지 말아요. 저도 여기 곁에 있을게요. ⟦곁⟧" }], usage: { input_tokens: 10, output_tokens: 10 } });
+  const env = { TALK_MODE: "live", ANTHROPIC_API_KEY: "x", TALK_MONTHLY_USD: "5" };
+  const r = await Talk.handle({ method: "POST", body: JSON.stringify({ room: "star", q: "요즘 너무 지쳐서 다 그만두고 싶어요", sid }), ip: "8.8.2.1" }, env, talkStore, NOW, llm, pay_);
+  const o = JSON.parse(r.body);
+  assert.strictEqual(r.status, 200);
+  assert.strictEqual(o.crisis, true);
+  assert.ok(!/⟦곁⟧/.test(o.a) && !/109/.test(o.a));
+  assert.strictEqual(await Dust.balanceOf(pay_, uh), before, "위기 답은 차감 없음");
+});

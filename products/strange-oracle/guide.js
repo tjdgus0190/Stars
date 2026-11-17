@@ -897,6 +897,8 @@
           }
           busy = false;
           if (!box.querySelector("[data-js=talk-clear]") && cur && cur.room === roomName) { const t = box.querySelector(".groom textarea"); const keep = t ? t.value : ""; draw(); const t2 = box.querySelector(".groom textarea"); if (t2) t2.value = keep; }
+          // (2026-11-17 운영자) 위기 답: 안내자 말에는 번호가 없고, 말풍선 밖 작은 줄로 109를 단다
+          if (data.crisis && A.crisisNote && cur && cur.room === roomName) { const lb = box.querySelector("[data-js=talk-log]"); if (lb) { lb.insertAdjacentHTML("beforeend", `<p class="groom__crisis" role="note">${esc(A.crisisNote)}</p>`); lb.scrollTop = lb.scrollHeight; } }
           refresh();
         } else {
           busy = false;

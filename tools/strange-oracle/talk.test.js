@@ -100,7 +100,7 @@ test("위기 신호: 모델을 부르지 않고 상담 전화 안내(무료 몫�
   const r = await run({ room: "sibyl", q: "요즘 그냥 죽고 싶어요" });
   const o = JSON.parse(r.body);
   assert.strictEqual(r.status, 200);
-  assert.ok(o.crisis && /109/.test(o.a)); // (2026-11-16) 안내자 말투로 109 한 줄
+  assert.ok(o.crisis && !/109/.test(o.a) && /곁에/.test(o.a)); // (2026-11-17 운영자) 안내자 말에는 번호 없음 — 화면이 crisis 표시로 작은 줄을 단다
   assert.strictEqual(calls.length, 0);
   for (let i = 0; i < Talk.FREE_PER_DAY; i++) assert.strictEqual((await run({ room: "sibyl", q: "x" + i })).status, 200);
 });

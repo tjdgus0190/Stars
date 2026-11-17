@@ -182,7 +182,11 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   }
   if (!uh) h.free++;
   try { await store.set(key, { usd: Math.round((b.usd + costOf(model, msg && msg.usage)) * 1e6) / 1e6, n: b.n + 1 }); } catch (e) { /* 기록 실패는 답을 막지 않는다(다음 요청이 다시 읽는다) */ }
-  const text = Prompt.textOf(msg);
+  let text = Prompt.textOf(msg);
+  // (2026-11-17) 모델이 위기를 알아챈 답(끝에 ⟦곁⟧): 표시를 걷고 crisis로 알린다 → 화면이 말풍선 아래 작은 안내 줄(109)을 단다
+  const crisisSeen = /⟦곁⟧/.test(text);
+  if (crisisSeen) text = text.replace(/\s*⟦곁⟧\s*/g, " ").trim();
+  if (crisisSeen && text) return json(200, Object.assign({ a: text, crisis: true }, uh ? { paid: await Dust.balanceOf(payStore, uh).catch(() => null) } : {})); // 위기 답은 별가루를 쓰지 않는다
   if (!text) return json(200, { a: Prompt.declineReply(p.room), declined: true }); // 답하지 못한 물음은 별가루를 쓰지 않는다
   if (uh && FREE_TEST) { let bal = null; try { bal = await Dust.balanceOf(payStore, uh); } catch (e) { bal = null; } return json(200, { a: text, paid: bal }); } // 시험 배포: 차감 없음
   if (uh) {

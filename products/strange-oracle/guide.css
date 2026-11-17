@@ -559,3 +559,6 @@ html.room-open .tabbar, html.room-open .gtop { visibility: hidden; }
 
 /* (2026-11-16) 처음 화면 신년운세 배너 아래 소개 페이지 링크 */
 .gny-more { display: block; margin: 8px 4px 0; text-align: right; font-family: var(--font-sans); font-size: 0.8125rem; color: oklch(0.86 0.09 85); text-decoration: underline; text-underline-offset: 3px; }
+
+/* (2026-11-17 운영자) 위기 답 아래 작은 안내 줄(안내자 말풍선 밖) */
+.groom__crisis { margin: 6px 0 10px 44px; font-family: var(--font-sans); font-size: 0.75rem; line-height: 1.5; color: var(--c-text-faint, oklch(0.7 0.02 285)); }
