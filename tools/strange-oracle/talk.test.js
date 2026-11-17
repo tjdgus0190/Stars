@@ -96,13 +96,32 @@ test("방마다 결과 번호 모양이 맞으면 통과", async () => {
   }
 });
 
-test("위기 신호: 모델을 부르지 않고 상담 전화 안내(무료 몫도 쓰지 않음)", async () => {
-  const r = await run({ room: "sibyl", q: "요즘 그냥 죽고 싶어요" });
+// (2026-11-17 운영자) 위기 신호: 고정 답으로 끊지 않고 모델이 맥락으로 판단 — 그 방의 점술로 위로하고 따뜻하게 다시 묻는다
+test("위기 신호: 모델에 주의를 알리고 맥락으로 답함 · ⟦곁⟧이면 crisis · 모델이 못 답하면 곁에 머무는 대비 답", async () => {
+  const cr = async (params) => { calls.push(params); return { stop_reason: "end_turn", content: [{ type: "text", text: "그 마음, 가볍게 듣지 않을게요. 당신의 신탁은 닫힌 문이 아니라 잠시 멈춘 울림이에요. 오늘 가장 무거웠던 순간은 언제였나요? ⟦곁⟧" }], usage: { input_tokens: 100, output_tokens: 50 } }; };
+  const r = await run({ room: "sibyl", q: "요즘 그냥 죽고 싶어요" }, { llm: cr });
   const o = JSON.parse(r.body);
   assert.strictEqual(r.status, 200);
-  assert.ok(o.crisis && !/109/.test(o.a) && /곁에/.test(o.a)); // (2026-11-17 운영자) 안내자 말에는 번호 없음 — 화면이 crisis 표시로 작은 줄을 단다
-  assert.strictEqual(calls.length, 0);
-  for (let i = 0; i < Talk.FREE_PER_DAY; i++) assert.strictEqual((await run({ room: "sibyl", q: "x" + i })).status, 200);
+  assert.strictEqual(calls.length, 1, "모델을 부른다");
+  assert.ok(/# 주의/.test(calls[0].system[1].text), "위기일 수 있다는 주의를 알린다");
+  assert.ok(/다른 사람·가족·친구·기관에 기대 보라거나/.test(calls[0].system[0].text) && /따뜻한 질문 하나로 맺는다/.test(calls[0].system[0].text));
+  assert.ok(o.crisis && !/⟦곁⟧/.test(o.a) && /\?/.test(o.a));
+  // 앞선 문답에 신호가 있어도 주의를 알린다(맥락)
+  calls = [];
+  await run({ room: "sibyl", q: "그냥 오늘도 그래요", hist: [{ q: "요즘 죽고 싶다는 생각이 들어요", a: "들려줘서 고마워요." }] }, { llm: cr });
+  assert.ok(/# 주의/.test(calls[0].system[1].text));
+  // 신호 없는 물음에는 주의 없음
+  calls = [];
+  await run({ room: "sibyl", q: "올해 일은 어떨까요?" });
+  assert.ok(!/# 주의/.test(calls[0].system[1].text));
+  // 모델이 답하지 못하면(거절·오류) 거절 문장 대신 곁에 머무는 대비 답
+  const refuse = async () => ({ stop_reason: "refusal", content: [], usage: { input_tokens: 10, output_tokens: 0 } });
+  const r2 = JSON.parse((await run({ room: "rune", q: "죽고 싶어" }, { llm: refuse })).body);
+  assert.ok(r2.crisis && /\?/.test(r2.a) && !/109/.test(r2.a));
+  const boom = async () => { throw Object.assign(new Error("x"), { status: 500 }); };
+  const r3 = await run({ room: "saju", q: "자해를 하게 돼요" }, { llm: boom });
+  assert.strictEqual(r3.status, 200);
+  assert.ok(JSON.parse(r3.body).crisis);
 });
 
 test("거절(전체 사슬)·빈 답 → 안내자 말투의 정해진 한 줄", async () => {

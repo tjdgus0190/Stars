@@ -136,19 +136,18 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   const evalOk = evalKeyOk(env, req.evalKey);
   const h = evalOk ? { n: 0, free: 0 } : slot(String(req.ip || "unknown"), now);
   const LIM = limits(env);
-  if (h.n >= LIM.window) return json(429, { error: "rate" }, { "Retry-After": "600" });
   const p = parse(req.body);
+  if (h.n >= LIM.window) return p && Prompt.crisis(p.q) ? json(200, { a: Prompt.crisisReply(p.room), crisis: true }) : json(429, { error: "rate" }, { "Retry-After": "600" });
   if (!p) return json(400, { error: "bad" });
-  if (!p.sid && h.free >= LIM.free) return json(429, { error: "rate" }, { "Retry-After": "600" }); // 무료 몫만 하루 상한
+  // (2026-11-17 운영자) 위기 신호: 고정 답으로 끊지 않는다. 이번 물음·앞선 문답·앞서 물은 것에 신호가 있으면 모델에 알리고, 모델이 맥락으로 판단해 그 방의 점술로 위로하고 다시 묻는다
+  p.risk = Prompt.crisis(p.q) || (p.hist || []).some((x) => Prompt.crisis(x.q)) || (p.past || []).some((x) => Prompt.crisis(x));
+  if (!p.sid && h.free >= LIM.free) return p.risk ? json(200, { a: Prompt.crisisReply(p.room), crisis: true }) : json(429, { error: "rate" }, { "Retry-After": "600" }); // 무료 몫만 하루 상한(위기일 수 있는 물음은 막지 않고 곁에 머무는 대비 답)
   h.n++;
-
-  // 위기 신호: 모델을 부르지 않고 정해진 안내(상담 전화)를 돌려준다. 횟수·별가루를 쓰지 않는다
-  if (Prompt.crisis(p.q)) return json(200, { a: Prompt.crisisReply(p.room), crisis: true });
 
   const key = (env.TALK_BUDGET_PREFIX === "budget-test/" ? "budget-test/" : "budget/") + month(now); // (2026-11-17) 시험 배포는 따로 센다
   let b;
   try { b = (await store.get(key)) || { usd: 0, n: 0 }; } catch (e) { return json(503, { error: "store" }); }
-  if (b.usd >= Number(env.TALK_MONTHLY_USD)) return json(503, { error: "budget" });
+  if (b.usd >= Number(env.TALK_MONTHLY_USD)) return p.risk ? json(200, { a: Prompt.crisisReply(p.room), crisis: true }) : json(503, { error: "budget" }); // 위기일 수 있는 물음은 상한에 닿아도 곁에 머무는 대비 답
 
   const FREE_TEST = env.TALK_TEST_FREE === "1"; // 시험 배포만(respond가 배포 종류로 정한다)
   // 충전한 별가루로 묻기: 로그인 표 → 계정 → 잔액 10 이상 (차감은 답을 받은 뒤)
@@ -158,7 +157,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
     try {
       uh = await Auth.sessionOf(payStore, p.sid, now);
       if (!uh) return json(401, { error: "session" });
-      if (!FREE_TEST && (await Dust.balanceOf(payStore, uh)) < TALK_COST) return json(402, { error: "dust" });
+      if (!FREE_TEST && !p.risk && (await Dust.balanceOf(payStore, uh)) < TALK_COST) return json(402, { error: "dust" }); // 위기일 수 있는 물음은 별가루가 없어도 답한다(충전 안내로 막지 않음)
     } catch (e) { return json(503, { error: "store" }); }
   }
 
@@ -178,6 +177,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
     const ty = String((e && e.error && e.error.error && e.error.error.type) || (e && e.name) || "").replace(/[^A-Za-z_]/g, "").slice(0, 40);
     // 상태 번호가 없으면(요청 전 실패) 오류 첫머리 120자도 — 키 모양 글자는 지운다
     const why = st ? undefined : String((e && e.message) || "").replace(/sk-[A-Za-z0-9_-]+/g, "[key]").slice(0, 120);
+    if (p.risk) return json(200, { a: Prompt.crisisReply(p.room), crisis: true }); // 위기일 수 있는 물음은 모델 오류여도 곁에 머무는 대비 답
     return json(502, { error: "upstream", status: st, type: ty, why });
   }
   if (!uh) h.free++;
@@ -187,6 +187,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   const crisisSeen = /⟦곁⟧/.test(text);
   if (crisisSeen) text = text.replace(/\s*⟦곁⟧\s*/g, " ").trim();
   if (crisisSeen && text) return json(200, Object.assign({ a: text, crisis: true }, uh ? { paid: await Dust.balanceOf(payStore, uh).catch(() => null) } : {})); // 위기 답은 별가루를 쓰지 않는다
+  if (!text && p.risk) return json(200, { a: Prompt.crisisReply(p.room), crisis: true }); // 위기일 수 있는 물음에 모델이 답하지 못하면 거절 대신 곁에 머무는 대비 답(별가루 없음)
   if (!text) return json(200, { a: Prompt.declineReply(p.room), declined: true }); // 답하지 못한 물음은 별가루를 쓰지 않는다
   if (uh && FREE_TEST) { let bal = null; try { bal = await Dust.balanceOf(payStore, uh); } catch (e) { bal = null; } return json(200, { a: text, paid: bal }); } // 시험 배포: 차감 없음
   if (uh) {
