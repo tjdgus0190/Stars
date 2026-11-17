@@ -39,7 +39,7 @@ window.NAV = {
   channel: { url: "https://pf.kakao.com/_xinaNX", show: false, reward: false },
   // (2026-11-16 운영자) 앱처럼 홈 화면에 두기(PWA). mode: "test" = 시험 주소에서만(운영 주소 prodHosts에서는 아무것도 하지 않음) · "live" = 어디서나 · "off"
   pwa: {
-    mode: "test",
+    mode: "live", // (2026-11-17 운영자) 운영에서도: 앱 설치·실행 연출·위 띠 「앱 설치」·설치 수 집계·웹 푸시 카드
     prodHosts: ["strange-oracle.com", "www.strange-oracle.com"],
     install: "/install/",
     icon: "/products/strange-oracle/img/app/icon-480.webp",
@@ -66,6 +66,7 @@ window.NAV = {
         "목적: 매일 아침 오늘의 신탁 알림을 보내기 위해서예요.",
         "저장 위치: 호스팅 회사 Netlify의 저장소(미국). 알림은 휴대폰·브라우저 회사의 알림 서버(구글·애플 등)를 거쳐 가요. 알림 문구는 휴대폰 안에서 만들어서 알림 서버에는 내용이 가지 않아요.",
         "보관: 알림을 끄면 바로 지우고, 1년 동안 알림이 닿지 않으면 자동으로 지워요.",
+        "끄는 방법: 이 카드의 「알림 끄기」(오늘의 신탁·나의 이야기 페이지), 또는 휴대폰 설정에서 낯선 점술관 알림을 끄면 돼요.",
         "선택 사항이에요. 알림을 받지 않아도 모든 기능을 그대로 쓸 수 있어요.",
       ],
       on: "알림 받기",

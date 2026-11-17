@@ -435,7 +435,8 @@ async function handle(req, env, store, kakao, now = Date.now()) {
 // 새 형식 함수(v2) 연결
 async function respond(req, context, openStore, env = process.env, kakao = null) {
   // (2026-11-15) 시험 배포(branch-deploy)면 잔액 응답에 talkFree를 붙여 화면이 심층상담을 막지 않게 한다(차감 없음은 함수 talk가 한다)
-  if (context && context.deploy && context.deploy.context === "branch-deploy") env = Object.assign({}, env, { TALK_TEST_FREE: "1", TALK_SYNC_DEPLOY: "1" });
+  // (2026-11-17 운영 배포) 시험 배포의 무료 심층상담(TALK_TEST_FREE)은 끔. 대화 보관 시험(TALK_SYNC_DEPLOY)만 남긴다
+  if (context && context.deploy && context.deploy.context === "branch-deploy") env = Object.assign({}, env, { TALK_SYNC_DEPLOY: "1" });
   const body = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
   const r = await handle({ method: req.method, url: req.url, body }, env, Pay.storeFrom(openStore), kakao);
   return new Response(r.body, { status: r.status, headers: r.headers });

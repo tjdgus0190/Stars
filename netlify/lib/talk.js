@@ -214,7 +214,8 @@ function storeFrom(openStore) {
 // Netlify Functions v2 요청 → handle
 // (2026-11-15 운영자) 시험 배포(Netlify 배포 종류 "branch-deploy")에서만 심층상담을 별가루 없이 계속 해 볼 수 있게(TALK_TEST_FREE).
 //   운영(production)에서는 켜지지 않는다. 10분 횟수 제한은 그대로 두되, 시험 배포 값(TALK_RATE_10MIN)이 없으면 60으로
-const testEnv = (env, context) => (context && context.deploy && context.deploy.context === "branch-deploy" ? Object.assign({ TALK_RATE_10MIN: "60" }, env, { TALK_TEST_FREE: "1" }) : env);
+//   (2026-11-17 운영 배포) QA 조건대로 시험 배포의 무료 심층상담을 끔: 시험 주소도 별가루를 쓴다(같은 저장소·월 상한). 10분 횟수 60은 그대로
+const testEnv = (env, context) => (context && context.deploy && context.deploy.context === "branch-deploy" ? Object.assign({ TALK_RATE_10MIN: "60" }, env) : env);
 async function respond(req, context, openStore, env = process.env, openPay = null, Anthropic = null) {
   env = testEnv(env, context);
   const body = req.method === "POST" ? await req.text() : "";
