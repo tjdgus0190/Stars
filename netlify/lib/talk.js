@@ -157,7 +157,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
     try {
       uh = await Auth.sessionOf(payStore, p.sid, now);
       if (!uh) return json(401, { error: "session" });
-      if (!FREE_TEST && !p.risk && (await Dust.balanceOf(payStore, uh)) < TALK_COST) return json(402, { error: "dust" }); // 위기일 수 있는 물음은 별가루가 없어도 답한다(충전 안내로 막지 않음)
+      if (!FREE_TEST && (await Dust.balanceOf(payStore, uh)) < TALK_COST) return json(402, { error: "dust" }); // (2026-11-17 운영자) 위기일 수 있는 물음도 별가루가 모자라면 묻지 못한다
     } catch (e) { return json(503, { error: "store" }); }
   }
 
@@ -186,17 +186,17 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   // (2026-11-17) 모델이 위기를 알아챈 답(끝에 ⟦곁⟧): 표시를 걷고 crisis로 알린다 → 화면이 말풍선 아래 작은 안내 줄(109)을 단다
   const crisisSeen = /⟦곁⟧/.test(text);
   if (crisisSeen) text = text.replace(/\s*⟦곁⟧\s*/g, " ").trim();
-  if (crisisSeen && text) return json(200, Object.assign({ a: text, crisis: true }, uh ? { paid: await Dust.balanceOf(payStore, uh).catch(() => null) } : {})); // 위기 답은 별가루를 쓰지 않는다
+  const crisisFlag = crisisSeen && text ? { crisis: true } : {}; // (2026-11-17 운영자) 위기 답도 다른 답과 똑같이 별가루를 쓴다 — 화면에 작은 안내 줄만 더
   if (!text && p.risk) return json(200, { a: Prompt.crisisReply(p.room), crisis: true }); // 위기일 수 있는 물음에 모델이 답하지 못하면 거절 대신 곁에 머무는 대비 답(별가루 없음)
   if (!text) return json(200, { a: Prompt.declineReply(p.room), declined: true }); // 답하지 못한 물음은 별가루를 쓰지 않는다
-  if (uh && FREE_TEST) { let bal = null; try { bal = await Dust.balanceOf(payStore, uh); } catch (e) { bal = null; } return json(200, { a: text, paid: bal }); } // 시험 배포: 차감 없음
+  if (uh && FREE_TEST) { let bal = null; try { bal = await Dust.balanceOf(payStore, uh); } catch (e) { bal = null; } return json(200, Object.assign({ a: text, paid: bal }, crisisFlag)); } // 시험 배포: 차감 없음
   if (uh) {
     let left = false;
     try { left = await Dust.spend(payStore, uh, TALK_COST, now); } catch (e) { left = false; }
-    if (left === false) return json(200, { a: text, paid: null }); // 그새 잔액이 모자라졌으면 이번 답은 그대로 준다(다음부터 402)
-    return json(200, { a: text, paid: left });
+    if (left === false) return json(200, Object.assign({ a: text, paid: null }, crisisFlag)); // 그새 잔액이 모자라졌으면 이번 답은 그대로 준다(다음부터 402)
+    return json(200, Object.assign({ a: text, paid: left }, crisisFlag));
   }
-  return json(200, { a: text });
+  return json(200, Object.assign({ a: text }, crisisFlag));
 }
 
 // 실제 모델 호출 (Anthropic 공식 SDK). 함수 인스턴스마다 클라이언트 하나

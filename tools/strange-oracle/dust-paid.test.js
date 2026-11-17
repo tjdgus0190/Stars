@@ -320,7 +320,7 @@ test("심층상담 시험 배포: 무료 + 따로 센 비용 장부 · 시험 �
 });
 
 // (2026-11-17 운영자) 모델이 위기를 알아챈 답(끝에 ⟦곁⟧): 표시를 걷고 crisis 표시 · 별가루를 쓰지 않음 · 109는 안내자 말에 없음(화면이 작은 줄로)
-test("심층상담 위기 표시: ⟦곁⟧ → crisis, 표시 걷음, 차감 없음", async () => {
+test("심층상담 위기 표시: ⟦곁⟧ → crisis, 표시 걷음, 다른 답과 똑같이 5 차감 · 모자라면 402", async () => {
   const pay_ = new MemStore();
   const talkStore = new MemStore();
   const { sid, uh } = await login(pay_);
@@ -333,5 +333,9 @@ test("심층상담 위기 표시: ⟦곁⟧ → crisis, 표시 걷음, 차감 �
   assert.strictEqual(r.status, 200);
   assert.strictEqual(o.crisis, true);
   assert.ok(!/⟦곁⟧/.test(o.a) && !/109/.test(o.a));
-  assert.strictEqual(await Dust.balanceOf(pay_, uh), before, "위기 답은 차감 없음");
+  assert.strictEqual(await Dust.balanceOf(pay_, uh), before - 5, "위기 답도 5 차감(운영자 2026-11-17)");
+  // 별가루가 모자라면 위기일 수 있는 물음도 묻지 못한다
+  await Dust.spend(pay_, uh, await Dust.balanceOf(pay_, uh), NOW);
+  const r2 = await Talk.handle({ method: "POST", body: JSON.stringify({ room: "star", q: "요즘 죽고 싶어요", sid }), ip: "8.8.2.2" }, env, talkStore, NOW, llm, pay_);
+  assert.strictEqual(r2.status, 402);
 });
