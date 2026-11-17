@@ -17,6 +17,7 @@
   const CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>';
   const DOTS = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>';
   const OPEN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>';
+  const GET_ICON = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>'; // (2026-11-17) 「설치」 단추: 위 띠 「앱 설치」와 같은 내려받기 표시
   const KEBAB = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>';
 
   const ua = navigator.userAgent || "";
@@ -51,7 +52,7 @@
     <small class="ins-eyebrow">${esc(P.eyebrow)}</small><h1>${esc(P.name)}</h1><p class="ins-lead">${esc(P.lead)}</p>
     <ul class="ins-feats">${feats}</ul>
     <div class="ins-cta" data-js="cta">
-      <button class="ins-btn" type="button" data-js="add">${PLUS.replace("<svg", '<svg class="ico"')}${esc(inapp ? P.inapp.btn : P.add)}</button>
+      <button class="ins-btn" type="button" data-js="add">${GET_ICON}${esc(inapp ? P.inapp.btn : P.add)}</button>
       ${(inapp ? P.inapp.note : P.note) ? `<p class="ins-note">${esc(inapp ? P.inapp.note : P.note)}</p>` : ""}
       <a class="ins-web" href="${HOME}">${esc(P.web)}</a>
     </div>`;
