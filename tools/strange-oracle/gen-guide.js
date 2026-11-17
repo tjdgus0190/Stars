@@ -58,6 +58,7 @@ function build() {
   const { LEGENDS: L } = load("data-legends.js");
   const ORIGIN = new URL(TEXT.site.url).origin;
   const GA4 = (TEXT.analytics && TEXT.analytics.ga4) || "";
+const NAVER_VERIFY = (TEXT.verify && /^[0-9a-f]{20,64}$/.test(TEXT.verify.naver || "") && TEXT.verify.naver) || ""; // (2026-11-17) 네이버 서치어드바이저 소유 확인
   const navItem = (href) => { for (const g of N.groups) for (const it of g.items) if (it.href === href) return it; return null; };
   const entry = (name) => G.pages[name] || G.tools[name] || (G.apps || {})[name] || L.list[name] || (name === "legends" ? L.hub : null);
   const hrefOf = (name) => { const e = entry(name); if (!e) throw new Error("모르는 관련 링크: " + name); return e.path; };
@@ -190,7 +191,7 @@ ${related(d.related)}`;
   <meta property="og:url" content="${url}" />
   <meta property="og:image" content="${ORIGIN}${PB}og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="theme-color" content="#080717" />
+  <meta name="theme-color" content="#080717" />${NAVER_VERIFY ? `\n  <meta name="naver-site-verification" content="${NAVER_VERIFY}" />` : ""}
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 ${fonts.map(([f, sri]) => `  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/${f}" integrity="${sri}" crossorigin="anonymous" />`).join("\n")}
