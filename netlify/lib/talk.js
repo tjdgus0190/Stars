@@ -145,7 +145,7 @@ async function handle(req, env, store, now = Date.now(), llm, payStore = null) {
   // 위기 신호: 모델을 부르지 않고 정해진 안내(상담 전화)를 돌려준다. 횟수·별가루를 쓰지 않는다
   if (Prompt.crisis(p.q)) return json(200, { a: Prompt.crisisReply(p.room), crisis: true });
 
-  const key = "budget/" + month(now);
+  const key = (env.TALK_BUDGET_PREFIX === "budget-test/" ? "budget-test/" : "budget/") + month(now); // (2026-11-17) 시험 배포는 따로 센다
   let b;
   try { b = (await store.get(key)) || { usd: 0, n: 0 }; } catch (e) { return json(503, { error: "store" }); }
   if (b.usd >= Number(env.TALK_MONTHLY_USD)) return json(503, { error: "budget" });
@@ -214,8 +214,12 @@ function storeFrom(openStore) {
 // Netlify Functions v2 요청 → handle
 // (2026-11-15 운영자) 시험 배포(Netlify 배포 종류 "branch-deploy")에서만 심층상담을 별가루 없이 계속 해 볼 수 있게(TALK_TEST_FREE).
 //   운영(production)에서는 켜지지 않는다. 10분 횟수 제한은 그대로 두되, 시험 배포 값(TALK_RATE_10MIN)이 없으면 60으로
-//   (2026-11-17 운영 배포) QA 조건대로 시험 배포의 무료 심층상담을 끔: 시험 주소도 별가루를 쓴다(같은 저장소·월 상한). 10분 횟수 60은 그대로
-const testEnv = (env, context) => (context && context.deploy && context.deploy.context === "branch-deploy" ? Object.assign({ TALK_RATE_10MIN: "60" }, env) : env);
+//   (2026-11-17 운영자) 시험 배포는 운영과 따로: 비용 장부(budget-test/<월>)와 월 상한(TALK_TEST_MONTHLY_USD, 없으면 10달러)을 따로 둬서
+//   시험 대화가 운영 월 상한을 쓰지 않게 한 뒤(QA가 막았던 이유) 무료 심층상담을 다시 켠다. 운영(production)에는 아무 영향 없음
+const TEST_CAP_USD = "10";
+const testEnv = (env, context) => (context && context.deploy && context.deploy.context === "branch-deploy"
+  ? Object.assign({ TALK_RATE_10MIN: "60" }, env, { TALK_TEST_FREE: "1", TALK_BUDGET_PREFIX: "budget-test/", TALK_MONTHLY_USD: env.TALK_TEST_MONTHLY_USD || TEST_CAP_USD })
+  : env);
 async function respond(req, context, openStore, env = process.env, openPay = null, Anthropic = null) {
   env = testEnv(env, context);
   const body = req.method === "POST" ? await req.text() : "";
@@ -224,4 +228,4 @@ async function respond(req, context, openStore, env = process.env, openPay = nul
 }
 
 const _reset = () => hits.clear();
-module.exports = { limits, TALK_COST, modelOf, respond, handle, parse, validR, costOf, envOk, storeFrom, STORE_NAME, ROOMS, R_SHAPE, MAX_Q, FREE_PER_DAY, DEFAULT_MODEL, _reset };
+module.exports = { testEnv, limits, TALK_COST, modelOf, respond, handle, parse, validR, costOf, envOk, storeFrom, STORE_NAME, ROOMS, R_SHAPE, MAX_Q, FREE_PER_DAY, DEFAULT_MODEL, _reset };

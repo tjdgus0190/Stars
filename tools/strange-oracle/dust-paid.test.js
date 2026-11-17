@@ -295,3 +295,26 @@ test("심층상담 손님과의 사이: 도감에 그 방이 있으면 단골(�
   await Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", r: { s: 0 }, q: "물음" }), ip: "8.8.8.2" }, env, talkStore, NOW, llm, pay_);
   assert.ok(/처음 만난 손님\(초면\)/.test(seen));
 });
+
+// (2026-11-17 운영자) 시험 배포는 운영과 따로: 무료 · 비용 장부 budget-test/ · 월 상한 TALK_TEST_MONTHLY_USD(기본 10달러). 운영 장부·상한은 건드리지 않는다
+test("심층상담 시험 배포: 무료 + 따로 센 비용 장부 · 시험 상한에 닿아도 운영은 그대로", async () => {
+  const pay_ = new MemStore();
+  const talkStore = new MemStore();
+  const ok = async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: "답" }], usage: { input_tokens: 10, output_tokens: 10 } });
+  const { sid } = await login(pay_);
+  const prod = { TALK_MODE: "live", ANTHROPIC_API_KEY: "x", TALK_MONTHLY_USD: "50" };
+  const branch = Talk.testEnv(prod, { deploy: { context: "branch-deploy" } });
+  assert.strictEqual(branch.TALK_TEST_FREE, "1");
+  assert.strictEqual(branch.TALK_MONTHLY_USD, "10", "시험 상한 기본 10달러");
+  assert.strictEqual(Talk.testEnv(Object.assign({ TALK_TEST_MONTHLY_USD: "3" }, prod), { deploy: { context: "branch-deploy" } }).TALK_MONTHLY_USD, "3");
+  assert.deepStrictEqual(Talk.testEnv(prod, { deploy: { context: "production" } }), prod, "운영은 그대로");
+  const ask = (env, ip) => Talk.handle({ method: "POST", body: JSON.stringify({ room: "saju", q: "물음", sid }), ip }, env, talkStore, NOW, ok, pay_);
+  assert.strictEqual((await ask(branch, "8.8.1.1")).status, 200, "잔액 0이어도 시험 배포는 답함");
+  const keys = [...talkStore.map.keys()];
+  assert.ok(keys.some((k) => k.startsWith("budget-test/")) && !keys.some((k) => k.startsWith("budget/")), "시험 대화는 시험 장부에만");
+  // 시험 장부가 상한을 넘어도 운영은 닫히지 않는다
+  const mk = [...talkStore.map.keys()].find((k) => k.startsWith("budget-test/"));
+  talkStore.map.set(mk, JSON.stringify({ usd: 999, n: 1 }));
+  assert.strictEqual(JSON.parse((await ask(branch, "8.8.1.2")).body).error, "budget");
+  assert.strictEqual((await ask(prod, "8.8.1.3")).status, 402, "운영은 상한과 무관(잔액 0이라 402)");
+});
