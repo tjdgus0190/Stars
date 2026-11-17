@@ -6772,7 +6772,8 @@
           } catch (e) {
             return;
           }
-          return location.replace(location.pathname); // 방 파일·화면을 처음부터 다시 맞춘다
+          // 방 파일·화면을 처음부터 다시 맞춘다. (2026-11-17 운영자) 신년운세로 가던 중이면 다시 연 뒤에도 신년운세로(#ny-hub를 지우지 않는다)
+          return location.replace(location.pathname + (/^#ny-/.test(location.hash) || /^ny-/.test(currentName) ? "#ny-hub" : ""));
         }
         if (d) pushSave(true);
         else if (fresh && readLogin() && readLogin().consent == null) openConsent();

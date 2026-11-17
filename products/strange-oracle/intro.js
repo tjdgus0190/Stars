@@ -5,6 +5,8 @@
 //   아무 데나 누르면 바로 들어간다. 움직임 줄이기 설정이면 짧게 나타났다 사라진다.
 // 보이는 때: 홈 화면 앱으로 연 경우(display-mode standalone)만, 앱을 켤 때 한 번(이 탭 sessionStorage "strange-oracle-intro" = "1", 입력값 아님).
 // 문구: data-nav.js NAV.pwa.intro · 모양: nav.css .sointro
+// (2026-11-17 운영자: 아이콘이 떠 있는 시간을 최대한 짧게) 다른 스크립트(defer)를 기다리지 않고 <body>가 생기는 즉시 연출을 시작한다.
+//   문구(data-nav.js)는 늦게 와도 되는 부분(이름·한 줄)에만 쓰고, 오면 그때 채운다.
 (function () {
   "use strict";
   var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
@@ -23,9 +25,11 @@
   var finish = function () { if (done) return; done = true; H.classList.remove("so-intro"); };
   var bail = setTimeout(finish, 6000); // 무슨 일이 있어도 6초 뒤에는 점술관이 보인다
 
+  var started = false, t0 = 0;
   var start = function () {
-    var C = window.NAV && window.NAV.pwa, T = C && C.intro;
-    if (!T || C.mode === "off") { clearTimeout(bail); finish(); return; }
+    if (started || !document.body) return;
+    started = true;
+    t0 = performance.now();
     var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
     // 일곱 문장(앱 아이콘과 같은 자리·같은 결의 단순한 선 그림, 24×24)
@@ -45,7 +49,6 @@
     }
     var ticks = "";
     for (var k = 0; k < 56; k++) ticks += '<line x1="150" y1="' + (150 - R - 6) + '" x2="150" y2="' + (150 - R - (k % 4 ? 2 : 9)) + '" transform="rotate(' + (k * 360 / 56).toFixed(2) + ' 150 150)"/>';
-    var name = Array.from(String(T.name)).map(function (ch, j) { return ch === " " ? " " : '<span style="--j:' + j + '">' + esc(ch) + "</span>"; }).join("");
     var box = document.createElement("div");
     box.className = "sointro" + (calm ? " is-calm" : fromIcon ? " is-from-icon" : "");
     box.setAttribute("aria-hidden", "true"); // 꾸밈 연출(3초 뒤 저절로 사라짐)
@@ -62,9 +65,19 @@
       '<path class="sointro__leaf sointro__leaf--l" d="M-15 23V-5a15 15 0 0 1 15-15V23zM-5 6v0.1"/>' +
       '<path class="sointro__leaf sointro__leaf--r" d="M15 23V-5a15 15 0 0 0-15-15V23zM5 6v0.1"/>' +
       "</g>" + nodes + "</svg></div>" +
-      '<div class="sointro__words"><small>' + esc(T.eyebrow) + '</small><b class="sointro__name">' + name + "</b><p>" + esc(T.line) + "</p></div>" +
+      '<div class="sointro__words"></div>' +
       '<div class="sointro__flood"></div>';
     document.body.append(box);
+    // 문구는 data-nav.js가 오면 채운다. 늦게 오면 그만큼 앞당겨(음수 지연) 다른 움직임과 박자를 맞춘다
+    var words = box.querySelector(".sointro__words");
+    var fill = function () {
+      var C = window.NAV && window.NAV.pwa, T = C && C.intro;
+      if (!C || C.mode === "off") { go(); return; }
+      if (!T || words.childElementCount) return;
+      words.style.setProperty("--el", Math.round(performance.now() - t0) + "ms");
+      var name = Array.from(String(T.name)).map(function (ch, j) { return ch === " " ? " " : '<span style="--j:' + j + '">' + esc(ch) + "</span>"; }).join("");
+      words.innerHTML = "<small>" + esc(T.eyebrow) + '</small><b class="sointro__name">' + name + "</b><p>" + esc(T.line) + "</p>";
+    };
     if (fromIcon) {
       // 시스템 첫 화면의 아이콘 고리(지름 ≈ 240px × 0.57)와 같은 크기·화면 가운데에서 출발해 제자리로 펼쳐진다
       var stage = box.querySelector(".sointro__stage"), r0 = stage.getBoundingClientRect();
@@ -82,10 +95,16 @@
       setTimeout(function () { box.remove(); }, calm ? 400 : 1000);
     };
     box.addEventListener("click", go);
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fill, { once: true }); else fill();
     requestAnimationFrame(function () { box.classList.add("is-on"); });
-    timers.push(setTimeout(go, calm ? 1100 : fromIcon ? 3500 : 3100));
+    timers.push(setTimeout(go, calm ? 1100 : fromIcon ? 3000 : 3100));
     clearTimeout(bail);
   };
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
-  else start();
+  // <body>가 생기는 순간 시작(이 파일은 <head>에서 돈다)
+  if (document.body) start();
+  else {
+    var mo = new MutationObserver(function () { if (document.body) { mo.disconnect(); start(); } });
+    mo.observe(H, { childList: true });
+    document.addEventListener("DOMContentLoaded", start, { once: true });
+  }
 })();
