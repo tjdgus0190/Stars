@@ -6898,6 +6898,7 @@
     so_resume: { step: ["made", "used", "failed"] },
     so_book: { step: ["toc", "cover", "read", "done", "preview"], chapter: BOOK_IDS }, // (13단계 13-8, 18-11)
     so_auth: { step: ["start", "linked", "found", "none", "forgot", "fail", "consent", "logout", "erase"], mode: ["restore", "link", "forget", "login"] }, // (21단계) 카카오 로그인 단계 이름만. 회원번호·코드 없음
+    so_pwa: { step: ["ask_app", "ask_web", "get_click", "install_click", "prompt_accept", "prompt_dismiss", "installed", "open_outside", "first_open", "open", "push_on", "push_off"] }, // (2026-11-17 운영자) 앱 설치·실행 단계 이름만(pwa.js)
     so_pay: { step: ["view", "start", "done", "pass_ok", "pass_fail", "code_kakao", "keep_on", "keep_off", "keep_load"], from: ["preview", "toc", "hub", "story", "locked", "room", "dock", "offer", "after_saju", "finale", "ny", "other"] },
     // (2026-10-30 기획 v7 작업 D) 오검 뒤 책 제안: 보임·자세히 보기·무료로 계속·닫기. placement·도착 방 이름만
     so_book_offer_view: { placement: ["after_ogham"], destination_room: CHAPTER_ORDER },

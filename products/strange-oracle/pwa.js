@@ -29,6 +29,24 @@
 
   const standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
 
+  // ── (2026-11-17 운영자) GA4: 앱 설치·실행을 단계 이름만으로 센다(so_pwa { step }). 분석이 아직 준비 전이면 잠시 뒤 한 번 더
+  const pwaTrack = (step) => {
+    const send = () => Boolean(window.Analytics && window.Analytics.track("so_pwa", { step }));
+    if (send()) return;
+    const later = () => setTimeout(send, 1200);
+    if (document.readyState === "complete") later(); else window.addEventListener("load", later, { once: true });
+  };
+  window.addEventListener("appinstalled", () => pwaTrack("installed")); // 안드로이드 크롬 등: 설치 완료
+  // 홈 화면 앱으로 연 경우: 이 기기에서 처음 연 것(= 설치해서 쓰기 시작, 아이폰 포함) 한 번 + 실행마다 한 번
+  if (standalone) {
+    let first = false;
+    try { first = !localStorage.getItem("strange-oracle-app"); if (first) localStorage.setItem("strange-oracle-app", "1"); } catch (e) { first = false; } // 처음 열었다는 표시만(입력값 아님)
+    if (first) pwaTrack("first_open");
+    let opened = true;
+    try { opened = Boolean(sessionStorage.getItem("strange-oracle-app-open")); sessionStorage.setItem("strange-oracle-app-open", "1"); } catch (e) { opened = true; }
+    if (!opened) pwaTrack("open");
+  }
+
   // ── (2026-11-16 운영자) 웹 푸시 「오늘의 신탁 알림」 카드: 오늘의 신탁·나의 이야기 페이지에. 서버(PUSH_MODE)가 꺼져 있으면(503) 아무것도 그리지 않는다
   //   저장: 이 기기 쪽에는 없음(브라우저가 알림 주소를 가진다). 서버에는 알림 주소·시각만(동의 화면에 적은 대로)
   const PU = C.push;
@@ -78,6 +96,7 @@
           sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
           const r = await post("/api/push/subscribe", { endpoint: sub.endpoint });
           if (r.status !== 200) { await sub.unsubscribe().catch(() => {}); sub = null; msg = PU.fail; return draw(); }
+          pwaTrack("push_on");
           msg = PU.done;
           return draw();
         }
@@ -85,6 +104,7 @@
           await post("/api/push/unsubscribe", { endpoint: sub.endpoint }).catch(() => {});
           await sub.unsubscribe().catch(() => {});
           sub = null; msg = PU.offDone;
+          pwaTrack("push_off");
           return draw();
         }
         if (act === "test" && sub) { await post("/api/push/test", { endpoint: sub.endpoint }); msg = PU.testSent; return draw(); }
@@ -103,6 +123,7 @@
       a.href = C.install;
       a.setAttribute("aria-label", GET.label);
       a.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>${escP(GET.text)}</span>`;
+      a.addEventListener("click", () => pwaTrack("get_click"));
       if (spot.classList.contains("topbar__end")) spot.prepend(a); else spot.before(a);
     }
   }
@@ -132,8 +153,9 @@
     box.addEventListener("click", (e) => {
       const t = e.target.closest("[data-pwa]");
       if (!t) return;
-      if (t.dataset.pwa === "app") { mark("app"); return; } // 링크로 설치 페이지에
+      if (t.dataset.pwa === "app") { mark("app"); pwaTrack("ask_app"); return; } // 링크로 설치 페이지에
       mark("web");
+      pwaTrack("ask_web");
       box.classList.remove("is-on");
       setTimeout(() => box.remove(), 320);
     });

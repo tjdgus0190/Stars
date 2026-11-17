@@ -227,6 +227,14 @@ ${tabbar(d.path)}
     }
   }
   rewrites.push(...APP_FILES); // (2026-11-16) 앱처럼 홈 화면에 두기: 서비스 워커·앱 정보 파일은 사이트 맨 위 주소로, 설치 페이지는 /install/
+  // (2026-11-17 운영자) 설치 페이지(손으로 쓴 HTML)에도 GA4 측정 ID를 적는다(앱 설치 수 집계). 표시 줄 <!-- gen-ga4 … --> 앞의 GUIDE_PAGE만 바꾼다
+  {
+    const ip = path.join(P, "install", "index.html");
+    const html = fs.readFileSync(ip, "utf8");
+    const next = html.replace(/<script>window\.GUIDE_PAGE = \{[^<]*\};<\/script>(<!-- gen-ga4)/, `<script>window.GUIDE_PAGE = ${JSON.stringify({ page: "install", kind: "app", ga4: GA4 })};</script>$1`);
+    if (next === html && !html.includes(JSON.stringify({ page: "install", kind: "app", ga4: GA4 }))) throw new Error("install/index.html의 gen-ga4 줄을 찾지 못함");
+    if (next !== html) { fs.writeFileSync(ip, next); console.log("  썼음: products/strange-oracle/install/index.html (GA4)"); }
+  }
   return { files, urls, origin: ORIGIN, rewrites, netlify: netlifyBlock(rewrites) };
 }
 

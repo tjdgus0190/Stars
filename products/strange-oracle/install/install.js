@@ -27,10 +27,21 @@
   const standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
   const HOME = "/";
 
+  // (2026-11-17 운영자) GA4: 설치 단계 이름만(so_pwa { step }). 측정 ID가 비어 있으면 아무것도 불러오지 않는다(analytics.js)
+  const CONF = window.GUIDE_PAGE || {}, AN = window.Analytics;
+  let anOn = false;
+  if (AN && CONF.ga4) {
+    const search = location.search;
+    if (search) history.replaceState(null, "", location.pathname + location.hash);
+    anOn = AN.init({ ga4: CONF.ga4, title: document.title, events: { so_pwa: { step: ["install_view", "install_click", "prompt_accept", "prompt_dismiss", "installed", "open_outside"] } }, utm: { search, allow: {}, ignore: [] } });
+  }
+  const pwaTrack = (step) => { if (anOn) AN.track("so_pwa", { step }); };
+  pwaTrack("install_view");
+
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
   let deferred = window.SO_INSTALL || null;
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferred = e; });
-  window.addEventListener("appinstalled", () => done());
+  window.addEventListener("appinstalled", () => { pwaTrack("installed"); done(); });
 
   // 이미 홈 화면 앱으로 열었으면 바로 점술관으로
   if (standalone) { location.replace(HOME); return; }
@@ -79,6 +90,7 @@
   box.addEventListener("click", async (e) => {
     const b = e.target.closest("[data-js=add]");
     if (!b) return;
+    pwaTrack(inapp ? "open_outside" : "install_click");
     if (inapp) return openOutside();
     if (deferred) {
       b.disabled = true;
@@ -86,6 +98,7 @@
         deferred.prompt();
         const r = await deferred.userChoice;
         deferred = null;
+        pwaTrack(r && r.outcome === "accepted" ? "prompt_accept" : "prompt_dismiss");
         if (r && r.outcome === "accepted") return done();
       } catch (x) { /* 아래 안내로 */ }
       b.disabled = false;
