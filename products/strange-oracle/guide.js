@@ -29,7 +29,7 @@
   if (A && CONF.ga4) {
     const search = location.search;
     if (search) history.replaceState(null, "", location.pathname + location.hash);
-    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] }, so_dust: { step: ["start", "done"] }, so_auth: { step: ["login", "fail", "logout"] }, so_pwa: { step: ["ask_app", "ask_web", "get_click", "install_click", "prompt_accept", "prompt_dismiss", "installed", "open_outside", "first_open", "open", "push_on", "push_off"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
+    on = A.init({ ga4: CONF.ga4, title: document.title, events: { so_guide_view: { page: PAGES }, so_guide_cta: { page: PAGES }, so_tool_result: { tool: TOOLS }, so_talk: { room: ["saju", "ogham", "star", "decan", "tzolkin", "rune", "sibyl"], step: ["answer"] }, so_dust: { step: ["start", "done"] }, so_auth: { step: ["login", "fail", "logout"] }, so_pwa: { step: ["ask_app", "ask_web", "get_click", "install_click", "prompt_accept", "prompt_dismiss", "installed", "open_outside", "first_open", "open", "push_on", "push_off", "push_ask", "push_later"] } }, utm: { search, allow: CAMPAIGN, ignore: ["fbclid", "ttclid", "gclid"] } });
     if (on) A.track("so_guide_view", { page: CONF.page });
     const cookie = $("[data-js=cookie-line]");
     if (cookie && A.configured(CONF.ga4)) cookie.hidden = false;

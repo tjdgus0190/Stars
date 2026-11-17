@@ -57,6 +57,16 @@
   const escP = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store", credentials: "omit" });
   const keyBytes = (k) => { const s = atob(k.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((k.length + 3) % 4)); return Uint8Array.from(s, (c) => c.charCodeAt(0)); };
+  // 알림 켜기(공통): 권한 묻기 → 이 기기 등록 → 서버에 알림 주소. 결과 "on" | "denied" | "fail"
+  async function pushOn(reg, key) {
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") return { state: perm === "denied" ? "denied" : "dismiss", sub: null };
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
+    const r = await post("/api/push/subscribe", { endpoint: sub.endpoint });
+    if (r.status !== 200) { await sub.unsubscribe().catch(() => {}); return { state: "fail", sub: null }; }
+    pwaTrack("push_on");
+    return { state: "on", sub };
+  }
   async function pushCard() {
     if (!pushSpot) return;
     let key = "";
@@ -91,12 +101,9 @@
       try {
         if (act === "on") {
           draw(true);
-          const perm = await Notification.requestPermission();
-          if (perm !== "granted") { draw(); return; }
-          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
-          const r = await post("/api/push/subscribe", { endpoint: sub.endpoint });
-          if (r.status !== 200) { await sub.unsubscribe().catch(() => {}); sub = null; msg = PU.fail; return draw(); }
-          pwaTrack("push_on");
+          const res = await pushOn(reg, key);
+          if (res.state !== "on") { sub = null; msg = res.state === "fail" ? PU.fail : ""; return draw(); }
+          sub = res.sub;
           msg = PU.done;
           return draw();
         }
@@ -112,6 +119,57 @@
     });
   }
   pushCard();
+
+  // ── (2026-11-17 운영자) 앱을 처음 켰을 때: 실행 연출이 끝나자마자 알림 창을 한 번(카드와 같은 내용, 6장 예외 6). 이 기기에서 한 번만 묻는다
+  //   저장: 이 기기 localStorage "strange-oracle-push-ask" = "1"(물어봤다는 표시, 입력값 아님)
+  async function firstPushAsk() {
+    const F = PU && PU.first;
+    if (!F || !standalone || !pushable || Notification.permission !== "default") return;
+    try { if (localStorage.getItem("strange-oracle-push-ask")) return; } catch (e) { return; }
+    let key = "";
+    try { const r = await fetch("/api/push/key", { cache: "no-store", credentials: "omit" }); if (r.status !== 200) return; key = (await r.json()).key || ""; } catch (e) { return; }
+    if (!key) return;
+    const reg = await navigator.serviceWorker.ready.catch(() => null);
+    if (!reg || (await reg.pushManager.getSubscription().catch(() => null))) return;
+    // 실행 연출이 끝난 뒤(막이 걷히고 빛이 사라질 즈음)
+    await new Promise((ok) => { const t0 = Date.now(); const w = () => (!document.documentElement.classList.contains("so-intro") && !document.querySelector(".sointro")) || Date.now() - t0 > 8000 ? ok() : setTimeout(w, 150); w(); });
+    await new Promise((ok) => setTimeout(ok, 350));
+    if (document.querySelector(".pwa-ask")) return;
+    try { localStorage.setItem("strange-oracle-push-ask", "1"); } catch (e) { /* 이 화면에서만 */ }
+    pwaTrack("push_ask");
+    const box = document.createElement("div");
+    box.className = "pwa-ask pwa-ask--push";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-label", F.title);
+    const body = (state) => state === "done"
+      ? `<small class="pwa-ask__eyebrow">${escP(F.eyebrow)}</small><h2>${escP(F.done)}</h2><div class="pwa-ask__gap"></div><button class="pwa-ask__app" type="button" data-pwa="close">${escP(F.ok)}</button>`
+      : `<small class="pwa-ask__eyebrow">${escP(F.eyebrow)}</small><h2>${escP(F.title)}</h2><p>${escP(F.body)}</p>
+        <p class="pwa-ask__short">${escP(F.short)}</p><details class="pwa-push__more pwa-ask__more"><summary>${escP(PU.more)}</summary><ul>${PU.detail.map((x) => `<li>${escP(x)}</li>`).join("")}</ul></details>
+        ${state === "fail" ? `<p class="pwa-push__msg">${escP(PU.fail)}</p>` : ""}
+        <button class="pwa-ask__app" type="button" data-pwa="on"${state === "busy" ? " disabled" : ""}>${escP(state === "busy" ? PU.working : F.on)}</button>
+        <button class="pwa-ask__web" type="button" data-pwa="later">${escP(F.later)}</button>`;
+    const paint = (state) => { box.querySelector(".pwa-ask__card").innerHTML = `<div class="pwa-ask__icon"><img src="${escP(C.icon)}" alt="" width="84" height="84"></div>` + body(state); };
+    box.innerHTML = `<div class="pwa-ask__scrim" data-pwa="later"></div><div class="pwa-ask__card"></div>`;
+    paint("ask");
+    document.body.append(box);
+    requestAnimationFrame(() => box.classList.add("is-on"));
+    const close = () => { box.classList.remove("is-on"); setTimeout(() => box.remove(), 320); };
+    box.addEventListener("click", async (e) => {
+      const t = e.target.closest("[data-pwa]");
+      if (!t) return;
+      if (t.dataset.pwa === "later") { pwaTrack("push_later"); return close(); }
+      if (t.dataset.pwa === "close") return close();
+      if (t.dataset.pwa !== "on" || t.disabled) return;
+      paint("busy");
+      let res = { state: "fail" };
+      try { res = await pushOn(reg, key); } catch (x) { res = { state: "fail" }; }
+      if (res.state === "on") return paint("done");
+      if (res.state === "fail") return paint("fail");
+      close(); // 권한 창에서 거절·닫음 → 조용히 닫는다(오늘의 신탁 카드에서 다시 켤 수 있음)
+    });
+  }
+  firstPushAsk();
 
   // ── (2026-11-17 운영자) 웹으로 들어왔을 때 위 띠에 「앱 설치」 단추를 늘 둔다 → 설치 페이지. 홈 화면 앱·설치 페이지에서는 두지 않는다
   const GET = C.get;

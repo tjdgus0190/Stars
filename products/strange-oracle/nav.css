@@ -229,3 +229,10 @@ html.so-intro.so-intro-icon body::after { background: radial-gradient(circle at 
 .gtop__inner:has(.pwa-get) { gap: 8px; }
 .gtop__inner:has(.pwa-get) .gtop__brand { white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 380px) { .pwa-get { height: 26px; padding: 0 8px 0 6px; gap: 3px; font-size: 0.6875rem; } .pwa-get svg { width: 12px; height: 12px; } }
+
+/* (2026-11-17 운영자) 앱 첫 실행 알림 창: 처음 묻는 창(pwa-ask) 모양에 요약 한 줄·자세히 보기 */
+.pwa-ask--push .pwa-ask__short { margin-top: 10px; font: 500 0.8125rem/1.5 system-ui, sans-serif; color: oklch(0.82 0.06 85); }
+.pwa-ask--push .pwa-ask__more { margin: 8px auto 16px; max-width: 340px; text-align: left; }
+.pwa-ask--push .pwa-push__msg { margin: 0 0 10px; }
+.pwa-ask--push .pwa-ask__app:disabled { opacity: 0.6; }
+.pwa-ask--push .pwa-ask__app { width: 100%; border: 0; cursor: pointer; }
