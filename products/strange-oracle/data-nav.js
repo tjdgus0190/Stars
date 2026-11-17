@@ -45,6 +45,8 @@ window.NAV = {
     icon: "/products/strange-oracle/img/app/icon-480.webp",
     // (2026-11-16 운영자) 홈 화면 앱을 켤 때의 실행 연출(intro.js)
     intro: { eyebrow: "STRANGE ORACLE", name: "낯선 점술관", line: "오늘 밤, 일곱 개의 문이 열려요" },
+    // (2026-11-17 운영자) 웹으로 들어왔을 때 위 띠에 늘 남는 설치 단추(홈 화면 앱 안에서는 안 보임)
+    get: { text: "앱 설치", label: "낯선 점술관 앱 설치하기" },
     // 처음 들어왔을 때 한 번 묻는 창
     ask: {
       eyebrow: "STRANGE ORACLE",

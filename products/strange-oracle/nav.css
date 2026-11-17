@@ -196,3 +196,36 @@ html.so-intro body::after { content: ""; position: fixed; inset: 0; z-index: 199
 @keyframes soi-turn { from { transform: rotate(-8deg); } to { transform: rotate(6deg); } }
 @keyframes soi-twinkle { from { filter: brightness(0.75); } to { filter: brightness(1.25); } }
 @keyframes soi-flood { 0% { opacity: 0; transform: scale(1); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(40); } }
+
+/* (2026-11-17 운영자) 안드로이드: 시스템 첫 화면의 큰 아이콘(240px 그림을 지름 160px 원으로 보여 줌)에서 이어 시작 */
+html.so-intro.so-intro-icon body::after { background: radial-gradient(circle at 50% 50%, transparent 79.5px, #080717 80px), url(/products/strange-oracle/img/app/icon-maskable-512.png) center / 240px 240px no-repeat, #080717; }
+.sointro__icon { position: absolute; left: 50%; top: 50%; width: 160px; height: 160px; margin: -80px 0 0 -80px; border-radius: 50%; background: url(/products/strange-oracle/img/app/icon-maskable-512.png) center / 240px 240px no-repeat; }
+.sointro.is-from-icon .sointro__icon { animation: soi-icon-out 0.55s ease 0.3s forwards; }
+.sointro.is-from-icon .sointro__sky, .sointro.is-from-icon .sointro__mist { transition-delay: 0.45s; }
+.sointro.is-from-icon .sointro__stage { animation: soi-unfold 1.05s cubic-bezier(0.65, 0, 0.25, 1) 0.55s both; }
+.sointro.is-from-icon .sointro__seal { animation: soi-show 0.45s ease 0.25s both, soi-turn2 7s linear 1.4s both; }
+.sointro.is-from-icon .sointro__ring, .sointro.is-from-icon .sointro__inner { stroke-dashoffset: 0; animation: none; }
+.sointro.is-from-icon .sointro__ticks, .sointro.is-from-icon .sointro__node, .sointro.is-from-icon .sointro__frame { opacity: 1; animation: none; }
+.sointro.is-from-icon .sointro__disc, .sointro.is-from-icon .sointro__sig { animation: soi-flare 0.7s ease calc(1.3s + var(--i) * 0.1s) both; }
+.sointro.is-from-icon .sointro__halo { animation: soi-halo 1.1s ease-out calc(1.3s + var(--i) * 0.1s) both; }
+.sointro.is-from-icon .sointro__leaf { opacity: 1; }
+.sointro.is-from-icon .sointro__leaf--l { animation: soi-open-l 0.75s cubic-bezier(0.55, 0, 0.25, 1) 2.1s forwards; }
+.sointro.is-from-icon .sointro__leaf--r { animation: soi-open-r 0.75s cubic-bezier(0.55, 0, 0.25, 1) 2.1s forwards; }
+.sointro.is-from-icon .sointro__light { animation: soi-light 1.1s ease-out 2.15s forwards; }
+.sointro.is-from-icon .sointro__words small { animation-delay: 1.6s; }
+.sointro.is-from-icon .sointro__name span { animation-delay: calc(1.75s + var(--j) * 0.07s); }
+.sointro.is-from-icon .sointro__words p { animation-delay: 2.45s; }
+@keyframes soi-icon-out { to { opacity: 0; transform: scale(1.04); } }
+@keyframes soi-unfold { from { transform: translate(var(--fx), var(--fy)) scale(var(--fs)); } to { transform: none; } }
+@keyframes soi-show { from { opacity: 0; } to { opacity: 1; } }
+@keyframes soi-turn2 { from { transform: rotate(0deg); } to { transform: rotate(8deg); } }
+@keyframes soi-flare { 0% { transform: scale(1); } 40% { transform: scale(1.22); } 100% { transform: scale(1); } }
+
+/* (2026-11-17 운영자) 웹에서 위 띠의 「앱 설치」 단추 */
+.pwa-get { display: inline-flex; align-items: center; gap: 4px; flex: none; height: 28px; padding: 0 10px 0 8px; border-radius: 999px; border: 1px solid oklch(0.78 0.11 85 / 0.55); background: oklch(0.78 0.11 85 / 0.12); color: var(--gold, #e3c07a); font-family: var(--font-sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; text-decoration: none; white-space: nowrap; }
+.pwa-get svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pwa-get:active { transform: scale(0.96); }
+.topbar__end .pwa-get { margin-right: 6px; }
+.gtop__inner:has(.pwa-get) { gap: 8px; }
+.gtop__inner:has(.pwa-get) .gtop__brand { white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 380px) { .pwa-get { height: 26px; padding: 0 8px 0 6px; gap: 3px; font-size: 0.6875rem; } .pwa-get svg { width: 12px; height: 12px; } }

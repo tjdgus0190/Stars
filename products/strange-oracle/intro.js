@@ -1,5 +1,7 @@
 // 홈 화면 앱(PWA)을 켤 때의 실행 연출 — 처음 화면(/)의 <head>에서 바로 불러온다(gen-guide.js). (2026-11-16 운영자)
 // 흐름(약 3초): 별이 깨어남 → 금빛 고리가 그려짐 → 일곱 문장이 차례로 켜짐 → 가운데 문이 열리고 빛이 번짐 → 점술관으로.
+//   (2026-11-17 운영자) 안드로이드: 휴대폰이 먼저 띄우는 큰 앱 아이콘(시스템 첫 화면)과 같은 자리·크기의 아이콘에서 시작해,
+//   아이콘이 그대로 풀려 금빛 고리가 되고 문장이 켜진다(끊김 없이). 아이폰: 검은 첫 화면 → 고리를 그리며 시작.
 //   아무 데나 누르면 바로 들어간다. 움직임 줄이기 설정이면 짧게 나타났다 사라진다.
 // 보이는 때: 홈 화면 앱으로 연 경우(display-mode standalone)만, 앱을 켤 때 한 번(이 탭 sessionStorage "strange-oracle-intro" = "1", 입력값 아님).
 // 문구: data-nav.js NAV.pwa.intro · 모양: nav.css .sointro
@@ -13,6 +15,10 @@
   } catch (e) { return; }
   var H = document.documentElement;
   H.classList.add("so-intro"); // 첫 화면이 비치지 않게 어두운 막을 먼저 친다(nav.css)
+  var ICON = "/products/strange-oracle/img/app/icon-maskable-512.png";
+  var calm0 = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fromIcon = /Android/i.test(navigator.userAgent) && !calm0;
+  if (fromIcon) { H.classList.add("so-intro-icon"); new Image().src = ICON; } // 막에도 같은 아이콘을 그려 시스템 첫 화면과 이어지게
   var done = false;
   var finish = function () { if (done) return; done = true; H.classList.remove("so-intro"); };
   var bail = setTimeout(finish, 6000); // 무슨 일이 있어도 6초 뒤에는 점술관이 보인다
@@ -41,10 +47,10 @@
     for (var k = 0; k < 56; k++) ticks += '<line x1="150" y1="' + (150 - R - 6) + '" x2="150" y2="' + (150 - R - (k % 4 ? 2 : 9)) + '" transform="rotate(' + (k * 360 / 56).toFixed(2) + ' 150 150)"/>';
     var name = Array.from(String(T.name)).map(function (ch, j) { return ch === " " ? " " : '<span style="--j:' + j + '">' + esc(ch) + "</span>"; }).join("");
     var box = document.createElement("div");
-    box.className = "sointro" + (calm ? " is-calm" : "");
+    box.className = "sointro" + (calm ? " is-calm" : fromIcon ? " is-from-icon" : "");
     box.setAttribute("aria-hidden", "true"); // 꾸밈 연출(3초 뒤 저절로 사라짐)
     box.innerHTML =
-      '<div class="sointro__sky"></div><div class="sointro__mist"></div>' +
+      '<div class="sointro__sky"></div><div class="sointro__mist"></div>' + (fromIcon ? '<div class="sointro__icon"></div>' : "") +
       '<div class="sointro__stage"><svg class="sointro__seal" viewBox="0 0 300 300" aria-hidden="true">' +
       '<defs><radialGradient id="soiGlow"><stop offset="0" stop-color="#fff6dc"/><stop offset="0.35" stop-color="#f3d58e" stop-opacity="0.85"/><stop offset="1" stop-color="#f3d58e" stop-opacity="0"/></radialGradient></defs>' +
       '<g class="sointro__ticks">' + ticks + "</g>" +
@@ -59,6 +65,14 @@
       '<div class="sointro__words"><small>' + esc(T.eyebrow) + '</small><b class="sointro__name">' + name + "</b><p>" + esc(T.line) + "</p></div>" +
       '<div class="sointro__flood"></div>';
     document.body.append(box);
+    if (fromIcon) {
+      // 시스템 첫 화면의 아이콘 고리(지름 ≈ 240px × 0.57)와 같은 크기·화면 가운데에서 출발해 제자리로 펼쳐진다
+      var stage = box.querySelector(".sointro__stage"), r0 = stage.getBoundingClientRect();
+      var ringD = r0.width * (2 * R) / 300;
+      stage.style.setProperty("--fs", ((240 * 0.57) / ringD).toFixed(4));
+      stage.style.setProperty("--fx", (window.innerWidth / 2 - (r0.left + r0.width / 2)).toFixed(1) + "px");
+      stage.style.setProperty("--fy", (window.innerHeight / 2 - (r0.top + r0.height / 2)).toFixed(1) + "px");
+    }
     var timers = [];
     var go = function () {
       if (box.classList.contains("is-go")) return;
@@ -69,7 +83,7 @@
     };
     box.addEventListener("click", go);
     requestAnimationFrame(function () { box.classList.add("is-on"); });
-    timers.push(setTimeout(go, calm ? 1100 : 3100));
+    timers.push(setTimeout(go, calm ? 1100 : fromIcon ? 3500 : 3100));
     clearTimeout(bail);
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });

@@ -93,6 +93,20 @@
   }
   pushCard();
 
+  // ── (2026-11-17 운영자) 웹으로 들어왔을 때 위 띠에 「앱 설치」 단추를 늘 둔다 → 설치 페이지. 홈 화면 앱·설치 페이지에서는 두지 않는다
+  const GET = C.get;
+  if (GET && !standalone && page !== C.install) {
+    const spot = document.querySelector(".gtop__inner .dust-badge, .gtop__inner [data-js=dust-slot]") || document.querySelector(".topbar__end");
+    if (spot) {
+      const a = document.createElement("a");
+      a.className = "pwa-get";
+      a.href = C.install;
+      a.setAttribute("aria-label", GET.label);
+      a.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>${escP(GET.text)}</span>`;
+      if (spot.classList.contains("topbar__end")) spot.prepend(a); else spot.before(a);
+    }
+  }
+
   const A = C.ask;
   if (standalone || !A || location.pathname.replace(/\/+$/, "/") === C.install) return;
   let asked = "";
