@@ -214,3 +214,10 @@ test("(2026-11-16 맞춤 1단계) 다른 방 결과 번호(rs)·앞서 물었던
   const plain = Prompt.build(Talk.parse(JSON.stringify({ room: "saju", q: "x" })), "claude-opus-5-5").system[1].text;
   assert.ok(!/다른 방에서 받은 결과/.test(plain) && !/앞서 물었던/.test(plain));
 });
+
+// (2026-11-17 운영자) 위기 단어가 잘못 걸리지 않게: 관용 표현·과장·다른 뜻은 위기가 아니다 / 분명한 말은 그대로 위기
+test("위기 신호: 잘못 걸리던 말은 거르고, 분명한 말은 그대로", () => {
+  const P = require(path.join(ROOT, "netlify", "lib", "talk-prompt.js"));
+  for (const q of ["유서 깊은 집안이라 부담돼요", "어제 축구에서 자살골 넣었어요", "버스에서 뛰어내렸다가 넘어졌어요", "발표 망쳐서 창피해 죽고 싶었어요", "그 사람이 보고 싶어 죽고 싶을 만큼 설레요", "요즘 너무 지치고 우울해요", "헤어지고 나서 하루하루가 괴로워요", "일이 하나도 안 풀려요"]) assert.strictEqual(P.crisis(q), false, q);
+  for (const q of ["요즘 정말 죽고 싶어요", "자해를 하게 돼요", "그만 살고 싶어요", "유서를 써 놨어요", "옥상에서 뛰어내리고 싶어요", "사라지고 싶어요 진짜로", "삶을 끝내고 싶다는 생각이 들어요"]) assert.strictEqual(P.crisis(q), true, q);
+});
