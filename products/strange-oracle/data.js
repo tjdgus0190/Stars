@@ -38,7 +38,7 @@ window.TEXT = {
   // analytics.ga4: GA4 측정 ID "G-XXXXXXXXXX". 넣기 전에 GA4 데이터 스트림의 '향상된 측정'을 반드시 끈다(12-5)
   analytics: { ga4: "G-4J5SVQV3B1" },
   // (2026-11-17 운영자) 검색 사이트 소유 확인 값(공개되는 값). 처음 화면·안내 페이지는 gen-guide.js가, 입구는 index.html에 같은 값을 적는다
-  verify: { naver: "f0c2ad6dedff4b5522643f095eba6ac8384c3b78" },
+  verify: { naver: "f0c2ad6dedff4b5522643f095eba6ac8384c3b78", google: "hsKDDbteX3cjiqyISCMlguNfTjPlOyiN2JzWyuj5e64" }, // (2026-11-18) google: 구글 서치 콘솔
 
   // ── (2026-11-04 운영자 결정, 시험판) 2027 신년운세 탭 「새해의 회랑」. 나의 이야기와 따로 떨어진 탭: 듣고 싶은 방을 골라 들어갔다 나온다(다음 방으로 잇지 않음).
   // mode: "off" = 꺼짐(하단 탭·새해 화면·app-ny.js·data-ny.js·style-ny.css 없음). "live" = 열림(2026-11-14~). "test" = 시험 페이지에서만(mock-server --mode test가 응답할 때만 바꾼다).
