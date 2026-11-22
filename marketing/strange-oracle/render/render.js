@@ -56,6 +56,12 @@ const which = args.find((a) => !a.startsWith("--") && !/^\d+$/.test(a)) || "all"
 const checkOnly = args.includes("--check");
 const PORT = Number(args[args.indexOf("--port") + 1]) || 8790;
 if (PORT === 8787 || PORT === 8788) throw new Error("포트 8787·8788은 쓰지 않는다 (8790 권장)");
+// (2026-11-22) 자동 게시: scenes/legend/ep/<편>.js가 있으면 「ep-<편>」을 따로 적지 않아도 렌더한다(길이는 그 파일의 T.dur)
+{
+  const m = /^ep-([a-z0-9-]+)$/.exec(which);
+  const f = m && path.join(__dirname, "..", "scenes", "legend", "ep", `${m[1]}.js`);
+  if (m && !ADS[which] && fs.existsSync(f)) { const c = require(f); ADS[which] = { scene: `legend-ep.html?ep=${m[1]}`, out: `legend-ep-${m[1]}-ko.mp4`, frames: Math.round(c.T.dur * FPS) }; }
+}
 const list = which === "all" ? Object.keys(ADS) : [which];
 if (!list.every((k) => ADS[k])) throw new Error(`알 수 없는 안: ${which} (ad1 | ad2 | ad3 | ad1x | ad2x | ad3x | ad4x | ad5x | ad6x | reel-<방> | all)`);
 

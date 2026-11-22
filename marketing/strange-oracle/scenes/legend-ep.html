@@ -39,9 +39,9 @@
   <div class="safe-guide" id="safe"><i></i><i></i><i></i><i></i></div>
 </main>
 <script>
-  // 편 설정을 먼저 불러온 뒤 조립(주소의 ?ep= 값은 영문 소문자만 받는다)
+  // 편 설정을 먼저 불러온 뒤 조립(주소의 ?ep= 값은 영문 소문자·숫자·하이픈만 받는다 — 2026-11-22 자동 게시 편 이름 p20261123-rune)
   (function () {
-    const ep = (new URLSearchParams(location.search).get("ep") || "").replace(/[^a-z]/g, "");
+    const ep = (new URLSearchParams(location.search).get("ep") || "").replace(/[^a-z0-9-]/g, "");
     const st = document.querySelector(".stage");
     const load = (src) => new Promise((ok) => { const s = document.createElement("script"); s.src = src; s.onload = ok; document.body.append(s); });
     window.__ready3d = load(`legend/ep/${ep}.js`).then(() => {

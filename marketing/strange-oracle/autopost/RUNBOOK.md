@@ -1,0 +1,114 @@
+# 인스타그램 자동 게시 작업서 (운영자 결정 2026-11-22)
+
+매일 이 작업서대로 그날 게시물 하나를 만들어 **저녁 7시(한국 시각)**에 낯선 점술관 인스타그램(@strange_oracle_off)에 올린다.
+운영자 결정: 「바로 자동」 — 운영자 확인 없이 올린다. 그래서 아래 **멈춤 조건**을 반드시 지킨다.
+CLAUDE.md(운영 규칙)가 이 작업서보다 앞선다. 작업 전에 CLAUDE.md 8장(콘텐츠 규칙)을 다시 읽는다.
+
+## 0. 요일과 형식 (한국 시각 기준)
+
+| 요일 | 형식 | 도구 |
+|---|---|---|
+| 월 · 수 · 금 · 일 | **릴스** (세로 영상 40~55초, 소리 포함) | 전설 릴스 공용 틀 `scenes/legend/ep/<편>.js` → `render/render.js` → `render/sound-legend.js` |
+| 화 · 목 · 토 | **캐러셀** (1080×1350 JPEG 5~8장) | `instagram/tales/<편>.js` → `instagram/render-tale.js` |
+
+## 1. 무엇을 만드나 — 기준
+
+- **각 점술의 재밌는 역사적 사실이나 전설.** 재미가 1순위이고, 내용이 자극적이어도 된다(배신, 독, 저주, 전쟁, 금기, 기묘한 예언이 맞아떨어진 일 등).
+- **일곱 방을 돌아가며 다룬다**: 만신(사주·한국 무속) · 오검(켈트) · 베다(인도 점성술) · 데칸(이집트) · 촐킨(마야) · 룬(북유럽) · 시빌라(그리스·로마 신탁).
+  - 최근 게시물과 같은 방은 연달아 하지 않는다.
+  - 최근 30개와 같은 이야기는 다시 하지 않는다.
+- **첫 3초(첫 장)에 충격적인 한 줄로 시작한다.** 예: 「독이 든 술잔에 룬을 새기자 — 잔이 산산조각 났다」
+- **사실과 전설을 섞지 않는다.**
+  - 기록이 있는 일은 「기록에 따르면」, 전설은 「전설에 따르면」으로 쓴다.
+  - 근거(사서·사가·경전 이름과 장)를 작업 메모에 남긴다.
+  - 확인할 수 없는 「사실」은 지어내지 않는다. 모르면 다른 이야기를 고른다.
+- 마지막은 **댓글을 부르는 물음**으로 맺는다. 예: 「당신이라면 그 잔을 마셨을까요?」 ① / ② 고르기
+- 끝에 **그 방으로 이어지는 한 줄**을 넣는다: 「프로필 링크에서 ○번째 문」
+
+## 2. 넘지 않는 선 (자극적이어도 이건 안 된다)
+
+- **CLAUDE.md 8장 금지**를 그대로 따른다.
+  - 보는 사람에 대한 건강·질병·죽음·사고 예언
+  - 투자·도박·로또 권유
+  - 특정 띠·유형·성별·지역 비하
+  - 불안을 자극해 행동을 강요하는 말
+  - 「100% 적중」 같은 과장
+  - 공식 검사 흉내
+- **실존 인물**: 현대 인물(20세기 이후)·살아 있는 사람·연예인은 다루지 않는다. 수백 년 전 역사·전설 속 인물(왕, 영웅, 무녀)은 이야기 속 인물로만 다룬다. 이 해석은 운영자 확인 대기 중이다.
+- 잔혹한 장면을 그림·글로 자세히 묘사하지 않는다(인스타그램 커뮤니티 가이드라인). 죽음·처형은 「그는 돌아오지 못했다」 수준으로만 쓴다.
+- 자해·자살을 이야기 소재로 쓰지 않는다.
+- 게시 문구와 영상 안에 「AI」라는 말을 쓰지 않는다(운영자 결정 2026-11-16).
+- 가격·「무료」 범위는 지금 서비스와 같을 때만 쓴다. 쓰지 않아도 된다.
+
+## 3. 그림 (저작권)
+
+쓸 수 있는 순서는 아래와 같다.
+1. 저장소의 그림 창고:
+   - `marketing/strange-oracle/scenes/legend/art/`: 공개 명화. 출처는 `marketing/strange-oracle/CREDITS.md`
+   - `marketing/strange-oracle/autopost/art/`: 운영자가 올린 그림. 미드저니 등 생성 그림이 있으면 그 게시물은 운영자가 앱에서 AI 표시를 해야 하므로 **쓰지 않는다**. 운영자가 허락한 파일만 쓴다
+2. **저작권이 없는 명화를 새로 받아 쓴다**:
+   - 메트로폴리탄 미술관 Open Access(CC0), 클리블랜드 미술관 Open Access(CC0), 시카고 미술관(CC0), 위키미디어 공용의 Public Domain 표시 파일만 쓴다.
+   - 요청에는 일반 이름 User-Agent(예: `StrangeOracleArtBot/1.0`)를 붙인다. 개인 정보는 넣지 않는다.
+   - 받은 그림은 긴 변 2200px 이하, 600KB 이하 JPEG로 줄여 `scenes/legend/art/<방>-<내용>.jpg`에 둔다.
+   - `marketing/strange-oracle/CREDITS.md`에 작품명·작가·소장처·라이선스·주소 한 줄을 더한다.
+3. 직접 그린 SVG 소품(뿔잔, 돌, 두루마리 등): 전설 릴스 틀의 `prop`.
+
+- 출처·라이선스를 확인하지 못한 그림, 사진작가의 현대 사진, 영화·게임 장면은 쓰지 않는다.
+
+## 4. 만드는 순서
+
+> 저장소 루트에서. 헤드리스 크롬은 `EDGE_PATH=tools/strange-oracle/chromium.sh`.
+
+1. **최근 게시 확인**: `node tools/strange-oracle/ig-publish.js recent 30` → 최근 이야기와 방을 본다.
+   - 토큰 오류(code 190)가 나면 **멈추고** 운영자에게 알린다. 「인스타 토큰을 새로 받아 환경 설정 Network secret에 바꿔 넣어 주세요」.
+2. **주제 고르기**: `autopost/topics.md`에서 아직 안 한 것을 고른다. 없으면 같은 기준으로 새로 찾는다(웹 검색으로 근거 확인).
+3. **편 이름**: `p<YYYYMMDD>-<방>`. 예: `p20261123-rune`.
+4. **만들기**
+   - **캐러셀**:
+     1. `instagram/tales/<편>.js`를 쓴다. 모양은 `instagram/tales/sample-rune.js`처럼, 장면 3~6장으로 한다.
+     2. 장면 글은 3~4줄, 한 줄 14자 안팎. 강조는 `<em>`(금빛)과 `<span class="red">`(붉은 글)만 쓴다.
+     3. 렌더: `EDGE_PATH=tools/strange-oracle/chromium.sh node --experimental-websocket marketing/strange-oracle/instagram/render-tale.js <편> marketing/strange-oracle/autopost/out/<편>`
+     4. 「글이 너무 길어」 경고가 나오면 줄여서 다시 찍는다.
+   - **릴스**:
+     1. `scenes/legend/ep/<편>.js`를 쓴다. 같은 폴더의 `rune.js`·`decan.js` 등을 본보기로, 같은 키(T·caps·shots·gold·red·leaks·white·redHits·prop·ask·end·sound)를 쓴다. 길이 `T.dur`는 40~55초이고, 첫 자막(hook)은 0초에 바로 뜬다.
+     2. 렌더: `EDGE_PATH=tools/strange-oracle/chromium.sh node --experimental-websocket marketing/strange-oracle/render/render.js ep-<편> --port 8790`
+     3. 소리: `node marketing/strange-oracle/render/sound-legend.js <편>` → `marketing/strange-oracle/out/legend-ep-<편>-ko-sound.mp4`
+     4. 게시용 복사: `marketing/strange-oracle/autopost/out/<편>/reel.mp4`. 20MB를 넘으면 `ffmpeg -crf 26`으로 다시 인코딩한다(jsDelivr 한도). 표지는 `ffmpeg -ss 1.2 -i reel.mp4 -frames:v 1 -q:v 3 cover.jpg`.
+5. **눈으로 확인**: 캐러셀은 모든 장, 릴스는 2·10·20·30·마지막 초의 프레임을 이미지로 열어 본다.
+   - 확인할 것: 글이 잘리지 않는지, 글자가 깨지지 않는지(네모 글자), 그림이 비지 않는지, 오타.
+   - 하나라도 이상하면 고치고 다시 찍는다.
+6. **게시 문구**: `autopost/out/<편>/caption.txt`
+   - 첫 줄은 이미지의 hook과 같은 결의 한 줄이다.
+   - 2~5줄은 줄거리 미끼다. 결말은 숨긴다.
+   - 그다음 물음 한 줄(댓글 유도), 「프로필 링크에서 ○번째 문 · 낯선 점술관」.
+   - 해시태그는 **5개 이하**: `#낯선점술관` + 방(`#사주` `#오검` `#베다점성술` `#이집트신화` `#마야달력` `#룬` `#그리스신화` 중 하나) + 이야기 관련 2~3개.
+7. **올리기 준비**:
+   1. `git add`(편 파일, 새 그림, CREDITS, autopost/out/<편>/) → 커밋 → **이 세션의 작업 브랜치로 push**.
+   2. 커밋 값(SHA)으로:
+      - 캐러셀: `node tools/strange-oracle/ig-publish.js carousel <SHA> <caption.txt> <사진들…>`
+      - 릴스: `node tools/strange-oracle/ig-publish.js reel <SHA> <caption.txt> <reel.mp4> <cover.jpg>`
+   3. 나온 **컨테이너 id**를 기억한다(24시간 유효).
+8. **저녁 7시에 게시**: 한국 시각 18:59 전이면 그때까지 기다린 뒤 `node tools/strange-oracle/ig-publish.js publish <컨테이너 id>`.
+   - 기다리는 방법: `send_later` 도구가 있으면 19:00(Asia/Seoul)에 「컨테이너 <id> 게시」 메시지를 남긴다. 없으면 백그라운드 명령 `until [ "$(TZ=Asia/Seoul date +%H%M)" -ge 1859 ]; do sleep 30; done`.
+   - 이미 19:00이 지났으면 바로 올린다(밤 10시까지). 그보다 늦으면 올리지 않고 운영자에게 알린다.
+9. **보고**(마지막 메시지):
+   - 날짜·형식·방·이야기 제목·게시 주소
+   - 새로 쓴 그림 출처
+   - 근거(사서·전설 이름)
+   - 실패했다면 이유
+
+## 5. 멈춤 조건 (확인 없이 올리는 대신 꼭 지킨다)
+
+다음이면 **올리지 않고** 보고만 한다.
+- 2장의 선을 넘었는지 애매할 때
+- 그림 출처·라이선스를 확인하지 못했을 때
+- 렌더 결과가 깨졌을 때
+- API 오류가 두 번 이어질 때
+
+같은 날 두 번 올리지 않는다. `recent`로 오늘(한국 날짜) 이미 올라간 게 있으면 멈춘다.
+
+## 6. 운영자가 할 일
+
+- 토큰 갱신: 「Instagram 로그인」 방식 토큰은 60일이 지나면 만료된다. 만료되면 1단계에서 멈추고 알린다.
+- 새 그림을 창고에 넣고 싶으면 `autopost/art/`에 올린다. AI 생성 그림은 자동 게시에서 쓰지 않는다.
+- 주제를 더하고 싶으면 `autopost/topics.md`에 한 줄 적는다.

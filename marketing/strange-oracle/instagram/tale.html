@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>낯선 점술관 · 전설 캐러셀</title>
+  <!-- (2026-11-22) 자동 게시용 그림 이야기 캐러셀. tale.html?id=<편>&p=<쪽>, 판 1080x1350. 내용은 tales/<편>.js(window.TALE), 그리기는 tale.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/400.css" integrity="sha384-UmN2JKCN3ZzGKhUCbF72zmj7SCKSsgzpBPRTuYCs90jUI3LUOfltMKpFi9ZWIfoL" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang@5.3.0/700.css" integrity="sha384-EIZic2kT4Iyqg6Rn2tm4B7Ql9xDJWopYmx3ry1RafjC/gfDHItTLBMXp6jrmkxla" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-kr@5.3.1/900.css" integrity="sha384-ooIXEUf5zNTP6iR7nXHfVaimYiliyT2VNoP9xlOV2oDtqPxNA/KjJt+5FWUwFxQd" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.3.0/700.css" integrity="sha384-O/oLJBLGGldMs7HxAYRnSN50LYc4P4P3qiJbqSV358VWDpuJKiErXj9iWy8+R3LZ" crossorigin="anonymous" />
+  <link rel="stylesheet" href="tale.css" />
+</head>
+<body>
+  <main class="tale" data-js="tale"></main>
+  <script>
+    (function () {
+      var id = (new URLSearchParams(location.search).get("id") || "").replace(/[^a-z0-9-]/g, "");
+      document.write('<script src="tales/' + id + '.js"><\/script><script src="tale.js"><\/script>');
+    })();
+  </script>
+</body>
+</html>

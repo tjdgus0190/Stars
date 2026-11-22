@@ -1,0 +1,3 @@
+#!/bin/sh
+# 리눅스 클라우드 세션용 헤드리스 크롬 (cdp.js의 EDGE_PATH로 쓴다). 예: EDGE_PATH=tools/strange-oracle/chromium.sh node ...
+exec /opt/pw-browsers/chromium --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox "$@"
