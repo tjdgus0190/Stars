@@ -9,6 +9,7 @@
 //   node tools/strange-oracle/ig-publish.js carousel <커밋> <캡션파일> <사진.jpg> <사진.jpg> ...   → 컨테이너 id(아직 게시 안 함)
 //   node tools/strange-oracle/ig-publish.js reel <커밋> <캡션파일> <영상.mp4> [표지.jpg]          → 처리 끝날 때까지 기다린 컨테이너 id
 //   node tools/strange-oracle/ig-publish.js publish <컨테이너 id>                                  → 게시물 id·주소
+//   node tools/strange-oracle/ig-publish.js insights [개수]                        → 최근 게시물별 조회·도달·저장·공유·좋아요·댓글(성과로 배우기)
 //   node tools/strange-oracle/ig-publish.js check-url <커밋> <경로>                                  → jsDelivr가 그 파일을 내주는지(형식·크기)
 // 결과는 마지막 줄에 JSON 한 줄. 실패하면 종료 코드 1과 {"error": ...}
 "use strict";
@@ -71,6 +72,19 @@ const me = () => ME || (ME = curl("GET", `${API}/me?fields=user_id,username`));
     const r = curl("GET", `${API}/me/media?fields=id,caption,timestamp,permalink,media_type&limit=${n}`);
     return out({ items: (r.data || []).map((x) => ({ at: x.timestamp, type: x.media_type, first: String(x.caption || "").split("\n")[0].slice(0, 80), tag: (/\[([a-z]+-[0-9a-z-]+)\]/.exec(x.caption || "") || [])[1] || null, url: x.permalink })) });
   }
+  // (2026-11-22) 성과: 최근 게시물마다 조회·도달·저장·공유(권한 instagram_business_manage_insights가 있어야 함, 없으면 그 칸만 null)
+  if (cmd === "insights") {
+    const n = Math.min(30, Number(a[0]) || 15);
+    const r = curl("GET", `${API}/me/media?fields=id,caption,timestamp,permalink,media_type,like_count,comments_count&limit=${n}`);
+    const rows = [];
+    for (const x of r.data || []) {
+      let m = {};
+      const q = spawnSync("curl", ["-sS", "--max-time", "60", `${API}/${x.id}/insights?metric=views,reach,saved,shares,total_interactions`], { encoding: "utf8" });
+      try { const j = JSON.parse(q.stdout); (j.data || []).forEach((d) => { m[d.name] = d.values && d.values[0] ? d.values[0].value : d.total_value ? d.total_value.value : null; }); if (j.error) m = { error: j.error.message.slice(0, 80) }; } catch (e) { m = {}; }
+      rows.push({ at: x.timestamp, type: x.media_type, first: String(x.caption || "").split("\n")[0].slice(0, 80), likes: x.like_count, comments: x.comments_count, ...m, url: x.permalink });
+    }
+    return out({ items: rows });
+  }
   if (cmd === "check-url") { const u = cdn(a[0], a[1]); return out(Object.assign({ url: u }, head(u))); }
   if (cmd === "carousel") {
     const [sha, capFile, ...imgs] = a;
@@ -113,5 +127,5 @@ const me = () => ME || (ME = curl("GET", `${API}/me?fields=user_id,username`));
     const m = curl("GET", `${API}/${p.id}?fields=permalink,timestamp`);
     return out({ media: p.id, url: m.permalink, at: m.timestamp });
   }
-  fail("명령: whoami | recent | carousel | reel | publish | check-url");
+  fail("명령: whoami | recent | insights | carousel | reel | publish | check-url");
 })();
