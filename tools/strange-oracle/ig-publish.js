@@ -29,7 +29,7 @@ const out = (o) => { console.log(JSON.stringify(o)); };
 const fail = (msg, extra) => { out(Object.assign({ error: msg }, extra || {})); process.exit(1); };
 
 function curl(method, url, fields) {
-  const args = ["-sS", "--max-time", "120", "-X", method, url];
+  const args = ["-sS", "-g", "--max-time", "120", "-X", method, url]; // -g: 주소의 {} [] 를 curl 묶음 기호로 읽지 않게
   for (const [k, v] of Object.entries(fields || {})) if (v != null) args.push("--form-string", `${k}=${v}`);
   const r = spawnSync("curl", args, { encoding: "utf8" });
   if (r.status !== 0) fail("curl 실패", { stderr: String(r.stderr).slice(0, 300) });
@@ -69,7 +69,11 @@ const caption = (f) => {
 let ME = null;
 const me = () => {
   if (ME) return ME;
-  if (process.env.IG_USER_ID) return (ME = { user_id: process.env.IG_USER_ID, username: null });
+  // 인스타 비즈니스 계정 id(비밀 아님): 환경 변수 IG_USER_ID 또는 marketing/strange-oracle/autopost/config.json의 igUserId
+  let cfg = {};
+  try { cfg = JSON.parse(fs.readFileSync(path.join(ROOT, "marketing", "strange-oracle", "autopost", "config.json"), "utf8")); } catch (e) { cfg = {}; }
+  const fixed = process.env.IG_USER_ID || (/^\d{5,30}$/.test(String(cfg.igUserId || "")) ? String(cfg.igUserId) : "");
+  if (fixed) { const u = curl("GET", `${API}/${fixed}?fields=id,username`); return (ME = { user_id: u.id, username: u.username }); }
   if (!FB) return (ME = curl("GET", `${API}/me?fields=user_id,username`));
   const pages = curl("GET", `${API}/me/accounts?fields=name,instagram_business_account{id,username}&limit=50`);
   const hit = (pages.data || []).find((x) => x.instagram_business_account);
@@ -93,7 +97,7 @@ const MEDIA_OF = () => `${API}/${me().user_id}/media`;
     const rows = [];
     for (const x of r.data || []) {
       let m = {};
-      const q = spawnSync("curl", ["-sS", "--max-time", "60", `${API}/${x.id}/insights?metric=views,reach,saved,shares,total_interactions`], { encoding: "utf8" });
+      const q = spawnSync("curl", ["-sS", "-g", "--max-time", "60", `${API}/${x.id}/insights?metric=views,reach,saved,shares,total_interactions`], { encoding: "utf8" });
       try { const j = JSON.parse(q.stdout); (j.data || []).forEach((d) => { m[d.name] = d.values && d.values[0] ? d.values[0].value : d.total_value ? d.total_value.value : null; }); if (j.error) m = { error: j.error.message.slice(0, 80) }; } catch (e) { m = {}; }
       rows.push({ at: x.timestamp, type: x.media_type, first: String(x.caption || "").split("\n")[0].slice(0, 80), likes: x.like_count, comments: x.comments_count, ...m, url: x.permalink });
     }
