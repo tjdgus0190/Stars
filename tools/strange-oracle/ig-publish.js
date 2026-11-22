@@ -1,5 +1,5 @@
-// (2026-11-22 운영자) 인스타그램 자동 게시 — Instagram API(Instagram 로그인 방식, graph.instagram.com).
-// 토큰은 코드·파일·출력 어디에도 없다: 클라우드 환경의 Network secret(graph.instagram.com, Authorization: Bearer)이 요청에 붙는다.
+// (2026-11-22 운영자) 인스타그램 자동 게시 — Instagram API(페이스북 토큰 EAA… = graph.facebook.com 기본 · Instagram 로그인 토큰 IG… = IG_HOST=graph.instagram.com).
+// 토큰은 코드·파일·출력 어디에도 없다: 클라우드 환경의 Network secret(그 호스트, Authorization: Bearer)이 요청에 붙는다.
 //   그래서 요청은 프록시를 따르는 curl로 보낸다(Node 내장 fetch는 HTTPS_PROXY를 따르지 않음).
 // 사진·영상은 공개 주소여야 한다: 저장소(공개)에 올린 커밋을 jsDelivr로 연다 → https://cdn.jsdelivr.net/gh/tjdgus0190/Stars@<커밋>/<경로>
 //
@@ -18,7 +18,11 @@ const fs = require("fs");
 const path = require("path");
 
 const REPO = "tjdgus0190/Stars";
-const API = "https://graph.instagram.com" + (process.env.IG_API_VERSION ? "/" + process.env.IG_API_VERSION : "");
+// (2026-11-22) 토큰 종류에 따라 주소가 다르다: 「Instagram 로그인」 토큰(IG…) = graph.instagram.com, 페이스북·시스템 사용자 토큰(EAA…) = graph.facebook.com(기본).
+//   IG_HOST=graph.instagram.com 으로 바꿀 수 있다. Network secret도 같은 호스트에 넣어야 한다.
+const HOST = process.env.IG_HOST || "graph.facebook.com";
+const FB = HOST === "graph.facebook.com";
+const API = `https://${HOST}/${process.env.IG_API_VERSION || "v23.0"}`;
 const ROOT = path.resolve(__dirname, "..", "..");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const out = (o) => { console.log(JSON.stringify(o)); };
@@ -61,21 +65,31 @@ const caption = (f) => {
   if ((c.match(/#[^\s#]+/g) || []).length > 30) fail("해시태그가 30개를 넘음");
   return c;
 };
+// 인스타 계정 id: IG 토큰이면 /me, 페이스북 토큰이면 연결된 페이지의 인스타 비즈니스 계정(IG_USER_ID로 정할 수도 있다)
 let ME = null;
-const me = () => ME || (ME = curl("GET", `${API}/me?fields=user_id,username`));
+const me = () => {
+  if (ME) return ME;
+  if (process.env.IG_USER_ID) return (ME = { user_id: process.env.IG_USER_ID, username: null });
+  if (!FB) return (ME = curl("GET", `${API}/me?fields=user_id,username`));
+  const pages = curl("GET", `${API}/me/accounts?fields=name,instagram_business_account{id,username}&limit=50`);
+  const hit = (pages.data || []).find((x) => x.instagram_business_account);
+  if (!hit) fail("이 토큰으로 볼 수 있는 페이스북 페이지에 연결된 인스타 계정이 없음(인스타를 페이지에 연결하고, 토큰에 pages_show_list·instagram_basic 권한)", { pages: (pages.data || []).map((x) => x.name) });
+  return (ME = { user_id: hit.instagram_business_account.id, username: hit.instagram_business_account.username, page: hit.name });
+};
+const MEDIA_OF = () => `${API}/${me().user_id}/media`;
 
 (async () => {
   const [cmd, ...a] = process.argv.slice(2);
   if (cmd === "whoami") return out(me());
   if (cmd === "recent") {
     const n = Math.min(50, Number(a[0]) || 30);
-    const r = curl("GET", `${API}/me/media?fields=id,caption,timestamp,permalink,media_type&limit=${n}`);
+    const r = curl("GET", `${MEDIA_OF()}?fields=id,caption,timestamp,permalink,media_type&limit=${n}`);
     return out({ items: (r.data || []).map((x) => ({ at: x.timestamp, type: x.media_type, first: String(x.caption || "").split("\n")[0].slice(0, 80), tag: (/\[([a-z]+-[0-9a-z-]+)\]/.exec(x.caption || "") || [])[1] || null, url: x.permalink })) });
   }
   // (2026-11-22) 성과: 최근 게시물마다 조회·도달·저장·공유(권한 instagram_business_manage_insights가 있어야 함, 없으면 그 칸만 null)
   if (cmd === "insights") {
     const n = Math.min(30, Number(a[0]) || 15);
-    const r = curl("GET", `${API}/me/media?fields=id,caption,timestamp,permalink,media_type,like_count,comments_count&limit=${n}`);
+    const r = curl("GET", `${MEDIA_OF()}?fields=id,caption,timestamp,permalink,media_type,like_count,comments_count&limit=${n}`);
     const rows = [];
     for (const x of r.data || []) {
       let m = {};

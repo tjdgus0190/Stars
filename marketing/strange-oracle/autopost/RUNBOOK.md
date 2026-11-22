@@ -109,7 +109,7 @@ CLAUDE.md(운영 규칙)가 이 작업서보다 앞선다. 작업 전에 CLAUDE.
 > 저장소 루트에서. 헤드리스 크롬은 `EDGE_PATH=tools/strange-oracle/chromium.sh`.
 
 1. **최근 게시 확인**: `autopost/learn.md`(있으면)를 먼저 읽고, `node tools/strange-oracle/ig-publish.js recent 30`으로 최근 이야기·방·훅 유형을 본다. 일요일이면 「우리 성과로 배우기」도 한다.
-   - 토큰 오류(code 190)가 나면 **멈추고** 운영자에게 알린다. 「인스타 토큰을 새로 받아 환경 설정 Network secret에 바꿔 넣어 주세요」.
+   - 토큰 오류(code 190)나 연결 거절(403)이 나면 **멈추고** 운영자에게 알린다. 「인스타 토큰을 새로 받아 환경 설정 Network secret(graph.facebook.com, Authorization, Bearer)에 바꿔 넣어 주세요」. 토큰은 페이스북 쪽(EAA…)이라 주소는 graph.facebook.com이다(2026-11-22).
 2. **주제 고르기**: `autopost/topics.md`에서 아직 안 한 것을 고른다. 없으면 같은 기준으로 새로 찾는다(웹 검색으로 근거 확인).
 3. **편 이름**: `p<YYYYMMDD>-<방>`. 예: `p20261123-rune`.
 4. **만들기**
