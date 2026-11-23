@@ -75,6 +75,9 @@ const me = () => {
   const fixed = process.env.IG_USER_ID || (/^\d{5,30}$/.test(String(cfg.igUserId || "")) ? String(cfg.igUserId) : "");
   if (fixed) { const u = curl("GET", `${API}/${fixed}?fields=id,username`); return (ME = { user_id: u.id, username: u.username }); }
   if (!FB) return (ME = curl("GET", `${API}/me?fields=user_id,username`));
+  // 페이지 토큰이면 /me가 곧 그 페이지다 → 페이지에 연결된 인스타 계정
+  const self = spawnSync("curl", ["-sS", "-g", "--max-time", "60", `${API}/me?fields=name,instagram_business_account{id,username}`], { encoding: "utf8" });
+  try { const j = JSON.parse(self.stdout); if (j && j.instagram_business_account) return (ME = { user_id: j.instagram_business_account.id, username: j.instagram_business_account.username, page: j.name }); } catch (e) { /* 아래 사용자 토큰 길 */ }
   const pages = curl("GET", `${API}/me/accounts?fields=name,instagram_business_account{id,username}&limit=50`);
   const hit = (pages.data || []).find((x) => x.instagram_business_account);
   if (!hit) fail("이 토큰으로 볼 수 있는 페이스북 페이지에 연결된 인스타 계정이 없음(인스타를 페이지에 연결하고, 토큰에 pages_show_list·instagram_basic 권한)", { pages: (pages.data || []).map((x) => x.name) });
