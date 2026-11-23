@@ -8,6 +8,8 @@
 //   node tools/strange-oracle/ig-publish.js recent [개수]                          → 최근 게시물(첫 줄·시각·주소) — 같은 이야기를 다시 올리지 않으려고 본다
 //   node tools/strange-oracle/ig-publish.js carousel <커밋> <캡션파일> <사진.jpg> <사진.jpg> ...   → 컨테이너 id(아직 게시 안 함)
 //   node tools/strange-oracle/ig-publish.js reel <커밋> <캡션파일> <영상.mp4> [표지.jpg]          → 처리 끝날 때까지 기다린 컨테이너 id
+//   투표 붙이기(캐러셀·릴스, 운영자 2026-11-23): 맨 뒤에 --poll "질문|보기1|보기2[|보기3|보기4]"  (보기 2~4개, 각 1~25자)
+//     → 게시물 캡션 아래 투표(Instagram API with Facebook Login의 caption add-on, poll_attachment = {option_a..option_d}). 스토리는 안 됨.
 //   node tools/strange-oracle/ig-publish.js publish <컨테이너 id>                                  → 게시물 id·주소
 //   node tools/strange-oracle/ig-publish.js insights [개수]                        → 최근 게시물별 조회·도달·저장·공유·좋아요·댓글(성과로 배우기)
 //   node tools/strange-oracle/ig-publish.js check-url <커밋> <경로>                                  → jsDelivr가 그 파일을 내주는지(형식·크기)
@@ -22,7 +24,7 @@ const REPO = "tjdgus0190/Stars";
 //   IG_HOST=graph.instagram.com 으로 바꿀 수 있다. Network secret도 같은 호스트에 넣어야 한다.
 const HOST = process.env.IG_HOST || "graph.facebook.com";
 const FB = HOST === "graph.facebook.com";
-const API = `https://${HOST}/${process.env.IG_API_VERSION || "v23.0"}`;
+const API = `https://${HOST}/${process.env.IG_API_VERSION || "v27.0"}`;
 const ROOT = path.resolve(__dirname, "..", "..");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const out = (o) => { console.log(JSON.stringify(o)); };
@@ -85,8 +87,26 @@ const me = () => {
 };
 const MEDIA_OF = () => `${API}/${me().user_id}/media`;
 
+// --poll "질문|보기1|보기2..." → poll_attachment JSON (2026-11-23 시험: option_a~option_d, 1~25자, 질문 칸 question도 받아 줌)
+function pollOf(argv) {
+  const i = argv.findIndex((x) => x === "--poll" || x.startsWith("--poll="));
+  if (i < 0) return { rest: argv, poll: null };
+  const raw = argv[i].startsWith("--poll=") ? argv[i].slice(7) : argv[i + 1];
+  const rest = argv.filter((_, j) => j !== i && !(argv[i] === "--poll" && j === i + 1));
+  const parts = String(raw || "").split("|").map((x) => x.trim());
+  const [question, ...opts] = parts;
+  if (!FB) fail("투표는 graph.facebook.com(페이스북 로그인 토큰)에서만 된다");
+  if (opts.length < 2 || opts.length > 4) fail("투표 보기는 2~4개");
+  if (!opts.every((o) => [...o].length >= 1 && [...o].length <= 25)) fail("투표 보기는 각 1~25자");
+  if (!question || [...question].length > 80) fail("투표 질문이 비었거나 너무 김");
+  const poll = { question };
+  opts.forEach((o, k) => { poll["option_" + "abcd"[k]] = o; });
+  return { rest, poll: JSON.stringify(poll) };
+}
+
 (async () => {
-  const [cmd, ...a] = process.argv.slice(2);
+  const { rest: argv, poll } = pollOf(process.argv.slice(2));
+  const [cmd, ...a] = argv;
   if (cmd === "whoami") return out(me());
   if (cmd === "recent") {
     const n = Math.min(50, Number(a[0]) || 30);
@@ -119,8 +139,8 @@ const MEDIA_OF = () => `${API}/${me().user_id}/media`;
       await ready(u, "image/jpeg");
       kids.push(curl("POST", `${API}/${id}/media`, { image_url: u, is_carousel_item: "true" }).id);
     }
-    const c = curl("POST", `${API}/${id}/media`, { media_type: "CAROUSEL", children: kids.join(","), caption: cap });
-    return out({ container: c.id, children: kids.length });
+    const c = curl("POST", `${API}/${id}/media`, { media_type: "CAROUSEL", children: kids.join(","), caption: cap, poll_attachment: poll });
+    return out({ container: c.id, children: kids.length, poll: !!poll });
   }
   if (cmd === "reel") {
     const [sha, capFile, video, cover] = a;
@@ -129,12 +149,12 @@ const MEDIA_OF = () => `${API}/${me().user_id}/media`;
     const id = me().user_id || me().id;
     const vu = cdn(sha, video);
     await ready(vu, "video/mp4");
-    const fields = { media_type: "REELS", video_url: vu, caption: cap, share_to_feed: "true" };
+    const fields = { media_type: "REELS", video_url: vu, caption: cap, share_to_feed: "true", poll_attachment: poll };
     if (cover) { const cu = cdn(sha, cover); await ready(cu, "image/jpeg"); fields.cover_url = cu; }
     const c = curl("POST", `${API}/${id}/media`, fields);
     for (let i = 0; i < 60; i++) { // 영상 처리: 최대 약 10분
       const s = curl("GET", `${API}/${c.id}?fields=status_code,status`);
-      if (s.status_code === "FINISHED") return out({ container: c.id });
+      if (s.status_code === "FINISHED") return out({ container: c.id, poll: !!poll });
       if (s.status_code === "ERROR" || s.status_code === "EXPIRED") fail("영상 처리 실패", { status: s.status });
       await sleep(10000);
     }
