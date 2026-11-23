@@ -57,6 +57,19 @@ a { color: var(--gold); }
 .grelated { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
 .grelated a { display: block; padding: 12px 16px; border-radius: 12px; text-decoration: none; color: var(--c-text-strong); background: oklch(0.18 0.04 285 / 0.7); border: 1px solid oklch(0.38 0.04 285 / 0.45); }
 .grelated small { display: block; margin-top: 2px; color: var(--c-text-faint); font-size: 0.75rem; }
+/* (2026-11-23) 2027 띠별 운세: 열두 띠 바로가기 · 나이별 · 달별 · 해 볼 것 */
+.gddi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.gddi a { display: block; padding: 10px 4px; border-radius: 12px; text-align: center; text-decoration: none; color: var(--c-text-strong); font-size: var(--fs-sm); background: oklch(0.18 0.04 285 / 0.7); border: 1px solid oklch(0.38 0.04 285 / 0.45); }
+.gddi a[aria-current="page"] { border-color: var(--gold); color: var(--gold); }
+.gddi small { display: block; margin-top: 2px; color: var(--c-text-faint); font-size: 0.7rem; }
+.gyears, .gmonths { display: grid; gap: 8px; margin: 12px 0 8px; padding: 0; list-style: none; }
+.gyears li, .gmonths li { padding: 12px 14px; border-radius: 14px; background: oklch(0.19 0.04 285 / 0.75); border: 1px solid oklch(0.38 0.04 285 / 0.5); }
+.gyears b, .gmonths b { display: block; color: var(--gold); font-size: var(--fs-md); }
+.gmonths small { display: block; margin-top: 2px; color: var(--c-text-faint); font-size: 0.75rem; }
+.gyears span, .gmonths span { display: block; margin-top: 4px; font-size: var(--fs-sm); line-height: 1.6; color: var(--c-text-muted); }
+.gmonths-head { margin: 18px 0 0; font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--gold-dim); }
+.gadvice { margin: 12px 0 0; padding-left: 1.4em; line-height: 1.7; }
+.gadvice li { margin: 4px 0; }
 .gfoot { margin-top: 48px; padding-top: 18px; border-top: 1px solid oklch(0.38 0.04 285 / 0.45); font-size: 0.75rem; color: var(--c-text-faint); line-height: 1.7; }
 .gfoot a { color: var(--c-text-muted); margin-right: 12px; }
 

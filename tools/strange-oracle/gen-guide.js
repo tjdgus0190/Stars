@@ -56,6 +56,7 @@ function build() {
   const { DECANS } = load("data-decans.js");
   const { TZOLKIN_SIGNS } = load("data-tzolkin.js");
   const { LEGENDS: L } = load("data-legends.js");
+  const { NY_DDI: Y } = load("data-ny-ddi.js"); // (2026-11-23) 2027 띠별 운세 검색 페이지
   const ORIGIN = new URL(TEXT.site.url).origin;
   const GA4 = (TEXT.analytics && TEXT.analytics.ga4) || "";
 const NAVER_VERIFY = (TEXT.verify && /^[0-9a-f]{20,64}$/.test(TEXT.verify.naver || "") && TEXT.verify.naver) || ""; // (2026-11-17) 네이버 서치어드바이저 소유 확인
@@ -84,7 +85,7 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
   };
   const sections = (list) => (list || []).map((s) => `<section><h2>${esc(s.head)}</h2>${s.lead ? `<p class="glead">${esc(s.lead)}</p>` : ""}${s.table ? table(s.table) : ""}${(s.body || []).map((p) => `<p>${esc(p)}</p>`).join("")}</section>`).join("\n");
   const faq = (list) => `<section><h2>${esc(G.ui.faqHead)}</h2><div class="gfaq">${list.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("")}</div></section>`;
-  const related = (names) => `<section><h2>${esc(G.ui.relatedHead)}</h2><ul class="grelated">${names.map((n) => { const href = hrefOf(n), it = navItem(href) || entry(n); return `<li><a href="${href}">${esc(it.label || n)}${it.note ? `<small>${esc(it.note)}</small>` : ""}</a></li>`; }).join("")}</ul></section>`;
+  const related = (names) => `<section><h2>${esc(G.ui.relatedHead)}</h2><ul class="grelated">${names.map((n) => { const href = hrefOf(n), it = navItem(href) || entry(n); return `<li><a href="${href}">${esc(it.label || it.h1 || n)}${it.note ? `<small>${esc(it.note)}</small>` : ""}</a></li>`; }).join("")}</ul></section>`;
   const foot = () => `<footer class="gfoot"><p class="gnote" data-js="cookie-line" hidden>${esc(TEXT.privacy.cookieLine)}</p><p><a href="${PB}legal/terms.html">${esc(TEXT.legal.links.terms)}</a><a href="${PB}legal/privacy.html">${esc(TEXT.legal.links.privacy)}</a></p><p>${esc(G.ui.footer)}</p></footer>`;
   const ldFaq = (list) => ({ "@type": "FAQPage", mainEntity: list.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) });
 
@@ -105,6 +106,50 @@ ${N.groups.map((g) => `  <nav class="sidenav__group" aria-label="${esc(g.head)}"
     return `<form class="gform" data-js="tool-form" novalidate autocomplete="off">${cal}${dateRow(F)}${timeRow(F)}${F.zone ? `<p class="gnote">${esc(F.zone)}</p>` : ""}<p class="gnote">${esc(G.ui.privacyNote)}</p><p class="gerror" data-js="tool-error" role="alert" hidden></p><button class="gbtn" type="submit">${esc(F.submit)}</button></form>
 <section class="gresult" data-js="tool-result" aria-live="polite" hidden></section>`;
   };
+
+  // (2026-11-23) 2027 띠별 운세 — 달별 흐름은 띠 지지와 그달 지지의 합(육합·삼합)·충으로 계산
+  const fillY = (t, o) => String(t).replace(/\{(\w+)\}/g, (_, k) => (o[k] != null ? o[k] : ""));
+  const ddiMonths = (b) => {
+    const good = [], slow = [];
+    for (const m of Y.ui.months) {
+      if ((b + m.br) % 12 === 1) good.push([m, Y.ui.goodWhy.liuhe]);
+      else if (b !== m.br && b % 4 === m.br % 4) good.push([m, Y.ui.goodWhy.sanhe]);
+      if ((b + 6) % 12 === m.br) slow.push([m, Y.ui.slowWhy]);
+    }
+    if (!good.length || slow.length !== 1) throw new Error("띠 달 계산 이상: " + b);
+    const li = ([m, why]) => `<li><b>${esc(m.label)}</b><small>${esc(m.name)}</small><span>${esc(why)}</span></li>`;
+    return `<h3 class="gmonths-head">${esc(Y.ui.goodMonths)}</h3><ul class="gmonths">${good.map(li).join("")}</ul><h3 class="gmonths-head">${esc(Y.ui.slowMonth)}</h3><ul class="gmonths">${slow.map(li).join("")}</ul>`;
+  };
+  const ddiChips = (current) => `<ul class="gddi">${Object.entries(Y.list).map(([k, x]) => `<li><a href="${x.path}"${k === current ? ' aria-current="page"' : ""}>${esc(x.name)}<small>${esc(x.han)}</small></a></li>`).join("")}</ul>`;
+  const ddiHub = () => `<section><h2>${esc(Y.ui.hubHead)}</h2><p class="glead">${esc(Y.ui.hubLead)}</p>${ddiChips("")}</section>`;
+  const ddiBody = (name, d) => {
+    const x = Y.list[name], o = { name: x.name };
+    return `<p class="geyebrow">${esc(fillY(Y.ui.eyebrow, o))}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(x.theme)}</p>
+${x.summary.map((p) => `<p>${esc(p)}</p>`).join("\n")}
+<section><h2>${esc(fillY(Y.ui.yearsHead, o))}</h2><ul class="gyears">${x.years.map((y) => `<li><b>${esc(fillY(Y.ui.yearItem, { y, age: 2027 - y }))}</b><span>${esc(x.cohorts[y])}</span></li>`).join("")}</ul></section>
+<section><h2>${esc(Y.ui.workHead)}</h2><p>${esc(x.work)}</p></section>
+<section><h2>${esc(Y.ui.moneyHead)}</h2><p>${esc(x.money)}</p></section>
+<section><h2>${esc(Y.ui.loveHead)}</h2><p>${esc(x.love)}</p></section>
+<section><h2>${esc(Y.ui.conditionHead)}</h2><p>${esc(x.condition)}</p></section>
+<section><h2>${esc(fillY(Y.ui.monthsHead, o))}</h2><p class="glead">${esc(Y.ui.monthsLead)}</p>${ddiMonths(x.br)}</section>
+<section><h2>${esc(Y.ui.adviceHead)}</h2><ol class="gadvice">${x.advice.map((a) => `<li>${esc(a)}</li>`).join("")}</ol></section>
+<section><h2>${esc(Y.ui.howHead)}</h2>${Y.ui.how.map((p) => `<p>${esc(p)}</p>`).join("")}</section>
+${faq(d.faq)}
+<div class="gcta"><h2>${esc(Y.ui.cta.head)}</h2><p>${esc(Y.ui.cta.body)}</p><a class="gbtn" href="${Y.ui.cta.href}" data-js="to-room">${esc(Y.ui.cta.btn)}</a></div>
+<section><h2>${esc(Y.ui.otherHead)}</h2>${ddiChips(name)}</section>
+${related(Y.ui.related)}`;
+  };
+  // 띠 페이지의 머리 정보(제목·설명·FAQ)
+  const ddiPages = Object.fromEntries(Object.entries(Y.list).map(([k, x]) => {
+    const yy = x.years.slice().reverse().slice(0, 3).map((y) => String(y).slice(2) + "년생").join("·");
+    return [k, {
+      path: x.path,
+      title: `2027 ${x.name} 운세 · 정미년 ${x.name} 신년운세 (${yy}) | 낯선 점술관`,
+      description: `2027년 정미년 ${x.name} 신년운세. ${x.theme}. ${x.years.join("·")}년생 나이별 운세와 일·돈·관계·컨디션, 달별 흐름까지 무료로 봐요.`,
+      h1: `2027년 ${x.name} 운세, 정미년 ${x.name}의 한 해`,
+      faq: [x.faq].concat(Y.ui.faq),
+    }];
+  }));
 
   const page = (name, d, kind) => {
     const url = ORIGIN + d.path;
@@ -145,6 +190,8 @@ ${F.ny ? `<a class="gfeat gfeat--ny" href="${esc(N.ny)}" data-js="home-ny"><span
 <section class="gsec"><h2>${esc(d.guidesHead)}</h2>${chipList(group("점술 알아보기"))}</section>
 <section class="gsec"><h2>${esc(d.legendsHead)}</h2><ul class="gstrip">${Object.values(L.list).map((x) => `<li><a href="${x.path}" style="--art:url('${DEX_IMG(({ oracle: "sibyl", rune: "rune", ogham: "ogham", vedic: "star", egypt: "decan", maya: "tzolkin", saju: "saju" })[x.guide] || "saju")}')"><small>${esc(x.note)}</small><b>${esc(x.label)}</b></a></li>`).join("")}</ul><p class="gmore"><a href="${L.hub.path}">${esc(d.legendsMore)} →</a></p></section>
 <section class="gsec gabout"><h2>${esc(d.aboutHead)}</h2>${d.about.map((p) => `<p>${esc(p)}</p>`).join("")}</section>`
+      : kind === "ddi"
+      ? ddiBody(name, d)
       : kind === "legend"
       ? `<p class="geyebrow">${esc(L.ui.roomBadge.replace("{room}", d.room))}</p><h1>${esc(d.h1)}</h1><p class="glead">${esc(d.hook)}</p>
 <article class="gstory">${d.story.map((p) => `<p>${esc(p)}</p>`).join("")}</article>
@@ -171,7 +218,7 @@ ${related(d.related)}`
       : `<p class="geyebrow">${esc(d.eyebrow)}</p><h1>${esc(d.h1)}</h1>
 ${d.intro.map((p) => `<p>${esc(p)}</p>`).join("\n")}
 ${d.tool ? `<a class="gtool-link" href="${d.tool.href}">${esc(d.tool.label)}</a>` : ""}
-${sections(d.sections)}
+${sections(d.sections)}${name === "newyear2027" ? "\n" + ddiHub() : ""}
 ${faq(d.faq)}
 <div class="gcta"><h2>${esc(d.cta.head)}</h2><p>${esc(d.cta.body)}</p><a class="gbtn" href="${d.cta.href || PB}" data-js="to-room">${esc(d.cta.btn)}</a></div>
 ${related(d.related)}`;
@@ -219,7 +266,7 @@ ${tabbar(d.path)}
   const files = [];
   const urls = [];
   const rewrites = [];
-  for (const [kind, group] of [["home", { home: G.home }], ["page", G.pages], ["tool", G.tools], ["app", G.apps || {}], ["legends", { legends: L.hub }], ["legend", L.list]]) {
+  for (const [kind, group] of [["home", { home: G.home }], ["page", G.pages], ["tool", G.tools], ["app", G.apps || {}], ["legends", { legends: L.hub }], ["legend", L.list], ["ddi", ddiPages]]) {
     for (const [name, d] of Object.entries(group)) {
       if (kind === "tool" && !TOOL_SCRIPTS[name]) throw new Error("TOOL_SCRIPTS에 없는 도구: " + name);
       if (kind === "app" && !APP_SCRIPTS[name]) throw new Error("APP_SCRIPTS에 없는 페이지: " + name);
@@ -261,7 +308,8 @@ function tomlWith(block) {
 function routes() {
   const { GUIDE: G } = load("data-guide.js");
   const { LEGENDS: L } = load("data-legends.js");
-  return [G.home].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {}), [L.hub], Object.values(L.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]).concat(APP_FILES);
+  const { NY_DDI: Y } = load("data-ny-ddi.js");
+  return [G.home].concat(Object.values(G.pages), Object.values(G.tools), Object.values(G.apps || {}), [L.hub], Object.values(L.list)).concat(Object.values(Y.list)).map((d) => [d.path, `${PB}guide/${slugOf(d)}/index.html`]).concat(APP_FILES);
 }
 
 module.exports = { build, routes };

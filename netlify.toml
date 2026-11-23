@@ -182,6 +182,66 @@
   status = 200
   force = true
 [[redirects]]
+  from = "/newyear-2027/rat/"
+  to = "/products/strange-oracle/guide/newyear-2027/rat/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/ox/"
+  to = "/products/strange-oracle/guide/newyear-2027/ox/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/tiger/"
+  to = "/products/strange-oracle/guide/newyear-2027/tiger/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/rabbit/"
+  to = "/products/strange-oracle/guide/newyear-2027/rabbit/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/dragon/"
+  to = "/products/strange-oracle/guide/newyear-2027/dragon/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/snake/"
+  to = "/products/strange-oracle/guide/newyear-2027/snake/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/horse/"
+  to = "/products/strange-oracle/guide/newyear-2027/horse/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/goat/"
+  to = "/products/strange-oracle/guide/newyear-2027/goat/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/monkey/"
+  to = "/products/strange-oracle/guide/newyear-2027/monkey/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/rooster/"
+  to = "/products/strange-oracle/guide/newyear-2027/rooster/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/dog/"
+  to = "/products/strange-oracle/guide/newyear-2027/dog/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/newyear-2027/pig/"
+  to = "/products/strange-oracle/guide/newyear-2027/pig/index.html"
+  status = 200
+  force = true
+[[redirects]]
   from = "/sw.js"
   to = "/products/strange-oracle/sw.js"
   status = 200
