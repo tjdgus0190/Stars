@@ -11,6 +11,8 @@
 //   투표 붙이기(캐러셀·릴스, 운영자 2026-11-23): 맨 뒤에 --poll "질문|보기1|보기2[|보기3|보기4]"  (보기 2~4개, 각 1~25자)
 //     → 게시물 캡션 아래 투표(Instagram API with Facebook Login의 caption add-on, poll_attachment = {option_a..option_d}). 스토리는 안 됨.
 //   node tools/strange-oracle/ig-publish.js publish <컨테이너 id>                                  → 게시물 id·주소
+//   node tools/strange-oracle/ig-publish.js publish-at <컨테이너 id> [HHMM=1900]                    → 한국 시각 그때까지 스스로 기다렸다가 올린다(2026-11-24: 게시 순간에 명령을 새로 못 돌리는 일 대비, 컨테이너 만든 직후 백그라운드로 한 번 띄운다)
+//     오늘(한국 날짜) 이미 올라간 게시물이 있으면 올리지 않는다. 22:00이 지나면 올리지 않는다.
 //   node tools/strange-oracle/ig-publish.js insights [개수]                        → 최근 게시물별 조회·도달·저장·공유·좋아요·댓글(성과로 배우기)
 //   node tools/strange-oracle/ig-publish.js check-url <커밋> <경로>                                  → jsDelivr가 그 파일을 내주는지(형식·크기)
 // 결과는 마지막 줄에 JSON 한 줄. 실패하면 종료 코드 1과 {"error": ...}
@@ -160,6 +162,22 @@ function pollOf(argv) {
     }
     fail("영상 처리가 10분 안에 끝나지 않음", { container: c.id });
   }
+  if (cmd === "publish-at") {
+    const cid = a[0], at = a[1] || "1900";
+    if (!/^\d+$/.test(cid || "") || !/^([01]\d|2[0-3])[0-5]\d$/.test(at)) fail("publish-at <컨테이너 id> [HHMM]");
+    const kst = () => new Date(Date.now() + 9 * 3600e3);
+    const hhmm = () => kst().toISOString().slice(11, 16).replace(":", "");
+    while (hhmm() < at) await sleep(20000);
+    if (hhmm() >= "2200") fail("22:00이 지나 올리지 않음", { container: cid });
+    const today = kst().toISOString().slice(0, 10);
+    const r = curl("GET", `${MEDIA_OF()}?fields=id,timestamp,permalink&limit=5`);
+    const dup = (r.data || []).find((x) => new Date(Date.parse(x.timestamp.replace(/(\+\d\d)(\d\d)$/, "$1:$2")) + 9 * 3600e3).toISOString().slice(0, 10) === today);
+    if (dup) fail("오늘 이미 올라간 게시물이 있어 올리지 않음", { url: dup.permalink });
+    const id = me().user_id || me().id;
+    const p = curl("POST", `${API}/${id}/media_publish`, { creation_id: cid });
+    const m = curl("GET", `${API}/${p.id}?fields=permalink,timestamp`);
+    return out({ media: p.id, url: m.permalink, at: m.timestamp });
+  }
   if (cmd === "publish") {
     const cid = a[0];
     if (!/^\d+$/.test(cid || "")) fail("컨테이너 id가 이상함");
@@ -168,5 +186,5 @@ function pollOf(argv) {
     const m = curl("GET", `${API}/${p.id}?fields=permalink,timestamp`);
     return out({ media: p.id, url: m.permalink, at: m.timestamp });
   }
-  fail("명령: whoami | recent | insights | carousel | reel | publish | check-url");
+  fail("명령: whoami | recent | insights | carousel | reel | publish | publish-at | check-url");
 })();
